@@ -1,0 +1,17 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# 환경변수
+.env
+
+# macOS
+.DS_Store
+
+# 수집 원본 (용량·diff 노이즈)
+data/raw/
+
+# 개인정보 포함 (채널톡 상담 데이터)
+data/private/
