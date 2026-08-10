@@ -1,0 +1,637 @@
+[
+  {
+    "doc_id": "0ffc2d8de31e",
+    "url": "https://docs.riido.io/getting-started/intro.md",
+    "title": "소개",
+    "category": "getting-started",
+    "order": 1,
+    "path": "clean/getting-started/intro.md",
+    "images": [
+      "/files/p4pPo2ksb6tSk2uKncCR"
+    ],
+    "bytes": 30,
+    "source_urls": [
+      "https://docs.riido.io/getting-started/intro.md"
+    ]
+  },
+  {
+    "doc_id": "764f1bb9b2d9",
+    "url": "https://docs.riido.io/getting-started/core-concepts.md",
+    "title": "핵심 개념",
+    "category": "getting-started",
+    "order": 2,
+    "path": "clean/getting-started/core-concepts.md",
+    "images": [
+      "/files/Y6mT513NHSgHLov5zhu7",
+      "/files/TV3QtBeAOQyTOSjXrU4V"
+    ],
+    "bytes": 4268,
+    "source_urls": [
+      "https://docs.riido.io/getting-started/core-concepts.md"
+    ]
+  },
+  {
+    "doc_id": "7e2418cfc86d",
+    "url": "https://docs.riido.io/ai-agents/intro.md",
+    "title": "AI 에이전트 (Beta)",
+    "category": "ai-agents",
+    "order": 3,
+    "path": "clean/ai-agents/intro.md",
+    "images": [
+      "/files/cF6yUEkgOT5rN9ERY9DR",
+      "/files/TOuDSBZxvyrw7uBsUSjV",
+      "/files/taGh6IMnOqkbOPsQUh9e",
+      "/files/WQplXTLgPJ14bwvopc4t"
+    ],
+    "bytes": 2097,
+    "source_urls": [
+      "https://docs.riido.io/ai-agents/intro.md"
+    ]
+  },
+  {
+    "doc_id": "7591069b70f9",
+    "url": "https://docs.riido.io/workspaces/overview.md",
+    "title": "워크스페이스",
+    "category": "workspaces",
+    "order": 4,
+    "path": "clean/workspaces/overview.md",
+    "images": [
+      "/files/VEd5SXWg2Z5SOIyUnO01",
+      "/files/gbgvbTjGQf4gta0ao31D"
+    ],
+    "bytes": 980,
+    "source_urls": [
+      "https://docs.riido.io/workspaces/overview.md"
+    ]
+  },
+  {
+    "doc_id": "567f0ce8042c",
+    "url": "https://docs.riido.io/workspaces/members.md",
+    "title": "멤버",
+    "category": "workspaces",
+    "order": 5,
+    "path": "clean/workspaces/members.md",
+    "images": [
+      "/files/4XHCVSviYKkB46QDqkhI"
+    ],
+    "bytes": 2132,
+    "source_urls": [
+      "https://docs.riido.io/workspaces/members.md"
+    ]
+  },
+  {
+    "doc_id": "95a1b20de638",
+    "url": "https://docs.riido.io/workspaces/plans-and-billing.md",
+    "title": "구독 및 결제",
+    "category": "workspaces",
+    "order": 6,
+    "path": "clean/workspaces/plans-and-billing.md",
+    "images": [
+      "/files/jBox1P0JjnmQEVErYo36"
+    ],
+    "bytes": 4994,
+    "source_urls": [
+      "https://docs.riido.io/workspaces/plans-and-billing.md"
+    ]
+  },
+  {
+    "doc_id": "da8743ff8cae",
+    "url": "https://docs.riido.io/teams/overview.md",
+    "title": "팀",
+    "category": "teams",
+    "order": 7,
+    "path": "clean/teams/overview.md",
+    "images": [
+      "/files/I4NPr0AScYvcQICpq3RE"
+    ],
+    "bytes": 3309,
+    "source_urls": [
+      "https://docs.riido.io/teams/overview.md"
+    ]
+  },
+  {
+    "doc_id": "6c3b150c3146",
+    "url": "https://docs.riido.io/teams/private-teams.md",
+    "title": "비공개 팀",
+    "category": "teams",
+    "order": 8,
+    "path": "clean/teams/private-teams.md",
+    "images": [
+      "/files/tLhkMcPVUgzYCTkplSn3",
+      "/files/O4DKIAVjDND9erABEgil"
+    ],
+    "bytes": 1324,
+    "source_urls": [
+      "https://docs.riido.io/teams/private-teams.md"
+    ]
+  },
+  {
+    "doc_id": "a26e14ee99d1",
+    "url": "https://docs.riido.io/teams/statuses.md",
+    "title": "작업 상태",
+    "category": "teams",
+    "order": 9,
+    "path": "clean/teams/statuses.md",
+    "images": [
+      "/files/xV01IiR3xmdXxlZXzW9p"
+    ],
+    "bytes": 1651,
+    "source_urls": [
+      "https://docs.riido.io/teams/statuses.md"
+    ]
+  },
+  {
+    "doc_id": "2edd9ad4a6fa",
+    "url": "https://docs.riido.io/issues/workflow.md",
+    "title": "작업 흐름으로 이해하는 프로젝트 관리",
+    "category": "issues",
+    "order": 10,
+    "path": "clean/issues/workflow.md",
+    "images": [],
+    "bytes": 3712,
+    "source_urls": [
+      "https://docs.riido.io/issues/workflow.md"
+    ]
+  },
+  {
+    "doc_id": "9d9ba80dfef6",
+    "url": "https://docs.riido.io/issues/intake.md",
+    "title": "계획: 대기 작업",
+    "category": "issues",
+    "order": 11,
+    "path": "clean/issues/intake.md",
+    "images": [
+      "/files/8nMbHrwRE1IvIUUuRWE0",
+      "/files/lQ6tfrdn6MvLKEV5RAH6",
+      "/files/KfgAYa5KAW42F8HWvCPE"
+    ],
+    "bytes": 2101,
+    "source_urls": [
+      "https://docs.riido.io/issues/intake.md"
+    ]
+  },
+  {
+    "doc_id": "11957633d8b2",
+    "url": "https://docs.riido.io/issues/backlog.md",
+    "title": "계획: 백로그",
+    "category": "issues",
+    "order": 12,
+    "path": "clean/issues/backlog.md",
+    "images": [
+      "/files/clpwdVfXky2b18T20LXd",
+      "/files/iQkJu2aapBIjkjD22VrL",
+      "/files/MHR3opXeeySancVF6yGS"
+    ],
+    "bytes": 2345,
+    "source_urls": [
+      "https://docs.riido.io/issues/backlog.md"
+    ]
+  },
+  {
+    "doc_id": "949ddd65a2a5",
+    "url": "https://docs.riido.io/issues/work-items.md",
+    "title": "실행: 작업",
+    "category": "issues",
+    "order": 13,
+    "path": "clean/issues/work-items.md",
+    "images": [
+      "/files/Q48UprAaYVlF2jLEV7wm",
+      "/files/Bo8942823QzhS7pyDIKM",
+      "/files/jFufSEiyQKdrPJcxuym1"
+    ],
+    "bytes": 5457,
+    "source_urls": [
+      "https://docs.riido.io/issues/work-items.md"
+    ]
+  },
+  {
+    "doc_id": "fcb3c228f5a0",
+    "url": "https://docs.riido.io/issues/archived-items.md",
+    "title": "운영: 보관 작업",
+    "category": "issues",
+    "order": 14,
+    "path": "clean/issues/archived-items.md",
+    "images": [],
+    "bytes": 1659,
+    "source_urls": [
+      "https://docs.riido.io/issues/archived-items.md"
+    ]
+  },
+  {
+    "doc_id": "673858aecdcf",
+    "url": "https://docs.riido.io/issues/issue-relations.md",
+    "title": "작업간 연결",
+    "category": "issues",
+    "order": 15,
+    "path": "clean/issues/issue-relations.md",
+    "images": [
+      "/files/fmyFPJvf6c1L7ru6ROk5"
+    ],
+    "bytes": 2655,
+    "source_urls": [
+      "https://docs.riido.io/issues/issue-relations.md"
+    ]
+  },
+  {
+    "doc_id": "1c0005b1dfeb",
+    "url": "https://docs.riido.io/views/dashboards.md",
+    "title": "대시보드",
+    "category": "views",
+    "order": 16,
+    "path": "clean/views/dashboards.md",
+    "images": [
+      "/files/5QgKG33v3yykons5Lcbj"
+    ],
+    "bytes": 2760,
+    "source_urls": [
+      "https://docs.riido.io/views/dashboards.md"
+    ]
+  },
+  {
+    "doc_id": "9b9516882026",
+    "url": "https://docs.riido.io/views/diagram.md",
+    "title": "작업 관계도",
+    "category": "views",
+    "order": 17,
+    "path": "clean/views/diagram.md",
+    "images": [
+      "/files/MuDbuSkCBNNFsXSnSzua",
+      "/files/0495NtdknEjQxRusFBol"
+    ],
+    "bytes": 1684,
+    "source_urls": [
+      "https://docs.riido.io/views/diagram.md"
+    ]
+  },
+  {
+    "doc_id": "333984364686",
+    "url": "https://docs.riido.io/views/custom-views.md",
+    "title": "저장된 보기",
+    "category": "views",
+    "order": 18,
+    "path": "clean/views/custom-views.md",
+    "images": [
+      "/files/GgcvZR3lYmj7eiNvuDUo"
+    ],
+    "bytes": 2447,
+    "source_urls": [
+      "https://docs.riido.io/views/custom-views.md"
+    ]
+  },
+  {
+    "doc_id": "aacfc8cf7480",
+    "url": "https://docs.riido.io/docs/editor.md",
+    "title": "에디터",
+    "category": "docs",
+    "order": 19,
+    "path": "clean/docs/editor.md",
+    "images": [
+      "/files/qYEB2VjeGkejv2qniwPJ"
+    ],
+    "bytes": 2011,
+    "source_urls": [
+      "https://docs.riido.io/docs/editor.md"
+    ]
+  },
+  {
+    "doc_id": "c7f7233f8cd2",
+    "url": "https://docs.riido.io/docs/templates.md",
+    "title": "문서 템플릿",
+    "category": "docs",
+    "order": 20,
+    "path": "clean/docs/templates.md",
+    "images": [
+      "/files/XJovG2rVhPwqAmtAZYn1"
+    ],
+    "bytes": 1055,
+    "source_urls": [
+      "https://docs.riido.io/docs/templates.md"
+    ]
+  },
+  {
+    "doc_id": "854f9556fa9d",
+    "url": "https://docs.riido.io/docs/comments.md",
+    "title": "댓글",
+    "category": "docs",
+    "order": 21,
+    "path": "clean/docs/comments.md",
+    "images": [
+      "/files/w6UtpacqUsOB2QGfaYv5"
+    ],
+    "bytes": 2032,
+    "source_urls": [
+      "https://docs.riido.io/docs/comments.md"
+    ]
+  },
+  {
+    "doc_id": "261e80b246e8",
+    "url": "https://docs.riido.io/sprints/overview.md",
+    "title": "스프린트",
+    "category": "sprints",
+    "order": 22,
+    "path": "clean/sprints/overview.md",
+    "images": [
+      "/files/vMbX4MFjJ2yrXPR7l6aV"
+    ],
+    "bytes": 2256,
+    "source_urls": [
+      "https://docs.riido.io/sprints/overview.md"
+    ]
+  },
+  {
+    "doc_id": "2c428c0d81be",
+    "url": "https://docs.riido.io/sprints/sprint-graph.md",
+    "title": "스프린트 그래프",
+    "category": "sprints",
+    "order": 23,
+    "path": "clean/sprints/sprint-graph.md",
+    "images": [
+      "/files/9UJmmCTSu7OuecD2UpiL"
+    ],
+    "bytes": 2867,
+    "source_urls": [
+      "https://docs.riido.io/sprints/sprint-graph.md"
+    ]
+  },
+  {
+    "doc_id": "40ac0f0ac641",
+    "url": "https://docs.riido.io/sprints/automations.md",
+    "title": "자동화",
+    "category": "sprints",
+    "order": 24,
+    "path": "clean/sprints/automations.md",
+    "images": [
+      "/files/tjRAXbsmwWaxJRwyLOqu"
+    ],
+    "bytes": 1153,
+    "source_urls": [
+      "https://docs.riido.io/sprints/automations.md"
+    ]
+  },
+  {
+    "doc_id": "205de439d5a8",
+    "url": "https://docs.riido.io/meetings/overview.md",
+    "title": "미팅",
+    "category": "meetings",
+    "order": 25,
+    "path": "clean/meetings/overview.md",
+    "images": [
+      "/files/QIBhzoc1bKOqFAo9CIyT"
+    ],
+    "bytes": 2206,
+    "source_urls": [
+      "https://docs.riido.io/meetings/overview.md"
+    ]
+  },
+  {
+    "doc_id": "d639f52b10eb",
+    "url": "https://docs.riido.io/meetings/automations.md",
+    "title": "자동화",
+    "category": "meetings",
+    "order": 26,
+    "path": "clean/meetings/automations.md",
+    "images": [
+      "/files/2Ok1sOVD6csJklOfP2tv"
+    ],
+    "bytes": 1689,
+    "source_urls": [
+      "https://docs.riido.io/meetings/automations.md"
+    ]
+  },
+  {
+    "doc_id": "6e9c13b73663",
+    "url": "https://docs.riido.io/ai/mcp.md",
+    "title": "MCP 서버",
+    "category": "ai",
+    "order": 27,
+    "path": "clean/ai/mcp.md",
+    "images": [
+      "/files/UmvIXORXrDt1Nx9TcRE2",
+      "/files/wO6vFSBl3lpga00FO571",
+      "/files/k2dkYXk0MBFuoBM6G8yj",
+      "/files/zoNWpPnTkOtppDBQScv7",
+      "/files/rqVBxPX3zjBun5Vnx0RG",
+      "/files/aDY6ozclVLFzdgPnoRW8",
+      "/files/K9x9uRG4aDIL8L8QyyYI",
+      "/files/PZeAe4qPBLWrIXrxVU8U",
+      "/files/ECzW7UH3BkjOiIAEnrPm",
+      "/files/Kko8D2xPVKqKRvRovHDe",
+      "/files/nljCW3YdUoWe8mbMMUle",
+      "/files/Zukj0kGTSQrT77Fjbr6y",
+      "/files/0BvcD2umdpvmGb0DRzek",
+      "/files/5oCD3qvh0aa5aEBqSsNM",
+      "/files/G88vJfj86lm5Jj4zIccB",
+      "/files/7bwho9Izi7ivvLWisZzb",
+      "/files/katQfztwu5aBou1aAfrL",
+      "/files/Z7QMK0kKKZtrQQvPpd98",
+      "/files/t5MFwBNJLto9YIo9rRoA",
+      "/files/UAoCmkCOVAqAkrtInXvh",
+      "/files/opfw5FSw6xiw5E1WJyja",
+      "/files/RUnsvK5g4xOl3lzcRVaV",
+      "/files/cym2huiVgsSGl70FdW7o",
+      "/files/mQWmbqTEwl9z6Fke2OaX",
+      "/files/i9EdJeQNwxu2vJd4Erjg",
+      "/files/6P89NvFSyGj848LEo62Z",
+      "/files/K4YRPrpaLhF9Qo5L4voC",
+      "/files/eWDcfQ9A23m6TUXCLCS8",
+      "/files/R3BjehyimPhQUgRJqPqt",
+      "/files/Jhi8gRYGKSUnaxMLl4M2",
+      "/files/aHJqfsYSVrHPS9NNFOl1"
+    ],
+    "bytes": 5143,
+    "source_urls": [
+      "https://docs.riido.io/ai/mcp.md",
+      "https://docs.riido.io/integrations/mcp.md"
+    ]
+  },
+  {
+    "doc_id": "2a49ad92d587",
+    "url": "https://docs.riido.io/ai/auto-scheduling.md",
+    "title": "프로젝트 일정 자동 생성",
+    "category": "ai",
+    "order": 28,
+    "path": "clean/ai/auto-scheduling.md",
+    "images": [],
+    "bytes": 1277,
+    "source_urls": [
+      "https://docs.riido.io/ai/auto-scheduling.md"
+    ]
+  },
+  {
+    "doc_id": "c837145b4afd",
+    "url": "https://docs.riido.io/ai/duplicate-detection.md",
+    "title": "중복 작업 감지",
+    "category": "ai",
+    "order": 29,
+    "path": "clean/ai/duplicate-detection.md",
+    "images": [
+      "/files/bMF0kKbNx9hGLOmoHVtg"
+    ],
+    "bytes": 1107,
+    "source_urls": [
+      "https://docs.riido.io/ai/duplicate-detection.md"
+    ]
+  },
+  {
+    "doc_id": "d0d1ed17106f",
+    "url": "https://docs.riido.io/ai/release-notes.md",
+    "title": "릴리즈 노트 자동 생성",
+    "category": "ai",
+    "order": 30,
+    "path": "clean/ai/release-notes.md",
+    "images": [
+      "/files/XtzOJns81HRIsiz5otAV"
+    ],
+    "bytes": 1547,
+    "source_urls": [
+      "https://docs.riido.io/ai/release-notes.md"
+    ]
+  },
+  {
+    "doc_id": "b86425eb9784",
+    "url": "https://docs.riido.io/integrations/github.md",
+    "title": "깃허브",
+    "category": "integrations",
+    "order": 31,
+    "path": "clean/integrations/github.md",
+    "images": [
+      "/files/WczIkfe1Fy5o8PYXgSiC",
+      "/files/jntwFlu9mTaTpIDMQ0gB",
+      "/files/3rJeuV5vcBeWDrDYrI1K",
+      "/files/nXiyYEQpSwk2YKMLO0Ag"
+    ],
+    "bytes": 4094,
+    "source_urls": [
+      "https://docs.riido.io/integrations/github.md"
+    ]
+  },
+  {
+    "doc_id": "a13bfdc38996",
+    "url": "https://docs.riido.io/integrations/figma.md",
+    "title": "피그마",
+    "category": "integrations",
+    "order": 32,
+    "path": "clean/integrations/figma.md",
+    "images": [
+      "/files/E3QyC5oZXvnZsMG5MtW1",
+      "/files/CxjOAtJOSzU4VavKxwGm",
+      "/files/96W3R5b8qRdarhv2lYzX",
+      "/files/VEXuYteFrFyZCHrjQQjf",
+      "/files/YhfhszMrZm4d6QilMYKJ"
+    ],
+    "bytes": 3797,
+    "source_urls": [
+      "https://docs.riido.io/integrations/figma.md"
+    ]
+  },
+  {
+    "doc_id": "43e5e2414349",
+    "url": "https://docs.riido.io/integrations/slack.md",
+    "title": "슬랙",
+    "category": "integrations",
+    "order": 33,
+    "path": "clean/integrations/slack.md",
+    "images": [
+      "/files/PC0M4YuXw22P4vp3KPP7",
+      "/files/Nya9oKfEYT6F4VFxEOZX",
+      "/files/VGLMwudiGNqa74z8RJ86",
+      "/files/ekSeIahpqoJrETA3LF2I",
+      "/files/7lycTW9lkEaOkpLTMpi2"
+    ],
+    "bytes": 4219,
+    "source_urls": [
+      "https://docs.riido.io/integrations/slack.md"
+    ]
+  },
+  {
+    "doc_id": "ee834b371049",
+    "url": "https://docs.riido.io/integrations/discord.md",
+    "title": "디스코드",
+    "category": "integrations",
+    "order": 34,
+    "path": "clean/integrations/discord.md",
+    "images": [
+      "/files/UWVbodnhF4g16EeOeC1v"
+    ],
+    "bytes": 3930,
+    "source_urls": [
+      "https://docs.riido.io/integrations/discord.md"
+    ]
+  },
+  {
+    "doc_id": "5623097e1502",
+    "url": "https://docs.riido.io/integrations/google-calendar.md",
+    "title": "구글 캘린더",
+    "category": "integrations",
+    "order": 35,
+    "path": "clean/integrations/google-calendar.md",
+    "images": [
+      "/files/2yrezAz10jEOhZbzWhUS",
+      "/files/H1CMYsWD7SVZFjOfSUgi"
+    ],
+    "bytes": 3152,
+    "source_urls": [
+      "https://docs.riido.io/integrations/google-calendar.md"
+    ]
+  },
+  {
+    "doc_id": "6cfca70f98e5",
+    "url": "https://docs.riido.io/data/search.md",
+    "title": "검색",
+    "category": "data",
+    "order": 37,
+    "path": "clean/data/search.md",
+    "images": [
+      "/files/xYDUw7jj8K2k1Oc5vg9q"
+    ],
+    "bytes": 1555,
+    "source_urls": [
+      "https://docs.riido.io/data/search.md"
+    ]
+  },
+  {
+    "doc_id": "c225265a1fa1",
+    "url": "https://docs.riido.io/data/notifications.md",
+    "title": "알림",
+    "category": "data",
+    "order": 38,
+    "path": "clean/data/notifications.md",
+    "images": [
+      "/files/aHBKzdtzKbEKIWmunRPv"
+    ],
+    "bytes": 2524,
+    "source_urls": [
+      "https://docs.riido.io/data/notifications.md"
+    ]
+  },
+  {
+    "doc_id": "688dd8ac7efd",
+    "url": "https://docs.riido.io/data/filters.md",
+    "title": "필터",
+    "category": "data",
+    "order": 39,
+    "path": "clean/data/filters.md",
+    "images": [
+      "/files/NQPNjByuWOxLB3V1Mmtu"
+    ],
+    "bytes": 2006,
+    "source_urls": [
+      "https://docs.riido.io/data/filters.md"
+    ]
+  },
+  {
+    "doc_id": "a7061c4853df",
+    "url": "https://docs.riido.io/data/trash.md",
+    "title": "휴지통",
+    "category": "data",
+    "order": 40,
+    "path": "clean/data/trash.md",
+    "images": [
+      "/files/0zcdw7qBSzib7H5VYErW"
+    ],
+    "bytes": 2031,
+    "source_urls": [
+      "https://docs.riido.io/data/trash.md"
+    ]
+  }
+]
