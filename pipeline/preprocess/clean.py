@@ -14,6 +14,23 @@ BOILERPLATE_PREFIX = "> For the complete documentation index"
 SITE_ROOT = "https://docs.riido.io"
 
 
+def html_to_text(fragment: str) -> str:
+    """짧은 HTML 조각을 검색 가능한 일반 텍스트로 바꾼다."""
+
+    fragment = re.sub(
+        r'<a\s+[^>]*href="([^"]+)"[^>]*>(.*?)</a>',
+        lambda m: f"{html_to_text(m.group(2)).strip()} ({m.group(1)})",
+        fragment,
+        flags=re.S,
+    )
+    fragment = re.sub(r"</p>\s*<p[^>]*>", " ", fragment, flags=re.S)
+    fragment = re.sub(r"</?p[^>]*>", " ", fragment, flags=re.S)
+    fragment = re.sub(r"<br\s*/?>", " ", fragment)
+    fragment = re.sub(r"<[^>]+>", "", fragment)
+    fragment = re.sub(r"\s+", " ", fragment)
+    return fragment.strip()
+
+
 def strip_boilerplate(text: str) -> str:
     lines = text.splitlines()
     if lines and lines[0].strip().startswith(BOILERPLATE_PREFIX):
@@ -44,8 +61,6 @@ def html_table_to_text(text: str) -> str:
 
     def convert(match: re.Match) -> str:
         table = match.group(0)
-        if 'data-view="cards"' in table:
-            return ""
 
         rows = re.findall(r"<tr>(.*?)</tr>", table, re.S)
         if not rows:
@@ -53,7 +68,15 @@ def html_table_to_text(text: str) -> str:
 
         def cells(row: str, tag: str) -> list[str]:
             raw = re.findall(rf"<{tag}[^>]*>(.*?)</{tag}>", row, re.S)
-            return [re.sub(r"<[^>]+>", "", c).strip() for c in raw]
+            return [html_to_text(c) for c in raw]
+
+        if 'data-view="cards"' in table:
+            lines = []
+            for row in rows[1:]:
+                values = [v for v in cells(row, "td") if v]
+                if values:
+                    lines.append(" / ".join(values))
+            return "\n".join(lines)
 
         headers = cells(rows[0], "th")
         lines = []
@@ -74,6 +97,11 @@ def html_table_to_text(text: str) -> str:
 def strip_gitbook_syntax(text: str) -> str:
     # tab title은 속성 안에 있어 태그를 지우면 사라지므로 본문으로 꺼낸다
     text = re.sub(r'\{%\s*tab title="(.*?)"\s*%\}', r"**\1**", text)
+    text = re.sub(
+        r'\{%\s*embed\s+url="([^"]+)"\s*%\}',
+        lambda m: m.group(1).strip("<>"),
+        text,
+    )
     text = re.sub(r"\{%.*?%\}", "", text, flags=re.S)
     return text
 
@@ -85,6 +113,14 @@ def normalize_links(text: str) -> str:
 
 
 def tidy(text: str) -> str:
+    text = re.sub(
+        r"<summary>\s*(.*?)\s*</summary>",
+        lambda m: f"\n\n### {html_to_text(m.group(1))}\n\n",
+        text,
+        flags=re.S,
+    )
+    text = re.sub(r"</p>\s*<p[^>]*>", " ", text, flags=re.S)
+    text = re.sub(r"</?p[^>]*>", " ", text, flags=re.S)
     text = re.sub(r"<[^>]+>", "", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip() + "\n"
