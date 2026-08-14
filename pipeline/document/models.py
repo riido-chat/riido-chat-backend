@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
-
+# frozen=True: 객체 생성 후 필드값 변경을 막는다.
 @dataclass(frozen=True)
 class NormalizedDocument:
     """정제된 공식 문서 한 개를 나타낸다."""
