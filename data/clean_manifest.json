@@ -9,7 +9,7 @@
     "images": [
       "/files/p4pPo2ksb6tSk2uKncCR"
     ],
-    "bytes": 30,
+    "bytes": 1244,
     "source_urls": [
       "https://docs.riido.io/getting-started/intro.md"
     ]
@@ -148,7 +148,7 @@
     "order": 10,
     "path": "clean/issues/workflow.md",
     "images": [],
-    "bytes": 3712,
+    "bytes": 3737,
     "source_urls": [
       "https://docs.riido.io/issues/workflow.md"
     ]
@@ -199,7 +199,7 @@
       "/files/Bo8942823QzhS7pyDIKM",
       "/files/jFufSEiyQKdrPJcxuym1"
     ],
-    "bytes": 5457,
+    "bytes": 5461,
     "source_urls": [
       "https://docs.riido.io/issues/work-items.md"
     ]
@@ -348,7 +348,7 @@
     "images": [
       "/files/9UJmmCTSu7OuecD2UpiL"
     ],
-    "bytes": 2867,
+    "bytes": 2870,
     "source_urls": [
       "https://docs.riido.io/sprints/sprint-graph.md"
     ]
@@ -438,7 +438,7 @@
       "/files/Jhi8gRYGKSUnaxMLl4M2",
       "/files/aHJqfsYSVrHPS9NNFOl1"
     ],
-    "bytes": 5143,
+    "bytes": 5167,
     "source_urls": [
       "https://docs.riido.io/ai/mcp.md",
       "https://docs.riido.io/integrations/mcp.md"
@@ -519,7 +519,7 @@
       "/files/VEXuYteFrFyZCHrjQQjf",
       "/files/YhfhszMrZm4d6QilMYKJ"
     ],
-    "bytes": 3797,
+    "bytes": 3805,
     "source_urls": [
       "https://docs.riido.io/integrations/figma.md"
     ]
@@ -538,7 +538,7 @@
       "/files/ekSeIahpqoJrETA3LF2I",
       "/files/7lycTW9lkEaOkpLTMpi2"
     ],
-    "bytes": 4219,
+    "bytes": 4235,
     "source_urls": [
       "https://docs.riido.io/integrations/slack.md"
     ]
@@ -553,7 +553,7 @@
     "images": [
       "/files/UWVbodnhF4g16EeOeC1v"
     ],
-    "bytes": 3930,
+    "bytes": 3942,
     "source_urls": [
       "https://docs.riido.io/integrations/discord.md"
     ]
@@ -569,7 +569,7 @@
       "/files/2yrezAz10jEOhZbzWhUS",
       "/files/H1CMYsWD7SVZFjOfSUgi"
     ],
-    "bytes": 3152,
+    "bytes": 3164,
     "source_urls": [
       "https://docs.riido.io/integrations/google-calendar.md"
     ]
