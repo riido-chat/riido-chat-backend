@@ -1,0 +1,1982 @@
+[
+  {
+    "question_id": "Q01",
+    "question": "새로 들어온 요청을 검토한 뒤 백로그나 바로 실행할 작업으로 넘기려면 어떻게 해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 개요",
+        "score": 16.011281
+      },
+      {
+        "rank": 2,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 전환된 백로그",
+        "score": 12.239993
+      },
+      {
+        "rank": 3,
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 작업 처리",
+        "score": 11.539042
+      },
+      {
+        "rank": 4,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 신규 생성된 백로그",
+        "score": 11.435959
+      },
+      {
+        "rank": 5,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 구조",
+        "score": 10.315818
+      },
+      {
+        "rank": 6,
+        "document_title": "중복 작업 감지",
+        "section_path": "중복 작업 감지 > 중복 작업 감지 사용하는 법",
+        "score": 9.317459
+      },
+      {
+        "rank": 7,
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 9.256218
+      },
+      {
+        "rank": 8,
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 검토된 대기 작업",
+        "score": 8.337553
+      },
+      {
+        "rank": 9,
+        "document_title": "중복 작업 감지",
+        "section_path": "중복 작업 감지 > 개요",
+        "score": 7.693655
+      },
+      {
+        "rank": 10,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 속성",
+        "score": 7.66447
+      }
+    ]
+  },
+  {
+    "question_id": "Q02",
+    "question": "백로그 항목을 프로젝트나 실제 작업으로 바꾸면 기존 정보도 그대로 따라가나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 구조",
+        "score": 14.052125
+      },
+      {
+        "rank": 2,
+        "document_title": "중복 작업 감지",
+        "section_path": "중복 작업 감지 > 중복 작업 감지 사용하는 법",
+        "score": 13.98316
+      },
+      {
+        "rank": 3,
+        "document_title": "중복 작업 감지",
+        "section_path": "중복 작업 감지 > 개요",
+        "score": 12.872189
+      },
+      {
+        "rank": 4,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 전환된 백로그",
+        "score": 12.239993
+      },
+      {
+        "rank": 5,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 개요",
+        "score": 10.607657
+      },
+      {
+        "rank": 6,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 속성",
+        "score": 9.903161
+      },
+      {
+        "rank": 7,
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 작업 처리",
+        "score": 9.103718
+      },
+      {
+        "rank": 8,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 작업으로 전환",
+        "score": 8.629652
+      },
+      {
+        "rank": 9,
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 8.288067
+      },
+      {
+        "rank": 10,
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 진행 중",
+        "score": 7.572717
+      }
+    ]
+  },
+  {
+    "question_id": "Q03",
+    "question": "현재 적용한 필터와 정렬 조건을 저장해서 다음에도 똑같이 불러오려면 어떻게 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 보기 생성하기",
+        "score": 18.871435
+      },
+      {
+        "rank": 2,
+        "document_title": "필터",
+        "section_path": "필터 > 개요",
+        "score": 18.487236
+      },
+      {
+        "rank": 3,
+        "document_title": "필터",
+        "section_path": "필터 > 저장된 보기",
+        "score": 17.505457
+      },
+      {
+        "rank": 4,
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 개요",
+        "score": 14.410376
+      },
+      {
+        "rank": 5,
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 보기 편집하기",
+        "score": 14.359085
+      },
+      {
+        "rank": 6,
+        "document_title": "필터",
+        "section_path": "필터 > 필터 적용하기",
+        "score": 13.774967
+      },
+      {
+        "rank": 7,
+        "document_title": "피그마",
+        "section_path": "피그마 > 피그마 뤼이도 플러그인",
+        "score": 12.752273
+      },
+      {
+        "rank": 8,
+        "document_title": "필터",
+        "section_path": "필터 > 필터 카테고리",
+        "score": 9.995598
+      },
+      {
+        "rank": 9,
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 공개 범위",
+        "score": 9.367993
+      },
+      {
+        "rank": 10,
+        "document_title": "구독 및 결제",
+        "section_path": "구독 및 결제 > 구독 변경 또는 취소",
+        "score": 6.619155
+      }
+    ]
+  },
+  {
+    "question_id": "Q04",
+    "question": "빈 문서에 팀에서 만든 문서 템플릿을 적용하려면 어떻게 해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "문서 템플릿",
+        "section_path": "문서 템플릿 > 템플릿 적용",
+        "score": 24.205504
+      },
+      {
+        "rank": 2,
+        "document_title": "문서 템플릿",
+        "section_path": "문서 템플릿 > 개요",
+        "score": 14.727211
+      },
+      {
+        "rank": 3,
+        "document_title": "문서 템플릿",
+        "section_path": "문서 템플릿 > 템플릿 생성",
+        "score": 14.036515
+      },
+      {
+        "rank": 4,
+        "document_title": "에디터",
+        "section_path": "에디터 > 문서 형식 적용",
+        "score": 9.96592
+      },
+      {
+        "rank": 5,
+        "document_title": "에디터",
+        "section_path": "에디터 > 개요",
+        "score": 8.990943
+      },
+      {
+        "rank": 6,
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > 개요",
+        "score": 7.205298
+      },
+      {
+        "rank": 7,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 설정",
+        "score": 7.098705
+      },
+      {
+        "rank": 8,
+        "document_title": "알림",
+        "section_path": "알림 > 개요",
+        "score": 6.031975
+      },
+      {
+        "rank": 9,
+        "document_title": "대시보드",
+        "section_path": "대시보드 > 링크",
+        "score": 5.959306
+      },
+      {
+        "rank": 10,
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > MCP 사용 사례",
+        "score": 5.517594
+      }
+    ]
+  },
+  {
+    "question_id": "Q05",
+    "question": "보관함에 넣은 완료 작업을 다시 진행 가능한 상태로 되돌릴 수 있나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 작업 보관함",
+        "score": 17.848696
+      },
+      {
+        "rank": 2,
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기",
+        "score": 15.024838
+      },
+      {
+        "rank": 3,
+        "document_title": "자동화",
+        "section_path": "자동화 > 자동화 설정",
+        "score": 14.119629
+      },
+      {
+        "rank": 4,
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 작업 보관",
+        "score": 11.270632
+      },
+      {
+        "rank": 5,
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 10.749801
+      },
+      {
+        "rank": 6,
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 개요",
+        "score": 8.754508
+      },
+      {
+        "rank": 7,
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 개요",
+        "score": 8.474662
+      },
+      {
+        "rank": 8,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 복구 및 영구 삭제",
+        "score": 8.305241
+      },
+      {
+        "rank": 9,
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 개요",
+        "score": 8.224168
+      },
+      {
+        "rank": 10,
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 완료 상태",
+        "score": 8.208944
+      }
+    ]
+  },
+  {
+    "question_id": "Q06",
+    "question": "실수로 삭제한 작업을 원래 프로젝트와 팀 위치로 복구하려면 어떻게 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 복구 및 영구 삭제",
+        "score": 19.104673
+      },
+      {
+        "rank": 2,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 개요",
+        "score": 18.724703
+      },
+      {
+        "rank": 3,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 삭제된 페이지 보기",
+        "score": 9.096413
+      },
+      {
+        "rank": 4,
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 보기 위치",
+        "score": 8.911137
+      },
+      {
+        "rank": 5,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 관리",
+        "score": 6.903028
+      },
+      {
+        "rank": 6,
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 관계 유형별 동작",
+        "score": 6.810392
+      },
+      {
+        "rank": 7,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 휴지통 사용법",
+        "score": 6.137416
+      },
+      {
+        "rank": 8,
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 설정",
+        "score": 5.996094
+      },
+      {
+        "rank": 9,
+        "document_title": "구독 및 결제",
+        "section_path": "구독 및 결제 > 구독 변경 또는 취소",
+        "score": 5.947083
+      },
+      {
+        "rank": 10,
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 개요",
+        "score": 5.572917
+      }
+    ]
+  },
+  {
+    "question_id": "Q07",
+    "question": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 설정",
+        "score": 11.322785
+      },
+      {
+        "rank": 2,
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 개요",
+        "score": 10.984536
+      },
+      {
+        "rank": 3,
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 외부 공유",
+        "score": 7.543899
+      },
+      {
+        "rank": 4,
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 공개 범위",
+        "score": 7.495087
+      },
+      {
+        "rank": 5,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 자주 묻는 질문 (FAQ)",
+        "score": 5.458447
+      },
+      {
+        "rank": 6,
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 접근 권한",
+        "score": 5.375118
+      },
+      {
+        "rank": 7,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 설정",
+        "score": 4.37989
+      },
+      {
+        "rank": 8,
+        "document_title": "구독 및 결제",
+        "section_path": "구독 및 결제 > 구독 변경 또는 취소",
+        "score": 4.234814
+      },
+      {
+        "rank": 9,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 작업으로 전환",
+        "score": 4.098099
+      },
+      {
+        "rank": 10,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 관리",
+        "score": 4.010548
+      }
+    ]
+  },
+  {
+    "question_id": "Q08",
+    "question": "스프린트 시작 요일을 바꾸면 현재 진행 중인 스프린트에는 어떻게 반영되나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 시작 요일",
+        "score": 17.940546
+      },
+      {
+        "rank": 2,
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 설정",
+        "score": 15.249034
+      },
+      {
+        "rank": 3,
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 진행 중",
+        "score": 13.330062
+      },
+      {
+        "rank": 4,
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 참고",
+        "score": 11.897285
+      },
+      {
+        "rank": 5,
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 그래프 보는 법",
+        "score": 9.041439
+      },
+      {
+        "rank": 6,
+        "document_title": "자동화",
+        "section_path": "자동화 > 자동화 설정",
+        "score": 8.63671
+      },
+      {
+        "rank": 7,
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 개요",
+        "score": 8.474866
+      },
+      {
+        "rank": 8,
+        "document_title": "자동화",
+        "section_path": "자동화 > 미팅 반복 설정",
+        "score": 8.29093
+      },
+      {
+        "rank": 9,
+        "document_title": "자동화",
+        "section_path": "자동화 > 개요",
+        "score": 8.130815
+      },
+      {
+        "rank": 10,
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 지난 스프린트 그래프 보는 법",
+        "score": 7.493495
+      }
+    ]
+  },
+  {
+    "question_id": "Q09",
+    "question": "앞으로 진행할 스프린트 세 개를 미리 생성하려면 어떤 설정을 사용해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 미리 생성할 다가올 스프린트 개수",
+        "score": 12.97477
+      },
+      {
+        "rank": 2,
+        "document_title": "자동화",
+        "section_path": "자동화 > 자동화 설정",
+        "score": 8.255752
+      },
+      {
+        "rank": 3,
+        "document_title": "릴리즈 노트 자동 생성",
+        "section_path": "릴리즈 노트 자동 생성 > 릴리즈 노트 자동 생성 사용하는 법",
+        "score": 6.414335
+      },
+      {
+        "rank": 4,
+        "document_title": "문서 템플릿",
+        "section_path": "문서 템플릿 > 템플릿 생성",
+        "score": 5.761933
+      },
+      {
+        "rank": 5,
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 기간",
+        "score": 5.617048
+      },
+      {
+        "rank": 6,
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 설정",
+        "score": 5.458907
+      },
+      {
+        "rank": 7,
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 개요",
+        "score": 5.341525
+      },
+      {
+        "rank": 8,
+        "document_title": "핵심 개념",
+        "section_path": "핵심 개념 > 효율적인 프로젝트 관리",
+        "score": 5.149547
+      },
+      {
+        "rank": 9,
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 시작 요일",
+        "score": 5.018408
+      },
+      {
+        "rank": 10,
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 참고",
+        "score": 4.920009
+      }
+    ]
+  },
+  {
+    "question_id": "Q10",
+    "question": "특정 페이지나 댓글에서 더 이상 알림을 받고 싶지 않을 때는 어떻게 끄나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "알림",
+        "section_path": "알림 > 알림 설정",
+        "score": 15.429391
+      },
+      {
+        "rank": 2,
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 자주 묻는 질문 (FAQ)",
+        "score": 10.61088
+      },
+      {
+        "rank": 3,
+        "document_title": "알림",
+        "section_path": "알림 > 알림 확인하기",
+        "score": 9.341209
+      },
+      {
+        "rank": 4,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 자주 묻는 질문 (FAQ)",
+        "score": 9.045566
+      },
+      {
+        "rank": 5,
+        "document_title": "알림",
+        "section_path": "알림 > 개요",
+        "score": 7.361737
+      },
+      {
+        "rank": 6,
+        "document_title": "알림",
+        "section_path": "알림 > 알림 활용하기",
+        "score": 6.349822
+      },
+      {
+        "rank": 7,
+        "document_title": "댓글",
+        "section_path": "댓글 > 댓글 구독",
+        "score": 5.227541
+      },
+      {
+        "rank": 8,
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 개요",
+        "score": 5.145007
+      },
+      {
+        "rank": 9,
+        "document_title": "댓글",
+        "section_path": "댓글 > 댓글 작성",
+        "score": 4.876445
+      },
+      {
+        "rank": 10,
+        "document_title": "알림",
+        "section_path": "알림 > 참고",
+        "score": 4.563398
+      }
+    ]
+  },
+  {
+    "question_id": "Q11",
+    "question": "저장된 보기를 나만 사용하거나 팀 전체에 공개하도록 설정할 수 있나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 공개 범위",
+        "score": 20.52586
+      },
+      {
+        "rank": 2,
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 보기 생성하기",
+        "score": 10.982757
+      },
+      {
+        "rank": 3,
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 보기 편집하기",
+        "score": 10.621735
+      },
+      {
+        "rank": 4,
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 설정",
+        "score": 10.527657
+      },
+      {
+        "rank": 5,
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 개요",
+        "score": 9.73267
+      },
+      {
+        "rank": 6,
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 외부 공유",
+        "score": 9.608932
+      },
+      {
+        "rank": 7,
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 보기 위치",
+        "score": 9.553186
+      },
+      {
+        "rank": 8,
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 접근 권한",
+        "score": 9.268808
+      },
+      {
+        "rank": 9,
+        "document_title": "검색",
+        "section_path": "검색 > 검색 결과 활용하기",
+        "score": 7.553313
+      },
+      {
+        "rank": 10,
+        "document_title": "문서 템플릿",
+        "section_path": "문서 템플릿 > 개요",
+        "score": 7.495223
+      }
+    ]
+  },
+  {
+    "question_id": "Q12",
+    "question": "팀에서 새로운 작업 상태를 추가하거나 기존 상태를 삭제하려면 어디서 설정하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 설정",
+        "score": 13.592912
+      },
+      {
+        "rank": 2,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 설정",
+        "score": 9.001012
+      },
+      {
+        "rank": 3,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 관리",
+        "score": 8.713829
+      },
+      {
+        "rank": 4,
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 관계 유형별 동작",
+        "score": 7.876099
+      },
+      {
+        "rank": 5,
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 작업 상태 자동화",
+        "score": 7.236902
+      },
+      {
+        "rank": 6,
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 개요",
+        "score": 7.063
+      },
+      {
+        "rank": 7,
+        "document_title": "피그마",
+        "section_path": "피그마 > 피그마 연동",
+        "score": 6.502778
+      },
+      {
+        "rank": 8,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 멤버",
+        "score": 6.26915
+      },
+      {
+        "rank": 9,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 자주 묻는 질문 (FAQ)",
+        "score": 6.198289
+      },
+      {
+        "rank": 10,
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기",
+        "score": 6.176989
+      }
+    ]
+  },
+  {
+    "question_id": "Q13",
+    "question": "뤄이도 워크스페이스를 슬랙과 연결하고 팀별 알림 채널을 지정하려면 어떻게 해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 18.514455
+      },
+      {
+        "rank": 2,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 자주 묻는 질문 (FAQ)",
+        "score": 14.961216
+      },
+      {
+        "rank": 3,
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 연동 설정 가이드",
+        "score": 12.968669
+      },
+      {
+        "rank": 4,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 슬랙 연동으로 얻는 핵심 가치",
+        "score": 10.636666
+      },
+      {
+        "rank": 5,
+        "document_title": "댓글",
+        "section_path": "댓글 > 개요",
+        "score": 9.200096
+      },
+      {
+        "rank": 6,
+        "document_title": "알림",
+        "section_path": "알림 > 참고",
+        "score": 7.903137
+      },
+      {
+        "rank": 7,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 6.728769
+      },
+      {
+        "rank": 8,
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 연동 설정 가이드",
+        "score": 6.725855
+      },
+      {
+        "rank": 9,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 개요",
+        "score": 6.37343
+      },
+      {
+        "rank": 10,
+        "document_title": "댓글",
+        "section_path": "댓글 > 댓글 구독",
+        "score": 5.100389
+      }
+    ]
+  },
+  {
+    "question_id": "Q14",
+    "question": "디스코드 서버를 뤄이도에 연결한 다음 팀별 채널을 지정하는 방법을 알려주세요.",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 연동 설정 가이드",
+        "score": 23.997442
+      },
+      {
+        "rank": 2,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 자주 묻는 질문 (FAQ)",
+        "score": 9.61406
+      },
+      {
+        "rank": 3,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 9.425358
+      },
+      {
+        "rank": 4,
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 연결 추가하기",
+        "score": 8.806507
+      },
+      {
+        "rank": 5,
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 디스코드 연동으로 얻는 핵심 가치",
+        "score": 8.793114
+      },
+      {
+        "rank": 6,
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > 설치 가이드",
+        "score": 5.964323
+      },
+      {
+        "rank": 7,
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > 개요",
+        "score": 5.781785
+      },
+      {
+        "rank": 8,
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 속성",
+        "score": 5.610811
+      },
+      {
+        "rank": 9,
+        "document_title": "알림",
+        "section_path": "알림 > 알림 활용하기",
+        "score": 5.483753
+      },
+      {
+        "rank": 10,
+        "document_title": "알림",
+        "section_path": "알림 > 개요",
+        "score": 4.912687
+      }
+    ]
+  },
+  {
+    "question_id": "Q15",
+    "question": "구글 캘린더를 워크스페이스에 연동하고 팀별 캘린더를 선택하려면 어떻게 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 24.389482
+      },
+      {
+        "rank": 2,
+        "document_title": "자동화",
+        "section_path": "자동화 > 구글 캘린더 연동",
+        "score": 22.286477
+      },
+      {
+        "rank": 3,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 자주 묻는 질문 (FAQ)",
+        "score": 19.579033
+      },
+      {
+        "rank": 4,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 미팅 일정 동기화 방식",
+        "score": 18.228208
+      },
+      {
+        "rank": 5,
+        "document_title": "자동화",
+        "section_path": "자동화 > 개요",
+        "score": 13.502305
+      },
+      {
+        "rank": 6,
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 연동 설정 가이드",
+        "score": 9.32585
+      },
+      {
+        "rank": 7,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 8.459129
+      },
+      {
+        "rank": 8,
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 연동 설정 가이드",
+        "score": 7.894232
+      },
+      {
+        "rank": 9,
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 워크스페이스 설정",
+        "score": 6.892808
+      },
+      {
+        "rank": 10,
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 작업 상태 자동화",
+        "score": 6.54817
+      }
+    ]
+  },
+  {
+    "question_id": "Q16",
+    "question": "깃허브 Organization과 Repository를 뤄이도 워크스페이스에 연결하는 절차가 궁금해요.",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 연동 설정 가이드",
+        "score": 22.024326
+      },
+      {
+        "rank": 2,
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 작업 상태 자동화",
+        "score": 6.980123
+      },
+      {
+        "rank": 3,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 5.986586
+      },
+      {
+        "rank": 4,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 5.634556
+      },
+      {
+        "rank": 5,
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 뤼이도와 Github 연결",
+        "score": 5.538737
+      },
+      {
+        "rank": 6,
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 여러 워크스페이스에 참여",
+        "score": 5.4386
+      },
+      {
+        "rank": 7,
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 연동 설정 가이드",
+        "score": 5.395469
+      },
+      {
+        "rank": 8,
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 개요",
+        "score": 5.351563
+      },
+      {
+        "rank": 9,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 자주 묻는 질문 (FAQ)",
+        "score": 5.20472
+      },
+      {
+        "rank": 10,
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 워크스페이스 설정",
+        "score": 5.169554
+      }
+    ]
+  },
+  {
+    "question_id": "Q17",
+    "question": "피그마에서 뤄이도 플러그인을 설치하고 계정을 연결하려면 어떻게 해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "피그마",
+        "section_path": "피그마 > 연동 설정 가이드",
+        "score": 22.098336
+      },
+      {
+        "rank": 2,
+        "document_title": "피그마",
+        "section_path": "피그마 > 자주 묻는 질문 (FAQ)",
+        "score": 15.881233
+      },
+      {
+        "rank": 3,
+        "document_title": "피그마",
+        "section_path": "피그마 > 피그마 뤼이도 플러그인",
+        "score": 13.402665
+      },
+      {
+        "rank": 4,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 7.085935
+      },
+      {
+        "rank": 5,
+        "document_title": "피그마",
+        "section_path": "피그마 > 피그마 연동",
+        "score": 7.046588
+      },
+      {
+        "rank": 6,
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 연동 설정 가이드",
+        "score": 6.848422
+      },
+      {
+        "rank": 7,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 6.810703
+      },
+      {
+        "rank": 8,
+        "document_title": "피그마",
+        "section_path": "피그마 > 개요",
+        "score": 6.723739
+      },
+      {
+        "rank": 9,
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 관계 유형별 동작",
+        "score": 4.92873
+      },
+      {
+        "rank": 10,
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 작업 관리",
+        "score": 4.28471
+      }
+    ]
+  },
+  {
+    "question_id": "Q18",
+    "question": "ChatGPT에 뤄이도 MCP를 연결하려면 어떤 설정을 해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > 설치 가이드",
+        "score": 11.767999
+      },
+      {
+        "rank": 2,
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > 개요",
+        "score": 6.738178
+      },
+      {
+        "rank": 3,
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 관계 유형별 동작",
+        "score": 5.520444
+      },
+      {
+        "rank": 4,
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 개요",
+        "score": 4.034451
+      },
+      {
+        "rank": 5,
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > MCP 사용 사례",
+        "score": 3.920787
+      },
+      {
+        "rank": 6,
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 작업 상태 자동화",
+        "score": 3.884815
+      },
+      {
+        "rank": 7,
+        "document_title": "댓글",
+        "section_path": "댓글 > 댓글 구독",
+        "score": 3.725505
+      },
+      {
+        "rank": 8,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 3.597156
+      },
+      {
+        "rank": 9,
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 연동 설정 가이드",
+        "score": 3.581995
+      },
+      {
+        "rank": 10,
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 연결 추가하기",
+        "score": 3.447525
+      }
+    ]
+  },
+  {
+    "question_id": "Q19",
+    "question": "구글 캘린더를 연결했는데 작업 마감일이 캘린더에 표시되지 않아요. 연동 오류인가요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 자주 묻는 질문 (FAQ)",
+        "score": 24.711419
+      },
+      {
+        "rank": 2,
+        "document_title": "자동화",
+        "section_path": "자동화 > 구글 캘린더 연동",
+        "score": 21.573469
+      },
+      {
+        "rank": 3,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 21.511867
+      },
+      {
+        "rank": 4,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 미팅 일정 동기화 방식",
+        "score": 18.228208
+      },
+      {
+        "rank": 5,
+        "document_title": "자동화",
+        "section_path": "자동화 > 개요",
+        "score": 13.502305
+      },
+      {
+        "rank": 6,
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 다양한 보기",
+        "score": 10.47012
+      },
+      {
+        "rank": 7,
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 디스코드 연동으로 얻는 핵심 가치",
+        "score": 7.474665
+      },
+      {
+        "rank": 8,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 슬랙 연동으로 얻는 핵심 가치",
+        "score": 7.275538
+      },
+      {
+        "rank": 9,
+        "document_title": "피그마",
+        "section_path": "피그마 > 피그마 연동",
+        "score": 6.2544
+      },
+      {
+        "rank": 10,
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 계층 구조 시각화",
+        "score": 6.18242
+      }
+    ]
+  },
+  {
+    "question_id": "Q20",
+    "question": "슬랙 연동 후 알림이 너무 많이 오는데 알림 범위를 줄일 수 있나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 자주 묻는 질문 (FAQ)",
+        "score": 19.434294
+      },
+      {
+        "rank": 2,
+        "document_title": "알림",
+        "section_path": "알림 > 참고",
+        "score": 14.744401
+      },
+      {
+        "rank": 3,
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 자주 묻는 질문 (FAQ)",
+        "score": 14.684075
+      },
+      {
+        "rank": 4,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 슬랙 연동으로 얻는 핵심 가치",
+        "score": 14.068623
+      },
+      {
+        "rank": 5,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 12.660216
+      },
+      {
+        "rank": 6,
+        "document_title": "알림",
+        "section_path": "알림 > 알림 확인하기",
+        "score": 12.340576
+      },
+      {
+        "rank": 7,
+        "document_title": "댓글",
+        "section_path": "댓글 > 개요",
+        "score": 11.464238
+      },
+      {
+        "rank": 8,
+        "document_title": "알림",
+        "section_path": "알림 > 알림 활용하기",
+        "score": 10.023467
+      },
+      {
+        "rank": 9,
+        "document_title": "알림",
+        "section_path": "알림 > 알림 설정",
+        "score": 9.971332
+      },
+      {
+        "rank": 10,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 자주 묻는 질문 (FAQ)",
+        "score": 9.544911
+      }
+    ]
+  },
+  {
+    "question_id": "Q21",
+    "question": "슬랙 연동 설정에서 비공개 채널이 보이지 않는데 어떻게 연결하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 자주 묻는 질문 (FAQ)",
+        "score": 18.192948
+      },
+      {
+        "rank": 2,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 16.558817
+      },
+      {
+        "rank": 3,
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 연동 설정 가이드",
+        "score": 10.965435
+      },
+      {
+        "rank": 4,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 슬랙 연동으로 얻는 핵심 가치",
+        "score": 10.721955
+      },
+      {
+        "rank": 5,
+        "document_title": "댓글",
+        "section_path": "댓글 > 개요",
+        "score": 8.564414
+      },
+      {
+        "rank": 6,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 개요",
+        "score": 7.535013
+      },
+      {
+        "rank": 7,
+        "document_title": "알림",
+        "section_path": "알림 > 참고",
+        "score": 7.056247
+      },
+      {
+        "rank": 8,
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 설정",
+        "score": 6.862905
+      },
+      {
+        "rank": 9,
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 연동 설정 가이드",
+        "score": 6.324657
+      },
+      {
+        "rank": 10,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 6.288015
+      }
+    ]
+  },
+  {
+    "question_id": "Q22",
+    "question": "기존 작업 상태를 삭제하려고 하는데 삭제되지 않는 이유가 무엇인가요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 설정",
+        "score": 11.854495
+      },
+      {
+        "rank": 2,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 개요",
+        "score": 10.225269
+      },
+      {
+        "rank": 3,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 복구 및 영구 삭제",
+        "score": 9.486358
+      },
+      {
+        "rank": 4,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 관리",
+        "score": 9.474773
+      },
+      {
+        "rank": 5,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 삭제된 페이지 보기",
+        "score": 9.196079
+      },
+      {
+        "rank": 6,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 멤버",
+        "score": 9.016489
+      },
+      {
+        "rank": 7,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 자주 묻는 질문 (FAQ)",
+        "score": 8.889085
+      },
+      {
+        "rank": 8,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 휴지통 사용법",
+        "score": 8.76105
+      },
+      {
+        "rank": 9,
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 작업 처리",
+        "score": 7.364975
+      },
+      {
+        "rank": 10,
+        "document_title": "구독 및 결제",
+        "section_path": "구독 및 결제 > 구독 변경 또는 취소",
+        "score": 6.404191
+      }
+    ]
+  },
+  {
+    "question_id": "Q23",
+    "question": "비활성화한 워크스페이스 멤버를 완전히 삭제할 수 없어요. 다시 초대하면 새 계정이 만들어지나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "멤버",
+        "section_path": "멤버 > 멤버 비활성화",
+        "score": 22.809829
+      },
+      {
+        "rank": 2,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 멤버",
+        "score": 13.953617
+      },
+      {
+        "rank": 3,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 관리",
+        "score": 12.081628
+      },
+      {
+        "rank": 4,
+        "document_title": "멤버",
+        "section_path": "멤버 > 개요",
+        "score": 10.928569
+      },
+      {
+        "rank": 5,
+        "document_title": "구독 및 결제",
+        "section_path": "구독 및 결제 > 구독 변경 또는 취소",
+        "score": 9.550305
+      },
+      {
+        "rank": 6,
+        "document_title": "멤버",
+        "section_path": "멤버 > 권한",
+        "score": 9.351257
+      },
+      {
+        "rank": 7,
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 접근 권한",
+        "score": 8.518295
+      },
+      {
+        "rank": 8,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 8.259267
+      },
+      {
+        "rank": 9,
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 설정",
+        "score": 8.196755
+      },
+      {
+        "rank": 10,
+        "document_title": "구독 및 결제",
+        "section_path": "구독 및 결제 > 워크스페이스에 멤버 추가하기",
+        "score": 8.002672
+      }
+    ]
+  },
+  {
+    "question_id": "Q24",
+    "question": "팀을 삭제했는데 다시 복구할 수 있나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 복구 및 영구 삭제",
+        "score": 12.603945
+      },
+      {
+        "rank": 2,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 개요",
+        "score": 11.912104
+      },
+      {
+        "rank": 3,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 삭제된 페이지 보기",
+        "score": 10.902122
+      },
+      {
+        "rank": 4,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 관리",
+        "score": 8.551637
+      },
+      {
+        "rank": 5,
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 설정",
+        "score": 5.78873
+      },
+      {
+        "rank": 6,
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 휴지통 사용법",
+        "score": 5.364335
+      },
+      {
+        "rank": 7,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 멤버",
+        "score": 5.355773
+      },
+      {
+        "rank": 8,
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 공개 범위",
+        "score": 4.467104
+      },
+      {
+        "rank": 9,
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 자주 묻는 질문 (FAQ)",
+        "score": 3.770341
+      },
+      {
+        "rank": 10,
+        "document_title": "구독 및 결제",
+        "section_path": "구독 및 결제 > 구독 변경 또는 취소",
+        "score": 3.62131
+      }
+    ]
+  },
+  {
+    "question_id": "Q25",
+    "question": "워크스페이스와 팀은 각각 어떤 단위이고 서로 어떤 관계인가요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 개요",
+        "score": 6.399602
+      },
+      {
+        "rank": 2,
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 개요",
+        "score": 5.721919
+      },
+      {
+        "rank": 3,
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 개요",
+        "score": 5.590645
+      },
+      {
+        "rank": 4,
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 작업 관리",
+        "score": 5.512767
+      },
+      {
+        "rank": 5,
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 5.455307
+      },
+      {
+        "rank": 6,
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 여러 워크스페이스에 참여",
+        "score": 5.4386
+      },
+      {
+        "rank": 7,
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 연동 설정 가이드",
+        "score": 5.254019
+      },
+      {
+        "rank": 8,
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 자주 묻는 질문 (FAQ)",
+        "score": 5.222475
+      },
+      {
+        "rank": 9,
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 계층 구조 시각화",
+        "score": 5.20168
+      },
+      {
+        "rank": 10,
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 워크스페이스 설정",
+        "score": 5.169554
+      }
+    ]
+  },
+  {
+    "question_id": "Q26",
+    "question": "대기 작업과 백로그는 어떤 차이가 있고 각각 언제 사용하는 공간인가요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 개요",
+        "score": 15.092721
+      },
+      {
+        "rank": 2,
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 작업 처리",
+        "score": 14.978172
+      },
+      {
+        "rank": 3,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 전환된 백로그",
+        "score": 13.838162
+      },
+      {
+        "rank": 4,
+        "document_title": "중복 작업 감지",
+        "section_path": "중복 작업 감지 > 중복 작업 감지 사용하는 법",
+        "score": 11.9059
+      },
+      {
+        "rank": 5,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 구조",
+        "score": 11.818036
+      },
+      {
+        "rank": 6,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 신규 생성된 백로그",
+        "score": 10.187551
+      },
+      {
+        "rank": 7,
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 개요",
+        "score": 10.145005
+      },
+      {
+        "rank": 8,
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 9.587641
+      },
+      {
+        "rank": 9,
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 속성",
+        "score": 9.255807
+      },
+      {
+        "rank": 10,
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 보기 생성하기",
+        "score": 9.139406
+      }
+    ]
+  },
+  {
+    "question_id": "Q27",
+    "question": "프로젝트, 목표, 작업, 하위작업은 어떤 계층 구조로 구성되나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 구조",
+        "score": 20.302649
+      },
+      {
+        "rank": 2,
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 개요",
+        "score": 16.824644
+      },
+      {
+        "rank": 3,
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 계층 구조 시각화",
+        "score": 15.586186
+      },
+      {
+        "rank": 4,
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 외부 공유",
+        "score": 12.639899
+      },
+      {
+        "rank": 5,
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 개요",
+        "score": 12.442494
+      },
+      {
+        "rank": 6,
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 보기 위치",
+        "score": 12.199693
+      },
+      {
+        "rank": 7,
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 11.297251
+      },
+      {
+        "rank": 8,
+        "document_title": "핵심 개념",
+        "section_path": "핵심 개념 > 기본 개념",
+        "score": 11.19153
+      },
+      {
+        "rank": 9,
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 속성",
+        "score": 10.218818
+      },
+      {
+        "rank": 10,
+        "document_title": "프로젝트 일정 자동 생성",
+        "section_path": "프로젝트 일정 자동 생성 > 개요",
+        "score": 9.367737
+      }
+    ]
+  },
+  {
+    "question_id": "Q28",
+    "question": "작업 관계에서 '차단 중'과 '차단됨'은 어떻게 다른가요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 관계 유형별 동작",
+        "score": 20.011442
+      },
+      {
+        "rank": 2,
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 개요",
+        "score": 16.643024
+      },
+      {
+        "rank": 3,
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 계층 구조 시각화",
+        "score": 7.222385
+      },
+      {
+        "rank": 4,
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 보기 위치",
+        "score": 6.195346
+      },
+      {
+        "rank": 5,
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 작업 관리",
+        "score": 6.13599
+      },
+      {
+        "rank": 6,
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 개요",
+        "score": 6.110788
+      },
+      {
+        "rank": 7,
+        "document_title": "대시보드",
+        "section_path": "대시보드 > 작업",
+        "score": 4.841693
+      },
+      {
+        "rank": 8,
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > The Riido Way",
+        "score": 4.427462
+      },
+      {
+        "rank": 9,
+        "document_title": "대시보드",
+        "section_path": "대시보드 > 개요",
+        "score": 4.231494
+      },
+      {
+        "rank": 10,
+        "document_title": "핵심 개념",
+        "section_path": "핵심 개념 > 효율적인 프로젝트 관리",
+        "score": 4.099405
+      }
+    ]
+  },
+  {
+    "question_id": "Q29",
+    "question": "스프린트 그래프의 보라색 점선과 보라색 실선은 각각 무엇을 의미하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 그래프 해석 팁",
+        "score": 27.932036
+      },
+      {
+        "rank": 2,
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 그래프 보는 법",
+        "score": 22.546316
+      },
+      {
+        "rank": 3,
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 지난 스프린트 그래프 보는 법",
+        "score": 9.519592
+      },
+      {
+        "rank": 4,
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 참고",
+        "score": 9.162256
+      },
+      {
+        "rank": 5,
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 개요",
+        "score": 8.381025
+      },
+      {
+        "rank": 6,
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 설정",
+        "score": 3.882436
+      },
+      {
+        "rank": 7,
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 시작 요일",
+        "score": 3.822895
+      },
+      {
+        "rank": 8,
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 미리 생성할 다가올 스프린트 개수",
+        "score": 3.594264
+      },
+      {
+        "rank": 9,
+        "document_title": "자동화",
+        "section_path": "자동화 > 자동화 설정",
+        "score": 3.48662
+      },
+      {
+        "rank": 10,
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 개요",
+        "score": 3.255441
+      }
+    ]
+  },
+  {
+    "question_id": "Q30",
+    "question": "뤄이도 AI 에이전트는 기존 AI 도구와 무엇이 다르고 어떤 프로젝트 맥락을 이해하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "document_title": "AI 에이전트 (Beta)",
+        "section_path": "AI 에이전트 (Beta) > 개요",
+        "score": 23.940833
+      },
+      {
+        "rank": 2,
+        "document_title": "AI 에이전트 (Beta)",
+        "section_path": "AI 에이전트 (Beta) > 이용 가이드",
+        "score": 17.984684
+      },
+      {
+        "rank": 3,
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > MCP 사용 사례",
+        "score": 12.844207
+      },
+      {
+        "rank": 4,
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > 개요",
+        "score": 12.785616
+      },
+      {
+        "rank": 5,
+        "document_title": "프로젝트 일정 자동 생성",
+        "section_path": "프로젝트 일정 자동 생성 > Riido AI 사용하는 법",
+        "score": 10.031149
+      },
+      {
+        "rank": 6,
+        "document_title": "프로젝트 일정 자동 생성",
+        "section_path": "프로젝트 일정 자동 생성 > 개요",
+        "score": 8.785627
+      },
+      {
+        "rank": 7,
+        "document_title": "중복 작업 감지",
+        "section_path": "중복 작업 감지 > 개요",
+        "score": 8.235373
+      },
+      {
+        "rank": 8,
+        "document_title": "팀",
+        "section_path": "팀 > 팀 멤버",
+        "score": 7.254042
+      },
+      {
+        "rank": 9,
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > The Riido Way",
+        "score": 6.761277
+      },
+      {
+        "rank": 10,
+        "document_title": "릴리즈 노트 자동 생성",
+        "section_path": "릴리즈 노트 자동 생성 > 릴리즈 노트 자동 생성 사용하는 법",
+        "score": 6.120381
+      }
+    ]
+  }
+]
