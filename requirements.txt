@@ -1,1 +1,3 @@
 requests
+rank-bm25
+kiwipiepy
