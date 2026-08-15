@@ -84,7 +84,7 @@ class BM25RetrieverTest(unittest.TestCase):
 
         retriever = BM25Retriever(retrieval_chunks)
 
-        self.assertEqual(141, retriever._index.corpus_size)
+        self.assertEqual(142, retriever._index.corpus_size)
 
     def test_returns_top_ten_including_zero_scores(self) -> None:
         chunks = [

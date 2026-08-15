@@ -25,6 +25,7 @@ QUESTION_BLOCK_PATTERN = re.compile(
 RESULT_PATTERN = re.compile(
     r"^rank: (?P<rank>\d+)\n"
     r"score: (?P<score>-?\d+(?:\.\d+)?)\n"
+    r"section_id: (?P<section_id>[^\n]+)\n"
     r"document_title: (?P<document_title>[^\n]+)\n"
     r"section_path: (?P<section_path>[^\n]+)\n"
     r"source_url: [^\n]*\n"
@@ -42,6 +43,7 @@ def parse_labeling_candidates(text: str) -> List[Dict[str, Any]]:
         candidates = [
             {
                 "rank": int(result_match.group("rank")),
+                "section_id": result_match.group("section_id"),
                 "document_title": result_match.group("document_title"),
                 "section_path": result_match.group("section_path"),
                 "score": float(result_match.group("score")),

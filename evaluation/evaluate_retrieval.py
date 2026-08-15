@@ -23,11 +23,11 @@ METRIC_KEYS = (
     "mrr_at_10",
     "ndcg_at_10",
 )
-SectionIdentity = Tuple[str, str]
+SectionIdentity = str
 
 
 def _section_identity(section: Dict[str, Any]) -> SectionIdentity:
-    return section["document_title"], section["section_path"]
+    return section["section_id"]
 
 
 def _relevant_identities(

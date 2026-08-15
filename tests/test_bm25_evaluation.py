@@ -5,12 +5,12 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from evaluation.run_bm25_evaluation import (
-    build_retrieval_chunks,
     load_questions,
     print_evaluation_results,
     save_evaluation_results,
 )
 from retrieval.bm25_retriever import BM25Retriever
+from retrieval.corpus import build_retrieval_chunks
 
 
 class BM25EvaluationTest(unittest.TestCase):
@@ -39,7 +39,7 @@ class BM25EvaluationTest(unittest.TestCase):
         )
 
     def test_builds_retrieval_chunks_for_canonical_corpus(self) -> None:
-        self.assertEqual(141, len(self.retrieval_chunks))
+        self.assertEqual(142, len(self.retrieval_chunks))
         self.assertTrue(
             all(chunk.document_title for chunk in self.retrieval_chunks)
         )
@@ -69,6 +69,7 @@ class BM25EvaluationTest(unittest.TestCase):
         self.assertIn(self.questions[0]["question"], text)
         self.assertEqual(10, text.count("\nrank: "))
         self.assertIn("score:", text)
+        self.assertIn("section_id:", text)
         self.assertIn("document_title:", text)
         self.assertIn("section_path:", text)
         self.assertIn("source_url:", text)

@@ -2,7 +2,7 @@ import json
 import unittest
 from pathlib import Path
 
-from evaluation.run_bm25_evaluation import build_retrieval_chunks
+from retrieval.corpus import build_retrieval_chunks
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -36,11 +36,9 @@ class GroundTruthTest(unittest.TestCase):
         self.assertEqual(question_ids, ground_truth_ids)
         self.assertEqual(len(ground_truth_ids), len(set(ground_truth_ids)))
 
-    def test_uses_candidate_compatible_identity_fields(self) -> None:
-        candidate_identity_fields = {
-            "document_title",
-            "section_path",
-        }
+    def test_uses_section_id_with_human_readable_fields(self) -> None:
+        candidate_identity_fields = {"section_id"}
+        display_fields = {"document_title", "section_path"}
         actual_candidate_fields = set(
             self.candidates[0]["candidates"][0]
         )
@@ -55,47 +53,51 @@ class GroundTruthTest(unittest.TestCase):
             )
             self.assertTrue(item["relevant_sections"])
             for section in item["relevant_sections"]:
-                self.assertEqual(candidate_identity_fields, set(section))
+                self.assertEqual(
+                    candidate_identity_fields | display_fields,
+                    set(section),
+                )
 
     def test_relevant_sections_exist_in_canonical_corpus(self) -> None:
-        corpus_sections = {
-            (
-                chunk.document_title,
-                " > ".join(chunk.section_path),
-            )
-            for chunk in build_retrieval_chunks()
+        corpus_section_ids = {
+            chunk.section_id for chunk in build_retrieval_chunks()
         }
 
         for item in self.ground_truth:
             for section in item["relevant_sections"]:
-                identity = (
-                    section["document_title"],
-                    section["section_path"],
+                self.assertIn(
+                    section["section_id"],
+                    corpus_section_ids,
+                    item["question_id"],
                 )
-                self.assertIn(identity, corpus_sections, item["question_id"])
+
+    def test_section_ids_are_unique_in_canonical_corpus(self) -> None:
+        chunks = build_retrieval_chunks()
+
+        self.assertEqual(
+            len(chunks),
+            len({chunk.section_id for chunk in chunks}),
+        )
 
     def test_includes_each_questions_expected_section(self) -> None:
+        chunks = build_retrieval_chunks()
         ground_truth_by_id = {
             item["question_id"]: {
-                (
-                    section["document_title"],
-                    section["section_path"],
-                )
-                for section in item["relevant_sections"]
+                section["section_id"] for section in item["relevant_sections"]
             }
             for item in self.ground_truth
         }
 
         for question in self.questions:
-            expected = (
-                question["expected_document"],
-                (
-                    f"{question['expected_document']} > "
-                    f"{question['expected_section']}"
-                ),
-            )
+            matches = [
+                chunk
+                for chunk in chunks
+                if chunk.document_title == question["expected_document"]
+                and chunk.section_path[-1] == question["expected_section"]
+            ]
+            self.assertEqual(1, len(matches), question["id"])
             self.assertIn(
-                expected,
+                matches[0].section_id,
                 ground_truth_by_id[question["id"]],
                 question["id"],
             )
@@ -103,10 +105,7 @@ class GroundTruthTest(unittest.TestCase):
     def test_has_no_duplicate_sections_per_question(self) -> None:
         for item in self.ground_truth:
             identities = [
-                (
-                    section["document_title"],
-                    section["section_path"],
-                )
+                section["section_id"]
                 for section in item["relevant_sections"]
             ]
             self.assertEqual(

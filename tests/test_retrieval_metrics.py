@@ -3,6 +3,7 @@ import math
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Optional
 
 from evaluation.evaluate_retrieval import (
     METRIC_KEYS,
@@ -15,9 +16,14 @@ from evaluation.evaluate_retrieval import (
 )
 
 
-def create_section(name: str, rank: int = 1):
+def create_section(
+    name: str,
+    rank: int = 1,
+    section_id: Optional[str] = None,
+):
     return {
         "rank": rank,
+        "section_id": section_id or name,
         "document_title": "문서",
         "section_path": f"문서 > {name}",
     }
@@ -109,6 +115,24 @@ class RetrievalMetricsTest(unittest.TestCase):
                 1.0 + 1.0 / math.log2(3) + 1.0 / math.log2(4)
             ),
             calculate_ndcg_at_10(candidates, self.relevant_sections),
+        )
+
+    def test_distinguishes_same_display_path_by_section_id(self) -> None:
+        candidates = [
+            create_section("개요", rank=1, section_id="document-a:0"),
+            create_section("개요", rank=2, section_id="document-b:0"),
+        ]
+        relevant_sections = [
+            create_section("개요", section_id="document-b:0"),
+        ]
+
+        self.assertEqual(
+            0.0,
+            calculate_recall_at_k(candidates, relevant_sections, 1),
+        )
+        self.assertEqual(
+            1.0,
+            calculate_recall_at_k(candidates, relevant_sections, 2),
         )
 
     def test_evaluates_current_thirty_questions(self) -> None:

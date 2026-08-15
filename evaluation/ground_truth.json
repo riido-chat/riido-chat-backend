@@ -3,6 +3,7 @@
     "question_id": "Q01",
     "relevant_sections": [
       {
+        "section_id": "9d9ba80dfef6:b545c692c53d",
         "document_title": "계획: 대기 작업",
         "section_path": "계획: 대기 작업 > 작업 처리"
       }
@@ -12,6 +13,7 @@
     "question_id": "Q02",
     "relevant_sections": [
       {
+        "section_id": "11957633d8b2:26264fecfd4a",
         "document_title": "계획: 백로그",
         "section_path": "계획: 백로그 > 작업으로 전환"
       }
@@ -21,10 +23,12 @@
     "question_id": "Q03",
     "relevant_sections": [
       {
+        "section_id": "333984364686:5db9d1f52377",
         "document_title": "저장된 보기",
         "section_path": "저장된 보기 > 보기 생성하기"
       },
       {
+        "section_id": "688dd8ac7efd:0d980cb3f519",
         "document_title": "필터",
         "section_path": "필터 > 저장된 보기"
       }
@@ -34,6 +38,7 @@
     "question_id": "Q04",
     "relevant_sections": [
       {
+        "section_id": "c7f7233f8cd2:514df535f932",
         "document_title": "문서 템플릿",
         "section_path": "문서 템플릿 > 템플릿 적용"
       }
@@ -43,6 +48,7 @@
     "question_id": "Q05",
     "relevant_sections": [
       {
+        "section_id": "fcb3c228f5a0:7ce560cd7b49",
         "document_title": "운영: 보관 작업",
         "section_path": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기"
       }
@@ -52,6 +58,7 @@
     "question_id": "Q06",
     "relevant_sections": [
       {
+        "section_id": "a7061c4853df:73e63632e555",
         "document_title": "휴지통",
         "section_path": "휴지통 > 복구 및 영구 삭제"
       }
@@ -61,6 +68,7 @@
     "question_id": "Q07",
     "relevant_sections": [
       {
+        "section_id": "6c3b150c3146:6c9e58fb04ca",
         "document_title": "비공개 팀",
         "section_path": "비공개 팀 > 설정"
       }
@@ -70,6 +78,7 @@
     "question_id": "Q08",
     "relevant_sections": [
       {
+        "section_id": "261e80b246e8:48338ffe0288",
         "document_title": "스프린트",
         "section_path": "스프린트 > 스프린트 시작 요일"
       }
@@ -79,6 +88,7 @@
     "question_id": "Q09",
     "relevant_sections": [
       {
+        "section_id": "261e80b246e8:7a8e11bfc496",
         "document_title": "스프린트",
         "section_path": "스프린트 > 미리 생성할 다가올 스프린트 개수"
       }
@@ -88,6 +98,7 @@
     "question_id": "Q10",
     "relevant_sections": [
       {
+        "section_id": "c225265a1fa1:8056485bc27c",
         "document_title": "알림",
         "section_path": "알림 > 알림 설정"
       }
@@ -97,6 +108,7 @@
     "question_id": "Q11",
     "relevant_sections": [
       {
+        "section_id": "333984364686:ba056589ecd1",
         "document_title": "저장된 보기",
         "section_path": "저장된 보기 > 공개 범위"
       }
@@ -106,6 +118,7 @@
     "question_id": "Q12",
     "relevant_sections": [
       {
+        "section_id": "a26e14ee99d1:8ddbdaa9dc9b",
         "document_title": "작업 상태",
         "section_path": "작업 상태 > 설정"
       }
@@ -115,6 +128,7 @@
     "question_id": "Q13",
     "relevant_sections": [
       {
+        "section_id": "43e5e2414349:b60d8edf2d0a",
         "document_title": "슬랙",
         "section_path": "슬랙 > 연동 설정 가이드"
       }
@@ -124,6 +138,7 @@
     "question_id": "Q14",
     "relevant_sections": [
       {
+        "section_id": "ee834b371049:6fe68edda26a",
         "document_title": "디스코드",
         "section_path": "디스코드 > 연동 설정 가이드"
       }
@@ -133,6 +148,7 @@
     "question_id": "Q15",
     "relevant_sections": [
       {
+        "section_id": "5623097e1502:b8b2000bc35a",
         "document_title": "구글 캘린더",
         "section_path": "구글 캘린더 > 연동 설정 가이드"
       }
@@ -142,6 +158,7 @@
     "question_id": "Q16",
     "relevant_sections": [
       {
+        "section_id": "b86425eb9784:c2921a208e92",
         "document_title": "깃허브",
         "section_path": "깃허브 > 연동 설정 가이드"
       }
@@ -151,6 +168,7 @@
     "question_id": "Q17",
     "relevant_sections": [
       {
+        "section_id": "a13bfdc38996:8f9d2cf72c3e",
         "document_title": "피그마",
         "section_path": "피그마 > 연동 설정 가이드"
       }
@@ -160,6 +178,7 @@
     "question_id": "Q18",
     "relevant_sections": [
       {
+        "section_id": "6e9c13b73663:ef1266158078",
         "document_title": "MCP 서버",
         "section_path": "MCP 서버 > 설치 가이드"
       }
@@ -169,6 +188,7 @@
     "question_id": "Q19",
     "relevant_sections": [
       {
+        "section_id": "5623097e1502:76d8211bc501",
         "document_title": "구글 캘린더",
         "section_path": "구글 캘린더 > 자주 묻는 질문 (FAQ)"
       }
@@ -178,6 +198,7 @@
     "question_id": "Q20",
     "relevant_sections": [
       {
+        "section_id": "43e5e2414349:9976bd5ed072",
         "document_title": "슬랙",
         "section_path": "슬랙 > 자주 묻는 질문 (FAQ)"
       }
@@ -187,6 +208,7 @@
     "question_id": "Q21",
     "relevant_sections": [
       {
+        "section_id": "43e5e2414349:9976bd5ed072",
         "document_title": "슬랙",
         "section_path": "슬랙 > 자주 묻는 질문 (FAQ)"
       }
@@ -196,6 +218,7 @@
     "question_id": "Q22",
     "relevant_sections": [
       {
+        "section_id": "a26e14ee99d1:8ddbdaa9dc9b",
         "document_title": "작업 상태",
         "section_path": "작업 상태 > 설정"
       }
@@ -205,6 +228,7 @@
     "question_id": "Q23",
     "relevant_sections": [
       {
+        "section_id": "567f0ce8042c:6a09b6285b28",
         "document_title": "멤버",
         "section_path": "멤버 > 멤버 비활성화"
       }
@@ -214,6 +238,7 @@
     "question_id": "Q24",
     "relevant_sections": [
       {
+        "section_id": "da8743ff8cae:26bbdd776a1e",
         "document_title": "팀",
         "section_path": "팀 > 팀 관리"
       }
@@ -223,6 +248,7 @@
     "question_id": "Q25",
     "relevant_sections": [
       {
+        "section_id": "764f1bb9b2d9:edc324ca1f86",
         "document_title": "핵심 개념",
         "section_path": "핵심 개념 > 기본 개념"
       }
@@ -232,14 +258,17 @@
     "question_id": "Q26",
     "relevant_sections": [
       {
+        "section_id": "2edd9ad4a6fa:c0f4071b4014",
         "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
         "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조"
       },
       {
+        "section_id": "9d9ba80dfef6:2e1668de5714",
         "document_title": "계획: 대기 작업",
         "section_path": "계획: 대기 작업 > 개요"
       },
       {
+        "section_id": "11957633d8b2:a6f5feefa6e5",
         "document_title": "계획: 백로그",
         "section_path": "계획: 백로그 > 개요"
       }
@@ -249,14 +278,17 @@
     "question_id": "Q27",
     "relevant_sections": [
       {
+        "section_id": "949ddd65a2a5:09e9b2c9384c",
         "document_title": "실행: 작업",
         "section_path": "실행: 작업 > 구조"
       },
       {
+        "section_id": "764f1bb9b2d9:edc324ca1f86",
         "document_title": "핵심 개념",
         "section_path": "핵심 개념 > 기본 개념"
       },
       {
+        "section_id": "9b9516882026:e32fcf17e277",
         "document_title": "작업 관계도",
         "section_path": "작업 관계도 > 개요"
       }
@@ -266,10 +298,12 @@
     "question_id": "Q28",
     "relevant_sections": [
       {
+        "section_id": "673858aecdcf:b1d03b889c87",
         "document_title": "작업간 연결",
         "section_path": "작업간 연결 > 관계 유형별 동작"
       },
       {
+        "section_id": "673858aecdcf:7d8048c2174c",
         "document_title": "작업간 연결",
         "section_path": "작업간 연결 > 개요"
       }
@@ -279,6 +313,7 @@
     "question_id": "Q29",
     "relevant_sections": [
       {
+        "section_id": "2c428c0d81be:012f04cb7b63",
         "document_title": "스프린트 그래프",
         "section_path": "스프린트 그래프 > 그래프 보는 법"
       }
@@ -288,6 +323,7 @@
     "question_id": "Q30",
     "relevant_sections": [
       {
+        "section_id": "7e2418cfc86d:b32001724300",
         "document_title": "AI 에이전트 (Beta)",
         "section_path": "AI 에이전트 (Beta) > 개요"
       }
