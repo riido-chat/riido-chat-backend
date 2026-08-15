@@ -26,7 +26,7 @@ class Subsection:
 
 @dataclass(frozen=True)
 class Section:
-    """문서의 H2 의미 구조 단위를 나타낸다."""
+    """문서의 의미 구조 단위를 나타낸다."""
 
     section_id: str
     document_id: str

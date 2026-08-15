@@ -10,11 +10,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from pipeline.document.chunker import create_chunks
-from pipeline.document.loader import load_normalized_documents
-from pipeline.document.section_parser import parse_sections
 from retrieval.bm25_retriever import BM25Retriever
-from retrieval.models import RetrievalChunk
+from retrieval.corpus import build_retrieval_chunks
 
 
 DEFAULT_QUESTIONS_PATH = PROJECT_ROOT / "evaluation/bm25_questions.json"
@@ -30,24 +27,6 @@ def load_questions(
     """평가 질문 JSON을 순서대로 읽는다."""
 
     return json.loads(Path(questions_path).read_text(encoding="utf-8"))
-
-
-def build_retrieval_chunks(
-    manifest_path: Union[str, Path] = DEFAULT_MANIFEST_PATH,
-) -> List[RetrievalChunk]:
-    """기존 문서 파이프라인의 결과를 RetrievalChunk로 변환한다."""
-
-    retrieval_chunks = []
-
-    for document in load_normalized_documents(manifest_path):
-        sections = parse_sections(document)
-        chunks = create_chunks(sections)
-        retrieval_chunks.extend(
-            RetrievalChunk.from_document_chunk(document, chunk)
-            for chunk in chunks
-        )
-
-    return retrieval_chunks
 
 
 def format_evaluation_results(
@@ -73,6 +52,7 @@ def format_evaluation_results(
                     "",
                     f"rank: {result.rank}",
                     f"score: {result.score:.6f}",
+                    f"section_id: {result.chunk.section_id}",
                     f"document_title: {result.chunk.document_title}",
                     f"section_path: {' > '.join(result.chunk.section_path)}",
                     f"source_url: {result.chunk.source_url}",
@@ -107,7 +87,7 @@ def save_evaluation_results(
 
 def main() -> None:
     questions = load_questions()
-    retriever = BM25Retriever(build_retrieval_chunks())
+    retriever = BM25Retriever(build_retrieval_chunks(DEFAULT_MANIFEST_PATH))
     result_text = format_evaluation_results(questions, retriever)
     print(result_text, end="")
     output_path = save_evaluation_results(result_text)

@@ -3,7 +3,8 @@
 질문: 새로 들어온 요청을 검토한 뒤 백로그나 바로 실행할 작업으로 넘기려면 어떻게 해야 하나요?
 
 rank: 1
-score: 16.011281
+score: 16.060329
+section_id: 11957633d8b2:a6f5feefa6e5
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 개요
 source_url: https://docs.riido.io/issues/backlog.md
@@ -13,7 +14,8 @@ content:
 작업을 당장 시작하지 않더라도, 백로그에 잘 정리해두면 언제든 팀의 상황에 따라 실행으로 옮길 수 있습니다. 계획 단계의 핵심 도구인 백로그를 통해, 팀은 일의 흐름을 놓치지 않고 안정적인 실행 기반을 마련할 수 있습니다.
 
 rank: 2
-score: 12.239993
+score: 12.272737
+section_id: 11957633d8b2:cce467185dfa
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 전환된 백로그
 source_url: https://docs.riido.io/issues/backlog.md
@@ -21,7 +23,8 @@ content:
 한 번 작업으로 전환된 백로그는 사라지지 않습니다. ‘전환된 백로그’ 페이지에서 해당 작업과 어떤 백로그에서 시작되었는지 연결 상태를 확인할 수 있습니다. 이를 통해 기획의 히스토리를 빠뜨리지 않고 명확하게 추적할 수 있습니다.
 
 rank: 3
-score: 11.539042
+score: 11.565918
+section_id: 9d9ba80dfef6:b545c692c53d
 document_title: 계획: 대기 작업
 section_path: 계획: 대기 작업 > 작업 처리
 source_url: https://docs.riido.io/issues/intake.md
@@ -37,7 +40,8 @@ content:
 진행하지 않기로 한 작업은 ‘거절’을 클릭해 상태를 거절됨으로 변경합니다. 거절 시에는 사유를 작성해야 하며, 입력한 내용은 댓글로 자동 기록됩니다. 이를 통해 누가 어떤 이유로 작업을 거절했는지 추적할 수 있습니다.
 
 rank: 4
-score: 11.435959
+score: 11.464473
+section_id: 11957633d8b2:a0709b43f1a9
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 신규 생성된 백로그
 source_url: https://docs.riido.io/issues/backlog.md
@@ -45,7 +49,8 @@ content:
 새롭게 추가된 백로그만 따로 모아보고 싶을 때는 ‘신규 백로그’ 필터를 사용합니다. 아직 확인하지 못한 백로그를 빠르게 확인하고, 빠뜨림 없이 검토할 수 있습니다.
 
 rank: 5
-score: 10.315818
+score: 10.345103
+section_id: 11957633d8b2:8e468f02bf3a
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 구조
 source_url: https://docs.riido.io/issues/backlog.md
@@ -53,7 +58,8 @@ content:
 백로그는 \[백로그 섹션 → 백로그 아이템]으로 2단계 계층 구조로 이루어져 있습니다. 필요한 만큼 섹션을 만들어 백로그를 주제별로 구분하고, 각 섹션 안에 백로그 항목들을 정리할 수 있습니다. 이를 통해 많은 백로그가 쌓이더라도 직관적으로 필요한 정보를 한눈에 확인할 수 있습니다.
 
 rank: 6
-score: 9.317459
+score: 9.339317
+section_id: c837145b4afd:55978b839cb4
 document_title: 중복 작업 감지
 section_path: 중복 작업 감지 > 중복 작업 감지 사용하는 법
 source_url: https://docs.riido.io/ai/duplicate-detection.md
@@ -74,7 +80,8 @@ content:
 * 새로운 작업이 필요하다면 ‘무시하고 생성하기’ 버튼을 눌러 생성할 수 있습니다.
 
 rank: 7
-score: 9.256218
+score: 9.283144
+section_id: 2edd9ad4a6fa:c0f4071b4014
 document_title: 작업 흐름으로 이해하는 프로젝트 관리
 section_path: 작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조
 source_url: https://docs.riido.io/issues/workflow.md
@@ -120,7 +127,8 @@ content:
 완료되었지만 여전히 중요한 정보로 남아야 하는 작업들을 모아두는 공간입니다. 언제든지 다시 실행 단계로 이동할 수 있으며, 팀은 업무의 연속성과 개선의 기반을 확보할 수 있습니다.
 
 rank: 8
-score: 8.337553
+score: 8.355219
+section_id: 9d9ba80dfef6:9b27cc48daca
 document_title: 계획: 대기 작업
 section_path: 계획: 대기 작업 > 검토된 대기 작업
 source_url: https://docs.riido.io/issues/intake.md
@@ -128,7 +136,8 @@ content:
 검토가 완료된 작업은 ‘검토됨’ 탭으로 이동합니다. 이곳에서는 검토가 끝난 대기 작업의 최종 상태와 히스토리를 확인할 수 있습니다.
 
 rank: 9
-score: 7.693655
+score: 7.710845
+section_id: c837145b4afd:2ca4af05f81e
 document_title: 중복 작업 감지
 section_path: 중복 작업 감지 > 개요
 source_url: https://docs.riido.io/ai/duplicate-detection.md
@@ -138,7 +147,8 @@ content:
 이를 통해 불필요한 중복 생성을 방지하고, 팀의 작업 흐름을 보다 깔끔하고 일관되게 유지할 수 있습니다.
 
 rank: 10
-score: 7.664470
+score: 7.682057
+section_id: 11957633d8b2:aa8af54aa5cd
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 속성
 source_url: https://docs.riido.io/issues/backlog.md
@@ -157,7 +167,8 @@ content:
 질문: 백로그 항목을 프로젝트나 실제 작업으로 바꾸면 기존 정보도 그대로 따라가나요?
 
 rank: 1
-score: 14.052125
+score: 14.099804
+section_id: 11957633d8b2:8e468f02bf3a
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 구조
 source_url: https://docs.riido.io/issues/backlog.md
@@ -165,7 +176,8 @@ content:
 백로그는 \[백로그 섹션 → 백로그 아이템]으로 2단계 계층 구조로 이루어져 있습니다. 필요한 만큼 섹션을 만들어 백로그를 주제별로 구분하고, 각 섹션 안에 백로그 항목들을 정리할 수 있습니다. 이를 통해 많은 백로그가 쌓이더라도 직관적으로 필요한 정보를 한눈에 확인할 수 있습니다.
 
 rank: 2
-score: 13.983160
+score: 14.018105
+section_id: c837145b4afd:55978b839cb4
 document_title: 중복 작업 감지
 section_path: 중복 작업 감지 > 중복 작업 감지 사용하는 법
 source_url: https://docs.riido.io/ai/duplicate-detection.md
@@ -186,7 +198,8 @@ content:
 * 새로운 작업이 필요하다면 ‘무시하고 생성하기’ 버튼을 눌러 생성할 수 있습니다.
 
 rank: 3
-score: 12.872189
+score: 12.904314
+section_id: c837145b4afd:2ca4af05f81e
 document_title: 중복 작업 감지
 section_path: 중복 작업 감지 > 개요
 source_url: https://docs.riido.io/ai/duplicate-detection.md
@@ -196,7 +209,8 @@ content:
 이를 통해 불필요한 중복 생성을 방지하고, 팀의 작업 흐름을 보다 깔끔하고 일관되게 유지할 수 있습니다.
 
 rank: 4
-score: 12.239993
+score: 12.272737
+section_id: 11957633d8b2:cce467185dfa
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 전환된 백로그
 source_url: https://docs.riido.io/issues/backlog.md
@@ -204,7 +218,8 @@ content:
 한 번 작업으로 전환된 백로그는 사라지지 않습니다. ‘전환된 백로그’ 페이지에서 해당 작업과 어떤 백로그에서 시작되었는지 연결 상태를 확인할 수 있습니다. 이를 통해 기획의 히스토리를 빠뜨리지 않고 명확하게 추적할 수 있습니다.
 
 rank: 5
-score: 10.607657
+score: 10.634327
+section_id: 11957633d8b2:a6f5feefa6e5
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 개요
 source_url: https://docs.riido.io/issues/backlog.md
@@ -214,7 +229,8 @@ content:
 작업을 당장 시작하지 않더라도, 백로그에 잘 정리해두면 언제든 팀의 상황에 따라 실행으로 옮길 수 있습니다. 계획 단계의 핵심 도구인 백로그를 통해, 팀은 일의 흐름을 놓치지 않고 안정적인 실행 기반을 마련할 수 있습니다.
 
 rank: 6
-score: 9.903161
+score: 9.936940
+section_id: 11957633d8b2:aa8af54aa5cd
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 속성
 source_url: https://docs.riido.io/issues/backlog.md
@@ -230,7 +246,8 @@ content:
 * 예상 시작일: 작업이 언제쯤 시작될 예정인지 지정
 
 rank: 7
-score: 9.103718
+score: 9.124774
+section_id: 9d9ba80dfef6:b545c692c53d
 document_title: 계획: 대기 작업
 section_path: 계획: 대기 작업 > 작업 처리
 source_url: https://docs.riido.io/issues/intake.md
@@ -246,7 +263,8 @@ content:
 진행하지 않기로 한 작업은 ‘거절’을 클릭해 상태를 거절됨으로 변경합니다. 거절 시에는 사유를 작성해야 하며, 입력한 내용은 댓글로 자동 기록됩니다. 이를 통해 누가 어떤 이유로 작업을 거절했는지 추적할 수 있습니다.
 
 rank: 8
-score: 8.629652
+score: 8.619697
+section_id: 11957633d8b2:26264fecfd4a
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 작업으로 전환
 source_url: https://docs.riido.io/issues/backlog.md
@@ -254,7 +272,8 @@ content:
 ‘전환’ 버튼을 눌러 프로젝트, 목표, 작업으로 전환할 수 있습니다. 작업으로 전환 시에는 기존의 모든 정보가 그대로 유지되어, 실행 단계에서 이어서 작업을 진행할 수 있습니다.
 
 rank: 9
-score: 8.288067
+score: 8.270676
+section_id: 2edd9ad4a6fa:c0f4071b4014
 document_title: 작업 흐름으로 이해하는 프로젝트 관리
 section_path: 작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조
 source_url: https://docs.riido.io/issues/workflow.md
@@ -300,7 +319,8 @@ content:
 완료되었지만 여전히 중요한 정보로 남아야 하는 작업들을 모아두는 공간입니다. 언제든지 다시 실행 단계로 이동할 수 있으며, 팀은 업무의 연속성과 개선의 기반을 확보할 수 있습니다.
 
 rank: 10
-score: 7.572717
+score: 7.595406
+section_id: a26e14ee99d1:2786f7438a88
 document_title: 작업 상태
 section_path: 작업 상태 > 진행 중
 source_url: https://docs.riido.io/teams/statuses.md
@@ -311,7 +331,8 @@ content:
 질문: 현재 적용한 필터와 정렬 조건을 저장해서 다음에도 똑같이 불러오려면 어떻게 하나요?
 
 rank: 1
-score: 18.871435
+score: 18.919472
+section_id: 333984364686:5db9d1f52377
 document_title: 저장된 보기
 section_path: 저장된 보기 > 보기 생성하기
 source_url: https://docs.riido.io/views/custom-views.md
@@ -327,7 +348,8 @@ content:
 백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.
 
 rank: 2
-score: 18.487236
+score: 18.534610
+section_id: 688dd8ac7efd:05afebae0312
 document_title: 필터
 section_path: 필터 > 개요
 source_url: https://docs.riido.io/data/filters.md
@@ -337,7 +359,8 @@ content:
 자주 사용하는 필터 조합은 [저장된 보기](https://docs.riido.io/views/custom-views.md)로 등록해, 한 번의 클릭으로 동일한 조건을 빠르게 불러올 수 있습니다.
 
 rank: 3
-score: 17.505457
+score: 17.555594
+section_id: 688dd8ac7efd:0d980cb3f519
 document_title: 필터
 section_path: 필터 > 저장된 보기
 source_url: https://docs.riido.io/data/filters.md
@@ -347,7 +370,8 @@ content:
 자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.
 
 rank: 4
-score: 14.410376
+score: 14.442710
+section_id: 333984364686:4cf1d0445a55
 document_title: 저장된 보기
 section_path: 저장된 보기 > 개요
 source_url: https://docs.riido.io/views/custom-views.md
@@ -359,7 +383,8 @@ content:
 나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다.
 
 rank: 5
-score: 14.359085
+score: 14.402554
+section_id: 333984364686:294a258fc7b7
 document_title: 저장된 보기
 section_path: 저장된 보기 > 보기 편집하기
 source_url: https://docs.riido.io/views/custom-views.md
@@ -370,7 +395,8 @@ content:
 * 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.
 
 rank: 6
-score: 13.774967
+score: 13.812921
+section_id: 688dd8ac7efd:1ad5bfa76f8e
 document_title: 필터
 section_path: 필터 > 필터 적용하기
 source_url: https://docs.riido.io/data/filters.md
@@ -381,7 +407,8 @@ content:
 * 모든 필터를 해제하고 기본 보기로 돌아가려면 ‘필터 초기화’ 버튼을 클릭합니다.
 
 rank: 7
-score: 12.752273
+score: 12.779571
+section_id: a13bfdc38996:5cace80db708
 document_title: 피그마
 section_path: 피그마 > 피그마 뤼이도 플러그인
 source_url: https://docs.riido.io/integrations/figma.md
@@ -395,7 +422,8 @@ content:
 플러그인 내에서 다양한 필터 및 정렬 기능을 제공하여, 원하는 작업을 빠르게 찾아 디자인과 연결할 수 있습니다.
 
 rank: 8
-score: 9.995598
+score: 10.030707
+section_id: 688dd8ac7efd:c36e82021bba
 document_title: 필터
 section_path: 필터 > 필터 카테고리
 source_url: https://docs.riido.io/data/filters.md
@@ -415,7 +443,8 @@ content:
 | 마감일  | ●    |       |     |    |    |
 
 rank: 9
-score: 9.367993
+score: 9.391454
+section_id: 333984364686:ba056589ecd1
 document_title: 저장된 보기
 section_path: 저장된 보기 > 공개 범위
 source_url: https://docs.riido.io/views/custom-views.md
@@ -428,7 +457,8 @@ content:
 팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.
 
 rank: 10
-score: 6.619155
+score: 6.642660
+section_id: 95a1b20de638:18af4c7df7aa
 document_title: 구독 및 결제
 section_path: 구독 및 결제 > 구독 변경 또는 취소
 source_url: https://docs.riido.io/workspaces/plans-and-billing.md
@@ -448,7 +478,8 @@ content:
 질문: 빈 문서에 팀에서 만든 문서 템플릿을 적용하려면 어떻게 해야 하나요?
 
 rank: 1
-score: 24.205504
+score: 24.283947
+section_id: c7f7233f8cd2:514df535f932
 document_title: 문서 템플릿
 section_path: 문서 템플릿 > 템플릿 적용
 source_url: https://docs.riido.io/docs/templates.md
@@ -456,7 +487,8 @@ content:
 비어 있는 에디터를 클릭하면, 팀에 등록된 템플릿 목록이 자동으로 표시됩니다. 원하는 템플릿을 클릭하면, 즉시 문서에 적용되어 기본 구조와 형식이 자동으로 채워집니다.
 
 rank: 2
-score: 14.727211
+score: 14.788654
+section_id: c7f7233f8cd2:903fc62edea3
 document_title: 문서 템플릿
 section_path: 문서 템플릿 > 개요
 source_url: https://docs.riido.io/docs/templates.md
@@ -464,7 +496,8 @@ content:
 회의록, 기획안, 회고 등 반복적으로 작성하는 문서가 있다면, 템플릿으로 저장해두고 팀 전체가 동일한 양식으로 활용할 수 있습니다. 문서의 형식을 통일하면 협업 시 커뮤니케이션 오류를 줄이고, 불필요한 문서 작성 시간을 절약할 수 있습니다. 모든 템플릿은 팀 단위로 관리되며, 협업 문서의 품질과 일관성을 높이는 데 도움을 줍니다.
 
 rank: 3
-score: 14.036515
+score: 14.092612
+section_id: c7f7233f8cd2:01fd815455b0
 document_title: 문서 템플릿
 section_path: 문서 템플릿 > 템플릿 생성
 source_url: https://docs.riido.io/docs/templates.md
@@ -475,7 +508,8 @@ content:
 2. 에디터에서 바로 생성
 
 rank: 4
-score: 9.965920
+score: 9.995127
+section_id: aacfc8cf7480:ca57cf9e9b84
 document_title: 에디터
 section_path: 에디터 > 문서 형식 적용
 source_url: https://docs.riido.io/docs/editor.md
@@ -503,7 +537,8 @@ content:
 이미지와 영상 파일은 복사/붙여넣기만으로 자동 삽입됩니다. 별도의 업로드 단계를 거치지 않아도 시각 자료를 쉽게 추가할 수 있습니다. 이를 통해 회의록, 기획안, 회고록 등 다양한 문서를 더 풍부하고 이해하기 쉽게 만들 수 있습니다.
 
 rank: 5
-score: 8.990943
+score: 9.018681
+section_id: aacfc8cf7480:d92c91a3e31c
 document_title: 에디터
 section_path: 에디터 > 개요
 source_url: https://docs.riido.io/docs/editor.md
@@ -513,7 +548,8 @@ content:
 이제 도구를 오가거나 링크를 복사할 필요 없이, 협업에 필요한 모든 문서를 뤼이도 안에서 바로 작성하고 관리할 수 있습니다.
 
 rank: 6
-score: 7.205298
+score: 7.226169
+section_id: 6e9c13b73663:58cd615292d6
 document_title: MCP 서버
 section_path: MCP 서버 > 개요
 source_url: https://docs.riido.io/ai/mcp.md
@@ -523,7 +559,8 @@ AI 툴(Claude, Cursor 등)은 이미 개발 및 기획 과정에서 필수 도�
 뤼이도 MCP(Model Context Protocol) 서버는 이 단절을 완전히 해소합니다. AI가 직접 뤼이도 워크스페이스에 연결되어 데이터 조회, 작업 생성, 문서 업데이트까지 처리할 수 있습니다.
 
 rank: 7
-score: 7.098705
+score: 7.142089
+section_id: da8743ff8cae:9135af8d0050
 document_title: 팀
 section_path: 팀 > 팀 설정
 source_url: https://docs.riido.io/teams/overview.md
@@ -539,7 +576,8 @@ content:
 팀 설정 메뉴: 템플릿 / 설정 정보: 팀 단위의 문서 템플릿
 
 rank: 8
-score: 6.031975
+score: 6.049558
+section_id: c225265a1fa1:4e5a6172d25a
 document_title: 알림
 section_path: 알림 > 개요
 source_url: https://docs.riido.io/data/notifications.md
@@ -547,7 +585,8 @@ content:
 뤼이도의 알림 기능은 워크스페이스 내에서 나에게 발생한 모든 변동 사항을 한눈에 확인할 수 있도록 도와줍니다. 작업, 미팅, 문서, 댓글 등에서 발생한 주요 이벤트가 자동으로 알림으로 전달되며, 중요한 정보를 놓치지 않고 빠르게 대응할 수 있습니다.
 
 rank: 9
-score: 5.959306
+score: 5.990953
+section_id: 1c0005b1dfeb:281921125b1e
 document_title: 대시보드
 section_path: 대시보드 > 링크
 source_url: https://docs.riido.io/views/dashboards.md
@@ -557,7 +596,8 @@ content:
 링크는 섹션 단위로 그룹화할 수 있어, 주제별로 체계적으로 정리하고 빠르게 접근할 수 있습니다. 이를 통해 파편화된 외부 정보를 모으고, 협업 효율을 높일 수 있습니다.
 
 rank: 10
-score: 5.517594
+score: 5.548088
+section_id: 6e9c13b73663:cd786201dd96
 document_title: MCP 서버
 section_path: MCP 서버 > MCP 사용 사례
 source_url: https://docs.riido.io/ai/mcp.md
@@ -588,7 +628,8 @@ AI는 프로젝트 맥락을 이해하여 설명만으로도 온전한 작업을
 질문: 보관함에 넣은 완료 작업을 다시 진행 가능한 상태로 되돌릴 수 있나요?
 
 rank: 1
-score: 17.848696
+score: 17.900559
+section_id: fcb3c228f5a0:4fb20bbf5133
 document_title: 운영: 보관 작업
 section_path: 운영: 보관 작업 > 작업 보관함
 source_url: https://docs.riido.io/issues/archived-items.md
@@ -596,7 +637,8 @@ content:
 작업이 ‘완료’ 상태가 되면, 설정에 따라 자동 또는 수동으로 작업 보관함으로 이동할 수 있습니다. 보관함은 단순한 목록이 아니라, 프로젝트나 목표별로 완료된 작업 이력을 확인할 수 있는 운영 중심의 기록 보관소입니다. 회고나 QA를 비롯한 다양한 후속 작업에서 데이터를 빠르게 꺼내어 재활용할 수 있습니다.
 
 rank: 2
-score: 15.024838
+score: 15.068871
+section_id: fcb3c228f5a0:7ce560cd7b49
 document_title: 운영: 보관 작업
 section_path: 운영: 보관 작업 > 보관된 작업을 다시 활성화하기
 source_url: https://docs.riido.io/issues/archived-items.md
@@ -608,7 +650,8 @@ content:
 이처럼 모든 기록은 그대로 보존되어 과거의 맥락을 잃지 않은 채 이어받을 수 있습니다. 이는 뤼이도의 철학인 “지속적인 개선과 성장”을 실천하는 가장 직접적인 방식입니다.
 
 rank: 3
-score: 14.119629
+score: 14.166061
+section_id: 40ac0f0ac641:03c976577bcd
 document_title: 자동화
 section_path: 자동화 > 자동화 설정
 source_url: https://docs.riido.io/sprints/automations.md
@@ -624,7 +667,8 @@ content:
 스프린트가 종료되면, 이번 스프린트에서 완료된 작업이 자동으로 작업 보관함에 이동됩니다. 완료된 작업은 실행 흐름에서 자동으로 정리되고, 이전 스프린트의 기록은 운영 자산으로 보존됩니다.
 
 rank: 4
-score: 11.270632
+score: 11.311038
+section_id: 949ddd65a2a5:56598b0ddfc0
 document_title: 실행: 작업
 section_path: 실행: 작업 > 작업 보관
 source_url: https://docs.riido.io/issues/work-items.md
@@ -632,7 +676,8 @@ content:
 작업이 완료되면 ‘작업 보관함’으로 이동할 수 있습니다. 모든 히스토리는 그대로 보존되며, 이전 작업은 회고나 개선, 고도화 시 재사용 가능한 운영 자산으로 관리됩니다. 뤼이도는 완료된 작업도 팀의 성장 자산으로 남도록 설계되어 있는 부분이 가장 큰 특징입니다.
 
 rank: 5
-score: 10.749801
+score: 10.798100
+section_id: 2edd9ad4a6fa:c0f4071b4014
 document_title: 작업 흐름으로 이해하는 프로젝트 관리
 section_path: 작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조
 source_url: https://docs.riido.io/issues/workflow.md
@@ -678,7 +723,8 @@ content:
 완료되었지만 여전히 중요한 정보로 남아야 하는 작업들을 모아두는 공간입니다. 언제든지 다시 실행 단계로 이동할 수 있으며, 팀은 업무의 연속성과 개선의 기반을 확보할 수 있습니다.
 
 rank: 6
-score: 8.754508
+score: 8.780361
+section_id: fcb3c228f5a0:87393c951ab1
 document_title: 운영: 보관 작업
 section_path: 운영: 보관 작업 > 개요
 source_url: https://docs.riido.io/issues/archived-items.md
@@ -686,7 +732,8 @@ content:
 보관 작업은 완료된 작업 중, 실시간 관리가 필요 없는 작업을 다음 개선과 성장의 출발점으로 전환하는 공간입니다. 이를 통해 실행 공간은 깔끔하게 유지되고, 팀은 과거 작업의 맥락과 히스토리를 잃지 않으며 다음 실행의 기반을 탄탄하게 마련할 수 있습니다.
 
 rank: 7
-score: 8.474662
+score: 8.516433
+section_id: 673858aecdcf:7d8048c2174c
 document_title: 작업간 연결
 section_path: 작업간 연결 > 개요
 source_url: https://docs.riido.io/issues/issue-relations.md
@@ -702,7 +749,8 @@ content:
 관계 유형: 중복됨 / 설명: 현재 작업이 다른 작업에 중복되어 있는 상태
 
 rank: 8
-score: 8.305241
+score: 8.319804
+section_id: a7061c4853df:73e63632e555
 document_title: 휴지통
 section_path: 휴지통 > 복구 및 영구 삭제
 source_url: https://docs.riido.io/data/trash.md
@@ -720,7 +768,8 @@ content:
 휴지통에 보관되는 기간(30일)이 지나면, 모든 데이터는 자동으로 삭제됩니다. 삭제 이후에는 시스템 상에서도 복원할 수 없으니 주의가 필요합니다.
 
 rank: 9
-score: 8.224168
+score: 8.265814
+section_id: a26e14ee99d1:ede573b9b2c7
 document_title: 작업 상태
 section_path: 작업 상태 > 개요
 source_url: https://docs.riido.io/teams/statuses.md
@@ -732,7 +781,8 @@ content:
 > 계획 > 준비됨 > 진행 중 > 완료 > 운영
 
 rank: 10
-score: 8.208944
+score: 8.260139
+section_id: a26e14ee99d1:781c27b9eaaa
 document_title: 작업 상태
 section_path: 작업 상태 > 완료 상태
 source_url: https://docs.riido.io/teams/statuses.md
@@ -743,7 +793,8 @@ content:
 질문: 실수로 삭제한 작업을 원래 프로젝트와 팀 위치로 복구하려면 어떻게 하나요?
 
 rank: 1
-score: 19.104673
+score: 19.129616
+section_id: a7061c4853df:73e63632e555
 document_title: 휴지통
 section_path: 휴지통 > 복구 및 영구 삭제
 source_url: https://docs.riido.io/data/trash.md
@@ -761,7 +812,8 @@ content:
 휴지통에 보관되는 기간(30일)이 지나면, 모든 데이터는 자동으로 삭제됩니다. 삭제 이후에는 시스템 상에서도 복원할 수 없으니 주의가 필요합니다.
 
 rank: 2
-score: 18.724703
+score: 18.745687
+section_id: a7061c4853df:a5d15ef4cee0
 document_title: 휴지통
 section_path: 휴지통 > 개요
 source_url: https://docs.riido.io/data/trash.md
@@ -771,7 +823,8 @@ content:
 휴지통은 팀의 실수를 최소화하고, 삭제된 데이터를 안전하게 관리할 수 있도록 설계되었습니다. 필요한 경우, 삭제된 페이지를 열어 확인하거나 바로 복구할 수도 있습니다.
 
 rank: 3
-score: 9.096413
+score: 9.119523
+section_id: a7061c4853df:4c7aa16de474
 document_title: 휴지통
 section_path: 휴지통 > 삭제된 페이지 보기
 source_url: https://docs.riido.io/data/trash.md
@@ -781,7 +834,8 @@ content:
 * 페이지 내에서도 ‘복구’ 또는 ‘영구 삭제’를 바로 실행할 수 있습니다.
 
 rank: 4
-score: 8.911137
+score: 8.899059
+section_id: 9b9516882026:45b415ba30ac
 document_title: 작업 관계도
 section_path: 작업 관계도 > 보기 위치
 source_url: https://docs.riido.io/views/diagram.md
@@ -795,7 +849,8 @@ content:
 선택한 작업을 중심으로, 해당 작업과 연결된 상위 · 하위 작업만 집중적으로 볼 수 있습니다. 지금 진행 중인 업무가 전체 목표 안에서 어떤 위치에 있는지 쉽게 이해할 수 있습니다.
 
 rank: 5
-score: 6.903028
+score: 6.946862
+section_id: da8743ff8cae:26bbdd776a1e
 document_title: 팀
 section_path: 팀 > 팀 관리
 source_url: https://docs.riido.io/teams/overview.md
@@ -820,7 +875,8 @@ content:
 팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.
 
 rank: 6
-score: 6.810392
+score: 6.825474
+section_id: 673858aecdcf:b1d03b889c87
 document_title: 작업간 연결
 section_path: 작업간 연결 > 관계 유형별 동작
 source_url: https://docs.riido.io/issues/issue-relations.md
@@ -842,7 +898,8 @@ content:
 하나의 작업에는 여러 개의 중복 존재 작업이 연결될 수 있으며, 반대로 중복됨은 한 개의 원본 작업만을 가질 수 있습니다.
 
 rank: 7
-score: 6.137416
+score: 6.119572
+section_id: a7061c4853df:6f88dd13099e
 document_title: 휴지통
 section_path: 휴지통 > 휴지통 사용법
 source_url: https://docs.riido.io/data/trash.md
@@ -852,7 +909,8 @@ content:
 * 각 항목 우측에는 남은 보관 기간이 표시되어, 언제 영구 삭제되는지 한눈에 확인할 수 있습니다.
 
 rank: 8
-score: 5.996094
+score: 6.025856
+section_id: a26e14ee99d1:8ddbdaa9dc9b
 document_title: 작업 상태
 section_path: 작업 상태 > 설정
 source_url: https://docs.riido.io/teams/statuses.md
@@ -864,7 +922,8 @@ content:
 * 단, 첫 단계(계획)와 마지막 단계(운영)는 시스템 기본 영역으로, 추가 및 삭제가 불가능합니다.
 
 rank: 9
-score: 5.947083
+score: 5.974934
+section_id: 95a1b20de638:18af4c7df7aa
 document_title: 구독 및 결제
 section_path: 구독 및 결제 > 구독 변경 또는 취소
 source_url: https://docs.riido.io/workspaces/plans-and-billing.md
@@ -881,7 +940,8 @@ content:
 * 모든 워크스페이스 멤버는 관리자가 됩니다.
 
 rank: 10
-score: 5.572917
+score: 5.593662
+section_id: 9d9ba80dfef6:2e1668de5714
 document_title: 계획: 대기 작업
 section_path: 계획: 대기 작업 > 개요
 source_url: https://docs.riido.io/issues/intake.md
@@ -894,7 +954,8 @@ content:
 질문: 현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?
 
 rank: 1
-score: 11.322785
+score: 11.427587
+section_id: 6c3b150c3146:6c9e58fb04ca
 document_title: 비공개 팀
 section_path: 비공개 팀 > 설정
 source_url: https://docs.riido.io/teams/private-teams.md
@@ -902,7 +963,8 @@ content:
 비공개 팀으로 전환하려면 설정 페이지의 \[팀 설정 > 일반]의 공개 범위에서 ‘비공개’를 선택하세요. 설정을 저장하면 즉시 팀이 비공개로 전환됩니다.
 
 rank: 2
-score: 10.984536
+score: 11.086505
+section_id: 6c3b150c3146:9f525d515668
 document_title: 비공개 팀
 section_path: 비공개 팀 > 개요
 source_url: https://docs.riido.io/teams/private-teams.md
@@ -912,7 +974,22 @@ content:
 비공개 팀은 주로 고객 데이터, HR, 재무 관리처럼 일부 멤버만 접근해야 하는 작업을 안전하게 관리할 때 사용됩니다.
 
 rank: 3
-score: 7.543899
+score: 7.575713
+section_id: 333984364686:ba056589ecd1
+document_title: 저장된 보기
+section_path: 저장된 보기 > 공개 범위
+source_url: https://docs.riido.io/views/custom-views.md
+content:
+보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.
+
+* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.
+* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.
+
+팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.
+
+rank: 4
+score: 7.573597
+section_id: 949ddd65a2a5:6036f1478624
 document_title: 실행: 작업
 section_path: 실행: 작업 > 외부 공유
 source_url: https://docs.riido.io/issues/work-items.md
@@ -935,21 +1012,9 @@ content:
 
 이 방식을 통해, 전체 맥락을 공유하되 민감한 정보는 유연하게 보호할 수 있습니다.
 
-rank: 4
-score: 7.495087
-document_title: 저장된 보기
-section_path: 저장된 보기 > 공개 범위
-source_url: https://docs.riido.io/views/custom-views.md
-content:
-보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.
-
-* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.
-* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.
-
-팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.
-
 rank: 5
-score: 5.458447
+score: 5.489118
+section_id: 43e5e2414349:9976bd5ed072
 document_title: 슬랙
 section_path: 슬랙 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/slack.md
@@ -976,7 +1041,8 @@ content:
 네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.
 
 rank: 6
-score: 5.375118
+score: 5.440679
+section_id: 6c3b150c3146:f4771653dfff
 document_title: 비공개 팀
 section_path: 비공개 팀 > 접근 권한
 source_url: https://docs.riido.io/teams/private-teams.md
@@ -986,7 +1052,8 @@ content:
 워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.
 
 rank: 7
-score: 4.379890
+score: 4.462228
+section_id: da8743ff8cae:9135af8d0050
 document_title: 팀
 section_path: 팀 > 팀 설정
 source_url: https://docs.riido.io/teams/overview.md
@@ -1002,7 +1069,8 @@ content:
 팀 설정 메뉴: 템플릿 / 설정 정보: 팀 단위의 문서 템플릿
 
 rank: 8
-score: 4.234814
+score: 4.282253
+section_id: 95a1b20de638:18af4c7df7aa
 document_title: 구독 및 결제
 section_path: 구독 및 결제 > 구독 변경 또는 취소
 source_url: https://docs.riido.io/workspaces/plans-and-billing.md
@@ -1019,7 +1087,8 @@ content:
 * 모든 워크스페이스 멤버는 관리자가 됩니다.
 
 rank: 9
-score: 4.098099
+score: 4.114351
+section_id: 11957633d8b2:26264fecfd4a
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 작업으로 전환
 source_url: https://docs.riido.io/issues/backlog.md
@@ -1027,7 +1096,8 @@ content:
 ‘전환’ 버튼을 눌러 프로젝트, 목표, 작업으로 전환할 수 있습니다. 작업으로 전환 시에는 기존의 모든 정보가 그대로 유지되어, 실행 단계에서 이어서 작업을 진행할 수 있습니다.
 
 rank: 10
-score: 4.010548
+score: 4.087259
+section_id: da8743ff8cae:26bbdd776a1e
 document_title: 팀
 section_path: 팀 > 팀 관리
 source_url: https://docs.riido.io/teams/overview.md
@@ -1055,7 +1125,8 @@ content:
 질문: 스프린트 시작 요일을 바꾸면 현재 진행 중인 스프린트에는 어떻게 반영되나요?
 
 rank: 1
-score: 17.940546
+score: 18.004787
+section_id: 261e80b246e8:48338ffe0288
 document_title: 스프린트
 section_path: 스프린트 > 스프린트 시작 요일
 source_url: https://docs.riido.io/sprints/overview.md
@@ -1067,7 +1138,8 @@ content:
 주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.
 
 rank: 2
-score: 15.249034
+score: 15.305645
+section_id: 261e80b246e8:8f39a6741f94
 document_title: 스프린트
 section_path: 스프린트 > 스프린트 설정
 source_url: https://docs.riido.io/sprints/overview.md
@@ -1075,7 +1147,8 @@ content:
 스프린트 설정은 \[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.
 
 rank: 3
-score: 13.330062
+score: 13.212097
+section_id: a26e14ee99d1:2786f7438a88
 document_title: 작업 상태
 section_path: 작업 상태 > 진행 중
 source_url: https://docs.riido.io/teams/statuses.md
@@ -1083,7 +1156,8 @@ content:
 ‘진행 중’ 단계로 분류된 작업은 뤼이도에서 실제 작업이 시작된 상태로 인식됩니다. 이 정보는 작업 시작 시점을 판단할 때 활용되며, 스프린트 차트나 통계 등 여러 데이터 시각화 지표에 반영됩니다.
 
 rank: 4
-score: 11.897285
+score: 11.784116
+section_id: 2c428c0d81be:91e1e3f290e3
 document_title: 스프린트 그래프
 section_path: 스프린트 그래프 > 참고
 source_url: https://docs.riido.io/sprints/sprint-graph.md
@@ -1092,7 +1166,8 @@ content:
 * 그래프 상의 데이터는 스프린트가 종료되면 자동으로 저장되어, 이후 작업의 변동 사항이 생기더라도 그래프에는 반영되지 않습니다. 이는 스프린트 회고 시점의 데이터를 기준으로 분석할 수 있도록 하기 위함입니다.
 
 rank: 5
-score: 9.041439
+score: 9.085840
+section_id: 2c428c0d81be:012f04cb7b63
 document_title: 스프린트 그래프
 section_path: 스프린트 그래프 > 그래프 보는 법
 source_url: https://docs.riido.io/sprints/sprint-graph.md
@@ -1105,7 +1180,8 @@ content:
 구분: 보라색 실선 / 설명: 실제로 완료된 작업의 누적 개수. 기준선과 비교하여 현재 속도가 계획 대비 빠른지, 느린지를 즉시 파악할 수 있습니다.
 
 rank: 6
-score: 8.636710
+score: 8.680511
+section_id: 40ac0f0ac641:03c976577bcd
 document_title: 자동화
 section_path: 자동화 > 자동화 설정
 source_url: https://docs.riido.io/sprints/automations.md
@@ -1121,7 +1197,8 @@ content:
 스프린트가 종료되면, 이번 스프린트에서 완료된 작업이 자동으로 작업 보관함에 이동됩니다. 완료된 작업은 실행 흐름에서 자동으로 정리되고, 이전 스프린트의 기록은 운영 자산으로 보존됩니다.
 
 rank: 7
-score: 8.474866
+score: 8.519444
+section_id: 2c428c0d81be:7d100b73fa0e
 document_title: 스프린트 그래프
 section_path: 스프린트 그래프 > 개요
 source_url: https://docs.riido.io/sprints/sprint-graph.md
@@ -1131,7 +1208,8 @@ content:
 그래프는 실시간 데이터를 기반으로 업데이트되며, 진행 중인 작업과 완료된 작업의 추이를 즉시 파악할 수 있습니다. 이를 통해 일정 지연, 병목 구간, 리소스 불균형을 조기에 발견하고 대응할 수 있습니다.
 
 rank: 8
-score: 8.290930
+score: 8.169645
+section_id: d639f52b10eb:f5fb72a47de5
 document_title: 자동화
 section_path: 자동화 > 미팅 반복 설정
 source_url: https://docs.riido.io/meetings/automations.md
@@ -1147,7 +1225,8 @@ content:
 반복 미팅은 팀의 업무 리듬에 따라 자유롭게 조정할 수 있으며, 템플릿을 수정하면 이후 생성되는 모든 반복 미팅에 자동으로 반영됩니다.
 
 rank: 9
-score: 8.130815
+score: 8.168550
+section_id: 40ac0f0ac641:6bbc22c7fbca
 document_title: 자동화
 section_path: 자동화 > 개요
 source_url: https://docs.riido.io/sprints/automations.md
@@ -1155,7 +1234,8 @@ content:
 스프린트를 시작하거나 종료할 때마다 반복되는 작업이 있다면, 자동화 기능을 통해 한 번의 설정으로 처리할 수 있습니다. 작업을 일일이 수동으로 정리하지 않아도 되기 때문에 팀은 실행에 더 집중할 수 있고, 스프린트 리듬도 자연스럽게 유지됩니다.
 
 rank: 10
-score: 7.493495
+score: 7.528792
+section_id: 2c428c0d81be:dc2014df6707
 document_title: 스프린트 그래프
 section_path: 스프린트 그래프 > 지난 스프린트 그래프 보는 법
 source_url: https://docs.riido.io/sprints/sprint-graph.md
@@ -1166,7 +1246,8 @@ content:
 질문: 앞으로 진행할 스프린트 세 개를 미리 생성하려면 어떤 설정을 사용해야 하나요?
 
 rank: 1
-score: 12.974770
+score: 13.031288
+section_id: 261e80b246e8:7a8e11bfc496
 document_title: 스프린트
 section_path: 스프린트 > 미리 생성할 다가올 스프린트 개수
 source_url: https://docs.riido.io/sprints/overview.md
@@ -1176,7 +1257,8 @@ content:
 예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.
 
 rank: 2
-score: 8.255752
+score: 8.312775
+section_id: 40ac0f0ac641:03c976577bcd
 document_title: 자동화
 section_path: 자동화 > 자동화 설정
 source_url: https://docs.riido.io/sprints/automations.md
@@ -1192,7 +1274,8 @@ content:
 스프린트가 종료되면, 이번 스프린트에서 완료된 작업이 자동으로 작업 보관함에 이동됩니다. 완료된 작업은 실행 흐름에서 자동으로 정리되고, 이전 스프린트의 기록은 운영 자산으로 보존됩니다.
 
 rank: 3
-score: 6.414335
+score: 6.450640
+section_id: d0d1ed17106f:313273b55e2b
 document_title: 릴리즈 노트 자동 생성
 section_path: 릴리즈 노트 자동 생성 > 릴리즈 노트 자동 생성 사용하는 법
 source_url: https://docs.riido.io/ai/release-notes.md
@@ -1218,7 +1301,8 @@ content:
 * 변경 사항은 자동으로 저장되며, 결과는 복사하여 외부 채널에 바로 공유할 수 있습니다.
 
 rank: 4
-score: 5.761933
+score: 5.808505
+section_id: c7f7233f8cd2:01fd815455b0
 document_title: 문서 템플릿
 section_path: 문서 템플릿 > 템플릿 생성
 source_url: https://docs.riido.io/docs/templates.md
@@ -1229,7 +1313,8 @@ content:
 2. 에디터에서 바로 생성
 
 rank: 5
-score: 5.617048
+score: 5.657264
+section_id: 261e80b246e8:1c82492f0b2a
 document_title: 스프린트
 section_path: 스프린트 > 스프린트 기간
 source_url: https://docs.riido.io/sprints/overview.md
@@ -1244,7 +1329,8 @@ content:
 예: 초기 스타트업 팀 — 1주 / 대규모 프로젝트 팀 — 2\~3주
 
 rank: 6
-score: 5.458907
+score: 5.498715
+section_id: 261e80b246e8:8f39a6741f94
 document_title: 스프린트
 section_path: 스프린트 > 스프린트 설정
 source_url: https://docs.riido.io/sprints/overview.md
@@ -1252,7 +1338,8 @@ content:
 스프린트 설정은 \[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.
 
 rank: 7
-score: 5.341525
+score: 5.371817
+section_id: 2c428c0d81be:7d100b73fa0e
 document_title: 스프린트 그래프
 section_path: 스프린트 그래프 > 개요
 source_url: https://docs.riido.io/sprints/sprint-graph.md
@@ -1262,7 +1349,8 @@ content:
 그래프는 실시간 데이터를 기반으로 업데이트되며, 진행 중인 작업과 완료된 작업의 추이를 즉시 파악할 수 있습니다. 이를 통해 일정 지연, 병목 구간, 리소스 불균형을 조기에 발견하고 대응할 수 있습니다.
 
 rank: 8
-score: 5.149547
+score: 5.180276
+section_id: 764f1bb9b2d9:f196ea27ae96
 document_title: 핵심 개념
 section_path: 핵심 개념 > 효율적인 프로젝트 관리
 source_url: https://docs.riido.io/getting-started/core-concepts.md
@@ -1284,7 +1372,8 @@ IT 프로젝트는 PM, 개발자, 디자이너 등 다양한 직군이 함께 �
 대시보드는 수많은 작업과 멤버 속에서도 중요한 정보를 놓치지 않도록 도와줍니다. 프로젝트의 전체 흐름을 한눈에 파악하고, 우선순위가 높은 항목을 빠르게 확인할 수 있습니다.
 
 rank: 9
-score: 5.018408
+score: 5.052375
+section_id: 261e80b246e8:48338ffe0288
 document_title: 스프린트
 section_path: 스프린트 > 스프린트 시작 요일
 source_url: https://docs.riido.io/sprints/overview.md
@@ -1296,7 +1385,8 @@ content:
 주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.
 
 rank: 10
-score: 4.920009
+score: 4.946414
+section_id: 2c428c0d81be:91e1e3f290e3
 document_title: 스프린트 그래프
 section_path: 스프린트 그래프 > 참고
 source_url: https://docs.riido.io/sprints/sprint-graph.md
@@ -1308,7 +1398,8 @@ content:
 질문: 특정 페이지나 댓글에서 더 이상 알림을 받고 싶지 않을 때는 어떻게 끄나요?
 
 rank: 1
-score: 15.429391
+score: 15.396601
+section_id: c225265a1fa1:8056485bc27c
 document_title: 알림
 section_path: 알림 > 알림 설정
 source_url: https://docs.riido.io/data/notifications.md
@@ -1320,7 +1411,8 @@ content:
 * 알림을 다시 받고 싶다면, 같은 위치에서 ‘알림 받기’ 버튼으로 재활성화할 수 있습니다.
 
 rank: 2
-score: 10.610880
+score: 10.646115
+section_id: ee834b371049:2a2928a908fc
 document_title: 디스코드
 section_path: 디스코드 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/discord.md
@@ -1341,7 +1433,8 @@ content:
 네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.
 
 rank: 3
-score: 9.341209
+score: 9.382212
+section_id: c225265a1fa1:21a1e3032cdd
 document_title: 알림
 section_path: 알림 > 알림 확인하기
 source_url: https://docs.riido.io/data/notifications.md
@@ -1358,7 +1451,8 @@ content:
 알림은 오입력이나 중복 발생을 방지하기 위해 약간의 시간차를 두고 발생합니다. 새로운 알림이 도착하면, 상단 알림 버튼 우측에 개수가 포함된 뱃지(❹) 형태로 표시됩니다.
 
 rank: 4
-score: 9.045566
+score: 9.074842
+section_id: 43e5e2414349:9976bd5ed072
 document_title: 슬랙
 section_path: 슬랙 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/slack.md
@@ -1385,7 +1479,8 @@ content:
 네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.
 
 rank: 5
-score: 7.361737
+score: 7.382612
+section_id: c225265a1fa1:4e5a6172d25a
 document_title: 알림
 section_path: 알림 > 개요
 source_url: https://docs.riido.io/data/notifications.md
@@ -1393,7 +1488,8 @@ content:
 뤼이도의 알림 기능은 워크스페이스 내에서 나에게 발생한 모든 변동 사항을 한눈에 확인할 수 있도록 도와줍니다. 작업, 미팅, 문서, 댓글 등에서 발생한 주요 이벤트가 자동으로 알림으로 전달되며, 중요한 정보를 놓치지 않고 빠르게 대응할 수 있습니다.
 
 rank: 6
-score: 6.349822
+score: 6.375850
+section_id: c225265a1fa1:567b1cd31b93
 document_title: 알림
 section_path: 알림 > 알림 활용하기
 source_url: https://docs.riido.io/data/notifications.md
@@ -1407,7 +1503,8 @@ content:
 * **일괄 처리:** 우측 상단 메뉴를 통해 모든 알림을 읽음 처리하거나, 보관된 알림만 따로 모아볼 수 있습니다.
 
 rank: 7
-score: 5.227541
+score: 5.249732
+section_id: 854f9556fa9d:1b058ab0fb93
 document_title: 댓글
 section_path: 댓글 > 댓글 구독
 source_url: https://docs.riido.io/docs/comments.md
@@ -1417,7 +1514,8 @@ content:
 이를 통해 중요한 논의를 놓치지 않고 참여할 수 있으며, 필요에 따라 언제든 구독을 해지할 수도 있습니다.
 
 rank: 8
-score: 5.145007
+score: 5.078082
+section_id: 6c3b150c3146:9f525d515668
 document_title: 비공개 팀
 section_path: 비공개 팀 > 개요
 source_url: https://docs.riido.io/teams/private-teams.md
@@ -1427,7 +1525,8 @@ content:
 비공개 팀은 주로 고객 데이터, HR, 재무 관리처럼 일부 멤버만 접근해야 하는 작업을 안전하게 관리할 때 사용됩니다.
 
 rank: 9
-score: 4.876445
+score: 4.906796
+section_id: 854f9556fa9d:9fac9564ad00
 document_title: 댓글
 section_path: 댓글 > 댓글 작성
 source_url: https://docs.riido.io/docs/comments.md
@@ -1435,7 +1534,8 @@ content:
 작업 또는 미팅 페이지 하단에서 언제든지 댓글을 남길 수 있습니다. 댓글은 블록 기반 에디터로 구성되어 있어, 텍스트뿐 아니라 이미지, 코드 블록, 링크 등 다양한 형식을 쉽게 추가할 수 있습니다.
 
 rank: 10
-score: 4.563398
+score: 4.574339
+section_id: c225265a1fa1:c94c162f41b5
 document_title: 알림
 section_path: 알림 > 참고
 source_url: https://docs.riido.io/data/notifications.md
@@ -1446,7 +1546,8 @@ content:
 질문: 저장된 보기를 나만 사용하거나 팀 전체에 공개하도록 설정할 수 있나요?
 
 rank: 1
-score: 20.525860
+score: 20.617180
+section_id: 333984364686:ba056589ecd1
 document_title: 저장된 보기
 section_path: 저장된 보기 > 공개 범위
 source_url: https://docs.riido.io/views/custom-views.md
@@ -1459,7 +1560,8 @@ content:
 팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.
 
 rank: 2
-score: 10.982757
+score: 11.027489
+section_id: 333984364686:5db9d1f52377
 document_title: 저장된 보기
 section_path: 저장된 보기 > 보기 생성하기
 source_url: https://docs.riido.io/views/custom-views.md
@@ -1475,7 +1577,8 @@ content:
 백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.
 
 rank: 3
-score: 10.621735
+score: 10.651337
+section_id: 333984364686:294a258fc7b7
 document_title: 저장된 보기
 section_path: 저장된 보기 > 보기 편집하기
 source_url: https://docs.riido.io/views/custom-views.md
@@ -1486,7 +1589,8 @@ content:
 * 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.
 
 rank: 4
-score: 10.527657
+score: 10.602125
+section_id: 6c3b150c3146:6c9e58fb04ca
 document_title: 비공개 팀
 section_path: 비공개 팀 > 설정
 source_url: https://docs.riido.io/teams/private-teams.md
@@ -1494,7 +1598,8 @@ content:
 비공개 팀으로 전환하려면 설정 페이지의 \[팀 설정 > 일반]의 공개 범위에서 ‘비공개’를 선택하세요. 설정을 저장하면 즉시 팀이 비공개로 전환됩니다.
 
 rank: 5
-score: 9.732670
+score: 9.801628
+section_id: 6c3b150c3146:9f525d515668
 document_title: 비공개 팀
 section_path: 비공개 팀 > 개요
 source_url: https://docs.riido.io/teams/private-teams.md
@@ -1504,7 +1609,8 @@ content:
 비공개 팀은 주로 고객 데이터, HR, 재무 관리처럼 일부 멤버만 접근해야 하는 작업을 안전하게 관리할 때 사용됩니다.
 
 rank: 6
-score: 9.608932
+score: 9.639925
+section_id: 949ddd65a2a5:6036f1478624
 document_title: 실행: 작업
 section_path: 실행: 작업 > 외부 공유
 source_url: https://docs.riido.io/issues/work-items.md
@@ -1528,7 +1634,8 @@ content:
 이 방식을 통해, 전체 맥락을 공유하되 민감한 정보는 유연하게 보호할 수 있습니다.
 
 rank: 7
-score: 9.553186
+score: 9.589422
+section_id: 9b9516882026:45b415ba30ac
 document_title: 작업 관계도
 section_path: 작업 관계도 > 보기 위치
 source_url: https://docs.riido.io/views/diagram.md
@@ -1542,7 +1649,8 @@ content:
 선택한 작업을 중심으로, 해당 작업과 연결된 상위 · 하위 작업만 집중적으로 볼 수 있습니다. 지금 진행 중인 업무가 전체 목표 안에서 어떤 위치에 있는지 쉽게 이해할 수 있습니다.
 
 rank: 8
-score: 9.268808
+score: 9.316451
+section_id: 6c3b150c3146:f4771653dfff
 document_title: 비공개 팀
 section_path: 비공개 팀 > 접근 권한
 source_url: https://docs.riido.io/teams/private-teams.md
@@ -1552,7 +1660,8 @@ content:
 워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.
 
 rank: 9
-score: 7.553313
+score: 7.591354
+section_id: 6cfca70f98e5:caab890e232f
 document_title: 검색
 section_path: 검색 > 검색 결과 활용하기
 source_url: https://docs.riido.io/data/search.md
@@ -1562,7 +1671,8 @@ content:
 * 검색은 워크스페이스 내의 접근 가능한 모든 데이터를 기준으로 작동합니다. 비공개 팀이나 참여하고 있지 않은 팀은, 접근 권한이 있어야 표시됩니다.
 
 rank: 10
-score: 7.495223
+score: 7.532209
+section_id: c7f7233f8cd2:903fc62edea3
 document_title: 문서 템플릿
 section_path: 문서 템플릿 > 개요
 source_url: https://docs.riido.io/docs/templates.md
@@ -1573,7 +1683,8 @@ content:
 질문: 팀에서 새로운 작업 상태를 추가하거나 기존 상태를 삭제하려면 어디서 설정하나요?
 
 rank: 1
-score: 13.592912
+score: 13.687611
+section_id: a26e14ee99d1:8ddbdaa9dc9b
 document_title: 작업 상태
 section_path: 작업 상태 > 설정
 source_url: https://docs.riido.io/teams/statuses.md
@@ -1585,7 +1696,8 @@ content:
 * 단, 첫 단계(계획)와 마지막 단계(운영)는 시스템 기본 영역으로, 추가 및 삭제가 불가능합니다.
 
 rank: 2
-score: 9.001012
+score: 9.088198
+section_id: da8743ff8cae:9135af8d0050
 document_title: 팀
 section_path: 팀 > 팀 설정
 source_url: https://docs.riido.io/teams/overview.md
@@ -1601,7 +1713,8 @@ content:
 팀 설정 메뉴: 템플릿 / 설정 정보: 팀 단위의 문서 템플릿
 
 rank: 3
-score: 8.713829
+score: 8.778653
+section_id: da8743ff8cae:26bbdd776a1e
 document_title: 팀
 section_path: 팀 > 팀 관리
 source_url: https://docs.riido.io/teams/overview.md
@@ -1626,7 +1739,8 @@ content:
 팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.
 
 rank: 4
-score: 7.876099
+score: 7.914510
+section_id: 673858aecdcf:b1d03b889c87
 document_title: 작업간 연결
 section_path: 작업간 연결 > 관계 유형별 동작
 source_url: https://docs.riido.io/issues/issue-relations.md
@@ -1648,7 +1762,8 @@ content:
 하나의 작업에는 여러 개의 중복 존재 작업이 연결될 수 있으며, 반대로 중복됨은 한 개의 원본 작업만을 가질 수 있습니다.
 
 rank: 5
-score: 7.236902
+score: 7.317071
+section_id: b86425eb9784:fb7196c378c9
 document_title: 깃허브
 section_path: 깃허브 > 작업 상태 자동화
 source_url: https://docs.riido.io/integrations/github.md
@@ -1672,7 +1787,8 @@ content:
 팀별 상태는 팀별 \[설장 > 팀 > 작업 상태] 페이지에서 커스텀 가능하며, 뤼이도의 작업 상태에 대한 상세한 설명은 [작업 상태](https://docs.riido.io/teams/statuses)에서 확인할 수 있습니다.
 
 rank: 6
-score: 7.063000
+score: 7.123876
+section_id: a26e14ee99d1:ede573b9b2c7
 document_title: 작업 상태
 section_path: 작업 상태 > 개요
 source_url: https://docs.riido.io/teams/statuses.md
@@ -1684,7 +1800,8 @@ content:
 > 계획 > 준비됨 > 진행 중 > 완료 > 운영
 
 rank: 7
-score: 6.502778
+score: 6.541891
+section_id: a13bfdc38996:245ede639654
 document_title: 피그마
 section_path: 피그마 > 피그마 연동
 source_url: https://docs.riido.io/integrations/figma.md
@@ -1702,7 +1819,8 @@ content:
 피그마에서 파일 혹은 프레임의 상태를 Ready for Dev 로 변경하면, 뤼이도 작업도 미리 지정한 상태로 자동 업데이트 됩니다. 디자이너는 추가 소통이나 뤼이도에 접속할 필요 없이 피그마에서 모든 소통을 완료할 수 있으며, 개발자는 업데이트 누락 없이 디자인이 완료된 순간 바로 작업을 진행할 수 있습니다.
 
 rank: 8
-score: 6.269150
+score: 6.311751
+section_id: da8743ff8cae:e2b4dc113d2f
 document_title: 팀
 section_path: 팀 > 팀 멤버
 source_url: https://docs.riido.io/teams/overview.md
@@ -1714,7 +1832,8 @@ content:
 만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.
 
 rank: 9
-score: 6.198289
+score: 6.226008
+section_id: 5623097e1502:76d8211bc501
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -1732,7 +1851,8 @@ content:
 구글 캘린더 연동이 완료되면, 구글 캘린더에서 발생하는 알림은 구글의 알림 설정을 따르게 됩니다. 이는 뤼이도 내의 미팅 알림과 별개로 작동합니다.
 
 rank: 10
-score: 6.176989
+score: 6.212887
+section_id: fcb3c228f5a0:7ce560cd7b49
 document_title: 운영: 보관 작업
 section_path: 운영: 보관 작업 > 보관된 작업을 다시 활성화하기
 source_url: https://docs.riido.io/issues/archived-items.md
@@ -1747,7 +1867,8 @@ content:
 질문: 뤄이도 워크스페이스를 슬랙과 연결하고 팀별 알림 채널을 지정하려면 어떻게 해야 하나요?
 
 rank: 1
-score: 18.514455
+score: 18.593071
+section_id: 43e5e2414349:b60d8edf2d0a
 document_title: 슬랙
 section_path: 슬랙 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/slack.md
@@ -1771,7 +1892,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 2
-score: 14.961216
+score: 15.006955
+section_id: 43e5e2414349:9976bd5ed072
 document_title: 슬랙
 section_path: 슬랙 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/slack.md
@@ -1798,7 +1920,8 @@ content:
 네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.
 
 rank: 3
-score: 12.968669
+score: 13.035654
+section_id: ee834b371049:6fe68edda26a
 document_title: 디스코드
 section_path: 디스코드 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/discord.md
@@ -1822,7 +1945,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 4
-score: 10.636666
+score: 10.669897
+section_id: 43e5e2414349:6ec68508c108
 document_title: 슬랙
 section_path: 슬랙 > 슬랙 연동으로 얻는 핵심 가치
 source_url: https://docs.riido.io/integrations/slack.md
@@ -1839,7 +1963,8 @@ content:
 **일일 리포트**
 
 rank: 5
-score: 9.200096
+score: 9.223043
+section_id: 854f9556fa9d:f59ce20fded2
 document_title: 댓글
 section_path: 댓글 > 개요
 source_url: https://docs.riido.io/docs/comments.md
@@ -1849,7 +1974,8 @@ content:
 슬랙이나 디스코드와 연동되어 댓글 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.
 
 rank: 6
-score: 7.903137
+score: 7.926076
+section_id: c225265a1fa1:c94c162f41b5
 document_title: 알림
 section_path: 알림 > 참고
 source_url: https://docs.riido.io/data/notifications.md
@@ -1857,7 +1983,8 @@ content:
 * [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.
 
 rank: 7
-score: 6.728769
+score: 6.780584
+section_id: 5623097e1502:b8b2000bc35a
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -1881,7 +2008,8 @@ content:
 3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.
 
 rank: 8
-score: 6.725855
+score: 6.754736
+section_id: b86425eb9784:c2921a208e92
 document_title: 깃허브
 section_path: 깃허브 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/github.md
@@ -1899,7 +2027,8 @@ Github 연동은 워크스페이스 단위로 설정되며, 연결할 Repository
 2. 권한이 부여된 Repository 중, 뤼이도와 연결할 Repository를 추가합니다.
 
 rank: 9
-score: 6.373430
+score: 6.399201
+section_id: 43e5e2414349:4fdacd7803e6
 document_title: 슬랙
 section_path: 슬랙 > 개요
 source_url: https://docs.riido.io/integrations/slack.md
@@ -1911,7 +2040,8 @@ content:
 이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.
 
 rank: 10
-score: 5.100389
+score: 5.115612
+section_id: 854f9556fa9d:1b058ab0fb93
 document_title: 댓글
 section_path: 댓글 > 댓글 구독
 source_url: https://docs.riido.io/docs/comments.md
@@ -1924,7 +2054,8 @@ content:
 질문: 디스코드 서버를 뤄이도에 연결한 다음 팀별 채널을 지정하는 방법을 알려주세요.
 
 rank: 1
-score: 23.997442
+score: 24.074408
+section_id: ee834b371049:6fe68edda26a
 document_title: 디스코드
 section_path: 디스코드 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/discord.md
@@ -1948,7 +2079,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 2
-score: 9.614060
+score: 9.642745
+section_id: 43e5e2414349:9976bd5ed072
 document_title: 슬랙
 section_path: 슬랙 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/slack.md
@@ -1975,7 +2107,8 @@ content:
 네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.
 
 rank: 3
-score: 9.425358
+score: 9.481421
+section_id: 43e5e2414349:b60d8edf2d0a
 document_title: 슬랙
 section_path: 슬랙 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/slack.md
@@ -1999,7 +2132,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 4
-score: 8.806507
+score: 8.846110
+section_id: 673858aecdcf:593dd4fa3def
 document_title: 작업간 연결
 section_path: 작업간 연결 > 연결 추가하기
 source_url: https://docs.riido.io/issues/issue-relations.md
@@ -2010,7 +2144,8 @@ content:
 2. 에디터나 댓글에서 다른 작업을 멘션(@)
 
 rank: 5
-score: 8.793114
+score: 8.813686
+section_id: ee834b371049:d048c70e1bf1
 document_title: 디스코드
 section_path: 디스코드 > 디스코드 연동으로 얻는 핵심 가치
 source_url: https://docs.riido.io/integrations/discord.md
@@ -2021,7 +2156,8 @@ content:
 기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.
 
 rank: 6
-score: 5.964323
+score: 5.985644
+section_id: 6e9c13b73663:ef1266158078
 document_title: MCP 서버
 section_path: MCP 서버 > 설치 가이드
 source_url: https://docs.riido.io/ai/mcp.md
@@ -2154,7 +2290,8 @@ $ /mcp
 5. Riido MCP 정상 연결 확인
 
 rank: 7
-score: 5.781785
+score: 5.800137
+section_id: 6e9c13b73663:58cd615292d6
 document_title: MCP 서버
 section_path: MCP 서버 > 개요
 source_url: https://docs.riido.io/ai/mcp.md
@@ -2164,7 +2301,8 @@ AI 툴(Claude, Cursor 등)은 이미 개발 및 기획 과정에서 필수 도�
 뤼이도 MCP(Model Context Protocol) 서버는 이 단절을 완전히 해소합니다. AI가 직접 뤼이도 워크스페이스에 연결되어 데이터 조회, 작업 생성, 문서 업데이트까지 처리할 수 있습니다.
 
 rank: 8
-score: 5.610811
+score: 5.632382
+section_id: 9d9ba80dfef6:6fc3432260ff
 document_title: 계획: 대기 작업
 section_path: 계획: 대기 작업 > 속성
 source_url: https://docs.riido.io/issues/intake.md
@@ -2177,7 +2315,8 @@ content:
 * 라벨: 유형, 카테고리 등 작업을 구분할 수 있는 태그
 
 rank: 9
-score: 5.483753
+score: 5.500219
+section_id: c225265a1fa1:567b1cd31b93
 document_title: 알림
 section_path: 알림 > 알림 활용하기
 source_url: https://docs.riido.io/data/notifications.md
@@ -2191,7 +2330,8 @@ content:
 * **일괄 처리:** 우측 상단 메뉴를 통해 모든 알림을 읽음 처리하거나, 보관된 알림만 따로 모아볼 수 있습니다.
 
 rank: 10
-score: 4.912687
+score: 4.924078
+section_id: c225265a1fa1:4e5a6172d25a
 document_title: 알림
 section_path: 알림 > 개요
 source_url: https://docs.riido.io/data/notifications.md
@@ -2202,7 +2342,8 @@ content:
 질문: 구글 캘린더를 워크스페이스에 연동하고 팀별 캘린더를 선택하려면 어떻게 하나요?
 
 rank: 1
-score: 24.389482
+score: 23.660486
+section_id: 5623097e1502:b8b2000bc35a
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -2226,7 +2367,8 @@ content:
 3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.
 
 rank: 2
-score: 22.286477
+score: 21.509036
+section_id: d639f52b10eb:f9d910a50c33
 document_title: 자동화
 section_path: 자동화 > 구글 캘린더 연동
 source_url: https://docs.riido.io/meetings/automations.md
@@ -2234,7 +2376,8 @@ content:
 워크스페이스와 구글 계정을 연동하면, 뤼이도에서 생성된 미팅이 자동으로 구글 캘린더에 등록됩니다. 반대로 구글 캘린더에서 생성한 일정도 뤼이도 내 미팅 목록에 자동으로 표시됩니다. 미팅 제목, 참여자, 시간, 장소가 양방향으로 동기화됩니다. 구글 캘린더 연동 설정 방법은 [가이드](https://docs.riido.io/integrations/google-calendar.md)에서 자세히 확인할 수 있습니다.
 
 rank: 3
-score: 19.579033
+score: 18.769588
+section_id: 5623097e1502:76d8211bc501
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -2252,7 +2395,8 @@ content:
 구글 캘린더 연동이 완료되면, 구글 캘린더에서 발생하는 알림은 구글의 알림 설정을 따르게 됩니다. 이는 뤼이도 내의 미팅 알림과 별개로 작동합니다.
 
 rank: 4
-score: 18.228208
+score: 17.458479
+section_id: 5623097e1502:0c33dc302925
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 미팅 일정 동기화 방식
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -2278,7 +2422,21 @@ content:
 * 참여자 추가/제거
 
 rank: 5
-score: 13.502305
+score: 16.838082
+section_id: 5623097e1502:a731f8580273
+document_title: 구글 캘린더
+section_path: 구글 캘린더 > 개요
+source_url: https://docs.riido.io/integrations/google-calendar.md
+content:
+프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.
+
+뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.
+
+이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다.
+
+rank: 6
+score: 12.954195
+section_id: d639f52b10eb:7002884b41fc
 document_title: 자동화
 section_path: 자동화 > 개요
 source_url: https://docs.riido.io/meetings/automations.md
@@ -2287,8 +2445,9 @@ content:
 
 또한 **구글 캘린더 연동**을 통해 생성된 미팅을 캘린더에서 바로 확인하고, 참석 알림을 자동으로 받을 수 있습니다. 이를 통해 미팅 준비와 참여 과정을 훨씬 간소화할 수 있습니다.
 
-rank: 6
-score: 9.325850
+rank: 7
+score: 9.290813
+section_id: b86425eb9784:c2921a208e92
 document_title: 깃허브
 section_path: 깃허브 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/github.md
@@ -2305,8 +2464,9 @@ Github 연동은 워크스페이스 단위로 설정되며, 연결할 Repository
 1. Github 설정 업데이트를 통해 뤼이도가 접근할 Repository 권한을 설정합니다. `All repositories` 또는 `Only select repositories` 중 하나를 선택합니다.
 2. 권한이 부여된 Repository 중, 뤼이도와 연결할 Repository를 추가합니다.
 
-rank: 7
-score: 8.459129
+rank: 8
+score: 8.444552
+section_id: 43e5e2414349:b60d8edf2d0a
 document_title: 슬랙
 section_path: 슬랙 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/slack.md
@@ -2329,8 +2489,9 @@ content:
 2. 필요하면 수동으로 직접 연결할 수도 있습니다.
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
-rank: 8
-score: 7.894232
+rank: 9
+score: 7.875191
+section_id: ee834b371049:6fe68edda26a
 document_title: 디스코드
 section_path: 디스코드 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/discord.md
@@ -2353,43 +2514,21 @@ content:
 2. 필요하면 수동으로 직접 연결할 수도 있습니다.
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
-rank: 9
-score: 6.892808
+rank: 10
+score: 6.885272
+section_id: 7591069b70f9:852f2729c6f3
 document_title: 워크스페이스
 section_path: 워크스페이스 > 워크스페이스 설정
 source_url: https://docs.riido.io/workspaces/overview.md
 content:
 워크스페이스 설정으로 이동하기 위해서는, 좌측 사이드바의 \[워크스페이스 > 설정] 버튼을 클릭하여 이동할 수 있습니다. 설정 페이지에서는 로고, 이름과 같은 기본적인 워크스페이스 정보부터 워크스페이스 멤버, 외부 연동, 알림 등에 대한 설정이 가능합니다.
-
-rank: 10
-score: 6.548170
-document_title: 깃허브
-section_path: 깃허브 > 작업 상태 자동화
-source_url: https://docs.riido.io/integrations/github.md
-content:
-연결된 브랜치에 업데이트가 생길 경우, 뤼이도 작업 상태를 자동으로 업데이트하여 수동 작업을 완전히 제거합니다.
-
-#### 1. 기본 자동화 설정
-
-최초 연동시, 팀의 작업 흐름에 맞게 다음과 같은 자동화가 기본적으로 설정되어 있습니다. PR이 Merge될 경우, 뤼이도의 작업 상태가 자동으로 완료로 변경됩니다.
-
-| Github Action | 뤼이도 상태 |
-| ------------- | ------ |
-| Merge         | 완료     |
-
-#### 2. 자동화 커스텀
-
-상태 자동화는 팀의 특성에 맞게 세부적으로 커스텀 할 수 있습니다. \[설정 > 워크스페이스 > 외부 연동 > Github] 페이지에서 커스텀이 가능합니다. 상태 자동화는 팀과 관련된 설정이기 때문에, 워크스페이스에 존재하는 각 팀별로 설정 업데이트가 필요합니다.
-
-자동화를 적용할 수 있는 깃허브 액션은 `Branch Create`, `PR Open`, `PR Close`, `Merge`로 총 4가지가 존재합니다.
-
-팀별 상태는 팀별 \[설장 > 팀 > 작업 상태] 페이지에서 커스텀 가능하며, 뤼이도의 작업 상태에 대한 상세한 설명은 [작업 상태](https://docs.riido.io/teams/statuses)에서 확인할 수 있습니다.
 ================================================================================
 질문 ID: Q16
 질문: 깃허브 Organization과 Repository를 뤄이도 워크스페이스에 연결하는 절차가 궁금해요.
 
 rank: 1
-score: 22.024326
+score: 22.086404
+section_id: b86425eb9784:c2921a208e92
 document_title: 깃허브
 section_path: 깃허브 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/github.md
@@ -2407,7 +2546,8 @@ Github 연동은 워크스페이스 단위로 설정되며, 연결할 Repository
 2. 권한이 부여된 Repository 중, 뤼이도와 연결할 Repository를 추가합니다.
 
 rank: 2
-score: 6.980123
+score: 7.010326
+section_id: b86425eb9784:fb7196c378c9
 document_title: 깃허브
 section_path: 깃허브 > 작업 상태 자동화
 source_url: https://docs.riido.io/integrations/github.md
@@ -2431,7 +2571,8 @@ content:
 팀별 상태는 팀별 \[설장 > 팀 > 작업 상태] 페이지에서 커스텀 가능하며, 뤼이도의 작업 상태에 대한 상세한 설명은 [작업 상태](https://docs.riido.io/teams/statuses)에서 확인할 수 있습니다.
 
 rank: 3
-score: 5.986586
+score: 6.028829
+section_id: 43e5e2414349:b60d8edf2d0a
 document_title: 슬랙
 section_path: 슬랙 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/slack.md
@@ -2455,7 +2596,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 4
-score: 5.634556
+score: 5.674484
+section_id: 5623097e1502:b8b2000bc35a
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -2479,7 +2621,8 @@ content:
 3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.
 
 rank: 5
-score: 5.538737
+score: 5.559649
+section_id: b86425eb9784:85561efaf97e
 document_title: 깃허브
 section_path: 깃허브 > 뤼이도와 Github 연결
 source_url: https://docs.riido.io/integrations/github.md
@@ -2501,7 +2644,8 @@ content:
 깃허브를 방문하지 않고도 개발 진행 상황을 한눈에 확인할 수 있으며, PR을 클릭하면 Github의 해당 PR 페이지로 바로 이동하여 상세한 논의 내용을 확인할 수 있습니다.
 
 rank: 6
-score: 5.438600
+score: 5.477159
+section_id: 7591069b70f9:97c40b93dde0
 document_title: 워크스페이스
 section_path: 워크스페이스 > 여러 워크스페이스에 참여
 source_url: https://docs.riido.io/workspaces/overview.md
@@ -2509,7 +2653,8 @@ content:
 사용자는 여러 워크스페이스에 참여할 수 있습니다. 좌측 상단의 워크스페이스 이름을 클릭하여, 참여 중인 모든 워크스페이스를 확인할 수 있습니다.
 
 rank: 7
-score: 5.395469
+score: 5.433433
+section_id: ee834b371049:6fe68edda26a
 document_title: 디스코드
 section_path: 디스코드 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/discord.md
@@ -2533,7 +2678,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 8
-score: 5.351563
+score: 5.389401
+section_id: 7591069b70f9:9d78075e912d
 document_title: 워크스페이스
 section_path: 워크스페이스 > 개요
 source_url: https://docs.riido.io/workspaces/overview.md
@@ -2541,7 +2687,8 @@ content:
 워크스페이스는 여러 팀과 프로젝트를 한 공간에서 관리할 수 있는 하나의 조직입니다. 하나의 조직에서는 하나의 워크스페이스를 운영하는 것을 권장합니다. 워크스페이스가 생성되면, 워크스페이스 이름과 동일한 팀을 자동으로 생성합니다.
 
 rank: 9
-score: 5.204720
+score: 5.240626
+section_id: 43e5e2414349:9976bd5ed072
 document_title: 슬랙
 section_path: 슬랙 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/slack.md
@@ -2568,7 +2715,8 @@ content:
 네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.
 
 rank: 10
-score: 5.169554
+score: 5.205896
+section_id: 7591069b70f9:852f2729c6f3
 document_title: 워크스페이스
 section_path: 워크스페이스 > 워크스페이스 설정
 source_url: https://docs.riido.io/workspaces/overview.md
@@ -2579,7 +2727,8 @@ content:
 질문: 피그마에서 뤄이도 플러그인을 설치하고 계정을 연결하려면 어떻게 해야 하나요?
 
 rank: 1
-score: 22.098336
+score: 22.150415
+section_id: a13bfdc38996:8f9d2cf72c3e
 document_title: 피그마
 section_path: 피그마 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/figma.md
@@ -2597,7 +2746,8 @@ content:
 2. 플러그인을 실행하여 피그마와 연결할 뤼이도 계정을 승인합니다.
 
 rank: 2
-score: 15.881233
+score: 15.910648
+section_id: a13bfdc38996:6edc1374729e
 document_title: 피그마
 section_path: 피그마 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/figma.md
@@ -2611,7 +2761,8 @@ content:
 아니요, 필수가 아닙니다. 뤼이도 작업에 디자인 임베드와 자동 상태 변경은 플러그인 없이도 완벽하게 동작합니다. 플러그인은 디자이너가 피그마를 벗어나지 않고 모든 뤼이도 작업을 관리할 수 있도록 지원하는 기능입니다.
 
 rank: 3
-score: 13.402665
+score: 13.440085
+section_id: a13bfdc38996:5cace80db708
 document_title: 피그마
 section_path: 피그마 > 피그마 뤼이도 플러그인
 source_url: https://docs.riido.io/integrations/figma.md
@@ -2625,7 +2776,8 @@ content:
 플러그인 내에서 다양한 필터 및 정렬 기능을 제공하여, 원하는 작업을 빠르게 찾아 디자인과 연결할 수 있습니다.
 
 rank: 4
-score: 7.085935
+score: 7.115663
+section_id: 5623097e1502:b8b2000bc35a
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -2649,7 +2801,8 @@ content:
 3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.
 
 rank: 5
-score: 7.046588
+score: 7.066942
+section_id: a13bfdc38996:245ede639654
 document_title: 피그마
 section_path: 피그마 > 피그마 연동
 source_url: https://docs.riido.io/integrations/figma.md
@@ -2667,7 +2820,8 @@ content:
 피그마에서 파일 혹은 프레임의 상태를 Ready for Dev 로 변경하면, 뤼이도 작업도 미리 지정한 상태로 자동 업데이트 됩니다. 디자이너는 추가 소통이나 뤼이도에 접속할 필요 없이 피그마에서 모든 소통을 완료할 수 있으며, 개발자는 업데이트 누락 없이 디자인이 완료된 순간 바로 작업을 진행할 수 있습니다.
 
 rank: 6
-score: 6.848422
+score: 6.876435
+section_id: ee834b371049:6fe68edda26a
 document_title: 디스코드
 section_path: 디스코드 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/discord.md
@@ -2691,7 +2845,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 7
-score: 6.810703
+score: 6.838541
+section_id: 43e5e2414349:b60d8edf2d0a
 document_title: 슬랙
 section_path: 슬랙 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/slack.md
@@ -2715,7 +2870,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 8
-score: 6.723739
+score: 6.744262
+section_id: a13bfdc38996:ab6532b44988
 document_title: 피그마
 section_path: 피그마 > 개요
 source_url: https://docs.riido.io/integrations/figma.md
@@ -2728,7 +2884,8 @@ content:
 * **개발자:** 뤼이도 작업 상세에서 최신 디자인을 실시간으로 확인하고, 디자인 완료 시점에 맞춰 지체 없이 개발을 시작합니다.
 
 rank: 9
-score: 4.928730
+score: 4.950248
+section_id: 673858aecdcf:b1d03b889c87
 document_title: 작업간 연결
 section_path: 작업간 연결 > 관계 유형별 동작
 source_url: https://docs.riido.io/issues/issue-relations.md
@@ -2750,7 +2907,8 @@ content:
 하나의 작업에는 여러 개의 중복 존재 작업이 연결될 수 있으며, 반대로 중복됨은 한 개의 원본 작업만을 가질 수 있습니다.
 
 rank: 10
-score: 4.284710
+score: 4.302050
+section_id: 949ddd65a2a5:b1af22cab7a1
 document_title: 실행: 작업
 section_path: 실행: 작업 > 작업 관리
 source_url: https://docs.riido.io/issues/work-items.md
@@ -2769,7 +2927,8 @@ content:
 질문: ChatGPT에 뤄이도 MCP를 연결하려면 어떤 설정을 해야 하나요?
 
 rank: 1
-score: 11.767999
+score: 11.796787
+section_id: 6e9c13b73663:ef1266158078
 document_title: MCP 서버
 section_path: MCP 서버 > 설치 가이드
 source_url: https://docs.riido.io/ai/mcp.md
@@ -2902,7 +3061,8 @@ $ /mcp
 5. Riido MCP 정상 연결 확인
 
 rank: 2
-score: 6.738178
+score: 6.755935
+section_id: 6e9c13b73663:58cd615292d6
 document_title: MCP 서버
 section_path: MCP 서버 > 개요
 source_url: https://docs.riido.io/ai/mcp.md
@@ -2912,7 +3072,8 @@ AI 툴(Claude, Cursor 등)은 이미 개발 및 기획 과정에서 필수 도�
 뤼이도 MCP(Model Context Protocol) 서버는 이 단절을 완전히 해소합니다. AI가 직접 뤼이도 워크스페이스에 연결되어 데이터 조회, 작업 생성, 문서 업데이트까지 처리할 수 있습니다.
 
 rank: 3
-score: 5.520444
+score: 5.549638
+section_id: 673858aecdcf:b1d03b889c87
 document_title: 작업간 연결
 section_path: 작업간 연결 > 관계 유형별 동작
 source_url: https://docs.riido.io/issues/issue-relations.md
@@ -2934,7 +3095,8 @@ content:
 하나의 작업에는 여러 개의 중복 존재 작업이 연결될 수 있으며, 반대로 중복됨은 한 개의 원본 작업만을 가질 수 있습니다.
 
 rank: 4
-score: 4.034451
+score: 4.050610
+section_id: 261e80b246e8:203889cf792c
 document_title: 스프린트
 section_path: 스프린트 > 개요
 source_url: https://docs.riido.io/sprints/overview.md
@@ -2944,7 +3106,8 @@ content:
 뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.
 
 rank: 5
-score: 3.920787
+score: 3.929171
+section_id: 6e9c13b73663:cd786201dd96
 document_title: MCP 서버
 section_path: MCP 서버 > MCP 사용 사례
 source_url: https://docs.riido.io/ai/mcp.md
@@ -2972,7 +3135,8 @@ AI는 프로젝트 맥락을 이해하여 설명만으로도 온전한 작업을
 개발자는 더 이상 작업 결과물을 정리하느라 시간을 쓸 필요 없습니다. Cursor에서 새로운 기능을 완성했을 때, “방금 구현한 로그인 기능을 뤼이도 작업에 요약해서 팀과 공유해 줘”라고 말해보세요. AI가 코드를 분석해, 팀원들이 이해하기 쉬운 형태로 뤼이도 작업 페이지에 자동으로 정리해 줘요.
 
 rank: 6
-score: 3.884815
+score: 3.911343
+section_id: b86425eb9784:fb7196c378c9
 document_title: 깃허브
 section_path: 깃허브 > 작업 상태 자동화
 source_url: https://docs.riido.io/integrations/github.md
@@ -2996,7 +3160,8 @@ content:
 팀별 상태는 팀별 \[설장 > 팀 > 작업 상태] 페이지에서 커스텀 가능하며, 뤼이도의 작업 상태에 대한 상세한 설명은 [작업 상태](https://docs.riido.io/teams/statuses)에서 확인할 수 있습니다.
 
 rank: 7
-score: 3.725505
+score: 3.744013
+section_id: 854f9556fa9d:1b058ab0fb93
 document_title: 댓글
 section_path: 댓글 > 댓글 구독
 source_url: https://docs.riido.io/docs/comments.md
@@ -3006,7 +3171,8 @@ content:
 이를 통해 중요한 논의를 놓치지 않고 참여할 수 있으며, 필요에 따라 언제든 구독을 해지할 수도 있습니다.
 
 rank: 8
-score: 3.597156
+score: 3.631070
+section_id: 5623097e1502:b8b2000bc35a
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -3030,7 +3196,8 @@ content:
 3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.
 
 rank: 9
-score: 3.581995
+score: 3.617602
+section_id: b86425eb9784:c2921a208e92
 document_title: 깃허브
 section_path: 깃허브 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/github.md
@@ -3048,7 +3215,8 @@ Github 연동은 워크스페이스 단위로 설정되며, 연결할 Repository
 2. 권한이 부여된 Repository 중, 뤼이도와 연결할 Repository를 추가합니다.
 
 rank: 10
-score: 3.447525
+score: 3.480264
+section_id: 673858aecdcf:593dd4fa3def
 document_title: 작업간 연결
 section_path: 작업간 연결 > 연결 추가하기
 source_url: https://docs.riido.io/issues/issue-relations.md
@@ -3062,7 +3230,8 @@ content:
 질문: 구글 캘린더를 연결했는데 작업 마감일이 캘린더에 표시되지 않아요. 연동 오류인가요?
 
 rank: 1
-score: 24.711419
+score: 23.912811
+section_id: 5623097e1502:76d8211bc501
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -3080,7 +3249,8 @@ content:
 구글 캘린더 연동이 완료되면, 구글 캘린더에서 발생하는 알림은 구글의 알림 설정을 따르게 됩니다. 이는 뤼이도 내의 미팅 알림과 별개로 작동합니다.
 
 rank: 2
-score: 21.573469
+score: 20.784759
+section_id: d639f52b10eb:f9d910a50c33
 document_title: 자동화
 section_path: 자동화 > 구글 캘린더 연동
 source_url: https://docs.riido.io/meetings/automations.md
@@ -3088,7 +3258,8 @@ content:
 워크스페이스와 구글 계정을 연동하면, 뤼이도에서 생성된 미팅이 자동으로 구글 캘린더에 등록됩니다. 반대로 구글 캘린더에서 생성한 일정도 뤼이도 내 미팅 목록에 자동으로 표시됩니다. 미팅 제목, 참여자, 시간, 장소가 양방향으로 동기화됩니다. 구글 캘린더 연동 설정 방법은 [가이드](https://docs.riido.io/integrations/google-calendar.md)에서 자세히 확인할 수 있습니다.
 
 rank: 3
-score: 21.511867
+score: 20.752396
+section_id: 5623097e1502:b8b2000bc35a
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -3112,7 +3283,8 @@ content:
 3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.
 
 rank: 4
-score: 18.228208
+score: 17.458479
+section_id: 5623097e1502:0c33dc302925
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 미팅 일정 동기화 방식
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -3138,7 +3310,21 @@ content:
 * 참여자 추가/제거
 
 rank: 5
-score: 13.502305
+score: 16.838082
+section_id: 5623097e1502:a731f8580273
+document_title: 구글 캘린더
+section_path: 구글 캘린더 > 개요
+source_url: https://docs.riido.io/integrations/google-calendar.md
+content:
+프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.
+
+뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.
+
+이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다.
+
+rank: 6
+score: 12.954195
+section_id: d639f52b10eb:7002884b41fc
 document_title: 자동화
 section_path: 자동화 > 개요
 source_url: https://docs.riido.io/meetings/automations.md
@@ -3147,8 +3333,9 @@ content:
 
 또한 **구글 캘린더 연동**을 통해 생성된 미팅을 캘린더에서 바로 확인하고, 참석 알림을 자동으로 받을 수 있습니다. 이를 통해 미팅 준비와 참여 과정을 훨씬 간소화할 수 있습니다.
 
-rank: 6
-score: 10.470120
+rank: 7
+score: 10.260319
+section_id: 949ddd65a2a5:28c75fba571f
 document_title: 실행: 작업
 section_path: 실행: 작업 > 다양한 보기
 source_url: https://docs.riido.io/issues/work-items.md
@@ -3159,8 +3346,9 @@ content:
 | ---------------------------------------------------------------------------------------------- | ---------------------------------- | ------------------------- | ---------------------------------- |
 |  가장 기본적인 보기 형태로, 작업을 빠르게 스캔하거나 정렬할 때 적합합니다.  뤼이도의 계층 구조를 가장 명확하게 보여주는 방식입니다.  | 상태를 기준으로 작업 흐름을 보드 형태로 시각화한 형태입니다. | 작업의 우선순위를 한눈에 파악할 수 있습니다. | 마감일과 일정을 중심으로 작업을 정리하고 확인할 수 있습니다. |
 
-rank: 7
-score: 7.474665
+rank: 8
+score: 7.273533
+section_id: ee834b371049:d048c70e1bf1
 document_title: 디스코드
 section_path: 디스코드 > 디스코드 연동으로 얻는 핵심 가치
 source_url: https://docs.riido.io/integrations/discord.md
@@ -3170,8 +3358,9 @@ content:
 기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.
 기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.
 
-rank: 8
-score: 7.275538
+rank: 9
+score: 7.080348
+section_id: 43e5e2414349:6ec68508c108
 document_title: 슬랙
 section_path: 슬랙 > 슬랙 연동으로 얻는 핵심 가치
 source_url: https://docs.riido.io/integrations/slack.md
@@ -3187,8 +3376,9 @@ content:
 
 **일일 리포트**
 
-rank: 9
-score: 6.254400
+rank: 10
+score: 6.214507
+section_id: a13bfdc38996:245ede639654
 document_title: 피그마
 section_path: 피그마 > 피그마 연동
 source_url: https://docs.riido.io/integrations/figma.md
@@ -3204,24 +3394,13 @@ content:
 #### 2) Ready for Dev 상태 자동 변경
 
 피그마에서 파일 혹은 프레임의 상태를 Ready for Dev 로 변경하면, 뤼이도 작업도 미리 지정한 상태로 자동 업데이트 됩니다. 디자이너는 추가 소통이나 뤼이도에 접속할 필요 없이 피그마에서 모든 소통을 완료할 수 있으며, 개발자는 업데이트 누락 없이 디자인이 완료된 순간 바로 작업을 진행할 수 있습니다.
-
-rank: 10
-score: 6.182420
-document_title: 작업 관계도
-section_path: 작업 관계도 > 계층 구조 시각화
-source_url: https://docs.riido.io/views/diagram.md
-content:
-작업 관계도에서는 프로젝트, 목표, 작업, 하위 작업이 트리 형태로 표시됩니다. 각 작업을 클릭하면 해당 작업의 상세 페이지로 이동할 수 있습니다.
-
-* 드래그를 통해 관계도를 자유롭게 이동할 수 있습니다.
-* 확대/축소를 통해 세부 구조와 전체 맥락을 전환할 수 있습니다.
-* 현재 작업과 직접 연결된 작업은 색이 진하게 표시되어, 복잡한 구조 속 관계를 직관적으로 파악할 수 있습니다.
 ================================================================================
 질문 ID: Q20
 질문: 슬랙 연동 후 알림이 너무 많이 오는데 알림 범위를 줄일 수 있나요?
 
 rank: 1
-score: 19.434294
+score: 19.412440
+section_id: 43e5e2414349:9976bd5ed072
 document_title: 슬랙
 section_path: 슬랙 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/slack.md
@@ -3248,7 +3427,8 @@ content:
 네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.
 
 rank: 2
-score: 14.744401
+score: 14.724743
+section_id: c225265a1fa1:c94c162f41b5
 document_title: 알림
 section_path: 알림 > 참고
 source_url: https://docs.riido.io/data/notifications.md
@@ -3256,7 +3436,8 @@ content:
 * [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.
 
 rank: 3
-score: 14.684075
+score: 14.658106
+section_id: ee834b371049:2a2928a908fc
 document_title: 디스코드
 section_path: 디스코드 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/discord.md
@@ -3277,7 +3458,8 @@ content:
 네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.
 
 rank: 4
-score: 14.068623
+score: 14.040269
+section_id: 43e5e2414349:6ec68508c108
 document_title: 슬랙
 section_path: 슬랙 > 슬랙 연동으로 얻는 핵심 가치
 source_url: https://docs.riido.io/integrations/slack.md
@@ -3294,7 +3476,8 @@ content:
 **일일 리포트**
 
 rank: 5
-score: 12.660216
+score: 12.617224
+section_id: 43e5e2414349:b60d8edf2d0a
 document_title: 슬랙
 section_path: 슬랙 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/slack.md
@@ -3318,7 +3501,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 6
-score: 12.340576
+score: 12.377067
+section_id: c225265a1fa1:21a1e3032cdd
 document_title: 알림
 section_path: 알림 > 알림 확인하기
 source_url: https://docs.riido.io/data/notifications.md
@@ -3335,7 +3519,8 @@ content:
 알림은 오입력이나 중복 발생을 방지하기 위해 약간의 시간차를 두고 발생합니다. 새로운 알림이 도착하면, 상단 알림 버튼 우측에 개수가 포함된 뱃지(❹) 형태로 표시됩니다.
 
 rank: 7
-score: 11.464238
+score: 11.447070
+section_id: 854f9556fa9d:f59ce20fded2
 document_title: 댓글
 section_path: 댓글 > 개요
 source_url: https://docs.riido.io/docs/comments.md
@@ -3345,7 +3530,8 @@ content:
 슬랙이나 디스코드와 연동되어 댓글 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.
 
 rank: 8
-score: 10.023467
+score: 10.058166
+section_id: c225265a1fa1:567b1cd31b93
 document_title: 알림
 section_path: 알림 > 알림 활용하기
 source_url: https://docs.riido.io/data/notifications.md
@@ -3359,7 +3545,8 @@ content:
 * **일괄 처리:** 우측 상단 메뉴를 통해 모든 알림을 읽음 처리하거나, 보관된 알림만 따로 모아볼 수 있습니다.
 
 rank: 9
-score: 9.971332
+score: 10.006863
+section_id: c225265a1fa1:8056485bc27c
 document_title: 알림
 section_path: 알림 > 알림 설정
 source_url: https://docs.riido.io/data/notifications.md
@@ -3371,7 +3558,8 @@ content:
 * 알림을 다시 받고 싶다면, 같은 위치에서 ‘알림 받기’ 버튼으로 재활성화할 수 있습니다.
 
 rank: 10
-score: 9.544911
+score: 9.511720
+section_id: 5623097e1502:76d8211bc501
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -3392,7 +3580,8 @@ content:
 질문: 슬랙 연동 설정에서 비공개 채널이 보이지 않는데 어떻게 연결하나요?
 
 rank: 1
-score: 18.192948
+score: 18.182458
+section_id: 43e5e2414349:9976bd5ed072
 document_title: 슬랙
 section_path: 슬랙 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/slack.md
@@ -3419,7 +3608,8 @@ content:
 네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.
 
 rank: 2
-score: 16.558817
+score: 16.547479
+section_id: 43e5e2414349:b60d8edf2d0a
 document_title: 슬랙
 section_path: 슬랙 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/slack.md
@@ -3443,7 +3633,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 3
-score: 10.965435
+score: 10.941933
+section_id: ee834b371049:6fe68edda26a
 document_title: 디스코드
 section_path: 디스코드 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/discord.md
@@ -3467,7 +3658,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 4
-score: 10.721955
+score: 10.680740
+section_id: 43e5e2414349:6ec68508c108
 document_title: 슬랙
 section_path: 슬랙 > 슬랙 연동으로 얻는 핵심 가치
 source_url: https://docs.riido.io/integrations/slack.md
@@ -3484,7 +3676,8 @@ content:
 **일일 리포트**
 
 rank: 5
-score: 8.564414
+score: 8.535793
+section_id: 854f9556fa9d:f59ce20fded2
 document_title: 댓글
 section_path: 댓글 > 개요
 source_url: https://docs.riido.io/docs/comments.md
@@ -3494,7 +3687,8 @@ content:
 슬랙이나 디스코드와 연동되어 댓글 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.
 
 rank: 6
-score: 7.535013
+score: 7.513828
+section_id: 43e5e2414349:4fdacd7803e6
 document_title: 슬랙
 section_path: 슬랙 > 개요
 source_url: https://docs.riido.io/integrations/slack.md
@@ -3506,7 +3700,8 @@ content:
 이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.
 
 rank: 7
-score: 7.056247
+score: 7.010227
+section_id: c225265a1fa1:c94c162f41b5
 document_title: 알림
 section_path: 알림 > 참고
 source_url: https://docs.riido.io/data/notifications.md
@@ -3514,7 +3709,8 @@ content:
 * [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.
 
 rank: 8
-score: 6.862905
+score: 6.900592
+section_id: 6c3b150c3146:6c9e58fb04ca
 document_title: 비공개 팀
 section_path: 비공개 팀 > 설정
 source_url: https://docs.riido.io/teams/private-teams.md
@@ -3522,7 +3718,8 @@ content:
 비공개 팀으로 전환하려면 설정 페이지의 \[팀 설정 > 일반]의 공개 범위에서 ‘비공개’를 선택하세요. 설정을 저장하면 즉시 팀이 비공개로 전환됩니다.
 
 rank: 9
-score: 6.324657
+score: 6.290989
+section_id: b86425eb9784:c2921a208e92
 document_title: 깃허브
 section_path: 깃허브 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/github.md
@@ -3540,7 +3737,8 @@ Github 연동은 워크스페이스 단위로 설정되며, 연결할 Repository
 2. 권한이 부여된 Repository 중, 뤼이도와 연결할 Repository를 추가합니다.
 
 rank: 10
-score: 6.288015
+score: 6.253877
+section_id: 5623097e1502:b8b2000bc35a
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -3567,7 +3765,8 @@ content:
 질문: 기존 작업 상태를 삭제하려고 하는데 삭제되지 않는 이유가 무엇인가요?
 
 rank: 1
-score: 11.854495
+score: 11.903278
+section_id: a26e14ee99d1:8ddbdaa9dc9b
 document_title: 작업 상태
 section_path: 작업 상태 > 설정
 source_url: https://docs.riido.io/teams/statuses.md
@@ -3579,7 +3778,8 @@ content:
 * 단, 첫 단계(계획)와 마지막 단계(운영)는 시스템 기본 영역으로, 추가 및 삭제가 불가능합니다.
 
 rank: 2
-score: 10.225269
+score: 10.256423
+section_id: a7061c4853df:a5d15ef4cee0
 document_title: 휴지통
 section_path: 휴지통 > 개요
 source_url: https://docs.riido.io/data/trash.md
@@ -3589,7 +3789,8 @@ content:
 휴지통은 팀의 실수를 최소화하고, 삭제된 데이터를 안전하게 관리할 수 있도록 설계되었습니다. 필요한 경우, 삭제된 페이지를 열어 확인하거나 바로 복구할 수도 있습니다.
 
 rank: 3
-score: 9.486358
+score: 9.517488
+section_id: a7061c4853df:73e63632e555
 document_title: 휴지통
 section_path: 휴지통 > 복구 및 영구 삭제
 source_url: https://docs.riido.io/data/trash.md
@@ -3607,7 +3808,8 @@ content:
 휴지통에 보관되는 기간(30일)이 지나면, 모든 데이터는 자동으로 삭제됩니다. 삭제 이후에는 시스템 상에서도 복원할 수 없으니 주의가 필요합니다.
 
 rank: 4
-score: 9.474773
+score: 9.501893
+section_id: da8743ff8cae:26bbdd776a1e
 document_title: 팀
 section_path: 팀 > 팀 관리
 source_url: https://docs.riido.io/teams/overview.md
@@ -3632,7 +3834,8 @@ content:
 팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.
 
 rank: 5
-score: 9.196079
+score: 9.226443
+section_id: a7061c4853df:4c7aa16de474
 document_title: 휴지통
 section_path: 휴지통 > 삭제된 페이지 보기
 source_url: https://docs.riido.io/data/trash.md
@@ -3642,7 +3845,8 @@ content:
 * 페이지 내에서도 ‘복구’ 또는 ‘영구 삭제’를 바로 실행할 수 있습니다.
 
 rank: 6
-score: 9.016489
+score: 9.041750
+section_id: da8743ff8cae:e2b4dc113d2f
 document_title: 팀
 section_path: 팀 > 팀 멤버
 source_url: https://docs.riido.io/teams/overview.md
@@ -3654,7 +3858,8 @@ content:
 만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.
 
 rank: 7
-score: 8.889085
+score: 8.914217
+section_id: 5623097e1502:76d8211bc501
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -3672,7 +3877,8 @@ content:
 구글 캘린더 연동이 완료되면, 구글 캘린더에서 발생하는 알림은 구글의 알림 설정을 따르게 됩니다. 이는 뤼이도 내의 미팅 알림과 별개로 작동합니다.
 
 rank: 8
-score: 8.761050
+score: 8.786555
+section_id: a7061c4853df:6f88dd13099e
 document_title: 휴지통
 section_path: 휴지통 > 휴지통 사용법
 source_url: https://docs.riido.io/data/trash.md
@@ -3682,7 +3888,8 @@ content:
 * 각 항목 우측에는 남은 보관 기간이 표시되어, 언제 영구 삭제되는지 한눈에 확인할 수 있습니다.
 
 rank: 9
-score: 7.364975
+score: 7.381012
+section_id: 9d9ba80dfef6:b545c692c53d
 document_title: 계획: 대기 작업
 section_path: 계획: 대기 작업 > 작업 처리
 source_url: https://docs.riido.io/issues/intake.md
@@ -3698,7 +3905,8 @@ content:
 진행하지 않기로 한 작업은 ‘거절’을 클릭해 상태를 거절됨으로 변경합니다. 거절 시에는 사유를 작성해야 하며, 입력한 내용은 댓글로 자동 기록됩니다. 이를 통해 누가 어떤 이유로 작업을 거절했는지 추적할 수 있습니다.
 
 rank: 10
-score: 6.404191
+score: 6.420534
+section_id: 95a1b20de638:18af4c7df7aa
 document_title: 구독 및 결제
 section_path: 구독 및 결제 > 구독 변경 또는 취소
 source_url: https://docs.riido.io/workspaces/plans-and-billing.md
@@ -3718,7 +3926,8 @@ content:
 질문: 비활성화한 워크스페이스 멤버를 완전히 삭제할 수 없어요. 다시 초대하면 새 계정이 만들어지나요?
 
 rank: 1
-score: 22.809829
+score: 22.820504
+section_id: 567f0ce8042c:6a09b6285b28
 document_title: 멤버
 section_path: 멤버 > 멤버 비활성화
 source_url: https://docs.riido.io/workspaces/members.md
@@ -3730,7 +3939,8 @@ content:
 비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.
 
 rank: 2
-score: 13.953617
+score: 13.963540
+section_id: da8743ff8cae:e2b4dc113d2f
 document_title: 팀
 section_path: 팀 > 팀 멤버
 source_url: https://docs.riido.io/teams/overview.md
@@ -3742,7 +3952,8 @@ content:
 만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.
 
 rank: 3
-score: 12.081628
+score: 12.078682
+section_id: da8743ff8cae:26bbdd776a1e
 document_title: 팀
 section_path: 팀 > 팀 관리
 source_url: https://docs.riido.io/teams/overview.md
@@ -3767,7 +3978,8 @@ content:
 팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.
 
 rank: 4
-score: 10.928569
+score: 10.982086
+section_id: 567f0ce8042c:dc7240487954
 document_title: 멤버
 section_path: 멤버 > 개요
 source_url: https://docs.riido.io/workspaces/members.md
@@ -3775,7 +3987,8 @@ content:
 워크스페이스 멤버는 좌측 사이드바의 \[워크스페이스 > 멤버] 또는 설정 페이지의 \[워크스페이스 > 멤버] 페이지에서 확인할 수 있습니다. 해당 페이지에는 현재 활성화된 멤버와, 과거에 있었던 비활성화된 멤버가 모두 존재합니다.
 
 rank: 5
-score: 9.550305
+score: 9.537117
+section_id: 95a1b20de638:18af4c7df7aa
 document_title: 구독 및 결제
 section_path: 구독 및 결제 > 구독 변경 또는 취소
 source_url: https://docs.riido.io/workspaces/plans-and-billing.md
@@ -3792,7 +4005,8 @@ content:
 * 모든 워크스페이스 멤버는 관리자가 됩니다.
 
 rank: 6
-score: 9.351257
+score: 9.356260
+section_id: 567f0ce8042c:a71a73e4ac34
 document_title: 멤버
 section_path: 멤버 > 권한
 source_url: https://docs.riido.io/workspaces/members.md
@@ -3810,7 +4024,8 @@ content:
 멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다.
 
 rank: 7
-score: 8.518295
+score: 8.504997
+section_id: 6c3b150c3146:f4771653dfff
 document_title: 비공개 팀
 section_path: 비공개 팀 > 접근 권한
 source_url: https://docs.riido.io/teams/private-teams.md
@@ -3820,7 +4035,8 @@ content:
 워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.
 
 rank: 8
-score: 8.259267
+score: 8.295019
+section_id: 43e5e2414349:b60d8edf2d0a
 document_title: 슬랙
 section_path: 슬랙 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/slack.md
@@ -3844,7 +4060,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 9
-score: 8.196755
+score: 8.168889
+section_id: a26e14ee99d1:8ddbdaa9dc9b
 document_title: 작업 상태
 section_path: 작업 상태 > 설정
 source_url: https://docs.riido.io/teams/statuses.md
@@ -3856,7 +4073,8 @@ content:
 * 단, 첫 단계(계획)와 마지막 단계(운영)는 시스템 기본 영역으로, 추가 및 삭제가 불가능합니다.
 
 rank: 10
-score: 8.002672
+score: 8.047903
+section_id: 95a1b20de638:c6dbd3a17dd8
 document_title: 구독 및 결제
 section_path: 구독 및 결제 > 워크스페이스에 멤버 추가하기
 source_url: https://docs.riido.io/workspaces/plans-and-billing.md
@@ -3876,7 +4094,8 @@ content:
 질문: 팀을 삭제했는데 다시 복구할 수 있나요?
 
 rank: 1
-score: 12.603945
+score: 12.644515
+section_id: a7061c4853df:73e63632e555
 document_title: 휴지통
 section_path: 휴지통 > 복구 및 영구 삭제
 source_url: https://docs.riido.io/data/trash.md
@@ -3894,7 +4113,8 @@ content:
 휴지통에 보관되는 기간(30일)이 지나면, 모든 데이터는 자동으로 삭제됩니다. 삭제 이후에는 시스템 상에서도 복원할 수 없으니 주의가 필요합니다.
 
 rank: 2
-score: 11.912104
+score: 11.953577
+section_id: a7061c4853df:a5d15ef4cee0
 document_title: 휴지통
 section_path: 휴지통 > 개요
 source_url: https://docs.riido.io/data/trash.md
@@ -3904,7 +4124,8 @@ content:
 휴지통은 팀의 실수를 최소화하고, 삭제된 데이터를 안전하게 관리할 수 있도록 설계되었습니다. 필요한 경우, 삭제된 페이지를 열어 확인하거나 바로 복구할 수도 있습니다.
 
 rank: 3
-score: 10.902122
+score: 10.927795
+section_id: a7061c4853df:4c7aa16de474
 document_title: 휴지통
 section_path: 휴지통 > 삭제된 페이지 보기
 source_url: https://docs.riido.io/data/trash.md
@@ -3914,7 +4135,8 @@ content:
 * 페이지 내에서도 ‘복구’ 또는 ‘영구 삭제’를 바로 실행할 수 있습니다.
 
 rank: 4
-score: 8.551637
+score: 8.597576
+section_id: da8743ff8cae:26bbdd776a1e
 document_title: 팀
 section_path: 팀 > 팀 관리
 source_url: https://docs.riido.io/teams/overview.md
@@ -3939,7 +4161,8 @@ content:
 팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.
 
 rank: 5
-score: 5.788730
+score: 5.818098
+section_id: a26e14ee99d1:8ddbdaa9dc9b
 document_title: 작업 상태
 section_path: 작업 상태 > 설정
 source_url: https://docs.riido.io/teams/statuses.md
@@ -3951,17 +4174,8 @@ content:
 * 단, 첫 단계(계획)와 마지막 단계(운영)는 시스템 기본 영역으로, 추가 및 삭제가 불가능합니다.
 
 rank: 6
-score: 5.364335
-document_title: 휴지통
-section_path: 휴지통 > 휴지통 사용법
-source_url: https://docs.riido.io/data/trash.md
-content:
-* 각 페이지 상단 메뉴의 ‘휴지통’ 버튼을 클릭하면, 삭제된 항목을 확인할 수 있습니다.
-* 휴지통에서는 항목이 유형별(작업 / 목표 / 프로젝트 등)로 분류되어 표시됩니다.
-* 각 항목 우측에는 남은 보관 기간이 표시되어, 언제 영구 삭제되는지 한눈에 확인할 수 있습니다.
-
-rank: 7
-score: 5.355773
+score: 5.394702
+section_id: da8743ff8cae:e2b4dc113d2f
 document_title: 팀
 section_path: 팀 > 팀 멤버
 source_url: https://docs.riido.io/teams/overview.md
@@ -3972,8 +4186,20 @@ content:
 
 만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.
 
+rank: 7
+score: 5.378477
+section_id: a7061c4853df:6f88dd13099e
+document_title: 휴지통
+section_path: 휴지통 > 휴지통 사용법
+source_url: https://docs.riido.io/data/trash.md
+content:
+* 각 페이지 상단 메뉴의 ‘휴지통’ 버튼을 클릭하면, 삭제된 항목을 확인할 수 있습니다.
+* 휴지통에서는 항목이 유형별(작업 / 목표 / 프로젝트 등)로 분류되어 표시됩니다.
+* 각 항목 우측에는 남은 보관 기간이 표시되어, 언제 영구 삭제되는지 한눈에 확인할 수 있습니다.
+
 rank: 8
-score: 4.467104
+score: 4.500077
+section_id: 333984364686:ba056589ecd1
 document_title: 저장된 보기
 section_path: 저장된 보기 > 공개 범위
 source_url: https://docs.riido.io/views/custom-views.md
@@ -3986,7 +4212,8 @@ content:
 팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.
 
 rank: 9
-score: 3.770341
+score: 3.782109
+section_id: 5623097e1502:76d8211bc501
 document_title: 구글 캘린더
 section_path: 구글 캘린더 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/google-calendar.md
@@ -4004,7 +4231,8 @@ content:
 구글 캘린더 연동이 완료되면, 구글 캘린더에서 발생하는 알림은 구글의 알림 설정을 따르게 됩니다. 이는 뤼이도 내의 미팅 알림과 별개로 작동합니다.
 
 rank: 10
-score: 3.621310
+score: 3.644266
+section_id: 95a1b20de638:18af4c7df7aa
 document_title: 구독 및 결제
 section_path: 구독 및 결제 > 구독 변경 또는 취소
 source_url: https://docs.riido.io/workspaces/plans-and-billing.md
@@ -4024,7 +4252,8 @@ content:
 질문: 워크스페이스와 팀은 각각 어떤 단위이고 서로 어떤 관계인가요?
 
 rank: 1
-score: 6.399602
+score: 6.441372
+section_id: 9b9516882026:e32fcf17e277
 document_title: 작업 관계도
 section_path: 작업 관계도 > 개요
 source_url: https://docs.riido.io/views/diagram.md
@@ -4034,7 +4263,8 @@ content:
 이를 통해 팀은 현재 어떤 목표 아래 어떤 작업들이 진행 중인지, 그리고 각 작업이 어떤 상위 단위에 속해 있는지를 명확히 이해할 수 있습니다. 시각적으로 구조를 파악함으로써, 팀의 방향성과 진행 상황을 쉽게 점검할 수 있습니다.
 
 rank: 2
-score: 5.721919
+score: 5.781779
+section_id: 7591069b70f9:9d78075e912d
 document_title: 워크스페이스
 section_path: 워크스페이스 > 개요
 source_url: https://docs.riido.io/workspaces/overview.md
@@ -4042,7 +4272,8 @@ content:
 워크스페이스는 여러 팀과 프로젝트를 한 공간에서 관리할 수 있는 하나의 조직입니다. 하나의 조직에서는 하나의 워크스페이스를 운영하는 것을 권장합니다. 워크스페이스가 생성되면, 워크스페이스 이름과 동일한 팀을 자동으로 생성합니다.
 
 rank: 3
-score: 5.590645
+score: 5.613301
+section_id: 673858aecdcf:7d8048c2174c
 document_title: 작업간 연결
 section_path: 작업간 연결 > 개요
 source_url: https://docs.riido.io/issues/issue-relations.md
@@ -4058,7 +4289,8 @@ content:
 관계 유형: 중복됨 / 설명: 현재 작업이 다른 작업에 중복되어 있는 상태
 
 rank: 4
-score: 5.512767
+score: 5.528160
+section_id: 949ddd65a2a5:b1af22cab7a1
 document_title: 실행: 작업
 section_path: 실행: 작업 > 작업 관리
 source_url: https://docs.riido.io/issues/work-items.md
@@ -4074,7 +4306,8 @@ content:
 * **작업 관계도:** 관련된 모든 작업을 트리 형태로 시각화해 흐름을 한눈에 파악할 수 있습니다.
 
 rank: 5
-score: 5.455307
+score: 5.508491
+section_id: 43e5e2414349:b60d8edf2d0a
 document_title: 슬랙
 section_path: 슬랙 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/slack.md
@@ -4098,7 +4331,8 @@ content:
 3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.
 
 rank: 6
-score: 5.438600
+score: 5.477159
+section_id: 7591069b70f9:97c40b93dde0
 document_title: 워크스페이스
 section_path: 워크스페이스 > 여러 워크스페이스에 참여
 source_url: https://docs.riido.io/workspaces/overview.md
@@ -4106,7 +4340,8 @@ content:
 사용자는 여러 워크스페이스에 참여할 수 있습니다. 좌측 상단의 워크스페이스 이름을 클릭하여, 참여 중인 모든 워크스페이스를 확인할 수 있습니다.
 
 rank: 7
-score: 5.254019
+score: 5.285616
+section_id: b86425eb9784:c2921a208e92
 document_title: 깃허브
 section_path: 깃허브 > 연동 설정 가이드
 source_url: https://docs.riido.io/integrations/github.md
@@ -4124,7 +4359,8 @@ Github 연동은 워크스페이스 단위로 설정되며, 연결할 Repository
 2. 권한이 부여된 Repository 중, 뤼이도와 연결할 Repository를 추가합니다.
 
 rank: 8
-score: 5.222475
+score: 5.253862
+section_id: ee834b371049:2a2928a908fc
 document_title: 디스코드
 section_path: 디스코드 > 자주 묻는 질문 (FAQ)
 source_url: https://docs.riido.io/integrations/discord.md
@@ -4145,7 +4381,8 @@ content:
 네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.
 
 rank: 9
-score: 5.201680
+score: 5.214609
+section_id: 9b9516882026:b527f7f75ac6
 document_title: 작업 관계도
 section_path: 작업 관계도 > 계층 구조 시각화
 source_url: https://docs.riido.io/views/diagram.md
@@ -4157,7 +4394,8 @@ content:
 * 현재 작업과 직접 연결된 작업은 색이 진하게 표시되어, 복잡한 구조 속 관계를 직관적으로 파악할 수 있습니다.
 
 rank: 10
-score: 5.169554
+score: 5.205896
+section_id: 7591069b70f9:852f2729c6f3
 document_title: 워크스페이스
 section_path: 워크스페이스 > 워크스페이스 설정
 source_url: https://docs.riido.io/workspaces/overview.md
@@ -4168,7 +4406,8 @@ content:
 질문: 대기 작업과 백로그는 어떤 차이가 있고 각각 언제 사용하는 공간인가요?
 
 rank: 1
-score: 15.092721
+score: 15.128658
+section_id: 11957633d8b2:a6f5feefa6e5
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 개요
 source_url: https://docs.riido.io/issues/backlog.md
@@ -4178,7 +4417,8 @@ content:
 작업을 당장 시작하지 않더라도, 백로그에 잘 정리해두면 언제든 팀의 상황에 따라 실행으로 옮길 수 있습니다. 계획 단계의 핵심 도구인 백로그를 통해, 팀은 일의 흐름을 놓치지 않고 안정적인 실행 기반을 마련할 수 있습니다.
 
 rank: 2
-score: 14.978172
+score: 15.013566
+section_id: 9d9ba80dfef6:b545c692c53d
 document_title: 계획: 대기 작업
 section_path: 계획: 대기 작업 > 작업 처리
 source_url: https://docs.riido.io/issues/intake.md
@@ -4194,7 +4434,8 @@ content:
 진행하지 않기로 한 작업은 ‘거절’을 클릭해 상태를 거절됨으로 변경합니다. 거절 시에는 사유를 작성해야 하며, 입력한 내용은 댓글로 자동 기록됩니다. 이를 통해 누가 어떤 이유로 작업을 거절했는지 추적할 수 있습니다.
 
 rank: 3
-score: 13.838162
+score: 13.873057
+section_id: 11957633d8b2:cce467185dfa
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 전환된 백로그
 source_url: https://docs.riido.io/issues/backlog.md
@@ -4202,7 +4443,8 @@ content:
 한 번 작업으로 전환된 백로그는 사라지지 않습니다. ‘전환된 백로그’ 페이지에서 해당 작업과 어떤 백로그에서 시작되었는지 연결 상태를 확인할 수 있습니다. 이를 통해 기획의 히스토리를 빠뜨리지 않고 명확하게 추적할 수 있습니다.
 
 rank: 4
-score: 11.905900
+score: 11.937889
+section_id: c837145b4afd:55978b839cb4
 document_title: 중복 작업 감지
 section_path: 중복 작업 감지 > 중복 작업 감지 사용하는 법
 source_url: https://docs.riido.io/ai/duplicate-detection.md
@@ -4223,7 +4465,8 @@ content:
 * 새로운 작업이 필요하다면 ‘무시하고 생성하기’ 버튼을 눌러 생성할 수 있습니다.
 
 rank: 5
-score: 11.818036
+score: 11.849250
+section_id: 11957633d8b2:8e468f02bf3a
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 구조
 source_url: https://docs.riido.io/issues/backlog.md
@@ -4231,7 +4474,8 @@ content:
 백로그는 \[백로그 섹션 → 백로그 아이템]으로 2단계 계층 구조로 이루어져 있습니다. 필요한 만큼 섹션을 만들어 백로그를 주제별로 구분하고, 각 섹션 안에 백로그 항목들을 정리할 수 있습니다. 이를 통해 많은 백로그가 쌓이더라도 직관적으로 필요한 정보를 한눈에 확인할 수 있습니다.
 
 rank: 6
-score: 10.187551
+score: 10.220991
+section_id: 11957633d8b2:a0709b43f1a9
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 신규 생성된 백로그
 source_url: https://docs.riido.io/issues/backlog.md
@@ -4239,7 +4483,8 @@ content:
 새롭게 추가된 백로그만 따로 모아보고 싶을 때는 ‘신규 백로그’ 필터를 사용합니다. 아직 확인하지 못한 백로그를 빠르게 확인하고, 빠뜨림 없이 검토할 수 있습니다.
 
 rank: 7
-score: 10.145005
+score: 10.172974
+section_id: 9d9ba80dfef6:2e1668de5714
 document_title: 계획: 대기 작업
 section_path: 계획: 대기 작업 > 개요
 source_url: https://docs.riido.io/issues/intake.md
@@ -4249,7 +4494,8 @@ content:
 아직 정제되지 않은 작업들이 모여 있는 만큼, 빠르게 선별해 흐름에 맞는 위치로 옮기는 것이 중요합니다. 대기 작업은 계획 단계의 출발점으로, 정보의 혼잡을 방지하고 체계적인 업무 흐름을 만드는 데 도움을 줍니다.
 
 rank: 8
-score: 9.587641
+score: 9.605639
+section_id: 2edd9ad4a6fa:c0f4071b4014
 document_title: 작업 흐름으로 이해하는 프로젝트 관리
 section_path: 작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조
 source_url: https://docs.riido.io/issues/workflow.md
@@ -4295,7 +4541,8 @@ content:
 완료되었지만 여전히 중요한 정보로 남아야 하는 작업들을 모아두는 공간입니다. 언제든지 다시 실행 단계로 이동할 수 있으며, 팀은 업무의 연속성과 개선의 기반을 확보할 수 있습니다.
 
 rank: 9
-score: 9.255807
+score: 9.275442
+section_id: 11957633d8b2:aa8af54aa5cd
 document_title: 계획: 백로그
 section_path: 계획: 백로그 > 속성
 source_url: https://docs.riido.io/issues/backlog.md
@@ -4311,7 +4558,8 @@ content:
 * 예상 시작일: 작업이 언제쯤 시작될 예정인지 지정
 
 rank: 10
-score: 9.139406
+score: 9.163210
+section_id: 333984364686:5db9d1f52377
 document_title: 저장된 보기
 section_path: 저장된 보기 > 보기 생성하기
 source_url: https://docs.riido.io/views/custom-views.md
@@ -4330,7 +4578,8 @@ content:
 질문: 프로젝트, 목표, 작업, 하위작업은 어떤 계층 구조로 구성되나요?
 
 rank: 1
-score: 20.302649
+score: 20.314886
+section_id: 949ddd65a2a5:09e9b2c9384c
 document_title: 실행: 작업
 section_path: 실행: 작업 > 구조
 source_url: https://docs.riido.io/issues/work-items.md
@@ -4354,7 +4603,8 @@ content:
 하나의 작업을 더 세분화한 단위입니다. 단일 작업의 범위가 크거나, 여러 단계로 나누어 처리해야 할 경우 활용합니다. 하위 작업은 상위 작업과 연결되어 있으나, 상위 작업과 다른 목표와 프로젝트를 가질 수 있습니다.
 
 rank: 2
-score: 16.824644
+score: 16.832561
+section_id: 9b9516882026:e32fcf17e277
 document_title: 작업 관계도
 section_path: 작업 관계도 > 개요
 source_url: https://docs.riido.io/views/diagram.md
@@ -4364,7 +4614,8 @@ content:
 이를 통해 팀은 현재 어떤 목표 아래 어떤 작업들이 진행 중인지, 그리고 각 작업이 어떤 상위 단위에 속해 있는지를 명확히 이해할 수 있습니다. 시각적으로 구조를 파악함으로써, 팀의 방향성과 진행 상황을 쉽게 점검할 수 있습니다.
 
 rank: 3
-score: 15.586186
+score: 15.600132
+section_id: 9b9516882026:b527f7f75ac6
 document_title: 작업 관계도
 section_path: 작업 관계도 > 계층 구조 시각화
 source_url: https://docs.riido.io/views/diagram.md
@@ -4376,7 +4627,8 @@ content:
 * 현재 작업과 직접 연결된 작업은 색이 진하게 표시되어, 복잡한 구조 속 관계를 직관적으로 파악할 수 있습니다.
 
 rank: 4
-score: 12.639899
+score: 12.626854
+section_id: 949ddd65a2a5:6036f1478624
 document_title: 실행: 작업
 section_path: 실행: 작업 > 외부 공유
 source_url: https://docs.riido.io/issues/work-items.md
@@ -4400,7 +4652,8 @@ content:
 이 방식을 통해, 전체 맥락을 공유하되 민감한 정보는 유연하게 보호할 수 있습니다.
 
 rank: 5
-score: 12.442494
+score: 12.448785
+section_id: 949ddd65a2a5:c8a1279e8417
 document_title: 실행: 작업
 section_path: 실행: 작업 > 개요
 source_url: https://docs.riido.io/issues/work-items.md
@@ -4410,7 +4663,8 @@ content:
 각 작업은 ‘준비됨 → 진행 중 → 완료’의 업무 흐름 속에서 진행되며, 모든 과정의 맥락과 책임이 명확하게 설정됩니다. 이 구조 덕분에 협업은 더 쉬워지고, 진행 상황 파악도 훨씬 수월해집니다.
 
 rank: 6
-score: 12.199693
+score: 12.190368
+section_id: 9b9516882026:45b415ba30ac
 document_title: 작업 관계도
 section_path: 작업 관계도 > 보기 위치
 source_url: https://docs.riido.io/views/diagram.md
@@ -4424,7 +4678,8 @@ content:
 선택한 작업을 중심으로, 해당 작업과 연결된 상위 · 하위 작업만 집중적으로 볼 수 있습니다. 지금 진행 중인 업무가 전체 목표 안에서 어떤 위치에 있는지 쉽게 이해할 수 있습니다.
 
 rank: 7
-score: 11.297251
+score: 11.290963
+section_id: 2edd9ad4a6fa:c0f4071b4014
 document_title: 작업 흐름으로 이해하는 프로젝트 관리
 section_path: 작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조
 source_url: https://docs.riido.io/issues/workflow.md
@@ -4470,7 +4725,8 @@ content:
 완료되었지만 여전히 중요한 정보로 남아야 하는 작업들을 모아두는 공간입니다. 언제든지 다시 실행 단계로 이동할 수 있으며, 팀은 업무의 연속성과 개선의 기반을 확보할 수 있습니다.
 
 rank: 8
-score: 11.191530
+score: 11.179660
+section_id: 764f1bb9b2d9:edc324ca1f86
 document_title: 핵심 개념
 section_path: 핵심 개념 > 기본 개념
 source_url: https://docs.riido.io/getting-started/core-concepts.md
@@ -4508,7 +4764,8 @@ content:
 뤼이도 컴포넌트 구조
 
 rank: 9
-score: 10.218818
+score: 10.210695
+section_id: 949ddd65a2a5:4c10db99d1ad
 document_title: 실행: 작업
 section_path: 실행: 작업 > 속성
 source_url: https://docs.riido.io/issues/work-items.md
@@ -4528,7 +4785,8 @@ content:
 ● 사용 가능 / ○ 일부 제한 / — 사용 불가
 
 rank: 10
-score: 9.367737
+score: 9.336884
+section_id: 2a49ad92d587:0c8d65cfc82f
 document_title: 프로젝트 일정 자동 생성
 section_path: 프로젝트 일정 자동 생성 > 개요
 source_url: https://docs.riido.io/ai/auto-scheduling.md
@@ -4541,7 +4799,8 @@ AI가 자동으로 생성한 프로젝트는 목표와 작업 단위로 체계�
 질문: 작업 관계에서 '차단 중'과 '차단됨'은 어떻게 다른가요?
 
 rank: 1
-score: 20.011442
+score: 20.043704
+section_id: 673858aecdcf:b1d03b889c87
 document_title: 작업간 연결
 section_path: 작업간 연결 > 관계 유형별 동작
 source_url: https://docs.riido.io/issues/issue-relations.md
@@ -4563,7 +4822,8 @@ content:
 하나의 작업에는 여러 개의 중복 존재 작업이 연결될 수 있으며, 반대로 중복됨은 한 개의 원본 작업만을 가질 수 있습니다.
 
 rank: 2
-score: 16.643024
+score: 16.670341
+section_id: 673858aecdcf:7d8048c2174c
 document_title: 작업간 연결
 section_path: 작업간 연결 > 개요
 source_url: https://docs.riido.io/issues/issue-relations.md
@@ -4579,7 +4839,8 @@ content:
 관계 유형: 중복됨 / 설명: 현재 작업이 다른 작업에 중복되어 있는 상태
 
 rank: 3
-score: 7.222385
+score: 7.238275
+section_id: 9b9516882026:b527f7f75ac6
 document_title: 작업 관계도
 section_path: 작업 관계도 > 계층 구조 시각화
 source_url: https://docs.riido.io/views/diagram.md
@@ -4591,7 +4852,8 @@ content:
 * 현재 작업과 직접 연결된 작업은 색이 진하게 표시되어, 복잡한 구조 속 관계를 직관적으로 파악할 수 있습니다.
 
 rank: 4
-score: 6.195346
+score: 6.208261
+section_id: 9b9516882026:45b415ba30ac
 document_title: 작업 관계도
 section_path: 작업 관계도 > 보기 위치
 source_url: https://docs.riido.io/views/diagram.md
@@ -4605,7 +4867,8 @@ content:
 선택한 작업을 중심으로, 해당 작업과 연결된 상위 · 하위 작업만 집중적으로 볼 수 있습니다. 지금 진행 중인 업무가 전체 목표 안에서 어떤 위치에 있는지 쉽게 이해할 수 있습니다.
 
 rank: 5
-score: 6.135990
+score: 6.148333
+section_id: 949ddd65a2a5:b1af22cab7a1
 document_title: 실행: 작업
 section_path: 실행: 작업 > 작업 관리
 source_url: https://docs.riido.io/issues/work-items.md
@@ -4621,7 +4884,8 @@ content:
 * **작업 관계도:** 관련된 모든 작업을 트리 형태로 시각화해 흐름을 한눈에 파악할 수 있습니다.
 
 rank: 6
-score: 6.110788
+score: 6.123370
+section_id: 9b9516882026:e32fcf17e277
 document_title: 작업 관계도
 section_path: 작업 관계도 > 개요
 source_url: https://docs.riido.io/views/diagram.md
@@ -4631,7 +4895,8 @@ content:
 이를 통해 팀은 현재 어떤 목표 아래 어떤 작업들이 진행 중인지, 그리고 각 작업이 어떤 상위 단위에 속해 있는지를 명확히 이해할 수 있습니다. 시각적으로 구조를 파악함으로써, 팀의 방향성과 진행 상황을 쉽게 점검할 수 있습니다.
 
 rank: 7
-score: 4.841693
+score: 4.850392
+section_id: 1c0005b1dfeb:802f5a7b91ac
 document_title: 대시보드
 section_path: 대시보드 > 작업
 source_url: https://docs.riido.io/views/dashboards.md
@@ -4657,7 +4922,8 @@ content:
 현재 활성화된 모든 작업의 관계를 다이어그램 형태로 시각화하여 보여줍니다. 화면을 축소하면 전체 구조를, 확대하면 세부 내용을 확인할 수 있습니다. 이를 통해 팀은 프로젝트 간의 의존성, 병목, 중복 상태를 빠르게 파악하고 실행 흐름을 개선할 수 있습니다.
 
 rank: 8
-score: 4.427462
+score: 4.432265
+section_id: 2edd9ad4a6fa:c76be8dc28ab
 document_title: 작업 흐름으로 이해하는 프로젝트 관리
 section_path: 작업 흐름으로 이해하는 프로젝트 관리 > The Riido Way
 source_url: https://docs.riido.io/issues/workflow.md
@@ -4671,7 +4937,8 @@ content:
 https://way.riido.io/ko
 
 rank: 9
-score: 4.231494
+score: 4.239739
+section_id: 1c0005b1dfeb:902d21f9245e
 document_title: 대시보드
 section_path: 대시보드 > 개요
 source_url: https://docs.riido.io/views/dashboards.md
@@ -4683,7 +4950,8 @@ content:
 이를 통해 팀은 지금의 업무 흐름을 빠르게 파악하고, 협업의 방향과 우선순위를 명확히 정리할 수 있습니다.
 
 rank: 10
-score: 4.099405
+score: 4.103575
+section_id: 764f1bb9b2d9:f196ea27ae96
 document_title: 핵심 개념
 section_path: 핵심 개념 > 효율적인 프로젝트 관리
 source_url: https://docs.riido.io/getting-started/core-concepts.md
@@ -4708,7 +4976,8 @@ IT 프로젝트는 PM, 개발자, 디자이너 등 다양한 직군이 함께 �
 질문: 스프린트 그래프의 보라색 점선과 보라색 실선은 각각 무엇을 의미하나요?
 
 rank: 1
-score: 27.932036
+score: 27.980205
+section_id: 2c428c0d81be:c496ba980f67
 document_title: 스프린트 그래프
 section_path: 스프린트 그래프 > 그래프 해석 팁
 source_url: https://docs.riido.io/sprints/sprint-graph.md
@@ -4726,7 +4995,8 @@ content:
 진행 중 작업의 전환이 이루어지지 않고 있을 수 있습니다. 스프린트 초반이라면 정상일 수 있지만, 중반 이후라면 진행 상황 점검이 필요합니다.
 
 rank: 2
-score: 22.546316
+score: 22.588470
+section_id: 2c428c0d81be:012f04cb7b63
 document_title: 스프린트 그래프
 section_path: 스프린트 그래프 > 그래프 보는 법
 source_url: https://docs.riido.io/sprints/sprint-graph.md
@@ -4739,7 +5009,8 @@ content:
 구분: 보라색 실선 / 설명: 실제로 완료된 작업의 누적 개수. 기준선과 비교하여 현재 속도가 계획 대비 빠른지, 느린지를 즉시 파악할 수 있습니다.
 
 rank: 3
-score: 9.519592
+score: 9.551308
+section_id: 2c428c0d81be:dc2014df6707
 document_title: 스프린트 그래프
 section_path: 스프린트 그래프 > 지난 스프린트 그래프 보는 법
 source_url: https://docs.riido.io/sprints/sprint-graph.md
@@ -4747,7 +5018,8 @@ content:
 종료된 스프린트의 그래프는 각 스프린트 상세 페이지의 오른쪽 사이드바에 있는 ‘스프린트 보고서’에서 확인할 수 있습니다.
 
 rank: 4
-score: 9.162256
+score: 9.191857
+section_id: 2c428c0d81be:91e1e3f290e3
 document_title: 스프린트 그래프
 section_path: 스프린트 그래프 > 참고
 source_url: https://docs.riido.io/sprints/sprint-graph.md
@@ -4756,7 +5028,8 @@ content:
 * 그래프 상의 데이터는 스프린트가 종료되면 자동으로 저장되어, 이후 작업의 변동 사항이 생기더라도 그래프에는 반영되지 않습니다. 이는 스프린트 회고 시점의 데이터를 기준으로 분석할 수 있도록 하기 위함입니다.
 
 rank: 5
-score: 8.381025
+score: 8.407545
+section_id: 2c428c0d81be:7d100b73fa0e
 document_title: 스프린트 그래프
 section_path: 스프린트 그래프 > 개요
 source_url: https://docs.riido.io/sprints/sprint-graph.md
@@ -4766,7 +5039,8 @@ content:
 그래프는 실시간 데이터를 기반으로 업데이트되며, 진행 중인 작업과 완료된 작업의 추이를 즉시 파악할 수 있습니다. 이를 통해 일정 지연, 병목 구간, 리소스 불균형을 조기에 발견하고 대응할 수 있습니다.
 
 rank: 6
-score: 3.882436
+score: 3.900798
+section_id: 261e80b246e8:8f39a6741f94
 document_title: 스프린트
 section_path: 스프린트 > 스프린트 설정
 source_url: https://docs.riido.io/sprints/overview.md
@@ -4774,7 +5048,8 @@ content:
 스프린트 설정은 \[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.
 
 rank: 7
-score: 3.822895
+score: 3.840851
+section_id: 261e80b246e8:48338ffe0288
 document_title: 스프린트
 section_path: 스프린트 > 스프린트 시작 요일
 source_url: https://docs.riido.io/sprints/overview.md
@@ -4786,7 +5061,8 @@ content:
 주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.
 
 rank: 8
-score: 3.594264
+score: 3.611018
+section_id: 261e80b246e8:7a8e11bfc496
 document_title: 스프린트
 section_path: 스프린트 > 미리 생성할 다가올 스프린트 개수
 source_url: https://docs.riido.io/sprints/overview.md
@@ -4796,7 +5072,8 @@ content:
 예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.
 
 rank: 9
-score: 3.486620
+score: 3.502673
+section_id: 40ac0f0ac641:03c976577bcd
 document_title: 자동화
 section_path: 자동화 > 자동화 설정
 source_url: https://docs.riido.io/sprints/automations.md
@@ -4812,7 +5089,8 @@ content:
 스프린트가 종료되면, 이번 스프린트에서 완료된 작업이 자동으로 작업 보관함에 이동됩니다. 완료된 작업은 실행 흐름에서 자동으로 정리되고, 이전 스프린트의 기록은 운영 자산으로 보존됩니다.
 
 rank: 10
-score: 3.255441
+score: 3.270319
+section_id: 261e80b246e8:203889cf792c
 document_title: 스프린트
 section_path: 스프린트 > 개요
 source_url: https://docs.riido.io/sprints/overview.md
@@ -4825,7 +5103,8 @@ content:
 질문: 뤄이도 AI 에이전트는 기존 AI 도구와 무엇이 다르고 어떤 프로젝트 맥락을 이해하나요?
 
 rank: 1
-score: 23.940833
+score: 23.970132
+section_id: 7e2418cfc86d:b32001724300
 document_title: AI 에이전트 (Beta)
 section_path: AI 에이전트 (Beta) > 개요
 source_url: https://docs.riido.io/ai-agents/intro.md
@@ -4837,7 +5116,8 @@ AI 툴은 강력하지만, 작업을 맡길 때마다 프로젝트의 맥락을 
 이제 에이전트에게 일을 맡기고, 그 결과를 곧바로 팀의 성과로 이어갈 수 있습니다.
 
 rank: 2
-score: 17.984684
+score: 18.024670
+section_id: 7e2418cfc86d:7c9dfa18bcff
 document_title: AI 에이전트 (Beta)
 section_path: AI 에이전트 (Beta) > 이용 가이드
 source_url: https://docs.riido.io/ai-agents/intro.md
@@ -4874,7 +5154,8 @@ AI 에이전트 기능은 데스크탑앱에서만 사용할 수 있습니다. W
 3. 새로운 에이전트를 추가할 수도 있습니다.
 
 rank: 3
-score: 12.844207
+score: 12.843168
+section_id: 6e9c13b73663:cd786201dd96
 document_title: MCP 서버
 section_path: MCP 서버 > MCP 사용 사례
 source_url: https://docs.riido.io/ai/mcp.md
@@ -4902,7 +5183,8 @@ AI는 프로젝트 맥락을 이해하여 설명만으로도 온전한 작업을
 개발자는 더 이상 작업 결과물을 정리하느라 시간을 쓸 필요 없습니다. Cursor에서 새로운 기능을 완성했을 때, “방금 구현한 로그인 기능을 뤼이도 작업에 요약해서 팀과 공유해 줘”라고 말해보세요. AI가 코드를 분석해, 팀원들이 이해하기 쉬운 형태로 뤼이도 작업 페이지에 자동으로 정리해 줘요.
 
 rank: 4
-score: 12.785616
+score: 12.792095
+section_id: 6e9c13b73663:58cd615292d6
 document_title: MCP 서버
 section_path: MCP 서버 > 개요
 source_url: https://docs.riido.io/ai/mcp.md
@@ -4912,7 +5194,8 @@ AI 툴(Claude, Cursor 등)은 이미 개발 및 기획 과정에서 필수 도�
 뤼이도 MCP(Model Context Protocol) 서버는 이 단절을 완전히 해소합니다. AI가 직접 뤼이도 워크스페이스에 연결되어 데이터 조회, 작업 생성, 문서 업데이트까지 처리할 수 있습니다.
 
 rank: 5
-score: 10.031149
+score: 10.015745
+section_id: 2a49ad92d587:25d477bd271b
 document_title: 프로젝트 일정 자동 생성
 section_path: 프로젝트 일정 자동 생성 > Riido AI 사용하는 법
 source_url: https://docs.riido.io/ai/auto-scheduling.md
@@ -4939,7 +5222,8 @@ content:
 * 프로젝트 일정 자동 생성하기 버튼을 클릭합니다
 
 rank: 6
-score: 8.785627
+score: 8.757602
+section_id: 2a49ad92d587:0c8d65cfc82f
 document_title: 프로젝트 일정 자동 생성
 section_path: 프로젝트 일정 자동 생성 > 개요
 source_url: https://docs.riido.io/ai/auto-scheduling.md
@@ -4949,7 +5233,8 @@ content:
 AI가 자동으로 생성한 프로젝트는 목표와 작업 단위로 체계적으로 구성되며, 각 작업에는 담당자와 마감일이 자동으로 할당됩니다. 이를 통해 팀은 초기 세팅에 들이는 시간을 최소화하고, 곧바로 실행에 집중할 수 있습니다.
 
 rank: 7
-score: 8.235373
+score: 8.257125
+section_id: c837145b4afd:2ca4af05f81e
 document_title: 중복 작업 감지
 section_path: 중복 작업 감지 > 개요
 source_url: https://docs.riido.io/ai/duplicate-detection.md
@@ -4959,7 +5244,8 @@ content:
 이를 통해 불필요한 중복 생성을 방지하고, 팀의 작업 흐름을 보다 깔끔하고 일관되게 유지할 수 있습니다.
 
 rank: 8
-score: 7.254042
+score: 7.272511
+section_id: da8743ff8cae:e2b4dc113d2f
 document_title: 팀
 section_path: 팀 > 팀 멤버
 source_url: https://docs.riido.io/teams/overview.md
@@ -4971,7 +5257,8 @@ content:
 만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.
 
 rank: 9
-score: 6.761277
+score: 6.748168
+section_id: 2edd9ad4a6fa:c76be8dc28ab
 document_title: 작업 흐름으로 이해하는 프로젝트 관리
 section_path: 작업 흐름으로 이해하는 프로젝트 관리 > The Riido Way
 source_url: https://docs.riido.io/issues/workflow.md
@@ -4985,7 +5272,8 @@ content:
 https://way.riido.io/ko
 
 rank: 10
-score: 6.120381
+score: 6.137528
+section_id: d0d1ed17106f:313273b55e2b
 document_title: 릴리즈 노트 자동 생성
 section_path: 릴리즈 노트 자동 생성 > 릴리즈 노트 자동 생성 사용하는 법
 source_url: https://docs.riido.io/ai/release-notes.md

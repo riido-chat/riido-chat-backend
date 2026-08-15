@@ -18,6 +18,7 @@ class LabelingCandidatesTest(unittest.TestCase):
 
 rank: 1
 score: 12.345678
+section_id: document-id:0
 document_title: 테스트 문서
 section_path: 테스트 문서 > 테스트 섹션
 source_url: https://example.com/test.md
@@ -36,6 +37,7 @@ content:
                     "candidates": [
                         {
                             "rank": 1,
+                            "section_id": "document-id:0",
                             "document_title": "테스트 문서",
                             "section_path": "테스트 문서 > 테스트 섹션",
                             "score": 12.345678,
@@ -74,7 +76,7 @@ content:
 
         self.assertEqual(questions, saved_questions)
         self.assertEqual(
-            {"rank", "document_title", "section_path", "score"},
+            {"rank", "section_id", "document_title", "section_path", "score"},
             set(saved_questions[0]["candidates"][0]),
         )
 

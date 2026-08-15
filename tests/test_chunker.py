@@ -70,8 +70,8 @@ class ChunkerTest(unittest.TestCase):
         chunks = create_chunks(sections)
 
         self.assertEqual(39, len(documents))
-        self.assertEqual(141, len(sections))
-        self.assertEqual(141, len(chunks))
+        self.assertEqual(142, len(sections))
+        self.assertEqual(142, len(chunks))
         self.assertEqual(
             [section.section_id for section in sections],
             [chunk.chunk_id for chunk in chunks],
