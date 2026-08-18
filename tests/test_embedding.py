@@ -55,11 +55,91 @@ class EmbeddingTextTest(unittest.TestCase):
 
 
 class OpenAIEmbedderTest(unittest.TestCase):
-    def test_requests_embedding_with_confirmed_model_and_dimensions(self) -> None:
+    def test_requests_multiple_embeddings_once_and_restores_input_order(self) -> None:
+        first_embedding = [0.1] * OPENAI_EMBEDDING_DIMENSIONS
+        second_embedding = [0.2] * OPENAI_EMBEDDING_DIMENSIONS
+        client = Mock()
+        client.embeddings.create.return_value = SimpleNamespace(
+            data=[
+                SimpleNamespace(index=1, embedding=second_embedding),
+                SimpleNamespace(index=0, embedding=first_embedding),
+            ]
+        )
+        embedder = OpenAIEmbedder(client=client)
+
+        embeddings = embedder.embed_many(["첫 번째 텍스트", "두 번째 텍스트"])
+
+        client.embeddings.create.assert_called_once_with(
+            model=OPENAI_EMBEDDING_MODEL,
+            input=["첫 번째 텍스트", "두 번째 텍스트"],
+            dimensions=OPENAI_EMBEDDING_DIMENSIONS,
+            encoding_format="float",
+        )
+        self.assertEqual([first_embedding, second_embedding], embeddings)
+
+    def test_rejects_mismatched_response_count(self) -> None:
+        client = Mock()
+        client.embeddings.create.return_value = SimpleNamespace(
+            data=[
+                SimpleNamespace(
+                    index=0,
+                    embedding=[0.1] * OPENAI_EMBEDDING_DIMENSIONS,
+                )
+            ]
+        )
+        embedder = OpenAIEmbedder(client=client)
+
+        with self.assertRaisesRegex(RuntimeError, "응답 개수"):
+            embedder.embed_many(["첫 번째 텍스트", "두 번째 텍스트"])
+
+    def test_rejects_invalid_response_indexes(self) -> None:
+        client = Mock()
+        client.embeddings.create.return_value = SimpleNamespace(
+            data=[
+                SimpleNamespace(
+                    index=0,
+                    embedding=[0.1] * OPENAI_EMBEDDING_DIMENSIONS,
+                ),
+                SimpleNamespace(
+                    index=0,
+                    embedding=[0.2] * OPENAI_EMBEDDING_DIMENSIONS,
+                ),
+            ]
+        )
+        embedder = OpenAIEmbedder(client=client)
+
+        with self.assertRaisesRegex(RuntimeError, "응답 index"):
+            embedder.embed_many(["첫 번째 텍스트", "두 번째 텍스트"])
+
+    def test_rejects_invalid_embedding_dimension(self) -> None:
+        client = Mock()
+        client.embeddings.create.return_value = SimpleNamespace(
+            data=[
+                SimpleNamespace(
+                    index=0,
+                    embedding=[0.1] * (OPENAI_EMBEDDING_DIMENSIONS - 1),
+                )
+            ]
+        )
+        embedder = OpenAIEmbedder(client=client)
+
+        with self.assertRaisesRegex(ValueError, "1536차원"):
+            embedder.embed_many(["검색할 텍스트"])
+
+    def test_rejects_empty_texts_without_request(self) -> None:
+        client = Mock()
+        embedder = OpenAIEmbedder(client=client)
+
+        with self.assertRaisesRegex(ValueError, "하나 이상"):
+            embedder.embed_many([])
+
+        client.embeddings.create.assert_not_called()
+
+    def test_embed_keeps_single_embedding_contract(self) -> None:
         expected_embedding = [0.1] * OPENAI_EMBEDDING_DIMENSIONS
         client = Mock()
         client.embeddings.create.return_value = SimpleNamespace(
-            data=[SimpleNamespace(embedding=expected_embedding)]
+            data=[SimpleNamespace(index=0, embedding=expected_embedding)]
         )
         embedder = OpenAIEmbedder(client=client)
 
@@ -67,7 +147,7 @@ class OpenAIEmbedderTest(unittest.TestCase):
 
         client.embeddings.create.assert_called_once_with(
             model=OPENAI_EMBEDDING_MODEL,
-            input="검색할 텍스트",
+            input=["검색할 텍스트"],
             dimensions=OPENAI_EMBEDDING_DIMENSIONS,
             encoding_format="float",
         )

@@ -5,4 +5,3 @@ from sqlalchemy.orm import DeclarativeBase
 
 class Base(DeclarativeBase):
     """모든 ORM model이 상속하는 공용 declarative base."""
-
