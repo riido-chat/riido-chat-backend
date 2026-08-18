@@ -7,3 +7,6 @@ pydantic-settings
 SQLAlchemy[asyncio]
 asyncpg
 httpx
+openai
+alembic>=1.16.5,<1.17
+pgvector>=0.4.2,<0.5
