@@ -6,3 +6,4 @@ uvicorn[standard]
 pydantic-settings
 SQLAlchemy[asyncio]
 asyncpg
+httpx
