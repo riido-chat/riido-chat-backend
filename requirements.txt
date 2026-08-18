@@ -3,3 +3,4 @@ rank-bm25
 kiwipiepy
 fastapi
 uvicorn[standard]
+pydantic-settings
