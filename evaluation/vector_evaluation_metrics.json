@@ -1,0 +1,407 @@
+{
+  "summary": {
+    "question_count": 30,
+    "relevant_section_count": 36,
+    "average_metrics": {
+      "recall_at_1": 0.6888888888888889,
+      "recall_at_3": 0.861111111111111,
+      "recall_at_5": 0.9444444444444444,
+      "recall_at_10": 1.0,
+      "mrr_at_10": 0.8458730158730159,
+      "ndcg_at_10": 0.867428851937929
+    },
+    "top_10_miss_question_ids": []
+  },
+  "questions": [
+    {
+      "question_id": "Q01",
+      "question": "새로 들어온 요청을 검토한 뒤 백로그나 바로 실행할 작업으로 넘기려면 어떻게 해야 하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 0.0,
+        "recall_at_3": 0.0,
+        "recall_at_5": 0.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 0.14285714285714285,
+        "ndcg_at_10": 0.3333333333333333
+      }
+    },
+    {
+      "question_id": "Q02",
+      "question": "백로그 항목을 프로젝트나 실제 작업으로 바꾸면 기존 정보도 그대로 따라가나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 0.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 0.5,
+        "ndcg_at_10": 0.6309297535714575
+      }
+    },
+    {
+      "question_id": "Q03",
+      "question": "현재 적용한 필터와 정렬 조건을 저장해서 다음에도 똑같이 불러오려면 어떻게 하나요?",
+      "relevant_section_count": 2,
+      "metrics": {
+        "recall_at_1": 0.5,
+        "recall_at_3": 0.5,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 0.8503449055347546
+      }
+    },
+    {
+      "question_id": "Q04",
+      "question": "빈 문서에 팀에서 만든 문서 템플릿을 적용하려면 어떻게 해야 하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q05",
+      "question": "보관함에 넣은 완료 작업을 다시 진행 가능한 상태로 되돌릴 수 있나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 0.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 0.5,
+        "ndcg_at_10": 0.6309297535714575
+      }
+    },
+    {
+      "question_id": "Q06",
+      "question": "실수로 삭제한 작업을 원래 프로젝트와 팀 위치로 복구하려면 어떻게 하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q07",
+      "question": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q08",
+      "question": "스프린트 시작 요일을 바꾸면 현재 진행 중인 스프린트에는 어떻게 반영되나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q09",
+      "question": "앞으로 진행할 스프린트 세 개를 미리 생성하려면 어떤 설정을 사용해야 하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q10",
+      "question": "특정 페이지나 댓글에서 더 이상 알림을 받고 싶지 않을 때는 어떻게 끄나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q11",
+      "question": "저장된 보기를 나만 사용하거나 팀 전체에 공개하도록 설정할 수 있나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q12",
+      "question": "팀에서 새로운 작업 상태를 추가하거나 기존 상태를 삭제하려면 어디서 설정하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q13",
+      "question": "뤄이도 워크스페이스를 슬랙과 연결하고 팀별 알림 채널을 지정하려면 어떻게 해야 하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q14",
+      "question": "디스코드 서버를 뤄이도에 연결한 다음 팀별 채널을 지정하는 방법을 알려주세요.",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q15",
+      "question": "구글 캘린더를 워크스페이스에 연동하고 팀별 캘린더를 선택하려면 어떻게 하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q16",
+      "question": "깃허브 Organization과 Repository를 뤄이도 워크스페이스에 연결하는 절차가 궁금해요.",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q17",
+      "question": "피그마에서 뤄이도 플러그인을 설치하고 계정을 연결하려면 어떻게 해야 하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q18",
+      "question": "ChatGPT에 뤄이도 MCP를 연결하려면 어떤 설정을 해야 하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q19",
+      "question": "구글 캘린더를 연결했는데 작업 마감일이 캘린더에 표시되지 않아요. 연동 오류인가요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q20",
+      "question": "슬랙 연동 후 알림이 너무 많이 오는데 알림 범위를 줄일 수 있나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q21",
+      "question": "슬랙 연동 설정에서 비공개 채널이 보이지 않는데 어떻게 연결하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 0.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 0.5,
+        "ndcg_at_10": 0.6309297535714575
+      }
+    },
+    {
+      "question_id": "Q22",
+      "question": "기존 작업 상태를 삭제하려고 하는데 삭제되지 않는 이유가 무엇인가요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 0.0,
+        "recall_at_3": 0.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 0.2,
+        "ndcg_at_10": 0.38685280723454163
+      }
+    },
+    {
+      "question_id": "Q23",
+      "question": "비활성화한 워크스페이스 멤버를 완전히 삭제할 수 없어요. 다시 초대하면 새 계정이 만들어지나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q24",
+      "question": "팀을 삭제했는데 다시 복구할 수 있나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 0.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 0.3333333333333333,
+        "ndcg_at_10": 0.5
+      }
+    },
+    {
+      "question_id": "Q25",
+      "question": "워크스페이스와 팀은 각각 어떤 단위이고 서로 어떤 관계인가요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 0.0,
+        "recall_at_3": 0.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 0.2,
+        "ndcg_at_10": 0.38685280723454163
+      }
+    },
+    {
+      "question_id": "Q26",
+      "question": "대기 작업과 백로그는 어떤 차이가 있고 각각 언제 사용하는 공간인가요?",
+      "relevant_section_count": 3,
+      "metrics": {
+        "recall_at_1": 0.3333333333333333,
+        "recall_at_3": 0.6666666666666666,
+        "recall_at_5": 0.6666666666666666,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 0.8395700624665824
+      }
+    },
+    {
+      "question_id": "Q27",
+      "question": "프로젝트, 목표, 작업, 하위작업은 어떤 계층 구조로 구성되나요?",
+      "relevant_section_count": 3,
+      "metrics": {
+        "recall_at_1": 0.3333333333333333,
+        "recall_at_3": 0.6666666666666666,
+        "recall_at_5": 0.6666666666666666,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 0.9134015924715543
+      }
+    },
+    {
+      "question_id": "Q28",
+      "question": "작업 관계에서 '차단 중'과 '차단됨'은 어떻게 다른가요?",
+      "relevant_section_count": 2,
+      "metrics": {
+        "recall_at_1": 0.5,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 0.9197207891481876
+      }
+    },
+    {
+      "question_id": "Q29",
+      "question": "스프린트 그래프의 보라색 점선과 보라색 실선은 각각 무엇을 의미하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    },
+    {
+      "question_id": "Q30",
+      "question": "뤄이도 AI 에이전트는 기존 AI 도구와 무엇이 다르고 어떤 프로젝트 맥락을 이해하나요?",
+      "relevant_section_count": 1,
+      "metrics": {
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    }
+  ]
+}
