@@ -49,3 +49,14 @@ class RetrievalResult:
     chunk: RetrievalChunk
     score: float
     rank: int
+
+
+@dataclass(frozen=True)
+class HybridRetrievalResult:
+    """RRF로 결합한 검색 결과와 Retriever별 순위를 반환한다."""
+
+    chunk: RetrievalChunk
+    rrf_score: float
+    final_rank: int
+    bm25_rank: Optional[int]
+    vector_rank: Optional[int]
