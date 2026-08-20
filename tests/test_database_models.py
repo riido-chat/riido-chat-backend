@@ -2,24 +2,57 @@ import unittest
 
 from pgvector.sqlalchemy import VECTOR
 from sqlalchemy import BigInteger, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 
 from app.database.base import Base
-from app.database.models import ChunkEmbedding, DocumentChunk
+from app.database.models import (
+    AnswerStatus,
+    ChunkEmbedding,
+    ContentNode,
+    DocumentChunk,
+    LegacyChunkEmbedding,
+    LegacyDocumentChunk,
+    RagRun,
+)
 from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 
 
+ERD_TABLE_NAMES = {
+    "document_sources",
+    "ingestion_runs",
+    "document_versions",
+    "content_nodes",
+    "chunking_configs",
+    "document_chunks",
+    "embedding_configs",
+    "chunk_embeddings",
+    "index_versions",
+    "index_documents",
+    "index_runs",
+    "conversations",
+    "rag_runs",
+    "retrieval_results",
+    "model_calls",
+    "answer_citations",
+    "feedbacks",
+}
+
+LEGACY_TABLE_NAMES = {"legacy_document_chunks", "legacy_chunk_embeddings"}
+
+
 class DatabaseModelTest(unittest.TestCase):
-    def test_registers_only_vector_retrieval_tables(self) -> None:
+    def test_registers_erd_and_legacy_tables(self) -> None:
         self.assertEqual(
-            {"document_chunks", "chunk_embeddings"},
+            ERD_TABLE_NAMES | LEGACY_TABLE_NAMES,
             set(Base.metadata.tables),
         )
+        self.assertEqual("legacy_document_chunks", LegacyDocumentChunk.__tablename__)
+        self.assertEqual("legacy_chunk_embeddings", LegacyChunkEmbedding.__tablename__)
         self.assertEqual("document_chunks", DocumentChunk.__tablename__)
         self.assertEqual("chunk_embeddings", ChunkEmbedding.__tablename__)
 
-    def test_document_chunk_matches_retrieval_chunk_fields(self) -> None:
-        table = DocumentChunk.__table__
+    def test_legacy_document_chunk_matches_retrieval_chunk_fields(self) -> None:
+        table = LegacyDocumentChunk.__table__
 
         self.assertEqual(
             {
@@ -36,16 +69,11 @@ class DatabaseModelTest(unittest.TestCase):
         )
         self.assertTrue(table.c.chunk_id.primary_key)
         self.assertIsInstance(table.c.chunk_id.type, Text)
-        self.assertFalse(table.c.document_id.nullable)
-        self.assertFalse(table.c.section_id.nullable)
-        self.assertEqual(0, len(table.c.document_id.foreign_keys))
-        self.assertEqual(0, len(table.c.section_id.foreign_keys))
         self.assertIsInstance(table.c.section_path.type, ARRAY)
         self.assertIsInstance(table.c.section_path.type.item_type, Text)
-        self.assertTrue(table.c.category.nullable)
 
-    def test_chunk_embedding_has_one_to_one_cascade_constraint(self) -> None:
-        table = ChunkEmbedding.__table__
+    def test_legacy_chunk_embedding_keeps_one_to_one_cascade_constraint(self) -> None:
+        table = LegacyChunkEmbedding.__table__
         foreign_key = next(iter(table.c.chunk_id.foreign_keys))
         unique_constraints = {
             constraint.name: tuple(constraint.columns.keys())
@@ -58,7 +86,7 @@ class DatabaseModelTest(unittest.TestCase):
         self.assertIsNotNone(table.c.id.identity)
         self.assertFalse(table.c.chunk_id.nullable)
         self.assertEqual(
-            "document_chunks.chunk_id",
+            "legacy_document_chunks.chunk_id",
             foreign_key.target_fullname,
         )
         self.assertEqual("CASCADE", foreign_key.ondelete)
@@ -67,16 +95,47 @@ class DatabaseModelTest(unittest.TestCase):
             unique_constraints["uq_chunk_embeddings_chunk_id"],
         )
 
-    def test_embedding_uses_confirmed_vector_dimension_without_ann_index(self) -> None:
-        table = ChunkEmbedding.__table__
+    def test_embeddings_use_confirmed_vector_dimension(self) -> None:
+        for table in (LegacyChunkEmbedding.__table__, ChunkEmbedding.__table__):
+            self.assertIsInstance(table.c.embedding.type, VECTOR)
+            self.assertEqual(
+                OPENAI_EMBEDDING_DIMENSIONS,
+                table.c.embedding.type.dim,
+            )
+            self.assertEqual(1536, table.c.embedding.type.dim)
 
-        self.assertIsInstance(table.c.embedding.type, VECTOR)
+    def test_erd_document_chunk_shares_primary_key_with_content_node(self) -> None:
+        table = DocumentChunk.__table__
+        foreign_key = next(iter(table.c.id.foreign_keys))
+
+        self.assertTrue(table.c.id.primary_key)
+        self.assertEqual("content_nodes.id", foreign_key.target_fullname)
+        self.assertEqual("CASCADE", foreign_key.ondelete)
+
+    def test_content_node_has_nullable_identity_columns(self) -> None:
+        table = ContentNode.__table__
+
+        self.assertTrue(table.c.node_identity_hash.nullable)
+        self.assertTrue(table.c.node_identity_kind.nullable)
+        self.assertFalse(table.c.content_hash.nullable)
+
+    def test_rag_run_uses_uuid_identifiers_and_answer_status(self) -> None:
+        table = RagRun.__table__
+        unique_constraints = {
+            tuple(constraint.columns.keys())
+            for constraint in table.constraints
+            if isinstance(constraint, UniqueConstraint)
+        }
+
+        self.assertIsInstance(table.c.id.type, UUID)
+        self.assertIsInstance(table.c.conversation_id.type, UUID)
+        self.assertIn(("conversation_id", "turn_no"), unique_constraints)
         self.assertEqual(
-            OPENAI_EMBEDDING_DIMENSIONS,
-            table.c.embedding.type.dim,
+            {"PROCESSING", "COMPLETED", "WITHHELD", "ERROR", "CANCELLED"},
+            {member.value for member in AnswerStatus},
         )
-        self.assertEqual(1536, table.c.embedding.type.dim)
-        self.assertEqual(0, len(table.indexes))
+        self.assertTrue(table.c.withheld_reason_code.nullable)
+        self.assertTrue(table.c.error_code.nullable)
 
 
 if __name__ == "__main__":

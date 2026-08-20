@@ -5,7 +5,8 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.dml import Delete
 
-from app.database.models import ChunkEmbedding, DocumentChunk
+from app.database.models import LegacyChunkEmbedding as ChunkEmbedding
+from app.database.models import LegacyDocumentChunk as DocumentChunk
 from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 from retrieval.models import RetrievalChunk
 from retrieval.pgvector_store import PgVectorStore
@@ -78,9 +79,9 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             [
                 "delete",
-                "DocumentChunk",
+                "LegacyDocumentChunk",
                 "flush",
-                "ChunkEmbedding",
+                "LegacyChunkEmbedding",
                 "flush",
             ],
             events,
@@ -133,8 +134,8 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
         compiled = statement.compile(dialect=postgresql.dialect())
         sql = " ".join(str(compiled).split())
 
-        self.assertIn("JOIN chunk_embeddings", sql)
-        self.assertIn("chunk_embeddings.embedding <=>", sql)
+        self.assertIn("JOIN legacy_chunk_embeddings", sql)
+        self.assertIn("legacy_chunk_embeddings.embedding <=>", sql)
         self.assertIn("ORDER BY cosine_distance ASC", sql)
         self.assertIn("LIMIT", sql)
         self.assertIn(3, compiled.params.values())
