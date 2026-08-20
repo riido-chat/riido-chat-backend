@@ -5,7 +5,8 @@ from typing import List, Sequence, Tuple
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.models import ChunkEmbedding, DocumentChunk
+from app.database.models import LegacyChunkEmbedding as ChunkEmbedding
+from app.database.models import LegacyDocumentChunk as DocumentChunk
 from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 from retrieval.models import RetrievalChunk
 
