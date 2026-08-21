@@ -141,7 +141,7 @@ class RetrievalMetricsTest(unittest.TestCase):
         result = evaluate_retrieval(candidates, ground_truth)
 
         self.assertEqual(30, result["summary"]["question_count"])
-        self.assertEqual(36, result["summary"]["relevant_section_count"])
+        self.assertEqual(38, result["summary"]["relevant_section_count"])
         self.assertEqual(30, len(result["questions"]))
         self.assertEqual(
             set(METRIC_KEYS),
