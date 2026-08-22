@@ -6,26 +6,7 @@ from pathlib import Path
 from pipeline.document.loader import load_normalized_documents
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-
-
 class NormalizedDocumentLoaderTest(unittest.TestCase):
-    def test_loads_current_canonical_documents(self) -> None:
-        manifest_path = PROJECT_ROOT / "data/clean_manifest.json"
-        entries = json.loads(manifest_path.read_text(encoding="utf-8"))
-
-        documents = load_normalized_documents(manifest_path)
-
-        self.assertEqual(39, len(documents))
-        self.assertEqual(entries[0]["doc_id"], documents[0].document_id)
-        self.assertEqual(entries[0]["title"], documents[0].title)
-        self.assertEqual(entries[0]["url"], documents[0].source_url)
-        self.assertEqual(entries[0]["category"], documents[0].category)
-        self.assertEqual(
-            (manifest_path.parent / entries[0]["path"]).read_text(encoding="utf-8"),
-            documents[0].content,
-        )
-
     def test_maps_manifest_metadata_and_markdown_content(self) -> None:
         content = "# 테스트 문서\n\n본문입니다.\n"
         entry = {

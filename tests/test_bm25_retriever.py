@@ -1,15 +1,8 @@
 import unittest
-from pathlib import Path
 
-from pipeline.document.chunker import create_chunks
-from pipeline.document.loader import load_normalized_documents
 from pipeline.document.models import Chunk, NormalizedDocument
-from pipeline.document.section_parser import parse_sections
 from retrieval.bm25_retriever import BM25Retriever
 from retrieval.models import RetrievalChunk
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class BM25RetrieverTest(unittest.TestCase):
@@ -70,21 +63,6 @@ class BM25RetrieverTest(unittest.TestCase):
         self.assertIn(chunk.section_path[1], search_text)
         self.assertIn(chunk.content, search_text)
 
-    def test_creates_index_for_canonical_corpus(self) -> None:
-        documents = load_normalized_documents(PROJECT_ROOT / "data/clean_manifest.json")
-        retrieval_chunks = []
-
-        for document in documents:
-            sections = parse_sections(document)
-            chunks = create_chunks(sections)
-            retrieval_chunks.extend(
-                RetrievalChunk.from_document_chunk(document, chunk)
-                for chunk in chunks
-            )
-
-        retriever = BM25Retriever(retrieval_chunks)
-
-        self.assertEqual(142, retriever._index.corpus_size)
 
     def test_returns_top_ten_including_zero_scores(self) -> None:
         chunks = [

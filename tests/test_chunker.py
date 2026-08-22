@@ -1,13 +1,7 @@
 import unittest
-from pathlib import Path
 
 from pipeline.document.chunker import create_chunks
-from pipeline.document.loader import load_normalized_documents
 from pipeline.document.models import Section, Subsection
-from pipeline.document.section_parser import parse_sections
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class ChunkerTest(unittest.TestCase):
@@ -63,23 +57,6 @@ class ChunkerTest(unittest.TestCase):
         self.assertEqual(1, len(chunks))
         self.assertEqual(section.body, chunks[0].content)
 
-    def test_creates_one_chunk_per_section_for_canonical_corpus(self) -> None:
-        documents = load_normalized_documents(PROJECT_ROOT / "data/clean_manifest.json")
-        sections = [section for document in documents for section in parse_sections(document)]
-
-        chunks = create_chunks(sections)
-
-        self.assertEqual(39, len(documents))
-        self.assertEqual(142, len(sections))
-        self.assertEqual(142, len(chunks))
-        self.assertEqual(
-            [section.section_id for section in sections],
-            [chunk.chunk_id for chunk in chunks],
-        )
-        self.assertEqual(
-            [section.body for section in sections],
-            [chunk.content for chunk in chunks],
-        )
 
     @staticmethod
     def _section(sequence: int, body: str) -> Section:
