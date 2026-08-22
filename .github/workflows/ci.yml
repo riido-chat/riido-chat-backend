@@ -1,0 +1,61 @@
+# CI: develop 대상 PR마다 테스트를 자동 실행해 머지 전 검증을 강제한다.
+name: CI
+
+on:
+  pull_request:
+    branches: [develop]
+
+# 같은 PR에 새 커밋을 푸시하면 돌고 있던 이전 실행을 취소한다 (러너 시간 절약)
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # 러너 내부에 테스트용 DB를 띄운다.
+    # 로컬 docker-compose.yml과 동일한 이미지·계정값을 사용해 환경 차이를 없앤다.
+    # 이 값들은 러너 안에서만 존재하는 일회용 더미이므로 Secrets 처리 대상이 아니다.
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.6-pg18-bookworm
+        env:
+          POSTGRES_DB: riido
+          POSTGRES_USER: riido
+          POSTGRES_PASSWORD: riido
+        ports:
+          - 5432:5432  # 러너의 localhost:5432 로 노출 (외부 접근 불가)
+        # DB가 준비되기 전에 테스트가 시작되지 않도록 헬스체크로 대기
+        options: >-
+          --health-cmd "pg_isready -U riido -d riido"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    # app.core.config(Settings)와 alembic env.py가 이 환경변수를 읽는다.
+    # pydantic-settings는 환경변수를 .env 파일보다 우선하므로 .env 없이 동작한다.
+    env:
+      APP_ENV: test
+      DATABASE_URL: postgresql+asyncpg://riido:riido@localhost:5432/riido
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          # 로컬 .venv(3.9)와 맞춘 버전. 팀에서 버전 상향 확정 시 여기만 수정
+          python-version: "3.9"
+          cache: pip  # requirements.txt 해시 기준으로 의존성 캐시 (kiwipiepy 등 설치 시간 단축)
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # 스키마를 최신(head)으로 만든다.
+      # 이 단계가 있어야 DB 통합 테스트(test_rag_log_store_db)가 skip 되지 않고 실제로 돈다.
+      - name: Run migrations
+        run: alembic upgrade head
+
+      # 테스트는 표준 unittest 기반 — 별도 러너(pytest) 설치 불필요
+      - name: Run tests
+        run: python -m unittest discover -s tests -v

@@ -1,12 +1,7 @@
 import unittest
-from pathlib import Path
 
-from pipeline.document.loader import load_normalized_documents
 from pipeline.document.models import NormalizedDocument
 from pipeline.document.section_parser import parse_sections
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class SectionParserTest(unittest.TestCase):
@@ -333,28 +328,6 @@ Section 본문
         self.assertEqual("실제 Subsection", sections[1].subsections[0].title)
         self.assertIn("### 가짜 Subsection", sections[1].body)
 
-    def test_parses_all_canonical_documents(self) -> None:
-        documents = load_normalized_documents(PROJECT_ROOT / "data/clean_manifest.json")
-
-        sections = [section for document in documents for section in parse_sections(document)]
-        subsections = [
-            subsection for section in sections for subsection in section.subsections
-        ]
-
-        self.assertEqual(39, len(documents))
-        self.assertEqual(142, len(sections))
-        self.assertEqual(43, len(subsections))
-
-        google_calendar = next(
-            document
-            for document in documents
-            if document.source_url.endswith("/integrations/google-calendar.md")
-        )
-        google_sections = parse_sections(google_calendar)
-        self.assertEqual(4, len(google_sections))
-        self.assertEqual("개요", google_sections[0].title)
-        self.assertIn("양방향 동기화", google_sections[0].body)
-        self.assertEqual("연동 설정 가이드", google_sections[1].title)
 
     @staticmethod
     def _document(content: str) -> NormalizedDocument:

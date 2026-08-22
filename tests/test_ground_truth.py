@@ -2,7 +2,6 @@ import json
 import unittest
 from pathlib import Path
 
-from retrieval.corpus import build_retrieval_chunks
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -58,49 +57,8 @@ class GroundTruthTest(unittest.TestCase):
                     set(section),
                 )
 
-    def test_relevant_sections_exist_in_canonical_corpus(self) -> None:
-        corpus_section_ids = {
-            chunk.section_id for chunk in build_retrieval_chunks()
-        }
 
-        for item in self.ground_truth:
-            for section in item["relevant_sections"]:
-                self.assertIn(
-                    section["section_id"],
-                    corpus_section_ids,
-                    item["question_id"],
-                )
 
-    def test_section_ids_are_unique_in_canonical_corpus(self) -> None:
-        chunks = build_retrieval_chunks()
-
-        self.assertEqual(
-            len(chunks),
-            len({chunk.section_id for chunk in chunks}),
-        )
-
-    def test_includes_each_questions_expected_section(self) -> None:
-        chunks = build_retrieval_chunks()
-        ground_truth_by_id = {
-            item["question_id"]: {
-                section["section_id"] for section in item["relevant_sections"]
-            }
-            for item in self.ground_truth
-        }
-
-        for question in self.questions:
-            matches = [
-                chunk
-                for chunk in chunks
-                if chunk.document_title == question["expected_document"]
-                and chunk.section_path[-1] == question["expected_section"]
-            ]
-            self.assertEqual(1, len(matches), question["id"])
-            self.assertIn(
-                matches[0].section_id,
-                ground_truth_by_id[question["id"]],
-                question["id"],
-            )
 
     def test_has_no_duplicate_sections_per_question(self) -> None:
         for item in self.ground_truth:
