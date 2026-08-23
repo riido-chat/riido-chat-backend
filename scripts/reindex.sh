@@ -15,6 +15,9 @@ LOG_FILE="${LOG_DIR}/reindex-$(date +%Y%m%d-%H%M%S).log"
 # 상세 출력은 로그 파일에만 남긴다. SSM 출력은 24000자에서 잘리므로 요약만 남긴다.
 log() { echo "[reindex] $*" | tee -a "$LOG_FILE"; }
 
+# 라이브러리가 오류 메시지에 인증 헤더를 그대로 담는 경우가 있어 로그에서 가린다
+mask_secrets() { sed -E 's/sk-[A-Za-z0-9_-]{8,}/sk-***REDACTED***/g'; }
+
 # 실행 중인 앱과 같은 이미지를 써서 코드 버전을 일치시킨다
 IMAGE_URI=$(docker inspect --format '{{.Config.Image}}' riido-chat-api 2>/dev/null || true)
 if [ -z "$IMAGE_URI" ]; then
@@ -27,7 +30,7 @@ fi
 run_stage() {
   docker run --rm --user root --env-file "${APP_DIR}/.env" \
     -v "${STAGING_DIR}:/app/data" \
-    "$IMAGE_URI" python -m "$1" >> "$LOG_FILE" 2>&1
+    "$IMAGE_URI" python -m "$1" 2>&1 | mask_secrets >> "$LOG_FILE"
 }
 
 log "이미지: ${IMAGE_URI}"
@@ -58,6 +61,6 @@ find "$DATA_DIR" -mindepth 1 -delete
 cp -a "${STAGING_DIR}/." "${DATA_DIR}/"
 rm -rf "$STAGING_DIR"
 
-curl -fsS -X POST "${BASE_URL}/internal/corpus/reload" >> "$LOG_FILE" 2>&1
+curl -fsS -X POST "${BASE_URL}/internal/corpus/reload" 2>&1 | mask_secrets >> "$LOG_FILE"
 log "corpus 상태: $(curl -fsS "${BASE_URL}/internal/corpus")"
 log "완료. 이전 corpus는 ${PREVIOUS_DIR}에 보관된다."
