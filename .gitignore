@@ -5,7 +5,7 @@ __pycache__/
 *.pyc
 
 # 환경변수
-.env
+.env*
 
 # macOS
 .DS_Store
