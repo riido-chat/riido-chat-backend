@@ -1,0 +1,24 @@
+services:
+  api:
+    image: ${IMAGE_URI}
+    container_name: riido-chat-api
+    env_file: /opt/riido/.env
+    environment:
+      CORPUS_DIR: /app/data
+    volumes:
+      # 정제 corpus는 앱 EC2 호스트에 두고 읽기 전용으로 마운트한다
+      - /opt/riido/data:/app/data:ro
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      # slim 이미지에 curl이 없으므로 python으로 확인한다
+      test:
+        - CMD-SHELL
+        - >-
+          python -c "import urllib.request, sys;
+          sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status == 200 else 1)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

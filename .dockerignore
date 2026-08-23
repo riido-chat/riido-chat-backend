@@ -1,0 +1,27 @@
+.git
+.github
+.venv
+venv
+**/__pycache__
+*.pyc
+.env
+.env.example
+
+# corpus는 볼륨 마운트로 주입한다
+data
+
+# 런타임에 필요하지 않은 것들
+tests
+data_checks
+evaluation
+docs
+scripts
+docker
+docker-compose.yml
+docker-compose.app.yml
+README.md
+AGENTS.md
+.idea
+.cursor
+.codegraph
+.DS_Store

@@ -44,8 +44,8 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          # 로컬 .venv(3.9)와 맞춘 버전. 팀에서 버전 상향 확정 시 여기만 수정
-          python-version: "3.9"
+          # Dockerfile(python:3.12-slim)과 동일한 버전 유지
+          python-version: "3.12"
           cache: pip  # requirements.txt 해시 기준으로 의존성 캐시 (kiwipiepy 등 설치 시간 단축)
 
       - name: Install dependencies
