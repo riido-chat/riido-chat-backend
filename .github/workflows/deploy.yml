@@ -19,19 +19,32 @@ env:
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: riido-chat-api
   DEPLOY_BUCKET: riido-chat-deploy
+  DEPLOY_ROLE_ARN: arn:aws:iam::438546836951:role/riido-chat-github-deploy
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 진단용 임시 단계. 원인 확인 후 삭제한다.
+      - name: OIDC 클레임 확인
+        run: |
+          TOKEN=$(curl -sH "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value')
+          PAYLOAD=$(echo "$TOKEN" | cut -d. -f2)
+          PAD=$(( (4 - ${#PAYLOAD} % 4) % 4 ))
+          PAYLOAD="${PAYLOAD}$(printf '=%.0s' $(seq 0 $PAD))"
+          echo "$PAYLOAD" | tr '_-' '/+' | base64 -d 2>/dev/null \
+            | jq '{sub, aud, repository, ref, workflow_ref}'
+
       - uses: actions/checkout@v4
 
-      # 장기 액세스 키 없이 IAM 역할을 인수한다
+      # 장기 액세스 키 없이 IAM 역할을 인수한다.
+      # ARN은 비밀 정보가 아니므로 Secret 대신 직접 지정한다.
       - name: AWS 자격증명 획득
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-to-assume: ${{ env.DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: ECR 로그인
