@@ -50,6 +50,7 @@ class ChatErrorCode(str, Enum):
     """Chat API가 외부에 제공하는 기술 오류 코드."""
 
     INTERNAL_ERROR = "INTERNAL_ERROR"
+    SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE"
 
 
 class ChatAnswer(BaseModel):

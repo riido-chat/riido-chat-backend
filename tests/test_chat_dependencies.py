@@ -1,6 +1,7 @@
 import unittest
 from collections.abc import AsyncIterator
 from contextlib import ExitStack, contextmanager
+from pathlib import Path
 from typing import List
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -31,8 +32,10 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
             app = create_app()
 
             with TestClient(app) as client:
-                self.assertIs(self.corpus, app.state.retrieval_corpus)
-                self.assertIs(self.bm25_retriever, app.state.bm25_retriever)
+                self.assertIs(
+                    self.bm25_retriever,
+                    app.state.corpus_state.get_retriever(),
+                )
                 self.assertIs(self.embedder, app.state.embedder)
                 self.assertIs(
                     self.generation_service,
@@ -42,7 +45,9 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
                 self.assertEqual(200, client.get("/health").status_code)
                 self.assertEqual(200, client.get("/health").status_code)
 
-            dependencies["build_corpus"].assert_called_once_with()
+            dependencies["build_corpus"].assert_called_once_with(
+                Path("data/clean_manifest.json")
+            )
             dependencies["bm25"].assert_called_once_with(self.corpus)
             dependencies["embedder"].assert_called_once_with()
             dependencies["generator"].assert_called_once_with()
@@ -133,11 +138,11 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
     def _patched_lifespan_dependencies(self):
         patches = {
             "build_corpus": patch(
-                "app.main.build_retrieval_chunks",
+                "app.rag.corpus_state.build_retrieval_chunks",
                 return_value=self.corpus,
             ),
             "bm25": patch(
-                "app.main.BM25Retriever",
+                "app.rag.corpus_state.BM25Retriever",
                 return_value=self.bm25_retriever,
             ),
             "embedder": patch(
