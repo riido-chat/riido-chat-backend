@@ -22,8 +22,10 @@ if [ -z "$IMAGE_URI" ]; then
   exit 1
 fi
 
+# staging 디렉터리가 root 소유라 이미지 기본 사용자(riido)로는 쓸 수 없다.
+# 앱 컨테이너는 그대로 비루트로 읽기 전용 마운트를 사용한다.
 run_stage() {
-  docker run --rm --env-file "${APP_DIR}/.env" \
+  docker run --rm --user root --env-file "${APP_DIR}/.env" \
     -v "${STAGING_DIR}:/app/data" \
     "$IMAGE_URI" python -m "$1" >> "$LOG_FILE" 2>&1
 }
