@@ -26,17 +26,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 진단용 임시 단계. 원인 확인 후 삭제한다.
-      - name: OIDC 클레임 확인
-        run: |
-          TOKEN=$(curl -sH "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value')
-          PAYLOAD=$(echo "$TOKEN" | cut -d. -f2)
-          PAD=$(( (4 - ${#PAYLOAD} % 4) % 4 ))
-          PAYLOAD="${PAYLOAD}$(printf '=%.0s' $(seq 0 $PAD))"
-          echo "$PAYLOAD" | tr '_-' '/+' | base64 -d 2>/dev/null \
-            | jq '{sub, aud, repository, ref, workflow_ref}'
-
       - uses: actions/checkout@v4
 
       # 장기 액세스 키 없이 IAM 역할을 인수한다.
