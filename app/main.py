@@ -3,6 +3,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.chat import corpus_unavailable_response
@@ -55,6 +56,16 @@ def create_app() -> FastAPI:
         version="0.1.0",
         lifespan=lifespan,
     )
+    # 브라우저에서 다른 오리진의 FE가 호출하므로 허용 목록을 명시한다.
+    # 로그인이 없어 쿠키를 쓰지 않으므로 credentials는 허용하지 않는다.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=get_settings().cors_origin_list,
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Content-Type"],
+    )
+
     app.include_router(health_router)
     app.include_router(chat_router)
     app.include_router(internal_router)
