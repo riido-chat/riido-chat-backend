@@ -3,15 +3,34 @@
 from fastapi import APIRouter, Depends, Response, status
 
 from app.api.chat_schema import (
+    ChatError,
+    ChatErrorCode,
     ChatErrorResponse,
     ChatRequest,
     ChatResponse,
+    ChatResponseStatus,
 )
 from app.rag.chat_service import ChatService
 from app.rag.dependencies import get_chat_service
 
 
 router = APIRouter(tags=["chat"])
+
+CORPUS_UNAVAILABLE_MESSAGE = "검색 데이터가 아직 준비되지 않았습니다."
+
+
+def corpus_unavailable_response() -> ChatErrorResponse:
+    """corpus 미적재로 답변할 수 없을 때의 응답을 만든다."""
+
+    return ChatErrorResponse(
+        status=ChatResponseStatus.ERROR,
+        answer=None,
+        error=ChatError(
+            code=ChatErrorCode.SERVICE_UNAVAILABLE,
+            message=CORPUS_UNAVAILABLE_MESSAGE,
+        ),
+        citations=[],
+    )
 
 
 @router.post(
@@ -22,7 +41,11 @@ router = APIRouter(tags=["chat"])
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "model": ChatErrorResponse,
             "description": "답변 생성 중 기술 오류",
-        }
+        },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "model": ChatErrorResponse,
+            "description": "검색 corpus 미적재",
+        },
     },
     summary="이용가이드 기반 답변 생성",
 )

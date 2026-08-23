@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     app_env: str = "local"
     database_url: str = "postgresql+asyncpg://riido:riido@localhost:5432/riido"
     openai_api_key: Optional[str] = None
+    corpus_dir: str = "data"
 
     model_config = SettingsConfigDict(
         env_file=".env",

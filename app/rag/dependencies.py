@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db_session
 from app.rag.chat_service import ChatService
+from app.rag.corpus_state import CorpusState
 from app.rag.generation_service import GenerationService
 from retrieval.bm25_retriever import BM25Retriever
 from retrieval.embedding import OpenAIEmbedder
@@ -13,10 +14,18 @@ from retrieval.pgvector_store import PgVectorStore
 from retrieval.vector_retriever import VectorRetriever
 
 
-def get_bm25_retriever(request: Request) -> BM25Retriever:
-    """애플리케이션 시작 시 생성한 BM25Retriever를 반환한다."""
+def get_corpus_state(request: Request) -> CorpusState:
+    """애플리케이션 시작 시 생성한 CorpusState를 반환한다."""
 
-    return request.app.state.bm25_retriever
+    return request.app.state.corpus_state
+
+
+def get_bm25_retriever(
+    corpus_state: CorpusState = Depends(get_corpus_state),
+) -> BM25Retriever:
+    """적재된 BM25Retriever를 반환하고, 미적재면 CorpusNotLoadedError를 발생시킨다."""
+
+    return corpus_state.get_retriever()
 
 
 def get_embedder(request: Request) -> OpenAIEmbedder:
