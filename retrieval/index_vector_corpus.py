@@ -3,6 +3,7 @@
 import asyncio
 from typing import List, Sequence
 
+from app.database.models import IndexVersion
 from app.database.session import dispose_engine, get_session_factory
 from retrieval.corpus import build_retrieval_chunks
 from retrieval.embedding import OpenAIEmbedder, build_embedding_text
@@ -32,12 +33,12 @@ def build_index_items(
 
 async def replace_vector_corpus(
     items: Sequence[StoredEmbedding],
-) -> None:
-    """기존 DB session과 PgVectorStore로 Vector corpus를 교체한다."""
+) -> IndexVersion:
+    """신규 ERD에 전체 corpus를 적재하고 새 ACTIVE index를 반환한다."""
 
     try:
         async with get_session_factory()() as session:
-            await PgVectorStore(session).replace_all(items)
+            return await PgVectorStore(session).replace_all(items)
     finally:
         await dispose_engine()
 
@@ -48,8 +49,11 @@ def main() -> None:
         raise ValueError("Vector indexing할 Chunk가 하나 이상이어야 합니다.")
 
     items = build_index_items(chunks, OpenAIEmbedder())
-    asyncio.run(replace_vector_corpus(items))
-    print(f"Vector corpus indexing 완료: {len(items)}개 Chunk")
+    index_version = asyncio.run(replace_vector_corpus(items))
+    print(
+        "Vector corpus indexing 완료: "
+        f"{len(items)}개 Chunk, ACTIVE index={index_version.id}"
+    )
 
 
 if __name__ == "__main__":

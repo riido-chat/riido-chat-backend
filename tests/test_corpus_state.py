@@ -1,99 +1,90 @@
-import json
 import unittest
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from app.rag.corpus_state import CorpusNotLoadedError, CorpusState
-
-
-MARKDOWN = """# 워크스페이스 안내
-
-## 멤버 초대
-
-워크스페이스에 팀원을 초대하는 방법을 안내합니다.
-
-## 구독 결제
-
-구독 요금제와 결제 수단을 변경할 수 있습니다.
-
-## 스프린트 관리
-
-반복 주기로 스프린트를 만들고 진행 상황을 확인합니다.
-"""
+from retrieval.models import RetrievalChunk
 
 
 class CorpusStateTest(unittest.TestCase):
     def setUp(self) -> None:
-        self._directory = TemporaryDirectory()
-        self.corpus_dir = Path(self._directory.name)
+        self.state = CorpusState(Path("data"))
+        self.chunks = [
+            self._chunk(1, "document-1"),
+            self._chunk(2, "document-1"),
+            self._chunk(3, "document-2"),
+        ]
 
-    def tearDown(self) -> None:
-        self._directory.cleanup()
+    def test_starts_unloaded(self) -> None:
+        snapshot = self.state.snapshot()
 
-    def test_starts_unloaded_when_corpus_is_absent(self) -> None:
-        state = CorpusState(self.corpus_dir)
-        snapshot = state.snapshot()
-
-        self.assertFalse(state.is_loaded)
+        self.assertFalse(self.state.is_loaded)
         self.assertFalse(snapshot.loaded)
         self.assertEqual(0, snapshot.chunk_count)
         self.assertEqual(0, snapshot.document_count)
         self.assertIsNone(snapshot.loaded_at)
 
     def test_get_retriever_raises_when_corpus_is_not_loaded(self) -> None:
-        state = CorpusState(self.corpus_dir)
-
         with self.assertRaises(CorpusNotLoadedError):
-            state.get_retriever()
+            self.state.get_retriever()
 
-    def test_load_raises_when_manifest_is_missing(self) -> None:
-        state = CorpusState(self.corpus_dir)
+    def test_replace_rejects_empty_or_unpersisted_corpus(self) -> None:
+        with self.assertRaisesRegex(ValueError, "적재된 Chunk"):
+            self.state.replace([])
 
-        with self.assertRaises(FileNotFoundError):
-            state.load()
+        unpersisted = RetrievalChunk(
+            document_id="document",
+            section_id="section",
+            document_title="문서",
+            section_path=("문서", "섹션"),
+            source_url="https://docs.riido.io/test.md",
+            category="guide",
+            content="본문",
+        )
+        with self.assertRaisesRegex(ValueError, "index_version_id"):
+            self.state.replace([unpersisted])
 
-        self.assertFalse(state.is_loaded)
+    def test_replace_builds_index_and_reports_counts(self) -> None:
+        snapshot = self.state.replace(self.chunks)
 
-    def test_load_builds_index_and_reports_counts(self) -> None:
-        self._write_corpus()
-        state = CorpusState(self.corpus_dir)
-
-        snapshot = state.load()
-
-        self.assertTrue(state.is_loaded)
+        self.assertTrue(self.state.is_loaded)
         self.assertTrue(snapshot.loaded)
         self.assertEqual(3, snapshot.chunk_count)
-        self.assertEqual(1, snapshot.document_count)
+        self.assertEqual(2, snapshot.document_count)
         self.assertIsNotNone(snapshot.loaded_at)
-        self.assertEqual(str(state.manifest_path), snapshot.source)
+        self.assertEqual("index_version:7", snapshot.source)
 
-    def test_reload_replaces_previous_index(self) -> None:
-        self._write_corpus()
-        state = CorpusState(self.corpus_dir)
-        state.load()
-        first_retriever = state.get_retriever()
+    def test_replace_rejects_mixed_index_versions(self) -> None:
+        mixed = [self.chunks[0], self._chunk(4, "document-2", index_version_id=8)]
 
-        state.load()
+        with self.assertRaisesRegex(ValueError, "유일"):
+            self.state.replace(mixed)
 
-        self.assertIsNot(first_retriever, state.get_retriever())
+    def test_replace_swaps_completed_bm25_index(self) -> None:
+        self.state.replace(self.chunks)
+        first_retriever = self.state.get_retriever()
 
-    def _write_corpus(self) -> None:
-        markdown_path = self.corpus_dir / "clean" / "guide.md"
-        markdown_path.parent.mkdir(parents=True, exist_ok=True)
-        markdown_path.write_text(MARKDOWN, encoding="utf-8")
+        self.state.replace(self.chunks)
 
-        manifest = [
-            {
-                "doc_id": "document-id",
-                "title": "워크스페이스 안내",
-                "url": "https://docs.riido.io/guide.md",
-                "category": "guide",
-                "path": "clean/guide.md",
-            }
-        ]
-        (self.corpus_dir / "clean_manifest.json").write_text(
-            json.dumps(manifest, ensure_ascii=False),
-            encoding="utf-8",
+        self.assertIsNot(first_retriever, self.state.get_retriever())
+
+    @staticmethod
+    def _chunk(
+        chunk_id: int,
+        document_id: str,
+        *,
+        index_version_id: int = 7,
+    ) -> RetrievalChunk:
+        return RetrievalChunk(
+            document_id=document_id,
+            section_id=f"section-{chunk_id}",
+            document_title=f"문서 {document_id}",
+            section_path=(f"문서 {document_id}", f"섹션 {chunk_id}"),
+            source_url=f"https://docs.riido.io/{document_id}.md",
+            category="guide",
+            content=f"본문 {chunk_id}",
+            chunk_id=chunk_id,
+            document_version_id=100 + chunk_id,
+            index_version_id=index_version_id,
         )
 
 

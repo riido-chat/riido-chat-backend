@@ -34,7 +34,9 @@ class RetrievalCorpusTest(unittest.TestCase):
 
         self.assertEqual(1, len(chunks))
         chunk = chunks[0]
-        self.assertEqual("document-id:a8d0dd1a5c1a", chunk.chunk_id)
+        self.assertIsNone(chunk.chunk_id)
+        self.assertIsNone(chunk.document_version_id)
+        self.assertIsNone(chunk.index_version_id)
         self.assertEqual("document-id", chunk.document_id)
         self.assertEqual("document-id:a8d0dd1a5c1a", chunk.section_id)
         self.assertEqual("테스트 문서", chunk.document_title)

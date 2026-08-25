@@ -2,7 +2,7 @@ import unittest
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -14,6 +14,7 @@ from app.rag.corpus_state import (
     CorpusSnapshot,
     CorpusState,
 )
+from retrieval.pgvector_store import ActiveIndexNotFoundError
 
 
 @asynccontextmanager
@@ -40,12 +41,24 @@ EMPTY_SNAPSHOT = CorpusSnapshot(
 class InternalCorpusApiTest(unittest.TestCase):
     def setUp(self) -> None:
         self.corpus_state = Mock(spec=CorpusState)
+        self.active_chunks = [Mock()]
+        self.store = Mock()
+        self.store.load_active_chunks = AsyncMock(return_value=self.active_chunks)
+        self.store_patcher = patch(
+            "app.api.internal.PgVectorStore",
+            return_value=self.store,
+        )
+        self.store_patcher.start()
 
         with patch("app.main.lifespan", test_lifespan):
             self.app = create_app()
 
         self.app.state.corpus_state = self.corpus_state
         self.client = TestClient(self.app)
+
+    def tearDown(self) -> None:
+        self.store_patcher.stop()
+        self.client.close()
 
     def test_reports_unloaded_state(self) -> None:
         self.corpus_state.snapshot.return_value = EMPTY_SNAPSHOT
@@ -75,23 +88,24 @@ class InternalCorpusApiTest(unittest.TestCase):
         self.assertIsNotNone(body["loadedAt"])
 
     def test_reload_returns_new_state(self) -> None:
-        self.corpus_state.load.return_value = LOADED_SNAPSHOT
+        self.corpus_state.replace.return_value = LOADED_SNAPSHOT
 
         response = self.client.post("/internal/corpus/reload")
 
-        self.corpus_state.load.assert_called_once_with()
+        self.store.load_active_chunks.assert_awaited_once_with()
+        self.corpus_state.replace.assert_called_once_with(self.active_chunks)
         self.assertEqual(200, response.status_code)
         self.assertEqual(142, response.json()["chunkCount"])
 
     def test_reload_returns_503_when_corpus_is_missing(self) -> None:
-        self.corpus_state.load.side_effect = FileNotFoundError(
-            "clean manifest를 찾을 수 없습니다: data/clean_manifest.json"
+        self.store.load_active_chunks.side_effect = ActiveIndexNotFoundError(
+            "ACTIVE index version이 없습니다."
         )
 
         response = self.client.post("/internal/corpus/reload")
 
         self.assertEqual(503, response.status_code)
-        self.assertIn("clean manifest", response.json()["detail"])
+        self.assertIn("ACTIVE index", response.json()["detail"])
 
     def test_chat_returns_503_when_corpus_is_not_loaded(self) -> None:
         self.corpus_state.get_retriever.side_effect = CorpusNotLoadedError(

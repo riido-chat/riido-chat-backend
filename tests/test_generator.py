@@ -136,7 +136,7 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn(" > ".join(source.chunk.section_path), generation_input)
         self.assertIn(source.chunk.content, generation_input)
         self.assertIn("사용자 질문", generation_input)
-        self.assertNotIn(source.chunk.chunk_id, generation_input)
+        self.assertNotIn("Chunk ID:", generation_input)
         self.assertNotIn(source.chunk.source_url, generation_input)
         self.assertNotIn("rrf", generation_input.lower())
 
@@ -165,7 +165,6 @@ class GenerationContextTest(unittest.TestCase):
     @staticmethod
     def _result(index: int) -> HybridRetrievalResult:
         chunk = RetrievalChunk(
-            chunk_id=f"chunk-{index}",
             document_id=f"document-{index}",
             section_id=f"section-{index}",
             document_title=f"문서 {index}",
@@ -173,6 +172,9 @@ class GenerationContextTest(unittest.TestCase):
             source_url=f"https://docs.riido.io/{index}",
             category="guide",
             content=f"본문 {index}",
+            chunk_id=index,
+            document_version_id=100 + index,
+            index_version_id=1,
         )
         return HybridRetrievalResult(
             chunk=chunk,

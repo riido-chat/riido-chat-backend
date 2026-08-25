@@ -8,9 +8,12 @@ from pipeline.document.models import Chunk, NormalizedDocument
 
 @dataclass(frozen=True)
 class RetrievalChunk:
-    """Chunk와 출처 추적에 필요한 문서 메타데이터를 결합한다."""
+    """검색 결과와 신규 ERD 식별자, 출처 metadata를 결합한다.
 
-    chunk_id: str
+    Pipeline에서 DB 적재 전 조립한 객체는 세 DB 식별자가 None이고,
+    실제 BM25/Vector 검색에 사용하는 ACTIVE index corpus에서는 모두 채워진다.
+    """
+
     document_id: str
     section_id: str
     document_title: str
@@ -18,6 +21,9 @@ class RetrievalChunk:
     source_url: str
     category: Optional[str]
     content: str
+    chunk_id: Optional[int] = None
+    document_version_id: Optional[int] = None
+    index_version_id: Optional[int] = None
 
     @classmethod
     def from_document_chunk(
@@ -31,7 +37,6 @@ class RetrievalChunk:
             raise ValueError("Document와 Chunk의 document_id가 일치하지 않습니다.")
 
         return cls(
-            chunk_id=chunk.chunk_id,
             document_id=chunk.document_id,
             section_id=chunk.section_id,
             document_title=document.title,

@@ -1,7 +1,6 @@
 import unittest
 from collections.abc import AsyncIterator
 from contextlib import ExitStack, contextmanager
-from pathlib import Path
 from typing import List
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -17,11 +16,25 @@ from app.rag.generation_service import GenerationService
 from generation.generator import OpenAIGenerator
 from retrieval.bm25_retriever import BM25Retriever
 from retrieval.embedding import OpenAIEmbedder
+from retrieval.models import RetrievalChunk
 
 
 class ChatDependencyLifecycleTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.corpus = [Mock()]
+        self.corpus = [
+            RetrievalChunk(
+                document_id="document-1",
+                section_id="section-1",
+                document_title="문서 1",
+                section_path=("문서 1", "섹션 1"),
+                source_url="https://docs.riido.io/1.md",
+                category="guide",
+                content="본문 1",
+                chunk_id=1,
+                document_version_id=2,
+                index_version_id=3,
+            )
+        ]
         self.bm25_retriever = Mock(spec=BM25Retriever)
         self.embedder = Mock(spec=OpenAIEmbedder)
         self.generator = Mock(spec=OpenAIGenerator)
@@ -45,8 +58,9 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
                 self.assertEqual(200, client.get("/health").status_code)
                 self.assertEqual(200, client.get("/health").status_code)
 
-            dependencies["build_corpus"].assert_called_once_with(
-                Path("data/clean_manifest.json")
+            dependencies["store"].load_active_chunks.assert_awaited_once_with()
+            dependencies["store_class"].assert_called_once_with(
+                dependencies["lifespan_session"]
             )
             dependencies["bm25"].assert_called_once_with(self.corpus)
             dependencies["embedder"].assert_called_once_with()
@@ -136,10 +150,20 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
 
     @contextmanager
     def _patched_lifespan_dependencies(self):
+        lifespan_session = AsyncMock(spec=AsyncSession)
+        session_context = AsyncMock()
+        session_context.__aenter__.return_value = lifespan_session
+        session_factory = Mock(return_value=session_context)
+        store = Mock()
+        store.load_active_chunks = AsyncMock(return_value=self.corpus)
         patches = {
-            "build_corpus": patch(
-                "app.rag.corpus_state.build_retrieval_chunks",
-                return_value=self.corpus,
+            "session_factory": patch(
+                "app.main.get_session_factory",
+                return_value=session_factory,
+            ),
+            "store_class": patch(
+                "app.main.PgVectorStore",
+                return_value=store,
             ),
             "bm25": patch(
                 "app.rag.corpus_state.BM25Retriever",
@@ -164,10 +188,13 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
         }
 
         with ExitStack() as stack:
-            yield {
+            dependencies = {
                 name: stack.enter_context(dependency_patch)
                 for name, dependency_patch in patches.items()
             }
+            dependencies["lifespan_session"] = lifespan_session
+            dependencies["store"] = store
+            yield dependencies
 
 
 if __name__ == "__main__":

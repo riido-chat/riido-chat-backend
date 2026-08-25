@@ -201,7 +201,6 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
     ) -> HybridRetrievalResult:
         title = document_title or f"문서 {index}"
         chunk = RetrievalChunk(
-            chunk_id=f"chunk-{index}",
             document_id=f"document-{index}",
             section_id=f"section-{index}",
             document_title=title,
@@ -209,6 +208,9 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
             source_url=source_url or f"https://docs.riido.io/{index}",
             category="guide",
             content=f"본문 {index}",
+            chunk_id=index,
+            document_version_id=100 + index,
+            index_version_id=1,
         )
         return HybridRetrievalResult(
             chunk=chunk,
