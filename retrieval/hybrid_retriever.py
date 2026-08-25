@@ -26,21 +26,40 @@ def fuse_rrf_results(
     if top_k <= 0:
         raise ValueError("top_k는 1 이상이어야 합니다.")
 
-    chunks: Dict[str, RetrievalChunk] = {}
-    bm25_ranks: Dict[str, int] = {}
-    vector_ranks: Dict[str, int] = {}
+    chunks: Dict[int, RetrievalChunk] = {}
+    bm25_ranks: Dict[int, int] = {}
+    vector_ranks: Dict[int, int] = {}
+
+    index_version_ids = {
+        result.chunk.index_version_id
+        for result in (*bm25_results, *vector_results)
+    }
+    if None in index_version_ids:
+        raise ValueError("Hybrid Retrieval에는 DB 식별자가 있는 Chunk가 필요합니다.")
+    if len(index_version_ids) > 1:
+        raise ValueError("BM25와 Vector의 ACTIVE index version이 일치하지 않습니다.")
 
     for result in bm25_results:
         chunk_id = result.chunk.chunk_id
+        if chunk_id is None:
+            raise ValueError("BM25 결과에 신규 document_chunks.id가 없습니다.")
         chunks.setdefault(chunk_id, result.chunk)
         bm25_ranks.setdefault(chunk_id, result.rank)
 
     for result in vector_results:
         chunk_id = result.chunk.chunk_id
+        if chunk_id is None:
+            raise ValueError("Vector 결과에 신규 document_chunks.id가 없습니다.")
+        existing = chunks.get(chunk_id)
+        if existing is not None and (
+            existing.document_version_id != result.chunk.document_version_id
+            or existing.section_id != result.chunk.section_id
+        ):
+            raise ValueError("동일 Chunk PK의 문서 식별 정보가 일치하지 않습니다.")
         chunks.setdefault(chunk_id, result.chunk)
         vector_ranks.setdefault(chunk_id, result.rank)
 
-    def rrf_score(chunk_id: str) -> float:
+    def rrf_score(chunk_id: int) -> float:
         score = 0.0
         bm25_rank = bm25_ranks.get(chunk_id)
         vector_rank = vector_ranks.get(chunk_id)

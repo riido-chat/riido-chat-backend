@@ -24,7 +24,6 @@ from evaluation.run_bm25_evaluation import (
     load_questions,
 )
 from retrieval.bm25_retriever import BM25Retriever
-from retrieval.corpus import build_retrieval_chunks
 from retrieval.embedding import OpenAIEmbedder
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.models import HybridRetrievalResult
@@ -82,13 +81,13 @@ async def create_hybrid_candidates(
 ) -> List[Dict[str, Any]]:
     """기존 corpus와 session factory로 실제 Hybrid 후보를 생성한다."""
 
-    bm25_retriever = BM25Retriever(build_retrieval_chunks())
-
     try:
         async with get_session_factory()() as session:
+            store = PgVectorStore(session)
+            bm25_retriever = BM25Retriever(await store.load_active_chunks())
             vector_retriever = VectorRetriever(
                 OpenAIEmbedder(),
-                PgVectorStore(session),
+                store,
             )
             retriever = HybridRetriever(
                 bm25_retriever,

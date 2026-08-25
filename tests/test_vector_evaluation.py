@@ -14,7 +14,6 @@ class VectorEvaluationTest(unittest.IsolatedAsyncioTestCase):
         retriever.search.return_value = [
             RetrievalResult(
                 chunk=RetrievalChunk(
-                    chunk_id="chunk-1",
                     document_id="document-1",
                     section_id="section-1",
                     document_title="테스트 문서",
@@ -22,6 +21,9 @@ class VectorEvaluationTest(unittest.IsolatedAsyncioTestCase):
                     source_url="https://example.com/test.md",
                     category="guide",
                     content="테스트 본문",
+                    chunk_id=1,
+                    document_version_id=2,
+                    index_version_id=3,
                 ),
                 score=0.875,
                 rank=1,

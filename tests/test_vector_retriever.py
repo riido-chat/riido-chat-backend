@@ -91,7 +91,6 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
     @staticmethod
     def _chunk(index: int) -> RetrievalChunk:
         return RetrievalChunk(
-            chunk_id=f"chunk-{index}",
             document_id=f"document-{index}",
             section_id=f"section-{index}",
             document_title=f"문서 {index}",
@@ -99,6 +98,9 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
             source_url=f"https://docs.riido.io/document-{index}.md",
             category="guide",
             content=f"본문 {index}",
+            chunk_id=index + 1,
+            document_version_id=index + 101,
+            index_version_id=1,
         )
 
 

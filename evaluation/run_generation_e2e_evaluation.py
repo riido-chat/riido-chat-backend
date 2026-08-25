@@ -22,7 +22,6 @@ from evaluation.run_bm25_evaluation import (
 from generation.generator import OPENAI_GENERATION_MODEL, OpenAIGenerator
 from generation.models import FinalGenerationResult
 from retrieval.bm25_retriever import BM25Retriever
-from retrieval.corpus import build_retrieval_chunks
 from retrieval.embedding import OpenAIEmbedder
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.models import HybridRetrievalResult
@@ -205,14 +204,15 @@ async def run_evaluation() -> Path:
     if {question["id"] for question in questions} != set(ground_truth_by_id):
         raise ValueError("질문과 ground truth의 question_id가 일치하지 않습니다.")
 
-    bm25_retriever = BM25Retriever(build_retrieval_chunks())
     evaluation_results = []
 
     try:
         async with get_session_factory()() as session:
+            store = PgVectorStore(session)
+            bm25_retriever = BM25Retriever(await store.load_active_chunks())
             vector_retriever = VectorRetriever(
                 OpenAIEmbedder(),
-                PgVectorStore(session),
+                store,
             )
             hybrid_retriever = HybridRetriever(
                 bm25_retriever,

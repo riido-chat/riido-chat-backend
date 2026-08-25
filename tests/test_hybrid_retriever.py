@@ -109,7 +109,7 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
         )
 
         self.assertEqual(
-            ["chunk-a", "chunk-b"],
+            [bm25_chunk.chunk_id, vector_chunk.chunk_id],
             [result.chunk.chunk_id for result in results],
         )
 
@@ -124,7 +124,7 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
         )
 
         self.assertEqual(
-            ["chunk-a", "chunk-b"],
+            [chunk_a.chunk_id, chunk_b.chunk_id],
             [result.chunk.chunk_id for result in results],
         )
         self.assertEqual(results[0].rrf_score, results[1].rrf_score)
@@ -142,8 +142,8 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
         name: str,
         section_id: str = "",
     ) -> RetrievalChunk:
+        chunk_id = int(name) if name.isdigit() else ord(name[0])
         return RetrievalChunk(
-            chunk_id=f"chunk-{name}",
             document_id=f"document-{name}",
             section_id=section_id or f"section-{name}",
             document_title=f"문서 {name}",
@@ -151,6 +151,9 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
             source_url=f"https://docs.riido.io/document-{name}.md",
             category="guide",
             content=f"본문 {name}",
+            chunk_id=chunk_id,
+            document_version_id=chunk_id + 1000,
+            index_version_id=1,
         )
 
 

@@ -1,4 +1,5 @@
 import unittest
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
 from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
@@ -60,7 +61,6 @@ class VectorIndexItemTest(unittest.TestCase):
     @staticmethod
     def _chunk(index: int) -> RetrievalChunk:
         return RetrievalChunk(
-            chunk_id=f"chunk-{index}",
             document_id=f"document-{index}",
             section_id=f"section-{index}",
             document_title=f"문서 {index}",
@@ -96,6 +96,7 @@ class VectorIndexMainTest(unittest.TestCase):
 
         async def replace(_: object) -> None:
             events.append("replace")
+            return SimpleNamespace(id=77)
 
         build_chunks.return_value = self.chunks
         embedder = embedder_class.return_value
@@ -120,7 +121,7 @@ class VectorIndexMainTest(unittest.TestCase):
         )
         self.assertEqual(["embed_many", "replace"], events)
         print_result.assert_called_once_with(
-            "Vector corpus indexing 완료: 2개 Chunk"
+            "Vector corpus indexing 완료: 2개 Chunk, ACTIVE index=77"
         )
 
     @patch("retrieval.index_vector_corpus.replace_vector_corpus")
@@ -196,14 +197,16 @@ class VectorCorpusReplacementTest(unittest.IsolatedAsyncioTestCase):
         get_session_factory.return_value = session_factory
         items = [(VectorIndexItemTest._chunk(0), [0.1] * 1536)]
         store = store_class.return_value
-        store.replace_all = AsyncMock()
+        expected = SimpleNamespace(id=7)
+        store.replace_all = AsyncMock(return_value=expected)
 
-        await replace_vector_corpus(items)
+        result = await replace_vector_corpus(items)
 
         get_session_factory.assert_called_once_with()
         session_factory.assert_called_once_with()
         store_class.assert_called_once_with(session)
         store.replace_all.assert_awaited_once_with(items)
+        self.assertIs(expected, result)
         dispose_engine.assert_awaited_once_with()
 
 

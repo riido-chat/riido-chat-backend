@@ -11,11 +11,12 @@ from app.api.chat import router as chat_router
 from app.api.health import router as health_router
 from app.api.internal import router as internal_router
 from app.core.config import get_settings
-from app.database.session import dispose_engine
+from app.database.session import dispose_engine, get_session_factory
 from app.rag.corpus_state import CorpusNotLoadedError, CorpusState
 from app.rag.generation_service import GenerationService
 from generation.generator import OpenAIGenerator
 from retrieval.embedding import OpenAIEmbedder
+from retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     try:
         corpus_state = CorpusState(get_settings().corpus_dir)
         app.state.corpus_state = corpus_state
-        _load_corpus_if_available(corpus_state)
+        await _load_corpus_if_available(corpus_state)
         app.state.embedder = OpenAIEmbedder()
         app.state.generation_service = GenerationService(OpenAIGenerator())
         yield
@@ -34,12 +35,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await dispose_engine()
 
 
-def _load_corpus_if_available(corpus_state: CorpusState) -> None:
-    """corpus가 준비되어 있으면 적재하고, 없으면 미적재 상태로 기동한다."""
+async def _load_corpus_if_available(corpus_state: CorpusState) -> None:
+    """ACTIVE index가 준비되어 있으면 BM25 corpus를 적재한다."""
 
     try:
-        snapshot = corpus_state.load()
-    except (FileNotFoundError, ValueError) as exc:
+        async with get_session_factory()() as session:
+            chunks = await PgVectorStore(session).load_active_chunks()
+        snapshot = corpus_state.replace(chunks)
+    except (ActiveIndexNotFoundError, ValueError) as exc:
         logger.warning("corpus 미적재 상태로 기동합니다: %s", exc)
         return
 

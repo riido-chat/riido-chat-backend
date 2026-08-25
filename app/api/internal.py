@@ -5,9 +5,12 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database.session import get_db_session
 from app.rag.corpus_state import CorpusSnapshot, CorpusState
 from app.rag.dependencies import get_corpus_state
+from retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
 
 
 router = APIRouter(prefix="/internal", tags=["internal"])
@@ -45,12 +48,14 @@ async def read_corpus_status(
 @router.post("/corpus/reload", summary="검색 corpus 재적재")
 async def reload_corpus(
     corpus_state: CorpusState = Depends(get_corpus_state),
+    session: AsyncSession = Depends(get_db_session),
 ) -> CorpusStatusResponse:
-    """정제 문서를 다시 읽어 BM25 인덱스를 교체한다."""
+    """ACTIVE index의 Chunk로 BM25 인덱스를 교체한다."""
 
     try:
-        snapshot = corpus_state.load()
-    except (FileNotFoundError, ValueError) as exc:
+        chunks = await PgVectorStore(session).load_active_chunks()
+        snapshot = corpus_state.replace(chunks)
+    except (ActiveIndexNotFoundError, ValueError) as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(exc),

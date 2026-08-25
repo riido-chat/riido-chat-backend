@@ -17,7 +17,6 @@ from app.rag.generation_service import GenerationService
 from generation.generator import OpenAIGenerator
 from generation.models import FinalGenerationResult
 from retrieval.bm25_retriever import BM25Retriever
-from retrieval.corpus import build_retrieval_chunks
 from retrieval.embedding import OpenAIEmbedder
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.models import HybridRetrievalResult
@@ -59,13 +58,13 @@ def print_generation_result(
 
 
 async def run(question: str) -> None:
-    bm25_retriever = BM25Retriever(build_retrieval_chunks())
-
     try:
         async with get_session_factory()() as session:
+            store = PgVectorStore(session)
+            bm25_retriever = BM25Retriever(await store.load_active_chunks())
             vector_retriever = VectorRetriever(
                 OpenAIEmbedder(),
-                PgVectorStore(session),
+                store,
             )
             hybrid_retriever = HybridRetriever(
                 bm25_retriever,

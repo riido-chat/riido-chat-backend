@@ -34,7 +34,7 @@ class EmbeddingTextTest(unittest.TestCase):
         text = build_embedding_text(chunk)
 
         self.assertEqual("문서 제목\n설정\n전체 본문", text)
-        self.assertNotIn(chunk.chunk_id, text)
+        self.assertIsNone(chunk.chunk_id)
         self.assertNotIn(chunk.document_id, text)
         self.assertNotIn(chunk.section_id, text)
         self.assertNotIn(chunk.source_url, text)
@@ -43,7 +43,6 @@ class EmbeddingTextTest(unittest.TestCase):
     @staticmethod
     def _retrieval_chunk(section_path: Tuple[str, ...]) -> RetrievalChunk:
         return RetrievalChunk(
-            chunk_id="chunk-metadata",
             document_id="document-metadata",
             section_id="section-metadata",
             document_title="문서 제목",

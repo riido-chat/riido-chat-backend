@@ -42,17 +42,17 @@ class BM25RetrieverTest(unittest.TestCase):
     def test_searches_document_title(self) -> None:
         results = self.retriever.search("캘린더")
 
-        self.assertEqual("document-id-0:0", results[0].chunk.chunk_id)
+        self.assertEqual(1, results[0].chunk.chunk_id)
 
     def test_searches_section_path(self) -> None:
         results = self.retriever.search("이슈 생성")
 
-        self.assertEqual("document-id-1:0", results[0].chunk.chunk_id)
+        self.assertEqual(2, results[0].chunk.chunk_id)
 
     def test_searches_content(self) -> None:
         results = self.retriever.search("기록")
 
-        self.assertEqual("document-id-2:0", results[0].chunk.chunk_id)
+        self.assertEqual(3, results[0].chunk.chunk_id)
 
     def test_builds_search_text_without_duplicate_document_title(self) -> None:
         chunk = self.chunks[0]
@@ -123,7 +123,9 @@ class BM25RetrieverTest(unittest.TestCase):
 
         retrieval_chunk = RetrievalChunk.from_document_chunk(document, chunk)
 
-        self.assertEqual("chunk-id", retrieval_chunk.chunk_id)
+        self.assertIsNone(retrieval_chunk.chunk_id)
+        self.assertIsNone(retrieval_chunk.document_version_id)
+        self.assertIsNone(retrieval_chunk.index_version_id)
         self.assertEqual("document-id", retrieval_chunk.document_id)
         self.assertEqual("section-id", retrieval_chunk.section_id)
         self.assertEqual("문서 제목", retrieval_chunk.document_title)
@@ -140,7 +142,6 @@ class BM25RetrieverTest(unittest.TestCase):
         content: str,
     ) -> RetrievalChunk:
         return RetrievalChunk(
-            chunk_id=f"document-id-{index}:0",
             document_id=f"document-id-{index}",
             section_id=f"document-id-{index}:0",
             document_title=document_title,
@@ -148,6 +149,9 @@ class BM25RetrieverTest(unittest.TestCase):
             source_url=f"https://docs.riido.io/document-{index}.md",
             category="test",
             content=content,
+            chunk_id=index + 1,
+            document_version_id=index + 101,
+            index_version_id=1,
         )
 
 
