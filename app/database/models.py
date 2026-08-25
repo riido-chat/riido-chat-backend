@@ -5,8 +5,6 @@
 - 대화·RAG 영역: conversations → rag_runs → retrieval_results / model_calls / answer_citations / feedbacks
 - Legacy: ERD 도입 전 Vector Retrieval 최소 테이블(legacy_*).
   파이프라인 → DB 적재 매핑 확정 후 ERD 테이블로 흡수하고 제거한다.
-
-기준 문서: docs/04-통합ERD.md (v0.2.2), docs/92-현행ID체계참고.md
 """
 
 import enum
@@ -34,12 +32,12 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
 
-# 확정된 임베딩 차원 (OpenAI text embedding, 1536차원 고정 방침 — docs/90 반영 이력)
+# 확정된 임베딩 차원. OpenAI text embedding 1536차원으로 고정한다
 EMBEDDING_DIMENSIONS = 1536
 
 
 # ---------------------------------------------------------------------------
-# 상태 Enum (docs/02-상태기준.md)
+# 상태 Enum
 # 저장은 VARCHAR + CHECK 제약을 사용해 값 추가·변경 시 마이그레이션을 단순화한다.
 # ---------------------------------------------------------------------------
 
@@ -89,7 +87,32 @@ class AnswerStatus(str, enum.Enum):
     CANCELLED = "CANCELLED"
 
 
-def _status_enum(enum_cls: type[enum.Enum], name: str) -> SAEnum:
+class RetrieverType(str, enum.Enum):
+    """검색 후보를 만들어낸 검색기를 나타낸다. 같은 청크도 검색기별로 1행이다."""
+
+    BM25 = "BM25"
+    VECTOR = "VECTOR"
+
+
+class ModelCallPurpose(str, enum.Enum):
+    """모델 호출의 용도. QUERY_REWRITE, SUMMARIZATION은 구현 시 추가한다."""
+
+    EMBEDDING = "EMBEDDING"
+    GENERATION = "GENERATION"
+
+
+class FeedbackRating(str, enum.Enum):
+    """답변에 대한 사용자 평가. 취소는 없고 반대 값으로 변경만 가능하다."""
+
+    GOOD = "GOOD"
+    BAD = "BAD"
+
+
+def _status_enum(
+    enum_cls: type[enum.Enum],
+    name: str,
+    length: int = 20,
+) -> SAEnum:
     """VARCHAR + CHECK 제약으로 저장되는 상태 Enum 컬럼 타입을 만든다."""
 
     return SAEnum(
@@ -97,7 +120,7 @@ def _status_enum(enum_cls: type[enum.Enum], name: str) -> SAEnum:
         name=name,
         native_enum=False,
         create_constraint=True,
-        length=20,
+        length=length,
         values_callable=lambda cls: [member.value for member in cls],
     )
 
@@ -216,7 +239,7 @@ class ContentNode(Base):
     source_locator: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB)
     content_hash: Mapped[str] = mapped_column(String(128), nullable=False)
     # 재색인 간 동일 노드 추적용 신원 해시 — content_hash와 달리 내용이 바뀌어도 불변.
-    # MVP는 nullable로 시작하고 적재 로직 안정 후 제약을 조인다 (docs/92-현행ID체계참고.md 3.3)
+    # MVP는 nullable로 시작하고 적재 로직 안정 후 제약을 조인다
     node_identity_hash: Mapped[Optional[str]] = mapped_column(String(128))
     node_identity_kind: Mapped[Optional[str]] = mapped_column(String(30))
     metadata_: Mapped[Optional[dict[str, Any]]] = mapped_column("metadata", JSONB)
@@ -400,7 +423,7 @@ class Conversation(Base):
     )
     client_key: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True),
-        comment="익명/Mock 사용자 식별값. MVP에서는 기록하지 않고 로그인 확장 시 사용 (docs/90-A)",
+        comment="익명/Mock 사용자 식별값. MVP에서는 기록하지 않고 로그인 확장 시 사용",
     )
     status: Mapped[ConversationStatus] = mapped_column(
         _status_enum(ConversationStatus, "conversation_status"),
@@ -502,10 +525,16 @@ class RetrievalResultRow(Base):
         ForeignKey("document_chunks.id", ondelete="RESTRICT"),
         nullable=False,
     )
-    retriever_type: Mapped[str] = mapped_column(String(30), nullable=False)
+    retriever_type: Mapped[RetrieverType] = mapped_column(
+        _status_enum(RetrieverType, "retriever_type", length=30), nullable=False
+    )
     raw_score: Mapped[Optional[float]] = mapped_column(Numeric)
     retriever_rank: Mapped[Optional[int]] = mapped_column(Integer)
     fused_rank: Mapped[Optional[int]] = mapped_column(Integer)
+    fused_score: Mapped[Optional[float]] = mapped_column(
+        Numeric,
+        comment="융합 결과에 든 청크의 RRF 점수. 검색기별 행에 같은 값을 기록한다",
+    )
     selected_as_evidence: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
     )
@@ -527,7 +556,10 @@ class ModelCall(Base):
     index_run_id: Mapped[Optional[int]] = mapped_column(
         BigInteger, ForeignKey("index_runs.id", ondelete="CASCADE")
     )
-    purpose: Mapped[str] = mapped_column(String(40), nullable=False)
+    purpose: Mapped[ModelCallPurpose] = mapped_column(
+        _status_enum(ModelCallPurpose, "model_call_purpose", length=40),
+        nullable=False,
+    )
     provider: Mapped[str] = mapped_column(String(80), nullable=False)
     model_name: Mapped[str] = mapped_column(String(150), nullable=False)
     prompt_version: Mapped[Optional[str]] = mapped_column(String(50))
@@ -590,11 +622,19 @@ class Feedback(Base):
         nullable=False,
         unique=True,
     )
-    rating: Mapped[str] = mapped_column(String(30), nullable=False)
+    rating: Mapped[FeedbackRating] = mapped_column(
+        _status_enum(FeedbackRating, "feedback_rating", length=30), nullable=False
+    )
     reason_code: Mapped[Optional[str]] = mapped_column(String(50))
     comment: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[Any] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        comment="평가를 반대 값으로 변경한 시각. 신규 등록 시에는 created_at과 같다",
     )
 
 

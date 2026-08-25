@@ -8,10 +8,8 @@ ragRunId 하나로 재조회한다.
 - 이 계층은 commit 하지 않는다. add + flush까지만 수행하며
   트랜잭션 경계는 호출자(Chat API 등)가 관리한다.
 - 만료(24시간) 판정 같은 정책은 호출자 책임으로 두고,
-  여기서는 상태 전이 함수(mechanism)만 제공한다 (docs/90-A 논의 대기).
+  여기서는 상태 전이 함수(mechanism)만 제공한다.
 - 피드백 저장은 피드백 API 이슈에서 별도 구현한다.
-
-기준 문서: docs/04-통합ERD.md, docs/02-상태기준.md
 """
 
 import uuid
@@ -34,7 +32,7 @@ from app.database.models import (
     RetrievalResultRow,
 )
 
-# docs/02-상태기준.md — WITHHELD 보류 사유 4종
+# WITHHELD 보류 사유 4종
 WITHHELD_REASON_CODES = (
     "INSUFFICIENT_EVIDENCE",
     "AMBIGUOUS_QUESTION",
@@ -42,7 +40,7 @@ WITHHELD_REASON_CODES = (
     "UNVERIFIABLE_ANSWER",
 )
 
-# 확정 규칙: COMPLETED 답변의 유효 출처는 1~3개 (docs/07-출처인용형식.md)
+# 확정 규칙: COMPLETED 답변의 유효 출처는 1~3개
 MIN_CITATIONS = 1
 MAX_CITATIONS = 3
 
@@ -60,6 +58,7 @@ class RetrievalCandidateLog:
     raw_score: Optional[float] = None
     retriever_rank: Optional[int] = None
     fused_rank: Optional[int] = None
+    fused_score: Optional[float] = None
     selected_as_evidence: bool = False
     latency_ms: Optional[int] = None
 
@@ -328,6 +327,7 @@ class RagLogStore:
                 raw_score=candidate.raw_score,
                 retriever_rank=candidate.retriever_rank,
                 fused_rank=candidate.fused_rank,
+                fused_score=candidate.fused_score,
                 selected_as_evidence=candidate.selected_as_evidence,
                 latency_ms=candidate.latency_ms,
                 created_at=_utcnow(),

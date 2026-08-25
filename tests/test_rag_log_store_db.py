@@ -30,6 +30,8 @@ from app.database.models import (
     ExecutionStatus,
     IndexVersion,
     IndexVersionStatus,
+    ModelCallPurpose,
+    RetrieverType,
 )
 from app.rag.log_store import (
     CitationLog,
@@ -180,24 +182,26 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
             [
                 RetrievalCandidateLog(
                     chunk_id=self.chunk_id,
-                    retriever_type="BM25",
+                    retriever_type=RetrieverType.BM25.value,
                     raw_score=11.5,
                     retriever_rank=1,
                     fused_rank=1,
+                    fused_score=0.0328,
                     selected_as_evidence=True,
                 ),
                 RetrievalCandidateLog(
                     chunk_id=self.chunk_id,
-                    retriever_type="VECTOR",
+                    retriever_type=RetrieverType.VECTOR.value,
                     raw_score=0.87,
                     retriever_rank=1,
                     fused_rank=2,
+                    fused_score=0.0164,
                 ),
             ],
         )
         await self.store.record_model_call(
             rag_run_id=run.id,
-            purpose="ANSWER_GENERATION",
+            purpose=ModelCallPurpose.GENERATION.value,
             provider="openai",
             model_name="gpt-test",
             status=ExecutionStatus.SUCCESS,
@@ -227,8 +231,15 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(detail.run.citation_validated)
         self.assertEqual(2, len(detail.retrieval_results))
         self.assertTrue(detail.retrieval_results[0].selected_as_evidence)
+        self.assertEqual(
+            [0.0328, 0.0164],
+            [float(row.fused_score) for row in detail.retrieval_results],
+        )
         self.assertEqual(1, len(detail.model_calls))
-        self.assertEqual("ANSWER_GENERATION", detail.model_calls[0].purpose)
+        self.assertEqual(
+            ModelCallPurpose.GENERATION,
+            detail.model_calls[0].purpose,
+        )
         self.assertEqual(1, len(detail.citations))
         self.assertEqual(1, detail.citations[0].citation_order)
         self.assertIsNone(detail.feedback)
