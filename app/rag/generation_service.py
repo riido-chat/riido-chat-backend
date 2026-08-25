@@ -1,8 +1,9 @@
 """Generation 결과 검증과 최종 답변 상태 결정을 담당한다."""
 
 import re
-from typing import Dict, Sequence, Tuple
+from typing import Dict, Optional, Sequence, Tuple
 
+from app.rag.model_trace import ModelCallTrace
 from generation.generator import OpenAIGenerator, build_generation_context
 from generation.models import (
     Citation,
@@ -83,6 +84,8 @@ def validate_citations(
                     document_title=source.chunk.document_title,
                     section_path=source.chunk.section_path,
                     source_url=source.chunk.source_url,
+                    chunk_id=source.chunk.chunk_id,
+                    document_version_id=source.chunk.document_version_id,
                 )
             )
 
@@ -99,21 +102,29 @@ def validate_citations(
     )
 
 
-def _withheld_result(reason: FinalWithheldReason) -> FinalGenerationResult:
+def _withheld_result(
+    reason: FinalWithheldReason,
+    model_call: Optional[ModelCallTrace] = None,
+) -> FinalGenerationResult:
     return FinalGenerationResult(
         status=FinalAnswerStatus.WITHHELD,
         answer_markdown=WITHHELD_RESPONSES[reason],
         citations=(),
         withheld_reason=reason,
+        model_call=model_call,
     )
 
 
-def _error_result(error_code: str) -> FinalGenerationResult:
+def _error_result(
+    error_code: str,
+    model_call: Optional[ModelCallTrace] = None,
+) -> FinalGenerationResult:
     return FinalGenerationResult(
         status=FinalAnswerStatus.ERROR,
         answer_markdown=None,
         citations=(),
         error_code=error_code,
+        model_call=model_call,
     )
 
 
@@ -133,13 +144,17 @@ class GenerationService:
         sources = build_generation_context(retrieval_results)
 
         try:
-            generation_result = await self._generator.generate(question, sources)
+            call = await self._generator.generate_with_trace(question, sources)
         except Exception:
             return _error_result(UPSTREAM_ERROR_CODE)
 
+        if call.error is not None:
+            return _error_result(UPSTREAM_ERROR_CODE, call.trace)
+
+        generation_result = call.result
         if generation_result.status == GenerationStatus.WITHHELD:
             reason = FinalWithheldReason(generation_result.withheld_reason.value)
-            return _withheld_result(reason)
+            return _withheld_result(reason, call.trace)
 
         try:
             validated_answer = validate_citations(
@@ -147,12 +162,16 @@ class GenerationService:
                 sources,
             )
         except UnverifiableAnswerError:
-            return _withheld_result(FinalWithheldReason.UNVERIFIABLE_ANSWER)
+            return _withheld_result(
+                FinalWithheldReason.UNVERIFIABLE_ANSWER,
+                call.trace,
+            )
         except Exception:
-            return _error_result(CITATION_VALIDATION_ERROR_CODE)
+            return _error_result(CITATION_VALIDATION_ERROR_CODE, call.trace)
 
         return FinalGenerationResult(
             status=FinalAnswerStatus.COMPLETED,
             answer_markdown=validated_answer.answer_markdown,
             citations=validated_answer.citations,
+            model_call=call.trace,
         )

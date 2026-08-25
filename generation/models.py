@@ -6,6 +6,7 @@ from typing import Optional, Tuple
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
+from app.rag.model_trace import ModelCallTrace
 from retrieval.models import RetrievalChunk
 
 
@@ -78,12 +79,18 @@ class GenerationContextSource:
 
 @dataclass(frozen=True)
 class Citation:
-    """사용자에게 제공할 검증된 출처."""
+    """사용자에게 제공할 검증된 출처.
+
+    사용자 응답에는 쓰이지 않지만, 인용을 answer_citations에 남기려면 근거 청크의
+    DB 식별자가 필요하다. 병합된 인용은 대표 청크 하나의 식별자를 갖는다.
+    """
 
     citation_number: int
     document_title: str
     section_path: Tuple[str, ...]
     source_url: str
+    chunk_id: Optional[int] = None
+    document_version_id: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -95,6 +102,19 @@ class ValidatedAnswer:
 
 
 @dataclass(frozen=True)
+class GenerationCall:
+    """Generator 호출 한 번의 결과와 model_calls 기록용 관측값.
+
+    실패를 곧바로 던지지 않고 error에 담는 이유는, 실패한 호출도 재시도 횟수와
+    지연시간을 model_calls에 남겨야 하기 때문이다.
+    """
+
+    trace: ModelCallTrace
+    result: Optional[GenerationResult] = None
+    error: Optional[Exception] = None
+
+
+@dataclass(frozen=True)
 class FinalGenerationResult:
     """Application 계층에서 결정한 최종 Generation 결과."""
 
@@ -103,3 +123,4 @@ class FinalGenerationResult:
     citations: Tuple[Citation, ...]
     withheld_reason: Optional[FinalWithheldReason] = None
     error_code: Optional[str] = None
+    model_call: Optional[ModelCallTrace] = None
