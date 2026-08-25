@@ -1,4 +1,5 @@
 import unittest
+import uuid
 
 from pydantic import TypeAdapter, ValidationError
 
@@ -31,12 +32,21 @@ class ChatRequestTest(unittest.TestCase):
                 with self.assertRaises(ValidationError):
                     ChatRequest(question=question)
 
+    def test_accepts_optional_conversation_id(self) -> None:
+        conversation_id = "6abcc9de-f92d-4f26-8ca8-576fdde882c7"
+
+        request = ChatRequest(question="질문", conversationId=conversation_id)
+
+        self.assertEqual(uuid.UUID(conversation_id), request.conversation_id)
+        self.assertIsNone(ChatRequest(question="질문").conversation_id)
+
     def test_rejects_fields_outside_the_mvp_request_contract(self) -> None:
         with self.assertRaises(ValidationError):
-            ChatRequest(
-                question="질문",
-                conversationId="6abcc9de-f92d-4f26-8ca8-576fdde882c7",
-            )
+            ChatRequest(question="질문", clientKey="anonymous")
+
+
+CONVERSATION_ID = "8f4b2c1a-9d3e-4f7a-b6c5-2e8d9a0f1b3c"
+RAG_RUN_ID = "c7a91e42-5b8f-4d2c-a1e6-9f0b3d7c8e5a"
 
 
 class ChatResponseTest(unittest.TestCase):
@@ -45,6 +55,8 @@ class ChatResponseTest(unittest.TestCase):
     def test_serializes_completed_response_with_camel_case_fields(self) -> None:
         response = ChatCompletedResponse(
             status=ChatResponseStatus.COMPLETED,
+            conversation_id=uuid.UUID(CONVERSATION_ID),
+            rag_run_id=uuid.UUID(RAG_RUN_ID),
             answer=ChatAnswer(answer_markdown="초대할 수 있습니다. [1]"),
             citations=[
                 ChatCitation(
@@ -59,6 +71,8 @@ class ChatResponseTest(unittest.TestCase):
         self.assertEqual(
             {
                 "status": "COMPLETED",
+                "conversationId": CONVERSATION_ID,
+                "ragRunId": RAG_RUN_ID,
                 "answer": {"answerMarkdown": "초대할 수 있습니다. [1]"},
                 "citations": [
                     {
@@ -76,6 +90,8 @@ class ChatResponseTest(unittest.TestCase):
         response = self.response_adapter.validate_python(
             {
                 "status": "COMPLETED",
+                "conversationId": CONVERSATION_ID,
+                "ragRunId": RAG_RUN_ID,
                 "answer": {"answerMarkdown": "완료된 답변입니다. [1]"},
                 "citations": [
                     {
@@ -96,6 +112,8 @@ class ChatResponseTest(unittest.TestCase):
                 response = self.response_adapter.validate_python(
                     {
                         "status": "WITHHELD",
+                        "conversationId": CONVERSATION_ID,
+                        "ragRunId": RAG_RUN_ID,
                         "answer": None,
                         "withheld": {
                             "reasonCode": reason.value,
@@ -112,6 +130,8 @@ class ChatResponseTest(unittest.TestCase):
         response = self.response_adapter.validate_python(
             {
                 "status": "ERROR",
+                "conversationId": CONVERSATION_ID,
+                "ragRunId": RAG_RUN_ID,
                 "answer": None,
                 "error": {
                     "code": "INTERNAL_ERROR",
@@ -125,16 +145,52 @@ class ChatResponseTest(unittest.TestCase):
 
         self.assertIsInstance(response, ChatErrorResponse)
         self.assertEqual(ChatErrorCode.INTERNAL_ERROR, response.error.code)
+        self.assertEqual(uuid.UUID(RAG_RUN_ID), response.rag_run_id)
+
+    def test_allows_error_response_without_identifiers(self) -> None:
+        response = self.response_adapter.validate_python(
+            {
+                "status": "ERROR",
+                "conversationId": None,
+                "ragRunId": None,
+                "answer": None,
+                "error": {
+                    "code": "SERVICE_UNAVAILABLE",
+                    "message": "검색 데이터가 아직 준비되지 않았습니다.",
+                },
+                "citations": [],
+            }
+        )
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.assertIsNone(response.conversation_id)
+        self.assertIsNone(response.rag_run_id)
 
     def test_enforces_state_specific_response_shape(self) -> None:
         invalid_cases = (
             {
                 "status": "COMPLETED",
+                "conversationId": CONVERSATION_ID,
+                "ragRunId": RAG_RUN_ID,
                 "answer": {"answerMarkdown": "출처가 없는 답변"},
                 "citations": [],
             },
             {
+                "status": "COMPLETED",
+                "answer": {"answerMarkdown": "식별자가 없는 답변 [1]"},
+                "citations": [
+                    {
+                        "citationNumber": 1,
+                        "documentTitle": "문서",
+                        "sectionPath": ["문서", "섹션"],
+                        "sourceUrl": "https://docs.riido.io/guide",
+                    }
+                ],
+            },
+            {
                 "status": "WITHHELD",
+                "conversationId": CONVERSATION_ID,
+                "ragRunId": RAG_RUN_ID,
                 "answer": None,
                 "withheld": {
                     "reasonCode": "INSUFFICIENT_EVIDENCE",
@@ -167,8 +223,6 @@ class ChatResponseTest(unittest.TestCase):
 
     def test_keeps_http_dto_separate_from_internal_generation_result(self) -> None:
         self.assertIsNot(ChatCompletedResponse, FinalGenerationResult)
-        self.assertNotIn("conversation_id", ChatRequest.model_fields)
-        self.assertNotIn("rag_run_id", ChatCompletedResponse.model_fields)
         self.assertNotIn("summary", ChatAnswer.model_fields)
         self.assertNotIn("content_markdown", ChatAnswer.model_fields)
 

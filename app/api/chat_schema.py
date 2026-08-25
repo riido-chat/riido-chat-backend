@@ -1,7 +1,8 @@
 """Chat API MVP의 request/response HTTP DTO를 정의한다."""
 
+import uuid
 from enum import Enum
-from typing import Annotated, List, Literal, Union
+from typing import Annotated, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -19,6 +20,11 @@ class ChatRequest(BaseModel):
     model_config = HTTP_DTO_CONFIG
 
     question: str
+    conversation_id: Optional[uuid.UUID] = Field(
+        default=None,
+        alias="conversationId",
+        description="없으면 새 대화를 만들고, 있으면 해당 대화의 다음 턴으로 잇는다",
+    )
 
     @field_validator("question")
     @classmethod
@@ -51,6 +57,7 @@ class ChatErrorCode(str, Enum):
 
     INTERNAL_ERROR = "INTERNAL_ERROR"
     SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE"
+    NOT_FOUND = "NOT_FOUND"
 
 
 class ChatAnswer(BaseModel):
@@ -96,6 +103,8 @@ class ChatCompletedResponse(BaseModel):
     model_config = HTTP_DTO_CONFIG
 
     status: Literal[ChatResponseStatus.COMPLETED]
+    conversation_id: uuid.UUID = Field(alias="conversationId")
+    rag_run_id: uuid.UUID = Field(alias="ragRunId")
     answer: ChatAnswer
     citations: List[ChatCitation] = Field(min_length=1, max_length=3)
 
@@ -106,17 +115,27 @@ class ChatWithheldResponse(BaseModel):
     model_config = HTTP_DTO_CONFIG
 
     status: Literal[ChatResponseStatus.WITHHELD]
+    conversation_id: uuid.UUID = Field(alias="conversationId")
+    rag_run_id: uuid.UUID = Field(alias="ragRunId")
     answer: None
     withheld: ChatWithheld
     citations: List[ChatCitation] = Field(max_length=0)
 
 
 class ChatErrorResponse(BaseModel):
-    """기술 실패로 답변하지 못한 결과."""
+    """기술 실패로 답변하지 못한 결과.
+
+    corpus 미적재나 대화 조회 실패처럼 턴을 시작하지도 못한 경우가 있어
+    두 식별자는 nullable이다.
+    """
 
     model_config = HTTP_DTO_CONFIG
 
     status: Literal[ChatResponseStatus.ERROR]
+    conversation_id: Optional[uuid.UUID] = Field(
+        default=None, alias="conversationId"
+    )
+    rag_run_id: Optional[uuid.UUID] = Field(default=None, alias="ragRunId")
     answer: None
     error: ChatError
     citations: List[ChatCitation] = Field(max_length=0)

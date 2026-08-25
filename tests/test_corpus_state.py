@@ -27,6 +27,15 @@ class CorpusStateTest(unittest.TestCase):
         with self.assertRaises(CorpusNotLoadedError):
             self.state.get_retriever()
 
+    def test_index_version_id_raises_when_corpus_is_not_loaded(self) -> None:
+        with self.assertRaises(CorpusNotLoadedError):
+            self.state.index_version_id
+
+    def test_index_version_id_matches_the_loaded_corpus(self) -> None:
+        self.state.replace(self.chunks)
+
+        self.assertEqual(7, self.state.index_version_id)
+
     def test_replace_rejects_empty_or_unpersisted_corpus(self) -> None:
         with self.assertRaisesRegex(ValueError, "적재된 Chunk"):
             self.state.replace([])
