@@ -267,6 +267,23 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([1, 2], [r.turn_no for r in runs])
         self.assertEqual(AnswerStatus.WITHHELD, runs[0].status)
         self.assertEqual("INSUFFICIENT_EVIDENCE", runs[0].withheld_reason_code)
+        # 인용 검증에 도달하지 못한 보류는 판정 자체가 없다
+        self.assertIsNone(runs[0].citation_validated)
+
+    async def test_records_citation_validation_only_when_it_ran(self) -> None:
+        conversation = await self.store.create_conversation()
+        run = await self.store.start_rag_run(
+            conversation.id,
+            user_query="인용 검증 실패",
+            index_version_id=self.index_version_id,
+            context_strategy="WINDOW",
+        )
+
+        withheld = await self.store.withhold_rag_run(
+            run.id, reason_code="UNVERIFIABLE_ANSWER"
+        )
+
+        self.assertFalse(withheld.citation_validated)
 
     async def test_status_transitions_and_guards(self) -> None:
         conversation = await self.store.create_conversation()

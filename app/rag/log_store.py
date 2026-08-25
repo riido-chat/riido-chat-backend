@@ -33,11 +33,12 @@ from app.database.models import (
 )
 
 # WITHHELD 보류 사유 4종
+UNVERIFIABLE_ANSWER_REASON_CODE = "UNVERIFIABLE_ANSWER"
 WITHHELD_REASON_CODES = (
     "INSUFFICIENT_EVIDENCE",
     "AMBIGUOUS_QUESTION",
     "OUT_OF_SCOPE",
-    "UNVERIFIABLE_ANSWER",
+    UNVERIFIABLE_ANSWER_REASON_CODE,
 )
 
 # 확정 규칙: COMPLETED 답변의 유효 출처는 1~3개
@@ -260,7 +261,11 @@ class RagLogStore:
         run = await self._get_processing_run(rag_run_id)
         run.status = AnswerStatus.WITHHELD
         run.withheld_reason_code = reason_code
-        run.citation_validated = False
+        # 인용 검증까지 갔다가 유효 인용이 0개인 경우만 false다.
+        # 근거 부족 등으로 생성 단계에서 보류하면 검증에 도달하지 않아 null로 둔다.
+        run.citation_validated = (
+            False if reason_code == UNVERIFIABLE_ANSWER_REASON_CODE else None
+        )
         run.total_latency_ms = total_latency_ms
         run.completed_at = _utcnow()
         await self._touch_conversation(run.conversation_id)
