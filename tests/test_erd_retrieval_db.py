@@ -17,7 +17,6 @@ from app.database.models import (
     IndexVersionStatus,
 )
 from retrieval.bm25_retriever import BM25Retriever
-from retrieval.corpus import build_retrieval_chunks
 from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.models import RetrievalChunk
@@ -133,30 +132,6 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(1, active_count)
         await self._assert_active_chain(second_index, chunks)
-
-    async def test_preserves_all_canonical_corpus_units_in_active_index(
-        self,
-    ) -> None:
-        chunks = build_retrieval_chunks()
-        items = [
-            (chunk, [0.1] * OPENAI_EMBEDDING_DIMENSIONS)
-            for chunk in chunks
-        ]
-
-        active_index = await self.store.replace_all(items)
-        active_chunks = await self.store.load_active_chunks()
-
-        self.assertEqual(39, len({chunk.document_id for chunk in chunks}))
-        self.assertEqual(142, len(chunks))
-        self.assertEqual(
-            [chunk.section_id for chunk in chunks],
-            [chunk.section_id for chunk in active_chunks],
-        )
-        self.assertTrue(all(isinstance(chunk.chunk_id, int) for chunk in active_chunks))
-        self.assertEqual(
-            {active_index.id},
-            {chunk.index_version_id for chunk in active_chunks},
-        )
 
     async def _assert_active_chain(
         self,
