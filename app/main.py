@@ -12,6 +12,10 @@ from app.api.health import router as health_router
 from app.api.internal import router as internal_router
 from app.core.config import get_settings
 from app.database.session import dispose_engine, get_session_factory
+from app.rag.chat_service import (
+    ConversationNotFoundError,
+    conversation_not_found_response,
+)
 from app.rag.corpus_state import CorpusNotLoadedError, CorpusState
 from app.rag.generation_service import GenerationService
 from generation.generator import OpenAIGenerator
@@ -82,6 +86,20 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content=corpus_unavailable_response().model_dump(
+                mode="json",
+                by_alias=True,
+            ),
+        )
+
+    @app.exception_handler(ConversationNotFoundError)
+    async def handle_conversation_not_found(
+        _: Request,
+        exc: ConversationNotFoundError,
+    ) -> JSONResponse:
+        logger.info("이어갈 수 없는 대화로 요청을 받았습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=conversation_not_found_response().model_dump(
                 mode="json",
                 by_alias=True,
             ),

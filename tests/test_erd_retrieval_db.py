@@ -17,7 +17,7 @@ from app.database.models import (
     IndexVersionStatus,
 )
 from retrieval.bm25_retriever import BM25Retriever
-from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
+from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS, EmbeddingResponse
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.models import RetrievalChunk
 from retrieval.pgvector_store import PgVectorStore
@@ -27,6 +27,12 @@ from retrieval.vector_retriever import VectorRetriever
 class _StubEmbedder:
     def embed(self, text: str) -> list[float]:
         return [0.1] * OPENAI_EMBEDDING_DIMENSIONS
+
+    def embed_many_with_usage(self, texts) -> EmbeddingResponse:
+        return EmbeddingResponse(
+            embeddings=[[0.1] * OPENAI_EMBEDDING_DIMENSIONS for _ in texts],
+            input_tokens=len(texts),
+        )
 
 
 async def _check_database_available(url: str) -> bool:

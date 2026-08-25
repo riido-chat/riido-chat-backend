@@ -36,6 +36,7 @@ class CorpusState:
     def __init__(self, corpus_dir: Union[str, Path]) -> None:
         self._manifest_path = Path(corpus_dir) / CLEAN_MANIFEST_FILENAME
         self._retriever: Optional[BM25Retriever] = None
+        self._index_version_id: Optional[int] = None
         self._chunk_count = 0
         self._document_count = 0
         self._loaded_at: Optional[datetime] = None
@@ -48,6 +49,20 @@ class CorpusState:
     @property
     def is_loaded(self) -> bool:
         return self._retriever is not None
+
+    @property
+    def index_version_id(self) -> int:
+        """적재된 corpus의 ACTIVE index version을 반환한다.
+
+        rag_run은 어느 색인으로 답했는지 남겨야 하므로, 검색에 실제로 사용한
+        BM25 corpus와 같은 index version을 그대로 쓴다.
+        """
+
+        if self._index_version_id is None:
+            raise CorpusNotLoadedError(
+                f"corpus가 적재되지 않았습니다: {self._manifest_path}"
+            )
+        return self._index_version_id
 
     def get_retriever(self) -> BM25Retriever:
         """적재된 BM25Retriever를 반환하고, 미적재면 예외를 발생시킨다."""
@@ -73,11 +88,13 @@ class CorpusState:
         ):
             raise ValueError("BM25 corpus에 신규 ERD 식별자가 없는 Chunk가 있습니다.")
 
+        index_version_id = next(iter(index_version_ids))
         self._retriever = BM25Retriever(chunks)
+        self._index_version_id = index_version_id
         self._chunk_count = len(chunks)
         self._document_count = len({chunk.document_id for chunk in chunks})
         self._loaded_at = datetime.now(timezone.utc)
-        self._source = f"index_version:{next(iter(index_version_ids))}"
+        self._source = f"index_version:{index_version_id}"
         return self.snapshot()
 
     def snapshot(self) -> CorpusSnapshot:

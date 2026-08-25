@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
+from app.rag.model_trace import ModelCallTrace
 from pipeline.document.models import Chunk, NormalizedDocument
 
 
@@ -65,3 +66,30 @@ class HybridRetrievalResult:
     final_rank: int
     bm25_rank: Optional[int]
     vector_rank: Optional[int]
+
+
+@dataclass(frozen=True)
+class VectorSearchCall:
+    """Vector 검색 한 번의 결과와 Query embedding 호출 관측값.
+
+    실패를 예외로 던지지 않고 error에 담아 올리는 이유는, 실패한 embedding 호출도
+    model_calls에 남겨야 하기 때문이다.
+    """
+
+    results: Tuple[RetrievalResult, ...] = ()
+    latency_ms: int = 0
+    embedding_call: Optional[ModelCallTrace] = None
+    error: Optional[Exception] = None
+
+
+@dataclass(frozen=True)
+class HybridSearchCall:
+    """Hybrid 검색 한 번의 검색기별 후보 전체와 융합 결과, 모델 호출 관측값."""
+
+    bm25_results: Tuple[RetrievalResult, ...] = ()
+    vector_results: Tuple[RetrievalResult, ...] = ()
+    fused_results: Tuple[HybridRetrievalResult, ...] = ()
+    bm25_latency_ms: int = 0
+    vector_latency_ms: int = 0
+    embedding_call: Optional[ModelCallTrace] = None
+    error: Optional[Exception] = None

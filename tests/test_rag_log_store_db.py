@@ -30,6 +30,8 @@ from app.database.models import (
     ExecutionStatus,
     IndexVersion,
     IndexVersionStatus,
+    ModelCallPurpose,
+    RetrieverType,
 )
 from app.rag.log_store import (
     CitationLog,
@@ -180,24 +182,26 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
             [
                 RetrievalCandidateLog(
                     chunk_id=self.chunk_id,
-                    retriever_type="BM25",
+                    retriever_type=RetrieverType.BM25.value,
                     raw_score=11.5,
                     retriever_rank=1,
                     fused_rank=1,
+                    fused_score=0.0328,
                     selected_as_evidence=True,
                 ),
                 RetrievalCandidateLog(
                     chunk_id=self.chunk_id,
-                    retriever_type="VECTOR",
+                    retriever_type=RetrieverType.VECTOR.value,
                     raw_score=0.87,
                     retriever_rank=1,
                     fused_rank=2,
+                    fused_score=0.0164,
                 ),
             ],
         )
         await self.store.record_model_call(
             rag_run_id=run.id,
-            purpose="ANSWER_GENERATION",
+            purpose=ModelCallPurpose.GENERATION.value,
             provider="openai",
             model_name="gpt-test",
             status=ExecutionStatus.SUCCESS,
@@ -227,8 +231,15 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(detail.run.citation_validated)
         self.assertEqual(2, len(detail.retrieval_results))
         self.assertTrue(detail.retrieval_results[0].selected_as_evidence)
+        self.assertEqual(
+            [0.0328, 0.0164],
+            [float(row.fused_score) for row in detail.retrieval_results],
+        )
         self.assertEqual(1, len(detail.model_calls))
-        self.assertEqual("ANSWER_GENERATION", detail.model_calls[0].purpose)
+        self.assertEqual(
+            ModelCallPurpose.GENERATION,
+            detail.model_calls[0].purpose,
+        )
         self.assertEqual(1, len(detail.citations))
         self.assertEqual(1, detail.citations[0].citation_order)
         self.assertIsNone(detail.feedback)
@@ -256,6 +267,23 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([1, 2], [r.turn_no for r in runs])
         self.assertEqual(AnswerStatus.WITHHELD, runs[0].status)
         self.assertEqual("INSUFFICIENT_EVIDENCE", runs[0].withheld_reason_code)
+        # 인용 검증에 도달하지 못한 보류는 판정 자체가 없다
+        self.assertIsNone(runs[0].citation_validated)
+
+    async def test_records_citation_validation_only_when_it_ran(self) -> None:
+        conversation = await self.store.create_conversation()
+        run = await self.store.start_rag_run(
+            conversation.id,
+            user_query="인용 검증 실패",
+            index_version_id=self.index_version_id,
+            context_strategy="WINDOW",
+        )
+
+        withheld = await self.store.withhold_rag_run(
+            run.id, reason_code="UNVERIFIABLE_ANSWER"
+        )
+
+        self.assertFalse(withheld.citation_validated)
 
     async def test_status_transitions_and_guards(self) -> None:
         conversation = await self.store.create_conversation()

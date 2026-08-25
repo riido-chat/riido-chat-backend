@@ -1,10 +1,13 @@
 """BM25와 Vector 검색 결과를 RRF로 결합한다."""
 
+import time
+from dataclasses import replace
 from typing import Dict, List, Sequence
 
 from retrieval.bm25_retriever import BM25Retriever
 from retrieval.models import (
     HybridRetrievalResult,
+    HybridSearchCall,
     RetrievalChunk,
     RetrievalResult,
 )
@@ -14,6 +17,10 @@ from retrieval.vector_retriever import VectorRetriever
 CANDIDATE_K = 10
 DEFAULT_FINAL_TOP_K = 5
 RRF_RANK_CONSTANT = 60
+
+
+def _elapsed_ms(started: float) -> int:
+    return int((time.perf_counter() - started) * 1000)
 
 
 def fuse_rrf_results(
@@ -106,19 +113,59 @@ class HybridRetriever:
     ) -> List[HybridRetrievalResult]:
         """각 Retriever의 Top-10을 조회해 RRF 결과를 반환한다."""
 
+        call = await self.search_with_trace(query, top_k=top_k)
+        if call.error is not None:
+            raise call.error
+        return list(call.fused_results)
+
+    async def search_with_trace(
+        self,
+        query: str,
+        top_k: int = DEFAULT_FINAL_TOP_K,
+    ) -> HybridSearchCall:
+        """융합 결과와 함께 검색기별 후보 전체와 모델 호출 관측값을 반환한다.
+
+        RAG 실행 로그는 융합에서 탈락한 후보까지 남겨야 검색 품질을 되짚을 수
+        있으므로, 여기서 버리지 않고 호출자에게 그대로 올린다.
+        """
+
         if top_k <= 0:
             raise ValueError("top_k는 1 이상이어야 합니다.")
 
-        bm25_results = self._bm25_retriever.search(
+        bm25_started = time.perf_counter()
+        try:
+            bm25_results = self._bm25_retriever.search(
+                query,
+                top_k=CANDIDATE_K,
+            )
+        except Exception as error:
+            return HybridSearchCall(
+                bm25_latency_ms=_elapsed_ms(bm25_started),
+                error=error,
+            )
+        bm25_latency_ms = _elapsed_ms(bm25_started)
+
+        vector_call = await self._vector_retriever.search_with_trace(
             query,
             top_k=CANDIDATE_K,
         )
-        vector_results = await self._vector_retriever.search(
-            query,
-            top_k=CANDIDATE_K,
+        partial = HybridSearchCall(
+            bm25_results=tuple(bm25_results),
+            vector_results=vector_call.results,
+            bm25_latency_ms=bm25_latency_ms,
+            vector_latency_ms=vector_call.latency_ms,
+            embedding_call=vector_call.embedding_call,
         )
-        return fuse_rrf_results(
-            bm25_results,
-            vector_results,
-            top_k=top_k,
-        )
+        if vector_call.error is not None:
+            return replace(partial, error=vector_call.error)
+
+        try:
+            fused_results = fuse_rrf_results(
+                bm25_results,
+                vector_call.results,
+                top_k=top_k,
+            )
+        except Exception as error:
+            return replace(partial, error=error)
+
+        return replace(partial, fused_results=tuple(fused_results))

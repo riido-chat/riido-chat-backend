@@ -148,6 +148,15 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
         self.assertIs(self.generation_service, second._generation_service)
         self.assertEqual(sessions, released_sessions)
 
+        # 검색과 로그가 같은 session을 공유해야 2단계 커밋이 하나의 경계가 된다
+        self.assertIs(sessions[0], first._session)
+        self.assertIs(sessions[0], first._log_store._session)
+        self.assertIs(sessions[1], second._session)
+        self.assertIs(sessions[1], second._log_store._session)
+        self.assertIsNot(first._log_store, second._log_store)
+        self.assertEqual(3, first._index_version_id)
+        self.assertEqual(3, second._index_version_id)
+
     @contextmanager
     def _patched_lifespan_dependencies(self):
         lifespan_session = AsyncMock(spec=AsyncSession)

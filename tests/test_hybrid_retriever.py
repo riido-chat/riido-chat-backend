@@ -9,7 +9,8 @@ from retrieval.hybrid_retriever import (
     HybridRetriever,
     fuse_rrf_results,
 )
-from retrieval.models import RetrievalChunk, RetrievalResult
+from app.rag.model_trace import ModelCallTrace
+from retrieval.models import RetrievalChunk, RetrievalResult, VectorSearchCall
 from retrieval.vector_retriever import VectorRetriever
 
 
@@ -30,10 +31,12 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
             self._result(chunk_a, score=100.0, rank=1),
             self._result(chunk_b, score=50.0, rank=2),
         ]
-        self.vector_retriever.search.return_value = [
-            self._result(chunk_b, score=0.9, rank=1),
-            self._result(chunk_c, score=0.8, rank=2),
-        ]
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall(
+            results=(
+                self._result(chunk_b, score=0.9, rank=1),
+                self._result(chunk_c, score=0.8, rank=2),
+            )
+        )
 
         results = await self.retriever.search("사용자 질문", top_k=10)
 
@@ -41,7 +44,7 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
             "사용자 질문",
             top_k=CANDIDATE_K,
         )
-        self.vector_retriever.search.assert_awaited_once_with(
+        self.vector_retriever.search_with_trace.assert_awaited_once_with(
             "사용자 질문",
             top_k=CANDIDATE_K,
         )
@@ -67,7 +70,7 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
             self._result(self._chunk(str(index)), score=1.0, rank=index)
             for index in range(1, 11)
         ]
-        self.vector_retriever.search.return_value = []
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall()
 
         results = await self.retriever.search("질문")
 
@@ -82,7 +85,7 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
             self._result(self._chunk(str(index)), score=1.0, rank=index)
             for index in range(1, 11)
         ]
-        self.vector_retriever.search.return_value = []
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall()
 
         results = await self.retriever.search("평가 질문", top_k=10)
 
@@ -96,7 +99,70 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
                     await self.retriever.search("질문", top_k=top_k)
 
         self.bm25_retriever.search.assert_not_called()
-        self.vector_retriever.search.assert_not_awaited()
+        self.vector_retriever.search_with_trace.assert_not_awaited()
+
+    async def test_trace_keeps_every_candidate_of_both_retrievers(self) -> None:
+        chunk_a = self._chunk("a")
+        chunk_b = self._chunk("b")
+        chunk_c = self._chunk("c")
+        embedding_call = ModelCallTrace(
+            provider="openai",
+            model_name="text-embedding-3-large",
+            succeeded=True,
+            latency_ms=21,
+        )
+        self.bm25_retriever.search.return_value = [
+            self._result(chunk_a, score=100.0, rank=1),
+            self._result(chunk_b, score=50.0, rank=2),
+        ]
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall(
+            results=(self._result(chunk_c, score=0.8, rank=1),),
+            latency_ms=42,
+            embedding_call=embedding_call,
+        )
+
+        call = await self.retriever.search_with_trace("질문", top_k=1)
+
+        self.assertIsNone(call.error)
+        self.assertEqual(2, len(call.bm25_results))
+        self.assertEqual(1, len(call.vector_results))
+        # 융합에서 탈락한 후보도 남는다
+        self.assertEqual(1, len(call.fused_results))
+        self.assertEqual(42, call.vector_latency_ms)
+        self.assertIs(embedding_call, call.embedding_call)
+
+    async def test_trace_keeps_candidates_when_vector_search_fails(self) -> None:
+        failure = RuntimeError("embedding unavailable")
+        self.bm25_retriever.search.return_value = [
+            self._result(self._chunk("a"), score=1.0, rank=1)
+        ]
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall(
+            error=failure
+        )
+
+        call = await self.retriever.search_with_trace("질문")
+
+        self.assertIs(failure, call.error)
+        self.assertEqual(1, len(call.bm25_results))
+        self.assertEqual((), call.fused_results)
+
+    async def test_trace_reports_fusion_failure(self) -> None:
+        unindexed = self._chunk("a")
+        unindexed = RetrievalChunk(
+            **{
+                **unindexed.__dict__,
+                "index_version_id": None,
+            }
+        )
+        self.bm25_retriever.search.return_value = [
+            self._result(unindexed, score=1.0, rank=1)
+        ]
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall()
+
+        call = await self.retriever.search_with_trace("질문")
+
+        self.assertIsInstance(call.error, ValueError)
+        self.assertEqual((), call.fused_results)
 
     def test_keeps_different_chunk_ids_with_same_section_id(self) -> None:
         bm25_chunk = self._chunk("a", section_id="shared-section")

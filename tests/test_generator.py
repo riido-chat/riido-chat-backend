@@ -8,6 +8,7 @@ from openai import APITimeoutError
 from pydantic import ValidationError
 
 from generation.generator import (
+    GENERATION_PROMPT_VERSION,
     MAX_CONTEXT_SOURCES,
     OPENAI_GENERATION_MODEL,
     PROMPT_V1,
@@ -267,6 +268,55 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
             max_retries=0,
             timeout=30.0,
         )
+
+    async def test_trace_reports_tokens_without_retry_on_first_success(self) -> None:
+        client = Mock()
+        client.responses.parse = AsyncMock(
+            return_value=SimpleNamespace(
+                output_parsed=self._answerable_result(),
+                usage=SimpleNamespace(input_tokens=1200, output_tokens=300),
+            )
+        )
+        generator = OpenAIGenerator(client=client)
+
+        call = await generator.generate_with_trace("질문", [])
+
+        self.assertIsNone(call.error)
+        self.assertTrue(call.trace.succeeded)
+        self.assertEqual(0, call.trace.retry_count)
+        self.assertEqual(1200, call.trace.input_tokens)
+        self.assertEqual(300, call.trace.output_tokens)
+        self.assertEqual(GENERATION_PROMPT_VERSION, call.trace.prompt_version)
+        self.assertEqual(OPENAI_GENERATION_MODEL, call.trace.model_name)
+
+    async def test_trace_counts_one_retry_as_a_single_logical_call(self) -> None:
+        client = Mock()
+        client.responses.parse = AsyncMock(
+            side_effect=[
+                APITimeoutError(httpx.Request("POST", "https://api.openai.com")),
+                SimpleNamespace(output_parsed=self._answerable_result()),
+            ]
+        )
+        generator = OpenAIGenerator(client=client)
+
+        call = await generator.generate_with_trace("질문", [])
+
+        self.assertIsNone(call.error)
+        self.assertEqual(1, call.trace.retry_count)
+
+    async def test_trace_keeps_last_error_when_every_attempt_fails(self) -> None:
+        error = APITimeoutError(httpx.Request("POST", "https://api.openai.com"))
+        client = Mock()
+        client.responses.parse = AsyncMock(side_effect=[error, error])
+        generator = OpenAIGenerator(client=client)
+
+        call = await generator.generate_with_trace("질문", [])
+
+        self.assertIs(error, call.error)
+        self.assertIsNone(call.result)
+        self.assertFalse(call.trace.succeeded)
+        self.assertEqual(1, call.trace.retry_count)
+        self.assertIsNotNone(call.trace.error_message)
 
     @staticmethod
     def _client_with_response(result: object) -> Mock:

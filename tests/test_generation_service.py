@@ -7,15 +7,40 @@ from app.rag.generation_service import (
     WITHHELD_RESPONSES,
     GenerationService,
 )
-from generation.generator import OpenAIGenerator
+from app.rag.model_trace import ModelCallTrace
+from generation.generator import (
+    GENERATION_PROMPT_VERSION,
+    OPENAI_GENERATION_MODEL,
+    OpenAIGenerator,
+)
 from generation.models import (
     FinalAnswerStatus,
     FinalWithheldReason,
+    GenerationCall,
     GenerationResult,
     GenerationStatus,
     GenerationWithheldReason,
 )
 from retrieval.models import HybridRetrievalResult, RetrievalChunk
+
+
+def _trace(succeeded: bool = True) -> ModelCallTrace:
+    return ModelCallTrace(
+        provider="openai",
+        model_name=OPENAI_GENERATION_MODEL,
+        succeeded=succeeded,
+        latency_ms=120,
+        retry_count=1 if not succeeded else 0,
+        prompt_version=GENERATION_PROMPT_VERSION,
+    )
+
+
+def _failed_trace() -> ModelCallTrace:
+    return _trace(succeeded=False)
+
+
+def _call(result: GenerationResult) -> GenerationCall:
+    return GenerationCall(trace=_trace(), result=result)
 
 
 class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
@@ -25,9 +50,11 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_completes_with_first_marker_order_and_repeated_source(self) -> None:
         results = [self._result(1), self._result(2)]
-        self.generator.generate.return_value = self._answerable(
-            "두 번째 근거입니다. [SOURCE_2] 첫 번째 근거입니다. "
-            "[SOURCE_1] 다시 두 번째입니다. [SOURCE_2]"
+        self.generator.generate_with_trace.return_value = _call(
+            self._answerable(
+                "두 번째 근거입니다. [SOURCE_2] 첫 번째 근거입니다. "
+                "[SOURCE_1] 다시 두 번째입니다. [SOURCE_2]"
+            )
         )
 
         result = await self.service.generate_answer("질문", results)
@@ -60,8 +87,10 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
             section_name="같은 섹션",
         )
         third = self._result(3)
-        self.generator.generate.return_value = self._answerable(
-            "첫 근거 [SOURCE_1] 중복 근거 [SOURCE_2] 다른 근거 [SOURCE_3]"
+        self.generator.generate_with_trace.return_value = _call(
+            self._answerable(
+                "첫 근거 [SOURCE_1] 중복 근거 [SOURCE_2] 다른 근거 [SOURCE_3]"
+            )
         )
 
         result = await self.service.generate_answer(
@@ -80,8 +109,10 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
     async def test_keeps_same_url_with_different_section_paths_separate(self) -> None:
         first = self._result(1, source_url="https://same", section_name="섹션 A")
         second = self._result(2, source_url="https://same", section_name="섹션 B")
-        self.generator.generate.return_value = self._answerable(
-            "A 근거 [SOURCE_1] B 근거 [SOURCE_2]"
+        self.generator.generate_with_trace.return_value = _call(
+            self._answerable(
+                "A 근거 [SOURCE_1] B 근거 [SOURCE_2]"
+            )
         )
 
         result = await self.service.generate_answer("질문", [first, second])
@@ -98,8 +129,10 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
 
         for answer_markdown in cases:
             with self.subTest(answer_markdown=answer_markdown):
-                self.generator.generate.return_value = self._answerable(
-                    answer_markdown
+                self.generator.generate_with_trace.return_value = _call(
+                    self._answerable(
+                        answer_markdown
+                    )
                 )
                 result = await self.service.generate_answer(
                     "질문",
@@ -123,10 +156,12 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
     async def test_uses_fixed_response_for_generator_withheld_reason(self) -> None:
         for reason in GenerationWithheldReason:
             with self.subTest(reason=reason):
-                self.generator.generate.return_value = GenerationResult(
-                    status=GenerationStatus.WITHHELD,
-                    answer_markdown=None,
-                    withheld_reason=reason,
+                self.generator.generate_with_trace.return_value = _call(
+                    GenerationResult(
+                        status=GenerationStatus.WITHHELD,
+                        answer_markdown=None,
+                        withheld_reason=reason,
+                    )
                 )
 
                 result = await self.service.generate_answer("질문", [])
@@ -158,7 +193,10 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_returns_error_when_generation_call_fails(self) -> None:
-        self.generator.generate.side_effect = RuntimeError("API failure")
+        self.generator.generate_with_trace.return_value = GenerationCall(
+            trace=_failed_trace(),
+            error=RuntimeError("API failure"),
+        )
 
         result = await self.service.generate_answer("질문", [])
 
@@ -171,7 +209,9 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
     async def test_returns_error_when_citation_validation_processing_fails(
         self,
     ) -> None:
-        self.generator.generate.return_value = self._answerable("답변 [SOURCE_1]")
+        self.generator.generate_with_trace.return_value = _call(
+            self._answerable("답변 [SOURCE_1]")
+        )
 
         with patch(
             "app.rag.generation_service.validate_citations",
@@ -183,6 +223,50 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(CITATION_VALIDATION_ERROR_CODE, result.error_code)
         self.assertIsNone(result.answer_markdown)
         self.assertEqual((), result.citations)
+
+    async def test_citations_carry_chunk_identifiers_for_logging(self) -> None:
+        results = [self._result(1), self._result(2)]
+        self.generator.generate_with_trace.return_value = _call(
+            self._answerable("첫 근거 [SOURCE_2]")
+        )
+
+        result = await self.service.generate_answer("질문", results)
+
+        citation = result.citations[0]
+        self.assertEqual(results[1].chunk.chunk_id, citation.chunk_id)
+        self.assertEqual(
+            results[1].chunk.document_version_id,
+            citation.document_version_id,
+        )
+
+    async def test_passes_model_call_trace_through_every_outcome(self) -> None:
+        results = [self._result(1)]
+
+        self.generator.generate_with_trace.return_value = _call(
+            self._answerable("근거 [SOURCE_1]")
+        )
+        completed = await self.service.generate_answer("질문", results)
+        self.assertIsNotNone(completed.model_call)
+        self.assertTrue(completed.model_call.succeeded)
+
+        self.generator.generate_with_trace.return_value = _call(
+            GenerationResult(
+                status=GenerationStatus.WITHHELD,
+                answer_markdown=None,
+                withheld_reason=GenerationWithheldReason.OUT_OF_SCOPE,
+            )
+        )
+        withheld = await self.service.generate_answer("질문", results)
+        self.assertIsNotNone(withheld.model_call)
+
+        self.generator.generate_with_trace.return_value = GenerationCall(
+            trace=_failed_trace(),
+            error=RuntimeError("API failure"),
+        )
+        failed = await self.service.generate_answer("질문", results)
+        self.assertIsNotNone(failed.model_call)
+        self.assertFalse(failed.model_call.succeeded)
+        self.assertEqual(1, failed.model_call.retry_count)
 
     @staticmethod
     def _answerable(answer_markdown: str) -> GenerationResult:

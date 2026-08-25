@@ -1,5 +1,6 @@
 """RetrievalChunk의 embedding 입력과 OpenAI embedding 생성을 관리한다."""
 
+from dataclasses import dataclass
 from typing import List, Optional, Sequence
 
 from openai import OpenAI
@@ -8,8 +9,17 @@ from app.core.config import get_settings
 from retrieval.models import RetrievalChunk
 
 
+OPENAI_EMBEDDING_PROVIDER = "openai"
 OPENAI_EMBEDDING_MODEL = "text-embedding-3-large"
 OPENAI_EMBEDDING_DIMENSIONS = 1536
+
+
+@dataclass(frozen=True)
+class EmbeddingResponse:
+    """embedding 결과와 model_calls에 남길 사용량."""
+
+    embeddings: List[List[float]]
+    input_tokens: Optional[int] = None
 
 
 def build_embedding_text(chunk: RetrievalChunk) -> str:
@@ -41,6 +51,14 @@ class OpenAIEmbedder:
         texts: Sequence[str],
     ) -> List[List[float]]:
         """여러 text의 embedding을 한 번의 요청으로 생성한다."""
+
+        return self.embed_many_with_usage(texts).embeddings
+
+    def embed_many_with_usage(
+        self,
+        texts: Sequence[str],
+    ) -> EmbeddingResponse:
+        """embedding과 함께 호출 사용량을 반환한다 (model_calls 기록용)."""
 
         input_texts = list(texts)
         if not input_texts:
@@ -74,4 +92,8 @@ class OpenAIEmbedder:
                     f"{OPENAI_EMBEDDING_DIMENSIONS}차원이어야 합니다."
                 )
 
-        return embeddings
+        usage = getattr(response, "usage", None)
+        return EmbeddingResponse(
+            embeddings=embeddings,
+            input_tokens=getattr(usage, "prompt_tokens", None),
+        )

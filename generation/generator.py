@@ -1,19 +1,25 @@
 """Hybrid 검색 결과를 근거로 OpenAI 답변을 생성한다."""
 
-from typing import List, Optional, Sequence
+import time
+from typing import Any, List, Optional, Sequence
 
 from openai import APIConnectionError, APIStatusError, AsyncOpenAI
 
 from app.core.config import get_settings
+from app.rag.model_trace import ModelCallTrace
 from generation.models import (
+    GenerationCall,
     GenerationContextSource,
     GenerationResult,
 )
 from retrieval.models import HybridRetrievalResult
 
 
+OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.4-mini"
+GENERATION_PROMPT_VERSION = "v1"
 MAX_CONTEXT_SOURCES = 5
+MAX_GENERATION_ATTEMPTS = 2
 
 PROMPT_V1 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하는 안내 챗봇입니다.
 
@@ -94,6 +100,28 @@ def build_generation_input(
     return f"## Top-5 Context\n\n{context}\n\n## User Question\n\n{question}"
 
 
+def _generation_trace(
+    started: float,
+    *,
+    retry_count: int,
+    usage: Any = None,
+    error: Optional[Exception] = None,
+) -> ModelCallTrace:
+    """재시도를 포함한 총 소요와 사용량으로 model_calls 기록값을 만든다."""
+
+    return ModelCallTrace(
+        provider=OPENAI_GENERATION_PROVIDER,
+        model_name=OPENAI_GENERATION_MODEL,
+        succeeded=error is None,
+        latency_ms=int((time.perf_counter() - started) * 1000),
+        retry_count=retry_count,
+        input_tokens=getattr(usage, "input_tokens", None),
+        output_tokens=getattr(usage, "output_tokens", None),
+        prompt_version=GENERATION_PROMPT_VERSION,
+        error_message=None if error is None else str(error),
+    )
+
+
 def _is_transient_openai_error(error: Exception) -> bool:
     """연결 문제, timeout, rate limit과 서버 오류만 일시적 오류로 본다."""
 
@@ -123,9 +151,25 @@ class OpenAIGenerator:
     ) -> GenerationResult:
         """같은 호출에서 답변 생성과 answerability 판단을 수행한다."""
 
-        generation_input = build_generation_input(question, sources)
+        call = await self.generate_with_trace(question, sources)
+        if call.error is not None:
+            raise call.error
+        return call.result
 
-        for attempt in range(2):
+    async def generate_with_trace(
+        self,
+        question: str,
+        sources: Sequence[GenerationContextSource],
+    ) -> GenerationCall:
+        """생성 결과와 함께 재시도 횟수·지연시간·토큰 사용량을 반환한다.
+
+        재시도는 논리적 호출 1건으로 보므로 trace는 전체 시도를 하나로 요약한다.
+        """
+
+        generation_input = build_generation_input(question, sources)
+        started = time.perf_counter()
+
+        for attempt in range(MAX_GENERATION_ATTEMPTS):
             try:
                 response = await self._client.responses.parse(
                     model=OPENAI_GENERATION_MODEL,
@@ -138,10 +182,32 @@ class OpenAIGenerator:
                     raise RuntimeError(
                         "OpenAI Generation 응답에 Structured Output이 없습니다."
                     )
-                return result
+                return GenerationCall(
+                    trace=_generation_trace(
+                        started,
+                        retry_count=attempt,
+                        usage=getattr(response, "usage", None),
+                    ),
+                    result=result,
+                )
             except Exception as error:
                 if attempt == 0 and _is_transient_openai_error(error):
                     continue
-                raise
+                return GenerationCall(
+                    trace=_generation_trace(
+                        started,
+                        retry_count=attempt,
+                        error=error,
+                    ),
+                    error=error,
+                )
 
-        raise RuntimeError("OpenAI Generation 호출이 완료되지 않았습니다.")
+        error = RuntimeError("OpenAI Generation 호출이 완료되지 않았습니다.")
+        return GenerationCall(
+            trace=_generation_trace(
+                started,
+                retry_count=MAX_GENERATION_ATTEMPTS - 1,
+                error=error,
+            ),
+            error=error,
+        )

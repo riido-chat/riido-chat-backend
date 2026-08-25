@@ -2,9 +2,9 @@
 
 - 기존 Vector Retrieval 최소 테이블(document_chunks, chunk_embeddings)을
   legacy_document_chunks, legacy_chunk_embeddings로 개명한다 (데이터·임베딩 보존).
-- ERD v0.2.2의 17개 테이블을 생성한다 (docs/04-통합ERD.md 기준).
+- ERD v0.2.2의 17개 테이블을 생성한다.
 - node_identity_hash / node_identity_kind는 MVP 동안 nullable로 두고,
-  적재 로직 안정 후 별도 migration으로 제약을 조인다 (docs/92-현행ID체계참고.md 3.3).
+  적재 로직 안정 후 별도 migration으로 제약을 조인다.
 
 Revision ID: 20260820_02
 Revises: 20260818_01
