@@ -24,7 +24,19 @@ from generation.models import (
 from retrieval.models import HybridRetrievalResult
 
 
-SOURCE_MARKER_PATTERN = re.compile(r"\[SOURCE_(\d+)\]")
+SOURCE_MARKER_PATTERN = re.compile(r"\[SOURCE_([A-Za-z0-9_-]+)\]")
+FORBIDDEN_ANSWER_CONTENT_PATTERNS = (
+    re.compile(r"!?\[[^\]\r\n]*\]\([^\)\r\n]*\)"),
+    re.compile(r"\[[^\]\r\n]+\]\[[^\]\r\n]*\]"),
+    re.compile(r"(?m)^[ \t]{0,3}\[[^\]\r\n]+\]:[ \t]*\S+"),
+    re.compile(r"(?i)\b(?:[a-z][a-z0-9+.-]*://|www\.)[^\s<]+"),
+    re.compile(r"(?i)<[a-z][a-z0-9+.-]*:[^>\s]+>"),
+    re.compile(r"<[^<>\s]+@[^<>\s]+>"),
+    re.compile(
+        r"<!--|<![A-Za-z]|</?[A-Za-z][A-Za-z0-9-]*"
+        r"(?:\s[^<>]*?)?/?>"
+    ),
+)
 UPSTREAM_ERROR_CODE = "UPSTREAM_ERROR"
 CITATION_VALIDATION_ERROR_CODE = "CITATION_VALIDATION_ERROR"
 
@@ -46,14 +58,27 @@ WITHHELD_RESPONSES = {
 
 
 class UnverifiableAnswerError(ValueError):
-    """답변의 citation marker를 신뢰할 수 없을 때 발생한다."""
+    """답변이 외부 응답 계약에 맞게 검증될 수 없을 때 발생한다."""
+
+
+def _validate_answer_content(answer_markdown: str) -> None:
+    """출처 영역 밖에서 금지한 링크와 HTML이 답변 본문에 없는지 확인한다."""
+
+    content_without_source_markers = SOURCE_MARKER_PATTERN.sub("", answer_markdown)
+    if any(
+        pattern.search(content_without_source_markers)
+        for pattern in FORBIDDEN_ANSWER_CONTENT_PATTERNS
+    ):
+        raise UnverifiableAnswerError("답변 본문에 링크 또는 HTML이 포함됐습니다.")
 
 
 def validate_citations(
     answer_markdown: str,
     sources: Sequence[GenerationContextSource],
 ) -> ValidatedAnswer:
-    """Citation marker를 검증하고 중복 출처를 병합해 번호를 부여한다."""
+    """본문 형식과 Citation marker를 검증하고 중복 출처를 병합한다."""
+
+    _validate_answer_content(answer_markdown)
 
     markers = list(SOURCE_MARKER_PATTERN.finditer(answer_markdown))
     if not markers:
@@ -63,15 +88,11 @@ def validate_citations(
     used_source_ids = []
     for marker in markers:
         source_id = f"SOURCE_{marker.group(1)}"
-        if source_id not in source_by_id:
-            raise UnverifiableAnswerError(
-                f"Generation Context에 없는 출처입니다: {source_id}"
-            )
-        if source_id not in used_source_ids:
+        if source_id in source_by_id and source_id not in used_source_ids:
             used_source_ids.append(source_id)
 
-    if len(used_source_ids) > 3:
-        raise UnverifiableAnswerError("서로 다른 SOURCE는 최대 3개까지 허용됩니다.")
+    if not used_source_ids:
+        raise UnverifiableAnswerError("유효한 citation marker가 없습니다.")
 
     citation_number_by_identity: Dict[Tuple[str, Tuple[str, ...]], int] = {}
     citation_number_by_source_id: Dict[str, int] = {}
@@ -98,11 +119,18 @@ def validate_citations(
 
         citation_number_by_source_id[source_id] = citation_number
 
+    if len(citations) > 3:
+        raise UnverifiableAnswerError("최종 Citation은 최대 3개까지 허용됩니다.")
+
     def replace_marker(marker: re.Match[str]) -> str:
         source_id = f"SOURCE_{marker.group(1)}"
-        return f"[{citation_number_by_source_id[source_id]}]"
+        citation_number = citation_number_by_source_id.get(source_id)
+        return "" if citation_number is None else f"[{citation_number}]"
 
-    validated_markdown = SOURCE_MARKER_PATTERN.sub(replace_marker, answer_markdown)
+    validated_markdown = SOURCE_MARKER_PATTERN.sub(
+        replace_marker,
+        answer_markdown,
+    ).strip()
     return ValidatedAnswer(
         answer_markdown=validated_markdown,
         citations=tuple(citations),

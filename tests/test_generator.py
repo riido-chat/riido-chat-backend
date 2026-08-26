@@ -11,7 +11,7 @@ from generation.generator import (
     GENERATION_PROMPT_VERSION,
     MAX_CONTEXT_SOURCES,
     OPENAI_GENERATION_MODEL,
-    PROMPT_V1,
+    PROMPT_V2,
     OpenAIGenerator,
     build_generation_context,
     build_generation_input,
@@ -158,10 +158,15 @@ class GenerationContextTest(unittest.TestCase):
         self.assertNotIn(r"\[설정", generation_input)
 
     def test_prompt_avoids_duplicate_answers_and_uses_minimum_sources(self) -> None:
-        self.assertIn("반드시 가장 직접적인 SOURCE 하나만 선택", PROMPT_V1)
-        self.assertIn("중복 SOURCE는 사용하거나 인용하지 마세요", PROMPT_V1)
-        self.assertIn("SOURCE별로 답변 문단을 만들거나", PROMPT_V1)
-        self.assertIn("필요한 최소한의 SOURCE만 인용", PROMPT_V1)
+        self.assertIn("반드시 가장 직접적인 SOURCE 하나만 선택", PROMPT_V2)
+        self.assertIn("중복 SOURCE는 사용하거나 인용하지 마세요", PROMPT_V2)
+        self.assertIn("SOURCE별로 답변 문단을 만들거나", PROMPT_V2)
+        self.assertIn("필요한 최소한의 SOURCE만 인용", PROMPT_V2)
+
+    def test_prompt_forbids_links_urls_and_html(self) -> None:
+        self.assertEqual("v2", GENERATION_PROMPT_VERSION)
+        self.assertIn("Markdown 링크, URL, HTML을 포함하지 마세요", PROMPT_V2)
+        self.assertIn("별도 citations 영역", PROMPT_V2)
 
     @staticmethod
     def _result(index: int) -> HybridRetrievalResult:
@@ -187,7 +192,7 @@ class GenerationContextTest(unittest.TestCase):
 
 
 class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
-    async def test_requests_structured_output_with_prompt_v1(self) -> None:
+    async def test_requests_structured_output_with_prompt_v2(self) -> None:
         expected = self._answerable_result()
         client = self._client_with_response(expected)
         generator = OpenAIGenerator(client=client)
@@ -198,7 +203,7 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(expected, result)
         client.responses.parse.assert_awaited_once_with(
             model=OPENAI_GENERATION_MODEL,
-            instructions=PROMPT_V1,
+            instructions=PROMPT_V2,
             input=build_generation_input("질문", sources),
             text_format=GenerationResult,
         )
