@@ -69,6 +69,7 @@ class VectorRetriever:
         embedding_call = self._embedding_call(
             started,
             input_tokens=response.input_tokens,
+            retry_count=response.retry_count,
         )
 
         try:
@@ -100,6 +101,7 @@ class VectorRetriever:
     def _embedding_call(
         started: float,
         input_tokens: Optional[int] = None,
+        retry_count: int = 0,
         error: Optional[Exception] = None,
     ) -> ModelCallTrace:
         return ModelCallTrace(
@@ -107,6 +109,7 @@ class VectorRetriever:
             model_name=OPENAI_EMBEDDING_MODEL,
             succeeded=error is None,
             latency_ms=_elapsed_ms(started),
+            retry_count=retry_count,
             input_tokens=input_tokens,
             error_message=None if error is None else str(error),
         )
