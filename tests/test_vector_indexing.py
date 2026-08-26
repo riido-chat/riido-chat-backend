@@ -1,12 +1,16 @@
 import unittest
+from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
+from pipeline.document.models import NormalizedDocument
 from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 from retrieval.index_vector_corpus import (
+    ReindexResult,
     build_index_items,
     main,
-    replace_vector_corpus,
+    reindex_vector_corpus,
+    run_reindex,
 )
 from retrieval.models import RetrievalChunk
 
@@ -71,123 +75,189 @@ class VectorIndexItemTest(unittest.TestCase):
         )
 
 
-class VectorIndexMainTest(unittest.TestCase):
+class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
-        self.chunks = [VectorIndexItemTest._chunk(0), VectorIndexItemTest._chunk(1)]
-        self.embeddings = [
-            [float(index)] * OPENAI_EMBEDDING_DIMENSIONS
-            for index in range(len(self.chunks))
+        self.document = NormalizedDocument(
+            document_id="document-1",
+            title="문서 1",
+            source_url="https://docs.riido.io/document-1.md",
+            category="guide",
+            content="# 문서 1\n\n## 섹션 1\n\n본문 1",
+        )
+        self.chunk = VectorIndexItemTest._chunk(1)
+        self.persisted_chunk = replace(
+            self.chunk,
+            chunk_id=101,
+            document_version_id=201,
+        )
+        self.embedder = Mock()
+        self.embedder.embed_many.return_value = [
+            [0.1] * OPENAI_EMBEDDING_DIMENSIONS
         ]
+        self.session = AsyncMock()
 
-    @patch("retrieval.index_vector_corpus.replace_vector_corpus")
-    @patch("retrieval.index_vector_corpus.OpenAIEmbedder")
-    @patch("retrieval.index_vector_corpus.build_retrieval_chunks")
-    def test_stores_only_after_all_embeddings_succeed(
+    @patch("retrieval.index_vector_corpus.build_document_retrieval_chunks")
+    @patch("retrieval.index_vector_corpus.PgVectorStore")
+    async def test_commits_each_checkpoint_and_finishes_success(
         self,
+        store_class: Mock,
         build_chunks: Mock,
-        embedder_class: Mock,
-        replace_corpus: AsyncMock,
     ) -> None:
-        events = []
+        store = store_class.return_value
+        store.start_ingestion = AsyncMock(return_value=SimpleNamespace(id=11))
+        store.complete_ingestion = AsyncMock(
+            return_value=[self.persisted_chunk]
+        )
+        store.start_index = AsyncMock(return_value=SimpleNamespace(id=21))
+        store.store_index_items = AsyncMock()
+        index_version = SimpleNamespace(id=77)
+        store.activate_index = AsyncMock(return_value=index_version)
+        build_chunks.return_value = [self.chunk]
 
-        def embed_many(_: object) -> list[list[float]]:
-            events.append("embed_many")
-            return self.embeddings
+        result = await run_reindex(
+            [self.document],
+            self.embedder,
+            self.session,
+        )
 
-        async def replace(_: object) -> None:
-            events.append("replace")
-            return SimpleNamespace(id=77)
+        self.assertEqual(5, self.session.commit.await_count)
+        self.session.rollback.assert_not_awaited()
+        store.start_ingestion.assert_awaited_once_with(self.document)
+        store.complete_ingestion.assert_awaited_once_with(
+            11,
+            self.document,
+            [self.chunk],
+        )
+        store.start_index.assert_awaited_once_with([self.persisted_chunk])
+        store.store_index_items.assert_awaited_once()
+        store.activate_index.assert_awaited_once_with(21)
+        self.assertIs(index_version, result.index_version)
+        self.assertEqual(1, result.document_count)
+        self.assertEqual(1, result.chunk_count)
 
-        build_chunks.return_value = self.chunks
-        embedder = embedder_class.return_value
-        embedder.embed_many.side_effect = embed_many
-        replace_corpus.side_effect = replace
+    @patch("retrieval.index_vector_corpus.build_document_retrieval_chunks")
+    @patch("retrieval.index_vector_corpus.PgVectorStore")
+    async def test_marks_ingestion_failed_when_document_pipeline_fails(
+        self,
+        store_class: Mock,
+        build_chunks: Mock,
+    ) -> None:
+        failure = RuntimeError("parser unavailable")
+        store = store_class.return_value
+        store.start_ingestion = AsyncMock(return_value=SimpleNamespace(id=11))
+        store.fail_ingestion = AsyncMock()
+        build_chunks.side_effect = failure
+
+        with self.assertRaises(RuntimeError) as context:
+            await run_reindex([self.document], self.embedder, self.session)
+
+        self.assertIs(failure, context.exception)
+        store.fail_ingestion.assert_awaited_once_with(11, failure)
+        store.start_index.assert_not_called()
+        self.assertEqual(2, self.session.commit.await_count)
+        self.session.rollback.assert_awaited_once_with()
+
+    @patch("retrieval.index_vector_corpus.build_document_retrieval_chunks")
+    @patch("retrieval.index_vector_corpus.PgVectorStore")
+    async def test_marks_index_failed_when_embedding_fails(
+        self,
+        store_class: Mock,
+        build_chunks: Mock,
+    ) -> None:
+        failure = RuntimeError("embedding unavailable")
+        self.embedder.embed_many.side_effect = failure
+        store = store_class.return_value
+        store.start_ingestion = AsyncMock(return_value=SimpleNamespace(id=11))
+        store.complete_ingestion = AsyncMock(
+            return_value=[self.persisted_chunk]
+        )
+        store.start_index = AsyncMock(return_value=SimpleNamespace(id=21))
+        store.fail_index = AsyncMock()
+        build_chunks.return_value = [self.chunk]
+
+        with self.assertRaises(RuntimeError) as context:
+            await run_reindex([self.document], self.embedder, self.session)
+
+        self.assertIs(failure, context.exception)
+        store.fail_index.assert_awaited_once_with(
+            21,
+            failure,
+            failed_stage="EMBEDDING",
+        )
+        store.store_index_items.assert_not_called()
+        self.assertEqual(4, self.session.commit.await_count)
+        self.session.rollback.assert_awaited_once_with()
+
+    @patch("retrieval.index_vector_corpus.build_document_retrieval_chunks")
+    @patch("retrieval.index_vector_corpus.PgVectorStore")
+    async def test_marks_index_failed_when_validation_fails(
+        self,
+        store_class: Mock,
+        build_chunks: Mock,
+    ) -> None:
+        failure = RuntimeError("stored count mismatch")
+        store = store_class.return_value
+        store.start_ingestion = AsyncMock(return_value=SimpleNamespace(id=11))
+        store.complete_ingestion = AsyncMock(
+            return_value=[self.persisted_chunk]
+        )
+        store.start_index = AsyncMock(return_value=SimpleNamespace(id=21))
+        store.store_index_items = AsyncMock()
+        store.activate_index = AsyncMock(side_effect=failure)
+        store.fail_index = AsyncMock()
+        build_chunks.return_value = [self.chunk]
+
+        with self.assertRaises(RuntimeError) as context:
+            await run_reindex([self.document], self.embedder, self.session)
+
+        self.assertIs(failure, context.exception)
+        store.fail_index.assert_awaited_once_with(
+            21,
+            failure,
+            failed_stage="VALIDATING",
+        )
+        self.assertEqual(5, self.session.commit.await_count)
+        self.session.rollback.assert_awaited_once_with()
+
+
+class VectorIndexMainTest(unittest.TestCase):
+    @patch("retrieval.index_vector_corpus.reindex_vector_corpus")
+    @patch("retrieval.index_vector_corpus.OpenAIEmbedder")
+    @patch("retrieval.index_vector_corpus.load_normalized_documents")
+    def test_runs_reindex_and_prints_active_index(
+        self,
+        load_documents: Mock,
+        embedder_class: Mock,
+        reindex_corpus: AsyncMock,
+    ) -> None:
+        documents = [Mock(spec=NormalizedDocument)]
+        load_documents.return_value = documents
+        reindex_corpus.return_value = ReindexResult(
+            index_version=SimpleNamespace(id=77),
+            document_count=1,
+            chunk_count=2,
+        )
 
         with patch("builtins.print") as print_result:
             main()
 
-        replace_corpus.assert_awaited_once()
-        items = replace_corpus.await_args.args[0]
-        embedder.embed_many.assert_called_once_with(
-            [
-                "문서 0\n섹션 0\n본문 0",
-                "문서 1\n섹션 1\n본문 1",
-            ]
+        reindex_corpus.assert_awaited_once_with(
+            documents,
+            embedder_class.return_value,
         )
-        embedder.embed.assert_not_called()
-        self.assertEqual(
-            list(zip(self.chunks, self.embeddings)),
-            items,
-        )
-        self.assertEqual(["embed_many", "replace"], events)
         print_result.assert_called_once_with(
             "Vector corpus indexing 완료: 2개 Chunk, ACTIVE index=77"
         )
 
-    @patch("retrieval.index_vector_corpus.replace_vector_corpus")
-    @patch("retrieval.index_vector_corpus.OpenAIEmbedder")
-    @patch("retrieval.index_vector_corpus.build_retrieval_chunks")
-    def test_does_not_enter_db_stage_when_embedding_fails(
-        self,
-        build_chunks: Mock,
-        embedder_class: Mock,
-        replace_corpus: AsyncMock,
-    ) -> None:
-        failure = RuntimeError("embedding unavailable")
-        build_chunks.return_value = self.chunks
-        embedder_class.return_value.embed_many.side_effect = failure
-
-        with self.assertRaises(RuntimeError) as context:
-            main()
-
-        self.assertIs(failure, context.exception)
-        replace_corpus.assert_not_awaited()
-
-    @patch("retrieval.index_vector_corpus.replace_vector_corpus")
-    @patch("retrieval.index_vector_corpus.OpenAIEmbedder")
-    @patch("retrieval.index_vector_corpus.build_retrieval_chunks")
-    def test_does_not_enter_db_stage_when_embedding_count_mismatches(
-        self,
-        build_chunks: Mock,
-        embedder_class: Mock,
-        replace_corpus: AsyncMock,
-    ) -> None:
-        build_chunks.return_value = self.chunks
-        embedder_class.return_value.embed_many.return_value = [
-            self.embeddings[0]
-        ]
-
-        with self.assertRaisesRegex(RuntimeError, "개수가 Chunk 개수"):
-            main()
-
-        replace_corpus.assert_not_awaited()
-
-    @patch("retrieval.index_vector_corpus.replace_vector_corpus")
-    @patch("retrieval.index_vector_corpus.OpenAIEmbedder")
-    @patch("retrieval.index_vector_corpus.build_retrieval_chunks")
-    def test_rejects_empty_canonical_corpus_before_dependencies(
-        self,
-        build_chunks: Mock,
-        embedder_class: Mock,
-        replace_corpus: AsyncMock,
-    ) -> None:
-        build_chunks.return_value = []
-
-        with self.assertRaisesRegex(ValueError, "하나 이상"):
-            main()
-
-        embedder_class.assert_not_called()
-        replace_corpus.assert_not_awaited()
-
 
 class VectorCorpusReplacementTest(unittest.IsolatedAsyncioTestCase):
     @patch("retrieval.index_vector_corpus.dispose_engine")
-    @patch("retrieval.index_vector_corpus.PgVectorStore")
+    @patch("retrieval.index_vector_corpus.run_reindex")
     @patch("retrieval.index_vector_corpus.get_session_factory")
-    async def test_reuses_session_store_and_disposes_engine(
+    async def test_reuses_session_and_disposes_engine(
         self,
         get_session_factory: Mock,
-        store_class: Mock,
+        run: AsyncMock,
         dispose_engine: AsyncMock,
     ) -> None:
         session = AsyncMock()
@@ -195,17 +265,20 @@ class VectorCorpusReplacementTest(unittest.IsolatedAsyncioTestCase):
         session_context.__aenter__.return_value = session
         session_factory = Mock(return_value=session_context)
         get_session_factory.return_value = session_factory
-        items = [(VectorIndexItemTest._chunk(0), [0.1] * 1536)]
-        store = store_class.return_value
-        expected = SimpleNamespace(id=7)
-        store.replace_all = AsyncMock(return_value=expected)
+        documents = [Mock(spec=NormalizedDocument)]
+        embedder = Mock()
+        expected = ReindexResult(
+            index_version=SimpleNamespace(id=7),
+            document_count=1,
+            chunk_count=1,
+        )
+        run.return_value = expected
 
-        result = await replace_vector_corpus(items)
+        result = await reindex_vector_corpus(documents, embedder)
 
         get_session_factory.assert_called_once_with()
         session_factory.assert_called_once_with()
-        store_class.assert_called_once_with(session)
-        store.replace_all.assert_awaited_once_with(items)
+        run.assert_awaited_once_with(documents, embedder, session)
         self.assertIs(expected, result)
         dispose_engine.assert_awaited_once_with()
 
