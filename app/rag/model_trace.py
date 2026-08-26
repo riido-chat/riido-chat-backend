@@ -5,8 +5,13 @@ retrieval과 generation 계층이 이 객체를 만들어 올리고, 저장 계�
 ChatService가 담당한다.
 """
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Optional
+
+
+BeforeModelCallHook = Callable[[str, str, Optional[str]], Awaitable[None]]
+"""외부 모델 호출 직전에 provider, model, prompt version을 전달하는 hook."""
 
 
 @dataclass(frozen=True)

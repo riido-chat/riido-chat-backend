@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, Mock
 from retrieval.embedding import (
     OPENAI_EMBEDDING_DIMENSIONS,
     OPENAI_EMBEDDING_MODEL,
+    OPENAI_EMBEDDING_PROVIDER,
     EmbeddingResponse,
     OpenAIEmbedder,
 )
@@ -113,6 +114,47 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(0, call.embedding_call.retry_count)
         self.assertEqual(OPENAI_EMBEDDING_MODEL, call.embedding_call.model_name)
         self.assertIsNone(call.embedding_call.error_message)
+
+    async def test_runs_checkpoint_before_query_embedding(self) -> None:
+        events = []
+
+        async def checkpoint(*_args) -> None:
+            events.append("checkpoint")
+
+        def embed(_texts):
+            events.append("embedding")
+            return EmbeddingResponse(
+                embeddings=[self.embedding],
+                input_tokens=7,
+            )
+
+        before_model_call = AsyncMock(side_effect=checkpoint)
+        self.embedder.embed_many_with_usage.side_effect = embed
+        self.store.similarity_search.return_value = []
+
+        await self.retriever.search_with_trace(
+            "질문",
+            before_model_call=before_model_call,
+        )
+
+        self.assertEqual(["checkpoint", "embedding"], events)
+        before_model_call.assert_awaited_once_with(
+            OPENAI_EMBEDDING_PROVIDER,
+            OPENAI_EMBEDDING_MODEL,
+            None,
+        )
+
+    async def test_does_not_embed_when_checkpoint_fails(self) -> None:
+        before_model_call = AsyncMock(side_effect=RuntimeError("checkpoint failed"))
+
+        with self.assertRaisesRegex(RuntimeError, "checkpoint failed"):
+            await self.retriever.search_with_trace(
+                "질문",
+                before_model_call=before_model_call,
+            )
+
+        self.embedder.embed_many_with_usage.assert_not_called()
+        self.store.similarity_search.assert_not_awaited()
 
     async def test_trace_carries_embedding_sdk_retry_count(self) -> None:
         self.embedder.embed_many_with_usage.return_value = EmbeddingResponse(

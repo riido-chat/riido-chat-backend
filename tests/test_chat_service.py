@@ -1,5 +1,6 @@
 import unittest
 import uuid
+from itertools import count
 from types import SimpleNamespace
 from unittest.mock import ANY, AsyncMock
 
@@ -95,7 +96,43 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         self.log_store.start_rag_run.return_value = SimpleNamespace(
             id=self.rag_run_id
         )
-        self.retriever.search_with_trace.return_value = self._search_call()
+        model_call_ids = count(1)
+        self.log_store.start_model_call.side_effect = (
+            lambda **_kwargs: SimpleNamespace(id=next(model_call_ids))
+        )
+
+        self._search_result = self._search_call()
+        self._generation_result = None
+
+        async def search_with_checkpoint(
+            _question: str,
+            *,
+            before_model_call,
+        ) -> HybridSearchCall:
+            await before_model_call(
+                "openai",
+                "text-embedding-3-large",
+                None,
+            )
+            return self._search_result
+
+        async def generate_with_checkpoint(
+            _question: str,
+            _results,
+            *,
+            before_model_call,
+        ) -> FinalGenerationResult:
+            await before_model_call(
+                "openai",
+                "gpt-5.4-mini",
+                "v1",
+            )
+            return self._generation_result
+
+        self.retriever.search_with_trace.side_effect = search_with_checkpoint
+        self.generation_service.generate_answer.side_effect = (
+            generate_with_checkpoint
+        )
 
         self.service = ChatService(
             retriever=self.retriever,
@@ -110,7 +147,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
     # ------------------------------------------------------------------
 
     async def test_completed_response_carries_both_identifiers(self) -> None:
-        self.generation_service.generate_answer.return_value = self._completed()
+        self._generation_result = self._completed()
 
         response = await self.service.answer_question("멤버를 어떻게 초대하나요?")
 
@@ -126,7 +163,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
     async def test_withheld_response_carries_both_identifiers(self) -> None:
         for reason in FinalWithheldReason:
             with self.subTest(reason=reason):
-                self.generation_service.generate_answer.return_value = (
+                self._generation_result = (
                     FinalGenerationResult(
                         status=FinalAnswerStatus.WITHHELD,
                         answer_markdown=WITHHELD_RESPONSES[reason],
@@ -149,7 +186,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
     async def test_error_response_keeps_identifiers_and_hides_internal_code(
         self,
     ) -> None:
-        self.generation_service.generate_answer.return_value = FinalGenerationResult(
+        self._generation_result = FinalGenerationResult(
             status=FinalAnswerStatus.ERROR,
             answer_markdown=None,
             citations=(),
@@ -175,7 +212,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
     async def test_creates_conversation_when_request_has_no_conversation_id(
         self,
     ) -> None:
-        self.generation_service.generate_answer.return_value = self._completed()
+        self._generation_result = self._completed()
 
         await self.service.answer_question("질문")
 
@@ -194,7 +231,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             id=existing_id,
             status=ConversationStatus.ACTIVE,
         )
-        self.generation_service.generate_answer.return_value = self._completed()
+        self._generation_result = self._completed()
 
         response = await self.service.answer_question("질문", existing_id)
 
@@ -220,22 +257,41 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         self.session.commit.assert_not_awaited()
 
     # ------------------------------------------------------------------
-    # 2단계 커밋
+    # RagRun 2단계 + ModelCall checkpoint 커밋
     # ------------------------------------------------------------------
 
-    async def test_commits_turn_before_calling_the_generator(self) -> None:
+    async def test_commits_checkpoints_before_calling_external_models(self) -> None:
+        commits_before_embedding = []
         commits_before_generation = []
 
-        async def record_commit_count(*_args, **_kwargs):
+        async def record_embedding_commit_count(
+            _question,
+            *,
+            before_model_call,
+        ):
+            await before_model_call("openai", "text-embedding-3-large", None)
+            commits_before_embedding.append(self.session.commit.await_count)
+            return self._search_call()
+
+        async def record_commit_count(
+            _question,
+            _results,
+            *,
+            before_model_call,
+        ):
+            await before_model_call("openai", "gpt-5.4-mini", "v1")
             commits_before_generation.append(self.session.commit.await_count)
             return self._completed()
 
+        self.retriever.search_with_trace.side_effect = record_embedding_commit_count
         self.generation_service.generate_answer.side_effect = record_commit_count
 
         await self.service.answer_question("질문")
 
-        self.assertEqual([1], commits_before_generation)
-        self.assertEqual(2, self.session.commit.await_count)
+        # RagRun 시작 + Embedding 시작 + Generation 시작을 먼저 확정한다.
+        self.assertEqual([2], commits_before_embedding)
+        self.assertEqual([3], commits_before_generation)
+        self.assertEqual(4, self.session.commit.await_count)
 
     async def test_returns_error_without_identifiers_when_first_commit_fails(
         self,
@@ -253,9 +309,86 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             str(response.model_dump(mode="json", by_alias=True)),
         )
 
-    async def test_returns_answer_when_second_commit_fails(self) -> None:
-        self.generation_service.generate_answer.return_value = self._completed()
-        self.session.commit.side_effect = [None, RuntimeError("write failure")]
+    async def test_does_not_embed_when_embedding_checkpoint_commit_fails(
+        self,
+    ) -> None:
+        external_calls = []
+
+        async def search_after_checkpoint(
+            _question,
+            *,
+            before_model_call,
+        ):
+            await before_model_call("openai", "text-embedding-3-large", None)
+            external_calls.append("embedding")
+            return self._search_call()
+
+        self.retriever.search_with_trace.side_effect = search_after_checkpoint
+        self.session.commit.side_effect = [
+            None,
+            RuntimeError("checkpoint write failure"),
+            None,
+        ]
+
+        response = await self.service.answer_question("질문")
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.assertEqual(self.rag_run_id, response.rag_run_id)
+        self.assertEqual([], external_calls)
+        self.generation_service.generate_answer.assert_not_awaited()
+        self.log_store.finish_model_call.assert_not_awaited()
+        self.log_store.fail_rag_run.assert_awaited_once_with(
+            self.rag_run_id,
+            error_code="INTERNAL_ERROR",
+            total_latency_ms=ANY,
+        )
+
+    async def test_does_not_generate_when_generation_checkpoint_commit_fails(
+        self,
+    ) -> None:
+        external_calls = []
+
+        async def generate_after_checkpoint(
+            _question,
+            _results,
+            *,
+            before_model_call,
+        ):
+            await before_model_call("openai", "gpt-5.4-mini", "v1")
+            external_calls.append("generation")
+            return self._completed()
+
+        self.generation_service.generate_answer.side_effect = (
+            generate_after_checkpoint
+        )
+        self.session.commit.side_effect = [
+            None,
+            None,
+            RuntimeError("checkpoint write failure"),
+            None,
+        ]
+
+        response = await self.service.answer_question("질문")
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.assertEqual(self.rag_run_id, response.rag_run_id)
+        self.assertEqual([], external_calls)
+        self.assertEqual(2, self.log_store.start_model_call.await_count)
+        self.assertEqual(1, self.log_store.finish_model_call.await_count)
+        self.log_store.fail_rag_run.assert_awaited_once_with(
+            self.rag_run_id,
+            error_code="INTERNAL_ERROR",
+            total_latency_ms=ANY,
+        )
+
+    async def test_returns_answer_when_final_commit_fails(self) -> None:
+        self._generation_result = self._completed()
+        self.session.commit.side_effect = [
+            None,
+            None,
+            None,
+            RuntimeError("write failure"),
+        ]
 
         response = await self.service.answer_question("질문")
 
@@ -267,7 +400,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
     # ------------------------------------------------------------------
 
     async def test_records_every_candidate_of_both_retrievers(self) -> None:
-        self.generation_service.generate_answer.return_value = self._completed()
+        self._generation_result = self._completed()
 
         await self.service.answer_question("질문")
 
@@ -289,7 +422,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
     async def test_marks_only_fused_candidates_with_rank_score_and_evidence(
         self,
     ) -> None:
-        self.generation_service.generate_answer.return_value = self._completed()
+        self._generation_result = self._completed()
 
         await self.service.answer_question("질문")
 
@@ -316,7 +449,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(dropped.selected_as_evidence)
 
     async def test_records_candidates_even_when_the_answer_is_withheld(self) -> None:
-        self.generation_service.generate_answer.return_value = FinalGenerationResult(
+        self._generation_result = FinalGenerationResult(
             status=FinalAnswerStatus.WITHHELD,
             answer_markdown=WITHHELD_RESPONSES[
                 FinalWithheldReason.INSUFFICIENT_EVIDENCE
@@ -337,27 +470,42 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
     # 모델 호출 기록
     # ------------------------------------------------------------------
 
-    async def test_records_embedding_and_generation_calls(self) -> None:
-        self.generation_service.generate_answer.return_value = self._completed()
+    async def test_starts_and_finishes_embedding_and_generation_same_rows(
+        self,
+    ) -> None:
+        self._generation_result = self._completed()
 
         await self.service.answer_question("질문")
 
         purposes = [
             awaited.kwargs["purpose"]
-            for awaited in self.log_store.record_model_call.await_args_list
+            for awaited in self.log_store.start_model_call.await_args_list
         ]
         self.assertEqual(["EMBEDDING", "GENERATION"], purposes)
 
-        embedding = self.log_store.record_model_call.await_args_list[0].kwargs
-        self.assertEqual(ExecutionStatus.SUCCESS, embedding["status"])
-        self.assertEqual(11, embedding["input_tokens"])
-        self.assertEqual(self.rag_run_id, embedding["rag_run_id"])
+        embedding_start = self.log_store.start_model_call.await_args_list[0].kwargs
+        self.assertEqual(self.rag_run_id, embedding_start["rag_run_id"])
+        self.assertIsNone(embedding_start["prompt_version"])
 
-        generation = self.log_store.record_model_call.await_args_list[1].kwargs
-        self.assertEqual(ExecutionStatus.SUCCESS, generation["status"])
-        self.assertEqual(1200, generation["input_tokens"])
-        self.assertEqual(300, generation["output_tokens"])
-        self.assertEqual("v1", generation["prompt_version"])
+        generation_start = self.log_store.start_model_call.await_args_list[1].kwargs
+        self.assertEqual("v1", generation_start["prompt_version"])
+
+        embedding_finish = self.log_store.finish_model_call.await_args_list[0]
+        self.assertEqual(1, embedding_finish.args[0])
+        self.assertEqual(
+            ExecutionStatus.SUCCESS,
+            embedding_finish.kwargs["status"],
+        )
+        self.assertEqual(11, embedding_finish.kwargs["input_tokens"])
+
+        generation_finish = self.log_store.finish_model_call.await_args_list[1]
+        self.assertEqual(2, generation_finish.args[0])
+        self.assertEqual(
+            ExecutionStatus.SUCCESS,
+            generation_finish.kwargs["status"],
+        )
+        self.assertEqual(1200, generation_finish.kwargs["input_tokens"])
+        self.assertEqual(300, generation_finish.kwargs["output_tokens"])
 
     async def test_records_failed_generation_call_with_retry_count(self) -> None:
         trace = ModelCallTrace(
@@ -368,7 +516,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             retry_count=1,
             error_message="upstream timeout",
         )
-        self.generation_service.generate_answer.return_value = FinalGenerationResult(
+        self._generation_result = FinalGenerationResult(
             status=FinalAnswerStatus.ERROR,
             answer_markdown=None,
             citations=(),
@@ -378,11 +526,12 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
 
         await self.service.answer_question("질문")
 
-        generation = self.log_store.record_model_call.await_args_list[1].kwargs
-        self.assertEqual(ExecutionStatus.FAILED, generation["status"])
-        self.assertEqual(1, generation["retry_count"])
-        self.assertEqual(4200, generation["latency_ms"])
-        self.assertEqual("upstream timeout", generation["error_message"])
+        generation = self.log_store.finish_model_call.await_args_list[1]
+        self.assertEqual(2, generation.args[0])
+        self.assertEqual(ExecutionStatus.FAILED, generation.kwargs["status"])
+        self.assertEqual(1, generation.kwargs["retry_count"])
+        self.assertEqual(4200, generation.kwargs["latency_ms"])
+        self.assertEqual("upstream timeout", generation.kwargs["error_message"])
         self.log_store.fail_rag_run.assert_awaited_once_with(
             self.rag_run_id,
             error_code="UPSTREAM_ERROR",
@@ -394,7 +543,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
     # ------------------------------------------------------------------
 
     async def test_records_citations_with_chunk_and_document_version(self) -> None:
-        self.generation_service.generate_answer.return_value = self._completed()
+        self._generation_result = self._completed()
 
         await self.service.answer_question("질문")
 
@@ -424,7 +573,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             latency_ms=15,
             error_message="embedding unavailable",
         )
-        self.retriever.search_with_trace.return_value = HybridSearchCall(
+        self._search_result = HybridSearchCall(
             embedding_call=failed_embedding,
             error=RuntimeError("embedding unavailable"),
         )
@@ -439,8 +588,10 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             error_code="UPSTREAM_ERROR",
             total_latency_ms=ANY,
         )
-        embedding = self.log_store.record_model_call.await_args.kwargs
-        self.assertEqual(ExecutionStatus.FAILED, embedding["status"])
+        embedding = self.log_store.finish_model_call.await_args
+        self.assertEqual(1, embedding.args[0])
+        self.assertEqual(ExecutionStatus.FAILED, embedding.kwargs["status"])
+        self.log_store.start_model_call.assert_awaited_once()
 
     async def test_finishes_the_turn_when_generation_service_raises(self) -> None:
         self.generation_service.generate_answer.side_effect = RuntimeError(

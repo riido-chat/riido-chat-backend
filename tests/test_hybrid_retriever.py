@@ -101,6 +101,22 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
         self.bm25_retriever.search.assert_not_called()
         self.vector_retriever.search_with_trace.assert_not_awaited()
 
+    async def test_forwards_model_call_checkpoint_to_vector_retriever(self) -> None:
+        before_model_call = AsyncMock()
+        self.bm25_retriever.search.return_value = []
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall()
+
+        await self.retriever.search_with_trace(
+            "질문",
+            before_model_call=before_model_call,
+        )
+
+        self.vector_retriever.search_with_trace.assert_awaited_once_with(
+            "질문",
+            top_k=CANDIDATE_K,
+            before_model_call=before_model_call,
+        )
+
     async def test_trace_keeps_every_candidate_of_both_retrievers(self) -> None:
         chunk_a = self._chunk("a")
         chunk_b = self._chunk("b")

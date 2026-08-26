@@ -4,7 +4,7 @@ import asyncio
 import time
 from typing import List, Optional
 
-from app.rag.model_trace import ModelCallTrace
+from app.rag.model_trace import BeforeModelCallHook, ModelCallTrace
 from retrieval.embedding import (
     OPENAI_EMBEDDING_MODEL,
     OPENAI_EMBEDDING_PROVIDER,
@@ -45,6 +45,8 @@ class VectorRetriever:
         self,
         query: str,
         top_k: int = 10,
+        *,
+        before_model_call: Optional[BeforeModelCallHook] = None,
     ) -> VectorSearchCall:
         """검색 결과와 함께 Query embedding 호출 관측값을 반환한다."""
 
@@ -52,6 +54,13 @@ class VectorRetriever:
             raise ValueError("top_k는 1 이상이어야 합니다.")
         if not query.strip():
             return VectorSearchCall()
+
+        if before_model_call is not None:
+            await before_model_call(
+                OPENAI_EMBEDDING_PROVIDER,
+                OPENAI_EMBEDDING_MODEL,
+                None,
+            )
 
         started = time.perf_counter()
         try:
