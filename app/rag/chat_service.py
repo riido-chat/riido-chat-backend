@@ -30,7 +30,7 @@ from app.database.models import (
 from app.rag.generation_service import UPSTREAM_ERROR_CODE, GenerationService
 from app.rag.log_store import CitationLog, RagLogStore, RetrievalCandidateLog
 from app.rag.model_trace import ModelCallTrace
-from generation.models import FinalAnswerStatus, FinalGenerationResult
+from generation.models import Citation, FinalAnswerStatus, FinalGenerationResult
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.models import HybridSearchCall, RetrievalResult
 
@@ -89,6 +89,15 @@ def conversation_not_found_response() -> ChatErrorResponse:
     )
 
 
+def _to_response_section_path(citation: Citation) -> List[str]:
+    """내부 전체 경로에서 API가 별도 제공하는 문서 제목을 제외한다."""
+
+    section_path = citation.section_path
+    if section_path and section_path[0] == citation.document_title:
+        section_path = section_path[1:]
+    return list(section_path)
+
+
 def _to_chat_response(
     result: FinalGenerationResult,
     conversation_id: uuid.UUID,
@@ -107,7 +116,7 @@ def _to_chat_response(
                 ChatCitation(
                     citation_number=citation.citation_number,
                     document_title=citation.document_title,
-                    section_path=list(citation.section_path),
+                    section_path=_to_response_section_path(citation),
                     source_url=citation.source_url,
                 )
                 for citation in result.citations

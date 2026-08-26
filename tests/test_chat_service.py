@@ -75,7 +75,7 @@ def _generation_trace(succeeded: bool = True) -> ModelCallTrace:
         retry_count=1 if not succeeded else 0,
         input_tokens=1200,
         output_tokens=300,
-        prompt_version="v1",
+        prompt_version="v2",
     )
 
 
@@ -125,7 +125,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             await before_model_call(
                 "openai",
                 "gpt-5.4-mini",
-                "v1",
+                "v2",
             )
             return self._generation_result
 
@@ -159,6 +159,38 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             [1, 2],
             [citation.citation_number for citation in response.citations],
         )
+
+    async def test_response_section_path_excludes_document_title(self) -> None:
+        self._generation_result = self._completed()
+
+        response = await self.service.answer_question("질문")
+
+        self.assertEqual(
+            [["섹션 2"], ["섹션 1"]],
+            [citation.section_path for citation in response.citations],
+        )
+
+    async def test_root_citation_returns_empty_response_section_path(self) -> None:
+        self._generation_result = FinalGenerationResult(
+            status=FinalAnswerStatus.COMPLETED,
+            answer_markdown="문서 개요입니다. [1]",
+            citations=(
+                Citation(
+                    citation_number=1,
+                    document_title="문서 1",
+                    section_path=("문서 1",),
+                    source_url="https://docs.riido.io/1",
+                    chunk_id=1,
+                    document_version_id=101,
+                ),
+            ),
+            model_call=_generation_trace(),
+        )
+
+        response = await self.service.answer_question("문서 개요를 알려주세요.")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        self.assertEqual([], response.citations[0].section_path)
 
     async def test_withheld_response_carries_both_identifiers(self) -> None:
         for reason in FinalWithheldReason:
@@ -279,7 +311,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             *,
             before_model_call,
         ):
-            await before_model_call("openai", "gpt-5.4-mini", "v1")
+            await before_model_call("openai", "gpt-5.4-mini", "v2")
             commits_before_generation.append(self.session.commit.await_count)
             return self._completed()
 
@@ -354,7 +386,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             *,
             before_model_call,
         ):
-            await before_model_call("openai", "gpt-5.4-mini", "v1")
+            await before_model_call("openai", "gpt-5.4-mini", "v2")
             external_calls.append("generation")
             return self._completed()
 
@@ -490,7 +522,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(embedding_start["prompt_version"])
 
         generation_start = self.log_store.start_model_call.await_args_list[1].kwargs
-        self.assertEqual("v1", generation_start["prompt_version"])
+        self.assertEqual("v2", generation_start["prompt_version"])
 
         embedding_finish = self.log_store.finish_model_call.await_args_list[0]
         self.assertEqual(1, embedding_finish.args[0])
@@ -648,7 +680,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             *,
             before_model_call,
         ):
-            await before_model_call("openai", "gpt-5.4-mini", "v1")
+            await before_model_call("openai", "gpt-5.4-mini", "v2")
             raise RuntimeError("provider secret detail")
 
         self.generation_service.generate_answer.side_effect = raise_after_checkpoint

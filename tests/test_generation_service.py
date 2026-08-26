@@ -181,6 +181,38 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(2, len(result.citations))
         self.assertEqual([1, 2], [item.citation_number for item in result.citations])
 
+    async def test_checks_citation_limit_after_merging_duplicates(self) -> None:
+        first = self._result(
+            1,
+            source_url="https://same",
+            document_title="같은 문서",
+            section_name="같은 섹션",
+        )
+        duplicate = self._result(
+            2,
+            source_url="https://same",
+            document_title="같은 문서",
+            section_name="같은 섹션",
+        )
+        self.generator.generate_with_trace.return_value = _call(
+            self._answerable(
+                "중복 근거[SOURCE_1][SOURCE_2], "
+                "두 번째 근거[SOURCE_3], 세 번째 근거[SOURCE_4]"
+            )
+        )
+
+        result = await self.service.generate_answer(
+            "질문",
+            [first, duplicate, self._result(3), self._result(4)],
+        )
+
+        self.assertEqual(FinalAnswerStatus.COMPLETED, result.status)
+        self.assertEqual(
+            "중복 근거[1][1], 두 번째 근거[2], 세 번째 근거[3]",
+            result.answer_markdown,
+        )
+        self.assertEqual(3, len(result.citations))
+
     async def test_keeps_same_url_with_different_section_paths_separate(self) -> None:
         first = self._result(1, source_url="https://same", section_name="섹션 A")
         second = self._result(2, source_url="https://same", section_name="섹션 B")
@@ -194,6 +226,26 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(2, len(result.citations))
         self.assertEqual("A 근거 [1] B 근거 [2]", result.answer_markdown)
+
+    async def test_removes_only_invalid_sources_when_valid_citation_remains(
+        self,
+    ) -> None:
+        self.generator.generate_with_trace.return_value = _call(
+            self._answerable(
+                "잘못된 근거[SOURCE_9], 유효한 근거[SOURCE_1], "
+                "잘못된 형식[SOURCE_unknown]"
+            )
+        )
+
+        result = await self.service.generate_answer("질문", [self._result(1)])
+
+        self.assertEqual(FinalAnswerStatus.COMPLETED, result.status)
+        self.assertEqual(
+            "잘못된 근거, 유효한 근거[1], 잘못된 형식",
+            result.answer_markdown,
+        )
+        self.assertEqual(1, len(result.citations))
+        self.assertEqual(1, result.citations[0].citation_number)
 
     async def test_withholds_unverifiable_answers_without_citations(self) -> None:
         cases = (
@@ -227,6 +279,32 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
                 )
                 self.assertEqual((), result.citations)
                 self.assertIsNone(result.error_code)
+
+    async def test_withholds_answers_containing_links_or_html(self) -> None:
+        cases = (
+            "상세 내용은 [가이드](/guide)를 확인하세요. [SOURCE_1]",
+            "상세 주소는 https://docs.riido.io/guide 입니다. [SOURCE_1]",
+            "문의 주소는 <support@example.com>입니다. [SOURCE_1]",
+            "<strong>중요한 내용</strong>입니다. [SOURCE_1]",
+        )
+
+        for answer_markdown in cases:
+            with self.subTest(answer_markdown=answer_markdown):
+                self.generator.generate_with_trace.return_value = _call(
+                    self._answerable(answer_markdown)
+                )
+
+                result = await self.service.generate_answer(
+                    "질문",
+                    [self._result(1)],
+                )
+
+                self.assertEqual(FinalAnswerStatus.WITHHELD, result.status)
+                self.assertEqual(
+                    FinalWithheldReason.UNVERIFIABLE_ANSWER,
+                    result.withheld_reason,
+                )
+                self.assertEqual((), result.citations)
 
     async def test_uses_fixed_response_for_generator_withheld_reason(self) -> None:
         for reason in GenerationWithheldReason:
