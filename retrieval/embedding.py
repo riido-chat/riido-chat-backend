@@ -58,6 +58,8 @@ class OpenAIEmbedder:
     def embed_many_with_usage(
         self,
         texts: Sequence[str],
+        *,
+        sdk_max_retries: Optional[int] = None,
     ) -> EmbeddingResponse:
         """embedding과 함께 호출 사용량을 반환한다 (model_calls 기록용)."""
 
@@ -65,7 +67,11 @@ class OpenAIEmbedder:
         if not input_texts:
             raise ValueError("Embedding할 text가 하나 이상이어야 합니다.")
 
-        raw_response = self._client.embeddings.with_raw_response.create(
+        client = self._client
+        if sdk_max_retries is not None:
+            client = client.with_options(max_retries=sdk_max_retries)
+
+        raw_response = client.embeddings.with_raw_response.create(
             model=OPENAI_EMBEDDING_MODEL,
             input=input_texts,
             dimensions=OPENAI_EMBEDDING_DIMENSIONS,

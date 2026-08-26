@@ -374,7 +374,9 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.rag_run_id, response.rag_run_id)
         self.assertEqual([], external_calls)
         self.assertEqual(2, self.log_store.start_model_call.await_count)
-        self.assertEqual(1, self.log_store.finish_model_call.await_count)
+        # 실패한 checkpoint transaction을 rollback한 뒤 Embedding 마감을 다시 기록한다.
+        self.assertEqual(2, self.log_store.finish_model_call.await_count)
+        self.assertEqual(2, self.log_store.record_retrieval_results.await_count)
         self.log_store.fail_rag_run.assert_awaited_once_with(
             self.rag_run_id,
             error_code="INTERNAL_ERROR",
@@ -538,6 +540,52 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             total_latency_ms=ANY,
         )
 
+    async def test_finishes_trace_less_generation_error_on_checkpoint_row(
+        self,
+    ) -> None:
+        self._generation_result = FinalGenerationResult(
+            status=FinalAnswerStatus.ERROR,
+            answer_markdown=None,
+            citations=(),
+            error_code="UPSTREAM_ERROR",
+        )
+
+        response = await self.service.answer_question("질문")
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.assertEqual(self.rag_run_id, response.rag_run_id)
+        generation = self.log_store.finish_model_call.await_args_list[1]
+        self.assertEqual(2, generation.args[0])
+        self.assertEqual(ExecutionStatus.FAILED, generation.kwargs["status"])
+        self.assertIn("trace", generation.kwargs["error_message"])
+        self.log_store.fail_rag_run.assert_awaited_once_with(
+            self.rag_run_id,
+            error_code="UPSTREAM_ERROR",
+            total_latency_ms=ANY,
+        )
+
+    async def test_rejects_trace_less_completed_generation_result(self) -> None:
+        completed = self._completed()
+        self._generation_result = FinalGenerationResult(
+            status=FinalAnswerStatus.COMPLETED,
+            answer_markdown=completed.answer_markdown,
+            citations=completed.citations,
+        )
+
+        response = await self.service.answer_question("질문")
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        generation = self.log_store.finish_model_call.await_args_list[1]
+        self.assertEqual(2, generation.args[0])
+        self.assertEqual(ExecutionStatus.FAILED, generation.kwargs["status"])
+        self.assertIn("trace", generation.kwargs["error_message"])
+        self.log_store.complete_rag_run.assert_not_awaited()
+        self.log_store.fail_rag_run.assert_awaited_once_with(
+            self.rag_run_id,
+            error_code="INTERNAL_ERROR",
+            total_latency_ms=ANY,
+        )
+
     # ------------------------------------------------------------------
     # 인용 기록
     # ------------------------------------------------------------------
@@ -594,14 +642,29 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         self.log_store.start_model_call.assert_awaited_once()
 
     async def test_finishes_the_turn_when_generation_service_raises(self) -> None:
-        self.generation_service.generate_answer.side_effect = RuntimeError(
-            "provider secret detail"
-        )
+        async def raise_after_checkpoint(
+            _question,
+            _results,
+            *,
+            before_model_call,
+        ):
+            await before_model_call("openai", "gpt-5.4-mini", "v1")
+            raise RuntimeError("provider secret detail")
+
+        self.generation_service.generate_answer.side_effect = raise_after_checkpoint
 
         response = await self.service.answer_question("질문")
 
         self.assertIsInstance(response, ChatErrorResponse)
         self.assertEqual(self.rag_run_id, response.rag_run_id)
+        self.log_store.record_retrieval_results.assert_awaited_once()
+        generation = self.log_store.finish_model_call.await_args_list[1]
+        self.assertEqual(2, generation.args[0])
+        self.assertEqual(ExecutionStatus.FAILED, generation.kwargs["status"])
+        self.assertEqual(
+            "provider secret detail",
+            generation.kwargs["error_message"],
+        )
         self.log_store.fail_rag_run.assert_awaited_once_with(
             self.rag_run_id,
             error_code="INTERNAL_ERROR",

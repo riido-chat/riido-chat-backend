@@ -1,5 +1,8 @@
 import unittest
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, call, patch
+
+import httpx
+from openai import APIConnectionError
 
 from retrieval.embedding import (
     OPENAI_EMBEDDING_DIMENSIONS,
@@ -38,7 +41,8 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         results = await self.retriever.search("사용자 원문 질문", top_k=2)
 
         self.embedder.embed_many_with_usage.assert_called_once_with(
-            ["사용자 원문 질문"]
+            ["사용자 원문 질문"],
+            sdk_max_retries=0,
         )
         self.store.similarity_search.assert_awaited_once_with(
             self.embedding,
@@ -59,7 +63,8 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual([], results)
         self.embedder.embed_many_with_usage.assert_called_once_with(
-            ["검색 결과 없는 질문"]
+            ["검색 결과 없는 질문"],
+            sdk_max_retries=0,
         )
         self.store.similarity_search.assert_awaited_once_with(
             self.embedding,
@@ -99,7 +104,10 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         with self.assertRaisesRegex(RuntimeError, "database unavailable"):
             await self.retriever.search("질문")
 
-        self.embedder.embed_many_with_usage.assert_called_once_with(["질문"])
+        self.embedder.embed_many_with_usage.assert_called_once_with(
+            ["질문"],
+            sdk_max_retries=0,
+        )
 
     async def test_trace_records_successful_embedding_call(self) -> None:
         self.store.similarity_search.return_value = [(self.chunks[0], 0.9)]
@@ -121,8 +129,9 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         async def checkpoint(*_args) -> None:
             events.append("checkpoint")
 
-        def embed(_texts):
+        def embed(_texts, *, sdk_max_retries):
             events.append("embedding")
+            self.assertEqual(0, sdk_max_retries)
             return EmbeddingResponse(
                 embeddings=[self.embedding],
                 input_tokens=7,
@@ -169,6 +178,54 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(call.error)
         self.assertEqual(2, call.embedding_call.retry_count)
 
+    async def test_retries_transient_failures_and_records_actual_count(self) -> None:
+        self.embedder.embed_many_with_usage.side_effect = [
+            self._connection_error(),
+            self._connection_error(),
+            EmbeddingResponse(
+                embeddings=[self.embedding],
+                input_tokens=7,
+            ),
+        ]
+        self.store.similarity_search.return_value = [(self.chunks[0], 0.9)]
+
+        with patch(
+            "retrieval.vector_retriever.asyncio.sleep",
+            new_callable=AsyncMock,
+        ) as sleep:
+            result = await self.retriever.search_with_trace("질문")
+
+        self.assertIsNone(result.error)
+        self.assertEqual(2, result.embedding_call.retry_count)
+        self.assertEqual(3, self.embedder.embed_many_with_usage.call_count)
+        self.assertEqual([call(0.5), call(1.0)], sleep.await_args_list)
+
+    async def test_records_retry_count_and_total_latency_on_final_failure(
+        self,
+    ) -> None:
+        self.embedder.embed_many_with_usage.side_effect = [
+            self._connection_error(),
+            self._connection_error(),
+            self._connection_error(),
+        ]
+
+        with patch(
+            "retrieval.vector_retriever.asyncio.sleep",
+            new_callable=AsyncMock,
+        ), patch(
+            "retrieval.vector_retriever.time.perf_counter",
+            side_effect=[10.0, 13.0, 13.0],
+        ):
+            result = await self.retriever.search_with_trace("질문")
+
+        self.assertIsInstance(result.error, APIConnectionError)
+        self.assertFalse(result.embedding_call.succeeded)
+        self.assertEqual(2, result.embedding_call.retry_count)
+        self.assertEqual(3000, result.embedding_call.latency_ms)
+        self.assertEqual(3000, result.latency_ms)
+        self.assertEqual(3, self.embedder.embed_many_with_usage.call_count)
+        self.store.similarity_search.assert_not_awaited()
+
     async def test_trace_keeps_failed_embedding_call_for_logging(self) -> None:
         self.embedder.embed_many_with_usage.side_effect = RuntimeError(
             "embedding unavailable"
@@ -179,7 +236,9 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(call.error, RuntimeError)
         self.assertEqual((), call.results)
         self.assertFalse(call.embedding_call.succeeded)
+        self.assertEqual(0, call.embedding_call.retry_count)
         self.assertIn("embedding unavailable", call.embedding_call.error_message)
+        self.embedder.embed_many_with_usage.assert_called_once()
         self.store.similarity_search.assert_not_awaited()
 
     async def test_trace_keeps_embedding_call_when_store_fails(self) -> None:
@@ -203,6 +262,12 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
             chunk_id=index + 1,
             document_version_id=index + 101,
             index_version_id=1,
+        )
+
+    @staticmethod
+    def _connection_error() -> APIConnectionError:
+        return APIConnectionError(
+            request=httpx.Request("POST", "https://api.openai.com/v1/embeddings")
         )
 
 

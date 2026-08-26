@@ -3,6 +3,7 @@
 import logging
 import time
 import uuid
+from dataclasses import dataclass, replace
 from typing import List, Optional, Tuple
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -139,6 +140,29 @@ def _elapsed_ms(started: float) -> int:
     return int((time.perf_counter() - started) * 1000)
 
 
+@dataclass(frozen=True)
+class _ModelCallCheckpoint:
+    id: int
+    provider: str
+    model_name: str
+    prompt_version: Optional[str]
+    started: float
+
+
+def _failed_generation_trace(
+    checkpoint: _ModelCallCheckpoint,
+    error: Exception,
+) -> ModelCallTrace:
+    return ModelCallTrace(
+        provider=checkpoint.provider,
+        model_name=checkpoint.model_name,
+        succeeded=False,
+        latency_ms=_elapsed_ms(checkpoint.started),
+        prompt_version=checkpoint.prompt_version,
+        error_message=str(error),
+    )
+
+
 class ChatService:
     """Hybrid Retrieval부터 Chat HTTP 응답 변환까지 연결하고 실행 로그를 남긴다.
 
@@ -232,12 +256,8 @@ class ChatService:
             question,
             before_model_call=checkpoint_embedding,
         )
-        # Vector read transaction을 닫은 뒤 Embedding 결과 갱신을 새 transaction에 둔다.
+        # Vector read transaction을 닫고, 확보한 로그는 다음 transaction에서 마감한다.
         await self._session.rollback()
-        await self._finish_model_call(
-            embedding_model_call_id,
-            search.embedding_call,
-        )
 
         if search.error is not None:
             logger.warning(
@@ -251,44 +271,119 @@ class ChatService:
                 None,
                 None,
                 _elapsed_ms(started),
+                embedding_model_call_id=embedding_model_call_id,
+                record_retrieval=True,
             )
             return _internal_error_response(conversation_id, rag_run_id)
 
-        generation_model_call_id: Optional[int] = None
+        generation_checkpoint: Optional[_ModelCallCheckpoint] = None
 
         async def checkpoint_generation(
             provider: str,
             model_name: str,
             prompt_version: Optional[str],
         ) -> None:
-            nonlocal generation_model_call_id
-            if generation_model_call_id is not None:
+            nonlocal generation_checkpoint
+            if generation_checkpoint is not None:
                 raise RuntimeError("Generation 호출이 이미 시작됐습니다.")
-            # 이 commit에 앞서 stage한 Embedding 최종 상태도 함께 반영된다.
-            generation_model_call_id = await self._checkpoint_model_call(
+
+            # Generation 시작 commit에 앞서 확보한 Retrieval 로그도 함께 확정한다.
+            await self._finish_model_call(
+                embedding_model_call_id,
+                search.embedding_call,
+            )
+            await self._record_retrieval_results(rag_run_id, search)
+            model_call_id = await self._checkpoint_model_call(
                 rag_run_id,
                 ModelCallPurpose.GENERATION,
                 provider,
                 model_name,
                 prompt_version,
             )
+            generation_checkpoint = _ModelCallCheckpoint(
+                id=model_call_id,
+                provider=provider,
+                model_name=model_name,
+                prompt_version=prompt_version,
+                started=time.perf_counter(),
+            )
 
-        generation_result = await self._generation_service.generate_answer(
-            question,
-            search.fused_results,
-            before_model_call=checkpoint_generation,
-        )
-        response = _to_chat_response(
-            generation_result,
-            conversation_id,
-            rag_run_id,
-        )
+        generation_result: Optional[FinalGenerationResult] = None
+        try:
+            generation_result = await self._generation_service.generate_answer(
+                question,
+                search.fused_results,
+                before_model_call=checkpoint_generation,
+            )
+            if generation_checkpoint is None:
+                raise RuntimeError("Generation ModelCall checkpoint가 실행되지 않았습니다.")
+            if generation_result.model_call is None:
+                missing_trace_error = RuntimeError("Generation 호출 trace가 없습니다.")
+                if generation_result.status != FinalAnswerStatus.ERROR:
+                    raise missing_trace_error
+                generation_result = replace(
+                    generation_result,
+                    model_call=_failed_generation_trace(
+                        generation_checkpoint,
+                        missing_trace_error,
+                    ),
+                )
+
+            response = _to_chat_response(
+                generation_result,
+                conversation_id,
+                rag_run_id,
+            )
+        except Exception as error:
+            logger.exception(
+                "Generation 처리 중 예상하지 못한 오류가 발생했습니다: "
+                "rag_run_id=%s",
+                rag_run_id,
+            )
+            await self._session.rollback()
+
+            generation_trace = (
+                None if generation_result is None else generation_result.model_call
+            )
+            if generation_checkpoint is not None and generation_trace is None:
+                generation_trace = _failed_generation_trace(
+                    generation_checkpoint,
+                    error,
+                )
+            failed_result = FinalGenerationResult(
+                status=FinalAnswerStatus.ERROR,
+                answer_markdown=None,
+                citations=(),
+                error_code=INTERNAL_ERROR_CODE,
+                model_call=generation_trace,
+            )
+            generation_model_call_id = (
+                None if generation_checkpoint is None else generation_checkpoint.id
+            )
+            retrieval_needs_recovery = generation_checkpoint is None
+            await self._record_turn(
+                rag_run_id,
+                search,
+                failed_result,
+                generation_model_call_id,
+                _elapsed_ms(started),
+                embedding_model_call_id=(
+                    embedding_model_call_id
+                    if retrieval_needs_recovery
+                    else None
+                ),
+                record_retrieval=retrieval_needs_recovery,
+            )
+            return _internal_error_response(conversation_id, rag_run_id)
+
         await self._record_turn(
             rag_run_id,
             search,
             generation_result,
-            generation_model_call_id,
+            generation_checkpoint.id,
             _elapsed_ms(started),
+            embedding_model_call_id=None,
+            record_retrieval=False,
         )
         return response
 
@@ -368,7 +463,7 @@ class ChatService:
         )
 
     # ------------------------------------------------------------------
-    # 최종 트랜잭션 — Generation 결과, 검색 후보, RagRun 마감
+    # 결과 트랜잭션 — ModelCall, 검색 후보, RagRun 마감
     # ------------------------------------------------------------------
 
     async def _record_turn(
@@ -378,13 +473,21 @@ class ChatService:
         generation_result: Optional[FinalGenerationResult],
         generation_model_call_id: Optional[int],
         total_latency_ms: int,
+        *,
+        embedding_model_call_id: Optional[int],
+        record_retrieval: bool,
     ) -> None:
         try:
+            await self._finish_model_call(
+                embedding_model_call_id,
+                search.embedding_call,
+            )
             await self._finish_model_call(
                 generation_model_call_id,
                 None if generation_result is None else generation_result.model_call,
             )
-            await self._record_retrieval_results(rag_run_id, search)
+            if record_retrieval:
+                await self._record_retrieval_results(rag_run_id, search)
             await self._finish_rag_run(
                 rag_run_id,
                 search,
