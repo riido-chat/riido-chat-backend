@@ -12,7 +12,10 @@ from app.database.models import (
     ChunkEmbedding,
     ContentNode,
     DocumentChunk,
+    ExecutionStatus,
+    IngestionRun,
     IndexDocument,
+    IndexRun,
     IndexVersion,
     IndexVersionStatus,
 )
@@ -94,6 +97,7 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(IndexVersionStatus.ACTIVE, first_index.status)
         self.assertEqual(first_index.id, await self.store.get_active_index_version_id())
         await self._assert_active_chain(first_index, chunks)
+        await self._assert_successful_run_logs(first_index, document_count=2)
 
         active_chunks = await self.store.load_active_chunks()
         self.assertEqual(3, len(active_chunks))
@@ -145,6 +149,7 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(1, active_count)
         await self._assert_active_chain(second_index, chunks)
+        await self._assert_successful_run_logs(second_index, document_count=2)
 
     async def _assert_active_chain(
         self,
@@ -193,6 +198,42 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
             )
         )
         self.assertEqual(len(source_chunks), embedding_count)
+
+    async def _assert_successful_run_logs(
+        self,
+        index_version: IndexVersion,
+        *,
+        document_count: int,
+    ) -> None:
+        index_run = await self.session.scalar(
+            select(IndexRun).where(
+                IndexRun.index_version_id == index_version.id
+            )
+        )
+        self.assertEqual(ExecutionStatus.SUCCESS, index_run.status)
+        self.assertEqual("ACTIVE", index_run.summary["stage"])
+        self.assertIsNotNone(index_run.finished_at)
+
+        ingestion_runs = list(
+            (
+                await self.session.execute(
+                    select(IngestionRun)
+                    .join(
+                        IndexDocument,
+                        IndexDocument.document_version_id
+                        == IngestionRun.produced_version_id,
+                    )
+                    .where(IndexDocument.index_version_id == index_version.id)
+                )
+            ).scalars()
+        )
+        self.assertEqual(document_count, len(ingestion_runs))
+        self.assertTrue(
+            all(run.status == ExecutionStatus.SUCCESS for run in ingestion_runs)
+        )
+        self.assertTrue(
+            all(run.produced_version_id is not None for run in ingestion_runs)
+        )
 
     @staticmethod
     def _source_chunk(

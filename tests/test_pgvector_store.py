@@ -44,6 +44,16 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
     async def test_injects_async_session(self) -> None:
         self.assertIs(self.session, self.store._session)
 
+    async def test_redacts_openai_key_from_failure_message(self) -> None:
+        message = self.store._safe_error_message(
+            RuntimeError("request failed with sk-secret_123456789")
+        )
+
+        self.assertEqual(
+            "request failed with sk-***REDACTED***",
+            message,
+        )
+
     async def test_owns_transaction_when_session_has_no_active_transaction(self) -> None:
         expected = Mock(spec=IndexVersion)
 
