@@ -3,8 +3,14 @@
 import re
 from typing import Dict, Optional, Sequence, Tuple
 
-from app.rag.model_trace import ModelCallTrace
-from generation.generator import OpenAIGenerator, build_generation_context
+from app.rag.model_trace import BeforeModelCallHook, ModelCallTrace
+from generation.generator import (
+    GENERATION_PROMPT_VERSION,
+    OPENAI_GENERATION_MODEL,
+    OPENAI_GENERATION_PROVIDER,
+    OpenAIGenerator,
+    build_generation_context,
+)
 from generation.models import (
     Citation,
     FinalAnswerStatus,
@@ -138,10 +144,18 @@ class GenerationService:
         self,
         question: str,
         retrieval_results: Sequence[HybridRetrievalResult],
+        *,
+        before_model_call: Optional[BeforeModelCallHook] = None,
     ) -> FinalGenerationResult:
         """Hybrid Top-5로 답변을 생성하고 최종 상태를 결정한다."""
 
         sources = build_generation_context(retrieval_results)
+        if before_model_call is not None:
+            await before_model_call(
+                OPENAI_GENERATION_PROVIDER,
+                OPENAI_GENERATION_MODEL,
+                GENERATION_PROMPT_VERSION,
+            )
 
         try:
             call = await self._generator.generate_with_trace(question, sources)

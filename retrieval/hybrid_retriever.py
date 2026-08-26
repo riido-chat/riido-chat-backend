@@ -2,8 +2,9 @@
 
 import time
 from dataclasses import replace
-from typing import Dict, List, Sequence
+from typing import Dict, List, Optional, Sequence
 
+from app.rag.model_trace import BeforeModelCallHook
 from retrieval.bm25_retriever import BM25Retriever
 from retrieval.models import (
     HybridRetrievalResult,
@@ -122,6 +123,8 @@ class HybridRetriever:
         self,
         query: str,
         top_k: int = DEFAULT_FINAL_TOP_K,
+        *,
+        before_model_call: Optional[BeforeModelCallHook] = None,
     ) -> HybridSearchCall:
         """융합 결과와 함께 검색기별 후보 전체와 모델 호출 관측값을 반환한다.
 
@@ -145,9 +148,13 @@ class HybridRetriever:
             )
         bm25_latency_ms = _elapsed_ms(bm25_started)
 
+        vector_search_kwargs = {}
+        if before_model_call is not None:
+            vector_search_kwargs["before_model_call"] = before_model_call
         vector_call = await self._vector_retriever.search_with_trace(
             query,
             top_k=CANDIDATE_K,
+            **vector_search_kwargs,
         )
         partial = HybridSearchCall(
             bm25_results=tuple(bm25_results),

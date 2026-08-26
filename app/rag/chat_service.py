@@ -142,9 +142,9 @@ def _elapsed_ms(started: float) -> int:
 class ChatService:
     """Hybrid Retrieval부터 Chat HTTP 응답 변환까지 연결하고 실행 로그를 남긴다.
 
-    로그 저장은 2단계 커밋이다. 1차는 turn 생성까지 커밋해 ragRunId를 확정하고
-    커넥션을 풀에 돌려준다. 2차는 검색 후보, 모델 호출, 마감을 하나로 묶는다.
-    2차 커밋이 실패해도 답변은 이미 완성됐으므로 그대로 반환한다.
+    RagRun 로그는 시작과 최종 마감의 2단계 커밋을 유지한다. 각 외부 모델 호출
+    직전에는 ModelCall(PROCESSING)을 짧게 checkpoint commit하고, 호출 결과는
+    다음 checkpoint 또는 최종 마감에서 같은 행에 반영한다.
     """
 
     def __init__(
@@ -210,9 +210,34 @@ class ChatService:
         rag_run_id: uuid.UUID,
         started: float,
     ) -> ChatResponse:
-        search = await self._retriever.search_with_trace(question)
-        # LLM 호출 동안 커넥션을 붙들지 않도록 읽기 트랜잭션을 여기서 닫는다.
+        embedding_model_call_id: Optional[int] = None
+
+        async def checkpoint_embedding(
+            provider: str,
+            model_name: str,
+            prompt_version: Optional[str],
+        ) -> None:
+            nonlocal embedding_model_call_id
+            if embedding_model_call_id is not None:
+                raise RuntimeError("Query Embedding 호출이 이미 시작됐습니다.")
+            embedding_model_call_id = await self._checkpoint_model_call(
+                rag_run_id,
+                ModelCallPurpose.EMBEDDING,
+                provider,
+                model_name,
+                prompt_version,
+            )
+
+        search = await self._retriever.search_with_trace(
+            question,
+            before_model_call=checkpoint_embedding,
+        )
+        # Vector read transaction을 닫은 뒤 Embedding 결과 갱신을 새 transaction에 둔다.
         await self._session.rollback()
+        await self._finish_model_call(
+            embedding_model_call_id,
+            search.embedding_call,
+        )
 
         if search.error is not None:
             logger.warning(
@@ -224,13 +249,34 @@ class ChatService:
                 rag_run_id,
                 search,
                 None,
+                None,
                 _elapsed_ms(started),
             )
             return _internal_error_response(conversation_id, rag_run_id)
 
+        generation_model_call_id: Optional[int] = None
+
+        async def checkpoint_generation(
+            provider: str,
+            model_name: str,
+            prompt_version: Optional[str],
+        ) -> None:
+            nonlocal generation_model_call_id
+            if generation_model_call_id is not None:
+                raise RuntimeError("Generation 호출이 이미 시작됐습니다.")
+            # 이 commit에 앞서 stage한 Embedding 최종 상태도 함께 반영된다.
+            generation_model_call_id = await self._checkpoint_model_call(
+                rag_run_id,
+                ModelCallPurpose.GENERATION,
+                provider,
+                model_name,
+                prompt_version,
+            )
+
         generation_result = await self._generation_service.generate_answer(
             question,
             search.fused_results,
+            before_model_call=checkpoint_generation,
         )
         response = _to_chat_response(
             generation_result,
@@ -241,6 +287,7 @@ class ChatService:
             rag_run_id,
             search,
             generation_result,
+            generation_model_call_id,
             _elapsed_ms(started),
         )
         return response
@@ -278,7 +325,50 @@ class ChatService:
         return identifiers
 
     # ------------------------------------------------------------------
-    # 2차 트랜잭션 — 검색 후보, 모델 호출, 마감
+    # 외부 모델 호출 checkpoint
+    # ------------------------------------------------------------------
+
+    async def _checkpoint_model_call(
+        self,
+        rag_run_id: uuid.UUID,
+        purpose: ModelCallPurpose,
+        provider: str,
+        model_name: str,
+        prompt_version: Optional[str],
+    ) -> int:
+        call = await self._log_store.start_model_call(
+            rag_run_id=rag_run_id,
+            purpose=purpose.value,
+            provider=provider,
+            model_name=model_name,
+            prompt_version=prompt_version,
+        )
+        model_call_id = call.id
+        await self._session.commit()
+        return model_call_id
+
+    async def _finish_model_call(
+        self,
+        model_call_id: Optional[int],
+        trace: Optional[ModelCallTrace],
+    ) -> None:
+        if model_call_id is None or trace is None:
+            return
+
+        await self._log_store.finish_model_call(
+            model_call_id,
+            status=(
+                ExecutionStatus.SUCCESS if trace.succeeded else ExecutionStatus.FAILED
+            ),
+            input_tokens=trace.input_tokens,
+            output_tokens=trace.output_tokens,
+            latency_ms=trace.latency_ms,
+            retry_count=trace.retry_count,
+            error_message=trace.error_message,
+        )
+
+    # ------------------------------------------------------------------
+    # 최종 트랜잭션 — Generation 결과, 검색 후보, RagRun 마감
     # ------------------------------------------------------------------
 
     async def _record_turn(
@@ -286,11 +376,15 @@ class ChatService:
         rag_run_id: uuid.UUID,
         search: HybridSearchCall,
         generation_result: Optional[FinalGenerationResult],
+        generation_model_call_id: Optional[int],
         total_latency_ms: int,
     ) -> None:
         try:
+            await self._finish_model_call(
+                generation_model_call_id,
+                None if generation_result is None else generation_result.model_call,
+            )
             await self._record_retrieval_results(rag_run_id, search)
-            await self._record_model_calls(rag_run_id, search, generation_result)
             await self._finish_rag_run(
                 rag_run_id,
                 search,
@@ -365,49 +459,6 @@ class ChatService:
             # 융합 Top-5가 곧 Generation Context다. 최종 인용 여부와는 다르다.
             selected_as_evidence=fused is not None,
             latency_ms=latency_ms,
-        )
-
-    async def _record_model_calls(
-        self,
-        rag_run_id: uuid.UUID,
-        search: HybridSearchCall,
-        generation_result: Optional[FinalGenerationResult],
-    ) -> None:
-        await self._record_model_call(
-            rag_run_id,
-            ModelCallPurpose.EMBEDDING,
-            search.embedding_call,
-        )
-        if generation_result is not None:
-            await self._record_model_call(
-                rag_run_id,
-                ModelCallPurpose.GENERATION,
-                generation_result.model_call,
-            )
-
-    async def _record_model_call(
-        self,
-        rag_run_id: uuid.UUID,
-        purpose: ModelCallPurpose,
-        trace: Optional[ModelCallTrace],
-    ) -> None:
-        if trace is None:
-            return
-
-        await self._log_store.record_model_call(
-            purpose=purpose.value,
-            provider=trace.provider,
-            model_name=trace.model_name,
-            status=(
-                ExecutionStatus.SUCCESS if trace.succeeded else ExecutionStatus.FAILED
-            ),
-            rag_run_id=rag_run_id,
-            prompt_version=trace.prompt_version,
-            input_tokens=trace.input_tokens,
-            output_tokens=trace.output_tokens,
-            latency_ms=trace.latency_ms,
-            retry_count=trace.retry_count,
-            error_message=trace.error_message,
         )
 
     async def _finish_rag_run(

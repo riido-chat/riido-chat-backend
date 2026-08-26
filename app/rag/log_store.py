@@ -343,24 +343,17 @@ class RagLogStore:
         await self._session.flush()
         return rows
 
-    async def record_model_call(
+    async def start_model_call(
         self,
         *,
         purpose: str,
         provider: str,
         model_name: str,
-        status: ExecutionStatus,
         rag_run_id: Optional[uuid.UUID] = None,
         index_run_id: Optional[int] = None,
         prompt_version: Optional[str] = None,
-        input_tokens: Optional[int] = None,
-        output_tokens: Optional[int] = None,
-        estimated_cost: Optional[float] = None,
-        latency_ms: Optional[int] = None,
-        retry_count: int = 0,
-        error_message: Optional[str] = None,
     ) -> ModelCall:
-        """모델 호출 한 건을 기록한다. rag_run 또는 index_run에 연결한다."""
+        """외부 호출 전에 논리적 모델 호출 한 건을 PROCESSING으로 생성한다."""
 
         if rag_run_id is None and index_run_id is None:
             raise ValueError("rag_run_id 또는 index_run_id 중 하나는 필요합니다.")
@@ -372,16 +365,52 @@ class RagLogStore:
             provider=provider,
             model_name=model_name,
             prompt_version=prompt_version,
-            input_tokens=input_tokens,
-            output_tokens=output_tokens,
-            estimated_cost=estimated_cost,
-            latency_ms=latency_ms,
-            status=status,
-            retry_count=retry_count,
-            error_message=error_message,
+            status=ExecutionStatus.PROCESSING,
+            retry_count=0,
             created_at=_utcnow(),
         )
         self._session.add(call)
+        await self._session.flush()
+        return call
+
+    async def finish_model_call(
+        self,
+        model_call_id: int,
+        *,
+        status: ExecutionStatus,
+        input_tokens: Optional[int] = None,
+        output_tokens: Optional[int] = None,
+        estimated_cost: Optional[float] = None,
+        latency_ms: Optional[int] = None,
+        retry_count: int = 0,
+        error_message: Optional[str] = None,
+    ) -> ModelCall:
+        """PROCESSING 호출을 같은 행에서 SUCCESS 또는 FAILED로 마감한다."""
+
+        if status not in (ExecutionStatus.SUCCESS, ExecutionStatus.FAILED):
+            raise ValueError(f"모델 호출의 최종 상태가 아닙니다: {status}")
+        if retry_count < 0:
+            raise ValueError("retry_count는 0 이상이어야 합니다.")
+
+        call = await self._session.get(
+            ModelCall,
+            model_call_id,
+            with_for_update=True,
+        )
+        if call is None:
+            raise ValueError(f"존재하지 않는 모델 호출입니다: {model_call_id}")
+        if call.status != ExecutionStatus.PROCESSING:
+            raise ValueError(
+                f"PROCESSING 상태의 모델 호출만 마감할 수 있습니다: {call.status}"
+            )
+
+        call.status = status
+        call.input_tokens = input_tokens
+        call.output_tokens = output_tokens
+        call.estimated_cost = estimated_cost
+        call.latency_ms = latency_ms
+        call.retry_count = retry_count
+        call.error_message = error_message
         await self._session.flush()
         return call
 

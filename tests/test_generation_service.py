@@ -11,6 +11,7 @@ from app.rag.model_trace import ModelCallTrace
 from generation.generator import (
     GENERATION_PROMPT_VERSION,
     OPENAI_GENERATION_MODEL,
+    OPENAI_GENERATION_PROVIDER,
     OpenAIGenerator,
 )
 from generation.models import (
@@ -47,6 +48,50 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.generator = AsyncMock(spec=OpenAIGenerator)
         self.service = GenerationService(self.generator)
+
+    async def test_runs_checkpoint_before_generation(self) -> None:
+        events = []
+
+        async def checkpoint(*_args) -> None:
+            events.append("checkpoint")
+
+        async def generate(*_args):
+            events.append("generation")
+            return _call(
+                GenerationResult(
+                    status=GenerationStatus.WITHHELD,
+                    answer_markdown=None,
+                    withheld_reason=GenerationWithheldReason.OUT_OF_SCOPE,
+                )
+            )
+
+        before_model_call = AsyncMock(side_effect=checkpoint)
+        self.generator.generate_with_trace.side_effect = generate
+
+        await self.service.generate_answer(
+            "질문",
+            [],
+            before_model_call=before_model_call,
+        )
+
+        self.assertEqual(["checkpoint", "generation"], events)
+        before_model_call.assert_awaited_once_with(
+            OPENAI_GENERATION_PROVIDER,
+            OPENAI_GENERATION_MODEL,
+            GENERATION_PROMPT_VERSION,
+        )
+
+    async def test_does_not_generate_when_checkpoint_fails(self) -> None:
+        before_model_call = AsyncMock(side_effect=RuntimeError("checkpoint failed"))
+
+        with self.assertRaisesRegex(RuntimeError, "checkpoint failed"):
+            await self.service.generate_answer(
+                "질문",
+                [],
+                before_model_call=before_model_call,
+            )
+
+        self.generator.generate_with_trace.assert_not_awaited()
 
     async def test_completes_with_first_marker_order_and_repeated_source(self) -> None:
         results = [self._result(1), self._result(2)]

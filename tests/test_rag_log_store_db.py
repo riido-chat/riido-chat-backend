@@ -14,6 +14,7 @@ import unittest
 import uuid
 from datetime import datetime, timezone
 
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from app.core.config import get_settings
@@ -21,6 +22,7 @@ from app.database.models import (
     AnswerStatus,
     ChunkingConfig,
     ContentNode,
+    Conversation,
     ConversationStatus,
     DocumentChunk,
     DocumentSource,
@@ -30,6 +32,7 @@ from app.database.models import (
     ExecutionStatus,
     IndexVersion,
     IndexVersionStatus,
+    ModelCall,
     ModelCallPurpose,
     RetrieverType,
 )
@@ -163,6 +166,147 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
 
     # ------------------------------------------------------------------
 
+    async def test_model_call_checkpoint_is_visible_between_transactions(
+        self,
+    ) -> None:
+        """PROCESSING commit과 같은 행의 최종 갱신을 별도 session에서 확인한다."""
+
+        suffix = uuid.uuid4().hex[:8]
+        conversation_id = None
+        index_version_id = None
+        chunking_config_id = None
+        embedding_config_id = None
+
+        try:
+            async with AsyncSession(
+                bind=self.engine,
+                expire_on_commit=False,
+            ) as setup_session:
+                chunking = ChunkingConfig(
+                    version=f"checkpoint-chunking-{suffix}",
+                    strategy="SECTION",
+                    max_tokens=512,
+                    created_at=_now(),
+                )
+                embedding = EmbeddingConfig(
+                    version=f"checkpoint-embedding-{suffix}",
+                    provider="openai",
+                    model_name="text-embedding-test",
+                    dimensions=1536,
+                    input_template_version="v1",
+                    created_at=_now(),
+                )
+                setup_session.add_all([chunking, embedding])
+                await setup_session.flush()
+
+                index_version = IndexVersion(
+                    version=f"checkpoint-index-{suffix}",
+                    status=IndexVersionStatus.INACTIVE,
+                    chunking_config_id=chunking.id,
+                    embedding_config_id=embedding.id,
+                    created_at=_now(),
+                )
+                setup_session.add(index_version)
+                await setup_session.flush()
+
+                setup_store = RagLogStore(setup_session)
+                conversation = await setup_store.create_conversation()
+                run = await setup_store.start_rag_run(
+                    conversation.id,
+                    user_query="checkpoint 가시성 확인",
+                    index_version_id=index_version.id,
+                    context_strategy="NEW_TOPIC",
+                )
+                conversation_id = conversation.id
+                rag_run_id = run.id
+                index_version_id = index_version.id
+                chunking_config_id = chunking.id
+                embedding_config_id = embedding.id
+                await setup_session.commit()
+
+            async with AsyncSession(
+                bind=self.engine,
+                expire_on_commit=False,
+            ) as start_session:
+                started = await RagLogStore(start_session).start_model_call(
+                    rag_run_id=rag_run_id,
+                    purpose=ModelCallPurpose.GENERATION.value,
+                    provider="openai",
+                    model_name="gpt-test",
+                    prompt_version="v1",
+                )
+                model_call_id = started.id
+                await start_session.commit()
+
+            async with AsyncSession(bind=self.engine) as read_session:
+                processing = await read_session.get(ModelCall, model_call_id)
+                self.assertIsNotNone(processing)
+                self.assertEqual(ExecutionStatus.PROCESSING, processing.status)
+                self.assertIsNone(processing.latency_ms)
+
+            # 최종 갱신 transaction이 실패하면 checkpoint 행은 보존돼야 한다.
+            async with AsyncSession(bind=self.engine) as rollback_session:
+                await RagLogStore(rollback_session).finish_model_call(
+                    model_call_id,
+                    status=ExecutionStatus.SUCCESS,
+                    latency_ms=1200,
+                )
+                await rollback_session.rollback()
+
+            async with AsyncSession(bind=self.engine) as read_session:
+                processing = await read_session.get(ModelCall, model_call_id)
+                self.assertEqual(ExecutionStatus.PROCESSING, processing.status)
+
+            async with AsyncSession(bind=self.engine) as finish_session:
+                finished = await RagLogStore(finish_session).finish_model_call(
+                    model_call_id,
+                    status=ExecutionStatus.SUCCESS,
+                    input_tokens=1000,
+                    output_tokens=300,
+                    latency_ms=1200,
+                    retry_count=1,
+                )
+                self.assertEqual(model_call_id, finished.id)
+                await finish_session.commit()
+
+            async with AsyncSession(bind=self.engine) as read_session:
+                finished = await read_session.get(ModelCall, model_call_id)
+                row_count = await read_session.scalar(
+                    select(func.count(ModelCall.id)).where(
+                        ModelCall.rag_run_id == rag_run_id,
+                        ModelCall.purpose == ModelCallPurpose.GENERATION,
+                    )
+                )
+                self.assertEqual(1, row_count)
+                self.assertEqual(model_call_id, finished.id)
+                self.assertEqual(ExecutionStatus.SUCCESS, finished.status)
+                self.assertEqual(1, finished.retry_count)
+        finally:
+            async with AsyncSession(bind=self.engine) as cleanup_session:
+                if conversation_id is not None:
+                    await cleanup_session.execute(
+                        delete(Conversation).where(Conversation.id == conversation_id)
+                    )
+                if index_version_id is not None:
+                    await cleanup_session.execute(
+                        delete(IndexVersion).where(IndexVersion.id == index_version_id)
+                    )
+                if chunking_config_id is not None:
+                    await cleanup_session.execute(
+                        delete(ChunkingConfig).where(
+                            ChunkingConfig.id == chunking_config_id
+                        )
+                    )
+                if embedding_config_id is not None:
+                    await cleanup_session.execute(
+                        delete(EmbeddingConfig).where(
+                            EmbeddingConfig.id == embedding_config_id
+                        )
+                    )
+                await cleanup_session.commit()
+
+    # ------------------------------------------------------------------
+
     async def test_full_turn_lifecycle_completed(self) -> None:
         conversation = await self.store.create_conversation()
         self.assertEqual(ConversationStatus.ACTIVE, conversation.status)
@@ -199,16 +343,33 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
                 ),
             ],
         )
-        await self.store.record_model_call(
+        model_call = await self.store.start_model_call(
             rag_run_id=run.id,
             purpose=ModelCallPurpose.GENERATION.value,
             provider="openai",
             model_name="gpt-test",
+            prompt_version="v1",
+        )
+        model_call_id = model_call.id
+        self.assertEqual(ExecutionStatus.PROCESSING, model_call.status)
+        self.assertIsNone(model_call.input_tokens)
+        self.assertIsNone(model_call.latency_ms)
+
+        finished_model_call = await self.store.finish_model_call(
+            model_call_id,
             status=ExecutionStatus.SUCCESS,
             input_tokens=1000,
             output_tokens=300,
             latency_ms=1200,
         )
+        self.assertEqual(model_call_id, finished_model_call.id)
+        self.assertEqual(ExecutionStatus.SUCCESS, finished_model_call.status)
+        with self.assertRaisesRegex(ValueError, "PROCESSING"):
+            await self.store.finish_model_call(
+                model_call_id,
+                status=ExecutionStatus.FAILED,
+                error_message="중복 마감",
+            )
         await self.store.complete_rag_run(
             run.id,
             answer_content="## 멤버 초대 방법\n\n1. 설정으로 이동합니다. [1]",
@@ -236,10 +397,12 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
             [float(row.fused_score) for row in detail.retrieval_results],
         )
         self.assertEqual(1, len(detail.model_calls))
+        self.assertEqual(model_call_id, detail.model_calls[0].id)
         self.assertEqual(
             ModelCallPurpose.GENERATION,
             detail.model_calls[0].purpose,
         )
+        self.assertEqual(ExecutionStatus.SUCCESS, detail.model_calls[0].status)
         self.assertEqual(1, len(detail.citations))
         self.assertEqual(1, detail.citations[0].citation_order)
         self.assertIsNone(detail.feedback)
