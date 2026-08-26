@@ -1,5 +1,6 @@
 """수집 원본(L0)을 정제해 검색에 사용할 텍스트(L1)를 생성한다."""
 
+import hashlib
 import json
 import re
 from collections import defaultdict
@@ -12,6 +13,10 @@ CLEAN_MANIFEST_PATH = Path("data/clean_manifest.json")
 
 BOILERPLATE_PREFIX = "> For the complete documentation index"
 SITE_ROOT = "https://docs.riido.io"
+
+
+def sha256(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def html_to_text(fragment: str) -> str:
@@ -132,6 +137,11 @@ def main() -> None:
 
     for entry in manifest:
         text = (DATA_DIR / entry["path"]).read_text(encoding="utf-8")
+        raw_content_hash = sha256(text)
+        if raw_content_hash != entry["sha256"]:
+            raise ValueError(
+                f"수집 manifest와 원문 hash가 일치하지 않습니다: {entry['path']}"
+            )
 
         text = strip_boilerplate(text)
         text, images = extract_images(text)
@@ -146,7 +156,10 @@ def main() -> None:
 
         results.append({
             **{k: entry[k] for k in ("doc_id", "url", "title", "category", "order")},
-            "path": str(out_path.relative_to("data")),
+            "path": str(out_path.relative_to(DATA_DIR)),
+            "raw_content_uri": entry["path"],
+            "raw_content_hash": raw_content_hash,
+            "normalized_content_hash": sha256(text),
             "images": images,
             "bytes": len(text.encode("utf-8")),
         })

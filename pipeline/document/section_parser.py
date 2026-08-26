@@ -116,6 +116,16 @@ def _create_section_id(
     document_id: str,
     local_section_path: Tuple[str, ...],
 ) -> str:
+    digest = create_section_identity_hash(document_id, local_section_path)
+    return f"{document_id}:{digest[:_SECTION_ID_HASH_LENGTH]}"
+
+
+def create_section_identity_hash(
+    document_id: str,
+    local_section_path: Tuple[str, ...],
+) -> str:
+    """문서 ID와 문서 내부 경로로 재색인 간 유지되는 Section 신원을 만든다."""
+
     if local_section_path:
         identity_source = {
             "document_id": document_id,
@@ -134,8 +144,7 @@ def _create_section_id(
         separators=(",", ":"),
         sort_keys=True,
     )
-    digest = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
-    return f"{document_id}:{digest[:_SECTION_ID_HASH_LENGTH]}"
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
 def _validate_unique_semantic_paths(sections: List[Section]) -> None:

@@ -1,8 +1,10 @@
 """신규 ERD 전체 재색인과 ACTIVE Retrieval의 로컬 DB 통합 테스트."""
 
 import asyncio
+import hashlib
 import unittest
 import uuid
+from dataclasses import replace
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -12,6 +14,7 @@ from app.database.models import (
     ChunkEmbedding,
     ContentNode,
     DocumentChunk,
+    DocumentVersion,
     ExecutionStatus,
     IngestionRun,
     IndexDocument,
@@ -19,6 +22,8 @@ from app.database.models import (
     IndexVersion,
     IndexVersionStatus,
 )
+from pipeline.document.models import NormalizedDocument
+from pipeline.document.section_parser import create_section_identity_hash
 from retrieval.bm25_retriever import BM25Retriever
 from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS, EmbeddingResponse
 from retrieval.hybrid_retriever import HybridRetriever
@@ -91,13 +96,18 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
             (chunk, [0.1 + index * 0.1] * OPENAI_EMBEDDING_DIMENSIONS)
             for index, chunk in enumerate(chunks)
         ]
+        documents = [
+            self._source_document(suffix, document=1),
+            self._source_document(suffix, document=2),
+        ]
 
-        first_index = await self.store.replace_all(items)
+        first_index = await self.store.replace_all(items, documents)
 
         self.assertEqual(IndexVersionStatus.ACTIVE, first_index.status)
         self.assertEqual(first_index.id, await self.store.get_active_index_version_id())
         await self._assert_active_chain(first_index, chunks)
         await self._assert_successful_run_logs(first_index, document_count=2)
+        first_node_hashes = await self._active_node_hashes(first_index)
 
         active_chunks = await self.store.load_active_chunks()
         self.assertEqual(3, len(active_chunks))
@@ -136,7 +146,23 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
             {result.chunk.index_version_id for result in hybrid_results},
         )
 
-        second_index = await self.store.replace_all(items)
+        changed_chunks = [
+            replace(chunks[0], content="수정된 본문"),
+            *chunks[1:],
+        ]
+        changed_items = [
+            (chunk, [0.1 + index * 0.1] * OPENAI_EMBEDDING_DIMENSIONS)
+            for index, chunk in enumerate(changed_chunks)
+        ]
+        changed_documents = [
+            self._source_document(suffix, document=1, revision="changed"),
+            documents[1],
+        ]
+
+        second_index = await self.store.replace_all(
+            changed_items,
+            changed_documents,
+        )
 
         self.assertNotEqual(first_index.id, second_index.id)
         self.assertEqual(IndexVersionStatus.INACTIVE, first_index.status)
@@ -148,8 +174,18 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
             .where(IndexVersion.status == IndexVersionStatus.ACTIVE)
         )
         self.assertEqual(1, active_count)
-        await self._assert_active_chain(second_index, chunks)
+        await self._assert_active_chain(second_index, changed_chunks)
         await self._assert_successful_run_logs(second_index, document_count=2)
+        second_node_hashes = await self._active_node_hashes(second_index)
+        changed_section_id = chunks[0].section_id
+        self.assertEqual(
+            first_node_hashes[changed_section_id][0],
+            second_node_hashes[changed_section_id][0],
+        )
+        self.assertNotEqual(
+            first_node_hashes[changed_section_id][1],
+            second_node_hashes[changed_section_id][1],
+        )
 
     async def _assert_active_chain(
         self,
@@ -198,6 +234,81 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
             )
         )
         self.assertEqual(len(source_chunks), embedding_count)
+
+        document_versions = list(
+            (
+                await self.session.execute(
+                    select(DocumentVersion)
+                    .join(
+                        IndexDocument,
+                        IndexDocument.document_version_id == DocumentVersion.id,
+                    )
+                    .where(IndexDocument.index_version_id == index_version.id)
+                )
+            ).scalars()
+        )
+        self.assertTrue(
+            all(
+                version.raw_content_uri.startswith("raw/")
+                for version in document_versions
+            )
+        )
+        self.assertTrue(
+            all(
+                version.raw_content_hash != version.normalized_content_hash
+                for version in document_versions
+            )
+        )
+
+        content_nodes = list(
+            (
+                await self.session.execute(
+                    select(ContentNode)
+                    .join(
+                        IndexDocument,
+                        IndexDocument.document_version_id
+                        == ContentNode.document_version_id,
+                    )
+                    .where(IndexDocument.index_version_id == index_version.id)
+                )
+            ).scalars()
+        )
+        self.assertTrue(
+            all(node.node_identity_kind == "path" for node in content_nodes)
+        )
+        for node in content_nodes:
+            self.assertEqual(
+                create_section_identity_hash(
+                    node.metadata_["document_id"],
+                    tuple(node.metadata_["section_path"][1:]),
+                ),
+                node.node_identity_hash,
+            )
+
+    async def _active_node_hashes(
+        self,
+        index_version: IndexVersion,
+    ) -> dict[str, tuple[str, str]]:
+        nodes = list(
+            (
+                await self.session.execute(
+                    select(ContentNode)
+                    .join(
+                        IndexDocument,
+                        IndexDocument.document_version_id
+                        == ContentNode.document_version_id,
+                    )
+                    .where(IndexDocument.index_version_id == index_version.id)
+                )
+            ).scalars()
+        )
+        return {
+            node.metadata_["section_id"]: (
+                node.node_identity_hash,
+                node.content_hash,
+            )
+            for node in nodes
+        }
 
     async def _assert_successful_run_logs(
         self,
@@ -252,6 +363,30 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
             source_url=f"https://docs.riido.io/test/{suffix}/{document}.md",
             category="guide",
             content=f"문서 {document}의 본문 {section}",
+        )
+
+    @staticmethod
+    def _source_document(
+        suffix: str,
+        *,
+        document: int,
+        revision: str = "initial",
+    ) -> NormalizedDocument:
+        document_id = f"document-{suffix}-{document}"
+        normalized_content = f"# 문서 {document}\n\n{revision} 정제 본문"
+        return NormalizedDocument(
+            document_id=document_id,
+            title=f"문서 {document}",
+            source_url=f"https://docs.riido.io/test/{suffix}/{document}.md",
+            category="guide",
+            content=normalized_content,
+            raw_content_uri=f"raw/test/{suffix}/{document}.md",
+            raw_content_hash=hashlib.sha256(
+                f"{revision} raw {document}".encode("utf-8")
+            ).hexdigest(),
+            normalized_content_hash=hashlib.sha256(
+                normalized_content.encode("utf-8")
+            ).hexdigest(),
         )
 
 

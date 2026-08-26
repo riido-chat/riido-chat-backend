@@ -1,4 +1,6 @@
+import hashlib
 import unittest
+from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -12,6 +14,7 @@ from app.database.models import (
     DocumentVersion,
     IndexVersion,
 )
+from pipeline.document.models import NormalizedDocument
 from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 from retrieval.models import RetrievalChunk
 from retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
@@ -33,6 +36,17 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
             source_url="https://docs.riido.io/document.md",
             category="guide",
             content="Chunk 본문",
+        )
+        normalized_content = "# 문서 제목\n\n## 하위 섹션\n\nChunk 본문"
+        self.document = NormalizedDocument(
+            document_id="document-id",
+            title="문서 제목",
+            source_url="https://docs.riido.io/document.md",
+            category="guide",
+            content=normalized_content,
+            raw_content_uri="raw/document.md",
+            raw_content_hash=self._sha256("수집 원문"),
+            normalized_content_hash=self._sha256(normalized_content),
         )
         self.embedding = [0.1] * OPENAI_EMBEDDING_DIMENSIONS
         self.active_index = SimpleNamespace(
@@ -62,7 +76,10 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
             "_replace_rows",
             new=AsyncMock(return_value=expected),
         ) as replace_rows:
-            result = await self.store.replace_all([(self.chunk, self.embedding)])
+            result = await self.store.replace_all(
+                [(self.chunk, self.embedding)],
+                [self.document],
+            )
 
         self.assertIs(expected, result)
         replace_rows.assert_awaited_once()
@@ -79,7 +96,10 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
             "_replace_rows",
             new=AsyncMock(return_value=expected),
         ) as replace_rows:
-            result = await self.store.replace_all([(self.chunk, self.embedding)])
+            result = await self.store.replace_all(
+                [(self.chunk, self.embedding)],
+                [self.document],
+            )
 
         self.assertIs(expected, result)
         replace_rows.assert_awaited_once()
@@ -94,7 +114,10 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
             new=AsyncMock(side_effect=failure),
         ):
             with self.assertRaises(RuntimeError) as context:
-                await self.store.replace_all([(self.chunk, self.embedding)])
+                await self.store.replace_all(
+                    [(self.chunk, self.embedding)],
+                    [self.document],
+                )
 
         self.assertIs(failure, context.exception)
         exit_args = self.transaction.__aexit__.await_args.args
@@ -103,20 +126,58 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_validates_reindex_input_before_transaction(self) -> None:
         with self.assertRaisesRegex(ValueError, "하나 이상"):
-            await self.store.replace_all([])
+            await self.store.replace_all([], [])
         with self.assertRaisesRegex(ValueError, "1536차원"):
-            await self.store.replace_all([(self.chunk, [0.1])])
+            await self.store.replace_all([(self.chunk, [0.1])], [self.document])
 
         persisted = self._runtime_chunk()
         with self.assertRaisesRegex(ValueError, "DB 식별자"):
-            await self.store.replace_all([(persisted, self.embedding)])
+            await self.store.replace_all(
+                [(persisted, self.embedding)],
+                [self.document],
+            )
 
         with self.assertRaisesRegex(ValueError, "중복 section_id"):
             await self.store.replace_all(
-                [(self.chunk, self.embedding), (self.chunk, self.embedding)]
+                [(self.chunk, self.embedding), (self.chunk, self.embedding)],
+                [self.document],
+            )
+
+        other_document = NormalizedDocument(
+            document_id="other-document",
+            title=self.document.title,
+            source_url=self.document.source_url,
+            category=self.document.category,
+            content=self.document.content,
+            raw_content_uri=self.document.raw_content_uri,
+            raw_content_hash=self.document.raw_content_hash,
+            normalized_content_hash=self.document.normalized_content_hash,
+        )
+        with self.assertRaisesRegex(ValueError, "document_id"):
+            await self.store.replace_all(
+                [(self.chunk, self.embedding)],
+                [other_document],
             )
 
         self.session.begin.assert_not_called()
+
+    async def test_validates_document_hashes_before_ingestion(self) -> None:
+        invalid_raw_hash = replace(self.document, raw_content_hash="invalid")
+        with self.assertRaisesRegex(ValueError, "원문 hash"):
+            self.store._validate_document_chunks(
+                invalid_raw_hash,
+                [self.chunk],
+            )
+
+        mismatched_normalized_hash = replace(
+            self.document,
+            normalized_content_hash="f" * 64,
+        )
+        with self.assertRaisesRegex(ValueError, "내용과 hash"):
+            self.store._validate_document_chunks(
+                mismatched_normalized_hash,
+                [self.chunk],
+            )
 
     async def test_gets_exactly_one_active_index_version(self) -> None:
         result = Mock()
@@ -247,6 +308,10 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
             metadata_={"document_id": "document-id", "category": "guide"},
         )
         return document_chunk, content_node, document_version, document_source
+
+    @staticmethod
+    def _sha256(content: str) -> str:
+        return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
     @staticmethod
     def _runtime_chunk() -> RetrievalChunk:
