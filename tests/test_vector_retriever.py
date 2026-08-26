@@ -110,8 +110,22 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(call.embedding_call)
         self.assertTrue(call.embedding_call.succeeded)
         self.assertEqual(7, call.embedding_call.input_tokens)
+        self.assertEqual(0, call.embedding_call.retry_count)
         self.assertEqual(OPENAI_EMBEDDING_MODEL, call.embedding_call.model_name)
         self.assertIsNone(call.embedding_call.error_message)
+
+    async def test_trace_carries_embedding_sdk_retry_count(self) -> None:
+        self.embedder.embed_many_with_usage.return_value = EmbeddingResponse(
+            embeddings=[self.embedding],
+            input_tokens=7,
+            retry_count=2,
+        )
+        self.store.similarity_search.return_value = [(self.chunks[0], 0.9)]
+
+        call = await self.retriever.search_with_trace("질문")
+
+        self.assertIsNone(call.error)
+        self.assertEqual(2, call.embedding_call.retry_count)
 
     async def test_trace_keeps_failed_embedding_call_for_logging(self) -> None:
         self.embedder.embed_many_with_usage.side_effect = RuntimeError(

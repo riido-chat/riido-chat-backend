@@ -16,10 +16,11 @@ OPENAI_EMBEDDING_DIMENSIONS = 1536
 
 @dataclass(frozen=True)
 class EmbeddingResponse:
-    """embedding 결과와 model_calls에 남길 사용량."""
+    """embedding 결과와 model_calls에 남길 사용량·SDK 재시도 횟수."""
 
     embeddings: List[List[float]]
     input_tokens: Optional[int] = None
+    retry_count: int = 0
 
 
 def build_embedding_text(chunk: RetrievalChunk) -> str:
@@ -64,12 +65,13 @@ class OpenAIEmbedder:
         if not input_texts:
             raise ValueError("Embedding할 text가 하나 이상이어야 합니다.")
 
-        response = self._client.embeddings.create(
+        raw_response = self._client.embeddings.with_raw_response.create(
             model=OPENAI_EMBEDDING_MODEL,
             input=input_texts,
             dimensions=OPENAI_EMBEDDING_DIMENSIONS,
             encoding_format="float",
         )
+        response = raw_response.parse()
 
         if len(response.data) != len(input_texts):
             raise RuntimeError(
@@ -96,4 +98,5 @@ class OpenAIEmbedder:
         return EmbeddingResponse(
             embeddings=embeddings,
             input_tokens=getattr(usage, "prompt_tokens", None),
+            retry_count=raw_response.retries_taken,
         )
