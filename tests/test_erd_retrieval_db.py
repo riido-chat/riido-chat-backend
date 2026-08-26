@@ -28,7 +28,14 @@ class _StubEmbedder:
     def embed(self, text: str) -> list[float]:
         return [0.1] * OPENAI_EMBEDDING_DIMENSIONS
 
-    def embed_many_with_usage(self, texts) -> EmbeddingResponse:
+    def embed_many_with_usage(
+        self,
+        texts,
+        *,
+        sdk_max_retries=None,
+    ) -> EmbeddingResponse:
+        if sdk_max_retries != 0:
+            raise AssertionError("Query Embedding SDK retry가 비활성화되지 않았습니다.")
         return EmbeddingResponse(
             embeddings=[[0.1] * OPENAI_EMBEDDING_DIMENSIONS for _ in texts],
             input_tokens=len(texts),

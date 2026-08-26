@@ -4,7 +4,7 @@ from typing import Tuple
 from unittest.mock import Mock, patch
 
 import httpx
-from openai import OpenAI
+from openai import InternalServerError, OpenAI
 
 from retrieval.embedding import (
     OPENAI_EMBEDDING_DIMENSIONS,
@@ -218,6 +218,32 @@ class OpenAIEmbedderTest(unittest.TestCase):
 
         self.assertEqual(3, attempts)
         self.assertEqual(2, response.retry_count)
+
+    def test_can_disable_sdk_retry_for_query_embedding(self) -> None:
+        attempts = 0
+
+        def handle_request(request: httpx.Request) -> httpx.Response:
+            nonlocal attempts
+            attempts += 1
+            return httpx.Response(
+                500,
+                json={"error": {"message": "temporary error"}},
+                request=request,
+            )
+
+        client = OpenAI(
+            api_key="test-key",
+            http_client=httpx.Client(transport=httpx.MockTransport(handle_request)),
+        )
+        self.addCleanup(client.close)
+
+        with self.assertRaises(InternalServerError):
+            OpenAIEmbedder(client=client).embed_many_with_usage(
+                ["질문"],
+                sdk_max_retries=0,
+            )
+
+        self.assertEqual(1, attempts)
 
     def test_requires_api_key_when_client_is_not_injected(self) -> None:
         settings = SimpleNamespace(openai_api_key=None)

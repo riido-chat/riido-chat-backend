@@ -4,6 +4,8 @@ import asyncio
 import time
 from typing import List, Optional
 
+from openai import APIConnectionError, APIStatusError
+
 from app.rag.model_trace import BeforeModelCallHook, ModelCallTrace
 from retrieval.embedding import (
     OPENAI_EMBEDDING_MODEL,
@@ -14,8 +16,24 @@ from retrieval.models import RetrievalResult, VectorSearchCall
 from retrieval.pgvector_store import PgVectorStore
 
 
+QUERY_EMBEDDING_MAX_ATTEMPTS = 3
+QUERY_EMBEDDING_INITIAL_RETRY_DELAY_SECONDS = 0.5
+
+
 def _elapsed_ms(started: float) -> int:
     return int((time.perf_counter() - started) * 1000)
+
+
+def _is_transient_openai_error(error: Exception) -> bool:
+    if isinstance(error, APIConnectionError):
+        return True
+    if isinstance(error, APIStatusError):
+        return error.status_code in (408, 409, 429) or error.status_code >= 500
+    return False
+
+
+def _retry_delay_seconds(retry_count: int) -> float:
+    return QUERY_EMBEDDING_INITIAL_RETRY_DELAY_SECONDS * (2**retry_count)
 
 
 class VectorRetriever:
@@ -63,22 +81,37 @@ class VectorRetriever:
             )
 
         started = time.perf_counter()
-        try:
-            response = await asyncio.to_thread(
-                self._embedder.embed_many_with_usage,
-                [query],
-            )
-        except Exception as error:
-            return VectorSearchCall(
-                latency_ms=_elapsed_ms(started),
-                embedding_call=self._embedding_call(started, error=error),
-                error=error,
-            )
+        for attempt in range(QUERY_EMBEDDING_MAX_ATTEMPTS):
+            try:
+                response = await asyncio.to_thread(
+                    self._embedder.embed_many_with_usage,
+                    [query],
+                    sdk_max_retries=0,
+                )
+                break
+            except Exception as error:
+                can_retry = (
+                    attempt < QUERY_EMBEDDING_MAX_ATTEMPTS - 1
+                    and _is_transient_openai_error(error)
+                )
+                if can_retry:
+                    await asyncio.sleep(_retry_delay_seconds(attempt))
+                    continue
+
+                return VectorSearchCall(
+                    latency_ms=_elapsed_ms(started),
+                    embedding_call=self._embedding_call(
+                        started,
+                        retry_count=attempt,
+                        error=error,
+                    ),
+                    error=error,
+                )
 
         embedding_call = self._embedding_call(
             started,
             input_tokens=response.input_tokens,
-            retry_count=response.retry_count,
+            retry_count=attempt + response.retry_count,
         )
 
         try:

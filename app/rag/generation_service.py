@@ -1,6 +1,7 @@
 """Generation 결과 검증과 최종 답변 상태 결정을 담당한다."""
 
 import re
+import time
 from typing import Dict, Optional, Sequence, Tuple
 
 from app.rag.model_trace import BeforeModelCallHook, ModelCallTrace
@@ -134,6 +135,22 @@ def _error_result(
     )
 
 
+def _failed_generation_trace(
+    started: float,
+    error: Exception,
+) -> ModelCallTrace:
+    """Generator가 trace를 만들기 전에 끝난 예상 밖 실패를 기록한다."""
+
+    return ModelCallTrace(
+        provider=OPENAI_GENERATION_PROVIDER,
+        model_name=OPENAI_GENERATION_MODEL,
+        succeeded=False,
+        latency_ms=int((time.perf_counter() - started) * 1000),
+        prompt_version=GENERATION_PROMPT_VERSION,
+        error_message=str(error),
+    )
+
+
 class GenerationService:
     """Generator 호출과 Backend Citation Validation을 연결한다."""
 
@@ -157,10 +174,14 @@ class GenerationService:
                 GENERATION_PROMPT_VERSION,
             )
 
+        started = time.perf_counter()
         try:
             call = await self._generator.generate_with_trace(question, sources)
-        except Exception:
-            return _error_result(UPSTREAM_ERROR_CODE)
+        except Exception as error:
+            return _error_result(
+                UPSTREAM_ERROR_CODE,
+                _failed_generation_trace(started, error),
+            )
 
         if call.error is not None:
             return _error_result(UPSTREAM_ERROR_CODE, call.trace)

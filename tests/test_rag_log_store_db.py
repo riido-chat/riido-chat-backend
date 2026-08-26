@@ -13,10 +13,12 @@ import asyncio
 import unittest
 import uuid
 from datetime import datetime, timezone
+from unittest.mock import AsyncMock
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
+from app.api.chat_schema import ChatErrorResponse
 from app.core.config import get_settings
 from app.database.models import (
     AnswerStatus,
@@ -36,10 +38,20 @@ from app.database.models import (
     ModelCallPurpose,
     RetrieverType,
 )
+from app.rag.chat_service import ChatService
+from app.rag.generation_service import GenerationService
 from app.rag.log_store import (
     CitationLog,
     RagLogStore,
     RetrievalCandidateLog,
+)
+from app.rag.model_trace import ModelCallTrace
+from retrieval.hybrid_retriever import HybridRetriever
+from retrieval.models import (
+    HybridRetrievalResult,
+    HybridSearchCall,
+    RetrievalChunk,
+    RetrievalResult,
 )
 
 
@@ -74,7 +86,11 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         self.engine = create_async_engine(self.database_url)
         self.connection = await self.engine.connect()
         self.transaction = await self.connection.begin()
-        self.session = AsyncSession(bind=self.connection, expire_on_commit=False)
+        self.session = AsyncSession(
+            bind=self.connection,
+            expire_on_commit=False,
+            join_transaction_mode="create_savepoint",
+        )
         self.store = RagLogStore(self.session)
         await self._seed_content_chain()
 
@@ -406,6 +422,148 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, len(detail.citations))
         self.assertEqual(1, detail.citations[0].citation_order)
         self.assertIsNone(detail.feedback)
+
+    async def test_generation_exception_preserves_retrieval_and_failed_call(
+        self,
+    ) -> None:
+        chunk = RetrievalChunk(
+            document_id="test-document",
+            section_id="test-section",
+            document_title="테스트 문서",
+            section_path=("테스트 문서", "섹션"),
+            source_url="https://docs.riido.io/test.md",
+            category="guide",
+            content="테스트 본문",
+            chunk_id=self.chunk_id,
+            document_version_id=self.document_version_id,
+            index_version_id=self.index_version_id,
+        )
+        bm25_result = RetrievalResult(chunk=chunk, score=7.5, rank=1)
+        vector_result = RetrievalResult(chunk=chunk, score=0.9, rank=1)
+        fused_result = HybridRetrievalResult(
+            chunk=chunk,
+            rrf_score=0.032,
+            final_rank=1,
+            bm25_rank=1,
+            vector_rank=1,
+        )
+        search = HybridSearchCall(
+            bm25_results=(bm25_result,),
+            vector_results=(vector_result,),
+            fused_results=(fused_result,),
+            bm25_latency_ms=10,
+            vector_latency_ms=20,
+            embedding_call=ModelCallTrace(
+                provider="openai",
+                model_name="text-embedding-test",
+                succeeded=True,
+                latency_ms=15,
+                input_tokens=3,
+            ),
+        )
+
+        retriever = AsyncMock(spec=HybridRetriever)
+
+        async def search_after_checkpoint(_question, *, before_model_call):
+            await before_model_call("openai", "text-embedding-test", None)
+            return search
+
+        retriever.search_with_trace.side_effect = search_after_checkpoint
+
+        generation_service = AsyncMock(spec=GenerationService)
+
+        async def raise_after_checkpoint(
+            _question,
+            _results,
+            *,
+            before_model_call,
+        ):
+            await before_model_call("openai", "gpt-test", "v1")
+            raise RuntimeError("generation unavailable")
+
+        generation_service.generate_answer.side_effect = raise_after_checkpoint
+        service = ChatService(
+            retriever=retriever,
+            generation_service=generation_service,
+            log_store=self.store,
+            session=self.session,
+            index_version_id=self.index_version_id,
+        )
+
+        response = await service.answer_question("실패 로그를 확인해줘")
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.assertIsNotNone(response.conversation_id)
+        self.assertIsNotNone(response.rag_run_id)
+        detail = await self.store.get_rag_run_detail(response.rag_run_id)
+        self.assertIsNotNone(detail)
+        self.assertEqual(AnswerStatus.ERROR, detail.run.status)
+        self.assertEqual("INTERNAL_ERROR", detail.run.error_code)
+        self.assertEqual(2, len(detail.retrieval_results))
+        self.assertTrue(
+            all(row.selected_as_evidence for row in detail.retrieval_results)
+        )
+        self.assertEqual(2, len(detail.model_calls))
+        generation_calls = [
+            call
+            for call in detail.model_calls
+            if call.purpose == ModelCallPurpose.GENERATION
+        ]
+        self.assertEqual(1, len(generation_calls))
+        self.assertEqual(ExecutionStatus.FAILED, generation_calls[0].status)
+        self.assertEqual(
+            "generation unavailable",
+            generation_calls[0].error_message,
+        )
+        self.assertEqual(0, generation_calls[0].retry_count)
+        self.assertEqual([], detail.citations)
+
+    async def test_embedding_final_failure_persists_retry_count(self) -> None:
+        failed_search = HybridSearchCall(
+            embedding_call=ModelCallTrace(
+                provider="openai",
+                model_name="text-embedding-test",
+                succeeded=False,
+                latency_ms=3500,
+                retry_count=2,
+                error_message="embedding unavailable",
+            ),
+            error=RuntimeError("embedding unavailable"),
+        )
+        retriever = AsyncMock(spec=HybridRetriever)
+
+        async def search_after_checkpoint(_question, *, before_model_call):
+            await before_model_call("openai", "text-embedding-test", None)
+            return failed_search
+
+        retriever.search_with_trace.side_effect = search_after_checkpoint
+        generation_service = AsyncMock(spec=GenerationService)
+        service = ChatService(
+            retriever=retriever,
+            generation_service=generation_service,
+            log_store=self.store,
+            session=self.session,
+            index_version_id=self.index_version_id,
+        )
+
+        response = await service.answer_question("Embedding 실패를 확인해줘")
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.assertIsNotNone(response.conversation_id)
+        self.assertIsNotNone(response.rag_run_id)
+        generation_service.generate_answer.assert_not_awaited()
+        detail = await self.store.get_rag_run_detail(response.rag_run_id)
+        self.assertIsNotNone(detail)
+        self.assertEqual(AnswerStatus.ERROR, detail.run.status)
+        self.assertEqual("UPSTREAM_ERROR", detail.run.error_code)
+        self.assertEqual([], detail.retrieval_results)
+        self.assertEqual(1, len(detail.model_calls))
+        embedding_call = detail.model_calls[0]
+        self.assertEqual(ModelCallPurpose.EMBEDDING, embedding_call.purpose)
+        self.assertEqual(ExecutionStatus.FAILED, embedding_call.status)
+        self.assertEqual(3500, embedding_call.latency_ms)
+        self.assertEqual(2, embedding_call.retry_count)
+        self.assertEqual("embedding unavailable", embedding_call.error_message)
 
     async def test_turn_numbers_increase_within_conversation(self) -> None:
         conversation = await self.store.create_conversation()

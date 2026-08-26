@@ -93,6 +93,36 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
 
         self.generator.generate_with_trace.assert_not_awaited()
 
+    async def test_builds_failed_trace_when_generator_raises_after_checkpoint(
+        self,
+    ) -> None:
+        before_model_call = AsyncMock()
+        self.generator.generate_with_trace.side_effect = RuntimeError(
+            "unexpected provider failure"
+        )
+
+        with patch(
+            "app.rag.generation_service.time.perf_counter",
+            side_effect=[10.0, 12.5],
+        ):
+            result = await self.service.generate_answer(
+                "질문",
+                [],
+                before_model_call=before_model_call,
+            )
+
+        self.assertEqual(FinalAnswerStatus.ERROR, result.status)
+        self.assertEqual(UPSTREAM_ERROR_CODE, result.error_code)
+        self.assertIsNotNone(result.model_call)
+        self.assertFalse(result.model_call.succeeded)
+        self.assertEqual(2500, result.model_call.latency_ms)
+        self.assertEqual(0, result.model_call.retry_count)
+        self.assertEqual(
+            "unexpected provider failure",
+            result.model_call.error_message,
+        )
+        before_model_call.assert_awaited_once()
+
     async def test_completes_with_first_marker_order_and_repeated_source(self) -> None:
         results = [self._result(1), self._result(2)]
         self.generator.generate_with_trace.return_value = _call(
