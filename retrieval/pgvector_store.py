@@ -1,7 +1,6 @@
 """신규 ERD 기반 전체 색인 적재와 pgvector 검색을 관리한다."""
 
 import hashlib
-import json
 import re
 import uuid
 from collections import defaultdict
@@ -29,6 +28,7 @@ from app.database.models import (
     IndexVersionStatus,
 )
 from pipeline.document.models import NormalizedDocument
+from pipeline.document.section_parser import create_section_identity_hash
 from retrieval.embedding import (
     OPENAI_EMBEDDING_DIMENSIONS,
     OPENAI_EMBEDDING_MODEL,
@@ -47,6 +47,7 @@ CURRENT_FINAL_TOP_K = 5
 DEFAULT_TRIGGER_TYPE = "MANUAL"
 PARSER_NAME = "gitbook-markdown"
 PARSER_VERSION = "1"
+SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 StoredEmbedding = Tuple[RetrievalChunk, Sequence[float]]
 SimilarityResult = Tuple[RetrievalChunk, float]
@@ -65,6 +66,7 @@ class PgVectorStore:
     async def replace_all(
         self,
         items: Sequence[StoredEmbedding],
+        documents: Sequence[NormalizedDocument],
     ) -> IndexVersion:
         """호출자 transaction 안에서 전체 적재 단계를 한 번에 실행한다.
 
@@ -73,11 +75,12 @@ class PgVectorStore:
         """
 
         self._validate_new_index_items(items)
+        self._validate_reindex_documents(items, documents)
         if self._session.in_transaction():
-            return await self._replace_rows(items)
+            return await self._replace_rows(items, documents)
 
         async with self._session.begin():
-            return await self._replace_rows(items)
+            return await self._replace_rows(items, documents)
 
     async def start_ingestion(
         self,
@@ -126,14 +129,13 @@ class PgVectorStore:
                 DocumentVersion.document_source_id == source.id
             )
         )
-        content_hash = self._document_content_hash(chunks)
         document_version = DocumentVersion(
             document_source_id=source.id,
             version_no=(current_version_no or 0) + 1,
-            raw_content_uri=document.source_url,
+            raw_content_uri=document.raw_content_uri,
             mime_type="text/markdown",
-            raw_content_hash=content_hash,
-            normalized_content_hash=content_hash,
+            raw_content_hash=document.raw_content_hash,
+            normalized_content_hash=document.normalized_content_hash,
             parser_name=PARSER_NAME,
             parser_version=PARSER_VERSION,
             status=DocumentVersionStatus.PROCESSING,
@@ -498,21 +500,15 @@ class PgVectorStore:
     async def _replace_rows(
         self,
         items: Sequence[StoredEmbedding],
+        documents: Sequence[NormalizedDocument],
     ) -> IndexVersion:
         items_by_document: DefaultDict[str, List[StoredEmbedding]] = defaultdict(list)
         for item in items:
             items_by_document[item[0].document_id].append(item)
 
         persisted_items = []
-        for document_items in items_by_document.values():
-            first_chunk = document_items[0][0]
-            document = NormalizedDocument(
-                document_id=first_chunk.document_id,
-                title=first_chunk.document_title,
-                source_url=first_chunk.source_url,
-                category=first_chunk.category,
-                content="\n\n".join(chunk.content for chunk, _ in document_items),
-            )
+        for document in documents:
+            document_items = items_by_document[document.document_id]
             ingestion_run = await self.start_ingestion(document)
             persisted_chunks = await self.complete_ingestion(
                 ingestion_run.id,
@@ -621,8 +617,11 @@ class PgVectorStore:
                         "section_id": chunk.section_id,
                     },
                     content_hash=self._sha256(chunk.content),
-                    node_identity_hash=self._sha256(chunk.section_id),
-                    node_identity_kind="SECTION_ID",
+                    node_identity_hash=create_section_identity_hash(
+                        chunk.document_id,
+                        chunk.section_path[1:],
+                    ),
+                    node_identity_kind="path",
                     metadata_={
                         "document_id": chunk.document_id,
                         "section_id": chunk.section_id,
@@ -860,6 +859,14 @@ class PgVectorStore:
     ) -> None:
         if not chunks:
             raise ValueError("수집할 Chunk가 하나 이상이어야 합니다.")
+        if not document.raw_content_uri:
+            raise ValueError("원문 보관 위치가 필요합니다.")
+        if not SHA256_PATTERN.fullmatch(document.raw_content_hash):
+            raise ValueError("원문 hash는 SHA-256 형식이어야 합니다.")
+        if not SHA256_PATTERN.fullmatch(document.normalized_content_hash):
+            raise ValueError("정제 문서 hash는 SHA-256 형식이어야 합니다.")
+        if PgVectorStore._sha256(document.content) != document.normalized_content_hash:
+            raise ValueError("정제 문서 내용과 hash가 일치하지 않습니다.")
 
         section_ids = set()
         for chunk in chunks:
@@ -867,6 +874,8 @@ class PgVectorStore:
                 chunk.document_id != document.document_id
                 or chunk.document_title != document.title
                 or chunk.source_url != document.source_url
+                or not chunk.section_path
+                or chunk.section_path[0] != document.title
             ):
                 raise ValueError("문서와 Chunk metadata가 일치하지 않습니다.")
             if (
@@ -878,6 +887,19 @@ class PgVectorStore:
             if chunk.section_id in section_ids:
                 raise ValueError(f"중복 section_id입니다: {chunk.section_id}")
             section_ids.add(chunk.section_id)
+
+    @staticmethod
+    def _validate_reindex_documents(
+        items: Sequence[StoredEmbedding],
+        documents: Sequence[NormalizedDocument],
+    ) -> None:
+        document_ids = [document.document_id for document in documents]
+        if len(document_ids) != len(set(document_ids)):
+            raise ValueError("재색인 입력에 중복 document_id가 있습니다.")
+
+        item_document_ids = {chunk.document_id for chunk, _ in items}
+        if set(document_ids) != item_document_ids:
+            raise ValueError("재색인 문서와 Chunk의 document_id가 일치하지 않습니다.")
 
     @staticmethod
     def _validate_persisted_chunks(chunks: Sequence[RetrievalChunk]) -> None:
@@ -905,22 +927,6 @@ class PgVectorStore:
                 "embedding은 "
                 f"{OPENAI_EMBEDDING_DIMENSIONS}차원이어야 합니다."
             )
-
-    @staticmethod
-    def _document_content_hash(chunks: Sequence[RetrievalChunk]) -> str:
-        serialized = json.dumps(
-            [
-                {
-                    "section_id": chunk.section_id,
-                    "section_path": chunk.section_path,
-                    "content": chunk.content,
-                }
-                for chunk in chunks
-            ],
-            ensure_ascii=False,
-            separators=(",", ":"),
-        )
-        return PgVectorStore._sha256(serialized)
 
     @staticmethod
     def _sha256(value: str) -> str:

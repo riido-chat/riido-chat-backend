@@ -6,6 +6,9 @@
     "category": "getting-started",
     "order": 1,
     "path": "clean/getting-started/intro.md",
+    "raw_content_uri": "raw/getting-started/intro.md",
+    "raw_content_hash": "f5e8628adf87c4d30043e19de3fa48282e3807e8c3004a8e4a62d0a55df32426",
+    "normalized_content_hash": "bb57312d063144d38f8c4ab0c3b6b249a8b02d6854f9f82cd6aa29d2e0ed4062",
     "images": [
       "/files/p4pPo2ksb6tSk2uKncCR"
     ],
@@ -21,6 +24,9 @@
     "category": "getting-started",
     "order": 2,
     "path": "clean/getting-started/core-concepts.md",
+    "raw_content_uri": "raw/getting-started/core-concepts.md",
+    "raw_content_hash": "1d1bab5460c933aa45d9ee9e0294b4548eaa2e38d10f5234d791a47f5e0950fa",
+    "normalized_content_hash": "5867ea1a14db4bd0dd4f0af2890731f936dfa5a3ffecbaafaea0713ea1bd5209",
     "images": [
       "/files/Y6mT513NHSgHLov5zhu7",
       "/files/TV3QtBeAOQyTOSjXrU4V"
@@ -37,6 +43,9 @@
     "category": "ai-agents",
     "order": 3,
     "path": "clean/ai-agents/intro.md",
+    "raw_content_uri": "raw/ai-agents/intro.md",
+    "raw_content_hash": "56578ce477e042a2d2886e17b4f70be1698261b50d6b22ee1179aeb8e23ce134",
+    "normalized_content_hash": "e00a7cd6bcd0d9ba777727a88deeee2091d56b51955f9bb282d6a60e6c5c742b",
     "images": [
       "/files/cF6yUEkgOT5rN9ERY9DR",
       "/files/TOuDSBZxvyrw7uBsUSjV",
@@ -55,6 +64,9 @@
     "category": "workspaces",
     "order": 4,
     "path": "clean/workspaces/overview.md",
+    "raw_content_uri": "raw/workspaces/overview.md",
+    "raw_content_hash": "3cb2f7e314a7dd612618567a5e886a8b0aa438f75f47b01ff0e6f6f14419d5e4",
+    "normalized_content_hash": "3df65e1fe703c6efbfeb6421ec3ac2c6858858114a9578edc9f29add118832d8",
     "images": [
       "/files/VEd5SXWg2Z5SOIyUnO01",
       "/files/gbgvbTjGQf4gta0ao31D"
@@ -71,6 +83,9 @@
     "category": "workspaces",
     "order": 5,
     "path": "clean/workspaces/members.md",
+    "raw_content_uri": "raw/workspaces/members.md",
+    "raw_content_hash": "878189d3699c2916f8b9dcf074f2ac7babf9a76fbe58e463e6d8dfbf997fc9dd",
+    "normalized_content_hash": "870227442973309e97844618c93a5b15f89876fea587bf08c7bff7de26a897c9",
     "images": [
       "/files/4XHCVSviYKkB46QDqkhI"
     ],
@@ -86,6 +101,9 @@
     "category": "workspaces",
     "order": 6,
     "path": "clean/workspaces/plans-and-billing.md",
+    "raw_content_uri": "raw/workspaces/plans-and-billing.md",
+    "raw_content_hash": "52af272fb446e163abad834dc59d8090b76a62b659d4a61d2ebe2792f589d993",
+    "normalized_content_hash": "6daffbe55a1566aa617f4f816148e40140ac0f4f752afc4e72fedbfcd3322cbe",
     "images": [
       "/files/jBox1P0JjnmQEVErYo36"
     ],
@@ -101,6 +119,9 @@
     "category": "teams",
     "order": 7,
     "path": "clean/teams/overview.md",
+    "raw_content_uri": "raw/teams/overview.md",
+    "raw_content_hash": "7f7fafc5fb4cc51f82d8a14a9482050588aea7bf0b0775c2656d1f0bb1eccee2",
+    "normalized_content_hash": "da9e4e9d68432a7b77a5bda08a9b4f90104b9408e7c0588d8754f10fc5d90929",
     "images": [
       "/files/I4NPr0AScYvcQICpq3RE"
     ],
@@ -116,6 +137,9 @@
     "category": "teams",
     "order": 8,
     "path": "clean/teams/private-teams.md",
+    "raw_content_uri": "raw/teams/private-teams.md",
+    "raw_content_hash": "8f0418f73aed5ced1a75ee3a5e5f85238eaff0007d1cb54cca0f509ba579ee50",
+    "normalized_content_hash": "0c2fd5024826861b30b156cc09020594a7e9597213f2379e011c057a6326df0d",
     "images": [
       "/files/tLhkMcPVUgzYCTkplSn3",
       "/files/O4DKIAVjDND9erABEgil"
@@ -132,6 +156,9 @@
     "category": "teams",
     "order": 9,
     "path": "clean/teams/statuses.md",
+    "raw_content_uri": "raw/teams/statuses.md",
+    "raw_content_hash": "a79792ba057331973b95f2744dab5fdccb8b0cb623623e4f5a182d04e90dad12",
+    "normalized_content_hash": "5403efabfc0da403c0aa4d8d8c5f0b22d844aed31a073ad96d801536f9d8121f",
     "images": [
       "/files/xV01IiR3xmdXxlZXzW9p"
     ],
@@ -147,6 +174,9 @@
     "category": "issues",
     "order": 10,
     "path": "clean/issues/workflow.md",
+    "raw_content_uri": "raw/issues/workflow.md",
+    "raw_content_hash": "c123c416d47a0dc43861797002869042c0a8000328ffa0fb2b32e19fb8b1ac76",
+    "normalized_content_hash": "5907b73d529b4ab577327607e4eb4bd597cdf86c169699e25813f1313c6a6653",
     "images": [],
     "bytes": 3737,
     "source_urls": [
@@ -160,6 +190,9 @@
     "category": "issues",
     "order": 11,
     "path": "clean/issues/intake.md",
+    "raw_content_uri": "raw/issues/intake.md",
+    "raw_content_hash": "78f480c8a4d3f9b2d85f4ea5cde2398fc742ddd11f2fc7499c49626819b5944f",
+    "normalized_content_hash": "9700ea9baac1e9d4c75189c9cf550be1f3d962ff94df5472217cfa3d55ba8aa0",
     "images": [
       "/files/8nMbHrwRE1IvIUUuRWE0",
       "/files/lQ6tfrdn6MvLKEV5RAH6",
@@ -177,6 +210,9 @@
     "category": "issues",
     "order": 12,
     "path": "clean/issues/backlog.md",
+    "raw_content_uri": "raw/issues/backlog.md",
+    "raw_content_hash": "584892c8997589f3fc76826beb7626fc13fd4eee34a1c1b099343d123d9c83bf",
+    "normalized_content_hash": "29967bed4da16d89a5d3c46a4298dcbaab503a54569b53c431f723dc83ad7ed2",
     "images": [
       "/files/clpwdVfXky2b18T20LXd",
       "/files/iQkJu2aapBIjkjD22VrL",
@@ -194,6 +230,9 @@
     "category": "issues",
     "order": 13,
     "path": "clean/issues/work-items.md",
+    "raw_content_uri": "raw/issues/work-items.md",
+    "raw_content_hash": "a7f92c3e36fe31b0f90be482c13d5f9af679607ffffffebf011ce27e362ecdcd",
+    "normalized_content_hash": "751924bbfde1325e28bfa85ef19a62c3b8da9270ef3e43bdc5fc372736540913",
     "images": [
       "/files/Q48UprAaYVlF2jLEV7wm",
       "/files/Bo8942823QzhS7pyDIKM",
@@ -211,6 +250,9 @@
     "category": "issues",
     "order": 14,
     "path": "clean/issues/archived-items.md",
+    "raw_content_uri": "raw/issues/archived-items.md",
+    "raw_content_hash": "c21b142dabbf8ed489b60b88e06bbe7411b89b89fd1205a6f315218bd2072115",
+    "normalized_content_hash": "a331b0d4d5f04740571333b364896138f58207ddb033c9f0d454c11650bfa56f",
     "images": [],
     "bytes": 1659,
     "source_urls": [
@@ -224,6 +266,9 @@
     "category": "issues",
     "order": 15,
     "path": "clean/issues/issue-relations.md",
+    "raw_content_uri": "raw/issues/issue-relations.md",
+    "raw_content_hash": "5da06581b97584320148b3ffecc30efde02e3c7a1c16872792a9537c9f46ad69",
+    "normalized_content_hash": "bd4466bff295ad70c8fc9954ac97ee30e209e1dfec51957038f0301a5a32f308",
     "images": [
       "/files/fmyFPJvf6c1L7ru6ROk5"
     ],
@@ -239,6 +284,9 @@
     "category": "views",
     "order": 16,
     "path": "clean/views/dashboards.md",
+    "raw_content_uri": "raw/views/dashboards.md",
+    "raw_content_hash": "8d47fa1754000c8d2e032365ef90496f14acb0b7dac53542246e17df0825ae06",
+    "normalized_content_hash": "27dc7ab3658f1033d2226d322cc5631fb2262cf59ea6bc295f57faf647cf32d3",
     "images": [
       "/files/5QgKG33v3yykons5Lcbj"
     ],
@@ -254,6 +302,9 @@
     "category": "views",
     "order": 17,
     "path": "clean/views/diagram.md",
+    "raw_content_uri": "raw/views/diagram.md",
+    "raw_content_hash": "a12acc60667ca224b5d4fa0b3338a9279594e2a0298a397e2ed765a736215126",
+    "normalized_content_hash": "49ed090f5f108a9cfafa5a84c89c6705f4c1063edc46253788fea5bf90f77014",
     "images": [
       "/files/MuDbuSkCBNNFsXSnSzua",
       "/files/0495NtdknEjQxRusFBol"
@@ -270,6 +321,9 @@
     "category": "views",
     "order": 18,
     "path": "clean/views/custom-views.md",
+    "raw_content_uri": "raw/views/custom-views.md",
+    "raw_content_hash": "cf54085cf7493a12e154c536e415ad44dbd483ea1198c5dcae5758b9b1cb08ce",
+    "normalized_content_hash": "5a5816ccb721ac4503ad3779599c77467ea48757dca5098717e02a73a833c822",
     "images": [
       "/files/GgcvZR3lYmj7eiNvuDUo"
     ],
@@ -285,6 +339,9 @@
     "category": "docs",
     "order": 19,
     "path": "clean/docs/editor.md",
+    "raw_content_uri": "raw/docs/editor.md",
+    "raw_content_hash": "0c98778c1b8bdbbac0db5b0662c88dbcb1ed29bfdcd191fc043f7c7bbc8766af",
+    "normalized_content_hash": "3a8a3825f8927440a5d3aeac1a8d00800dba1a36dc2a2298227abfdb291fe048",
     "images": [
       "/files/qYEB2VjeGkejv2qniwPJ"
     ],
@@ -300,6 +357,9 @@
     "category": "docs",
     "order": 20,
     "path": "clean/docs/templates.md",
+    "raw_content_uri": "raw/docs/templates.md",
+    "raw_content_hash": "d0fa08d834708ccf45f2e1fc4101018d7c74a41088a60795fc39e1f6505eb30e",
+    "normalized_content_hash": "b276fca520bc0e14a92b569cd60765b58288b4f97de653aaa437be15364b92f2",
     "images": [
       "/files/XJovG2rVhPwqAmtAZYn1"
     ],
@@ -315,6 +375,9 @@
     "category": "docs",
     "order": 21,
     "path": "clean/docs/comments.md",
+    "raw_content_uri": "raw/docs/comments.md",
+    "raw_content_hash": "742a3d0f4018bb93c4665f186135129d03aca74b6755a97d631572f37f48bc5f",
+    "normalized_content_hash": "726bc2827d0147b7e815422bef88c2bd5a9a98f2bf78787c088d89500e501ead",
     "images": [
       "/files/w6UtpacqUsOB2QGfaYv5"
     ],
@@ -330,6 +393,9 @@
     "category": "sprints",
     "order": 22,
     "path": "clean/sprints/overview.md",
+    "raw_content_uri": "raw/sprints/overview.md",
+    "raw_content_hash": "f17ea96e422cece6c07715275176835d3b409e019daaf0392e539afc2c50a9d2",
+    "normalized_content_hash": "24147e9e17eea227b777942636228494288a362d77cc81f157cdc026ad1e8e6b",
     "images": [
       "/files/vMbX4MFjJ2yrXPR7l6aV"
     ],
@@ -345,6 +411,9 @@
     "category": "sprints",
     "order": 23,
     "path": "clean/sprints/sprint-graph.md",
+    "raw_content_uri": "raw/sprints/sprint-graph.md",
+    "raw_content_hash": "e0d15feaf3a4e56012394d2540831292c0493948692d37882f4a07b6abb59036",
+    "normalized_content_hash": "61535f540a45423a2a81120fdb70ca9faf135a8175da4e31bc246398e4231d04",
     "images": [
       "/files/9UJmmCTSu7OuecD2UpiL"
     ],
@@ -360,6 +429,9 @@
     "category": "sprints",
     "order": 24,
     "path": "clean/sprints/automations.md",
+    "raw_content_uri": "raw/sprints/automations.md",
+    "raw_content_hash": "ab76a04cb7cc5ba935d35c3a883387f30fe4a9c7fed396d97e7121196dbbd9d2",
+    "normalized_content_hash": "ce242ae619edd3d7c6dda8477a962bd66db4eee882de40fb2309d0570310977d",
     "images": [
       "/files/tjRAXbsmwWaxJRwyLOqu"
     ],
@@ -375,6 +447,9 @@
     "category": "meetings",
     "order": 25,
     "path": "clean/meetings/overview.md",
+    "raw_content_uri": "raw/meetings/overview.md",
+    "raw_content_hash": "8b8dec608dd4ac09aea4303518fd9bc58158520d9c9d816bccc16a74e766a5a9",
+    "normalized_content_hash": "bc97443ce718e0c0f89aadab05f25f49df6144b0a1d56cc3efe69d7f3d1ba5c7",
     "images": [
       "/files/QIBhzoc1bKOqFAo9CIyT"
     ],
@@ -390,6 +465,9 @@
     "category": "meetings",
     "order": 26,
     "path": "clean/meetings/automations.md",
+    "raw_content_uri": "raw/meetings/automations.md",
+    "raw_content_hash": "406e56607ee5499a3f340dfd553d63b780c83804c91ba14a62b21f64c285a651",
+    "normalized_content_hash": "89da8f3f1b5e26c8b5dc6ff7fe02a809d7b2ecf74273e2fcd6fa455a464557fd",
     "images": [
       "/files/2Ok1sOVD6csJklOfP2tv"
     ],
@@ -405,6 +483,9 @@
     "category": "ai",
     "order": 27,
     "path": "clean/ai/mcp.md",
+    "raw_content_uri": "raw/ai/mcp.md",
+    "raw_content_hash": "861a4ca312d547da3895fb7e41bee69997d7531992a446a9fb36e4deb26f0f91",
+    "normalized_content_hash": "f133556debe5bbe5d8a150288833b0b2040f57e810c4bc6e26754c13886e08f6",
     "images": [
       "/files/UmvIXORXrDt1Nx9TcRE2",
       "/files/wO6vFSBl3lpga00FO571",
@@ -451,6 +532,9 @@
     "category": "ai",
     "order": 28,
     "path": "clean/ai/auto-scheduling.md",
+    "raw_content_uri": "raw/ai/auto-scheduling.md",
+    "raw_content_hash": "eb4052aa8b845251b87a8be696c37048afc0cf79d83d4ad48c6ce89df0fbe16f",
+    "normalized_content_hash": "ea1a478d3177c61ac290d14790d6a49681fe29f5ab92152825e69387d05aca6a",
     "images": [],
     "bytes": 1277,
     "source_urls": [
@@ -464,6 +548,9 @@
     "category": "ai",
     "order": 29,
     "path": "clean/ai/duplicate-detection.md",
+    "raw_content_uri": "raw/ai/duplicate-detection.md",
+    "raw_content_hash": "dd5591b48cb77bdbb59cbe8263844c01ef7eff86a86e137b7b8169358051b1b1",
+    "normalized_content_hash": "107c4a95af273f90e86ceeae5cb7732826fa8f26bc39255ebb2219e93143de1d",
     "images": [
       "/files/bMF0kKbNx9hGLOmoHVtg"
     ],
@@ -479,6 +566,9 @@
     "category": "ai",
     "order": 30,
     "path": "clean/ai/release-notes.md",
+    "raw_content_uri": "raw/ai/release-notes.md",
+    "raw_content_hash": "10b19cd3a3079cb4408e13ceff48e1b4958c51d694793cbb50133964e55e3137",
+    "normalized_content_hash": "0acf06bce2a1eae1f574de2884cf8140ef97a1de7c91fe1b577c3ec52f9f1f3d",
     "images": [
       "/files/XtzOJns81HRIsiz5otAV"
     ],
@@ -494,6 +584,9 @@
     "category": "integrations",
     "order": 31,
     "path": "clean/integrations/github.md",
+    "raw_content_uri": "raw/integrations/github.md",
+    "raw_content_hash": "a071bc077da3ad8e8051a70e0ee37d7cb3819ab39b5c72da19903fe488e2bf3b",
+    "normalized_content_hash": "e6110e934f126e68f94875b3585a2fa001f272e6e4a3aedacdb31ca703254a23",
     "images": [
       "/files/WczIkfe1Fy5o8PYXgSiC",
       "/files/jntwFlu9mTaTpIDMQ0gB",
@@ -512,6 +605,9 @@
     "category": "integrations",
     "order": 32,
     "path": "clean/integrations/figma.md",
+    "raw_content_uri": "raw/integrations/figma.md",
+    "raw_content_hash": "40a1494fe199c3175edfa2a8a2163f8061a1abd424783f9070cfb42f6181d3a4",
+    "normalized_content_hash": "cc16b24cbcb2d11767063f5eda5f898b29f7fc4337ab977585ce013b55dc2c75",
     "images": [
       "/files/E3QyC5oZXvnZsMG5MtW1",
       "/files/CxjOAtJOSzU4VavKxwGm",
@@ -531,6 +627,9 @@
     "category": "integrations",
     "order": 33,
     "path": "clean/integrations/slack.md",
+    "raw_content_uri": "raw/integrations/slack.md",
+    "raw_content_hash": "b4914c53b3f471e12be0d2df17f9a4d6ce1eb7f2d5720295366f2f66dff81158",
+    "normalized_content_hash": "4b4d10cece9902f88da46fb56ea677eabb53966473a3dbf269d3bb9b184616a6",
     "images": [
       "/files/PC0M4YuXw22P4vp3KPP7",
       "/files/Nya9oKfEYT6F4VFxEOZX",
@@ -550,6 +649,9 @@
     "category": "integrations",
     "order": 34,
     "path": "clean/integrations/discord.md",
+    "raw_content_uri": "raw/integrations/discord.md",
+    "raw_content_hash": "b761a1a39e677ee77910fa5e35e35e754f631c701bac31f1f2affd16ef6cee1f",
+    "normalized_content_hash": "2a3104714f81054af6ecbcb09ec125bb16f4b9276d05b6aa7ad85b1a7eb99c1a",
     "images": [
       "/files/UWVbodnhF4g16EeOeC1v"
     ],
@@ -565,6 +667,9 @@
     "category": "integrations",
     "order": 35,
     "path": "clean/integrations/google-calendar.md",
+    "raw_content_uri": "raw/integrations/google-calendar.md",
+    "raw_content_hash": "3e08ac6654d74f0b6dcfeb1435b950943a3db6f76d522acca41f20f82ceb14dd",
+    "normalized_content_hash": "d828c11e04ac366cbecbdccb74ebf1a231eb006728ef9065fb8a46c8a17ee961",
     "images": [
       "/files/2yrezAz10jEOhZbzWhUS",
       "/files/H1CMYsWD7SVZFjOfSUgi"
@@ -581,6 +686,9 @@
     "category": "data",
     "order": 37,
     "path": "clean/data/search.md",
+    "raw_content_uri": "raw/data/search.md",
+    "raw_content_hash": "c33d946d703861dcb2b977d1f7f20d02d2a4f7cf7e6f8b85f1816311f5464553",
+    "normalized_content_hash": "3e0755ab77b5e20d72ade4c3f78704b2631326eb4d9427f7dfd148eb1033e654",
     "images": [
       "/files/xYDUw7jj8K2k1Oc5vg9q"
     ],
@@ -596,6 +704,9 @@
     "category": "data",
     "order": 38,
     "path": "clean/data/notifications.md",
+    "raw_content_uri": "raw/data/notifications.md",
+    "raw_content_hash": "166463667b3f14f43505b3ec8e96801040ba7e6e6d436ce1eda02f2d53ef61da",
+    "normalized_content_hash": "00ffba9726b75f7fa25c14977dc95fbb39b51ebe6a064793d3af3cc718af9ed5",
     "images": [
       "/files/aHBKzdtzKbEKIWmunRPv"
     ],
@@ -611,6 +722,9 @@
     "category": "data",
     "order": 39,
     "path": "clean/data/filters.md",
+    "raw_content_uri": "raw/data/filters.md",
+    "raw_content_hash": "a1bd6e10fd515d55c950989239293f12b585b82614767c9808bcfb6bde9018f7",
+    "normalized_content_hash": "9b9838cd3d75f9538c5325be245fdc1e6607a450aee87be95c8eda05a63e8dd1",
     "images": [
       "/files/NQPNjByuWOxLB3V1Mmtu"
     ],
@@ -626,6 +740,9 @@
     "category": "data",
     "order": 40,
     "path": "clean/data/trash.md",
+    "raw_content_uri": "raw/data/trash.md",
+    "raw_content_hash": "621ed9744455c5caa2c05006c55af1e52193e0f16d36129f7a01fc8660db81f5",
+    "normalized_content_hash": "e67e6b2a6f2c8f5fdfd9b3759578826eb34400fc67fdced4766058419ba0bcba",
     "images": [
       "/files/0zcdw7qBSzib7H5VYErW"
     ],

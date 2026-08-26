@@ -1,5 +1,6 @@
 """clean manifest와 Markdown을 NormalizedDocument로 읽는다."""
 
+import hashlib
 import json
 from pathlib import Path
 from typing import List, Union
@@ -8,7 +9,19 @@ from pipeline.document.models import NormalizedDocument
 
 
 DEFAULT_MANIFEST_PATH = Path("data/clean_manifest.json")
-REQUIRED_FIELDS = ("doc_id", "title", "url", "path")
+REQUIRED_FIELDS = (
+    "doc_id",
+    "title",
+    "url",
+    "path",
+    "raw_content_uri",
+    "raw_content_hash",
+    "normalized_content_hash",
+)
+
+
+def _sha256(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def load_normalized_documents(
@@ -45,6 +58,10 @@ def load_normalized_documents(
             )
 
         content = markdown_path.read_text(encoding="utf-8")
+        if _sha256(content) != entry["normalized_content_hash"]:
+            raise ValueError(
+                f"manifest entry #{index}의 정제 문서 hash가 일치하지 않습니다."
+            )
         documents.append(
             NormalizedDocument(
                 document_id=entry["doc_id"],
@@ -52,6 +69,9 @@ def load_normalized_documents(
                 source_url=entry["url"],
                 category=entry.get("category"),
                 content=content,
+                raw_content_uri=entry["raw_content_uri"],
+                raw_content_hash=entry["raw_content_hash"],
+                normalized_content_hash=entry["normalized_content_hash"],
             )
         )
 

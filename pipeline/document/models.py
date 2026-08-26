@@ -6,13 +6,16 @@ from typing import Optional, Tuple
 # frozen=True: 객체 생성 후 필드값 변경을 막는다.
 @dataclass(frozen=True)
 class NormalizedDocument:
-    """정제된 공식 문서 한 개를 나타낸다."""
+    """정제 본문과 이를 만든 수집 원본의 추적 metadata를 나타낸다."""
 
     document_id: str
     title: str
     source_url: str
     category: Optional[str]
     content: str
+    raw_content_uri: str
+    raw_content_hash: str
+    normalized_content_hash: str
 
 
 @dataclass(frozen=True)

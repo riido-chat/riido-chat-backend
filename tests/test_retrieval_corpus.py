@@ -1,3 +1,4 @@
+import hashlib
 import json
 import tempfile
 import unittest
@@ -14,6 +15,11 @@ class RetrievalCorpusTest(unittest.TestCase):
             "title": "테스트 문서",
             "category": "test",
             "path": "clean/test.md",
+            "raw_content_uri": "raw/test.md",
+            "raw_content_hash": hashlib.sha256(b"raw content").hexdigest(),
+            "normalized_content_hash": hashlib.sha256(
+                "# 테스트 문서\n\n## 개요\n\n검색할 본문\n".encode("utf-8")
+            ).hexdigest(),
         }
 
         with tempfile.TemporaryDirectory() as directory:

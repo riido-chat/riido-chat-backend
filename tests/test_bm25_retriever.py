@@ -111,6 +111,9 @@ class BM25RetrieverTest(unittest.TestCase):
             source_url="https://docs.riido.io/test.md",
             category="test",
             content="문서 본문",
+            raw_content_uri="raw/test.md",
+            raw_content_hash="0" * 64,
+            normalized_content_hash="1" * 64,
         )
         chunk = Chunk(
             chunk_id="chunk-id",

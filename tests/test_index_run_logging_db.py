@@ -1,6 +1,7 @@
 """수집·색인 실패 이력이 checkpoint commit 뒤 보존되는지 검증한다."""
 
 import asyncio
+import hashlib
 import unittest
 import uuid
 
@@ -96,6 +97,15 @@ class IndexRunLoggingDbTest(unittest.IsolatedAsyncioTestCase):
             source_url=self.source_url,
             category="test",
             content="# 로그 통합 테스트\n\n## 실행\n\n실패 로그 본문",
+            raw_content_uri=f"raw/log-test-{suffix}.md",
+            raw_content_hash=hashlib.sha256(
+                f"raw log test {suffix}".encode("utf-8")
+            ).hexdigest(),
+            normalized_content_hash=hashlib.sha256(
+                "# 로그 통합 테스트\n\n## 실행\n\n실패 로그 본문".encode(
+                    "utf-8"
+                )
+            ).hexdigest(),
         )
 
         async with self.session_factory() as session:

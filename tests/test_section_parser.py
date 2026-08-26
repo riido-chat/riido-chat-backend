@@ -1,7 +1,10 @@
 import unittest
 
 from pipeline.document.models import NormalizedDocument
-from pipeline.document.section_parser import parse_sections
+from pipeline.document.section_parser import (
+    create_section_identity_hash,
+    parse_sections,
+)
 
 
 class SectionParserTest(unittest.TestCase):
@@ -240,6 +243,10 @@ Section 본문
             parse_sections(original)[0].section_id,
             parse_sections(changed)[0].section_id,
         )
+        self.assertNotEqual(
+            create_section_identity_hash("document-id", ("설정",)),
+            create_section_identity_hash("document-id", ("환경 설정",)),
+        )
 
     def test_distinguishes_same_local_path_in_different_documents(self) -> None:
         first = self._document("## 개요\n\n본문")
@@ -249,6 +256,9 @@ Section 본문
             source_url="https://docs.riido.io/other.md",
             category="test",
             content="## 개요\n\n본문",
+            raw_content_uri="raw/other.md",
+            raw_content_hash="0" * 64,
+            normalized_content_hash="1" * 64,
         )
 
         self.assertNotEqual(
@@ -264,6 +274,9 @@ Section 본문
             source_url="https://docs.riido.io/test.md",
             category="test",
             content="## 개요\n\n본문",
+            raw_content_uri="raw/test.md",
+            raw_content_hash="0" * 64,
+            normalized_content_hash="1" * 64,
         )
 
         self.assertEqual(
@@ -337,6 +350,9 @@ Section 본문
             source_url="https://docs.riido.io/test.md",
             category="test",
             content=content,
+            raw_content_uri="raw/test.md",
+            raw_content_hash="0" * 64,
+            normalized_content_hash="1" * 64,
         )
 
 

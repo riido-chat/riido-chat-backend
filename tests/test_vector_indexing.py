@@ -1,3 +1,4 @@
+import hashlib
 import unittest
 from dataclasses import replace
 from types import SimpleNamespace
@@ -77,12 +78,18 @@ class VectorIndexItemTest(unittest.TestCase):
 
 class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
+        normalized_content = "# 문서 1\n\n## 섹션 1\n\n본문 1"
         self.document = NormalizedDocument(
             document_id="document-1",
             title="문서 1",
             source_url="https://docs.riido.io/document-1.md",
             category="guide",
-            content="# 문서 1\n\n## 섹션 1\n\n본문 1",
+            content=normalized_content,
+            raw_content_uri="raw/document-1.md",
+            raw_content_hash=hashlib.sha256(b"raw document 1").hexdigest(),
+            normalized_content_hash=hashlib.sha256(
+                normalized_content.encode("utf-8")
+            ).hexdigest(),
         )
         self.chunk = VectorIndexItemTest._chunk(1)
         self.persisted_chunk = replace(
