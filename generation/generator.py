@@ -177,7 +177,7 @@ class OpenAIGenerator:
             try:
                 response = await self._client.responses.parse(
                     model=OPENAI_GENERATION_MODEL,
-                    instructions=PROMPT_V2,
+                    instructions=PROMPT_V3,
                     input=generation_input,
                     text_format=GenerationResult,
                 )
