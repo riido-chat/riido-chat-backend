@@ -17,11 +17,11 @@ from retrieval.models import HybridRetrievalResult
 
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.4-mini"
-GENERATION_PROMPT_VERSION = "v2"
+GENERATION_PROMPT_VERSION = "v3"
 MAX_CONTEXT_SOURCES = 5
 MAX_GENERATION_ATTEMPTS = 2
 
-PROMPT_V2 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하는 안내 챗봇입니다.
+PROMPT_V3 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하는 안내 챗봇입니다.
 
 ## Grounding rules
 - 제공된 Context에 명시된 사실만 사용하세요.
@@ -38,7 +38,9 @@ PROMPT_V2 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하
 - 자연스러운 한국어 존댓말을 사용하세요.
 - 첫 1~2문장에서 질문의 핵심부터 간결하게 답하세요.
 - 절차형 질문은 필요한 경우 단계별로 안내하고 최소한의 Markdown만 사용하세요.
-- answer_markdown에 Markdown 링크, URL, HTML을 포함하지 마세요.
+- answer_markdown에 Markdown 링크 문법과 HTML을 사용하지 마세요.
+  사용자가 입력하거나 확인해야 하는 설정값과 엔드포인트 URL은
+  코드 블록이나 백틱 인라인 코드 안에 넣고, 그 밖의 URL은 본문에 쓰지 마세요.
   출처 링크는 Backend가 별도 citations 영역에 구성합니다.
 
 ## Citation rules

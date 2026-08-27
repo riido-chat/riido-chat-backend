@@ -164,8 +164,10 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn("필요한 최소한의 SOURCE만 인용", PROMPT_V2)
 
     def test_prompt_forbids_links_urls_and_html(self) -> None:
-        self.assertEqual("v2", GENERATION_PROMPT_VERSION)
-        self.assertIn("Markdown 링크, URL, HTML을 포함하지 마세요", PROMPT_V2)
+        self.assertEqual("v3", GENERATION_PROMPT_VERSION)
+        self.assertIn("Markdown 링크 문법과 HTML을 사용하지 마세요", PROMPT_V2)
+        self.assertIn("코드 블록이나 백틱 인라인 코드 안에 넣고", PROMPT_V2)
+        self.assertIn("그 밖의 URL은 본문에 쓰지 마세요", PROMPT_V2)
         self.assertIn("별도 citations 영역", PROMPT_V2)
 
     @staticmethod

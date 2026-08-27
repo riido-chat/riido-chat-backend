@@ -1,0 +1,1553 @@
+{
+  "model": "gpt-5.4-mini",
+  "summary": {
+    "total_count": 30,
+    "execution_success_count": 30,
+    "execution_failure_count": 0,
+    "retrieval_top_5_hit_count": 30,
+    "status_distribution": {
+      "COMPLETED": 30,
+      "WITHHELD": 0,
+      "ERROR": 0
+    },
+    "average_generation_latency_seconds": 2.046
+  },
+  "results": [
+    {
+      "question_id": "Q01",
+      "question": "새로 들어온 요청을 검토한 뒤 백로그나 바로 실행할 작업으로 넘기려면 어떻게 해야 하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "11957633d8b2:a6f5feefa6e5",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 개요"
+        },
+        {
+          "rank": 2,
+          "section_id": "11957633d8b2:a0709b43f1a9",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 신규 생성된 백로그"
+        },
+        {
+          "rank": 3,
+          "section_id": "11957633d8b2:cce467185dfa",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 전환된 백로그"
+        },
+        {
+          "rank": 4,
+          "section_id": "9d9ba80dfef6:b545c692c53d",
+          "document_title": "계획: 대기 작업",
+          "section_path": "계획: 대기 작업 > 작업 처리"
+        },
+        {
+          "rank": 5,
+          "section_id": "11957633d8b2:8e468f02bf3a",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 구조"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "새로 들어온 요청은 대기 작업에서 검토한 뒤, 진행하기로 결정하면 ‘승인’ 버튼을 클릭해 백로그나 작업으로 전환하실 수 있습니다. 승인된 작업은 선택한 단계로 이동됩니다.[1]\n\n대기 작업은 계획 단계이므로 여기서 바로 완료할 수는 없습니다. 진행하지 않기로 한 경우에는 ‘거절’을 눌러 상태를 거절됨으로 변경할 수 있습니다.[1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "계획: 대기 작업",
+          "sectionPath": "계획: 대기 작업 > 작업 처리",
+          "sourceUrl": "https://docs.riido.io/issues/intake.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 4.561
+    },
+    {
+      "question_id": "Q02",
+      "question": "백로그 항목을 프로젝트나 실제 작업으로 바꾸면 기존 정보도 그대로 따라가나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "11957633d8b2:cce467185dfa",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 전환된 백로그"
+        },
+        {
+          "rank": 2,
+          "section_id": "11957633d8b2:8e468f02bf3a",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 구조"
+        },
+        {
+          "rank": 3,
+          "section_id": "11957633d8b2:aa8af54aa5cd",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 속성"
+        },
+        {
+          "rank": 4,
+          "section_id": "11957633d8b2:a6f5feefa6e5",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 개요"
+        },
+        {
+          "rank": 5,
+          "section_id": "11957633d8b2:26264fecfd4a",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 작업으로 전환"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "네, 프로젝트나 실제 작업으로 전환해도 기존 정보는 그대로 유지됩니다. ‘전환’ 버튼을 눌러 프로젝트, 목표, 작업으로 전환할 수 있고, 작업으로 전환 시에는 기존의 모든 정보가 그대로 유지되어 실행 단계에서 이어서 작업을 진행할 수 있습니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "계획: 백로그",
+          "sectionPath": "계획: 백로그 > 작업으로 전환",
+          "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.705
+    },
+    {
+      "question_id": "Q03",
+      "question": "현재 적용한 필터와 정렬 조건을 저장해서 다음에도 똑같이 불러오려면 어떻게 하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "688dd8ac7efd:0d980cb3f519",
+          "document_title": "필터",
+          "section_path": "필터 > 저장된 보기"
+        },
+        {
+          "rank": 2,
+          "section_id": "333984364686:5db9d1f52377",
+          "document_title": "저장된 보기",
+          "section_path": "저장된 보기 > 보기 생성하기"
+        },
+        {
+          "rank": 3,
+          "section_id": "688dd8ac7efd:05afebae0312",
+          "document_title": "필터",
+          "section_path": "필터 > 개요"
+        },
+        {
+          "rank": 4,
+          "section_id": "333984364686:294a258fc7b7",
+          "document_title": "저장된 보기",
+          "section_path": "저장된 보기 > 보기 편집하기"
+        },
+        {
+          "rank": 5,
+          "section_id": "688dd8ac7efd:1ad5bfa76f8e",
+          "document_title": "필터",
+          "section_path": "필터 > 필터 적용하기"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "현재 페이지에서 필터나 정렬 조건을 설정한 뒤, 우측 상단의 `저장된 보기 생성` 버튼을 클릭하시면 현재 적용된 조건이 그대로 저장됩니다. 이렇게 저장한 보기는 다음에 동일한 조건으로 다시 불러올 수 있습니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "저장된 보기",
+          "sectionPath": "저장된 보기 > 보기 생성하기",
+          "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 3.411
+    },
+    {
+      "question_id": "Q04",
+      "question": "빈 문서에 팀에서 만든 문서 템플릿을 적용하려면 어떻게 해야 하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "c7f7233f8cd2:514df535f932",
+          "document_title": "문서 템플릿",
+          "section_path": "문서 템플릿 > 템플릿 적용"
+        },
+        {
+          "rank": 2,
+          "section_id": "c7f7233f8cd2:903fc62edea3",
+          "document_title": "문서 템플릿",
+          "section_path": "문서 템플릿 > 개요"
+        },
+        {
+          "rank": 3,
+          "section_id": "c7f7233f8cd2:01fd815455b0",
+          "document_title": "문서 템플릿",
+          "section_path": "문서 템플릿 > 템플릿 생성"
+        },
+        {
+          "rank": 4,
+          "section_id": "aacfc8cf7480:ca57cf9e9b84",
+          "document_title": "에디터",
+          "section_path": "에디터 > 문서 형식 적용"
+        },
+        {
+          "rank": 5,
+          "section_id": "da8743ff8cae:9135af8d0050",
+          "document_title": "팀",
+          "section_path": "팀 > 팀 설정"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "빈 에디터를 클릭하면 팀에 등록된 템플릿 목록이 자동으로 표시됩니다. 여기서 원하는 템플릿을 클릭하면 문서에 바로 적용되고, 기본 구조와 형식이 자동으로 채워집니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "문서 템플릿",
+          "sectionPath": "문서 템플릿 > 템플릿 적용",
+          "sourceUrl": "https://docs.riido.io/docs/templates.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 2.078
+    },
+    {
+      "question_id": "Q05",
+      "question": "보관함에 넣은 완료 작업을 다시 진행 가능한 상태로 되돌릴 수 있나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "fcb3c228f5a0:4fb20bbf5133",
+          "document_title": "운영: 보관 작업",
+          "section_path": "운영: 보관 작업 > 작업 보관함"
+        },
+        {
+          "rank": 2,
+          "section_id": "fcb3c228f5a0:7ce560cd7b49",
+          "document_title": "운영: 보관 작업",
+          "section_path": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기"
+        },
+        {
+          "rank": 3,
+          "section_id": "fcb3c228f5a0:87393c951ab1",
+          "document_title": "운영: 보관 작업",
+          "section_path": "운영: 보관 작업 > 개요"
+        },
+        {
+          "rank": 4,
+          "section_id": "949ddd65a2a5:56598b0ddfc0",
+          "document_title": "실행: 작업",
+          "section_path": "실행: 작업 > 작업 보관"
+        },
+        {
+          "rank": 5,
+          "section_id": "a7061c4853df:73e63632e555",
+          "document_title": "휴지통",
+          "section_path": "휴지통 > 복구 및 영구 삭제"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "네, 가능합니다. 보관된 작업은 언제든 다시 활성화하여 실행 가능한 상태로 되돌릴 수 있습니다. [1]\n\n프로젝트나 목표 단위로만 다시 활성화할 수도 있으며, 이 경우 하위 작업은 보관 상태로 유지됩니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "운영: 보관 작업",
+          "sectionPath": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기",
+          "sourceUrl": "https://docs.riido.io/issues/archived-items.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.212
+    },
+    {
+      "question_id": "Q06",
+      "question": "실수로 삭제한 작업을 원래 프로젝트와 팀 위치로 복구하려면 어떻게 하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "a7061c4853df:73e63632e555",
+          "document_title": "휴지통",
+          "section_path": "휴지통 > 복구 및 영구 삭제"
+        },
+        {
+          "rank": 2,
+          "section_id": "a7061c4853df:a5d15ef4cee0",
+          "document_title": "휴지통",
+          "section_path": "휴지통 > 개요"
+        },
+        {
+          "rank": 3,
+          "section_id": "a7061c4853df:4c7aa16de474",
+          "document_title": "휴지통",
+          "section_path": "휴지통 > 삭제된 페이지 보기"
+        },
+        {
+          "rank": 4,
+          "section_id": "a7061c4853df:6f88dd13099e",
+          "document_title": "휴지통",
+          "section_path": "휴지통 > 휴지통 사용법"
+        },
+        {
+          "rank": 5,
+          "section_id": "fcb3c228f5a0:7ce560cd7b49",
+          "document_title": "운영: 보관 작업",
+          "section_path": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "실수로 삭제한 작업은 휴지통 또는 해당 페이지 상단 배너의 `복구` 버튼을 통해 즉시 되돌릴 수 있습니다. 복구된 항목은 삭제 이전의 위치, 예를 들어 원래 속한 프로젝트나 팀으로 자동 복원됩니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "휴지통",
+          "sectionPath": "휴지통 > 복구 및 영구 삭제",
+          "sourceUrl": "https://docs.riido.io/data/trash.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.328
+    },
+    {
+      "question_id": "Q07",
+      "question": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "6c3b150c3146:6c9e58fb04ca",
+          "document_title": "비공개 팀",
+          "section_path": "비공개 팀 > 설정"
+        },
+        {
+          "rank": 2,
+          "section_id": "6c3b150c3146:9f525d515668",
+          "document_title": "비공개 팀",
+          "section_path": "비공개 팀 > 개요"
+        },
+        {
+          "rank": 3,
+          "section_id": "da8743ff8cae:9135af8d0050",
+          "document_title": "팀",
+          "section_path": "팀 > 팀 설정"
+        },
+        {
+          "rank": 4,
+          "section_id": "333984364686:ba056589ecd1",
+          "document_title": "저장된 보기",
+          "section_path": "저장된 보기 > 공개 범위"
+        },
+        {
+          "rank": 5,
+          "section_id": "6c3b150c3146:f4771653dfff",
+          "document_title": "비공개 팀",
+          "section_path": "비공개 팀 > 접근 권한"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 설정 페이지의 `팀 설정 > 일반`에서 공개 범위를 `비공개`로 선택하시면 됩니다. 설정을 저장하면 즉시 비공개 팀으로 전환됩니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "비공개 팀",
+          "sectionPath": "비공개 팀 > 설정",
+          "sourceUrl": "https://docs.riido.io/teams/private-teams.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.433
+    },
+    {
+      "question_id": "Q08",
+      "question": "스프린트 시작 요일을 바꾸면 현재 진행 중인 스프린트에는 어떻게 반영되나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "261e80b246e8:48338ffe0288",
+          "document_title": "스프린트",
+          "section_path": "스프린트 > 스프린트 시작 요일"
+        },
+        {
+          "rank": 2,
+          "section_id": "261e80b246e8:8f39a6741f94",
+          "document_title": "스프린트",
+          "section_path": "스프린트 > 스프린트 설정"
+        },
+        {
+          "rank": 3,
+          "section_id": "2c428c0d81be:91e1e3f290e3",
+          "document_title": "스프린트 그래프",
+          "section_path": "스프린트 그래프 > 참고"
+        },
+        {
+          "rank": 4,
+          "section_id": "2c428c0d81be:012f04cb7b63",
+          "document_title": "스프린트 그래프",
+          "section_path": "스프린트 그래프 > 그래프 보는 법"
+        },
+        {
+          "rank": 5,
+          "section_id": "40ac0f0ac641:6bbc22c7fbca",
+          "document_title": "자동화",
+          "section_path": "자동화 > 개요"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "스프린트 시작 요일을 바꾸면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다. [1]\n\n또한 주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "스프린트",
+          "sectionPath": "스프린트 > 스프린트 시작 요일",
+          "sourceUrl": "https://docs.riido.io/sprints/overview.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 5.598
+    },
+    {
+      "question_id": "Q09",
+      "question": "앞으로 진행할 스프린트 세 개를 미리 생성하려면 어떤 설정을 사용해야 하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "261e80b246e8:7a8e11bfc496",
+          "document_title": "스프린트",
+          "section_path": "스프린트 > 미리 생성할 다가올 스프린트 개수"
+        },
+        {
+          "rank": 2,
+          "section_id": "261e80b246e8:8f39a6741f94",
+          "document_title": "스프린트",
+          "section_path": "스프린트 > 스프린트 설정"
+        },
+        {
+          "rank": 3,
+          "section_id": "261e80b246e8:1c82492f0b2a",
+          "document_title": "스프린트",
+          "section_path": "스프린트 > 스프린트 기간"
+        },
+        {
+          "rank": 4,
+          "section_id": "40ac0f0ac641:03c976577bcd",
+          "document_title": "자동화",
+          "section_path": "자동화 > 자동화 설정"
+        },
+        {
+          "rank": 5,
+          "section_id": "261e80b246e8:48338ffe0288",
+          "document_title": "스프린트",
+          "section_path": "스프린트 > 스프린트 시작 요일"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "다가올 스프린트 개수를 `3개`로 설정하시면 됩니다. 이 설정은 다가올 스프린트를 미리 생성해두는 기능으로, 예를 들어 ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다. [1]\n\n스프린트 설정은 `[팀 설정 > 스프린트]`에서 관리할 수 있습니다. [2]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "스프린트",
+          "sectionPath": "스프린트 > 미리 생성할 다가올 스프린트 개수",
+          "sourceUrl": "https://docs.riido.io/sprints/overview.md"
+        },
+        {
+          "citationNumber": 2,
+          "documentTitle": "스프린트",
+          "sectionPath": "스프린트 > 스프린트 설정",
+          "sourceUrl": "https://docs.riido.io/sprints/overview.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 2.19
+    },
+    {
+      "question_id": "Q10",
+      "question": "특정 페이지나 댓글에서 더 이상 알림을 받고 싶지 않을 때는 어떻게 끄나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "c225265a1fa1:8056485bc27c",
+          "document_title": "알림",
+          "section_path": "알림 > 알림 설정"
+        },
+        {
+          "rank": 2,
+          "section_id": "c225265a1fa1:21a1e3032cdd",
+          "document_title": "알림",
+          "section_path": "알림 > 알림 확인하기"
+        },
+        {
+          "rank": 3,
+          "section_id": "854f9556fa9d:1b058ab0fb93",
+          "document_title": "댓글",
+          "section_path": "댓글 > 댓글 구독"
+        },
+        {
+          "rank": 4,
+          "section_id": "c225265a1fa1:4e5a6172d25a",
+          "document_title": "알림",
+          "section_path": "알림 > 개요"
+        },
+        {
+          "rank": 5,
+          "section_id": "c225265a1fa1:567b1cd31b93",
+          "document_title": "알림",
+          "section_path": "알림 > 알림 활용하기"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "특정 페이지나 댓글의 알림은 각각 개별로 끌 수 있습니다. 상세 페이지의 우측 상단 메뉴에서 `알림 끄기` 버튼을 클릭하면 페이지 알림을 비활성화할 수 있고, 댓글의 우측 상단 메뉴에서도 `알림 끄기` 버튼을 클릭하면 됩니다. 다시 알림을 받고 싶다면 같은 위치에서 `알림 받기` 버튼으로 재활성화할 수 있습니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "알림",
+          "sectionPath": "알림 > 알림 설정",
+          "sourceUrl": "https://docs.riido.io/data/notifications.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.603
+    },
+    {
+      "question_id": "Q11",
+      "question": "저장된 보기를 나만 사용하거나 팀 전체에 공개하도록 설정할 수 있나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "333984364686:ba056589ecd1",
+          "document_title": "저장된 보기",
+          "section_path": "저장된 보기 > 공개 범위"
+        },
+        {
+          "rank": 2,
+          "section_id": "333984364686:5db9d1f52377",
+          "document_title": "저장된 보기",
+          "section_path": "저장된 보기 > 보기 생성하기"
+        },
+        {
+          "rank": 3,
+          "section_id": "333984364686:294a258fc7b7",
+          "document_title": "저장된 보기",
+          "section_path": "저장된 보기 > 보기 편집하기"
+        },
+        {
+          "rank": 4,
+          "section_id": "6c3b150c3146:6c9e58fb04ca",
+          "document_title": "비공개 팀",
+          "section_path": "비공개 팀 > 설정"
+        },
+        {
+          "rank": 5,
+          "section_id": "949ddd65a2a5:6036f1478624",
+          "document_title": "실행: 작업",
+          "section_path": "실행: 작업 > 외부 공유"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "네, 가능합니다. 보기를 만들 때 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다. [1]\n\n- 팀 보기(공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다. [1]\n- 나만 보기(비공개): 개인 참고용이거나 실험적인 설정을 저장할 때 적합합니다. [1]\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "저장된 보기",
+          "sectionPath": "저장된 보기 > 공개 범위",
+          "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.882
+    },
+    {
+      "question_id": "Q12",
+      "question": "팀에서 새로운 작업 상태를 추가하거나 기존 상태를 삭제하려면 어디서 설정하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "a26e14ee99d1:8ddbdaa9dc9b",
+          "document_title": "작업 상태",
+          "section_path": "작업 상태 > 설정"
+        },
+        {
+          "rank": 2,
+          "section_id": "da8743ff8cae:9135af8d0050",
+          "document_title": "팀",
+          "section_path": "팀 > 팀 설정"
+        },
+        {
+          "rank": 3,
+          "section_id": "a26e14ee99d1:ede573b9b2c7",
+          "document_title": "작업 상태",
+          "section_path": "작업 상태 > 개요"
+        },
+        {
+          "rank": 4,
+          "section_id": "da8743ff8cae:26bbdd776a1e",
+          "document_title": "팀",
+          "section_path": "팀 > 팀 관리"
+        },
+        {
+          "rank": 5,
+          "section_id": "1c0005b1dfeb:802f5a7b91ac",
+          "document_title": "대시보드",
+          "section_path": "대시보드 > 작업"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "팀 설정 페이지의 **작업 상태** 메뉴에서 설정하시면 됩니다. 팀 설정 페이지에서는 작업 상태 추가 및 삭제를 관리할 수 있습니다. [1]\n\n작업 상태 화면에서는 ‘상태 추가’ 버튼으로 새 상태를 만들 수 있고, 기존 상태는 정보 편집이나 삭제가 가능합니다. 다만 첫 단계(계획)와 마지막 단계(운영)는 시스템 기본 영역이라 추가 및 삭제가 불가능합니다. [2]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "팀",
+          "sectionPath": "팀 > 팀 설정",
+          "sourceUrl": "https://docs.riido.io/teams/overview.md"
+        },
+        {
+          "citationNumber": 2,
+          "documentTitle": "작업 상태",
+          "sectionPath": "작업 상태 > 설정",
+          "sourceUrl": "https://docs.riido.io/teams/statuses.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 2.144
+    },
+    {
+      "question_id": "Q13",
+      "question": "뤄이도 워크스페이스를 슬랙과 연결하고 팀별 알림 채널을 지정하려면 어떻게 해야 하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "43e5e2414349:b60d8edf2d0a",
+          "document_title": "슬랙",
+          "section_path": "슬랙 > 연동 설정 가이드"
+        },
+        {
+          "rank": 2,
+          "section_id": "43e5e2414349:9976bd5ed072",
+          "document_title": "슬랙",
+          "section_path": "슬랙 > 자주 묻는 질문 (FAQ)"
+        },
+        {
+          "rank": 3,
+          "section_id": "43e5e2414349:6ec68508c108",
+          "document_title": "슬랙",
+          "section_path": "슬랙 > 슬랙 연동으로 얻는 핵심 가치"
+        },
+        {
+          "rank": 4,
+          "section_id": "ee834b371049:6fe68edda26a",
+          "document_title": "디스코드",
+          "section_path": "디스코드 > 연동 설정 가이드"
+        },
+        {
+          "rank": 5,
+          "section_id": "854f9556fa9d:f59ce20fded2",
+          "document_title": "댓글",
+          "section_path": "댓글 > 개요"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "슬랙 연동은 워크스페이스 단위로 진행한 뒤, 같은 페이지에서 팀별 알림 채널을 지정하시면 됩니다. [1]\n\n1. `설정 > 워크스페이스 > 외부 연동 > Slack` 페이지로 이동합니다. [1]\n2. `연동하기` 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다. [1]\n3. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다. [1]\n4. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되며, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "슬랙",
+          "sectionPath": "슬랙 > 연동 설정 가이드",
+          "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.795
+    },
+    {
+      "question_id": "Q14",
+      "question": "디스코드 서버를 뤄이도에 연결한 다음 팀별 채널을 지정하는 방법을 알려주세요.",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "ee834b371049:6fe68edda26a",
+          "document_title": "디스코드",
+          "section_path": "디스코드 > 연동 설정 가이드"
+        },
+        {
+          "rank": 2,
+          "section_id": "43e5e2414349:b60d8edf2d0a",
+          "document_title": "슬랙",
+          "section_path": "슬랙 > 연동 설정 가이드"
+        },
+        {
+          "rank": 3,
+          "section_id": "ee834b371049:d048c70e1bf1",
+          "document_title": "디스코드",
+          "section_path": "디스코드 > 디스코드 연동으로 얻는 핵심 가치"
+        },
+        {
+          "rank": 4,
+          "section_id": "6e9c13b73663:ef1266158078",
+          "document_title": "MCP 서버",
+          "section_path": "MCP 서버 > 설치 가이드"
+        },
+        {
+          "rank": 5,
+          "section_id": "6e9c13b73663:58cd615292d6",
+          "document_title": "MCP 서버",
+          "section_path": "MCP 서버 > 개요"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "디스코드 연동은 워크스페이스 단위로 먼저 진행한 뒤, 같은 페이지에서 팀별 채널을 지정하시면 됩니다. [1]\n\n1. `[설정 > 워크스페이스 > 외부 연동 > Discord]` 페이지로 이동합니다. [1]\n2. `연동하기` 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다. [1]\n3. 연동이 완료되면 같은 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다. [1]\n4. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되며, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "디스코드",
+          "sectionPath": "디스코드 > 연동 설정 가이드",
+          "sourceUrl": "https://docs.riido.io/integrations/discord.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 2.088
+    },
+    {
+      "question_id": "Q15",
+      "question": "구글 캘린더를 워크스페이스에 연동하고 팀별 캘린더를 선택하려면 어떻게 하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "5623097e1502:b8b2000bc35a",
+          "document_title": "구글 캘린더",
+          "section_path": "구글 캘린더 > 연동 설정 가이드"
+        },
+        {
+          "rank": 2,
+          "section_id": "d639f52b10eb:f9d910a50c33",
+          "document_title": "자동화",
+          "section_path": "자동화 > 구글 캘린더 연동"
+        },
+        {
+          "rank": 3,
+          "section_id": "5623097e1502:0c33dc302925",
+          "document_title": "구글 캘린더",
+          "section_path": "구글 캘린더 > 미팅 일정 동기화 방식"
+        },
+        {
+          "rank": 4,
+          "section_id": "5623097e1502:a731f8580273",
+          "document_title": "구글 캘린더",
+          "section_path": "구글 캘린더 > 개요"
+        },
+        {
+          "rank": 5,
+          "section_id": "5623097e1502:76d8211bc501",
+          "document_title": "구글 캘린더",
+          "section_path": "구글 캘린더 > 자주 묻는 질문 (FAQ)"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "구글 캘린더는 워크스페이스 단위로 먼저 연동한 뒤, 같은 페이지에서 팀별로 연결할 구글 캘린더를 선택하시면 됩니다. [1]\n\n1. `설정 > 워크스페이스 > 외부 연동 > Google Calendar`로 이동합니다. [1]\n2. `연동하기` 버튼을 클릭하고, 뤼이도와 연결할 구글 계정을 승인합니다. [1]\n3. 연동이 완료되면 동일한 페이지에서 팀별로 연결할 구글 캘린더를 선택합니다. [1]\n\n이때 각 팀은 하나의 구글 캘린더와 1:1로 연결됩니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "구글 캘린더",
+          "sectionPath": "구글 캘린더 > 연동 설정 가이드",
+          "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.659
+    },
+    {
+      "question_id": "Q16",
+      "question": "깃허브 Organization과 Repository를 뤄이도 워크스페이스에 연결하는 절차가 궁금해요.",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "b86425eb9784:c2921a208e92",
+          "document_title": "깃허브",
+          "section_path": "깃허브 > 연동 설정 가이드"
+        },
+        {
+          "rank": 2,
+          "section_id": "b86425eb9784:85561efaf97e",
+          "document_title": "깃허브",
+          "section_path": "깃허브 > 뤼이도와 Github 연결"
+        },
+        {
+          "rank": 3,
+          "section_id": "b86425eb9784:fb7196c378c9",
+          "document_title": "깃허브",
+          "section_path": "깃허브 > 작업 상태 자동화"
+        },
+        {
+          "rank": 4,
+          "section_id": "43e5e2414349:b60d8edf2d0a",
+          "document_title": "슬랙",
+          "section_path": "슬랙 > 연동 설정 가이드"
+        },
+        {
+          "rank": 5,
+          "section_id": "7591069b70f9:9d78075e912d",
+          "document_title": "워크스페이스",
+          "section_path": "워크스페이스 > 개요"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "깃허브 연동은 워크스페이스 단위로 설정하며, 연결할 Repository를 지정해야 합니다. 먼저 `[설정 > 워크스페이스 > 외부 연동 > Github]` 페이지로 이동한 뒤, `연동하기` 버튼을 클릭하고 뤼이도와 연결할 Github Organization을 선택합니다. [1]\n\n그 다음 Github 설정 업데이트에서 뤼이도가 접근할 Repository 권한을 `All repositories` 또는 `Only select repositories` 중 하나로 설정합니다. 이후 권한이 부여된 Repository 중에서 뤼이도와 연결할 Repository를 추가하시면 됩니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "깃허브",
+          "sectionPath": "깃허브 > 연동 설정 가이드",
+          "sourceUrl": "https://docs.riido.io/integrations/github.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.491
+    },
+    {
+      "question_id": "Q17",
+      "question": "피그마에서 뤄이도 플러그인을 설치하고 계정을 연결하려면 어떻게 해야 하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "a13bfdc38996:8f9d2cf72c3e",
+          "document_title": "피그마",
+          "section_path": "피그마 > 연동 설정 가이드"
+        },
+        {
+          "rank": 2,
+          "section_id": "a13bfdc38996:5cace80db708",
+          "document_title": "피그마",
+          "section_path": "피그마 > 피그마 뤼이도 플러그인"
+        },
+        {
+          "rank": 3,
+          "section_id": "a13bfdc38996:6edc1374729e",
+          "document_title": "피그마",
+          "section_path": "피그마 > 자주 묻는 질문 (FAQ)"
+        },
+        {
+          "rank": 4,
+          "section_id": "a13bfdc38996:245ede639654",
+          "document_title": "피그마",
+          "section_path": "피그마 > 피그마 연동"
+        },
+        {
+          "rank": 5,
+          "section_id": "a13bfdc38996:ab6532b44988",
+          "document_title": "피그마",
+          "section_path": "피그마 > 개요"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "피그마에서 뤼이도 플러그인을 설치한 뒤, 플러그인을 실행해 뤼이도 계정을 승인하시면 됩니다. [1]\n\n1. 피그마에서 `커뮤니티 > 플러그인 > Riido`로 이동하거나 전용 링크를 통해 뤼이도 플러그인을 설치합니다. [1]\n2. 설치한 플러그인을 실행하고, 피그마와 연결할 뤼이도 계정을 승인합니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "피그마",
+          "sectionPath": "피그마 > 연동 설정 가이드",
+          "sourceUrl": "https://docs.riido.io/integrations/figma.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 2.365
+    },
+    {
+      "question_id": "Q18",
+      "question": "ChatGPT에 뤄이도 MCP를 연결하려면 어떤 설정을 해야 하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "6e9c13b73663:ef1266158078",
+          "document_title": "MCP 서버",
+          "section_path": "MCP 서버 > 설치 가이드"
+        },
+        {
+          "rank": 2,
+          "section_id": "6e9c13b73663:58cd615292d6",
+          "document_title": "MCP 서버",
+          "section_path": "MCP 서버 > 개요"
+        },
+        {
+          "rank": 3,
+          "section_id": "6e9c13b73663:cd786201dd96",
+          "document_title": "MCP 서버",
+          "section_path": "MCP 서버 > MCP 사용 사례"
+        },
+        {
+          "rank": 4,
+          "section_id": "5623097e1502:b8b2000bc35a",
+          "document_title": "구글 캘린더",
+          "section_path": "구글 캘린더 > 연동 설정 가이드"
+        },
+        {
+          "rank": 5,
+          "section_id": "b86425eb9784:c2921a208e92",
+          "document_title": "깃허브",
+          "section_path": "깃허브 > 연동 설정 가이드"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "ChatGPT에서 뤼이도 MCP를 연결하려면 **ChatGPT Pro 요금제 이상**이 필요합니다. [1]\n\n설정 순서는 다음과 같습니다. [1]\n1. `설정 > 연동 및 앱 커넥터 페이지 > 고급 설정`으로 이동합니다.\n2. `개발자 모드`를 활성화합니다.\n3. `연동 및 앱 커넥터 페이지`에서 `[앱 만들기]`를 선택합니다.\n4. 앱 정보를 입력한 뒤 `[만들기]`를 클릭합니다.\n5. 아래 값을 설정합니다.\n\n```text\nMCP 서버 URL: https://mcp.riido.io/mcp\n인증: OAuth\n```\n\n6. `연동 및 앱 커넥터 페이지`에서 Riido MCP 연결을 확인합니다.\n7. `[+]` 버튼을 클릭하여 Riido MCP를 사용합니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "MCP 서버",
+          "sectionPath": "MCP 서버 > 설치 가이드",
+          "sourceUrl": "https://docs.riido.io/ai/mcp.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 2.229
+    },
+    {
+      "question_id": "Q19",
+      "question": "구글 캘린더를 연결했는데 작업 마감일이 캘린더에 표시되지 않아요. 연동 오류인가요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "5623097e1502:76d8211bc501",
+          "document_title": "구글 캘린더",
+          "section_path": "구글 캘린더 > 자주 묻는 질문 (FAQ)"
+        },
+        {
+          "rank": 2,
+          "section_id": "d639f52b10eb:f9d910a50c33",
+          "document_title": "자동화",
+          "section_path": "자동화 > 구글 캘린더 연동"
+        },
+        {
+          "rank": 3,
+          "section_id": "5623097e1502:b8b2000bc35a",
+          "document_title": "구글 캘린더",
+          "section_path": "구글 캘린더 > 연동 설정 가이드"
+        },
+        {
+          "rank": 4,
+          "section_id": "5623097e1502:a731f8580273",
+          "document_title": "구글 캘린더",
+          "section_path": "구글 캘린더 > 개요"
+        },
+        {
+          "rank": 5,
+          "section_id": "5623097e1502:0c33dc302925",
+          "document_title": "구글 캘린더",
+          "section_path": "구글 캘린더 > 미팅 일정 동기화 방식"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "아니요, 연동 오류로 보기는 어렵습니다. 뤼이도 내부의 ‘미팅’만 구글 캘린더와 양방향 연동을 지원하며, 작업의 마감일이나 다른 일정 정보는 현재 연동 대상이 아닙니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "구글 캘린더",
+          "sectionPath": "구글 캘린더 > 자주 묻는 질문 (FAQ)",
+          "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.305
+    },
+    {
+      "question_id": "Q20",
+      "question": "슬랙 연동 후 알림이 너무 많이 오는데 알림 범위를 줄일 수 있나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "43e5e2414349:9976bd5ed072",
+          "document_title": "슬랙",
+          "section_path": "슬랙 > 자주 묻는 질문 (FAQ)"
+        },
+        {
+          "rank": 2,
+          "section_id": "c225265a1fa1:c94c162f41b5",
+          "document_title": "알림",
+          "section_path": "알림 > 참고"
+        },
+        {
+          "rank": 3,
+          "section_id": "43e5e2414349:b60d8edf2d0a",
+          "document_title": "슬랙",
+          "section_path": "슬랙 > 연동 설정 가이드"
+        },
+        {
+          "rank": 4,
+          "section_id": "43e5e2414349:6ec68508c108",
+          "document_title": "슬랙",
+          "section_path": "슬랙 > 슬랙 연동으로 얻는 핵심 가치"
+        },
+        {
+          "rank": 5,
+          "section_id": "ee834b371049:2a2928a908fc",
+          "document_title": "디스코드",
+          "section_path": "디스코드 > 자주 묻는 질문 (FAQ)"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "네, 세부적인 알림 조정이 가능합니다. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리할 수 있고, 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭해 ‘알림 받기/끄기’로 설정하실 수 있습니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "슬랙",
+          "sectionPath": "슬랙 > 자주 묻는 질문 (FAQ)",
+          "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.56
+    },
+    {
+      "question_id": "Q21",
+      "question": "슬랙 연동 설정에서 비공개 채널이 보이지 않는데 어떻게 연결하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "43e5e2414349:b60d8edf2d0a",
+          "document_title": "슬랙",
+          "section_path": "슬랙 > 연동 설정 가이드"
+        },
+        {
+          "rank": 2,
+          "section_id": "43e5e2414349:9976bd5ed072",
+          "document_title": "슬랙",
+          "section_path": "슬랙 > 자주 묻는 질문 (FAQ)"
+        },
+        {
+          "rank": 3,
+          "section_id": "ee834b371049:6fe68edda26a",
+          "document_title": "디스코드",
+          "section_path": "디스코드 > 연동 설정 가이드"
+        },
+        {
+          "rank": 4,
+          "section_id": "43e5e2414349:6ec68508c108",
+          "document_title": "슬랙",
+          "section_path": "슬랙 > 슬랙 연동으로 얻는 핵심 가치"
+        },
+        {
+          "rank": 5,
+          "section_id": "c225265a1fa1:c94c162f41b5",
+          "document_title": "알림",
+          "section_path": "알림 > 참고"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "비공개 채널은 연결할 수 있습니다. 워크스페이스를 연동한 뒤, 연결하고자 하는 비공개 채널에서 뤼이도 봇을 언급해 초대하시면 뤼이도 슬랙 연동 채널 목록에 해당 채널이 표시됩니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "슬랙",
+          "sectionPath": "슬랙 > 자주 묻는 질문 (FAQ)",
+          "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.728
+    },
+    {
+      "question_id": "Q22",
+      "question": "기존 작업 상태를 삭제하려고 하는데 삭제되지 않는 이유가 무엇인가요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "a26e14ee99d1:8ddbdaa9dc9b",
+          "document_title": "작업 상태",
+          "section_path": "작업 상태 > 설정"
+        },
+        {
+          "rank": 2,
+          "section_id": "9d9ba80dfef6:b545c692c53d",
+          "document_title": "계획: 대기 작업",
+          "section_path": "계획: 대기 작업 > 작업 처리"
+        },
+        {
+          "rank": 3,
+          "section_id": "fcb3c228f5a0:87393c951ab1",
+          "document_title": "운영: 보관 작업",
+          "section_path": "운영: 보관 작업 > 개요"
+        },
+        {
+          "rank": 4,
+          "section_id": "a7061c4853df:a5d15ef4cee0",
+          "document_title": "휴지통",
+          "section_path": "휴지통 > 개요"
+        },
+        {
+          "rank": 5,
+          "section_id": "fcb3c228f5a0:7ce560cd7b49",
+          "document_title": "운영: 보관 작업",
+          "section_path": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "기존 작업 상태가 삭제되지 않는 이유는, 해당 상태에 적용된 작업이 아직 남아 있기 때문입니다. 상태를 삭제하려면 그 상태에 연결된 작업이 없어야 합니다. [1]\n\n또한 첫 단계인 ‘계획’과 마지막 단계인 ‘운영’은 시스템 기본 영역이라 추가 및 삭제가 불가능합니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "작업 상태",
+          "sectionPath": "작업 상태 > 설정",
+          "sourceUrl": "https://docs.riido.io/teams/statuses.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.455
+    },
+    {
+      "question_id": "Q23",
+      "question": "비활성화한 워크스페이스 멤버를 완전히 삭제할 수 없어요. 다시 초대하면 새 계정이 만들어지나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "567f0ce8042c:6a09b6285b28",
+          "document_title": "멤버",
+          "section_path": "멤버 > 멤버 비활성화"
+        },
+        {
+          "rank": 2,
+          "section_id": "da8743ff8cae:e2b4dc113d2f",
+          "document_title": "팀",
+          "section_path": "팀 > 팀 멤버"
+        },
+        {
+          "rank": 3,
+          "section_id": "567f0ce8042c:dc7240487954",
+          "document_title": "멤버",
+          "section_path": "멤버 > 개요"
+        },
+        {
+          "rank": 4,
+          "section_id": "da8743ff8cae:26bbdd776a1e",
+          "document_title": "팀",
+          "section_path": "팀 > 팀 관리"
+        },
+        {
+          "rank": 5,
+          "section_id": "6c3b150c3146:f4771653dfff",
+          "document_title": "비공개 팀",
+          "section_path": "비공개 팀 > 접근 권한"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "아니요. 비활성화된 멤버는 완전히 삭제할 수 없고, 나중에 같은 멤버를 다시 초대하더라도 새 계정이 생성되지 않습니다. 이전 계정이 그대로 활성 상태로 전환됩니다.[1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "멤버",
+          "sectionPath": "멤버 > 멤버 비활성화",
+          "sourceUrl": "https://docs.riido.io/workspaces/members.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.382
+    },
+    {
+      "question_id": "Q24",
+      "question": "팀을 삭제했는데 다시 복구할 수 있나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "a7061c4853df:73e63632e555",
+          "document_title": "휴지통",
+          "section_path": "휴지통 > 복구 및 영구 삭제"
+        },
+        {
+          "rank": 2,
+          "section_id": "a7061c4853df:a5d15ef4cee0",
+          "document_title": "휴지통",
+          "section_path": "휴지통 > 개요"
+        },
+        {
+          "rank": 3,
+          "section_id": "da8743ff8cae:26bbdd776a1e",
+          "document_title": "팀",
+          "section_path": "팀 > 팀 관리"
+        },
+        {
+          "rank": 4,
+          "section_id": "a7061c4853df:4c7aa16de474",
+          "document_title": "휴지통",
+          "section_path": "휴지통 > 삭제된 페이지 보기"
+        },
+        {
+          "rank": 5,
+          "section_id": "da8743ff8cae:e2b4dc113d2f",
+          "document_title": "팀",
+          "section_path": "팀 > 팀 멤버"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "아니요. 팀을 삭제하면 해당 팀과 관련된 모든 데이터가 영구적으로 삭제되며, 뤼이도 시스템에서도 복구할 수 없습니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "팀",
+          "sectionPath": "팀 > 팀 관리",
+          "sourceUrl": "https://docs.riido.io/teams/overview.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.166
+    },
+    {
+      "question_id": "Q25",
+      "question": "워크스페이스와 팀은 각각 어떤 단위이고 서로 어떤 관계인가요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "7591069b70f9:9d78075e912d",
+          "document_title": "워크스페이스",
+          "section_path": "워크스페이스 > 개요"
+        },
+        {
+          "rank": 2,
+          "section_id": "7591069b70f9:97c40b93dde0",
+          "document_title": "워크스페이스",
+          "section_path": "워크스페이스 > 여러 워크스페이스에 참여"
+        },
+        {
+          "rank": 3,
+          "section_id": "7591069b70f9:852f2729c6f3",
+          "document_title": "워크스페이스",
+          "section_path": "워크스페이스 > 워크스페이스 설정"
+        },
+        {
+          "rank": 4,
+          "section_id": "9b9516882026:e32fcf17e277",
+          "document_title": "작업 관계도",
+          "section_path": "작업 관계도 > 개요"
+        },
+        {
+          "rank": 5,
+          "section_id": "da8743ff8cae:62b414e2b349",
+          "document_title": "팀",
+          "section_path": "팀 > 개요"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "워크스페이스는 여러 팀과 프로젝트를 한 공간에서 관리할 수 있는 하나의 조직입니다. 하나의 조직에서는 하나의 워크스페이스를 운영하는 것을 권장합니다. [1]\n\n팀은 워크스페이스 안에서 여러 개를 만들 수 있는 단위이며, 워크스페이스를 처음 생성하면 워크스페이스와 동일한 이름의 팀이 기본으로 함께 만들어집니다. [2]\n\n즉, 워크스페이스가 상위 조직 단위이고, 팀은 그 워크스페이스 안에서 운영되는 단위라고 이해하시면 됩니다. [1][2]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "워크스페이스",
+          "sectionPath": "워크스페이스 > 개요",
+          "sourceUrl": "https://docs.riido.io/workspaces/overview.md"
+        },
+        {
+          "citationNumber": 2,
+          "documentTitle": "팀",
+          "sectionPath": "팀 > 개요",
+          "sourceUrl": "https://docs.riido.io/teams/overview.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.761
+    },
+    {
+      "question_id": "Q26",
+      "question": "대기 작업과 백로그는 어떤 차이가 있고 각각 언제 사용하는 공간인가요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "11957633d8b2:a6f5feefa6e5",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 개요"
+        },
+        {
+          "rank": 2,
+          "section_id": "11957633d8b2:cce467185dfa",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 전환된 백로그"
+        },
+        {
+          "rank": 3,
+          "section_id": "9d9ba80dfef6:b545c692c53d",
+          "document_title": "계획: 대기 작업",
+          "section_path": "계획: 대기 작업 > 작업 처리"
+        },
+        {
+          "rank": 4,
+          "section_id": "9d9ba80dfef6:2e1668de5714",
+          "document_title": "계획: 대기 작업",
+          "section_path": "계획: 대기 작업 > 개요"
+        },
+        {
+          "rank": 5,
+          "section_id": "11957633d8b2:8e468f02bf3a",
+          "document_title": "계획: 백로그",
+          "section_path": "계획: 백로그 > 구조"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "대기 작업은 팀에 새로 들어온 아이디어나 요청을 처음 모아두는 계획 단계의 출발점이고, 백로그는 검토를 마친 작업들을 우선순위에 따라 정리해두는 공간입니다. [1][2]\n\n대기 작업에서는 각 작업의 중요도와 필요성을 판단해 다음 단계인 백로그나 작업으로 옮길지를 결정합니다. 반면 백로그에서는 어떤 작업부터 실행할지 계획을 세우며, 필요할 때 실행으로 옮길 수 있게 정리해둡니다. [1][2]\n\n또한 대기 작업은 아직 정제되지 않은 작업을 빠르게 선별해 이동시키는 곳이고, 백로그는 주주제별로 정리해 흐름을 놓치지 않도록 하는 데 도움이 됩니다. [1][3]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "계획: 대기 작업",
+          "sectionPath": "계획: 대기 작업 > 개요",
+          "sourceUrl": "https://docs.riido.io/issues/intake.md"
+        },
+        {
+          "citationNumber": 2,
+          "documentTitle": "계획: 백로그",
+          "sectionPath": "계획: 백로그 > 개요",
+          "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+        },
+        {
+          "citationNumber": 3,
+          "documentTitle": "계획: 백로그",
+          "sectionPath": "계획: 백로그 > 구조",
+          "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 2.136
+    },
+    {
+      "question_id": "Q27",
+      "question": "프로젝트, 목표, 작업, 하위작업은 어떤 계층 구조로 구성되나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "949ddd65a2a5:09e9b2c9384c",
+          "document_title": "실행: 작업",
+          "section_path": "실행: 작업 > 구조"
+        },
+        {
+          "rank": 2,
+          "section_id": "9b9516882026:e32fcf17e277",
+          "document_title": "작업 관계도",
+          "section_path": "작업 관계도 > 개요"
+        },
+        {
+          "rank": 3,
+          "section_id": "9b9516882026:b527f7f75ac6",
+          "document_title": "작업 관계도",
+          "section_path": "작업 관계도 > 계층 구조 시각화"
+        },
+        {
+          "rank": 4,
+          "section_id": "2edd9ad4a6fa:c0f4071b4014",
+          "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+          "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조"
+        },
+        {
+          "rank": 5,
+          "section_id": "9b9516882026:45b415ba30ac",
+          "document_title": "작업 관계도",
+          "section_path": "작업 관계도 > 보기 위치"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "프로젝트, 목표, 작업, 하위작업은 `프로젝트 → 목표 → 작업 → 하위작업`의 계층 구조로 구성됩니다. 프로젝트는 팀 전체가 집중해야 하는 큰 단위의 업무이고, 목표는 프로젝트 내 중간 목표, 작업은 실제 수행 단위, 하위작업은 작업을 더 세분화한 단위입니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "실행: 작업",
+          "sectionPath": "실행: 작업 > 구조",
+          "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 2.743
+    },
+    {
+      "question_id": "Q28",
+      "question": "작업 관계에서 '차단 중'과 '차단됨'은 어떻게 다른가요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "673858aecdcf:b1d03b889c87",
+          "document_title": "작업간 연결",
+          "section_path": "작업간 연결 > 관계 유형별 동작"
+        },
+        {
+          "rank": 2,
+          "section_id": "673858aecdcf:7d8048c2174c",
+          "document_title": "작업간 연결",
+          "section_path": "작업간 연결 > 개요"
+        },
+        {
+          "rank": 3,
+          "section_id": "9d9ba80dfef6:b545c692c53d",
+          "document_title": "계획: 대기 작업",
+          "section_path": "계획: 대기 작업 > 작업 처리"
+        },
+        {
+          "rank": 4,
+          "section_id": "9b9516882026:b527f7f75ac6",
+          "document_title": "작업 관계도",
+          "section_path": "작업 관계도 > 계층 구조 시각화"
+        },
+        {
+          "rank": 5,
+          "section_id": "a26e14ee99d1:781c27b9eaaa",
+          "document_title": "작업 상태",
+          "section_path": "작업 상태 > 완료 상태"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "‘차단 중’은 현재 작업이 다른 작업의 진행을 막고 있는 상태이고, ‘차단됨’은 다른 작업이 완료되어야 현재 작업을 진행할 수 있는 상태입니다. 예를 들어 “서버 배포”가 끝나야 “테스트 환경 점검”을 할 수 있다면, 전자는 차단 중, 후자는 차단됨으로 연결됩니다.[1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "작업간 연결",
+          "sectionPath": "작업간 연결 > 관계 유형별 동작",
+          "sourceUrl": "https://docs.riido.io/issues/issue-relations.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.497
+    },
+    {
+      "question_id": "Q29",
+      "question": "스프린트 그래프의 보라색 점선과 보라색 실선은 각각 무엇을 의미하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "2c428c0d81be:012f04cb7b63",
+          "document_title": "스프린트 그래프",
+          "section_path": "스프린트 그래프 > 그래프 보는 법"
+        },
+        {
+          "rank": 2,
+          "section_id": "2c428c0d81be:c496ba980f67",
+          "document_title": "스프린트 그래프",
+          "section_path": "스프린트 그래프 > 그래프 해석 팁"
+        },
+        {
+          "rank": 3,
+          "section_id": "2c428c0d81be:91e1e3f290e3",
+          "document_title": "스프린트 그래프",
+          "section_path": "스프린트 그래프 > 참고"
+        },
+        {
+          "rank": 4,
+          "section_id": "2c428c0d81be:dc2014df6707",
+          "document_title": "스프린트 그래프",
+          "section_path": "스프린트 그래프 > 지난 스프린트 그래프 보는 법"
+        },
+        {
+          "rank": 5,
+          "section_id": "2c428c0d81be:7d100b73fa0e",
+          "document_title": "스프린트 그래프",
+          "section_path": "스프린트 그래프 > 개요"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "보라색 점선은 작업이 완료되어야 하는 기준선으로, 스프린트 전체 기간을 기준으로 전체 작업이 균등하게 완료된다고 가정했을 때의 이상적인 진행 속도를 보여줍니다. [1]\n\n보라색 실선은 실제로 완료된 작업의 누적 개수이며, 기준선과 비교해 현재 속도가 계획 대비 빠른지 느린지 바로 파악할 수 있습니다. [1]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "스프린트 그래프",
+          "sectionPath": "스프린트 그래프 > 그래프 보는 법",
+          "sourceUrl": "https://docs.riido.io/sprints/sprint-graph.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 1.793
+    },
+    {
+      "question_id": "Q30",
+      "question": "뤄이도 AI 에이전트는 기존 AI 도구와 무엇이 다르고 어떤 프로젝트 맥락을 이해하나요?",
+      "retrieval_top_5_sections": [
+        {
+          "rank": 1,
+          "section_id": "7e2418cfc86d:b32001724300",
+          "document_title": "AI 에이전트 (Beta)",
+          "section_path": "AI 에이전트 (Beta) > 개요"
+        },
+        {
+          "rank": 2,
+          "section_id": "7e2418cfc86d:7c9dfa18bcff",
+          "document_title": "AI 에이전트 (Beta)",
+          "section_path": "AI 에이전트 (Beta) > 이용 가이드"
+        },
+        {
+          "rank": 3,
+          "section_id": "6e9c13b73663:58cd615292d6",
+          "document_title": "MCP 서버",
+          "section_path": "MCP 서버 > 개요"
+        },
+        {
+          "rank": 4,
+          "section_id": "6e9c13b73663:cd786201dd96",
+          "document_title": "MCP 서버",
+          "section_path": "MCP 서버 > MCP 사용 사례"
+        },
+        {
+          "rank": 5,
+          "section_id": "2a49ad92d587:25d477bd271b",
+          "document_title": "프로젝트 일정 자동 생성",
+          "section_path": "프로젝트 일정 자동 생성 > Riido AI 사용하는 법"
+        }
+      ],
+      "expected_section_in_top_5": true,
+      "final_status": "COMPLETED",
+      "answerMarkdown": "뤼이도 AI 에이전트는 이미 사용 중인 AI(Codex, Claude Code, Cursor Agent, OpenClaw 등)를 그대로 에이전트로 등록해, 별도의 설명 없이도 워크스페이스·팀·작업의 맥락을 이해한 상태로 작업을 진행한다는 점이 다릅니다. [1]\n\n또한 에이전트는 작업 상세 페이지에서 할당받아 댓글로 작업 내역을 공유하고, 확인이 필요한 부분은 댓글에서 사람과 소통하며 진행합니다. [2]",
+      "citations": [
+        {
+          "citationNumber": 1,
+          "documentTitle": "AI 에이전트 (Beta)",
+          "sectionPath": "AI 에이전트 (Beta) > 개요",
+          "sourceUrl": "https://docs.riido.io/ai-agents/intro.md"
+        },
+        {
+          "citationNumber": 2,
+          "documentTitle": "AI 에이전트 (Beta)",
+          "sectionPath": "AI 에이전트 (Beta) > 이용 가이드",
+          "sourceUrl": "https://docs.riido.io/ai-agents/intro.md"
+        }
+      ],
+      "withheld_reason": null,
+      "error_code": null,
+      "generation_latency_seconds": 2.085
+    }
+  ]
+}
