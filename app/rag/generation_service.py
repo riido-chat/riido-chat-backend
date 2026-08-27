@@ -6,6 +6,7 @@ import time
 from typing import Dict, Optional, Sequence, Tuple
 
 from app.rag.model_trace import BeforeModelCallHook, ModelCallTrace
+from app.rag.progress import OnProgressStageHook, ProgressStage
 from generation.generator import (
     GENERATION_PROMPT_VERSION,
     OPENAI_GENERATION_MODEL,
@@ -251,6 +252,7 @@ class GenerationService:
         retrieval_results: Sequence[HybridRetrievalResult],
         *,
         before_model_call: Optional[BeforeModelCallHook] = None,
+        on_progress_stage: Optional[OnProgressStageHook] = None,
     ) -> FinalGenerationResult:
         """Hybrid Top-5로 답변을 생성하고 최종 상태를 결정한다."""
 
@@ -278,6 +280,9 @@ class GenerationService:
         if generation_result.status == GenerationStatus.WITHHELD:
             reason = FinalWithheldReason(generation_result.withheld_reason.value)
             return _withheld_result(reason, call.trace)
+
+        if on_progress_stage is not None:
+            await on_progress_stage(ProgressStage.VALIDATING)
 
         try:
             validated_answer = validate_citations(

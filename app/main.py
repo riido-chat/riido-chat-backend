@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -37,6 +38,8 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    # 응답 스트림보다 오래 사는 파이프라인 task를 앱이 소유한다.
+    app.state.pipeline_tasks = set()
     try:
         corpus_state = CorpusState(get_settings().corpus_dir)
         app.state.corpus_state = corpus_state
@@ -45,7 +48,21 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.generation_service = GenerationService(OpenAIGenerator())
         yield
     finally:
+        # 살아 있는 파이프라인이 끝난 뒤에 engine을 정리해야 세션이 깨지지 않는다.
+        await _drain_pipeline_tasks(app)
         await dispose_engine()
+
+
+async def _drain_pipeline_tasks(app: FastAPI) -> None:
+    """실행 중인 파이프라인 task가 모두 끝날 때까지 기다린다."""
+
+    pending = set(getattr(app.state, "pipeline_tasks", None) or ())
+    if not pending:
+        return
+
+    logger.info("실행 중인 파이프라인 %d건을 기다립니다.", len(pending))
+    # 하나가 실패해도 나머지 정리를 막지 않는다. 예외는 producer가 이미 처리했다.
+    await asyncio.gather(*pending, return_exceptions=True)
 
 
 async def _load_corpus_if_available(corpus_state: CorpusState) -> None:
