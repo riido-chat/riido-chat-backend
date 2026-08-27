@@ -158,17 +158,17 @@ class GenerationContextTest(unittest.TestCase):
         self.assertNotIn(r"\[설정", generation_input)
 
     def test_prompt_avoids_duplicate_answers_and_uses_minimum_sources(self) -> None:
-        self.assertIn("반드시 가장 직접적인 SOURCE 하나만 선택", PROMPT_V2)
-        self.assertIn("중복 SOURCE는 사용하거나 인용하지 마세요", PROMPT_V2)
-        self.assertIn("SOURCE별로 답변 문단을 만들거나", PROMPT_V2)
-        self.assertIn("필요한 최소한의 SOURCE만 인용", PROMPT_V2)
+        self.assertIn("반드시 가장 직접적인 SOURCE 하나만 선택", PROMPT_V3)
+        self.assertIn("중복 SOURCE는 사용하거나 인용하지 마세요", PROMPT_V3)
+        self.assertIn("SOURCE별로 답변 문단을 만들거나", PROMPT_V3)
+        self.assertIn("필요한 최소한의 SOURCE만 인용", PROMPT_V3)
 
     def test_prompt_forbids_links_urls_and_html(self) -> None:
         self.assertEqual("v3", GENERATION_PROMPT_VERSION)
-        self.assertIn("Markdown 링크 문법과 HTML을 사용하지 마세요", PROMPT_V2)
-        self.assertIn("코드 블록이나 백틱 인라인 코드 안에 넣고", PROMPT_V2)
-        self.assertIn("그 밖의 URL은 본문에 쓰지 마세요", PROMPT_V2)
-        self.assertIn("별도 citations 영역", PROMPT_V2)
+        self.assertIn("Markdown 링크 문법과 HTML을 사용하지 마세요", PROMPT_V3)
+        self.assertIn("코드 블록이나 백틱 인라인 코드 안에 넣고", PROMPT_V3)
+        self.assertIn("그 밖의 URL은 본문에 쓰지 마세요", PROMPT_V3)
+        self.assertIn("별도 citations 영역", PROMPT_V3)
 
     @staticmethod
     def _result(index: int) -> HybridRetrievalResult:
@@ -194,7 +194,7 @@ class GenerationContextTest(unittest.TestCase):
 
 
 class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
-    async def test_requests_structured_output_with_prompt_v2(self) -> None:
+    async def test_requests_structured_output_with_prompt_v3(self) -> None:
         expected = self._answerable_result()
         client = self._client_with_response(expected)
         generator = OpenAIGenerator(client=client)
@@ -205,7 +205,7 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(expected, result)
         client.responses.parse.assert_awaited_once_with(
             model=OPENAI_GENERATION_MODEL,
-            instructions=PROMPT_V2,
+            instructions=PROMPT_V3,
             input=build_generation_input("질문", sources),
             text_format=GenerationResult,
         )
