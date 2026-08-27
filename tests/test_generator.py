@@ -11,7 +11,7 @@ from generation.generator import (
     GENERATION_PROMPT_VERSION,
     MAX_CONTEXT_SOURCES,
     OPENAI_GENERATION_MODEL,
-    PROMPT_V2,
+    PROMPT_V3,
     OpenAIGenerator,
     build_generation_context,
     build_generation_input,
