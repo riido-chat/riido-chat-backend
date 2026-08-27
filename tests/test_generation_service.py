@@ -306,6 +306,103 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
                 )
                 self.assertEqual((), result.citations)
 
+    async def test_allows_links_and_html_inside_code_regions(self) -> None:
+        cases = (
+            (
+                "설정 예시입니다. [SOURCE_1]\n\n"
+                "```\nbase_url = https://docs.riido.io/guide\n```",
+                "설정 예시입니다. [1]\n\n"
+                "```\nbase_url = https://docs.riido.io/guide\n```",
+            ),
+            (
+                "엔드포인트는 `https://api.riido.io/v1/chat` 입니다. [SOURCE_1]",
+                "엔드포인트는 `https://api.riido.io/v1/chat` 입니다. [1]",
+            ),
+            (
+                "예시는 다음과 같습니다. [SOURCE_1]\n\n"
+                "```html\n<strong>강조</strong> [가이드](/guide)\n```",
+                "예시는 다음과 같습니다. [1]\n\n"
+                "```html\n<strong>강조</strong> [가이드](/guide)\n```",
+            ),
+            (
+                "설정 예시입니다. [SOURCE_1]\n\n"
+                "~~~\nwww.riido.io/guide\n~~~",
+                "설정 예시입니다. [1]\n\n~~~\nwww.riido.io/guide\n~~~",
+            ),
+        )
+
+        for answer_markdown, expected_markdown in cases:
+            with self.subTest(answer_markdown=answer_markdown):
+                self.generator.generate_with_trace.return_value = _call(
+                    self._answerable(answer_markdown)
+                )
+
+                result = await self.service.generate_answer(
+                    "질문",
+                    [self._result(1)],
+                )
+
+                self.assertEqual(FinalAnswerStatus.COMPLETED, result.status)
+                self.assertEqual(expected_markdown, result.answer_markdown)
+                self.assertIsNone(result.withheld_reason)
+
+    async def test_withholds_link_syntax_outside_code_regions(self) -> None:
+        cases = (
+            "자세한 내용은 [가이드][guide]를 확인하세요. [SOURCE_1]",
+            "[guide]: https://docs.riido.io/guide\n안내 내용입니다. [SOURCE_1]",
+            "주소는 <https://docs.riido.io/guide> 입니다. [SOURCE_1]",
+            "코드 밖 주소는 https://docs.riido.io 입니다. `옵션` [SOURCE_1]",
+            "```\ncode\n```\n주소는 https://docs.riido.io 입니다. [SOURCE_1]",
+        )
+
+        for answer_markdown in cases:
+            with self.subTest(answer_markdown=answer_markdown):
+                self.generator.generate_with_trace.return_value = _call(
+                    self._answerable(answer_markdown)
+                )
+
+                result = await self.service.generate_answer(
+                    "질문",
+                    [self._result(1)],
+                )
+
+                self.assertEqual(FinalAnswerStatus.WITHHELD, result.status)
+                self.assertEqual(
+                    FinalWithheldReason.UNVERIFIABLE_ANSWER,
+                    result.withheld_reason,
+                )
+                self.assertEqual((), result.citations)
+
+    async def test_handles_malformed_code_markup_without_error(self) -> None:
+        # 닫히지 않은 펜스와 짝이 맞지 않는 백틱에서도 예외 없이 상태를 결정한다.
+        cases = (
+            (
+                "설정 예시입니다. [SOURCE_1]\n\n```\nurl = https://docs.riido.io",
+                FinalAnswerStatus.COMPLETED,
+            ),
+            (
+                "값은 `option 입니다. [SOURCE_1]",
+                FinalAnswerStatus.COMPLETED,
+            ),
+            (
+                "값은 `option 이고 주소는 https://docs.riido.io 입니다. [SOURCE_1]",
+                FinalAnswerStatus.WITHHELD,
+            ),
+        )
+
+        for answer_markdown, expected_status in cases:
+            with self.subTest(answer_markdown=answer_markdown):
+                self.generator.generate_with_trace.return_value = _call(
+                    self._answerable(answer_markdown)
+                )
+
+                result = await self.service.generate_answer(
+                    "질문",
+                    [self._result(1)],
+                )
+
+                self.assertEqual(expected_status, result.status)
+
     async def test_uses_fixed_response_for_generator_withheld_reason(self) -> None:
         for reason in GenerationWithheldReason:
             with self.subTest(reason=reason):

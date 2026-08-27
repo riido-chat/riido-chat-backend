@@ -1,5 +1,6 @@
 """Generation 결과 검증과 최종 답변 상태 결정을 담당한다."""
 
+import logging
 import re
 import time
 from typing import Dict, Optional, Sequence, Tuple
@@ -24,6 +25,8 @@ from generation.models import (
 from retrieval.models import HybridRetrievalResult
 
 
+logger = logging.getLogger(__name__)
+
 SOURCE_MARKER_PATTERN = re.compile(r"\[SOURCE_([A-Za-z0-9_-]+)\]")
 FORBIDDEN_ANSWER_CONTENT_PATTERNS = (
     re.compile(r"!?\[[^\]\r\n]*\]\([^\)\r\n]*\)"),
@@ -36,6 +39,10 @@ FORBIDDEN_ANSWER_CONTENT_PATTERNS = (
         r"<!--|<![A-Za-z]|</?[A-Za-z][A-Za-z0-9-]*"
         r"(?:\s[^<>]*?)?/?>"
     ),
+)
+CODE_FENCE_LINE_PATTERN = re.compile(r"^(`{3,}|~{3,})(.*)$")
+INLINE_CODE_PATTERN = re.compile(
+    r"(?P<ticks>`+)(?:(?!\n[ \t]*\n)[\s\S])*?(?<!`)(?P=ticks)(?!`)"
 )
 UPSTREAM_ERROR_CODE = "UPSTREAM_ERROR"
 CITATION_VALIDATION_ERROR_CODE = "CITATION_VALIDATION_ERROR"
@@ -61,12 +68,65 @@ class UnverifiableAnswerError(ValueError):
     """답변이 외부 응답 계약에 맞게 검증될 수 없을 때 발생한다."""
 
 
-def _validate_answer_content(answer_markdown: str) -> None:
-    """출처 영역 밖에서 금지한 링크와 HTML이 답변 본문에 없는지 확인한다."""
+def _blank_code_region(match: re.Match[str]) -> str:
+    """코드 영역을 줄 구조만 남기고 지운다."""
 
-    content_without_source_markers = SOURCE_MARKER_PATTERN.sub("", answer_markdown)
+    return "\n" * match.group(0).count("\n") or " "
+
+
+def _strip_fenced_code_blocks(text: str) -> str:
+    """펜스 코드 블록을 빈 줄로 바꾼다. 닫히지 않은 펜스는 본문 끝까지 코드로 본다."""
+
+    stripped_lines = []
+    open_fence: Optional[Tuple[str, int]] = None
+
+    for line in text.split("\n"):
+        body = line.lstrip(" \t")
+        indented = len(line) - len(body) > 3
+        match = None if indented else CODE_FENCE_LINE_PATTERN.match(body)
+        marker = match.group(1) if match else ""
+        info = match.group(2) if match else ""
+
+        if open_fence is None:
+            # 백틱 펜스의 info string에는 백틱이 올 수 없다(인라인 코드와 구분).
+            if match and not (marker[0] == "`" and "`" in info):
+                open_fence = (marker[0], len(marker))
+                stripped_lines.append("")
+                continue
+            stripped_lines.append(line)
+            continue
+
+        fence_char, fence_length = open_fence
+        if (
+            match
+            and marker[0] == fence_char
+            and len(marker) >= fence_length
+            and not info.strip()
+        ):
+            open_fence = None
+        stripped_lines.append("")
+
+    return "\n".join(stripped_lines)
+
+
+def _strip_code_regions(answer_markdown: str) -> str:
+    """코드 블록과 인라인 코드를 금지 패턴 검사 대상에서 제외한다."""
+
+    return INLINE_CODE_PATTERN.sub(
+        _blank_code_region,
+        _strip_fenced_code_blocks(answer_markdown),
+    )
+
+
+def _validate_answer_content(answer_markdown: str) -> None:
+    """코드 영역 밖에서 금지한 링크와 HTML이 답변 본문에 없는지 확인한다."""
+
+    content_to_check = SOURCE_MARKER_PATTERN.sub(
+        "",
+        _strip_code_regions(answer_markdown),
+    )
     if any(
-        pattern.search(content_without_source_markers)
+        pattern.search(content_to_check)
         for pattern in FORBIDDEN_ANSWER_CONTENT_PATTERNS
     ):
         raise UnverifiableAnswerError("답변 본문에 링크 또는 HTML이 포함됐습니다.")
@@ -224,7 +284,8 @@ class GenerationService:
                 generation_result.answer_markdown,
                 sources,
             )
-        except UnverifiableAnswerError:
+        except UnverifiableAnswerError as error:
+            logger.warning("답변 검증에 실패해 보류합니다: reason=%s", error)
             return _withheld_result(
                 FinalWithheldReason.UNVERIFIABLE_ANSWER,
                 call.trace,
