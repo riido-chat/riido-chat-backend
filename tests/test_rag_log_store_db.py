@@ -32,6 +32,8 @@ from app.database.models import (
     DocumentVersionStatus,
     EmbeddingConfig,
     ExecutionStatus,
+    Feedback,
+    FeedbackRating,
     IndexVersion,
     IndexVersionStatus,
     ModelCall,
@@ -42,7 +44,9 @@ from app.rag.chat_service import ChatService
 from app.rag.generation_service import GenerationService
 from app.rag.log_store import (
     CitationLog,
+    FeedbackNotAllowedError,
     RagLogStore,
+    RagRunNotFoundError,
     RetrievalCandidateLog,
 )
 from app.rag.model_trace import ModelCallTrace
@@ -605,6 +609,96 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         )
 
         self.assertFalse(withheld.citation_validated)
+
+    async def test_feedback_registers_changes_and_clears(self) -> None:
+        run = await self._withheld_run("피드백 대상")
+
+        registered = await self.store.set_feedback(
+            run.id, rating=FeedbackRating.GOOD
+        )
+        self.assertEqual(FeedbackRating.GOOD, registered.rating)
+        self.assertEqual(registered.created_at, registered.updated_at)
+
+        # 같은 값 재전송은 무시하므로 updated_at이 그대로다
+        stamped_at = registered.updated_at
+        resent = await self.store.set_feedback(
+            run.id, rating=FeedbackRating.GOOD
+        )
+        self.assertEqual(stamped_at, resent.updated_at)
+
+        changed = await self.store.set_feedback(
+            run.id, rating=FeedbackRating.BAD
+        )
+        self.assertEqual(FeedbackRating.BAD, changed.rating)
+        self.assertGreater(changed.updated_at, changed.created_at)
+
+        detail = await self.store.get_rag_run_detail(run.id)
+        self.assertEqual(FeedbackRating.BAD, detail.feedback.rating)
+
+        self.assertTrue(await self.store.clear_feedback(run.id))
+        self.assertFalse(await self.store.clear_feedback(run.id))
+        self.assertEqual(
+            0,
+            await self.session.scalar(
+                select(func.count())
+                .select_from(Feedback)
+                .where(Feedback.rag_run_id == run.id)
+            ),
+        )
+
+    async def test_feedback_keeps_one_row_per_answer(self) -> None:
+        first = await self._withheld_run("첫 답변")
+        second = await self._withheld_run("두 번째 답변")
+
+        await self.store.set_feedback(first.id, rating=FeedbackRating.GOOD)
+        await self.store.set_feedback(first.id, rating=FeedbackRating.BAD)
+        await self.store.set_feedback(second.id, rating=FeedbackRating.GOOD)
+
+        self.assertEqual(
+            2,
+            await self.session.scalar(
+                select(func.count()).select_from(Feedback)
+            ),
+        )
+
+    async def test_feedback_rejects_turns_without_a_rateable_answer(self) -> None:
+        conversation = await self.store.create_conversation()
+        run = await self.store.start_rag_run(
+            conversation.id,
+            user_query="처리 중인 턴",
+            index_version_id=self.index_version_id,
+            context_strategy="NEW_TOPIC",
+        )
+
+        # PROCESSING 상태에서는 평가할 답변이 아직 없다
+        with self.assertRaises(FeedbackNotAllowedError):
+            await self.store.set_feedback(run.id, rating=FeedbackRating.GOOD)
+
+        await self.store.fail_rag_run(run.id, error_code="UPSTREAM_ERROR")
+        with self.assertRaises(FeedbackNotAllowedError):
+            await self.store.set_feedback(run.id, rating=FeedbackRating.GOOD)
+        with self.assertRaises(FeedbackNotAllowedError):
+            await self.store.clear_feedback(run.id)
+
+        with self.assertRaises(RagRunNotFoundError):
+            await self.store.set_feedback(
+                uuid.uuid4(), rating=FeedbackRating.GOOD
+            )
+
+    async def _withheld_run(self, user_query: str):
+        """평가 가능한 상태로 마감한 턴을 만든다."""
+
+        conversation = await self.store.create_conversation()
+        run = await self.store.start_rag_run(
+            conversation.id,
+            user_query=user_query,
+            index_version_id=self.index_version_id,
+            context_strategy="NEW_TOPIC",
+        )
+        await self.store.withhold_rag_run(
+            run.id, reason_code="INSUFFICIENT_EVIDENCE"
+        )
+        return run
 
     async def test_status_transitions_and_guards(self) -> None:
         conversation = await self.store.create_conversation()

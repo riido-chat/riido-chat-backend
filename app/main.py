@@ -8,6 +8,11 @@ from fastapi.responses import JSONResponse
 
 from app.api.chat import corpus_unavailable_response
 from app.api.chat import router as chat_router
+from app.api.feedback import (
+    feedback_not_allowed_response,
+    rag_run_not_found_response,
+)
+from app.api.feedback import router as feedback_router
 from app.api.health import router as health_router
 from app.api.internal import router as internal_router
 from app.core.config import get_settings
@@ -18,6 +23,7 @@ from app.rag.chat_service import (
 )
 from app.rag.corpus_state import CorpusNotLoadedError, CorpusState
 from app.rag.generation_service import GenerationService
+from app.rag.log_store import FeedbackNotAllowedError, RagRunNotFoundError
 from generation.generator import OpenAIGenerator
 from retrieval.embedding import OpenAIEmbedder
 from retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
@@ -69,12 +75,13 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=get_settings().cors_origin_list,
         allow_credentials=False,
-        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type"],
     )
 
     app.include_router(health_router)
     app.include_router(chat_router)
+    app.include_router(feedback_router)
     app.include_router(internal_router)
 
     @app.exception_handler(CorpusNotLoadedError)
@@ -100,6 +107,34 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content=conversation_not_found_response().model_dump(
+                mode="json",
+                by_alias=True,
+            ),
+        )
+
+    @app.exception_handler(RagRunNotFoundError)
+    async def handle_rag_run_not_found(
+        _: Request,
+        exc: RagRunNotFoundError,
+    ) -> JSONResponse:
+        logger.info("존재하지 않는 답변에 피드백 요청을 받았습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=rag_run_not_found_response().model_dump(
+                mode="json",
+                by_alias=True,
+            ),
+        )
+
+    @app.exception_handler(FeedbackNotAllowedError)
+    async def handle_feedback_not_allowed(
+        _: Request,
+        exc: FeedbackNotAllowedError,
+    ) -> JSONResponse:
+        logger.info("평가할 수 없는 답변에 피드백 요청을 받았습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content=feedback_not_allowed_response().model_dump(
                 mode="json",
                 by_alias=True,
             ),

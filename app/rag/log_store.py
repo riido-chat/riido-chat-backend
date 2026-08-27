@@ -27,6 +27,7 @@ from app.database.models import (
     ConversationStatus,
     ExecutionStatus,
     Feedback,
+    FeedbackRating,
     ModelCall,
     RagRun,
     RetrievalResultRow,
@@ -44,6 +45,17 @@ WITHHELD_REASON_CODES = (
 # 확정 규칙: COMPLETED 답변의 유효 출처는 1~3개
 MIN_CITATIONS = 1
 MAX_CITATIONS = 3
+
+# 확정 규칙: 완료와 보류 답변에만 평가를 받는다
+FEEDBACK_ALLOWED_STATUSES = (AnswerStatus.COMPLETED, AnswerStatus.WITHHELD)
+
+
+class RagRunNotFoundError(LookupError):
+    """존재하지 않는 ragRunId를 지정했을 때 발생한다."""
+
+
+class FeedbackNotAllowedError(RuntimeError):
+    """평가할 수 없는 상태의 턴에 피드백을 시도했을 때 발생한다."""
 
 
 def _utcnow() -> datetime:
@@ -413,6 +425,75 @@ class RagLogStore:
         call.error_message = error_message
         await self._session.flush()
         return call
+
+    # ------------------------------------------------------------------
+    # 피드백
+    # ------------------------------------------------------------------
+
+    async def set_feedback(
+        self,
+        rag_run_id: uuid.UUID,
+        *,
+        rating: FeedbackRating,
+    ) -> Feedback:
+        """답변 평가를 등록하거나 반대 값으로 변경한다.
+
+        같은 값 재전송은 무시하므로 updated_at을 갱신하지 않는다. 그래야
+        updated_at이 실제로 평가를 뒤집은 시각으로 남는다.
+        """
+
+        await self._get_feedback_target(rag_run_id)
+
+        feedback = await self._get_feedback(rag_run_id, lock=True)
+        now = _utcnow()
+        if feedback is None:
+            feedback = Feedback(
+                rag_run_id=rag_run_id,
+                rating=rating,
+                created_at=now,
+                updated_at=now,
+            )
+            self._session.add(feedback)
+        elif feedback.rating != rating:
+            feedback.rating = rating
+            feedback.updated_at = now
+
+        await self._session.flush()
+        return feedback
+
+    async def clear_feedback(self, rag_run_id: uuid.UUID) -> bool:
+        """등록된 평가를 지운다. 이미 없으면 아무것도 하지 않고 False를 반환한다."""
+
+        await self._get_feedback_target(rag_run_id)
+
+        feedback = await self._get_feedback(rag_run_id, lock=True)
+        if feedback is None:
+            return False
+
+        await self._session.delete(feedback)
+        await self._session.flush()
+        return True
+
+    async def _get_feedback_target(self, rag_run_id: uuid.UUID) -> RagRun:
+        run = await self._session.get(RagRun, rag_run_id)
+        if run is None:
+            raise RagRunNotFoundError(f"존재하지 않는 턴입니다: {rag_run_id}")
+        if run.status not in FEEDBACK_ALLOWED_STATUSES:
+            raise FeedbackNotAllowedError(
+                f"평가할 수 없는 상태의 턴입니다: {run.status}"
+            )
+        return run
+
+    async def _get_feedback(
+        self,
+        rag_run_id: uuid.UUID,
+        *,
+        lock: bool = False,
+    ) -> Optional[Feedback]:
+        statement = select(Feedback).where(Feedback.rag_run_id == rag_run_id)
+        if lock:
+            statement = statement.with_for_update()
+        return await self._session.scalar(statement)
 
     # ------------------------------------------------------------------
     # 조회
