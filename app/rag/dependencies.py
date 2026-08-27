@@ -104,3 +104,32 @@ def get_chat_service(
         session=session,
         index_version_id=index_version_id,
     )
+
+
+def build_chat_service(
+    *,
+    session: AsyncSession,
+    corpus_state: CorpusState,
+    embedder: OpenAIEmbedder,
+    generation_service: GenerationService,
+) -> ChatService:
+    """요청 의존성 밖에서 ChatService를 조립한다.
+
+    응답 스트림보다 오래 사는 파이프라인은 request-scoped session을 쓸 수 없어서,
+    호출자가 직접 소유한 session을 받아 검색·로그 계층에 연결한다. 공유 부품인
+    BM25 corpus, Embedder, GenerationService는 인자로 받는다.
+    """
+
+    return ChatService(
+        retriever=HybridRetriever(
+            bm25_retriever=corpus_state.get_retriever(),
+            vector_retriever=VectorRetriever(
+                embedder=embedder,
+                store=PgVectorStore(session),
+            ),
+        ),
+        generation_service=generation_service,
+        log_store=RagLogStore(session),
+        session=session,
+        index_version_id=corpus_state.index_version_id,
+    )

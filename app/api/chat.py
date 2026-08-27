@@ -1,6 +1,9 @@
 """Chat API MVP endpoint를 제공한다."""
 
-from fastapi import APIRouter, Depends, Response, status
+from typing import Union
+
+from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi.responses import StreamingResponse
 
 from app.api.chat_schema import (
     ChatError,
@@ -10,6 +13,7 @@ from app.api.chat_schema import (
     ChatResponse,
     ChatResponseStatus,
 )
+from app.api.chat_stream import start_chat_stream, wants_event_stream
 from app.rag.chat_service import ChatService
 from app.rag.dependencies import get_chat_service
 
@@ -61,9 +65,27 @@ def corpus_unavailable_response() -> ChatErrorResponse:
 async def chat(
     request: ChatRequest,
     response: Response,
+    http_request: Request,
     service: ChatService = Depends(get_chat_service),
-) -> ChatResponse:
-    """질문을 ChatService에 전달하고 결과 상태에 맞는 HTTP 응답을 반환한다."""
+) -> Union[ChatResponse, StreamingResponse]:
+    """질문을 ChatService에 전달하고 결과 상태에 맞는 HTTP 응답을 반환한다.
+
+    Accept에 `text/event-stream`을 명시한 요청만 진행 상태 SSE로 분기한다.
+    턴 생성 전에 끝나면 스트림을 열지 않고 기존 동기 오류 응답을 그대로 쓴다.
+    """
+
+    if wants_event_stream(http_request.headers.get("accept")):
+        stream = await start_chat_stream(
+            http_request,
+            question=request.question,
+            conversation_id=request.conversation_id,
+        )
+        if isinstance(stream, StreamingResponse):
+            return stream
+        if stream.error is not None:
+            raise stream.error
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return stream.response
 
     result = await service.answer_question(
         request.question,

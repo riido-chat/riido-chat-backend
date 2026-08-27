@@ -4,7 +4,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, replace
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,6 +30,11 @@ from app.database.models import (
 from app.rag.generation_service import UPSTREAM_ERROR_CODE, GenerationService
 from app.rag.log_store import CitationLog, RagLogStore, RetrievalCandidateLog
 from app.rag.model_trace import ModelCallTrace
+from app.rag.progress import (
+    OnProgressStageHook,
+    OnTurnStartedHook,
+    ProgressStage,
+)
 from generation.models import Citation, FinalAnswerStatus, FinalGenerationResult
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.models import HybridSearchCall, RetrievalResult
@@ -198,6 +203,9 @@ class ChatService:
         self,
         question: str,
         conversation_id: Optional[uuid.UUID] = None,
+        *,
+        on_turn_started: Optional[OnTurnStartedHook] = None,
+        on_progress_stage: Optional[OnProgressStageHook] = None,
     ) -> ChatResponse:
         """질문을 검색·생성 파이프라인에 전달하고 실행 로그와 함께 응답한다."""
 
@@ -217,11 +225,14 @@ class ChatService:
             return _internal_error_response()
 
         try:
+            if on_turn_started is not None:
+                await on_turn_started(conversation_id, rag_run_id)
             return await self._run_turn(
                 question,
                 conversation_id,
                 rag_run_id,
                 started,
+                on_progress_stage=on_progress_stage,
             )
         except Exception:
             logger.exception(
@@ -242,6 +253,8 @@ class ChatService:
         conversation_id: uuid.UUID,
         rag_run_id: uuid.UUID,
         started: float,
+        *,
+        on_progress_stage: Optional[OnProgressStageHook] = None,
     ) -> ChatResponse:
         embedding_model_call_id: Optional[int] = None
 
@@ -260,6 +273,9 @@ class ChatService:
                 model_name,
                 prompt_version,
             )
+
+        if on_progress_stage is not None:
+            await on_progress_stage(ProgressStage.RETRIEVING)
 
         search = await self._retriever.search_with_trace(
             question,
@@ -316,13 +332,21 @@ class ChatService:
                 prompt_version=prompt_version,
                 started=time.perf_counter(),
             )
+            if on_progress_stage is not None:
+                await on_progress_stage(ProgressStage.GENERATING)
 
         generation_result: Optional[FinalGenerationResult] = None
+        # 훅 미주입 시 generate_answer 호출 인자를 기존과 완전히 동일하게 둔다.
+        generation_kwargs: Dict[str, OnProgressStageHook] = {}
+        if on_progress_stage is not None:
+            generation_kwargs["on_progress_stage"] = on_progress_stage
+
         try:
             generation_result = await self._generation_service.generate_answer(
                 question,
                 search.fused_results,
                 before_model_call=checkpoint_generation,
+                **generation_kwargs,
             )
             if generation_checkpoint is None:
                 raise RuntimeError("Generation ModelCall checkpoint가 실행되지 않았습니다.")
