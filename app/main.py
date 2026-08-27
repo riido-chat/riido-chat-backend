@@ -15,6 +15,8 @@ from app.api.feedback import (
 from app.api.feedback import router as feedback_router
 from app.api.health import router as health_router
 from app.api.internal import router as internal_router
+from app.api.rag_run import rag_run_result_not_found_response
+from app.api.rag_run import router as rag_run_router
 from app.core.config import get_settings
 from app.database.session import dispose_engine, get_session_factory
 from app.rag.chat_service import (
@@ -24,6 +26,7 @@ from app.rag.chat_service import (
 from app.rag.corpus_state import CorpusNotLoadedError, CorpusState
 from app.rag.generation_service import GenerationService
 from app.rag.log_store import FeedbackNotAllowedError, RagRunNotFoundError
+from app.rag.rag_run_view import RagRunResultNotFoundError
 from generation.generator import OpenAIGenerator
 from retrieval.embedding import OpenAIEmbedder
 from retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
@@ -82,6 +85,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(chat_router)
     app.include_router(feedback_router)
+    app.include_router(rag_run_router)
     app.include_router(internal_router)
 
     @app.exception_handler(CorpusNotLoadedError)
@@ -135,6 +139,20 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
             content=feedback_not_allowed_response().model_dump(
+                mode="json",
+                by_alias=True,
+            ),
+        )
+
+    @app.exception_handler(RagRunResultNotFoundError)
+    async def handle_rag_run_result_not_found(
+        _: Request,
+        exc: RagRunResultNotFoundError,
+    ) -> JSONResponse:
+        logger.info("존재하지 않는 답변의 결과를 조회했습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=rag_run_result_not_found_response().model_dump(
                 mode="json",
                 by_alias=True,
             ),
