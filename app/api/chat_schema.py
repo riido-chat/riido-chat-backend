@@ -13,26 +13,29 @@ HTTP_DTO_CONFIG = ConfigDict(
     populate_by_name=True,
 )
 
+MAX_QUESTION_LENGTH = 4_000
+
 
 class ChatRequest(BaseModel):
     """POST /api/chat 요청."""
 
     model_config = HTTP_DTO_CONFIG
 
-    question: str
+    question: str = Field(min_length=1, max_length=MAX_QUESTION_LENGTH)
     conversation_id: Optional[uuid.UUID] = Field(
         default=None,
         alias="conversationId",
         description="없으면 새 대화를 만들고, 있으면 해당 대화의 다음 턴으로 잇는다",
     )
 
-    @field_validator("question")
+    @field_validator("question", mode="before")
     @classmethod
-    def strip_and_validate_question(cls, question: str) -> str:
-        normalized_question = question.strip()
-        if not normalized_question:
-            raise ValueError("question은 비어 있을 수 없습니다.")
-        return normalized_question
+    def strip_question(cls, question: object) -> object:
+        """문자열 길이 제약을 적용하기 전에 바깥 공백을 제거한다."""
+
+        if isinstance(question, str):
+            return question.strip()
+        return question
 
 
 class ChatResponseStatus(str, Enum):
@@ -58,6 +61,7 @@ class ChatErrorCode(str, Enum):
     INTERNAL_ERROR = "INTERNAL_ERROR"
     SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE"
     NOT_FOUND = "NOT_FOUND"
+    CONVERSATION_BUSY = "CONVERSATION_BUSY"
 
 
 class ChatAnswer(BaseModel):

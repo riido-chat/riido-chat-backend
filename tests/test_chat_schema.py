@@ -16,6 +16,7 @@ from app.api.chat_schema import (
     ChatWithheld,
     ChatWithheldReasonCode,
     ChatWithheldResponse,
+    MAX_QUESTION_LENGTH,
 )
 from generation.models import FinalGenerationResult
 
@@ -31,6 +32,15 @@ class ChatRequestTest(unittest.TestCase):
             with self.subTest(question=question):
                 with self.assertRaises(ValidationError):
                     ChatRequest(question=question)
+
+    def test_applies_length_limit_after_stripping_outer_whitespace(self) -> None:
+        max_length_question = "가" * MAX_QUESTION_LENGTH
+
+        request = ChatRequest(question=f"  {max_length_question}  ")
+
+        self.assertEqual(max_length_question, request.question)
+        with self.assertRaises(ValidationError):
+            ChatRequest(question="가" * (MAX_QUESTION_LENGTH + 1))
 
     def test_accepts_optional_conversation_id(self) -> None:
         conversation_id = "6abcc9de-f92d-4f26-8ca8-576fdde882c7"

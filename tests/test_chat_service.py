@@ -2,6 +2,7 @@ import unittest
 import uuid
 from itertools import count
 from types import SimpleNamespace
+from typing import Optional
 from unittest.mock import ANY, AsyncMock
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,15 +15,28 @@ from app.api.chat_schema import (
     ChatWithheldReasonCode,
     ChatWithheldResponse,
 )
-from app.database.models import ConversationStatus, ExecutionStatus
+from app.database.models import ContextStrategy, ExecutionStatus
 from app.rag.chat_service import (
-    CONTEXT_STRATEGY_NEW_TOPIC,
     ChatService,
     ConversationNotFoundError,
 )
 from app.rag.generation_service import WITHHELD_RESPONSES, GenerationService
-from app.rag.log_store import RagLogStore
+from app.rag.log_store import (
+    ConversationBusyError,
+    ConversationUnavailableError,
+    RagLogStore,
+)
 from app.rag.model_trace import ModelCallTrace
+from app.rag.progress import ProgressStage
+from app.rag.query_rewrite import (
+    QUERY_REWRITE_PROMPT_VERSION,
+    QueryResolution,
+    QueryRewriteCall,
+    QueryRewriteCandidateTurn,
+    QueryRewriteDecision,
+    QueryRewriteService,
+    QueryRewriteTurnStatus,
+)
 from generation.models import (
     Citation,
     FinalAnswerStatus,
@@ -86,15 +100,16 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
 
         self.retriever = AsyncMock(spec=HybridRetriever)
         self.generation_service = AsyncMock(spec=GenerationService)
+        self.query_rewrite_service = AsyncMock(spec=QueryRewriteService)
         self.log_store = AsyncMock(spec=RagLogStore)
         self.session = AsyncMock(spec=AsyncSession)
 
         self.log_store.create_conversation.return_value = SimpleNamespace(
             id=self.conversation_id,
-            status=ConversationStatus.ACTIVE,
         )
         self.log_store.start_rag_run.return_value = SimpleNamespace(
-            id=self.rag_run_id
+            id=self.rag_run_id,
+            turn_no=1,
         )
         model_call_ids = count(1)
         self.log_store.start_model_call.side_effect = (
@@ -137,6 +152,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         self.service = ChatService(
             retriever=self.retriever,
             generation_service=self.generation_service,
+            query_rewrite_service=self.query_rewrite_service,
             log_store=self.log_store,
             session=self.session,
             index_version_id=INDEX_VERSION_ID,
@@ -249,44 +265,300 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         await self.service.answer_question("질문")
 
         self.log_store.create_conversation.assert_awaited_once_with()
-        self.log_store.get_conversation.assert_not_awaited()
         self.log_store.start_rag_run.assert_awaited_once_with(
             self.conversation_id,
             user_query="질문",
             index_version_id=INDEX_VERSION_ID,
-            context_strategy=CONTEXT_STRATEGY_NEW_TOPIC,
         )
 
-    async def test_reuses_active_conversation_from_request(self) -> None:
+    async def test_reuses_conversation_id_from_request(self) -> None:
         existing_id = uuid.uuid4()
-        self.log_store.get_conversation.return_value = SimpleNamespace(
-            id=existing_id,
-            status=ConversationStatus.ACTIVE,
-        )
         self._generation_result = self._completed()
 
         response = await self.service.answer_question("질문", existing_id)
 
-        self.log_store.get_conversation.assert_awaited_once_with(existing_id)
         self.log_store.create_conversation.assert_not_awaited()
+        self.log_store.start_rag_run.assert_awaited_once_with(
+            existing_id,
+            user_query="질문",
+            index_version_id=INDEX_VERSION_ID,
+        )
         self.assertEqual(existing_id, response.conversation_id)
 
-    async def test_rejects_unusable_conversation_before_creating_a_turn(self) -> None:
-        cases = (
-            None,
-            SimpleNamespace(id=uuid.uuid4(), status=ConversationStatus.CLOSED),
-            SimpleNamespace(id=uuid.uuid4(), status=ConversationStatus.EXPIRED),
+    async def test_maps_unusable_conversation_to_not_found(self) -> None:
+        existing_id = uuid.uuid4()
+        self.log_store.start_rag_run.side_effect = ConversationUnavailableError(
+            "이어갈 수 없는 대화입니다."
         )
 
-        for conversation in cases:
-            with self.subTest(conversation=conversation):
-                self.log_store.get_conversation.return_value = conversation
+        with self.assertRaises(ConversationNotFoundError):
+            await self.service.answer_question("질문", existing_id)
 
-                with self.assertRaises(ConversationNotFoundError):
-                    await self.service.answer_question("질문", uuid.uuid4())
-
-        self.log_store.start_rag_run.assert_not_awaited()
         self.session.commit.assert_not_awaited()
+        self.session.rollback.assert_awaited_once_with()
+        self.retriever.search_with_trace.assert_not_awaited()
+
+    async def test_propagates_busy_after_rolling_back_start_transaction(self) -> None:
+        existing_id = uuid.uuid4()
+        self.log_store.start_rag_run.side_effect = ConversationBusyError(existing_id)
+
+        with self.assertRaises(ConversationBusyError) as raised:
+            await self.service.answer_question("질문", existing_id)
+
+        self.assertEqual(existing_id, raised.exception.conversation_id)
+        self.session.rollback.assert_awaited_once_with()
+        self.session.commit.assert_not_awaited()
+        self.retriever.search_with_trace.assert_not_awaited()
+        self.generation_service.generate_answer.assert_not_awaited()
+
+    # ------------------------------------------------------------------
+    # Multi-turn Query Rewrite
+    # ------------------------------------------------------------------
+
+    async def test_first_turn_skips_query_rewrite(self) -> None:
+        self._generation_result = self._completed()
+
+        await self.service.answer_question("첫 질문")
+
+        self.query_rewrite_service.rewrite.assert_not_awaited()
+        self.log_store.get_query_rewrite_candidates.assert_not_awaited()
+        self.retriever.search_with_trace.assert_awaited_once_with(
+            "첫 질문",
+            before_model_call=ANY,
+        )
+
+    async def test_follow_up_uses_resolved_query_for_retrieval_and_generation(
+        self,
+    ) -> None:
+        self._generation_result = self._completed()
+        candidate = self._candidate_turn(1)
+        self._prepare_follow_up(
+            QueryRewriteCall(
+                trace=self._query_rewrite_trace(),
+                resolution=QueryResolution(
+                    decision=QueryRewriteDecision.FOLLOW_UP_RESOLVED,
+                    resolved_query="리두에서 멤버를 초대하는 방법",
+                    selected_turns=(candidate,),
+                ),
+            ),
+            [candidate],
+        )
+
+        response = await self.service.answer_question(
+            "그건 어떻게 해?",
+            self.conversation_id,
+        )
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        self.retriever.search_with_trace.assert_awaited_once_with(
+            "리두에서 멤버를 초대하는 방법",
+            before_model_call=ANY,
+        )
+        generation_question = self.generation_service.generate_answer.await_args.args[0]
+        self.assertEqual("리두에서 멤버를 초대하는 방법", generation_question)
+        resolution_log = self.log_store.record_query_resolution.await_args.kwargs
+        self.assertEqual(
+            ContextStrategy.FOLLOW_UP_WINDOW,
+            resolution_log["context_strategy"],
+        )
+        self.assertEqual(1, resolution_log["context_turn_count"])
+        self.assertEqual(
+            "v1",
+            resolution_log["context_snapshot"]["schemaVersion"],
+        )
+        self.assertEqual(
+            [1],
+            [
+                turn["turnNo"]
+                for turn in resolution_log["context_snapshot"]["selectedTurns"]
+            ],
+        )
+        self.assertEqual(
+            ["QUERY_REWRITE", "QUERY_EMBEDDING", "ANSWER_GENERATION"],
+            [
+                awaited.kwargs["purpose"]
+                for awaited in self.log_store.start_model_call.await_args_list
+            ],
+        )
+
+    async def test_new_topic_uses_current_question_without_context_snapshot(
+        self,
+    ) -> None:
+        self._generation_result = self._completed()
+        candidate = self._candidate_turn(1)
+        self._prepare_follow_up(
+            QueryRewriteCall(
+                trace=self._query_rewrite_trace(),
+                resolution=QueryResolution(
+                    decision=QueryRewriteDecision.NEW_TOPIC,
+                    resolved_query="결제 수단을 변경하는 방법",
+                    selected_turns=(),
+                ),
+            ),
+            [candidate],
+        )
+
+        await self.service.answer_question(
+            "결제 수단을 변경하는 방법",
+            self.conversation_id,
+        )
+
+        self.retriever.search_with_trace.assert_awaited_once_with(
+            "결제 수단을 변경하는 방법",
+            before_model_call=ANY,
+        )
+        self.log_store.record_query_resolution.assert_awaited_once_with(
+            self.rag_run_id,
+            resolved_query="결제 수단을 변경하는 방법",
+            context_strategy=ContextStrategy.NEW_TOPIC,
+            context_turn_count=0,
+            context_snapshot=None,
+        )
+
+    async def test_unresolved_follow_up_is_withheld_without_retrieval(self) -> None:
+        self._prepare_follow_up(
+            QueryRewriteCall(
+                trace=self._query_rewrite_trace(),
+                resolution=QueryResolution(
+                    decision=QueryRewriteDecision.FOLLOW_UP_UNRESOLVED,
+                    resolved_query=None,
+                    selected_turns=(),
+                ),
+            ),
+            [self._candidate_turn(1)],
+        )
+
+        on_progress_stage = AsyncMock()
+        response = await self.service.answer_question(
+            "그거 말고 다른 건?",
+            self.conversation_id,
+            on_progress_stage=on_progress_stage,
+        )
+
+        self.assertIsInstance(response, ChatWithheldResponse)
+        self.assertEqual(
+            ChatWithheldReasonCode.AMBIGUOUS_QUESTION,
+            response.withheld.reason_code,
+        )
+        self.retriever.search_with_trace.assert_not_awaited()
+        self.generation_service.generate_answer.assert_not_awaited()
+        on_progress_stage.assert_awaited_once_with(ProgressStage.RETRIEVING)
+        self.log_store.record_query_resolution.assert_awaited_once_with(
+            self.rag_run_id,
+            resolved_query=None,
+            context_strategy=ContextStrategy.FOLLOW_UP_WINDOW,
+            context_turn_count=0,
+            context_snapshot=None,
+        )
+        self.log_store.withhold_rag_run.assert_awaited_once_with(
+            self.rag_run_id,
+            reason_code="AMBIGUOUS_QUESTION",
+            total_latency_ms=ANY,
+        )
+
+    async def test_query_rewrite_failure_stops_before_retrieval(self) -> None:
+        error = RuntimeError("invalid structured output")
+        self._prepare_follow_up(
+            QueryRewriteCall(
+                trace=self._query_rewrite_trace(succeeded=False, error=error),
+                error_code="MODEL_OUTPUT_INVALID",
+                error=error,
+            ),
+            [self._candidate_turn(1)],
+        )
+
+        response = await self.service.answer_question(
+            "그건 어떻게 해?",
+            self.conversation_id,
+        )
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.retriever.search_with_trace.assert_not_awaited()
+        self.generation_service.generate_answer.assert_not_awaited()
+        self.log_store.record_query_resolution.assert_not_awaited()
+        self.log_store.fail_rag_run.assert_awaited_once_with(
+            self.rag_run_id,
+            error_code="MODEL_OUTPUT_INVALID",
+            total_latency_ms=ANY,
+        )
+        finished = self.log_store.finish_model_call.await_args
+        self.assertEqual(ExecutionStatus.FAILED, finished.kwargs["status"])
+
+    async def test_resolution_commit_failure_stops_before_retrieval(self) -> None:
+        candidate = self._candidate_turn(1)
+        self._prepare_follow_up(
+            QueryRewriteCall(
+                trace=self._query_rewrite_trace(),
+                resolution=QueryResolution(
+                    decision=QueryRewriteDecision.FOLLOW_UP_RESOLVED,
+                    resolved_query="독립 질문",
+                    selected_turns=(candidate,),
+                ),
+            ),
+            [candidate],
+        )
+        self.session.commit.side_effect = [
+            None,
+            None,
+            RuntimeError("resolution write failure"),
+            None,
+        ]
+
+        response = await self.service.answer_question(
+            "그건 어떻게 해?",
+            self.conversation_id,
+        )
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.retriever.search_with_trace.assert_not_awaited()
+        self.generation_service.generate_answer.assert_not_awaited()
+        self.log_store.fail_processing_model_calls.assert_awaited_once_with(
+            self.rag_run_id
+        )
+        self.log_store.fail_rag_run.assert_awaited_once_with(
+            self.rag_run_id,
+            error_code="INTERNAL_ERROR",
+            total_latency_ms=ANY,
+        )
+
+    async def test_ambiguous_final_commit_failure_cannot_return_withheld(
+        self,
+    ) -> None:
+        self._prepare_follow_up(
+            QueryRewriteCall(
+                trace=self._query_rewrite_trace(),
+                resolution=QueryResolution(
+                    decision=QueryRewriteDecision.FOLLOW_UP_UNRESOLVED,
+                    resolved_query=None,
+                    selected_turns=(),
+                ),
+            ),
+            [self._candidate_turn(1)],
+        )
+        self.session.commit.side_effect = [
+            None,
+            None,
+            None,
+            RuntimeError("withheld write failure"),
+            None,
+        ]
+
+        response = await self.service.answer_question(
+            "그거 말고 다른 건?",
+            self.conversation_id,
+        )
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.retriever.search_with_trace.assert_not_awaited()
+        self.generation_service.generate_answer.assert_not_awaited()
+        self.log_store.fail_processing_model_calls.assert_awaited_once_with(
+            self.rag_run_id
+        )
+        self.log_store.fail_rag_run.assert_awaited_once_with(
+            self.rag_run_id,
+            error_code="INTERNAL_ERROR",
+            total_latency_ms=ANY,
+        )
 
     # ------------------------------------------------------------------
     # RagRun 2단계 + ModelCall checkpoint 커밋
@@ -415,19 +687,48 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             total_latency_ms=ANY,
         )
 
-    async def test_returns_answer_when_final_commit_fails(self) -> None:
+    async def test_returns_error_and_closes_run_when_final_commit_fails(self) -> None:
         self._generation_result = self._completed()
         self.session.commit.side_effect = [
             None,
             None,
             None,
             RuntimeError("write failure"),
+            None,
         ]
 
         response = await self.service.answer_question("질문")
 
-        self.assertIsInstance(response, ChatCompletedResponse)
+        self.assertIsInstance(response, ChatErrorResponse)
         self.assertEqual(self.rag_run_id, response.rag_run_id)
+        self.log_store.fail_processing_model_calls.assert_awaited_once_with(
+            self.rag_run_id
+        )
+        self.log_store.fail_rag_run.assert_awaited_once_with(
+            self.rag_run_id,
+            error_code="INTERNAL_ERROR",
+            total_latency_ms=ANY,
+        )
+        self.assertEqual(5, self.session.commit.await_count)
+
+    async def test_late_worker_after_stale_recovery_cannot_return_success(
+        self,
+    ) -> None:
+        self._generation_result = self._completed()
+        self.log_store.finish_model_call.side_effect = [
+            None,
+            ValueError("PROCESSING 상태의 턴만 전이할 수 있습니다: ERROR"),
+        ]
+        self.log_store.fail_processing_model_calls.side_effect = ValueError(
+            "PROCESSING 상태의 턴만 전이할 수 있습니다: ERROR"
+        )
+
+        response = await self.service.answer_question("질문")
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.assertEqual(self.rag_run_id, response.rag_run_id)
+        self.log_store.complete_rag_run.assert_not_awaited()
+        self.log_store.fail_rag_run.assert_not_awaited()
 
     # ------------------------------------------------------------------
     # 검색 후보 기록
@@ -515,7 +816,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             awaited.kwargs["purpose"]
             for awaited in self.log_store.start_model_call.await_args_list
         ]
-        self.assertEqual(["EMBEDDING", "GENERATION"], purposes)
+        self.assertEqual(["QUERY_EMBEDDING", "ANSWER_GENERATION"], purposes)
 
         embedding_start = self.log_store.start_model_call.await_args_list[0].kwargs
         self.assertEqual(self.rag_run_id, embedding_start["rag_run_id"])
@@ -731,6 +1032,60 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.rag_run_id, response.rag_run_id)
 
     # ------------------------------------------------------------------
+
+    def _prepare_follow_up(
+        self,
+        call: QueryRewriteCall,
+        candidates: list[QueryRewriteCandidateTurn],
+    ) -> None:
+        self.log_store.start_rag_run.return_value = SimpleNamespace(
+            id=self.rag_run_id,
+            turn_no=2,
+        )
+        self.log_store.get_query_rewrite_candidates.return_value = candidates
+
+        async def rewrite(
+            _question,
+            _candidates,
+            *,
+            before_model_call,
+        ):
+            await before_model_call(
+                "openai",
+                "gpt-5.4-mini",
+                QUERY_REWRITE_PROMPT_VERSION,
+            )
+            return call
+
+        self.query_rewrite_service.rewrite.side_effect = rewrite
+
+    @staticmethod
+    def _candidate_turn(turn_no: int) -> QueryRewriteCandidateTurn:
+        return QueryRewriteCandidateTurn(
+            rag_run_id=uuid.UUID(int=turn_no),
+            turn_no=turn_no,
+            status=QueryRewriteTurnStatus.COMPLETED,
+            user_query=f"이전 질문 {turn_no}",
+            answer_content=f"이전 답변 {turn_no}",
+            withheld_reason_code=None,
+        )
+
+    @staticmethod
+    def _query_rewrite_trace(
+        *,
+        succeeded: bool = True,
+        error: Optional[Exception] = None,
+    ) -> ModelCallTrace:
+        return ModelCallTrace(
+            provider="openai",
+            model_name="gpt-5.4-mini",
+            succeeded=succeeded,
+            latency_ms=120,
+            input_tokens=90,
+            output_tokens=20,
+            prompt_version=QUERY_REWRITE_PROMPT_VERSION,
+            error_message=None if error is None else str(error),
+        )
 
     @staticmethod
     def _search_call() -> HybridSearchCall:

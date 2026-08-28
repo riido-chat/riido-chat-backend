@@ -35,6 +35,7 @@ from app.database.models import ConversationStatus
 from app.main import _drain_pipeline_tasks
 from app.rag.chat_service import ChatService
 from app.rag.generation_service import GenerationService
+from app.rag.query_rewrite import QueryRewriteService
 from app.rag.log_store import RagLogStore
 from app.rag.model_trace import ModelCallTrace
 from app.rag.progress import ProgressStage
@@ -99,6 +100,7 @@ class ProduceTurnTest(unittest.IsolatedAsyncioTestCase):
             corpus_state=object(),
             embedder=object(),
             generation_service=object(),
+            query_rewrite_service=object(),
         )
 
     def _pipeline(self, *, stages=(), result=None, error=None, start_turn=True):
@@ -231,7 +233,8 @@ class DrainTest(unittest.IsolatedAsyncioTestCase):
                 patch.object(main, "CorpusState", lambda _dir: object()), \
                 patch.object(main, "OpenAIEmbedder", lambda: object()), \
                 patch.object(main, "OpenAIGenerator", lambda: object()), \
-                patch.object(main, "GenerationService", lambda _g: object()):
+                patch.object(main, "GenerationService", lambda _g: object()), \
+                patch.object(main, "QueryRewriteService", lambda: object()):
             app = FastAPI()
             async with main.lifespan(app):
                 self.assertEqual(set(), app.state.pipeline_tasks)
@@ -262,6 +265,7 @@ class CoreHookNeutralityTest(unittest.IsolatedAsyncioTestCase):
 
         self.retriever = AsyncMock(spec=HybridRetriever)
         self.generation_service = AsyncMock(spec=GenerationService)
+        self.query_rewrite_service = AsyncMock(spec=QueryRewriteService)
         self.log_store = AsyncMock(spec=RagLogStore)
         self.session = AsyncMock(spec=AsyncSession)
 
@@ -270,7 +274,8 @@ class CoreHookNeutralityTest(unittest.IsolatedAsyncioTestCase):
             status=ConversationStatus.ACTIVE,
         )
         self.log_store.start_rag_run.return_value = SimpleNamespace(
-            id=self.rag_run_id
+            id=self.rag_run_id,
+            turn_no=1,
         )
         ids = count(1)
         self.log_store.start_model_call.side_effect = (
@@ -302,6 +307,7 @@ class CoreHookNeutralityTest(unittest.IsolatedAsyncioTestCase):
         self.service = ChatService(
             retriever=self.retriever,
             generation_service=self.generation_service,
+            query_rewrite_service=self.query_rewrite_service,
             log_store=self.log_store,
             session=self.session,
             index_version_id=INDEX_VERSION_ID,

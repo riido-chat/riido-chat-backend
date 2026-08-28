@@ -1,12 +1,13 @@
 import unittest
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, call as mock_call
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models import (
     AnswerStatus,
+    Conversation,
     ExecutionStatus,
     Feedback,
     FeedbackRating,
@@ -26,10 +27,30 @@ class RagLogStoreModelCallTest(unittest.IsolatedAsyncioTestCase):
         self.session = AsyncMock(spec=AsyncSession)
         self.store = RagLogStore(self.session)
         self.rag_run_id = uuid.uuid4()
+        self.conversation_id = uuid.uuid4()
+
+    def _processing_run(self) -> RagRun:
+        return RagRun(
+            id=self.rag_run_id,
+            conversation_id=self.conversation_id,
+            status=AnswerStatus.PROCESSING,
+        )
+
+    def _prepare_rag_run_lock(self, *, final_scalar=None) -> None:
+        run = self._processing_run()
+        self.session.get.side_effect = lambda model, _id: (
+            run if model is RagRun else final_scalar
+        )
+        scalar_results = [Conversation(id=self.conversation_id), run]
+        if final_scalar is not None:
+            scalar_results.append(final_scalar)
+        self.session.scalar.side_effect = scalar_results
 
     async def test_starts_model_call_in_processing_without_result_metrics(
         self,
     ) -> None:
+        self._prepare_rag_run_lock()
+
         call = await self.store.start_model_call(
             rag_run_id=self.rag_run_id,
             purpose=ModelCallPurpose.EMBEDDING.value,
@@ -56,7 +77,7 @@ class RagLogStoreModelCallTest(unittest.IsolatedAsyncioTestCase):
             status=ExecutionStatus.PROCESSING,
             retry_count=0,
         )
-        self.session.get.return_value = call
+        self._prepare_rag_run_lock(final_scalar=call)
 
         finished = await self.store.finish_model_call(
             7,
@@ -73,15 +94,14 @@ class RagLogStoreModelCallTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, finished.retry_count)
         self.assertEqual(4500, finished.latency_ms)
         self.assertEqual("upstream timeout", finished.error_message)
-        self.session.get.assert_awaited_once_with(
-            ModelCall,
-            7,
-            with_for_update=True,
+        self.assertEqual(
+            [mock_call(ModelCall, 7), mock_call(RagRun, self.rag_run_id)],
+            self.session.get.await_args_list,
         )
         self.session.flush.assert_awaited_once_with()
 
     async def test_rejects_finishing_an_already_finished_call(self) -> None:
-        self.session.get.return_value = ModelCall(
+        model_call = ModelCall(
             id=7,
             rag_run_id=self.rag_run_id,
             purpose=ModelCallPurpose.GENERATION,
@@ -90,6 +110,7 @@ class RagLogStoreModelCallTest(unittest.IsolatedAsyncioTestCase):
             status=ExecutionStatus.SUCCESS,
             retry_count=0,
         )
+        self._prepare_rag_run_lock(final_scalar=model_call)
 
         with self.assertRaisesRegex(ValueError, "PROCESSING"):
             await self.store.finish_model_call(

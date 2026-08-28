@@ -87,6 +87,19 @@ class AnswerStatus(str, enum.Enum):
     CANCELLED = "CANCELLED"
 
 
+class ContextStrategy(str, enum.Enum):
+    """현재 질문을 해석할 때 이전 대화 문맥을 사용한 방식을 나타낸다."""
+
+    NEW_TOPIC = "NEW_TOPIC"
+    FULL = "FULL"
+    WINDOW = "WINDOW"
+    SUMMARY = "SUMMARY"
+    UNRESOLVED = "UNRESOLVED"
+    FOLLOW_UP_FULL = "FOLLOW_UP_FULL"
+    FOLLOW_UP_WINDOW = "FOLLOW_UP_WINDOW"
+    FOLLOW_UP_SUMMARY = "FOLLOW_UP_SUMMARY"
+
+
 class RetrieverType(str, enum.Enum):
     """검색 후보를 만들어낸 검색기를 나타낸다. 같은 청크도 검색기별로 1행이다."""
 
@@ -95,10 +108,15 @@ class RetrieverType(str, enum.Enum):
 
 
 class ModelCallPurpose(str, enum.Enum):
-    """모델 호출의 용도. QUERY_REWRITE, SUMMARIZATION은 구현 시 추가한다."""
+    """모델 호출의 용도. 기존 값은 contract migration 전까지 함께 읽는다."""
 
     EMBEDDING = "EMBEDDING"
     GENERATION = "GENERATION"
+    QUERY_EMBEDDING = "QUERY_EMBEDDING"
+    CHUNK_EMBEDDING = "CHUNK_EMBEDDING"
+    ANSWER_GENERATION = "ANSWER_GENERATION"
+    QUERY_REWRITE = "QUERY_REWRITE"
+    CONVERSATION_SUMMARY = "CONVERSATION_SUMMARY"
 
 
 class FeedbackRating(str, enum.Enum):
@@ -474,7 +492,10 @@ class RagRun(Base):
     sanitized_query: Mapped[Optional[str]] = mapped_column(Text)
     resolved_query: Mapped[Optional[str]] = mapped_column(Text)
     query_hash: Mapped[Optional[str]] = mapped_column(String(128))
-    context_strategy: Mapped[str] = mapped_column(String(30), nullable=False)
+    context_strategy: Mapped[ContextStrategy] = mapped_column(
+        _status_enum(ContextStrategy, "context_strategy", length=30),
+        nullable=False,
+    )
     context_turn_count: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default="0"
     )

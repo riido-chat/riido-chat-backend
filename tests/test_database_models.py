@@ -1,7 +1,13 @@
 import unittest
 
 from pgvector.sqlalchemy import VECTOR
-from sqlalchemy import BigInteger, Text, UniqueConstraint
+from sqlalchemy import (
+    BigInteger,
+    CheckConstraint,
+    Enum as SAEnum,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 
 from app.database.base import Base
@@ -9,9 +15,12 @@ from app.database.models import (
     AnswerStatus,
     ChunkEmbedding,
     ContentNode,
+    ContextStrategy,
     DocumentChunk,
     LegacyChunkEmbedding,
     LegacyDocumentChunk,
+    ModelCall,
+    ModelCallPurpose,
     RagRun,
 )
 from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
@@ -136,6 +145,56 @@ class DatabaseModelTest(unittest.TestCase):
         )
         self.assertTrue(table.c.withheld_reason_code.nullable)
         self.assertTrue(table.c.error_code.nullable)
+
+    def test_expand_model_call_purpose_keeps_legacy_and_new_values(self) -> None:
+        purpose_type = ModelCall.__table__.c.purpose.type
+        model_call_constraint_names = {
+            constraint.name
+            for constraint in ModelCall.__table__.constraints
+            if isinstance(constraint, CheckConstraint)
+        }
+        expected = {
+            "EMBEDDING",
+            "GENERATION",
+            "QUERY_EMBEDDING",
+            "CHUNK_EMBEDDING",
+            "ANSWER_GENERATION",
+            "QUERY_REWRITE",
+            "CONVERSATION_SUMMARY",
+        }
+
+        self.assertEqual(expected, {member.value for member in ModelCallPurpose})
+        self.assertIsInstance(purpose_type, SAEnum)
+        self.assertIs(ModelCallPurpose, purpose_type.enum_class)
+        self.assertEqual(expected, set(purpose_type.enums))
+        self.assertIn(
+            "ck_model_calls_model_call_purpose",
+            model_call_constraint_names,
+        )
+
+    def test_expand_context_strategy_keeps_legacy_and_new_values(self) -> None:
+        strategy_type = RagRun.__table__.c.context_strategy.type
+        rag_run_constraint_names = {
+            constraint.name
+            for constraint in RagRun.__table__.constraints
+            if isinstance(constraint, CheckConstraint)
+        }
+        expected = {
+            "NEW_TOPIC",
+            "FULL",
+            "WINDOW",
+            "SUMMARY",
+            "UNRESOLVED",
+            "FOLLOW_UP_FULL",
+            "FOLLOW_UP_WINDOW",
+            "FOLLOW_UP_SUMMARY",
+        }
+
+        self.assertEqual(expected, {member.value for member in ContextStrategy})
+        self.assertIsInstance(strategy_type, SAEnum)
+        self.assertIs(ContextStrategy, strategy_type.enum_class)
+        self.assertEqual(expected, set(strategy_type.enums))
+        self.assertIn("ck_rag_runs_context_strategy", rag_run_constraint_names)
 
 
 if __name__ == "__main__":

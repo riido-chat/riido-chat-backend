@@ -13,7 +13,10 @@ from retrieval.embedding import (
 )
 from retrieval.models import RetrievalChunk, RetrievalResult
 from retrieval.pgvector_store import PgVectorStore
-from retrieval.vector_retriever import VectorRetriever
+from retrieval.vector_retriever import (
+    QUERY_EMBEDDING_TIMEOUT_SECONDS,
+    VectorRetriever,
+)
 
 
 class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
@@ -43,6 +46,7 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         self.embedder.embed_many_with_usage.assert_called_once_with(
             ["사용자 원문 질문"],
             sdk_max_retries=0,
+            timeout=QUERY_EMBEDDING_TIMEOUT_SECONDS,
         )
         self.store.similarity_search.assert_awaited_once_with(
             self.embedding,
@@ -65,6 +69,7 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         self.embedder.embed_many_with_usage.assert_called_once_with(
             ["검색 결과 없는 질문"],
             sdk_max_retries=0,
+            timeout=QUERY_EMBEDDING_TIMEOUT_SECONDS,
         )
         self.store.similarity_search.assert_awaited_once_with(
             self.embedding,
@@ -107,6 +112,7 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         self.embedder.embed_many_with_usage.assert_called_once_with(
             ["질문"],
             sdk_max_retries=0,
+            timeout=QUERY_EMBEDDING_TIMEOUT_SECONDS,
         )
 
     async def test_trace_records_successful_embedding_call(self) -> None:
@@ -129,9 +135,10 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         async def checkpoint(*_args) -> None:
             events.append("checkpoint")
 
-        def embed(_texts, *, sdk_max_retries):
+        def embed(_texts, *, sdk_max_retries, timeout):
             events.append("embedding")
             self.assertEqual(0, sdk_max_retries)
+            self.assertEqual(QUERY_EMBEDDING_TIMEOUT_SECONDS, timeout)
             return EmbeddingResponse(
                 embeddings=[self.embedding],
                 input_tokens=7,

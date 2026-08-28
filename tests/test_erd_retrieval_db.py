@@ -29,7 +29,10 @@ from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS, EmbeddingResponse
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.models import RetrievalChunk
 from retrieval.pgvector_store import PgVectorStore
-from retrieval.vector_retriever import VectorRetriever
+from retrieval.vector_retriever import (
+    QUERY_EMBEDDING_TIMEOUT_SECONDS,
+    VectorRetriever,
+)
 
 
 class _StubEmbedder:
@@ -41,9 +44,12 @@ class _StubEmbedder:
         texts,
         *,
         sdk_max_retries=None,
+        timeout=None,
     ) -> EmbeddingResponse:
         if sdk_max_retries != 0:
             raise AssertionError("Query Embedding SDK retry가 비활성화되지 않았습니다.")
+        if timeout != QUERY_EMBEDDING_TIMEOUT_SECONDS:
+            raise AssertionError("Query Embedding timeout이 30초가 아닙니다.")
         return EmbeddingResponse(
             embeddings=[[0.1] * OPENAI_EMBEDDING_DIMENSIONS for _ in texts],
             input_tokens=len(texts),

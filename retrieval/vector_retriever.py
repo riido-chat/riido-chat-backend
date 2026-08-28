@@ -18,6 +18,7 @@ from retrieval.pgvector_store import PgVectorStore
 
 QUERY_EMBEDDING_MAX_ATTEMPTS = 3
 QUERY_EMBEDDING_INITIAL_RETRY_DELAY_SECONDS = 0.5
+QUERY_EMBEDDING_TIMEOUT_SECONDS = 30.0
 
 
 def _elapsed_ms(started: float) -> int:
@@ -87,6 +88,7 @@ class VectorRetriever:
                     self._embedder.embed_many_with_usage,
                     [query],
                     sdk_max_retries=0,
+                    timeout=QUERY_EMBEDDING_TIMEOUT_SECONDS,
                 )
                 break
             except Exception as error:

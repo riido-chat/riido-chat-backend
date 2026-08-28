@@ -4,7 +4,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, replace
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,20 +22,42 @@ from app.api.chat_schema import (
     ChatWithheldResponse,
 )
 from app.database.models import (
-    ConversationStatus,
+    ContextStrategy,
     ExecutionStatus,
     ModelCallPurpose,
     RetrieverType,
 )
-from app.rag.generation_service import UPSTREAM_ERROR_CODE, GenerationService
-from app.rag.log_store import CitationLog, RagLogStore, RetrievalCandidateLog
+from app.rag.generation_service import (
+    UPSTREAM_ERROR_CODE,
+    WITHHELD_RESPONSES,
+    GenerationService,
+)
+from app.rag.log_store import (
+    CitationLog,
+    ConversationBusyError,
+    ConversationUnavailableError,
+    RagLogStore,
+    RetrievalCandidateLog,
+)
 from app.rag.model_trace import ModelCallTrace
 from app.rag.progress import (
     OnProgressStageHook,
     OnTurnStartedHook,
     ProgressStage,
 )
-from generation.models import Citation, FinalAnswerStatus, FinalGenerationResult
+from app.rag.query_rewrite import (
+    QueryResolution,
+    QueryRewriteCall,
+    QueryRewriteDecision,
+    QueryRewriteService,
+    build_context_snapshot,
+)
+from generation.models import (
+    Citation,
+    FinalAnswerStatus,
+    FinalGenerationResult,
+    FinalWithheldReason,
+)
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.models import HybridSearchCall, RetrievalResult
 
@@ -46,11 +68,11 @@ INTERNAL_ERROR_MESSAGE = "답변을 생성하는 중 오류가 발생했습니�
 CONVERSATION_NOT_FOUND_MESSAGE = (
     "이어갈 수 없는 대화입니다. 새로운 대화로 다시 질문해주세요."
 )
+CONVERSATION_BUSY_MESSAGE = (
+    "이 대화의 이전 질문을 처리 중입니다. 잠시 후 다시 시도해주세요."
+)
 
 INTERNAL_ERROR_CODE = "INTERNAL_ERROR"
-
-# 단일턴만 지원하는 동안 모든 턴은 새 주제로 기록한다
-CONTEXT_STRATEGY_NEW_TOPIC = "NEW_TOPIC"
 
 
 class ConversationNotFoundError(LookupError):
@@ -89,6 +111,22 @@ def conversation_not_found_response() -> ChatErrorResponse:
         error=ChatError(
             code=ChatErrorCode.NOT_FOUND,
             message=CONVERSATION_NOT_FOUND_MESSAGE,
+        ),
+        citations=[],
+    )
+
+
+def conversation_busy_response(conversation_id: uuid.UUID) -> ChatErrorResponse:
+    """같은 대화의 이전 턴이 처리 중일 때의 충돌 응답을 만든다."""
+
+    return ChatErrorResponse(
+        status=ChatResponseStatus.ERROR,
+        conversation_id=conversation_id,
+        rag_run_id=None,
+        answer=None,
+        error=ChatError(
+            code=ChatErrorCode.CONVERSATION_BUSY,
+            message=CONVERSATION_BUSY_MESSAGE,
         ),
         citations=[],
     )
@@ -163,6 +201,19 @@ class _ModelCallCheckpoint:
     started: float
 
 
+@dataclass(frozen=True)
+class _TurnStart:
+    conversation_id: uuid.UUID
+    rag_run_id: uuid.UUID
+    turn_no: int
+
+
+@dataclass(frozen=True)
+class _QueryResolutionOutcome:
+    resolved_query: Optional[str]
+    terminal_response: Optional[ChatResponse] = None
+
+
 def _failed_generation_trace(
     checkpoint: _ModelCallCheckpoint,
     error: Exception,
@@ -189,12 +240,14 @@ class ChatService:
         self,
         retriever: HybridRetriever,
         generation_service: GenerationService,
+        query_rewrite_service: QueryRewriteService,
         log_store: RagLogStore,
         session: AsyncSession,
         index_version_id: int,
     ) -> None:
         self._retriever = retriever
         self._generation_service = generation_service
+        self._query_rewrite_service = query_rewrite_service
         self._log_store = log_store
         self._session = session
         self._index_version_id = index_version_id
@@ -212,11 +265,13 @@ class ChatService:
         started = time.perf_counter()
 
         try:
-            conversation_id, rag_run_id = await self._start_turn(
+            turn = await self._start_turn(
                 question,
                 conversation_id,
             )
-        except ConversationNotFoundError:
+        except (ConversationNotFoundError, ConversationBusyError):
+            # FOR UPDATE를 포함한 시작 transaction을 닫고 HTTP 계층으로 전달한다.
+            await self._rollback_quietly()
             raise
         except Exception:
             # 1차 커밋 실패다. ragRunId가 없으면 응답을 구성할 수 없어 그대로 실패시킨다.
@@ -226,36 +281,56 @@ class ChatService:
 
         try:
             if on_turn_started is not None:
-                await on_turn_started(conversation_id, rag_run_id)
+                await on_turn_started(turn.conversation_id, turn.rag_run_id)
             return await self._run_turn(
                 question,
-                conversation_id,
-                rag_run_id,
+                turn,
                 started,
                 on_progress_stage=on_progress_stage,
             )
         except Exception:
             logger.exception(
                 "턴 실행 중 예상하지 못한 오류가 발생했습니다: rag_run_id=%s",
-                rag_run_id,
+                turn.rag_run_id,
             )
             # 마감하지 않으면 PROCESSING 행이 그대로 남는다.
             await self._fail_quietly(
-                rag_run_id,
+                turn.rag_run_id,
                 INTERNAL_ERROR_CODE,
                 _elapsed_ms(started),
             )
-            return _internal_error_response(conversation_id, rag_run_id)
+            return _internal_error_response(turn.conversation_id, turn.rag_run_id)
 
     async def _run_turn(
         self,
         question: str,
-        conversation_id: uuid.UUID,
-        rag_run_id: uuid.UUID,
+        turn: _TurnStart,
         started: float,
         *,
         on_progress_stage: Optional[OnProgressStageHook] = None,
     ) -> ChatResponse:
+        conversation_id = turn.conversation_id
+        rag_run_id = turn.rag_run_id
+
+        # Query Rewrite도 검색 질의 확정 단계이므로 기존 RETRIEVING에 포함한다.
+        if on_progress_stage is not None:
+            await on_progress_stage(ProgressStage.RETRIEVING)
+
+        if turn.turn_no == 1:
+            resolved_query = question
+        else:
+            resolution_outcome = await self._resolve_follow_up(
+                question,
+                conversation_id,
+                rag_run_id,
+                started,
+            )
+            if resolution_outcome.terminal_response is not None:
+                return resolution_outcome.terminal_response
+            if resolution_outcome.resolved_query is None:
+                raise RuntimeError("검색할 resolved_query가 확정되지 않았습니다.")
+            resolved_query = resolution_outcome.resolved_query
+
         embedding_model_call_id: Optional[int] = None
 
         async def checkpoint_embedding(
@@ -268,17 +343,14 @@ class ChatService:
                 raise RuntimeError("Query Embedding 호출이 이미 시작됐습니다.")
             embedding_model_call_id = await self._checkpoint_model_call(
                 rag_run_id,
-                ModelCallPurpose.EMBEDDING,
+                ModelCallPurpose.QUERY_EMBEDDING,
                 provider,
                 model_name,
                 prompt_version,
             )
 
-        if on_progress_stage is not None:
-            await on_progress_stage(ProgressStage.RETRIEVING)
-
         search = await self._retriever.search_with_trace(
-            question,
+            resolved_query,
             before_model_call=checkpoint_embedding,
         )
         # Vector read transaction을 닫고, 확보한 로그는 다음 transaction에서 마감한다.
@@ -320,7 +392,7 @@ class ChatService:
             await self._record_retrieval_results(rag_run_id, search)
             model_call_id = await self._checkpoint_model_call(
                 rag_run_id,
-                ModelCallPurpose.GENERATION,
+                ModelCallPurpose.ANSWER_GENERATION,
                 provider,
                 model_name,
                 prompt_version,
@@ -343,7 +415,7 @@ class ChatService:
 
         try:
             generation_result = await self._generation_service.generate_answer(
-                question,
+                resolved_query,
                 search.fused_results,
                 before_model_call=checkpoint_generation,
                 **generation_kwargs,
@@ -409,7 +481,7 @@ class ChatService:
             )
             return _internal_error_response(conversation_id, rag_run_id)
 
-        await self._record_turn(
+        recorded = await self._record_turn(
             rag_run_id,
             search,
             generation_result,
@@ -418,6 +490,8 @@ class ChatService:
             embedding_model_call_id=None,
             record_retrieval=False,
         )
+        if not recorded:
+            return _internal_error_response(conversation_id, rag_run_id)
         return response
 
     # ------------------------------------------------------------------
@@ -428,29 +502,184 @@ class ChatService:
         self,
         question: str,
         conversation_id: Optional[uuid.UUID],
-    ) -> Tuple[uuid.UUID, uuid.UUID]:
+    ) -> _TurnStart:
         if conversation_id is None:
             conversation = await self._log_store.create_conversation()
-        else:
-            conversation = await self._log_store.get_conversation(conversation_id)
-            if (
-                conversation is None
-                or conversation.status != ConversationStatus.ACTIVE
-            ):
-                raise ConversationNotFoundError(
-                    f"이어갈 수 없는 대화입니다: {conversation_id}"
-                )
+            conversation_id = conversation.id
 
-        run = await self._log_store.start_rag_run(
-            conversation.id,
-            user_query=question,
-            index_version_id=self._index_version_id,
-            context_strategy=CONTEXT_STRATEGY_NEW_TOPIC,
-        )
+        try:
+            run = await self._log_store.start_rag_run(
+                conversation_id,
+                user_query=question,
+                index_version_id=self._index_version_id,
+            )
+        except ConversationUnavailableError as error:
+            raise ConversationNotFoundError(
+                f"이어갈 수 없는 대화입니다: {conversation_id}"
+            ) from error
         # commit 이후 객체 접근을 피하려고 식별자를 먼저 확정한다.
-        identifiers = (conversation.id, run.id)
+        turn = _TurnStart(
+            conversation_id=conversation_id,
+            rag_run_id=run.id,
+            turn_no=run.turn_no,
+        )
         await self._session.commit()
-        return identifiers
+        return turn
+
+    # ------------------------------------------------------------------
+    # Query Rewrite checkpoint — 후속 질문의 검색 질의 확정
+    # ------------------------------------------------------------------
+
+    async def _resolve_follow_up(
+        self,
+        question: str,
+        conversation_id: uuid.UUID,
+        rag_run_id: uuid.UUID,
+        started: float,
+    ) -> _QueryResolutionOutcome:
+        candidates = await self._log_store.get_query_rewrite_candidates(rag_run_id)
+        model_call_id: Optional[int] = None
+
+        async def checkpoint_query_rewrite(
+            provider: str,
+            model_name: str,
+            prompt_version: Optional[str],
+        ) -> None:
+            nonlocal model_call_id
+            if model_call_id is not None:
+                raise RuntimeError("Query Rewrite 호출이 이미 시작됐습니다.")
+            model_call_id = await self._checkpoint_model_call(
+                rag_run_id,
+                ModelCallPurpose.QUERY_REWRITE,
+                provider,
+                model_name,
+                prompt_version,
+            )
+
+        call = await self._query_rewrite_service.rewrite(
+            question,
+            candidates,
+            before_model_call=checkpoint_query_rewrite,
+        )
+        if model_call_id is None:
+            raise RuntimeError("Query Rewrite ModelCall checkpoint가 실행되지 않았습니다.")
+        if call.error is None and call.resolution is None:
+            raise RuntimeError("Query Rewrite 성공 결과에 resolution이 없습니다.")
+        if call.error is None and not call.trace.succeeded:
+            raise RuntimeError("Query Rewrite 성공 결과의 trace가 FAILED입니다.")
+        if call.error is not None and call.trace.succeeded:
+            raise RuntimeError("Query Rewrite 실패 결과의 trace가 SUCCESS입니다.")
+
+        recorded = await self._record_query_rewrite(
+            rag_run_id,
+            model_call_id,
+            call,
+            _elapsed_ms(started),
+        )
+        if not recorded or call.error is not None:
+            return _QueryResolutionOutcome(
+                resolved_query=None,
+                terminal_response=_internal_error_response(
+                    conversation_id,
+                    rag_run_id,
+                ),
+            )
+
+        resolution = call.resolution
+        if resolution is None:
+            raise RuntimeError("기록된 Query Rewrite 결과에 resolution이 없습니다.")
+        if resolution.should_retrieve:
+            return _QueryResolutionOutcome(resolved_query=resolution.resolved_query)
+
+        return _QueryResolutionOutcome(
+            resolved_query=None,
+            terminal_response=await self._withhold_ambiguous_follow_up(
+                conversation_id,
+                rag_run_id,
+                started,
+            ),
+        )
+
+    async def _record_query_rewrite(
+        self,
+        rag_run_id: uuid.UUID,
+        model_call_id: int,
+        call: QueryRewriteCall,
+        total_latency_ms: int,
+    ) -> bool:
+        try:
+            await self._finish_model_call(model_call_id, call.trace)
+            if call.error is not None:
+                await self._log_store.fail_rag_run(
+                    rag_run_id,
+                    error_code=call.error_code or INTERNAL_ERROR_CODE,
+                    total_latency_ms=total_latency_ms,
+                )
+            else:
+                resolution = call.resolution
+                if resolution is None:
+                    raise RuntimeError("Query Rewrite resolution이 없습니다.")
+                await self._log_store.record_query_resolution(
+                    rag_run_id,
+                    resolved_query=resolution.resolved_query,
+                    context_strategy=self._context_strategy(resolution),
+                    context_turn_count=resolution.context_turn_count,
+                    context_snapshot=build_context_snapshot(resolution),
+                )
+            await self._session.commit()
+            return True
+        except Exception:
+            logger.exception(
+                "Query Rewrite 결과를 저장하지 못했습니다: rag_run_id=%s",
+                rag_run_id,
+            )
+            await self._fail_quietly(
+                rag_run_id,
+                INTERNAL_ERROR_CODE,
+                total_latency_ms,
+            )
+            return False
+
+    @staticmethod
+    def _context_strategy(resolution: QueryResolution) -> ContextStrategy:
+        if resolution.decision == QueryRewriteDecision.NEW_TOPIC:
+            return ContextStrategy.NEW_TOPIC
+        return ContextStrategy.FOLLOW_UP_WINDOW
+
+    async def _withhold_ambiguous_follow_up(
+        self,
+        conversation_id: uuid.UUID,
+        rag_run_id: uuid.UUID,
+        started: float,
+    ) -> ChatResponse:
+        result = FinalGenerationResult(
+            status=FinalAnswerStatus.WITHHELD,
+            answer_markdown=WITHHELD_RESPONSES[
+                FinalWithheldReason.AMBIGUOUS_QUESTION
+            ],
+            citations=(),
+            withheld_reason=FinalWithheldReason.AMBIGUOUS_QUESTION,
+        )
+        try:
+            await self._log_store.withhold_rag_run(
+                rag_run_id,
+                reason_code=FinalWithheldReason.AMBIGUOUS_QUESTION.value,
+                total_latency_ms=_elapsed_ms(started),
+            )
+            await self._session.commit()
+        except Exception:
+            logger.exception(
+                "모호한 후속 질문을 마감하지 못했습니다: rag_run_id=%s",
+                rag_run_id,
+            )
+            await self._fail_quietly(
+                rag_run_id,
+                INTERNAL_ERROR_CODE,
+                _elapsed_ms(started),
+            )
+            return _internal_error_response(conversation_id, rag_run_id)
+
+        return _to_chat_response(result, conversation_id, rag_run_id)
 
     # ------------------------------------------------------------------
     # 외부 모델 호출 checkpoint
@@ -509,7 +738,7 @@ class ChatService:
         *,
         embedding_model_call_id: Optional[int],
         record_retrieval: bool,
-    ) -> None:
+    ) -> bool:
         try:
             await self._finish_model_call(
                 embedding_model_call_id,
@@ -528,13 +757,20 @@ class ChatService:
                 total_latency_ms,
             )
             await self._session.commit()
+            return True
         except Exception:
-            # 답변은 이미 완성됐고 식별자도 유효하므로 로그 실패는 삼킨다.
             logger.exception(
                 "턴 실행 로그를 저장하지 못했습니다: rag_run_id=%s",
                 rag_run_id,
             )
-            await self._rollback_quietly()
+            # 성공 응답은 최종 commit이 확정된 뒤에만 반환한다. rollback 뒤에는
+            # 별도 transaction으로 RagRun과 미완료 ModelCall을 best-effort 마감한다.
+            await self._fail_quietly(
+                rag_run_id,
+                INTERNAL_ERROR_CODE,
+                total_latency_ms,
+            )
+            return False
 
     async def _record_retrieval_results(
         self,
@@ -671,6 +907,7 @@ class ChatService:
         try:
             # 실패 지점까지의 미완성 쓰기를 버리고 마감만 남긴다.
             await self._session.rollback()
+            await self._log_store.fail_processing_model_calls(rag_run_id)
             await self._log_store.fail_rag_run(
                 rag_run_id,
                 error_code=error_code,
