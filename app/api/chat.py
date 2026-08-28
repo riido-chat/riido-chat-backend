@@ -55,6 +55,10 @@ def corpus_unavailable_response() -> ChatErrorResponse:
             "model": ChatErrorResponse,
             "description": "이어갈 수 없는 conversationId",
         },
+        status.HTTP_409_CONFLICT: {
+            "model": ChatErrorResponse,
+            "description": "같은 대화의 이전 질문 처리 중",
+        },
         status.HTTP_503_SERVICE_UNAVAILABLE: {
             "model": ChatErrorResponse,
             "description": "검색 corpus 미적재",

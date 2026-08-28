@@ -33,6 +33,7 @@ from app.rag.corpus_state import CorpusState
 from app.rag.dependencies import build_chat_service
 from app.rag.generation_service import GenerationService
 from app.rag.progress import ProgressStage
+from app.rag.query_rewrite import QueryRewriteService
 from retrieval.embedding import OpenAIEmbedder
 
 
@@ -146,6 +147,7 @@ async def _chat_service_scope(
     corpus_state: CorpusState,
     embedder: OpenAIEmbedder,
     generation_service: GenerationService,
+    query_rewrite_service: QueryRewriteService,
 ) -> AsyncIterator[ChatService]:
     """producer가 소유하는 session으로 ChatService를 만든다.
 
@@ -158,6 +160,7 @@ async def _chat_service_scope(
             corpus_state=corpus_state,
             embedder=embedder,
             generation_service=generation_service,
+            query_rewrite_service=query_rewrite_service,
         )
 
 
@@ -169,6 +172,7 @@ async def produce_turn(
     corpus_state: CorpusState,
     embedder: OpenAIEmbedder,
     generation_service: GenerationService,
+    query_rewrite_service: QueryRewriteService,
 ) -> None:
     """파이프라인을 끝까지 실행하며 이벤트를 Queue에 넣는다.
 
@@ -182,6 +186,7 @@ async def produce_turn(
             corpus_state,
             embedder,
             generation_service,
+            query_rewrite_service,
         ) as service:
 
             async def on_turn_started(
@@ -297,6 +302,7 @@ async def start_chat_stream(
             corpus_state=request.app.state.corpus_state,
             embedder=request.app.state.embedder,
             generation_service=request.app.state.generation_service,
+            query_rewrite_service=request.app.state.query_rewrite_service,
         )
     )
     register_pipeline_task(request.app, task)

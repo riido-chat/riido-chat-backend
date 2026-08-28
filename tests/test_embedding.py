@@ -72,6 +72,7 @@ class OpenAIEmbedderTest(unittest.TestCase):
 
         embeddings = embedder.embed_many(["첫 번째 텍스트", "두 번째 텍스트"])
 
+        client.with_options.assert_not_called()
         client.embeddings.with_raw_response.create.assert_called_once_with(
             model=OPENAI_EMBEDDING_MODEL,
             input=["첫 번째 텍스트", "두 번째 텍스트"],
@@ -245,6 +246,38 @@ class OpenAIEmbedderTest(unittest.TestCase):
 
         self.assertEqual(1, attempts)
 
+    def test_applies_explicit_timeout_and_sdk_retry_override(self) -> None:
+        client, _ = self._client_with_response(
+            SimpleNamespace(
+                data=[
+                    SimpleNamespace(
+                        index=0,
+                        embedding=[0.1] * OPENAI_EMBEDDING_DIMENSIONS,
+                    )
+                ]
+            )
+        )
+
+        OpenAIEmbedder(client=client).embed_many_with_usage(
+            ["질문"],
+            sdk_max_retries=0,
+            timeout=30.0,
+        )
+
+        client.with_options.assert_called_once_with(
+            max_retries=0,
+            timeout=30.0,
+        )
+
+    def test_configures_default_client_without_timeout_override(self) -> None:
+        settings = SimpleNamespace(openai_api_key="test-key")
+
+        with patch("retrieval.embedding.get_settings", return_value=settings):
+            with patch("retrieval.embedding.OpenAI") as client_class:
+                OpenAIEmbedder()
+
+        client_class.assert_called_once_with(api_key="test-key")
+
     def test_requires_api_key_when_client_is_not_injected(self) -> None:
         settings = SimpleNamespace(openai_api_key=None)
 
@@ -261,6 +294,7 @@ class OpenAIEmbedderTest(unittest.TestCase):
         raw_response.parse.return_value = response
         raw_response.retries_taken = retries_taken
         client = Mock()
+        client.with_options.return_value = client
         client.embeddings.with_raw_response.create.return_value = raw_response
         return client, raw_response
 

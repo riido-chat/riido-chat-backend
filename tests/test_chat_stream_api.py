@@ -24,6 +24,7 @@ from app.main import create_app
 from app.rag.chat_service import ChatService, ConversationNotFoundError
 from app.rag.corpus_state import CorpusNotLoadedError
 from app.rag.dependencies import get_chat_service
+from app.rag.log_store import ConversationBusyError
 from app.rag.progress import ProgressStage
 
 
@@ -102,6 +103,7 @@ class ChatStreamApiTest(unittest.TestCase):
         self.app.state.corpus_state = object()
         self.app.state.embedder = object()
         self.app.state.generation_service = object()
+        self.app.state.query_rewrite_service = object()
 
         @asynccontextmanager
         async def scope(*_args, **_kwargs):
@@ -268,6 +270,41 @@ class ChatStreamApiTest(unittest.TestCase):
 
         self.assertEqual(404, response.status_code)
         self.assertEqual("NOT_FOUND", response.json()["error"]["code"])
+
+    def test_conversation_busy_returns_plain_json_409_for_sse_request(self) -> None:
+        self.stream_service.answer_question.side_effect = ConversationBusyError(
+            CONVERSATION_ID
+        )
+
+        with TestClient(self.app) as client:
+            response = client.post(
+                "/api/chat",
+                json={
+                    "question": "질문",
+                    "conversationId": str(CONVERSATION_ID),
+                },
+                headers=SSE_HEADERS,
+            )
+
+        body = response.json()
+        self.assertEqual(409, response.status_code)
+        self.assertNotIn("text/event-stream", response.headers["content-type"])
+        self.assertNotIn("event:", response.text)
+        self.assertEqual(str(CONVERSATION_ID), body["conversationId"])
+        self.assertIsNone(body["ragRunId"])
+        self.assertEqual("CONVERSATION_BUSY", body["error"]["code"])
+
+    def test_question_over_4000_characters_does_not_start_sse(self) -> None:
+        with TestClient(self.app) as client:
+            response = client.post(
+                "/api/chat",
+                json={"question": "가" * 4001},
+                headers=SSE_HEADERS,
+            )
+
+        self.assertEqual(422, response.status_code)
+        self.assertNotIn("text/event-stream", response.headers["content-type"])
+        self.stream_service.answer_question.assert_not_awaited()
 
     def test_turn_start_failure_returns_500_for_sse_request(self) -> None:
         self.stream_service.answer_question.return_value = error_response(

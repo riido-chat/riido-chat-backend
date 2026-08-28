@@ -14,8 +14,8 @@ ragRunId 하나로 재조회한다.
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import List, Optional, Sequence
+from datetime import datetime, timedelta, timezone
+from typing import Any, List, Optional, Sequence
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,12 +25,20 @@ from app.database.models import (
     AnswerStatus,
     Conversation,
     ConversationStatus,
+    ContextStrategy,
     ExecutionStatus,
     Feedback,
     FeedbackRating,
     ModelCall,
     RagRun,
     RetrievalResultRow,
+)
+from app.rag.query_rewrite import (
+    CONTEXT_SNAPSHOT_SCHEMA_VERSION,
+    MAX_QUERY_LENGTH,
+    MAX_QUERY_REWRITE_TURNS,
+    QueryRewriteCandidateTurn,
+    QueryRewriteTurnStatus,
 )
 
 # WITHHELD 보류 사유 4종
@@ -46,6 +54,16 @@ WITHHELD_REASON_CODES = (
 MIN_CITATIONS = 1
 MAX_CITATIONS = 3
 
+# 외부 호출 timeout보다 충분히 길게 두고, 이 시간이 지난 고아 실행만 복구한다.
+RAG_RUN_STALE_AFTER = timedelta(minutes=10)
+STALE_RAG_RUN_ERROR_CODE = "INTERNAL_ERROR"
+STALE_MODEL_CALL_ERROR_MESSAGE = (
+    "10분 이상 완료되지 않아 stale recovery로 실패 처리되었습니다."
+)
+FAILED_RUN_MODEL_CALL_ERROR_MESSAGE = (
+    "상위 RagRun 실패 복구로 모델 호출을 마감했습니다."
+)
+
 # 확정 규칙: 완료와 보류 답변에만 평가를 받는다
 FEEDBACK_ALLOWED_STATUSES = (AnswerStatus.COMPLETED, AnswerStatus.WITHHELD)
 
@@ -56,6 +74,18 @@ class RagRunNotFoundError(LookupError):
 
 class FeedbackNotAllowedError(RuntimeError):
     """평가할 수 없는 상태의 턴에 피드백을 시도했을 때 발생한다."""
+
+
+class ConversationUnavailableError(LookupError):
+    """존재하지 않거나 더 이어갈 수 없는 대화에 턴 생성을 시도했다."""
+
+
+class ConversationBusyError(RuntimeError):
+    """같은 대화에서 아직 유효한 RagRun이 처리 중일 때 발생한다."""
+
+    def __init__(self, conversation_id: uuid.UUID) -> None:
+        self.conversation_id = conversation_id
+        super().__init__(f"처리 중인 턴이 있는 대화입니다: {conversation_id}")
 
 
 def _utcnow() -> datetime:
@@ -164,17 +194,13 @@ class RagLogStore:
         *,
         user_query: str,
         index_version_id: int,
-        context_strategy: str,
-        context_turn_count: int = 0,
-        context_snapshot: Optional[dict] = None,
         sanitized_query: Optional[str] = None,
-        resolved_query: Optional[str] = None,
         query_hash: Optional[str] = None,
     ) -> RagRun:
         """ACTIVE 대화에 다음 턴을 PROCESSING 상태로 생성한다.
 
-        대화 행을 잠근 뒤 turn_no를 채번하므로 동시 요청에도 순서가 보장되고,
-        (conversation_id, turn_no) unique 제약이 최종 안전망이 된다.
+        대화 행을 잠근 뒤 PROCESSING 확인과 turn_no 채번을 한 transaction에서
+        수행한다. 첫 턴은 NEW_TOPIC, 후속 턴은 UNRESOLVED로 시작한다.
         """
 
         if not user_query or not user_query.strip():
@@ -184,11 +210,34 @@ class RagLogStore:
             Conversation, conversation_id, with_for_update=True
         )
         if conversation is None:
-            raise ValueError(f"존재하지 않는 대화입니다: {conversation_id}")
+            raise ConversationUnavailableError(
+                f"존재하지 않는 대화입니다: {conversation_id}"
+            )
         if conversation.status != ConversationStatus.ACTIVE:
-            raise ValueError(
+            raise ConversationUnavailableError(
                 f"후속 질문을 받을 수 없는 대화입니다: {conversation.status}"
             )
+
+        now = _utcnow()
+        processing_runs = list(
+            (
+                await self._session.scalars(
+                    select(RagRun)
+                    .where(
+                        RagRun.conversation_id == conversation_id,
+                        RagRun.status == AnswerStatus.PROCESSING,
+                    )
+                    .order_by(RagRun.created_at, RagRun.turn_no)
+                    .with_for_update()
+                )
+            ).all()
+        )
+        stale_before = now - RAG_RUN_STALE_AFTER
+        if any(run.created_at > stale_before for run in processing_runs):
+            raise ConversationBusyError(conversation_id)
+
+        if processing_runs:
+            await self._recover_stale_runs(processing_runs, recovered_at=now)
 
         max_turn = await self._session.scalar(
             select(func.max(RagRun.turn_no)).where(
@@ -196,6 +245,7 @@ class RagLogStore:
             )
         )
         next_turn_no = (max_turn or 0) + 1
+        is_first_turn = next_turn_no == 1
 
         run = RagRun(
             conversation_id=conversation_id,
@@ -203,16 +253,176 @@ class RagLogStore:
             index_version_id=index_version_id,
             user_query=user_query,
             sanitized_query=sanitized_query,
-            resolved_query=resolved_query,
+            resolved_query=user_query if is_first_turn else None,
             query_hash=query_hash,
-            context_strategy=context_strategy,
-            context_turn_count=context_turn_count,
-            context_snapshot=context_snapshot,
+            context_strategy=(
+                ContextStrategy.NEW_TOPIC
+                if is_first_turn
+                else ContextStrategy.UNRESOLVED
+            ),
+            context_turn_count=0,
+            context_snapshot=None,
             status=AnswerStatus.PROCESSING,
-            created_at=_utcnow(),
+            created_at=now,
         )
-        conversation.last_active_at = _utcnow()
+        conversation.last_active_at = now
         self._session.add(run)
+        await self._session.flush()
+        return run
+
+    async def _recover_stale_runs(
+        self,
+        runs: Sequence[RagRun],
+        *,
+        recovered_at: datetime,
+    ) -> None:
+        """Conversation lock 안에서 stale RagRun과 미완료 모델 호출을 마감한다."""
+
+        run_ids = [run.id for run in runs]
+        model_calls = list(
+            (
+                await self._session.scalars(
+                    select(ModelCall)
+                    .where(
+                        ModelCall.rag_run_id.in_(run_ids),
+                        ModelCall.status == ExecutionStatus.PROCESSING,
+                    )
+                    .with_for_update()
+                )
+            ).all()
+        )
+
+        for run in runs:
+            run.status = AnswerStatus.ERROR
+            run.error_code = STALE_RAG_RUN_ERROR_CODE
+            run.completed_at = recovered_at
+
+        for call in model_calls:
+            call.status = ExecutionStatus.FAILED
+            call.error_message = STALE_MODEL_CALL_ERROR_MESSAGE
+
+        await self._session.flush()
+
+    async def get_query_rewrite_candidates(
+        self,
+        rag_run_id: uuid.UUID,
+    ) -> List[QueryRewriteCandidateTurn]:
+        """현재 턴 이전의 유효한 최근 5턴을 시간 오름차순으로 반환한다."""
+
+        current_run = await self._get_processing_run(rag_run_id)
+        recent_runs = list(
+            (
+                await self._session.scalars(
+                    select(RagRun)
+                    .where(
+                        RagRun.conversation_id == current_run.conversation_id,
+                        RagRun.turn_no < current_run.turn_no,
+                        RagRun.status.in_(
+                            (AnswerStatus.COMPLETED, AnswerStatus.WITHHELD)
+                        ),
+                    )
+                    .order_by(RagRun.turn_no.desc())
+                    .limit(MAX_QUERY_REWRITE_TURNS)
+                )
+            ).all()
+        )
+
+        return [
+            QueryRewriteCandidateTurn(
+                rag_run_id=run.id,
+                turn_no=run.turn_no,
+                status=QueryRewriteTurnStatus(run.status.value),
+                user_query=run.user_query,
+                answer_content=(
+                    run.answer_content
+                    if run.status == AnswerStatus.COMPLETED
+                    else None
+                ),
+                withheld_reason_code=(
+                    run.withheld_reason_code
+                    if run.status == AnswerStatus.WITHHELD
+                    else None
+                ),
+            )
+            for run in reversed(recent_runs)
+        ]
+
+    async def record_query_resolution(
+        self,
+        rag_run_id: uuid.UUID,
+        *,
+        resolved_query: Optional[str],
+        context_strategy: ContextStrategy,
+        context_turn_count: int,
+        context_snapshot: Optional[dict[str, Any]],
+    ) -> RagRun:
+        """검증된 Query Rewrite 결과를 PROCESSING 턴에 checkpoint 기록한다."""
+
+        if context_strategy not in (
+            ContextStrategy.NEW_TOPIC,
+            ContextStrategy.FOLLOW_UP_WINDOW,
+        ):
+            raise ValueError(
+                f"MVP Query Rewrite에서 사용할 수 없는 문맥 전략입니다: "
+                f"{context_strategy}"
+            )
+        if not 0 <= context_turn_count <= MAX_QUERY_REWRITE_TURNS:
+            raise ValueError(
+                f"context_turn_count는 0~{MAX_QUERY_REWRITE_TURNS}여야 합니다."
+            )
+        if resolved_query is not None:
+            if not resolved_query.strip():
+                raise ValueError("resolved_query는 공백일 수 없습니다.")
+            if len(resolved_query) > MAX_QUERY_LENGTH:
+                raise ValueError(
+                    f"resolved_query는 최대 {MAX_QUERY_LENGTH}자까지 허용합니다."
+                )
+
+        selected_turns = None
+        if context_snapshot is not None:
+            if not isinstance(context_snapshot, dict):
+                raise ValueError("context_snapshot은 객체여야 합니다.")
+            if (
+                context_snapshot.get("schemaVersion")
+                != CONTEXT_SNAPSHOT_SCHEMA_VERSION
+            ):
+                raise ValueError("지원하지 않는 context_snapshot schemaVersion입니다.")
+            selected_turns = context_snapshot.get("selectedTurns")
+            if not isinstance(selected_turns, list):
+                raise ValueError("context_snapshot.selectedTurns는 배열이어야 합니다.")
+            if len(selected_turns) != context_turn_count:
+                raise ValueError(
+                    "context_turn_count는 snapshot의 selectedTurns 길이와 같아야 합니다."
+                )
+
+        if context_strategy == ContextStrategy.NEW_TOPIC:
+            if (
+                resolved_query is None
+                or context_turn_count != 0
+                or context_snapshot is not None
+            ):
+                raise ValueError(
+                    "NEW_TOPIC은 resolved_query와 빈 문맥 상태가 필요합니다."
+                )
+        elif resolved_query is None:
+            if context_turn_count != 0 or context_snapshot is not None:
+                raise ValueError(
+                    "해석하지 못한 FOLLOW_UP은 문맥 snapshot을 저장할 수 없습니다."
+                )
+        elif (
+            context_turn_count == 0
+            or context_snapshot is None
+            or not selected_turns
+        ):
+            raise ValueError(
+                "해석한 FOLLOW_UP은 하나 이상의 선택 문맥이 필요합니다."
+            )
+
+        run = await self._get_processing_run(rag_run_id)
+        run.resolved_query = resolved_query
+        run.context_strategy = context_strategy
+        run.context_turn_count = context_turn_count
+        run.context_snapshot = context_snapshot
         await self._session.flush()
         return run
 
@@ -311,7 +521,27 @@ class RagLogStore:
         return run
 
     async def _get_processing_run(self, rag_run_id: uuid.UUID) -> RagRun:
-        run = await self._session.get(RagRun, rag_run_id)
+        known_run = await self._session.get(RagRun, rag_run_id)
+        if known_run is None:
+            raise ValueError(f"존재하지 않는 턴입니다: {rag_run_id}")
+
+        # stale recovery와 같은 잠금 순서를 지켜 늦게 돌아온 worker의 부활과
+        # Conversation ↔ ModelCall 역순 잠금 교착을 막는다.
+        conversation = await self._session.scalar(
+            select(Conversation)
+            .where(Conversation.id == known_run.conversation_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+        if conversation is None:
+            raise ValueError(f"턴의 대화가 존재하지 않습니다: {rag_run_id}")
+
+        run = await self._session.scalar(
+            select(RagRun)
+            .where(RagRun.id == rag_run_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
         if run is None:
             raise ValueError(f"존재하지 않는 턴입니다: {rag_run_id}")
         if run.status != AnswerStatus.PROCESSING:
@@ -370,6 +600,9 @@ class RagLogStore:
         if rag_run_id is None and index_run_id is None:
             raise ValueError("rag_run_id 또는 index_run_id 중 하나는 필요합니다.")
 
+        if rag_run_id is not None:
+            await self._get_processing_run(rag_run_id)
+
         call = ModelCall(
             rag_run_id=rag_run_id,
             index_run_id=index_run_id,
@@ -404,10 +637,18 @@ class RagLogStore:
         if retry_count < 0:
             raise ValueError("retry_count는 0 이상이어야 합니다.")
 
-        call = await self._session.get(
-            ModelCall,
-            model_call_id,
-            with_for_update=True,
+        known_call = await self._session.get(ModelCall, model_call_id)
+        if known_call is None:
+            raise ValueError(f"존재하지 않는 모델 호출입니다: {model_call_id}")
+
+        if known_call.rag_run_id is not None:
+            await self._get_processing_run(known_call.rag_run_id)
+
+        call = await self._session.scalar(
+            select(ModelCall)
+            .where(ModelCall.id == model_call_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
         )
         if call is None:
             raise ValueError(f"존재하지 않는 모델 호출입니다: {model_call_id}")
@@ -425,6 +666,33 @@ class RagLogStore:
         call.error_message = error_message
         await self._session.flush()
         return call
+
+    async def fail_processing_model_calls(
+        self,
+        rag_run_id: uuid.UUID,
+        *,
+        error_message: str = FAILED_RUN_MODEL_CALL_ERROR_MESSAGE,
+    ) -> List[ModelCall]:
+        """RagRun 실패 마감과 같은 transaction에서 미완료 모델 호출을 닫는다."""
+
+        await self._get_processing_run(rag_run_id)
+        calls = list(
+            (
+                await self._session.scalars(
+                    select(ModelCall)
+                    .where(
+                        ModelCall.rag_run_id == rag_run_id,
+                        ModelCall.status == ExecutionStatus.PROCESSING,
+                    )
+                    .with_for_update()
+                )
+            ).all()
+        )
+        for call in calls:
+            call.status = ExecutionStatus.FAILED
+            call.error_message = call.error_message or error_message
+        await self._session.flush()
+        return calls
 
     # ------------------------------------------------------------------
     # 피드백

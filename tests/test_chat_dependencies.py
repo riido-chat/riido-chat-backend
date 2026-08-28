@@ -13,6 +13,7 @@ from app.main import create_app
 from app.rag.chat_service import ChatService
 from app.rag.dependencies import get_chat_service
 from app.rag.generation_service import GenerationService
+from app.rag.query_rewrite import QueryRewriteService
 from generation.generator import OpenAIGenerator
 from retrieval.bm25_retriever import BM25Retriever
 from retrieval.embedding import OpenAIEmbedder
@@ -39,6 +40,7 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
         self.embedder = Mock(spec=OpenAIEmbedder)
         self.generator = Mock(spec=OpenAIGenerator)
         self.generation_service = Mock(spec=GenerationService)
+        self.query_rewrite_service = Mock(spec=QueryRewriteService)
 
     def test_lifespan_initializes_shared_dependencies_once(self) -> None:
         with self._patched_lifespan_dependencies() as dependencies:
@@ -54,6 +56,10 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
                     self.generation_service,
                     app.state.generation_service,
                 )
+                self.assertIs(
+                    self.query_rewrite_service,
+                    app.state.query_rewrite_service,
+                )
 
                 self.assertEqual(200, client.get("/health").status_code)
                 self.assertEqual(200, client.get("/health").status_code)
@@ -68,6 +74,7 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
             dependencies["generation_service"].assert_called_once_with(
                 self.generator
             )
+            dependencies["query_rewrite_service"].assert_called_once_with()
             dependencies["dispose_engine"].assert_awaited_once_with()
 
     def test_builds_request_scoped_chat_dependency_graph(self) -> None:
@@ -146,6 +153,8 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
         )
         self.assertIs(self.generation_service, first._generation_service)
         self.assertIs(self.generation_service, second._generation_service)
+        self.assertIs(self.query_rewrite_service, first._query_rewrite_service)
+        self.assertIs(self.query_rewrite_service, second._query_rewrite_service)
         self.assertEqual(sessions, released_sessions)
 
         # 검색과 로그가 같은 session을 공유해야 2단계 커밋이 하나의 경계가 된다
@@ -189,6 +198,10 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
             "generation_service": patch(
                 "app.main.GenerationService",
                 return_value=self.generation_service,
+            ),
+            "query_rewrite_service": patch(
+                "app.main.QueryRewriteService",
+                return_value=self.query_rewrite_service,
             ),
             "dispose_engine": patch(
                 "app.main.dispose_engine",

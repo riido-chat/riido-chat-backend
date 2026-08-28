@@ -8,6 +8,7 @@ from app.rag.chat_service import ChatService
 from app.rag.corpus_state import CorpusState
 from app.rag.generation_service import GenerationService
 from app.rag.log_store import RagLogStore
+from app.rag.query_rewrite import QueryRewriteService
 from retrieval.bm25_retriever import BM25Retriever
 from retrieval.embedding import OpenAIEmbedder
 from retrieval.hybrid_retriever import HybridRetriever
@@ -60,6 +61,12 @@ def get_generation_service(request: Request) -> GenerationService:
     return request.app.state.generation_service
 
 
+def get_query_rewrite_service(request: Request) -> QueryRewriteService:
+    """애플리케이션 시작 시 생성한 QueryRewriteService를 반환한다."""
+
+    return request.app.state.query_rewrite_service
+
+
 def get_vector_retriever(
     session: AsyncSession = Depends(get_db_session),
     embedder: OpenAIEmbedder = Depends(get_embedder),
@@ -87,11 +94,14 @@ def get_hybrid_retriever(
 def get_chat_service(
     retriever: HybridRetriever = Depends(get_hybrid_retriever),
     generation_service: GenerationService = Depends(get_generation_service),
+    query_rewrite_service: QueryRewriteService = Depends(
+        get_query_rewrite_service
+    ),
     log_store: RagLogStore = Depends(get_rag_log_store),
     session: AsyncSession = Depends(get_db_session),
     index_version_id: int = Depends(get_index_version_id),
 ) -> ChatService:
-    """요청별 HybridRetriever와 공유 GenerationService, 실행 로그 저장을 연결한다.
+    """요청별 검색·로그와 공유 Generation·Query Rewrite 서비스를 연결한다.
 
     검색과 로그가 같은 session을 공유하므로 트랜잭션 경계를 ChatService가 직접
     관리한다 (RagLogStore는 commit하지 않는다).
@@ -100,6 +110,7 @@ def get_chat_service(
     return ChatService(
         retriever=retriever,
         generation_service=generation_service,
+        query_rewrite_service=query_rewrite_service,
         log_store=log_store,
         session=session,
         index_version_id=index_version_id,
@@ -112,12 +123,13 @@ def build_chat_service(
     corpus_state: CorpusState,
     embedder: OpenAIEmbedder,
     generation_service: GenerationService,
+    query_rewrite_service: QueryRewriteService,
 ) -> ChatService:
     """요청 의존성 밖에서 ChatService를 조립한다.
 
     응답 스트림보다 오래 사는 파이프라인은 request-scoped session을 쓸 수 없어서,
     호출자가 직접 소유한 session을 받아 검색·로그 계층에 연결한다. 공유 부품인
-    BM25 corpus, Embedder, GenerationService는 인자로 받는다.
+    BM25 corpus, Embedder, GenerationService, QueryRewriteService는 인자로 받는다.
     """
 
     return ChatService(
@@ -129,6 +141,7 @@ def build_chat_service(
             ),
         ),
         generation_service=generation_service,
+        query_rewrite_service=query_rewrite_service,
         log_store=RagLogStore(session),
         session=session,
         index_version_id=corpus_state.index_version_id,

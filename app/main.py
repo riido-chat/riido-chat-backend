@@ -22,11 +22,17 @@ from app.core.config import get_settings
 from app.database.session import dispose_engine, get_session_factory
 from app.rag.chat_service import (
     ConversationNotFoundError,
+    conversation_busy_response,
     conversation_not_found_response,
 )
 from app.rag.corpus_state import CorpusNotLoadedError, CorpusState
 from app.rag.generation_service import GenerationService
-from app.rag.log_store import FeedbackNotAllowedError, RagRunNotFoundError
+from app.rag.log_store import (
+    ConversationBusyError,
+    FeedbackNotAllowedError,
+    RagRunNotFoundError,
+)
+from app.rag.query_rewrite import QueryRewriteService
 from app.rag.rag_run_view import RagRunResultNotFoundError
 from generation.generator import OpenAIGenerator
 from retrieval.embedding import OpenAIEmbedder
@@ -46,6 +52,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await _load_corpus_if_available(corpus_state)
         app.state.embedder = OpenAIEmbedder()
         app.state.generation_service = GenerationService(OpenAIGenerator())
+        app.state.query_rewrite_service = QueryRewriteService()
         yield
     finally:
         # 살아 있는 파이프라인이 끝난 뒤에 engine을 정리해야 세션이 깨지지 않는다.
@@ -128,6 +135,20 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content=conversation_not_found_response().model_dump(
+                mode="json",
+                by_alias=True,
+            ),
+        )
+
+    @app.exception_handler(ConversationBusyError)
+    async def handle_conversation_busy(
+        _: Request,
+        exc: ConversationBusyError,
+    ) -> JSONResponse:
+        logger.info("처리 중인 대화로 중복 요청을 받았습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content=conversation_busy_response(exc.conversation_id).model_dump(
                 mode="json",
                 by_alias=True,
             ),

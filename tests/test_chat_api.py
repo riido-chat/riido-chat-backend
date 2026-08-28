@@ -22,6 +22,7 @@ from app.api.chat_schema import (
 from app.main import create_app
 from app.rag.chat_service import ChatService, ConversationNotFoundError
 from app.rag.dependencies import get_chat_service
+from app.rag.log_store import ConversationBusyError
 
 
 CONVERSATION_ID = "8f4b2c1a-9d3e-4f7a-b6c5-2e8d9a0f1b3c"
@@ -166,6 +167,12 @@ class ChatApiTest(unittest.TestCase):
         self.assertEqual(422, response.status_code)
         self.service.answer_question.assert_not_awaited()
 
+    def test_question_over_4000_characters_returns_422(self) -> None:
+        response = self._post({"question": "가" * 4001})
+
+        self.assertEqual(422, response.status_code)
+        self.service.answer_question.assert_not_awaited()
+
     def test_extra_request_field_returns_422(self) -> None:
         response = self._post({"question": "질문", "clientKey": "anonymous"})
 
@@ -210,6 +217,43 @@ class ChatApiTest(unittest.TestCase):
         self.assertEqual("NOT_FOUND", body["error"]["code"])
         self.assertIsNone(body["conversationId"])
         self.assertIsNone(body["ragRunId"])
+
+    def test_busy_conversation_returns_409_with_requested_conversation_id(
+        self,
+    ) -> None:
+        conversation_id = uuid.UUID(CONVERSATION_ID)
+        self.service.answer_question.side_effect = ConversationBusyError(
+            conversation_id
+        )
+
+        response = self._post(
+            {"question": "질문", "conversationId": CONVERSATION_ID}
+        )
+
+        self.assertEqual(409, response.status_code)
+        self.assertEqual("application/json", response.headers["content-type"])
+        self.assertEqual(
+            {
+                "status": "ERROR",
+                "conversationId": CONVERSATION_ID,
+                "ragRunId": None,
+                "answer": None,
+                "error": {
+                    "code": "CONVERSATION_BUSY",
+                    "message": (
+                        "이 대화의 이전 질문을 처리 중입니다. "
+                        "잠시 후 다시 시도해주세요."
+                    ),
+                },
+                "citations": [],
+            },
+            response.json(),
+        )
+
+    def test_openapi_documents_conversation_busy_response(self) -> None:
+        response = self.app.openapi()["paths"]["/api/chat"]["post"]["responses"]
+
+        self.assertIn("409", response)
 
     def _post(self, payload: dict[str, str]):
         with TestClient(self.app) as client:
