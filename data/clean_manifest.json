@@ -484,8 +484,8 @@
     "order": 27,
     "path": "clean/ai/mcp.md",
     "raw_content_uri": "raw/ai/mcp.md",
-    "raw_content_hash": "861a4ca312d547da3895fb7e41bee69997d7531992a446a9fb36e4deb26f0f91",
-    "normalized_content_hash": "f133556debe5bbe5d8a150288833b0b2040f57e810c4bc6e26754c13886e08f6",
+    "raw_content_hash": "08d15c891b08e655a9c0230cd348bac2eeee0a6872dc84727683ca92601e3228",
+    "normalized_content_hash": "72e4e0b63d8df13e5dad75c646182913e32d510a4d2f8bdc6deecde8c79d52b8",
     "images": [
       "/files/UmvIXORXrDt1Nx9TcRE2",
       "/files/wO6vFSBl3lpga00FO571",
@@ -519,7 +519,7 @@
       "/files/Jhi8gRYGKSUnaxMLl4M2",
       "/files/aHJqfsYSVrHPS9NNFOl1"
     ],
-    "bytes": 5167,
+    "bytes": 5446,
     "source_urls": [
       "https://docs.riido.io/ai/mcp.md",
       "https://docs.riido.io/integrations/mcp.md"
