@@ -63,6 +63,9 @@ STALE_MODEL_CALL_ERROR_MESSAGE = (
 FAILED_RUN_MODEL_CALL_ERROR_MESSAGE = (
     "상위 RagRun 실패 복구로 모델 호출을 마감했습니다."
 )
+CANCELLED_RUN_MODEL_CALL_ERROR_MESSAGE = (
+    "클라이언트 연결 종료로 모델 호출을 마감했습니다."
+)
 
 # 확정 규칙: 완료와 보류 답변에만 평가를 받는다
 FEEDBACK_ALLOWED_STATUSES = (AnswerStatus.COMPLETED, AnswerStatus.WITHHELD)
