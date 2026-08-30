@@ -1,3 +1,4 @@
+import asyncio
 import unittest
 import uuid
 from itertools import count
@@ -22,6 +23,7 @@ from app.rag.chat_service import (
 )
 from app.rag.generation_service import WITHHELD_RESPONSES, GenerationService
 from app.rag.log_store import (
+    CANCELLED_RUN_MODEL_CALL_ERROR_MESSAGE,
     ConversationBusyError,
     ConversationUnavailableError,
     RagLogStore,
@@ -161,6 +163,36 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
     # ------------------------------------------------------------------
     # 응답 변환
     # ------------------------------------------------------------------
+
+    async def test_cancelled_turn_closes_processing_logs(self) -> None:
+        generation_started = asyncio.Event()
+
+        async def wait_until_cancelled(
+            _question,
+            _results,
+            *,
+            before_model_call,
+        ):
+            await before_model_call("openai", "gpt-5.4-mini", "v2")
+            generation_started.set()
+            await asyncio.Event().wait()
+
+        self.generation_service.generate_answer.side_effect = wait_until_cancelled
+        task = asyncio.create_task(self.service.answer_question("질문"))
+
+        await generation_started.wait()
+        task.cancel()
+
+        with self.assertRaises(asyncio.CancelledError):
+            await task
+
+        self.log_store.fail_processing_model_calls.assert_awaited_once_with(
+            self.rag_run_id,
+            error_message=CANCELLED_RUN_MODEL_CALL_ERROR_MESSAGE,
+        )
+        self.log_store.cancel_rag_run.assert_awaited_once_with(self.rag_run_id)
+        self.log_store.fail_rag_run.assert_not_awaited()
+        self.session.commit.assert_awaited()
 
     async def test_completed_response_carries_both_identifiers(self) -> None:
         self._generation_result = self._completed()

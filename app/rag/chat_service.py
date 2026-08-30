@@ -1,5 +1,6 @@
 """Chat HTTP DTO와 기존 RAG 파이프라인을 연결하고 턴 실행을 기록한다."""
 
+import asyncio
 import logging
 import time
 import uuid
@@ -33,6 +34,7 @@ from app.rag.generation_service import (
     GenerationService,
 )
 from app.rag.log_store import (
+    CANCELLED_RUN_MODEL_CALL_ERROR_MESSAGE,
     CitationLog,
     ConversationBusyError,
     ConversationUnavailableError,
@@ -269,6 +271,9 @@ class ChatService:
                 question,
                 conversation_id,
             )
+        except asyncio.CancelledError:
+            await self._rollback_quietly()
+            raise
         except (ConversationNotFoundError, ConversationBusyError):
             # FOR UPDATE를 포함한 시작 transaction을 닫고 HTTP 계층으로 전달한다.
             await self._rollback_quietly()
@@ -288,6 +293,9 @@ class ChatService:
                 started,
                 on_progress_stage=on_progress_stage,
             )
+        except asyncio.CancelledError:
+            await self._cancel_quietly(turn.rag_run_id)
+            raise
         except Exception:
             logger.exception(
                 "턴 실행 중 예상하지 못한 오류가 발생했습니다: rag_run_id=%s",
@@ -897,6 +905,23 @@ class ChatService:
     # ------------------------------------------------------------------
     # 실패 경로 마감
     # ------------------------------------------------------------------
+
+    async def _cancel_quietly(self, rag_run_id: uuid.UUID) -> None:
+        try:
+            # 취소 시점의 미완성 쓰기를 버리고 하나의 transaction으로 마감한다.
+            await self._session.rollback()
+            await self._log_store.fail_processing_model_calls(
+                rag_run_id,
+                error_message=CANCELLED_RUN_MODEL_CALL_ERROR_MESSAGE,
+            )
+            await self._log_store.cancel_rag_run(rag_run_id)
+            await self._session.commit()
+        except Exception:
+            logger.exception(
+                "턴을 CANCELLED로 마감하지 못했습니다: rag_run_id=%s",
+                rag_run_id,
+            )
+            await self._rollback_quietly()
 
     async def _fail_quietly(
         self,

@@ -1,10 +1,11 @@
+import asyncio
 import unittest
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, patch
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 
 from app.api.chat_schema import (
@@ -19,6 +20,7 @@ from app.api.chat_schema import (
     ChatWithheldReasonCode,
     ChatWithheldResponse,
 )
+from app.api.chat import _answer_until_disconnect
 from app.main import create_app
 from app.rag.chat_service import ChatService, ConversationNotFoundError
 from app.rag.dependencies import get_chat_service
@@ -258,6 +260,37 @@ class ChatApiTest(unittest.TestCase):
     def _post(self, payload: dict[str, str]):
         with TestClient(self.app) as client:
             return client.post("/api/chat", json=payload)
+
+
+class ChatDisconnectTest(unittest.IsolatedAsyncioTestCase):
+    async def test_disconnect_cancels_answer_task(self) -> None:
+        service = AsyncMock(spec=ChatService)
+        answer_started = asyncio.Event()
+        answer_cancelled = asyncio.Event()
+        messages: asyncio.Queue = asyncio.Queue()
+
+        async def answer(_question, _conversation_id=None):
+            answer_started.set()
+            try:
+                await asyncio.Event().wait()
+            finally:
+                answer_cancelled.set()
+
+        async def receive():
+            return await messages.get()
+
+        service.answer_question.side_effect = answer
+        request = Request({"type": "http"}, receive=receive)
+        result_task = asyncio.create_task(
+            _answer_until_disconnect(request, service, "질문", None)
+        )
+
+        await answer_started.wait()
+        await messages.put({"type": "http.disconnect"})
+
+        self.assertIsNone(await result_task)
+        self.assertTrue(answer_cancelled.is_set())
+        service.answer_question.assert_awaited_once_with("질문", None)
 
 
 if __name__ == "__main__":

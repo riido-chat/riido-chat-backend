@@ -1,6 +1,8 @@
 """Chat API MVP endpoint를 제공한다."""
 
-from typing import Union
+import asyncio
+import uuid
+from typing import Optional, Union
 
 from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi.responses import StreamingResponse
@@ -21,6 +23,52 @@ from app.rag.dependencies import get_chat_service
 router = APIRouter(tags=["chat"])
 
 CORPUS_UNAVAILABLE_MESSAGE = "검색 데이터가 아직 준비되지 않았습니다."
+
+
+async def _wait_for_disconnect(request: Request) -> None:
+    """클라이언트가 일반 HTTP 요청 연결을 끊을 때까지 기다린다."""
+
+    while True:
+        message = await request.receive()
+        if message["type"] == "http.disconnect":
+            return
+
+
+async def _answer_until_disconnect(
+    request: Request,
+    service: ChatService,
+    question: str,
+    conversation_id: Optional[uuid.UUID],
+) -> Optional[ChatResponse]:
+    """답변 완료와 클라이언트 연결 종료 중 먼저 발생하는 쪽을 처리한다."""
+
+    answer_task = asyncio.create_task(
+        service.answer_question(question, conversation_id)
+    )
+    disconnect_task = asyncio.create_task(_wait_for_disconnect(request))
+
+    try:
+        done, _ = await asyncio.wait(
+            (answer_task, disconnect_task),
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        # 완료와 연결 종료가 같이 관측되면 이미 확정된 답변을 우선한다.
+        if answer_task in done:
+            return await answer_task
+
+        await disconnect_task
+        answer_task.cancel()
+        await asyncio.gather(answer_task, return_exceptions=True)
+        return None
+    finally:
+        for task in (answer_task, disconnect_task):
+            if not task.done():
+                task.cancel()
+        await asyncio.gather(
+            answer_task,
+            disconnect_task,
+            return_exceptions=True,
+        )
 
 
 def corpus_unavailable_response() -> ChatErrorResponse:
@@ -71,7 +119,7 @@ async def chat(
     response: Response,
     http_request: Request,
     service: ChatService = Depends(get_chat_service),
-) -> Union[ChatResponse, StreamingResponse]:
+) -> Union[ChatResponse, Response]:
     """질문을 ChatService에 전달하고 결과 상태에 맞는 HTTP 응답을 반환한다.
 
     Accept에 `text/event-stream`을 명시한 요청만 진행 상태 SSE로 분기한다.
@@ -91,10 +139,15 @@ async def chat(
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return stream.response
 
-    result = await service.answer_question(
+    result = await _answer_until_disconnect(
+        http_request,
+        service,
         request.question,
         request.conversation_id,
     )
+    if result is None:
+        # 클라이언트가 이미 연결을 끊어 실제 응답은 전송되지 않는다.
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     if isinstance(result, ChatErrorResponse):
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     return result
