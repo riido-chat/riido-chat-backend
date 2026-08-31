@@ -131,6 +131,19 @@ def tidy(text: str) -> str:
     return text.strip() + "\n"
 
 
+def normalize_markdown(text: str) -> tuple[str, list[str]]:
+    """GitBook Markdown 원문을 인메모리에서 정제한다."""
+
+    # UTF-8 BOM은 원문에는 보존하되 정규화 본문에서는 제거한다.
+    text = text.removeprefix("\ufeff")
+    text = strip_boilerplate(text)
+    text, images = extract_images(text)
+    text = html_table_to_text(text)
+    text = strip_gitbook_syntax(text)
+    text = normalize_links(text)
+    return tidy(text), images
+
+
 def main() -> None:
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     results = []
@@ -143,12 +156,7 @@ def main() -> None:
                 f"수집 manifest와 원문 hash가 일치하지 않습니다: {entry['path']}"
             )
 
-        text = strip_boilerplate(text)
-        text, images = extract_images(text)
-        text = html_table_to_text(text)
-        text = strip_gitbook_syntax(text)
-        text = normalize_links(text)
-        text = tidy(text)
+        text, images = normalize_markdown(text)
 
         out_path = CLEAN_DIR / Path(entry["path"]).relative_to("raw")
         out_path.parent.mkdir(parents=True, exist_ok=True)

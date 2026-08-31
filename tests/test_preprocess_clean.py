@@ -9,6 +9,18 @@ from pipeline.preprocess import clean
 
 
 class CleanManifestTest(unittest.TestCase):
+    def test_normalizes_uploaded_markdown_without_file_io(self) -> None:
+        raw_content = (
+            "\ufeff> For the complete documentation index\n\n"
+            "# 문서\n\n<summary>설정</summary>\n\n본문\n"
+        )
+
+        normalized, images = clean.normalize_markdown(raw_content)
+
+        self.assertNotIn("complete documentation index", normalized)
+        self.assertIn("### 설정", normalized)
+        self.assertEqual([], images)
+
     def test_carries_raw_metadata_and_normalized_hash(self) -> None:
         raw_content = "# 테스트 문서\n\n원문 본문\n"
 

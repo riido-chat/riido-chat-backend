@@ -123,7 +123,7 @@ async def chat(
     """질문을 ChatService에 전달하고 결과 상태에 맞는 HTTP 응답을 반환한다.
 
     Accept에 `text/event-stream`을 명시한 요청만 진행 상태 SSE로 분기한다.
-    턴 생성 전에 끝나면 스트림을 열지 않고 기존 동기 오류 응답을 그대로 쓴다.
+    턴 생성 전에 끝나면 스트림을 열지 않고 기존 동기 오류 응답을 그대로 쓴다. (현재 SSE는 보류)
     """
 
     if wants_event_stream(http_request.headers.get("accept")):

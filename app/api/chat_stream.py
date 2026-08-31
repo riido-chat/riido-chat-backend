@@ -27,6 +27,7 @@ from fastapi import Request
 from fastapi.responses import StreamingResponse
 
 from app.api.chat_schema import ChatResponse
+from app.core.task_registry import register_pipeline_task
 from app.database.session import get_session_factory
 from app.rag.chat_service import ChatService, _internal_error_response
 from app.rag.corpus_state import CorpusState
@@ -243,23 +244,6 @@ class _TurnIdentity:
         self.conversation_id = conversation_id
         self.rag_run_id = rag_run_id
         self.ready = True
-
-
-# ----------------------------------------------------------------------
-# task registry
-# ----------------------------------------------------------------------
-
-
-def register_pipeline_task(app: Any, task: "asyncio.Task") -> None:
-    """shutdown drain 대상으로 등록한다. 완료 시 자동으로 빠진다."""
-
-    registry = getattr(app.state, "pipeline_tasks", None)
-    if registry is None:
-        # lifespan을 대체한 테스트 등 registry가 없는 환경을 방어한다.
-        registry = set()
-        app.state.pipeline_tasks = registry
-    registry.add(task)
-    task.add_done_callback(registry.discard)
 
 
 # ----------------------------------------------------------------------

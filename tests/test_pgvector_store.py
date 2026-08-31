@@ -179,6 +179,25 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
                 [self.chunk],
             )
 
+    async def test_accepts_inline_raw_content_and_validates_its_hash(self) -> None:
+        raw_content = "# 관리자 업로드 원문"
+        inline_document = replace(
+            self.document,
+            raw_content_uri=None,
+            raw_content=raw_content,
+            raw_content_hash=self._sha256(raw_content),
+        )
+
+        self.store._validate_document_chunks(inline_document, [self.chunk])
+
+        mismatched = replace(inline_document, raw_content_hash="f" * 64)
+        with self.assertRaisesRegex(ValueError, "inline 원문"):
+            self.store._validate_document_chunks(mismatched, [self.chunk])
+
+        missing = replace(inline_document, raw_content=None)
+        with self.assertRaisesRegex(ValueError, "inline 원문"):
+            self.store._validate_document_chunks(missing, [self.chunk])
+
     async def test_gets_exactly_one_active_index_version(self) -> None:
         result = Mock()
         result.scalars.return_value.all.return_value = [self.active_index]
