@@ -100,7 +100,8 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         if not asyncio.run(_check_database_available(cls.database_url)):
             raise unittest.SkipTest(
                 "로컬 DB에 연결할 수 없어 통합 테스트를 건너뜁니다. "
-                "docker compose up -d && alembic upgrade head 후 재실행하세요."
+                "docker compose -f docker-compose.db.yml up -d && "
+                "alembic upgrade head 후 재실행하세요."
             )
 
     async def asyncSetUp(self) -> None:

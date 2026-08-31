@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # 러너 내부에 테스트용 DB를 띄운다.
-    # 로컬 docker-compose.yml과 동일한 이미지·계정값을 사용해 환경 차이를 없앤다.
+    # 로컬 docker-compose.db.yml과 동일한 이미지·계정값을 사용해 환경 차이를 없앤다.
     # 이 값들은 러너 안에서만 존재하는 일회용 더미이므로 Secrets 처리 대상이 아니다.
     services:
       postgres:
