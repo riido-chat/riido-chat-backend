@@ -13,9 +13,10 @@ class NormalizedDocument:
     source_url: str
     category: Optional[str]
     content: str
-    raw_content_uri: str
+    raw_content_uri: Optional[str]
     raw_content_hash: str
     normalized_content_hash: str
+    raw_content: Optional[str] = None
 
 
 @dataclass(frozen=True)

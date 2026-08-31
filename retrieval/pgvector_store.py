@@ -133,6 +133,7 @@ class PgVectorStore:
             document_source_id=source.id,
             version_no=(current_version_no or 0) + 1,
             raw_content_uri=document.raw_content_uri,
+            raw_content=document.raw_content,
             mime_type="text/markdown",
             raw_content_hash=document.raw_content_hash,
             normalized_content_hash=document.normalized_content_hash,
@@ -167,12 +168,23 @@ class PgVectorStore:
         self,
         ingestion_run_id: int,
         error: Exception,
+        *,
+        failed_stage: Optional[str] = None,
+        error_code: Optional[str] = None,
     ) -> IngestionRun:
         """PROCESSING 수집 실행을 FAILED로 마감한다."""
 
         run = await self._get_processing_ingestion_run(ingestion_run_id)
         run.status = ExecutionStatus.FAILED
-        run.summary = {"stage": "FAILED"}
+        run.summary = {
+            "stage": "FAILED",
+            **(
+                {"failed_stage": failed_stage}
+                if failed_stage is not None
+                else {}
+            ),
+            **({"error_code": error_code} if error_code is not None else {}),
+        }
         run.error_message = self._safe_error_message(error)
         run.finished_at = datetime.now(timezone.utc)
         await self._session.flush()
@@ -859,14 +871,20 @@ class PgVectorStore:
     ) -> None:
         if not chunks:
             raise ValueError("수집할 Chunk가 하나 이상이어야 합니다.")
-        if not document.raw_content_uri:
-            raise ValueError("원문 보관 위치가 필요합니다.")
+        if document.raw_content_uri is None and document.raw_content is None:
+            raise ValueError("원문 보관 위치 또는 inline 원문이 필요합니다.")
         if not SHA256_PATTERN.fullmatch(document.raw_content_hash):
             raise ValueError("원문 hash는 SHA-256 형식이어야 합니다.")
         if not SHA256_PATTERN.fullmatch(document.normalized_content_hash):
             raise ValueError("정제 문서 hash는 SHA-256 형식이어야 합니다.")
         if PgVectorStore._sha256(document.content) != document.normalized_content_hash:
             raise ValueError("정제 문서 내용과 hash가 일치하지 않습니다.")
+        if (
+            document.raw_content is not None
+            and PgVectorStore._sha256(document.raw_content)
+            != document.raw_content_hash
+        ):
+            raise ValueError("inline 원문 내용과 hash가 일치하지 않습니다.")
 
         section_ids = set()
         for chunk in chunks:

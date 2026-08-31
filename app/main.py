@@ -7,6 +7,9 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.admin.ingestion_service import AdminApiError
+from app.api.admin_documents import router as admin_documents_router
+from app.api.admin_schema import AdminErrorCode, AdminErrorResponse
 from app.api.chat import corpus_unavailable_response
 from app.api.chat import router as chat_router
 from app.api.feedback import (
@@ -111,6 +114,21 @@ def create_app() -> FastAPI:
     app.include_router(feedback_router)
     app.include_router(rag_run_router)
     app.include_router(internal_router)
+    app.include_router(admin_documents_router)
+
+    @app.exception_handler(AdminApiError)
+    async def handle_admin_api_error(
+        _: Request,
+        exc: AdminApiError,
+    ) -> JSONResponse:
+        logger.info("Admin 요청을 처리할 수 없습니다: %s", exc)
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=AdminErrorResponse(
+                code=AdminErrorCode(exc.code),
+                message=exc.message,
+            ).model_dump(mode="json", by_alias=True),
+        )
 
     @app.exception_handler(CorpusNotLoadedError)
     async def handle_corpus_not_loaded(
