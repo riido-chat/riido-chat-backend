@@ -4,7 +4,7 @@ set -euo pipefail
 
 IMAGE_URI="${1:?배포할 이미지 URI를 인자로 전달하세요}"
 APP_DIR="/opt/riido"
-COMPOSE_FILE="${APP_DIR}/docker-compose.app.yml"
+COMPOSE_FILE="${APP_DIR}/docker-compose.api.prod.yml"
 AWS_REGION="${AWS_REGION:-ap-northeast-2}"
 
 cd "$APP_DIR"
