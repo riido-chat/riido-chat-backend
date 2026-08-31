@@ -4,9 +4,8 @@ import asyncio
 import time
 from typing import List, Optional
 
-from openai import APIConnectionError, APIStatusError
-
 from app.rag.model_trace import BeforeModelCallHook, ModelCallTrace
+from app.rag.openai_error import is_transient_openai_error
 from retrieval.embedding import (
     OPENAI_EMBEDDING_MODEL,
     OPENAI_EMBEDDING_PROVIDER,
@@ -23,14 +22,6 @@ QUERY_EMBEDDING_TIMEOUT_SECONDS = 30.0
 
 def _elapsed_ms(started: float) -> int:
     return int((time.perf_counter() - started) * 1000)
-
-
-def _is_transient_openai_error(error: Exception) -> bool:
-    if isinstance(error, APIConnectionError):
-        return True
-    if isinstance(error, APIStatusError):
-        return error.status_code in (408, 409, 429) or error.status_code >= 500
-    return False
 
 
 def _retry_delay_seconds(retry_count: int) -> float:
@@ -94,7 +85,7 @@ class VectorRetriever:
             except Exception as error:
                 can_retry = (
                     attempt < QUERY_EMBEDDING_MAX_ATTEMPTS - 1
-                    and _is_transient_openai_error(error)
+                    and is_transient_openai_error(error)
                 )
                 if can_retry:
                     await asyncio.sleep(_retry_delay_seconds(attempt))

@@ -6,6 +6,7 @@ import time
 from typing import Dict, Optional, Sequence, Tuple
 
 from app.rag.model_trace import BeforeModelCallHook, ModelCallTrace
+from app.rag.openai_error import is_transient_openai_error
 from app.rag.progress import OnProgressStageHook, ProgressStage
 from generation.generator import (
     GENERATION_PROMPT_VERSION,
@@ -47,6 +48,7 @@ INLINE_CODE_PATTERN = re.compile(
 )
 UPSTREAM_ERROR_CODE = "UPSTREAM_ERROR"
 CITATION_VALIDATION_ERROR_CODE = "CITATION_VALIDATION_ERROR"
+INTERNAL_ERROR_CODE = "INTERNAL_ERROR"
 
 WITHHELD_RESPONSES = {
     FinalWithheldReason.INSUFFICIENT_EVIDENCE: (
@@ -67,6 +69,12 @@ WITHHELD_RESPONSES = {
 
 class UnverifiableAnswerError(ValueError):
     """답변이 외부 응답 계약에 맞게 검증될 수 없을 때 발생한다."""
+
+
+def _generation_error_code(error: Exception) -> str:
+    if is_transient_openai_error(error):
+        return UPSTREAM_ERROR_CODE
+    return INTERNAL_ERROR_CODE
 
 
 def _blank_code_region(match: re.Match[str]) -> str:
@@ -269,12 +277,12 @@ class GenerationService:
             call = await self._generator.generate_with_trace(question, sources)
         except Exception as error:
             return _error_result(
-                UPSTREAM_ERROR_CODE,
+                _generation_error_code(error),
                 _failed_generation_trace(started, error),
             )
 
         if call.error is not None:
-            return _error_result(UPSTREAM_ERROR_CODE, call.trace)
+            return _error_result(_generation_error_code(call.error), call.trace)
 
         generation_result = call.result
         if generation_result.status == GenerationStatus.WITHHELD:

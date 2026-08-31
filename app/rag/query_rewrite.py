@@ -7,12 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Optional, Sequence, Tuple
 
-from openai import (
-    APIConnectionError,
-    APIError,
-    APIStatusError,
-    AsyncOpenAI,
-)
+from openai import APIError, AsyncOpenAI
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -25,6 +20,7 @@ from pydantic import (
 
 from app.core.config import get_settings
 from app.rag.model_trace import BeforeModelCallHook, ModelCallTrace
+from app.rag.openai_error import is_transient_openai_error
 from generation.models import FinalWithheldReason
 
 
@@ -461,14 +457,6 @@ def _validate_response_status(response: object) -> None:
     )
 
 
-def _is_transient_openai_error(error: Exception) -> bool:
-    if isinstance(error, APIConnectionError):
-        return True
-    if isinstance(error, APIStatusError):
-        return error.status_code in (408, 409, 429) or error.status_code >= 500
-    return False
-
-
 def _to_output_invalid_error(
     error: Exception,
 ) -> Optional[QueryRewriteOutputInvalidError]:
@@ -570,8 +558,20 @@ class QueryRewriteService:
                     )
 
                 if isinstance(error, APIError):
-                    if attempt == 0 and _is_transient_openai_error(error):
-                        continue
+                    if is_transient_openai_error(error):
+                        if attempt == 0:
+                            continue
+                        return QueryRewriteCall(
+                            trace=_query_rewrite_trace(
+                                started,
+                                retry_count=attempt,
+                                input_tokens=input_tokens,
+                                output_tokens=output_tokens,
+                                error=error,
+                            ),
+                            error_code=UPSTREAM_ERROR_CODE,
+                            error=error,
+                        )
                     return QueryRewriteCall(
                         trace=_query_rewrite_trace(
                             started,
@@ -580,7 +580,7 @@ class QueryRewriteService:
                             output_tokens=output_tokens,
                             error=error,
                         ),
-                        error_code=UPSTREAM_ERROR_CODE,
+                        error_code=INTERNAL_ERROR_CODE,
                         error=error,
                     )
 

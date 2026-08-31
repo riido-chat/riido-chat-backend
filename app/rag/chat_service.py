@@ -5,7 +5,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, replace
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -42,6 +42,7 @@ from app.rag.log_store import (
     RetrievalCandidateLog,
 )
 from app.rag.model_trace import ModelCallTrace
+from app.rag.openai_error import is_transient_openai_error
 from app.rag.progress import (
     OnProgressStageHook,
     OnTurnStartedHook,
@@ -66,7 +67,17 @@ from retrieval.models import HybridSearchCall, RetrievalResult
 
 logger = logging.getLogger(__name__)
 
+UPSTREAM_ERROR_MESSAGE = (
+    "AI 서비스 연결이 원활하지 않습니다. 잠시 후 다시 시도해주세요."
+)
+MODEL_OUTPUT_INVALID_MESSAGE = (
+    "AI 응답을 처리하지 못했습니다. 잠시 후 다시 시도해주세요."
+)
+CITATION_VALIDATION_ERROR_MESSAGE = (
+    "답변 출처를 검증하는 중 오류가 발생했습니다."
+)
 INTERNAL_ERROR_MESSAGE = "답변을 생성하는 중 오류가 발생했습니다."
+SERVICE_UNAVAILABLE_MESSAGE = "검색 데이터가 아직 준비되지 않았습니다."
 CONVERSATION_NOT_FOUND_MESSAGE = (
     "이어갈 수 없는 대화입니다. 새로운 대화로 다시 질문해주세요."
 )
@@ -75,6 +86,19 @@ CONVERSATION_BUSY_MESSAGE = (
 )
 
 INTERNAL_ERROR_CODE = "INTERNAL_ERROR"
+
+CHAT_ERROR_POLICIES: Dict[ChatErrorCode, Tuple[str, bool]] = {
+    ChatErrorCode.UPSTREAM_ERROR: (UPSTREAM_ERROR_MESSAGE, True),
+    ChatErrorCode.MODEL_OUTPUT_INVALID: (MODEL_OUTPUT_INVALID_MESSAGE, True),
+    ChatErrorCode.CITATION_VALIDATION_ERROR: (
+        CITATION_VALIDATION_ERROR_MESSAGE,
+        False,
+    ),
+    ChatErrorCode.INTERNAL_ERROR: (INTERNAL_ERROR_MESSAGE, False),
+    ChatErrorCode.SERVICE_UNAVAILABLE: (SERVICE_UNAVAILABLE_MESSAGE, False),
+    ChatErrorCode.NOT_FOUND: (CONVERSATION_NOT_FOUND_MESSAGE, False),
+    ChatErrorCode.CONVERSATION_BUSY: (CONVERSATION_BUSY_MESSAGE, False),
+}
 
 
 class ConversationNotFoundError(LookupError):
@@ -85,52 +109,58 @@ class ConversationNotFoundError(LookupError):
     """
 
 
-def _internal_error_response(
+def chat_error_response(
+    error_code: Union[str, ChatErrorCode],
     conversation_id: Optional[uuid.UUID] = None,
     rag_run_id: Optional[uuid.UUID] = None,
 ) -> ChatErrorResponse:
+    """확정된 오류 코드에서 외부 안내와 재시도 정책을 결정한다.
+
+    알 수 없는 코드는 내부 상세를 노출하지 않고 재시도 불가로 처리한다.
+    """
+
+    try:
+        external_code = ChatErrorCode(error_code)
+    except ValueError:
+        external_code = ChatErrorCode.INTERNAL_ERROR
+    message, retryable = CHAT_ERROR_POLICIES[external_code]
     return ChatErrorResponse(
         status=ChatResponseStatus.ERROR,
         conversation_id=conversation_id,
         rag_run_id=rag_run_id,
         answer=None,
         error=ChatError(
-            code=ChatErrorCode.INTERNAL_ERROR,
-            message=INTERNAL_ERROR_MESSAGE,
+            code=external_code,
+            message=message,
+            retryable=retryable,
         ),
         citations=[],
+    )
+
+
+def _internal_error_response(
+    conversation_id: Optional[uuid.UUID] = None,
+    rag_run_id: Optional[uuid.UUID] = None,
+) -> ChatErrorResponse:
+    return chat_error_response(
+        ChatErrorCode.INTERNAL_ERROR,
+        conversation_id,
+        rag_run_id,
     )
 
 
 def conversation_not_found_response() -> ChatErrorResponse:
     """이어갈 수 없는 대화로 요청했을 때의 응답을 만든다."""
 
-    return ChatErrorResponse(
-        status=ChatResponseStatus.ERROR,
-        conversation_id=None,
-        rag_run_id=None,
-        answer=None,
-        error=ChatError(
-            code=ChatErrorCode.NOT_FOUND,
-            message=CONVERSATION_NOT_FOUND_MESSAGE,
-        ),
-        citations=[],
-    )
+    return chat_error_response(ChatErrorCode.NOT_FOUND)
 
 
 def conversation_busy_response(conversation_id: uuid.UUID) -> ChatErrorResponse:
     """같은 대화의 이전 턴이 처리 중일 때의 충돌 응답을 만든다."""
 
-    return ChatErrorResponse(
-        status=ChatResponseStatus.ERROR,
+    return chat_error_response(
+        ChatErrorCode.CONVERSATION_BUSY,
         conversation_id=conversation_id,
-        rag_run_id=None,
-        answer=None,
-        error=ChatError(
-            code=ChatErrorCode.CONVERSATION_BUSY,
-            message=CONVERSATION_BUSY_MESSAGE,
-        ),
-        citations=[],
     )
 
 
@@ -185,7 +215,11 @@ def _to_chat_response(
         )
 
     if result.status == FinalAnswerStatus.ERROR:
-        return _internal_error_response(conversation_id, rag_run_id)
+        return chat_error_response(
+            result.error_code or INTERNAL_ERROR_CODE,
+            conversation_id,
+            rag_run_id,
+        )
 
     raise ValueError(f"지원하지 않는 최종 답변 상태입니다: {result.status}")
 
@@ -365,12 +399,13 @@ class ChatService:
         await self._session.rollback()
 
         if search.error is not None:
+            search_error_code = self._search_error_code(search)
             logger.warning(
                 "검색에 실패했습니다: rag_run_id=%s",
                 rag_run_id,
                 exc_info=search.error,
             )
-            await self._record_turn(
+            recorded = await self._record_turn(
                 rag_run_id,
                 search,
                 None,
@@ -379,7 +414,13 @@ class ChatService:
                 embedding_model_call_id=embedding_model_call_id,
                 record_retrieval=True,
             )
-            return _internal_error_response(conversation_id, rag_run_id)
+            if not recorded:
+                return _internal_error_response(conversation_id, rag_run_id)
+            return chat_error_response(
+                search_error_code,
+                conversation_id,
+                rag_run_id,
+            )
 
         generation_checkpoint: Optional[_ModelCallCheckpoint] = None
 
@@ -584,10 +625,19 @@ class ChatService:
             call,
             _elapsed_ms(started),
         )
-        if not recorded or call.error is not None:
+        if not recorded:
             return _QueryResolutionOutcome(
                 resolved_query=None,
                 terminal_response=_internal_error_response(
+                    conversation_id,
+                    rag_run_id,
+                ),
+            )
+        if call.error is not None:
+            return _QueryResolutionOutcome(
+                resolved_query=None,
+                terminal_response=chat_error_response(
+                    call.error_code or INTERNAL_ERROR_CODE,
                     conversation_id,
                     rag_run_id,
                 ),
@@ -882,7 +932,13 @@ class ChatService:
     @staticmethod
     def _search_error_code(search: HybridSearchCall) -> str:
         embedding_call = search.embedding_call
-        if embedding_call is not None and not embedding_call.succeeded:
+        error = search.error
+        if (
+            embedding_call is not None
+            and not embedding_call.succeeded
+            and error is not None
+            and is_transient_openai_error(error)
+        ):
             return UPSTREAM_ERROR_CODE
         return INTERNAL_ERROR_CODE
 

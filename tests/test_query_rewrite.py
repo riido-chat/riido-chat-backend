@@ -718,7 +718,7 @@ class QueryRewriteServiceTest(unittest.IsolatedAsyncioTestCase):
 
         call = await service.rewrite("새 질문", [])
 
-        self.assertEqual(UPSTREAM_ERROR_CODE, call.error_code)
+        self.assertEqual(INTERNAL_ERROR_CODE, call.error_code)
         self.assertEqual(0, call.trace.retry_count)
         client.responses.parse.assert_awaited_once()
 
