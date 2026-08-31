@@ -17,6 +17,7 @@ from app.database.models import (
     ContentNode,
     ContextStrategy,
     DocumentChunk,
+    DocumentVersion,
     LegacyChunkEmbedding,
     LegacyDocumentChunk,
     ModelCall,
@@ -127,6 +128,22 @@ class DatabaseModelTest(unittest.TestCase):
         self.assertTrue(table.c.node_identity_hash.nullable)
         self.assertTrue(table.c.node_identity_kind.nullable)
         self.assertFalse(table.c.content_hash.nullable)
+
+    def test_document_version_supports_uri_or_inline_raw_content(self) -> None:
+        table = DocumentVersion.__table__
+        constraint_names = {
+            constraint.name
+            for constraint in table.constraints
+            if isinstance(constraint, CheckConstraint)
+        }
+
+        self.assertTrue(table.c.raw_content_uri.nullable)
+        self.assertTrue(table.c.raw_content.nullable)
+        self.assertIsInstance(table.c.raw_content.type, Text)
+        self.assertIn(
+            "ck_document_versions_raw_content_storage",
+            constraint_names,
+        )
 
     def test_rag_run_uses_uuid_identifiers_and_answer_status(self) -> None:
         table = RagRun.__table__

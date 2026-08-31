@@ -16,6 +16,7 @@ from sqlalchemy import (
     TIMESTAMP,
     BigInteger,
     Boolean,
+    CheckConstraint,
     ForeignKey,
     Identity,
     Index,
@@ -176,6 +177,10 @@ class DocumentVersion(Base):
 
     __tablename__ = "document_versions"
     __table_args__ = (
+        CheckConstraint(
+            "raw_content_uri IS NOT NULL OR raw_content IS NOT NULL",
+            name="raw_content_storage",
+        ),
         UniqueConstraint("document_source_id", "version_no"),
         Index(None, "document_source_id", "normalized_content_hash"),
     )
@@ -188,6 +193,7 @@ class DocumentVersion(Base):
     )
     version_no: Mapped[int] = mapped_column(Integer, nullable=False)
     raw_content_uri: Mapped[Optional[str]] = mapped_column(String(1000))
+    raw_content: Mapped[Optional[str]] = mapped_column(Text)
     mime_type: Mapped[str] = mapped_column(String(150), nullable=False)
     raw_content_hash: Mapped[str] = mapped_column(String(128), nullable=False)
     normalized_content_hash: Mapped[str] = mapped_column(String(128), nullable=False)

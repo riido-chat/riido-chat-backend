@@ -154,6 +154,7 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         version = DocumentVersion(
             document_source_id=source.id,
             version_no=1,
+            raw_content_uri=f"raw/test/{suffix}.md",
             mime_type="text/markdown",
             raw_content_hash="raw-" + suffix,
             normalized_content_hash="norm-" + suffix,
