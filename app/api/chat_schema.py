@@ -58,6 +58,9 @@ class ChatWithheldReasonCode(str, Enum):
 class ChatErrorCode(str, Enum):
     """Chat API가 외부에 제공하는 기술 오류 코드."""
 
+    UPSTREAM_ERROR = "UPSTREAM_ERROR"
+    MODEL_OUTPUT_INVALID = "MODEL_OUTPUT_INVALID"
+    CITATION_VALIDATION_ERROR = "CITATION_VALIDATION_ERROR"
     INTERNAL_ERROR = "INTERNAL_ERROR"
     SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE"
     NOT_FOUND = "NOT_FOUND"
@@ -99,6 +102,7 @@ class ChatError(BaseModel):
 
     code: ChatErrorCode
     message: str
+    retryable: bool
 
 
 class ChatCompletedResponse(BaseModel):

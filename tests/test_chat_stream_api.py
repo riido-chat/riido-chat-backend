@@ -84,6 +84,7 @@ def error_response(with_ids: bool = True) -> ChatErrorResponse:
         error=ChatError(
             code=ChatErrorCode.INTERNAL_ERROR,
             message="답변을 생성하는 중 오류가 발생했습니다.",
+            retryable=False,
         ),
         citations=[],
     )

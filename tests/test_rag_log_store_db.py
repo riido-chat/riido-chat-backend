@@ -15,6 +15,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock
 
+import httpx
+from openai import APITimeoutError
 from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
@@ -715,6 +717,9 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_embedding_final_failure_persists_retry_count(self) -> None:
+        error = APITimeoutError(
+            httpx.Request("POST", "https://api.openai.com")
+        )
         failed_search = HybridSearchCall(
             embedding_call=ModelCallTrace(
                 provider="openai",
@@ -724,7 +729,7 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
                 retry_count=2,
                 error_message="embedding unavailable",
             ),
-            error=RuntimeError("embedding unavailable"),
+            error=error,
         )
         retriever = AsyncMock(spec=HybridRetriever)
 
@@ -753,6 +758,8 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(detail)
         self.assertEqual(AnswerStatus.ERROR, detail.run.status)
         self.assertEqual("UPSTREAM_ERROR", detail.run.error_code)
+        self.assertEqual("UPSTREAM_ERROR", response.error.code.value)
+        self.assertTrue(response.error.retryable)
         self.assertEqual([], detail.retrieval_results)
         self.assertEqual(1, len(detail.model_calls))
         embedding_call = detail.model_calls[0]

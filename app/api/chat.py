@@ -8,7 +8,6 @@ from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi.responses import StreamingResponse
 
 from app.api.chat_schema import (
-    ChatError,
     ChatErrorCode,
     ChatErrorResponse,
     ChatRequest,
@@ -16,14 +15,11 @@ from app.api.chat_schema import (
     ChatResponseStatus,
 )
 from app.api.chat_stream import start_chat_stream, wants_event_stream
-from app.rag.chat_service import ChatService
+from app.rag.chat_service import ChatService, chat_error_response
 from app.rag.dependencies import get_chat_service
 
 
 router = APIRouter(tags=["chat"])
-
-CORPUS_UNAVAILABLE_MESSAGE = "검색 데이터가 아직 준비되지 않았습니다."
-
 
 async def _wait_for_disconnect(request: Request) -> None:
     """클라이언트가 일반 HTTP 요청 연결을 끊을 때까지 기다린다."""
@@ -77,17 +73,7 @@ def corpus_unavailable_response() -> ChatErrorResponse:
     의존성 해석 단계에서 막히므로 rag_run이 없고 두 식별자는 null이다.
     """
 
-    return ChatErrorResponse(
-        status=ChatResponseStatus.ERROR,
-        conversation_id=None,
-        rag_run_id=None,
-        answer=None,
-        error=ChatError(
-            code=ChatErrorCode.SERVICE_UNAVAILABLE,
-            message=CORPUS_UNAVAILABLE_MESSAGE,
-        ),
-        citations=[],
-    )
+    return chat_error_response(ChatErrorCode.SERVICE_UNAVAILABLE)
 
 
 @router.post(

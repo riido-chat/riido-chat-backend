@@ -3,10 +3,11 @@
 import time
 from typing import Any, List, Optional, Sequence
 
-from openai import APIConnectionError, APIStatusError, AsyncOpenAI
+from openai import AsyncOpenAI
 
 from app.core.config import get_settings
 from app.rag.model_trace import ModelCallTrace
+from app.rag.openai_error import is_transient_openai_error
 from generation.models import (
     GenerationCall,
     GenerationContextSource,
@@ -126,16 +127,6 @@ def _generation_trace(
     )
 
 
-def _is_transient_openai_error(error: Exception) -> bool:
-    """연결 문제, timeout, rate limit과 서버 오류만 일시적 오류로 본다."""
-
-    if isinstance(error, APIConnectionError):
-        return True
-    if isinstance(error, APIStatusError):
-        return error.status_code in (408, 409, 429) or error.status_code >= 500
-    return False
-
-
 class OpenAIGenerator:
     """OpenAI Responses API로 single-pass 답변을 생성한다."""
 
@@ -195,7 +186,7 @@ class OpenAIGenerator:
                     result=result,
                 )
             except Exception as error:
-                if attempt == 0 and _is_transient_openai_error(error):
+                if attempt == 0 and is_transient_openai_error(error):
                     continue
                 return GenerationCall(
                     trace=_generation_trace(

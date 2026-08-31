@@ -6,6 +6,8 @@ from types import SimpleNamespace
 from typing import Optional
 from unittest.mock import ANY, AsyncMock
 
+import httpx
+from openai import APITimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.chat_schema import (
@@ -263,7 +265,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(self.conversation_id, response.conversation_id)
                 self.assertEqual(self.rag_run_id, response.rag_run_id)
 
-    async def test_error_response_keeps_identifiers_and_hides_internal_code(
+    async def test_error_response_keeps_identifiers_and_exposes_safe_error_policy(
         self,
     ) -> None:
         self._generation_result = FinalGenerationResult(
@@ -277,11 +279,53 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         response = await self.service.answer_question("질문")
 
         self.assertIsInstance(response, ChatErrorResponse)
-        self.assertEqual(ChatErrorCode.INTERNAL_ERROR, response.error.code)
+        self.assertEqual(ChatErrorCode.UPSTREAM_ERROR, response.error.code)
+        self.assertTrue(response.error.retryable)
         self.assertEqual(self.conversation_id, response.conversation_id)
         self.assertEqual(self.rag_run_id, response.rag_run_id)
         self.assertNotIn(
-            "UPSTREAM_ERROR",
+            "provider secret",
+            str(response.model_dump(mode="json", by_alias=True)),
+        )
+
+    async def test_citation_validation_error_is_not_retryable(self) -> None:
+        self._generation_result = FinalGenerationResult(
+            status=FinalAnswerStatus.ERROR,
+            answer_markdown=None,
+            citations=(),
+            error_code="CITATION_VALIDATION_ERROR",
+            model_call=_generation_trace(),
+        )
+
+        response = await self.service.answer_question("질문")
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.assertEqual(
+            ChatErrorCode.CITATION_VALIDATION_ERROR,
+            response.error.code,
+        )
+        self.assertFalse(response.error.retryable)
+        self.assertEqual(self.conversation_id, response.conversation_id)
+        self.assertEqual(self.rag_run_id, response.rag_run_id)
+
+    async def test_unknown_generation_error_code_fails_closed_in_response(
+        self,
+    ) -> None:
+        self._generation_result = FinalGenerationResult(
+            status=FinalAnswerStatus.ERROR,
+            answer_markdown=None,
+            citations=(),
+            error_code="UNKNOWN_DETAIL",
+            model_call=_generation_trace(succeeded=False),
+        )
+
+        response = await self.service.answer_question("질문")
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.assertEqual(ChatErrorCode.INTERNAL_ERROR, response.error.code)
+        self.assertFalse(response.error.retryable)
+        self.assertNotIn(
+            "UNKNOWN_DETAIL",
             str(response.model_dump(mode="json", by_alias=True)),
         )
 
@@ -505,6 +549,8 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         )
 
         self.assertIsInstance(response, ChatErrorResponse)
+        self.assertEqual(ChatErrorCode.MODEL_OUTPUT_INVALID, response.error.code)
+        self.assertTrue(response.error.retryable)
         self.retriever.search_with_trace.assert_not_awaited()
         self.generation_service.generate_answer.assert_not_awaited()
         self.log_store.record_query_resolution.assert_not_awaited()
@@ -639,6 +685,8 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(response, ChatErrorResponse)
         self.assertIsNone(response.conversation_id)
         self.assertIsNone(response.rag_run_id)
+        self.assertEqual(ChatErrorCode.INTERNAL_ERROR, response.error.code)
+        self.assertFalse(response.error.retryable)
         self.retriever.search_with_trace.assert_not_awaited()
         self.assertNotIn(
             "postgres connection detail",
@@ -733,6 +781,8 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertIsInstance(response, ChatErrorResponse)
         self.assertEqual(self.rag_run_id, response.rag_run_id)
+        self.assertEqual(ChatErrorCode.INTERNAL_ERROR, response.error.code)
+        self.assertFalse(response.error.retryable)
         self.log_store.fail_processing_model_calls.assert_awaited_once_with(
             self.rag_run_id
         )
@@ -979,6 +1029,9 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
     # ------------------------------------------------------------------
 
     async def test_records_retrieval_failure_and_finishes_the_turn(self) -> None:
+        error = APITimeoutError(
+            httpx.Request("POST", "https://api.openai.com")
+        )
         failed_embedding = ModelCallTrace(
             provider="openai",
             model_name="text-embedding-3-large",
@@ -988,12 +1041,14 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         )
         self._search_result = HybridSearchCall(
             embedding_call=failed_embedding,
-            error=RuntimeError("embedding unavailable"),
+            error=error,
         )
 
         response = await self.service.answer_question("질문")
 
         self.assertIsInstance(response, ChatErrorResponse)
+        self.assertEqual(ChatErrorCode.UPSTREAM_ERROR, response.error.code)
+        self.assertTrue(response.error.retryable)
         self.assertEqual(self.rag_run_id, response.rag_run_id)
         self.generation_service.generate_answer.assert_not_awaited()
         self.log_store.fail_rag_run.assert_awaited_once_with(
@@ -1005,6 +1060,66 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, embedding.args[0])
         self.assertEqual(ExecutionStatus.FAILED, embedding.kwargs["status"])
         self.log_store.start_model_call.assert_awaited_once()
+
+    async def test_maps_non_transient_embedding_failure_to_internal_error(
+        self,
+    ) -> None:
+        failed_embedding = ModelCallTrace(
+            provider="openai",
+            model_name="text-embedding-3-large",
+            succeeded=False,
+            latency_ms=15,
+            error_message="invalid embedding response",
+        )
+        self._search_result = HybridSearchCall(
+            embedding_call=failed_embedding,
+            error=RuntimeError("invalid embedding response"),
+        )
+
+        response = await self.service.answer_question("질문")
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.assertEqual(ChatErrorCode.INTERNAL_ERROR, response.error.code)
+        self.assertFalse(response.error.retryable)
+        self.log_store.fail_rag_run.assert_awaited_once_with(
+            self.rag_run_id,
+            error_code="INTERNAL_ERROR",
+            total_latency_ms=ANY,
+        )
+
+    async def test_retrieval_failure_commit_error_returns_internal_error(
+        self,
+    ) -> None:
+        error = APITimeoutError(
+            httpx.Request("POST", "https://api.openai.com")
+        )
+        self._search_result = HybridSearchCall(
+            embedding_call=ModelCallTrace(
+                provider="openai",
+                model_name="text-embedding-3-large",
+                succeeded=False,
+                latency_ms=15,
+                error_message="embedding unavailable",
+            ),
+            error=error,
+        )
+        self.session.commit.side_effect = [
+            None,
+            None,
+            RuntimeError("retrieval failure write failed"),
+            None,
+        ]
+
+        response = await self.service.answer_question("질문")
+
+        self.assertIsInstance(response, ChatErrorResponse)
+        self.assertEqual(ChatErrorCode.INTERNAL_ERROR, response.error.code)
+        self.assertFalse(response.error.retryable)
+        self.log_store.fail_rag_run.assert_awaited_with(
+            self.rag_run_id,
+            error_code="INTERNAL_ERROR",
+            total_latency_ms=ANY,
+        )
 
     async def test_finishes_the_turn_when_generation_service_raises(self) -> None:
         async def raise_after_checkpoint(

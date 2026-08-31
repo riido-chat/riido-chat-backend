@@ -148,6 +148,7 @@ class ChatResponseTest(unittest.TestCase):
                     "message": (
                         "답변을 생성하는 중 오류가 발생했습니다."
                     ),
+                    "retryable": False,
                 },
                 "citations": [],
             }
@@ -167,6 +168,7 @@ class ChatResponseTest(unittest.TestCase):
                 "error": {
                     "code": "SERVICE_UNAVAILABLE",
                     "message": "검색 데이터가 아직 준비되지 않았습니다.",
+                    "retryable": False,
                 },
                 "citations": [],
             }
@@ -221,8 +223,16 @@ class ChatResponseTest(unittest.TestCase):
                 "error": {
                     "code": "UPSTREAM_ERROR",
                     "message": "내부 오류",
+                    "retryable": True,
                 },
-                "citations": [],
+                "citations": [
+                    {
+                        "citationNumber": 1,
+                        "documentTitle": "문서",
+                        "sectionPath": ["문서", "섹션"],
+                        "sourceUrl": "https://docs.riido.io/guide",
+                    }
+                ],
             },
         )
 
@@ -244,10 +254,42 @@ class ChatResponseTest(unittest.TestCase):
         error = ChatError(
             code=ChatErrorCode.INTERNAL_ERROR,
             message="답변을 생성하는 중 오류가 발생했습니다.",
+            retryable=False,
         )
 
         self.assertEqual("OUT_OF_SCOPE", withheld.reason_code.value)
         self.assertEqual("INTERNAL_ERROR", error.code.value)
+        self.assertFalse(error.retryable)
+
+    def test_requires_retryable_for_error_response(self) -> None:
+        with self.assertRaises(ValidationError):
+            self.response_adapter.validate_python(
+                {
+                    "status": "ERROR",
+                    "conversationId": CONVERSATION_ID,
+                    "ragRunId": RAG_RUN_ID,
+                    "answer": None,
+                    "error": {
+                        "code": "INTERNAL_ERROR",
+                        "message": "내부 오류",
+                    },
+                    "citations": [],
+                }
+            )
+
+    def test_declares_all_chat_error_codes(self) -> None:
+        self.assertEqual(
+            {
+                "UPSTREAM_ERROR",
+                "MODEL_OUTPUT_INVALID",
+                "CITATION_VALIDATION_ERROR",
+                "INTERNAL_ERROR",
+                "SERVICE_UNAVAILABLE",
+                "NOT_FOUND",
+                "CONVERSATION_BUSY",
+            },
+            {code.value for code in ChatErrorCode},
+        )
 
 
 if __name__ == "__main__":

@@ -22,7 +22,12 @@ from app.api.chat_schema import (
 )
 from app.api.chat import _answer_until_disconnect
 from app.main import create_app
-from app.rag.chat_service import ChatService, ConversationNotFoundError
+from app.rag.chat_service import (
+    ChatService,
+    ConversationNotFoundError,
+    chat_error_response,
+)
+from app.rag.corpus_state import CorpusNotLoadedError
 from app.rag.dependencies import get_chat_service
 from app.rag.log_store import ConversationBusyError
 
@@ -135,6 +140,7 @@ class ChatApiTest(unittest.TestCase):
             error=ChatError(
                 code=ChatErrorCode.INTERNAL_ERROR,
                 message="답변을 생성하는 중 오류가 발생했습니다.",
+                retryable=False,
             ),
             citations=[],
         )
@@ -151,11 +157,77 @@ class ChatApiTest(unittest.TestCase):
                 "error": {
                     "code": "INTERNAL_ERROR",
                     "message": "답변을 생성하는 중 오류가 발생했습니다.",
+                    "retryable": False,
                 },
                 "citations": [],
             },
             response.json(),
         )
+
+    def test_pipeline_error_codes_return_500_with_retry_policy(self) -> None:
+        cases = (
+            (
+                ChatErrorCode.UPSTREAM_ERROR,
+                True,
+                "AI 서비스 연결이 원활하지 않습니다. "
+                "잠시 후 다시 시도해주세요.",
+            ),
+            (
+                ChatErrorCode.MODEL_OUTPUT_INVALID,
+                True,
+                "AI 응답을 처리하지 못했습니다. "
+                "잠시 후 다시 시도해주세요.",
+            ),
+            (
+                ChatErrorCode.CITATION_VALIDATION_ERROR,
+                False,
+                "답변 출처를 검증하는 중 오류가 발생했습니다.",
+            ),
+            (
+                ChatErrorCode.INTERNAL_ERROR,
+                False,
+                "답변을 생성하는 중 오류가 발생했습니다.",
+            ),
+        )
+
+        for error_code, retryable, message in cases:
+            with self.subTest(error_code=error_code):
+                self.service.reset_mock()
+                self.service.answer_question.return_value = chat_error_response(
+                    error_code,
+                    uuid.UUID(CONVERSATION_ID),
+                    uuid.UUID(RAG_RUN_ID),
+                )
+
+                response = self._post({"question": "질문"})
+
+                self.assertEqual(500, response.status_code)
+                self.assertEqual(error_code.value, response.json()["error"]["code"])
+                self.assertEqual(
+                    retryable,
+                    response.json()["error"]["retryable"],
+                )
+                self.assertEqual(message, response.json()["error"]["message"])
+
+    def test_corpus_unavailable_returns_503_without_identifiers(self) -> None:
+        def raise_corpus_error() -> ChatService:
+            raise CorpusNotLoadedError("corpus가 적재되지 않았습니다.")
+
+        self.app.dependency_overrides[get_chat_service] = raise_corpus_error
+
+        response = self._post({"question": "질문"})
+
+        self.assertEqual(503, response.status_code)
+        self.assertEqual(
+            {
+                "code": "SERVICE_UNAVAILABLE",
+                "message": "검색 데이터가 아직 준비되지 않았습니다.",
+                "retryable": False,
+            },
+            response.json()["error"],
+        )
+        self.assertIsNone(response.json()["conversationId"])
+        self.assertIsNone(response.json()["ragRunId"])
 
     def test_empty_question_returns_422(self) -> None:
         response = self._post({"question": ""})
@@ -217,6 +289,7 @@ class ChatApiTest(unittest.TestCase):
         body = response.json()
         self.assertEqual("ERROR", body["status"])
         self.assertEqual("NOT_FOUND", body["error"]["code"])
+        self.assertFalse(body["error"]["retryable"])
         self.assertIsNone(body["conversationId"])
         self.assertIsNone(body["ragRunId"])
 
@@ -246,6 +319,7 @@ class ChatApiTest(unittest.TestCase):
                         "이 대화의 이전 질문을 처리 중입니다. "
                         "잠시 후 다시 시도해주세요."
                     ),
+                    "retryable": False,
                 },
                 "citations": [],
             },
@@ -256,6 +330,15 @@ class ChatApiTest(unittest.TestCase):
         response = self.app.openapi()["paths"]["/api/chat"]["post"]["responses"]
 
         self.assertIn("409", response)
+
+    def test_openapi_requires_retryable_and_lists_chat_error_codes(self) -> None:
+        schemas = self.app.openapi()["components"]["schemas"]
+
+        self.assertIn("retryable", schemas["ChatError"]["required"])
+        self.assertEqual(
+            {code.value for code in ChatErrorCode},
+            set(schemas["ChatErrorCode"]["enum"]),
+        )
 
     def _post(self, payload: dict[str, str]):
         with TestClient(self.app) as client:

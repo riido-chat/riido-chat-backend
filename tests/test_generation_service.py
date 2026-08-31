@@ -1,8 +1,12 @@
 import unittest
 from unittest.mock import AsyncMock, patch
 
+import httpx
+from openai import APITimeoutError
+
 from app.rag.generation_service import (
     CITATION_VALIDATION_ERROR_CODE,
+    INTERNAL_ERROR_CODE,
     UPSTREAM_ERROR_CODE,
     WITHHELD_RESPONSES,
     GenerationService,
@@ -93,7 +97,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
 
         self.generator.generate_with_trace.assert_not_awaited()
 
-    async def test_builds_failed_trace_when_generator_raises_after_checkpoint(
+    async def test_maps_unexpected_generator_exception_to_internal_error(
         self,
     ) -> None:
         before_model_call = AsyncMock()
@@ -112,7 +116,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
             )
 
         self.assertEqual(FinalAnswerStatus.ERROR, result.status)
-        self.assertEqual(UPSTREAM_ERROR_CODE, result.error_code)
+        self.assertEqual(INTERNAL_ERROR_CODE, result.error_code)
         self.assertIsNotNone(result.model_call)
         self.assertFalse(result.model_call.succeeded)
         self.assertEqual(2500, result.model_call.latency_ms)
@@ -443,9 +447,12 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_returns_error_when_generation_call_fails(self) -> None:
+        error = APITimeoutError(
+            httpx.Request("POST", "https://api.openai.com")
+        )
         self.generator.generate_with_trace.return_value = GenerationCall(
             trace=_failed_trace(),
-            error=RuntimeError("API failure"),
+            error=error,
         )
 
         result = await self.service.generate_answer("질문", [])
