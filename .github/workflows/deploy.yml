@@ -54,7 +54,7 @@ jobs:
       - name: 배포 스크립트 업로드
         run: |
           aws s3 cp scripts/deploy.sh "s3://${DEPLOY_BUCKET}/deploy/deploy.sh"
-          aws s3 cp docker-compose.app.yml "s3://${DEPLOY_BUCKET}/deploy/docker-compose.app.yml"
+          aws s3 cp docker-compose.api.prod.yml "s3://${DEPLOY_BUCKET}/deploy/docker-compose.api.prod.yml"
 
       # SSM으로 앱 EC2에서 스크립트를 내려받아 실행한다
       - name: 앱 EC2 배포
@@ -69,7 +69,7 @@ jobs:
               \"set -euo pipefail\",
               \"mkdir -p /opt/riido\",
               \"aws s3 cp s3://${DEPLOY_BUCKET}/deploy/deploy.sh /opt/riido/deploy.sh\",
-              \"aws s3 cp s3://${DEPLOY_BUCKET}/deploy/docker-compose.app.yml /opt/riido/docker-compose.app.yml\",
+              \"aws s3 cp s3://${DEPLOY_BUCKET}/deploy/docker-compose.api.prod.yml /opt/riido/docker-compose.api.prod.yml\",
               \"bash /opt/riido/deploy.sh ${IMAGE_URI}\"
             ]" \
             --query Command.CommandId --output text)

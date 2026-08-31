@@ -17,8 +17,9 @@ evaluation
 docs
 scripts
 docker
-docker-compose.yml
-docker-compose.app.yml
+docker-compose.db.yml
+docker-compose.api.prod.yml
+docker-compose.gateway.prod.yml
 README.md
 AGENTS.md
 .idea

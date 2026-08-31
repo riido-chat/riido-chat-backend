@@ -1,0 +1,19 @@
+name: riido-gateway
+
+services:
+  caddy:
+    image: caddy:2
+    container_name: riido-caddy
+    network_mode: host
+    command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+    name: riido-caddy-data
+  caddy_config:
+    name: riido-caddy-config
