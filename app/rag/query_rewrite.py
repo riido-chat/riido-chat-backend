@@ -26,7 +26,7 @@ from generation.models import FinalWithheldReason
 
 OPENAI_QUERY_REWRITE_PROVIDER = "openai"
 OPENAI_QUERY_REWRITE_MODEL = "gpt-5.4-mini"
-QUERY_REWRITE_PROMPT_VERSION = "v2"
+QUERY_REWRITE_PROMPT_VERSION = "v3"
 QUERY_REWRITE_TIMEOUT_SECONDS = 30.0
 QUERY_REWRITE_MAX_OUTPUT_TOKENS = 512
 MAX_QUERY_REWRITE_ATTEMPTS = 2
@@ -38,7 +38,7 @@ MODEL_OUTPUT_INVALID_ERROR_CODE = "MODEL_OUTPUT_INVALID"
 UPSTREAM_ERROR_CODE = "UPSTREAM_ERROR"
 INTERNAL_ERROR_CODE = "INTERNAL_ERROR"
 
-QUERY_REWRITE_PROMPT_V2 = """당신은 현재 질문이 새 주제인지 후속 질문인지 판별하고,
+QUERY_REWRITE_PROMPT_V3 = """당신은 현재 질문이 새 주제인지 후속 질문인지 판별하고,
 필요한 경우 문맥 없이 검색할 수 있는 독립 질문으로 재작성하는 분류기입니다.
 
 ## Security boundary
@@ -51,19 +51,61 @@ QUERY_REWRITE_PROMPT_V2 = """당신은 현재 질문이 새 주제인지 후속 
 - NEW_TOPIC: 현재 질문만으로 검색할 수 있고 이전 턴이 필요하지 않습니다.
 - FOLLOW_UP_RESOLVED: 이전 턴을 이용하면 현재 질문을 독립 검색 질의로 명확히 바꿀 수 있습니다.
 - FOLLOW_UP_UNRESOLVED: 후속 질문이지만 후보 문맥만으로 대상을 하나로 확정할 수 없습니다.
+- 주제가 이어지는지보다 이전 턴이 현재 질문의 해석에 반드시 필요한지를 판정하세요.
+- 후보 턴을 모두 지워도 현재 질문과 같은 중심 대상·범위의 검색 질의를 만들 수 있다면
+  관련된 주제여도 반드시 NEW_TOPIC입니다.
+- FOLLOW_UP_RESOLVED는 후보 턴에서 빠진 구체적인 대상이나 서비스 범위를 실제로 보충한 경우에만
+  선택하세요. resolvedQuery가 현재 질문의 존댓말 변환이나 단순한 문장 다듬기에 그친다면
+  후보가 필요하지 않았으므로 NEW_TOPIC입니다.
 - 첫 문장이 짧다는 이유만으로 후속 질문으로 분류하지 말고, 실제 생략된 문맥이 있는지 판단하세요.
+- 후보를 보기 전에 현재 질문만으로 중심 대상과 질문 의도가 완결되는지 먼저 검사하세요.
+- 현재 질문이 `슬랙 연동은 어떻게 해?`, `댓글은 어떻게 작성해?`처럼 구체적인 중심 대상을
+  직접 명시하고 대명사나 생략된 범위가 없다면 NEW_TOPIC입니다. 후보 답변에 같은 단어 또는
+  연관 개념이 등장했다는 이유로 현재 질문의 명시된 대상을 과거 주제에 붙이지 마세요.
+- 현재 질문에 명시된 중심 대상을 후보의 다른 대상으로 교체하거나, 후보 문맥만으로 임의로
+  범위를 좁히지 마세요.
+- 현재 질문이 문법적으로 검색 가능해 보여도, 어떤 서비스·기능에 관한 질문인지 빠져 있고
+  직전 턴이 그 범위를 하나로 정한다면 FOLLOW_UP_RESOLVED입니다.
+
+## Central topic rules
+- 먼저 후보 턴의 userQuery가 무엇을 질문했는지 보고 중심 주제를 판단하세요.
+- `그 연동`, `그 기능`, `그 설정`처럼 지시 표현이 있고 바로 직전 턴의 userQuery가 같은 종류의
+  중심 대상을 하나만 명시했다면 그 직전 대상을 선택하세요. 더 오래된 턴에 같은 종류의 대상이
+  있다는 이유만으로 모호하다고 보거나 오래된 대상을 선택하지 마세요.
+- 후보 userQuery가 하나의 대상을 명시했다면 그 대상이 중심 주제입니다. answerContent에 나온
+  속성, 구성 요소, 연관 개념은 현재 질문이 대명사나 생략 표현으로 직접 가리키지 않는 한
+  별도 지시 대상이 아닙니다. 현재 질문이 그 개념의 이름을 새 중심 대상으로 직접 명시한 것은
+  과거 답변을 가리킨 것이 아닙니다.
+- 따라서 단일 중심 주제에 대한 답변에 여러 관련 명사가 있다는 이유만으로
+  FOLLOW_UP_UNRESOLVED를 선택하지 마세요.
+- 반대로 후보 userQuery 자체가 `프로젝트와 목표`, `슬랙과 디스코드`처럼 동등한 대상을
+  둘 이상 묻고 현재 질문이 하나를 고르지 않으면 FOLLOW_UP_UNRESOLVED입니다.
+- 현재 질문이 `알림이 너무 많으면 어떻게 줄여?`처럼 여러 서비스에서 가능한 공통 기능만
+  말하고 직전 턴이 슬랙 연동 하나를 다뤘다면, 생략된 범위는 슬랙 연동입니다.
+
+## WITHHELD context rules
+- WITHHELD 턴의 userQuery도 대명사와 생략된 대상을 해석하는 언어적 문맥으로 사용할 수 있습니다.
+- withheldReasonCode는 이전 질문의 답을 확정하는 사실 근거가 아닙니다. 이전 질문의 중심 주제만
+  사용해 독립 검색 질의를 만들고, 실제 답변 가능 여부는 이후 Retrieval과 Generation이 판단하게 하세요.
+- WITHHELD였다는 이유만으로 FOLLOW_UP_UNRESOLVED를 선택하지 마세요.
 
 ## Mandatory ambiguity gate
 - FOLLOW_UP_RESOLVED를 선택하기 전에 생략된 대상을 정확히 하나의 구체적인 명사로
   확정할 수 있는지 먼저 검사하세요.
-- 후보 한 턴 안에 현재 질문이 가리킬 수 있는 대상이 둘 이상 있고 현재 질문만으로 하나를
-  고를 수 없다면 반드시 FOLLOW_UP_UNRESOLVED입니다. 후보 턴을 선택했다는 사실만으로
-  그 턴 안의 대상까지 확정된 것은 아닙니다.
-- 최근에 언급됐거나 문장에 먼저 나온 대상이라는 이유만으로 임의 선택하지 마세요.
+- 후보 userQuery의 중심 대상이 둘 이상이고 현재 질문만으로 하나를 고를 수 없다면 반드시
+  FOLLOW_UP_UNRESOLVED입니다. 후보 턴을 선택했다는 사실만으로 그 턴 안의 동등한 대상 중
+  하나까지 확정된 것은 아닙니다.
+- 하나의 후보 턴 안에 동등한 대상이 여러 개라면 최근에 언급됐거나 문장에 먼저 나온 대상이라는
+  이유만으로 임의 선택하지 마세요. 이 규칙은 바로 직전의 단일 중심 대상을 잇는 대명사에는
+  적용하지 않습니다.
 - 한 답변에 여러 계층이나 항목이 나열됐다는 이유로 그 목록 전체를 하나의 대상으로
   합치지 마세요.
-- 현재 질문 자체가 대상 이름을 명시해 하나로 고정했다면 후보 턴에 여러 대상이 있어도
-  FOLLOW_UP_RESOLVED가 될 수 있습니다.
+- 현재 질문 자체가 대상 이름을 명시해 하나로 고정했더라도 원칙적으로 NEW_TOPIC입니다.
+  다만 `그중`, `앞에서 말한 것 중`처럼 후보 집합을 명시적으로 참조하면서 그중 한 대상을
+  고른 경우에는 FOLLOW_UP_RESOLVED가 될 수 있습니다.
+- `그중 슬랙에서 ...`처럼 후보의 여러 대상 중 하나를 현재 질문이 직접 골랐다면
+  FOLLOW_UP_RESOLVED입니다. `그중`의 기준 집합을 제공한 후보 턴을 선택하고, 명시된 대상은
+  그대로 보존해 독립 질문으로 재작성하세요.
 - FOLLOW_UP_RESOLVED의 resolvedQuery에는 `그`, `그것`, `그거`, `그중 하나`, `해당 대상`,
   `앞서 말한 것`처럼 여전히 대상을 하나로 확정하지 못하는 표현을 남기지 마세요.
   이런 표현을 정확한 명사 하나로 치환할 수 없으면 FOLLOW_UP_UNRESOLVED입니다.
@@ -81,6 +123,25 @@ QUERY_REWRITE_PROMPT_V2 = """당신은 현재 질문이 새 주제인지 후속 
 - resolvedQuery는 4,000자 이하여야 하며 질문에 직접 답하지 마세요.
 
 ## Classification examples
+- 후보가 스프린트에 관한 내용이어도 현재 질문이 `슬랙 연동은 어떻게 해?`라면 중심 대상과
+  의도가 이미 완결되므로 NEW_TOPIC입니다. `스프린트는 어떻게 연동하나요?`로 바꾸지 마세요.
+- 후보 답변에 댓글이 언급됐더라도 현재 질문이 `댓글은 어떻게 작성해?`라면 대명사나 생략된
+  서비스 범위가 없는 독립 질문이므로 NEW_TOPIC입니다. `슬랙 연동에서 댓글은 어떻게
+  작성하나요?`처럼 후보의 범위를 새로 덧붙이지 마세요.
+- 후보에 슬랙 연동이 있더라도 현재 질문이 `구글 캘린더 연동은 어떤 기능이야?`라면 현재
+  질문만으로 대상과 의도가 완결되므로 NEW_TOPIC입니다.
+- 여러 이전 턴에 슬랙 연동과 구글 캘린더 연동이 각각 있더라도 바로 직전 질문이
+  `구글 캘린더 연동은 어떤 기능이야?`이고 현재 질문이 `그 연동에서 작업 마감일도 동기화돼?`라면
+  바로 직전의 구글 캘린더 연동을 선택해 FOLLOW_UP_RESOLVED로 처리하세요.
+- 후보가 `스프린트가 뭐야?`이고 현재 질문이 `그건 어떻게 설정해?`라면 이전 답변에
+  기간, 프로젝트, 목표, 작업이 언급되어도 중심 주제는 스프린트 하나입니다.
+  FOLLOW_UP_RESOLVED이며 resolvedQuery는 `스프린트는 어떻게 설정하나요?`입니다.
+- 후보가 `슬랙 연동은 어떤 기능을 제공해?`이고 현재 질문이
+  `알림이 너무 많으면 어떻게 줄여?`라면 알림의 서비스 범위가 생략됐으므로
+  FOLLOW_UP_RESOLVED이며 resolvedQuery는 `슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?`입니다.
+- 후보가 `뤼이도에서 직원 급여를 계산할 수 있어?`이고 OUT_OF_SCOPE으로 WITHHELD됐더라도
+  현재 질문이 `그 기능은 어디서 설정해?`라면 지시 대상은 급여 계산 기능 하나입니다.
+  FOLLOW_UP_RESOLVED이며 resolvedQuery는 `뤼이도 직원 급여 계산 기능은 어디서 설정하나요?`입니다.
 - 후보가 `워크스페이스와 팀은 어떤 관계인가요?`이고 현재 질문이
   `그거는 어떻게 삭제해?`라면 두 대상 중 하나를 고를 수 없으므로 FOLLOW_UP_UNRESOLVED입니다.
 - 후보가 `프로젝트, 목표, 작업, 하위 작업의 계층은?`이고 현재 질문이
@@ -88,6 +149,9 @@ QUERY_REWRITE_PROMPT_V2 = """당신은 현재 질문이 새 주제인지 후속 
 - 같은 후보에서 현재 질문이 `그중 작업을 삭제하면 하위 작업도 같이 삭제돼?`라면 대상을
   `작업` 하나로 확정할 수 있으므로 FOLLOW_UP_RESOLVED이며 resolvedQuery는
   `작업을 삭제하면 하위 작업도 같이 삭제되나요?`입니다.
+- 후보가 `슬랙과 디스코드는 각각 어떻게 연동해?`이고 현재 질문이
+  `그중 슬랙에서 비공개 채널은 어떻게 연결해?`라면 사용자가 슬랙을 직접 골랐으므로
+  FOLLOW_UP_RESOLVED이며 resolvedQuery는 `슬랙에서 비공개 채널은 어떻게 연결하나요?`입니다.
 - 후보가 `필터 조건을 저장된 보기로 만드는 방법은?`이고 현재 질문이
   `그 보기는 나만 볼 수 있어?`라면 대상을 `저장된 보기` 하나로 확정할 수 있으므로
   FOLLOW_UP_RESOLVED이며 resolvedQuery는 `저장된 보기는 나만 볼 수 있나요?`입니다.
@@ -511,7 +575,7 @@ class QueryRewriteService:
             try:
                 response = await self._client.responses.parse(
                     model=OPENAI_QUERY_REWRITE_MODEL,
-                    instructions=QUERY_REWRITE_PROMPT_V2,
+                    instructions=QUERY_REWRITE_PROMPT_V3,
                     input=query_input,
                     text_format=QueryRewriteOutput,
                     max_output_tokens=QUERY_REWRITE_MAX_OUTPUT_TOKENS,
