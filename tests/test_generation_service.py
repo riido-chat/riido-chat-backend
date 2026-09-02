@@ -433,7 +433,8 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
                     "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
                 ),
                 FinalWithheldReason.AMBIGUOUS_QUESTION: (
-                    "질문의 의미가 명확하지 않아 답변하기 어렵습니다. "
+                    "질문의 범위가 너무 넓거나 의미가 명확하지 않아 "
+                    "답변하기 어렵습니다. "
                     "질문을 조금 더 구체적으로 작성해주세요."
                 ),
                 FinalWithheldReason.OUT_OF_SCOPE: (
