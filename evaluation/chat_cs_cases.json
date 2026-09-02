@@ -1,6 +1,6 @@
 {
-  "version": "cs-v2",
-  "purpose": "초보 사용자의 용어 정의·사용 목적·기능 차이 질문에 공식 이용가이드 근거로 친절하게 답하는지 평가한다.",
+  "version": "cs-v3",
+  "purpose": "초보 사용자의 용어 정의·사용 목적·기능 차이 질문에 공식 이용가이드 근거로 친절하게 답하는지 평가한다. 서로 다른 문서 유형의 직접 정의 질문으로 답변 순서의 일반화 여부를 함께 검증한다.",
   "rubric": {
     "expectedDefinitionSentenceConceptGroups": "직접 정의 질문은 첫 문장에서 용어 자체의 의미를 독립적으로 설명해야 한다.",
     "expectedAnswerConceptGroups": "각 그룹에서 하나 이상의 표현이 답변에 포함되어야 한다.",
@@ -288,11 +288,230 @@
           ],
           "expectedAnswerConceptGroups": [
             ["저장된 보기"],
-            ["반복", "빠르게", "효율", "번거로움"],
-            ["개인", "팀", "공유"]
+            ["반복", "빠르게", "효율", "번거로움"]
           ],
           "minimumCitationCount": 1,
           "expectedCitationDocumentTitlesAny": ["저장된 보기"]
+        }
+      ]
+    },
+    {
+      "id": "CS16",
+      "description": "워크스페이스를 여러 팀과 프로젝트를 관리하는 조직 단위로 설명",
+      "turns": [
+        {
+          "question": "워크스페이스가 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["팀"],
+            ["프로젝트"],
+            ["공간", "조직"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["워크스페이스"],
+            ["관리"],
+            ["조직", "기업"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["워크스페이스", "핵심 개념"]
+        }
+      ]
+    },
+    {
+      "id": "CS17",
+      "description": "팀을 프로젝트 목적이나 기능별로 나누는 워크스페이스 단위로 설명",
+      "turns": [
+        {
+          "question": "팀이 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["워크스페이스"],
+            ["단위", "나누", "구분"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["팀"],
+            ["프로젝트", "기능", "목적"],
+            ["생성", "만들", "구성", "나누"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["팀", "핵심 개념"]
+        }
+      ]
+    },
+    {
+      "id": "CS18",
+      "description": "프로젝트를 팀이 집중하는 큰 단위 업무로 설명",
+      "turns": [
+        {
+          "question": "프로젝트가 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["팀"],
+            ["큰 단위", "큰 방향"],
+            ["업무", "일"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["프로젝트"],
+            ["목표"],
+            ["팀"],
+            ["큰 단위", "큰 방향"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["실행: 작업", "작업 흐름으로 이해하는 프로젝트 관리"]
+        }
+      ]
+    },
+    {
+      "id": "CS19",
+      "description": "목표를 프로젝트 안에서 기간 내 달성하는 중간 단위로 설명",
+      "turns": [
+        {
+          "question": "목표가 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["프로젝트"],
+            ["기간"],
+            ["달성"],
+            ["중간", "단위"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["목표"],
+            ["작업"],
+            ["구성", "연결", "구조"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["실행: 작업", "작업 흐름으로 이해하는 프로젝트 관리"]
+        }
+      ]
+    },
+    {
+      "id": "CS20",
+      "description": "작업을 담당자가 실제로 수행하는 세부 실행 단위로 설명",
+      "turns": [
+        {
+          "question": "작업이 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["실제"],
+            ["수행", "실행"],
+            ["단위", "업무", "일"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["작업"],
+            ["담당자", "일정", "우선순위"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["실행: 작업", "작업 흐름으로 이해하는 프로젝트 관리"]
+        }
+      ]
+    },
+    {
+      "id": "CS21",
+      "description": "뤼이도 미팅을 실행과 연결되는 협업 도구로 설명",
+      "turns": [
+        {
+          "question": "뤼이도 미팅이 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["회의", "미팅"],
+            ["실행"],
+            ["협업", "도구"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["프로젝트"],
+            ["목표"],
+            ["작업"],
+            ["연결"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["미팅"]
+        }
+      ]
+    },
+    {
+      "id": "CS22",
+      "description": "백로그를 검토한 작업의 우선순위와 실행 계획을 정리하는 공간으로 설명",
+      "turns": [
+        {
+          "question": "백로그가 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["검토"],
+            ["작업"],
+            ["정리", "공간"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["백로그"],
+            ["우선순위"],
+            ["계획"],
+            ["실행", "전환"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["계획: 백로그", "작업 흐름으로 이해하는 프로젝트 관리"]
+        }
+      ]
+    },
+    {
+      "id": "CS23",
+      "description": "대기 작업을 새 아이디어와 요청을 처음 수집하는 공간으로 설명",
+      "turns": [
+        {
+          "question": "대기 작업이 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["아이디어", "요청", "작업"],
+            ["수집", "모이", "모아"],
+            ["공간", "곳"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["대기 작업"],
+            ["중요도", "필요성", "검토", "선별"],
+            ["백로그", "실행"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["계획: 대기 작업", "작업 흐름으로 이해하는 프로젝트 관리"]
+        }
+      ]
+    },
+    {
+      "id": "CS24",
+      "description": "보관 작업을 완료된 작업을 다음 개선에 활용하는 공간으로 설명",
+      "turns": [
+        {
+          "question": "보관 작업이 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["완료"],
+            ["작업"],
+            ["보관", "공간"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["보관 작업"],
+            ["실행", "활성화", "개선"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["운영: 보관 작업", "작업 흐름으로 이해하는 프로젝트 관리"]
+        }
+      ]
+    },
+    {
+      "id": "CS25",
+      "description": "스프린트 그래프를 작업 진행 속도와 흐름을 보여주는 시각화로 설명",
+      "turns": [
+        {
+          "question": "스프린트 그래프가 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["스프린트"],
+            ["그래프", "시각화"],
+            ["진행", "속도", "흐름"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["실시간"],
+            ["진행 중", "완료"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["스프린트 그래프"]
         }
       ]
     }

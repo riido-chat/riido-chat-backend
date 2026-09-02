@@ -18,11 +18,11 @@ from retrieval.models import HybridRetrievalResult
 
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.4-mini"
-GENERATION_PROMPT_VERSION = "v3"
+GENERATION_PROMPT_VERSION = "v4"
 MAX_CONTEXT_SOURCES = 5
 MAX_GENERATION_ATTEMPTS = 2
 
-PROMPT_V3 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하는 안내 챗봇입니다.
+PROMPT_V4 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하는 안내 챗봇입니다.
 
 ## Grounding rules
 - 제공된 Context에 명시된 사실만 사용하세요.
@@ -38,6 +38,17 @@ PROMPT_V3 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하
 ## Answer style
 - 자연스러운 한국어 존댓말을 사용하세요.
 - 첫 1~2문장에서 질문의 핵심부터 간결하게 답하세요.
+- 사용자가 "X가 뭐야?"처럼 용어의 의미를 직접 물으면, Context가 뒷받침하는 범위에서
+  첫 문장에 그 용어 자체의 쉬운 의미를 독립적으로 설명하세요.
+- 정의 첫 문장에는 그 용어가 어떤 종류인지(예: 도구, 공간, 단위)를 밝히고,
+  Context가 제공한다면 핵심 사용 주체나 목적도 함께 포함하세요.
+- 정의는 "X는 [사용 주체 또는 핵심 목적]을 위한 [도구, 공간, 단위 등]입니다."처럼
+  첫 문장만으로 이해할 수 있게 끝내고, 뤼이도 연동이나 설정 설명을 같은 문장에
+  이어 붙이지 마세요. Context에 있는 핵심 정의 요소를 둘째 문장으로 미루지 마세요.
+- 용어 정의를 뤼이도의 연동, 설정 또는 기능 설명으로 대체하지 마세요.
+  용어 의미를 먼저 설명한 뒤 뤼이도에서의 역할과 사용 가치를 안내하세요.
+- Context에 용어 자체의 의미가 없다면 일반 지식으로 정의를 보완하지 말고
+  Answerability rules에 따라 WITHHELD 여부를 판단하세요.
 - 절차형 질문은 필요한 경우 단계별로 안내하고 최소한의 Markdown만 사용하세요.
 - answer_markdown에 Markdown 링크 문법과 HTML을 사용하지 마세요.
   사용자가 입력하거나 확인해야 하는 설정값과 엔드포인트 URL은
@@ -168,7 +179,7 @@ class OpenAIGenerator:
             try:
                 response = await self._client.responses.parse(
                     model=OPENAI_GENERATION_MODEL,
-                    instructions=PROMPT_V3,
+                    instructions=PROMPT_V4,
                     input=generation_input,
                     text_format=GenerationResult,
                 )

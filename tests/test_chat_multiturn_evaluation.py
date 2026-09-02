@@ -28,9 +28,9 @@ class ChatMultiTurnEvaluationTest(unittest.TestCase):
     def test_loads_versioned_cs_cases(self) -> None:
         payload = load_cases(DEFAULT_CS_CASES_PATH)
 
-        self.assertEqual("cs-v2", payload["version"])
+        self.assertEqual("cs-v3", payload["version"])
         self.assertEqual(
-            [f"CS{number:02d}" for number in range(1, 16)],
+            [f"CS{number:02d}" for number in range(1, 26)],
             [case["id"] for case in payload["cases"]],
         )
         for case in payload["cases"]:
@@ -38,6 +38,12 @@ class ChatMultiTurnEvaluationTest(unittest.TestCase):
             turn = case["turns"][0]
             self.assertTrue(turn["expectedAnswerConceptGroups"])
             self.assertTrue(turn["expectedCitationDocumentTitlesAny"])
+
+        definition_case_count = sum(
+            "expectedDefinitionSentenceConceptGroups" in case["turns"][0]
+            for case in payload["cases"]
+        )
+        self.assertGreaterEqual(definition_case_count, 10)
 
     def test_extracts_selected_turn_numbers_from_v1_snapshot(self) -> None:
         self.assertEqual(

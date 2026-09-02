@@ -11,7 +11,7 @@ from generation.generator import (
     GENERATION_PROMPT_VERSION,
     MAX_CONTEXT_SOURCES,
     OPENAI_GENERATION_MODEL,
-    PROMPT_V3,
+    PROMPT_V4,
     OpenAIGenerator,
     build_generation_context,
     build_generation_input,
@@ -158,17 +158,33 @@ class GenerationContextTest(unittest.TestCase):
         self.assertNotIn(r"\[설정", generation_input)
 
     def test_prompt_avoids_duplicate_answers_and_uses_minimum_sources(self) -> None:
-        self.assertIn("반드시 가장 직접적인 SOURCE 하나만 선택", PROMPT_V3)
-        self.assertIn("중복 SOURCE는 사용하거나 인용하지 마세요", PROMPT_V3)
-        self.assertIn("SOURCE별로 답변 문단을 만들거나", PROMPT_V3)
-        self.assertIn("필요한 최소한의 SOURCE만 인용", PROMPT_V3)
+        self.assertIn("반드시 가장 직접적인 SOURCE 하나만 선택", PROMPT_V4)
+        self.assertIn("중복 SOURCE는 사용하거나 인용하지 마세요", PROMPT_V4)
+        self.assertIn("SOURCE별로 답변 문단을 만들거나", PROMPT_V4)
+        self.assertIn("필요한 최소한의 SOURCE만 인용", PROMPT_V4)
+
+    def test_prompt_defines_terms_before_riido_role_and_value(self) -> None:
+        self.assertIn("용어의 의미를 직접 물으면", PROMPT_V4)
+        self.assertIn("첫 문장에 그 용어 자체의 쉬운 의미", PROMPT_V4)
+        self.assertIn("그 용어가 어떤 종류인지", PROMPT_V4)
+        self.assertIn("핵심 사용 주체나 목적", PROMPT_V4)
+        self.assertIn("첫 문장만으로 이해할 수 있게 끝내고", PROMPT_V4)
+        self.assertIn("같은 문장에", PROMPT_V4)
+        self.assertIn("이어 붙이지 마세요", PROMPT_V4)
+        self.assertIn("둘째 문장으로 미루지 마세요", PROMPT_V4)
+        self.assertIn("용어 의미를 먼저 설명한 뒤", PROMPT_V4)
+        self.assertIn("뤼이도에서의 역할과 사용 가치", PROMPT_V4)
+
+    def test_prompt_does_not_invent_unsupported_term_definitions(self) -> None:
+        self.assertIn("일반 지식으로 정의를 보완하지 말고", PROMPT_V4)
+        self.assertIn("WITHHELD 여부를 판단하세요", PROMPT_V4)
 
     def test_prompt_forbids_links_urls_and_html(self) -> None:
-        self.assertEqual("v3", GENERATION_PROMPT_VERSION)
-        self.assertIn("Markdown 링크 문법과 HTML을 사용하지 마세요", PROMPT_V3)
-        self.assertIn("코드 블록이나 백틱 인라인 코드 안에 넣고", PROMPT_V3)
-        self.assertIn("그 밖의 URL은 본문에 쓰지 마세요", PROMPT_V3)
-        self.assertIn("별도 citations 영역", PROMPT_V3)
+        self.assertEqual("v4", GENERATION_PROMPT_VERSION)
+        self.assertIn("Markdown 링크 문법과 HTML을 사용하지 마세요", PROMPT_V4)
+        self.assertIn("코드 블록이나 백틱 인라인 코드 안에 넣고", PROMPT_V4)
+        self.assertIn("그 밖의 URL은 본문에 쓰지 마세요", PROMPT_V4)
+        self.assertIn("별도 citations 영역", PROMPT_V4)
 
     @staticmethod
     def _result(index: int) -> HybridRetrievalResult:
@@ -194,7 +210,7 @@ class GenerationContextTest(unittest.TestCase):
 
 
 class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
-    async def test_requests_structured_output_with_prompt_v3(self) -> None:
+    async def test_requests_structured_output_with_prompt_v4(self) -> None:
         expected = self._answerable_result()
         client = self._client_with_response(expected)
         generator = OpenAIGenerator(client=client)
@@ -205,7 +221,7 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(expected, result)
         client.responses.parse.assert_awaited_once_with(
             model=OPENAI_GENERATION_MODEL,
-            instructions=PROMPT_V3,
+            instructions=PROMPT_V4,
             input=build_generation_input("질문", sources),
             text_format=GenerationResult,
         )
