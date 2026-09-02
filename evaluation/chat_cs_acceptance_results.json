@@ -1,0 +1,1139 @@
+{
+  "executedAt": "2026-09-02T02:54:13.867969+00:00",
+  "repositoryRevision": "ffe8a68105248d671b550bdf0e3a4153946d90d7",
+  "casesVersion": "cs-v2",
+  "apiBaseUrl": "http://localhost:8000",
+  "models": {
+    "queryRewrite": "gpt-5.4-mini",
+    "embedding": "text-embedding-3-large",
+    "generation": "gpt-5.4-mini"
+  },
+  "prompts": {
+    "queryRewrite": "v2",
+    "generation": "v3"
+  },
+  "indexVersion": {
+    "id": 1121,
+    "version": "idx-20260829T100556338602Z-081f9c7a",
+    "status": "ACTIVE",
+    "createdAt": "2026-08-29T10:05:56.338602+00:00",
+    "activatedAt": "2026-08-29T10:06:01.248164+00:00"
+  },
+  "summary": {
+    "totalCaseCount": 15,
+    "passedCaseCount": 12,
+    "failedCaseCount": 3
+  },
+  "results": [
+    {
+      "id": "CS01",
+      "description": "외부 서비스의 사전식 설명 대신 뤼이도 안에서의 디스코드 역할과 가치를 안내",
+      "passed": false,
+      "conversationId": "d84d0d37-b11b-49e9-9bce-a07062fe04a4",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "디스코드는 뭐야?",
+          "passed": false,
+          "failures": [
+            "첫 문장에 독립적인 용어 정의 개념이 없음: alternatives=['팀', '사람', '사용자']"
+          ],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "d84d0d37-b11b-49e9-9bce-a07062fe04a4",
+            "ragRunId": "4d7fb9d3-0f9c-4f99-9c9e-955f9a67eef3",
+            "answer": {
+              "answerMarkdown": "디스코드는 뤼이도와 연동해서 실시간 알림을 받고, 디스코드에서의 논의를 뤼이도에 자동으로 기록할 수 있는 소통 도구입니다. [1] 뤼이도의 디스코드 연동을 사용하면 작업 변경 사항을 즉시 팀에 공유하고, 팀별로 지정한 디스코드 채널로 활동이 전달됩니다. [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "디스코드",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/discord.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "디스코드",
+                "sectionPath": [
+                  "디스코드 연동으로 얻는 핵심 가치"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/discord.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "디스코드는 뭐야?",
+            "resolvedQuery": "디스코드는 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "디스코드",
+              "디스코드"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS02",
+      "description": "슬랙 연동의 기능 나열뿐 아니라 사용하는 이유를 안내",
+      "passed": true,
+      "conversationId": "2834fb07-de11-40db-8a31-332dfd63f0c3",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "슬랙을 뤼이도와 연결하면 뭐가 좋아?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "2834fb07-de11-40db-8a31-332dfd63f0c3",
+            "ragRunId": "70d5108b-bf62-4590-bfd6-b30082e515c8",
+            "answer": {
+              "answerMarkdown": "슬랙을 뤼이도와 연결하면 작업 변경 사항과 논의가 서로 자동으로 이어져, 정보가 흩어지지 않고 팀에 더 빠르게 공유됩니다. [1]\n\n구체적으로는 뤼이도의 핵심 업데이트가 실시간으로 슬랙에 전달되고, 슬랙에서 한 논의가 뤼이도에 자동 기록됩니다. 또 실시간 알림, 양방향 댓글 동기화, 일일 리포트, 협업 채널 일원화 같은 핵심 가치를 얻을 수 있습니다. [1] [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "슬랙 연동으로 얻는 핵심 가치"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "슬랙을 뤼이도와 연결하면 뭐가 좋아?",
+            "resolvedQuery": "슬랙을 뤼이도와 연결하면 뭐가 좋아?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "슬랙",
+              "슬랙"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS03",
+      "description": "스프린트의 쉬운 정의와 적합한 사용 목적을 함께 안내",
+      "passed": false,
+      "conversationId": "2a6d1eb7-a9e7-448d-ade0-4284a48d10ee",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "스프린트는 언제 사용하면 좋아?",
+          "passed": false,
+          "failures": [
+            "status 불일치: expected=COMPLETED, actual=WITHHELD",
+            "답변에 기대 개념이 없음: alternatives=['스프린트']",
+            "답변에 기대 개념이 없음: alternatives=['주기', '기간']",
+            "답변에 기대 개념이 없음: alternatives=['집중', '계획', '실행', '회고', '준비', '관리', '배정']",
+            "Citation 개수 부족: minimum=1, actual=0",
+            "기대 Citation 문서가 없음: expected_any=['스프린트', '핵심 개념'], actual=[]",
+            "DB status 불일치: expected=COMPLETED, actual=WITHHELD"
+          ],
+          "httpStatus": 200,
+          "response": {
+            "status": "WITHHELD",
+            "conversationId": "2a6d1eb7-a9e7-448d-ade0-4284a48d10ee",
+            "ragRunId": "1b6e0691-015a-4399-8e4d-db52150f2adf",
+            "answer": null,
+            "withheld": {
+              "reasonCode": "INSUFFICIENT_EVIDENCE",
+              "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+            },
+            "citations": []
+          },
+          "db": {
+            "status": "WITHHELD",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "스프린트는 언제 사용하면 좋아?",
+            "resolvedQuery": "스프린트는 언제 사용하면 좋아?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+            "errorCode": null,
+            "citationValidated": null,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 0,
+            "citationDocumentTitles": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS04",
+      "description": "워크스페이스와 팀의 범위 및 역할 차이를 초보자 관점에서 설명",
+      "passed": true,
+      "conversationId": "f8c5c89c-5e91-43f1-b780-08cb2068209b",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "워크스페이스랑 팀은 뭐가 달라?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "f8c5c89c-5e91-43f1-b780-08cb2068209b",
+            "ragRunId": "3005350f-1887-444d-977c-c5f4b2a23f0a",
+            "answer": {
+              "answerMarkdown": "워크스페이스는 여러 팀과 프로젝트를 한 공간에서 관리하는 하나의 조직이고, 팀은 그 워크스페이스 안에서 실제 작업이 이루어지는 공간입니다. [1] [2]\n\n워크스페이스는 하나의 기업이나 조직으로 간주할 수 있으며, 한 사용자는 하나 이상의 워크스페이스에 속할 수 있습니다. 반면 팀은 하나의 워크스페이스 안에서 여러 개를 만들 수 있고, 프로젝트 목적이나 기능별로 나눌 수 있습니다. [2] [3]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "워크스페이스",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/workspaces/overview.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "핵심 개념",
+                "sectionPath": [
+                  "기본 개념"
+                ],
+                "sourceUrl": "https://docs.riido.io/getting-started/core-concepts.md"
+              },
+              {
+                "citationNumber": 3,
+                "documentTitle": "팀",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/teams/overview.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "워크스페이스랑 팀은 뭐가 달라?",
+            "resolvedQuery": "워크스페이스랑 팀은 뭐가 달라?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 3,
+            "citationDocumentTitles": [
+              "워크스페이스",
+              "핵심 개념",
+              "팀"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS05",
+      "description": "저장된 보기가 해결하는 반복 필터링 불편을 설명",
+      "passed": true,
+      "conversationId": "2bfdb698-ce80-4a09-93bf-e5337e09f5be",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "저장된 보기는 왜 쓰는 거야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "2bfdb698-ce80-4a09-93bf-e5337e09f5be",
+            "ragRunId": "eebfd79e-03c1-4ddd-a613-eae1b438c893",
+            "answer": {
+              "answerMarkdown": "저장된 보기는 자주 쓰는 필터나 정렬 조건을 저장해두고, 나중에 다시 빠르게 불러와 쓰기 위해 사용합니다. 매번 같은 조건을 다시 설정하는 번거로움을 줄여주고, 여러 팀이나 다양한 업무 흐름을 함께 관리할 때 효율적으로 작업을 확인할 수 있습니다. [1]\n\n또한 개인용 보기로 쓰거나 팀 전체에 공개해 협업 기준을 맞추는 용도로도 활용할 수 있습니다. [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "저장된 보기",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "저장된 보기",
+                "sectionPath": [
+                  "공개 범위"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "저장된 보기는 왜 쓰는 거야?",
+            "resolvedQuery": "저장된 보기는 왜 쓰는 거야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "저장된 보기",
+              "저장된 보기"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS06",
+      "description": "비공개 팀이 필요한 상황과 접근 제한을 함께 안내",
+      "passed": true,
+      "conversationId": "add13ca0-25b3-415f-b00a-eeb87515c801",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "비공개 팀은 어떤 상황에서 사용해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "add13ca0-25b3-415f-b00a-eeb87515c801",
+            "ragRunId": "3d2f1b4f-4dc9-4201-9ac3-d72e611eac52",
+            "answer": {
+              "answerMarkdown": "비공개 팀은 일부 멤버만 접근해야 하는 작업을 안전하게 관리할 때 사용합니다. 예를 들어 고객 데이터, HR, 재무 관리처럼 민감한 업무에 적합합니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "비공개 팀",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/teams/private-teams.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "비공개 팀은 어떤 상황에서 사용해?",
+            "resolvedQuery": "비공개 팀은 어떤 상황에서 사용해?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "비공개 팀"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS07",
+      "description": "대시보드가 제공하는 전체 현황 파악과 우선순위 판단 가치를 설명",
+      "passed": true,
+      "conversationId": "f4e9d6ec-214b-43f1-ad9c-509515589682",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "팀 대시보드는 왜 필요한 거야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "f4e9d6ec-214b-43f1-ad9c-509515589682",
+            "ragRunId": "e30d28d5-b58d-49d9-874c-92caa527b584",
+            "answer": {
+              "answerMarkdown": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지 한눈에 보여주기 때문에 필요합니다. 이를 통해 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 주요 링크를 빠르게 확인할 수 있고, 업무 흐름과 우선순위를 명확히 정리할 수 있습니다. [1]\n\n또한 수많은 작업과 멤버 속에서도 중요한 정보를 놓치지 않도록 도와주며, 프로젝트의 전체 흐름과 우선순위가 높은 항목을 빠르게 파악하게 해줍니다. [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "대시보드",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/dashboards.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "핵심 개념",
+                "sectionPath": [
+                  "효율적인 프로젝트 관리"
+                ],
+                "sourceUrl": "https://docs.riido.io/getting-started/core-concepts.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "팀 대시보드는 왜 필요한 거야?",
+            "resolvedQuery": "팀 대시보드는 왜 필요한 거야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "대시보드",
+              "핵심 개념"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS08",
+      "description": "뤼이도 미팅이 단순 기록이 아니라 실행과 연결되는 이유를 설명",
+      "passed": true,
+      "conversationId": "c79d23a2-8b79-4f98-8569-78cbb45b4d4c",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "뤼이도 미팅은 일반 회의록이랑 뭐가 달라?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "c79d23a2-8b79-4f98-8569-78cbb45b4d4c",
+            "ragRunId": "6400e576-e7af-4154-bee4-3066aa89afa2",
+            "answer": {
+              "answerMarkdown": "뤼이도 미팅은 단순한 회의 기록이 아니라 실행을 위한 협업 도구라는 점이 다릅니다. 프로젝트, 목표, 작업과 직접 연결되어 있어서, 어떤 미팅에서 어떤 작업이 논의되었는지 바로 확인할 수 있습니다. [1]\n\n또한 미팅에서 논의된 작업을 직접 연결할 수 있고, 작업 상세 페이지에서도 해당 작업이 어떤 미팅에서 다뤄졌는지 확인할 수 있어 미팅과 실행을 자연스럽게 이어줍니다. [2]\n\n특히 데일리 스탠드업, 회고 같은 짧고 명확한 진행 중심 회의에 최적화되어 있고, 미팅 템플릿으로 빠르게 회의를 시작할 수 있습니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "미팅",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/meetings/overview.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "미팅",
+                "sectionPath": [
+                  "작업과 연결"
+                ],
+                "sourceUrl": "https://docs.riido.io/meetings/overview.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "뤼이도 미팅은 일반 회의록이랑 뭐가 달라?",
+            "resolvedQuery": "뤼이도 미팅은 일반 회의록이랑 뭐가 달라?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "미팅",
+              "미팅"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS09",
+      "description": "작업 관계도의 구조 시각화 목적과 확인 가능한 관계를 설명",
+      "passed": true,
+      "conversationId": "bc572f74-e16f-487c-a4b2-3a5ebfc44754",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "작업 관계도는 언제 보면 유용해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "bc572f74-e16f-487c-a4b2-3a5ebfc44754",
+            "ragRunId": "40c8f42d-ed42-41db-928b-ee7764782d98",
+            "answer": {
+              "answerMarkdown": "작업 관계도는 팀의 프로젝트 구조를 한눈에 파악하고, 여러 작업이 어떤 계층으로 연결되어 있는지 확인할 때 유용합니다. 특히 현재 어떤 목표 아래 어떤 작업들이 진행 중인지, 각 작업이 어떤 상위 단위에 속해 있는지 살펴볼 때 도움이 됩니다. [1]\n\n또한 작업 상세 페이지에서는 선택한 작업을 중심으로 상위·하위 작업만 집중해서 볼 수 있어, 지금 진행 중인 업무가 전체 목표 안에서 어디에 있는지 이해할 때 유용합니다. [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "작업 관계도",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/diagram.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "작업 관계도",
+                "sectionPath": [
+                  "보기 위치"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/diagram.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "작업 관계도는 언제 보면 유용해?",
+            "resolvedQuery": "작업 관계도는 언제 보면 유용해?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "작업 관계도",
+              "작업 관계도"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS10",
+      "description": "구글 캘린더 연동이 해결하는 중복 일정 관리 문제를 설명",
+      "passed": true,
+      "conversationId": "13f40f55-202c-4037-a1c0-c1ba0b1cf4db",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "구글 캘린더 연동은 왜 필요한 거야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "13f40f55-202c-4037-a1c0-c1ba0b1cf4db",
+            "ragRunId": "4841e640-8944-4a37-b071-49b623e141a2",
+            "answer": {
+              "answerMarkdown": "구글 캘린더 연동은 뤼이도 내부 미팅과 구글 캘린더의 일정을 양방향으로 동기화해서, 두 시스템의 일정이 항상 하나의 소스로 유지되도록 하기 위해 필요합니다. 이렇게 하면 일정을 따로 복사하거나 두 번 입력할 필요가 없고, 뤼이도와 구글 캘린더 어디에서 수정해도 서로 즉시 반영됩니다.[1][2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "구글 캘린더",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "자동화",
+                "sectionPath": [
+                  "구글 캘린더 연동"
+                ],
+                "sourceUrl": "https://docs.riido.io/meetings/automations.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+            "resolvedQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "구글 캘린더",
+              "자동화"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS11",
+      "description": "필터가 많은 작업에서 필요한 정보를 찾도록 돕는 목적을 설명",
+      "passed": true,
+      "conversationId": "f594f23c-47ed-49dd-8951-f0c52e0638a2",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "필터는 어떤 때 쓰면 돼?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "f594f23c-47ed-49dd-8951-f0c52e0638a2",
+            "ragRunId": "b0ea2a44-27fd-4253-bafd-7331eb34c60e",
+            "answer": {
+              "answerMarkdown": "작업이나 미팅이 많아져서 필요한 정보만 골라보고 싶을 때 필터를 사용하시면 됩니다. 뤼이도에서는 담당자, 상태, 마감일 등 다양한 조건으로 필터를 적용해 복잡한 데이터 속에서도 원하는 항목만 빠르게 찾을 수 있습니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "필터",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/data/filters.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "필터는 어떤 때 쓰면 돼?",
+            "resolvedQuery": "필터는 어떤 때 쓰면 돼?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "필터"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS12",
+      "description": "프로젝트·목표·작업을 큰 방향에서 실행 단위까지 구분",
+      "passed": true,
+      "conversationId": "4867fa1e-82c6-4d9e-812b-de4ae6dc3479",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "프로젝트, 목표, 작업은 각각 뭐가 달라?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "4867fa1e-82c6-4d9e-812b-de4ae6dc3479",
+            "ragRunId": "32a484c8-36f9-4c0e-a85d-d791a38d2adf",
+            "answer": {
+              "answerMarkdown": "프로젝트, 목표, 작업은 업무의 크기와 역할이 다릅니다. 프로젝트는 팀 전체가 집중해야 하는 큰 단위의 업무이고, 목표는 프로젝트 안에서 일정 기간 안에 달성해야 하는 중간 단위의 목표, 작업은 실제로 수행되는 실행 단위의 업무입니다. [1]\n\n정리하면, 프로젝트 안에 목표가 있고, 목표는 하나 이상의 작업으로 구성됩니다. 작업은 담당자, 일정, 우선순위 같은 세부 속성을 바탕으로 관리됩니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "실행: 작업",
+                "sectionPath": [
+                  "구조"
+                ],
+                "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "프로젝트, 목표, 작업은 각각 뭐가 달라?",
+            "resolvedQuery": "프로젝트, 목표, 작업은 각각 뭐가 달라?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "실행: 작업"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS13",
+      "description": "슬랙이라는 용어 자체를 먼저 설명한 뒤 뤼이도 연동 역할을 안내",
+      "passed": false,
+      "conversationId": "a4a7baff-29ef-44dc-980a-551b40e7ad75",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "슬랙은 뭐야?",
+          "passed": false,
+          "failures": [
+            "첫 문장에 독립적인 용어 정의 개념이 없음: alternatives=['팀', '사람', '사용자']",
+            "첫 문장에 독립적인 용어 정의 개념이 없음: alternatives=['소통', '커뮤니케이션']",
+            "첫 문장에 독립적인 용어 정의 개념이 없음: alternatives=['도구', '서비스']"
+          ],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "a4a7baff-29ef-44dc-980a-551b40e7ad75",
+            "ragRunId": "0b1d0d39-9ac3-4924-ae76-1aad2e922213",
+            "answer": {
+              "answerMarkdown": "슬랙 연동은 뤼이도의 핵심 업데이트를 실시간으로 슬랙에 전달하고, 슬랙에서의 논의도 뤼이도에 자동으로 기록해 주는 기능입니다. [1]\n\n또한 워크스페이스 단위로 연동한 뒤, 팀별로 알림을 보낼 슬랙 채널을 설정할 수 있습니다. [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "연동 설정 가이드"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "슬랙은 뭐야?",
+            "resolvedQuery": "슬랙은 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "슬랙",
+              "슬랙"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS14",
+      "description": "스프린트의 기간 기반 업무 단위 의미를 먼저 설명한 뒤 활용 가치를 안내",
+      "passed": true,
+      "conversationId": "511d15b5-4a84-4607-8a56-6757d46f2917",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "스프린트가 뭐야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "511d15b5-4a84-4607-8a56-6757d46f2917",
+            "ragRunId": "e9ba3f5e-4955-40c6-acee-aec281156590",
+            "answer": {
+              "answerMarkdown": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다. [1]\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "스프린트",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/sprints/overview.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "스프린트가 뭐야?",
+            "resolvedQuery": "스프린트가 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "스프린트"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "CS15",
+      "description": "저장된 보기의 필터 조건 저장 기능을 먼저 정의한 뒤 사용 이점을 안내",
+      "passed": true,
+      "conversationId": "d9c93fc3-89cf-4a4f-aee5-463cfb789233",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "저장된 보기가 뭐야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "d9c93fc3-89cf-4a4f-aee5-463cfb789233",
+            "ragRunId": "e9a979b2-4592-477e-b746-1c59caddb13d",
+            "answer": {
+              "answerMarkdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고, 나중에 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해서 자주 확인하는 조건을 반복 없이 빠르게 볼 수 있게 도와줍니다. [1]\n\n또한 보기를 만들 때 개인용으로만 사용할지, 팀 전체에 공개할지도 선택할 수 있습니다. [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "저장된 보기",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "저장된 보기",
+                "sectionPath": [
+                  "공개 범위"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "저장된 보기가 뭐야?",
+            "resolvedQuery": "저장된 보기가 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "저장된 보기",
+              "저장된 보기"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "recheckedAt": "2026-09-02T02:55:12.791061+00:00"
+}

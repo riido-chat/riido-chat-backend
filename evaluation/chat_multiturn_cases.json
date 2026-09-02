@@ -1,0 +1,343 @@
+{
+  "version": "v3",
+  "cases": [
+    {
+      "id": "MT01",
+      "description": "단일 대상을 대명사로 이어서 설정 방법 질문",
+      "turns": [
+        {
+          "question": "스프린트가 뭐야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "그건 어떻게 설정해?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["스프린트", "설정"]
+        }
+      ]
+    },
+    {
+      "id": "MT02",
+      "description": "명시된 후속 대상의 공개 범위 질문",
+      "turns": [
+        {
+          "question": "저장된 보기가 뭐야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "그 보기는 나만 볼 수 있어?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["저장된 보기"]
+        }
+      ]
+    },
+    {
+      "id": "MT03",
+      "description": "이전 문맥을 버리는 독립적인 새 주제",
+      "turns": [
+        {
+          "question": "스프린트가 뭐야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "슬랙 연동은 어떻게 해?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "NEW_TOPIC",
+          "expectedSelectedTurnNos": [],
+          "resolvedQueryKeywords": ["슬랙", "연동"]
+        }
+      ]
+    },
+    {
+      "id": "MT04",
+      "description": "가리키는 대상이 둘 이상인 모호한 후속 질문",
+      "turns": [
+        {
+          "question": "프로젝트와 목표는 어떤 차이가 있어?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "그건 어떻게 삭제해?",
+          "expectedStatus": "WITHHELD",
+          "expectedWithheldReason": "AMBIGUOUS_QUESTION",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": []
+        }
+      ]
+    },
+    {
+      "id": "MT05",
+      "description": "비공개 팀 단일 대상을 대명사로 이어서 설정 질문",
+      "turns": [
+        {
+          "question": "비공개 팀은 뭐야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "그건 어떻게 설정해?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["비공개 팀", "설정"]
+        }
+      ]
+    },
+    {
+      "id": "MT06",
+      "description": "저장된 보기 단일 대상을 대명사로 이어서 생성 질문",
+      "turns": [
+        {
+          "question": "저장된 보기가 뭐야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "그건 어떻게 만들어?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["저장된 보기"]
+        }
+      ]
+    },
+    {
+      "id": "MT07",
+      "description": "휴지통 위치를 생략한 복구 질문",
+      "turns": [
+        {
+          "question": "뤼이도 휴지통은 어떤 기능이야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "거기서 삭제한 작업을 어떻게 복구해?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["휴지통", "복구"]
+        }
+      ]
+    },
+    {
+      "id": "MT08",
+      "description": "작업 상태 대상을 생략한 추가 방법 질문",
+      "turns": [
+        {
+          "question": "팀의 작업 상태는 뭐야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "추가하려면 어디서 설정해?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["작업 상태", "설정"]
+        }
+      ]
+    },
+    {
+      "id": "MT09",
+      "description": "슬랙 연동 뒤 알림 범위 조정 질문",
+      "turns": [
+        {
+          "question": "슬랙 연동은 어떤 기능을 제공해?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "알림이 너무 많으면 어떻게 줄여?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["슬랙", "알림"]
+        }
+      ]
+    },
+    {
+      "id": "MT10",
+      "description": "구글 캘린더 연동 뒤 동기화 범위 질문",
+      "turns": [
+        {
+          "question": "구글 캘린더 연동은 어떤 기능이야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "작업 마감일도 동기화돼?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["구글 캘린더", "작업", "마감일"]
+        }
+      ]
+    },
+    {
+      "id": "MT11",
+      "description": "여러 연동 중 현재 질문이 슬랙을 명시하는 후속 질문",
+      "turns": [
+        {
+          "question": "슬랙과 디스코드는 각각 어떻게 연동해?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "그중 슬랙에서 비공개 채널은 어떻게 연결해?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["슬랙", "비공개 채널"]
+        }
+      ]
+    },
+    {
+      "id": "MT12",
+      "description": "여러 작업 계층 중 대상을 고르지 않은 후속 질문",
+      "turns": [
+        {
+          "question": "프로젝트, 목표, 작업은 어떤 관계야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "그중 하나를 삭제하면 어떻게 돼?",
+          "expectedStatus": "WITHHELD",
+          "expectedWithheldReason": "AMBIGUOUS_QUESTION",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": []
+        }
+      ]
+    },
+    {
+      "id": "MT13",
+      "description": "저장된 보기 문맥을 버리고 휴지통으로 전환",
+      "turns": [
+        {
+          "question": "저장된 보기가 뭐야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "휴지통에서 삭제한 작업을 어떻게 복구해?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "NEW_TOPIC",
+          "expectedSelectedTurnNos": [],
+          "resolvedQueryKeywords": ["휴지통", "복구"]
+        }
+      ]
+    },
+    {
+      "id": "MT14",
+      "description": "범위 밖 보류 뒤 독립적인 스프린트 주제로 전환",
+      "turns": [
+        {
+          "question": "뤼이도에서 직원 급여를 계산할 수 있어?",
+          "expectedStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        },
+        {
+          "question": "스프린트 시작 요일은 어떻게 바꿔?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "NEW_TOPIC",
+          "expectedSelectedTurnNos": [],
+          "resolvedQueryKeywords": ["스프린트", "시작 요일"]
+        }
+      ]
+    },
+    {
+      "id": "MT15",
+      "description": "범위 밖 보류 질문의 대상을 다시 가리키는 후속 질문",
+      "turns": [
+        {
+          "question": "뤼이도에서 직원 급여를 계산할 수 있어?",
+          "expectedStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        },
+        {
+          "question": "그 기능은 어디서 설정해?",
+          "expectedStatus": "WITHHELD",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["급여", "설정"]
+        }
+      ]
+    },
+    {
+      "id": "MT16",
+      "description": "멤버 비활성화 뒤 재초대 계정 처리 질문",
+      "turns": [
+        {
+          "question": "워크스페이스 멤버를 비활성화하면 어떻게 돼?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "나중에 다시 초대하면 새 계정이 생겨?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["멤버", "다시 초대"]
+        }
+      ]
+    },
+    {
+      "id": "MT17",
+      "description": "구독 취소 뒤 데이터 유지 여부 질문",
+      "turns": [
+        {
+          "question": "뤼이도 구독을 취소하면 어떻게 돼?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "기존 데이터도 삭제돼?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["구독", "취소", "데이터", "삭제"]
+        }
+      ]
+    },
+    {
+      "id": "MT18",
+      "description": "최근 5턴 안의 구글 캘린더 연동을 선택하는 긴 대화",
+      "turns": [
+        {
+          "question": "스프린트가 뭐야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "슬랙 연동은 어떤 기능이야?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "NEW_TOPIC",
+          "expectedSelectedTurnNos": []
+        },
+        {
+          "question": "저장된 보기는 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "NEW_TOPIC",
+          "expectedSelectedTurnNos": []
+        },
+        {
+          "question": "휴지통은 어떤 기능이야?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "NEW_TOPIC",
+          "expectedSelectedTurnNos": []
+        },
+        {
+          "question": "댓글은 어떻게 작성해?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "NEW_TOPIC",
+          "expectedSelectedTurnNos": []
+        },
+        {
+          "question": "구글 캘린더 연동은 어떤 기능이야?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "NEW_TOPIC",
+          "expectedSelectedTurnNos": []
+        },
+        {
+          "question": "그 연동에서 작업 마감일도 동기화돼?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [6],
+          "resolvedQueryKeywords": ["구글 캘린더", "작업", "마감일"]
+        }
+      ]
+    }
+  ]
+}

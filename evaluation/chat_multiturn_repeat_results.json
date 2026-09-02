@@ -1,0 +1,118 @@
+{
+  "version": "v1",
+  "repositoryRevision": "ffe8a68105248d671b550bdf0e3a4153946d90d7",
+  "casesVersion": "v3",
+  "repetitionCount": 3,
+  "summary": [
+    {
+      "id": "MT01",
+      "passedCount": 0,
+      "failedCount": 3,
+      "classification": "STABLE_FAILURE"
+    },
+    {
+      "id": "MT09",
+      "passedCount": 2,
+      "failedCount": 1,
+      "classification": "FLAKY_CONTEXT_SELECTION"
+    },
+    {
+      "id": "MT15",
+      "passedCount": 0,
+      "failedCount": 3,
+      "classification": "STABLE_FAILURE"
+    }
+  ],
+  "runs": [
+    {
+      "run": 1,
+      "executedAt": "2026-09-01T08:47:12.836792+00:00",
+      "results": [
+        {
+          "id": "MT01",
+          "passed": false,
+          "status": "WITHHELD",
+          "withheldReason": "AMBIGUOUS_QUESTION",
+          "resolvedQuery": null,
+          "selectedTurnNos": []
+        },
+        {
+          "id": "MT09",
+          "passed": false,
+          "status": "COMPLETED",
+          "resolvedQuery": "알림이 너무 많으면 어떻게 줄여?",
+          "selectedTurnNos": [],
+          "sourceDocument": "디스코드"
+        },
+        {
+          "id": "MT15",
+          "passed": false,
+          "status": "WITHHELD",
+          "withheldReason": "AMBIGUOUS_QUESTION",
+          "resolvedQuery": null,
+          "selectedTurnNos": []
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "executedAt": "2026-09-01T08:49:52.874571+00:00",
+      "results": [
+        {
+          "id": "MT01",
+          "passed": false,
+          "status": "WITHHELD",
+          "withheldReason": "AMBIGUOUS_QUESTION",
+          "resolvedQuery": null,
+          "selectedTurnNos": []
+        },
+        {
+          "id": "MT09",
+          "passed": true,
+          "status": "COMPLETED",
+          "resolvedQuery": "슬랙 연동에서 알림이 너무 많으면 어떻게 줄이나요?",
+          "selectedTurnNos": [1],
+          "sourceDocument": "슬랙"
+        },
+        {
+          "id": "MT15",
+          "passed": false,
+          "status": "WITHHELD",
+          "withheldReason": "AMBIGUOUS_QUESTION",
+          "resolvedQuery": null,
+          "selectedTurnNos": []
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "executedAt": "2026-09-01T08:50:21.800071+00:00",
+      "results": [
+        {
+          "id": "MT01",
+          "passed": false,
+          "status": "WITHHELD",
+          "withheldReason": "AMBIGUOUS_QUESTION",
+          "resolvedQuery": null,
+          "selectedTurnNos": []
+        },
+        {
+          "id": "MT09",
+          "passed": true,
+          "status": "COMPLETED",
+          "resolvedQuery": "슬랙 연동의 알림이 너무 많으면 어떻게 줄이나요?",
+          "selectedTurnNos": [1],
+          "sourceDocument": "슬랙"
+        },
+        {
+          "id": "MT15",
+          "passed": false,
+          "status": "WITHHELD",
+          "withheldReason": "AMBIGUOUS_QUESTION",
+          "resolvedQuery": null,
+          "selectedTurnNos": []
+        }
+      ]
+    }
+  ]
+}
