@@ -1,116 +1,139 @@
 {
-  "version": "v1",
-  "repositoryRevision": "ffe8a68105248d671b550bdf0e3a4153946d90d7",
+  "version": "v2",
+  "repositoryRevision": "820b291d62c9c025817339f722dae5ecbbdc8c7e",
   "casesVersion": "v3",
+  "queryRewritePromptVersion": "v3",
   "repetitionCount": 3,
   "summary": [
     {
       "id": "MT01",
-      "passedCount": 0,
-      "failedCount": 3,
-      "classification": "STABLE_FAILURE"
+      "contextSelectionPassedCount": 3,
+      "contextSelectionFailedCount": 0,
+      "casePassedCount": 0,
+      "classification": "STABLE_CONTEXT_SELECTION",
+      "downstreamFailure": "ANSWER_GENERATION_CITATION_LIMIT"
     },
     {
       "id": "MT09",
-      "passedCount": 2,
-      "failedCount": 1,
-      "classification": "FLAKY_CONTEXT_SELECTION"
+      "contextSelectionPassedCount": 3,
+      "contextSelectionFailedCount": 0,
+      "casePassedCount": 3,
+      "classification": "STABLE_CONTEXT_SELECTION"
     },
     {
       "id": "MT15",
-      "passedCount": 0,
-      "failedCount": 3,
-      "classification": "STABLE_FAILURE"
+      "contextSelectionPassedCount": 3,
+      "contextSelectionFailedCount": 0,
+      "casePassedCount": 3,
+      "classification": "STABLE_CONTEXT_SELECTION"
     }
   ],
   "runs": [
     {
       "run": 1,
-      "executedAt": "2026-09-01T08:47:12.836792+00:00",
+      "executedAt": "2026-09-02T07:40:16.738765+00:00",
       "results": [
         {
           "id": "MT01",
-          "passed": false,
+          "contextSelectionPassed": true,
+          "casePassed": false,
           "status": "WITHHELD",
-          "withheldReason": "AMBIGUOUS_QUESTION",
-          "resolvedQuery": null,
-          "selectedTurnNos": []
+          "withheldReason": "UNVERIFIABLE_ANSWER",
+          "contextStrategy": "FOLLOW_UP_WINDOW",
+          "resolvedQuery": "스프린트는 어떻게 설정하나요?",
+          "selectedTurnNos": [1]
         },
         {
           "id": "MT09",
-          "passed": false,
+          "contextSelectionPassed": true,
+          "casePassed": true,
           "status": "COMPLETED",
-          "resolvedQuery": "알림이 너무 많으면 어떻게 줄여?",
-          "selectedTurnNos": [],
-          "sourceDocument": "디스코드"
+          "contextStrategy": "FOLLOW_UP_WINDOW",
+          "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?",
+          "selectedTurnNos": [1],
+          "sourceDocument": "슬랙"
         },
         {
           "id": "MT15",
-          "passed": false,
+          "contextSelectionPassed": true,
+          "casePassed": true,
           "status": "WITHHELD",
-          "withheldReason": "AMBIGUOUS_QUESTION",
-          "resolvedQuery": null,
-          "selectedTurnNos": []
+          "withheldReason": "OUT_OF_SCOPE",
+          "contextStrategy": "FOLLOW_UP_WINDOW",
+          "resolvedQuery": "뤼이도 직원 급여 계산 기능은 어디서 설정하나요?",
+          "selectedTurnNos": [1]
         }
       ]
     },
     {
       "run": 2,
-      "executedAt": "2026-09-01T08:49:52.874571+00:00",
+      "executedAt": "2026-09-02T07:43:25.867384+00:00",
       "results": [
         {
           "id": "MT01",
-          "passed": false,
+          "contextSelectionPassed": true,
+          "casePassed": false,
           "status": "WITHHELD",
-          "withheldReason": "AMBIGUOUS_QUESTION",
-          "resolvedQuery": null,
-          "selectedTurnNos": []
+          "withheldReason": "UNVERIFIABLE_ANSWER",
+          "contextStrategy": "FOLLOW_UP_WINDOW",
+          "resolvedQuery": "스프린트는 어떻게 설정하나요?",
+          "selectedTurnNos": [1]
         },
         {
           "id": "MT09",
-          "passed": true,
+          "contextSelectionPassed": true,
+          "casePassed": true,
           "status": "COMPLETED",
-          "resolvedQuery": "슬랙 연동에서 알림이 너무 많으면 어떻게 줄이나요?",
+          "contextStrategy": "FOLLOW_UP_WINDOW",
+          "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?",
           "selectedTurnNos": [1],
           "sourceDocument": "슬랙"
         },
         {
           "id": "MT15",
-          "passed": false,
+          "contextSelectionPassed": true,
+          "casePassed": true,
           "status": "WITHHELD",
-          "withheldReason": "AMBIGUOUS_QUESTION",
-          "resolvedQuery": null,
-          "selectedTurnNos": []
+          "withheldReason": "OUT_OF_SCOPE",
+          "contextStrategy": "FOLLOW_UP_WINDOW",
+          "resolvedQuery": "뤼이도 직원 급여 계산 기능은 어디서 설정하나요?",
+          "selectedTurnNos": [1]
         }
       ]
     },
     {
       "run": 3,
-      "executedAt": "2026-09-01T08:50:21.800071+00:00",
+      "executedAt": "2026-09-02T07:43:52.969876+00:00",
       "results": [
         {
           "id": "MT01",
-          "passed": false,
+          "contextSelectionPassed": true,
+          "casePassed": false,
           "status": "WITHHELD",
-          "withheldReason": "AMBIGUOUS_QUESTION",
-          "resolvedQuery": null,
-          "selectedTurnNos": []
+          "withheldReason": "UNVERIFIABLE_ANSWER",
+          "contextStrategy": "FOLLOW_UP_WINDOW",
+          "resolvedQuery": "스프린트는 어떻게 설정하나요?",
+          "selectedTurnNos": [1]
         },
         {
           "id": "MT09",
-          "passed": true,
+          "contextSelectionPassed": true,
+          "casePassed": true,
           "status": "COMPLETED",
-          "resolvedQuery": "슬랙 연동의 알림이 너무 많으면 어떻게 줄이나요?",
+          "contextStrategy": "FOLLOW_UP_WINDOW",
+          "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?",
           "selectedTurnNos": [1],
           "sourceDocument": "슬랙"
         },
         {
           "id": "MT15",
-          "passed": false,
+          "contextSelectionPassed": true,
+          "casePassed": true,
           "status": "WITHHELD",
-          "withheldReason": "AMBIGUOUS_QUESTION",
-          "resolvedQuery": null,
-          "selectedTurnNos": []
+          "withheldReason": "OUT_OF_SCOPE",
+          "contextStrategy": "FOLLOW_UP_WINDOW",
+          "resolvedQuery": "뤼이도 직원 급여 계산 기능은 어디서 설정하나요?",
+          "selectedTurnNos": [1]
         }
       ]
     }
