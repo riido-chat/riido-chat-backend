@@ -2,9 +2,9 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.rag.model_trace import ModelCallTrace
 from retrieval.models import RetrievalChunk
@@ -23,6 +23,56 @@ class GenerationWithheldReason(str, Enum):
     INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE"
     AMBIGUOUS_QUESTION = "AMBIGUOUS_QUESTION"
     OUT_OF_SCOPE = "OUT_OF_SCOPE"
+
+
+class GenerationAnswerScope(str, Enum):
+    """Source 선택 단계가 판정한 질문의 답변 범위."""
+
+    SUMMARY = "SUMMARY"
+    MULTI_DETAIL = "MULTI_DETAIL"
+
+
+class GenerationEvidenceRequirement(BaseModel):
+    """질문이 요구한 정보 단위와 이를 직접 뒷받침하는 Source."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    information_unit: str = Field(min_length=1)
+    source_ids: List[str] = Field(min_length=1, max_length=5)
+
+    @model_validator(mode="after")
+    def validate_source_ids(self) -> "GenerationEvidenceRequirement":
+        if len(self.source_ids) != len(set(self.source_ids)):
+            raise ValueError("정보 단위의 Source ID는 중복될 수 없습니다.")
+        return self
+
+
+class GenerationSourcePlan(BaseModel):
+    """답변 생성 전에 질문 범위와 필요한 근거를 확정하는 내부 결과."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    status: GenerationStatus
+    answer_scope: GenerationAnswerScope
+    evidence_requirements: List[GenerationEvidenceRequirement] = Field(
+        max_length=8
+    )
+    withheld_reason: Optional[GenerationWithheldReason]
+
+    @model_validator(mode="after")
+    def validate_status_fields(self) -> "GenerationSourcePlan":
+        if self.status == GenerationStatus.ANSWERABLE:
+            if not self.evidence_requirements:
+                raise ValueError("ANSWERABLE에는 정보 단위별 근거가 필요합니다.")
+            if self.withheld_reason is not None:
+                raise ValueError("ANSWERABLE에는 withheld_reason을 사용할 수 없습니다.")
+            return self
+
+        if self.evidence_requirements:
+            raise ValueError("WITHHELD에는 정보 단위별 근거를 사용할 수 없습니다.")
+        if self.withheld_reason is None:
+            raise ValueError("WITHHELD에는 withheld_reason이 필요합니다.")
+        return self
 
 
 class GenerationResult(BaseModel):
