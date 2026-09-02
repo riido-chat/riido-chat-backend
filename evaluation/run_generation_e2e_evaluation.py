@@ -2,16 +2,20 @@
 
 import asyncio
 import json
+import os
+import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from time import perf_counter
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from app.database.models import IndexVersion
 from app.database.session import dispose_engine, get_session_factory
 from app.rag.generation_service import GenerationService
 from evaluation.evaluate_retrieval import DEFAULT_GROUND_TRUTH_PATH
@@ -19,10 +23,14 @@ from evaluation.run_bm25_evaluation import (
     DEFAULT_QUESTIONS_PATH,
     load_questions,
 )
-from generation.generator import OPENAI_GENERATION_MODEL, OpenAIGenerator
+from generation.generator import (
+    GENERATION_PROMPT_VERSION,
+    OPENAI_GENERATION_MODEL,
+    OpenAIGenerator,
+)
 from generation.models import FinalGenerationResult
 from retrieval.bm25_retriever import BM25Retriever
-from retrieval.embedding import OpenAIEmbedder
+from retrieval.embedding import OPENAI_EMBEDDING_MODEL, OpenAIEmbedder
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.models import HybridRetrievalResult
 from retrieval.pgvector_store import PgVectorStore
@@ -30,6 +38,23 @@ from retrieval.vector_retriever import VectorRetriever
 
 
 DEFAULT_OUTPUT_PATH = PROJECT_ROOT / "evaluation/generation_e2e_results.json"
+
+
+def detect_repository_revision() -> Optional[str]:
+    configured = os.getenv("GITHUB_SHA")
+    if configured:
+        return configured
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=PROJECT_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return result.stdout.strip() or None
 
 
 def load_ground_truth(
@@ -178,11 +203,30 @@ def summarize(results: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
 def save_results(
     results: Sequence[Dict[str, Any]],
     output_path: Path = DEFAULT_OUTPUT_PATH,
+    metadata: Optional[Dict[str, Any]] = None,
 ) -> Path:
     """질문별 결과와 전체 집계를 UTF-8 JSON으로 저장한다."""
 
     payload = {
+        "executed_at": (
+            None if metadata is None else metadata.get("executed_at")
+        ),
+        "repository_revision": (
+            None if metadata is None else metadata.get("repository_revision")
+        ),
         "model": OPENAI_GENERATION_MODEL,
+        "models": {
+            "embedding": OPENAI_EMBEDDING_MODEL,
+            "generation": OPENAI_GENERATION_MODEL,
+        },
+        "prompts": {"generation": GENERATION_PROMPT_VERSION},
+        "index_version": (
+            None if metadata is None else metadata.get("index_version")
+        ),
+        "corpus": None if metadata is None else metadata.get("corpus"),
+        "evaluation_set": (
+            None if metadata is None else metadata.get("evaluation_set")
+        ),
         "summary": summarize(results),
         "results": list(results),
     }
@@ -205,11 +249,45 @@ async def run_evaluation() -> Path:
         raise ValueError("질문과 ground truth의 question_id가 일치하지 않습니다.")
 
     evaluation_results = []
+    metadata = None
 
     try:
         async with get_session_factory()() as session:
             store = PgVectorStore(session)
-            bm25_retriever = BM25Retriever(await store.load_active_chunks())
+            active_chunks = await store.load_active_chunks()
+            active_index_id = await store.get_active_index_version_id()
+            active_index = await session.get(IndexVersion, active_index_id)
+            if active_index is None:
+                raise ValueError("ACTIVE index version을 조회할 수 없습니다.")
+            metadata = {
+                "executed_at": datetime.now(timezone.utc).isoformat(),
+                "repository_revision": detect_repository_revision(),
+                "index_version": {
+                    "id": active_index.id,
+                    "version": active_index.version,
+                    "status": active_index.status.value,
+                    "created_at": active_index.created_at.isoformat(),
+                    "activated_at": (
+                        None
+                        if active_index.activated_at is None
+                        else active_index.activated_at.isoformat()
+                    ),
+                },
+                "corpus": {
+                    "document_count": len(
+                        {chunk.document_id for chunk in active_chunks}
+                    ),
+                    "chunk_count": len(active_chunks),
+                },
+                "evaluation_set": {
+                    "question_count": len(questions),
+                    "relevant_section_count": sum(
+                        len(item["relevant_sections"])
+                        for item in ground_truth
+                    ),
+                },
+            }
+            bm25_retriever = BM25Retriever(active_chunks)
             vector_retriever = VectorRetriever(
                 OpenAIEmbedder(),
                 store,
@@ -247,7 +325,7 @@ async def run_evaluation() -> Path:
                     evaluation_result = to_execution_error(question, error)
 
                 evaluation_results.append(evaluation_result)
-                save_results(evaluation_results)
+                save_results(evaluation_results, metadata=metadata)
                 print(
                     f"[{index}/{len(questions)}] "
                     f"{question['id']} "
@@ -257,7 +335,7 @@ async def run_evaluation() -> Path:
     finally:
         await dispose_engine()
 
-    return save_results(evaluation_results)
+    return save_results(evaluation_results, metadata=metadata)
 
 
 def main() -> None:

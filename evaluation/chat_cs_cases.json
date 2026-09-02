@@ -1,0 +1,300 @@
+{
+  "version": "cs-v2",
+  "purpose": "초보 사용자의 용어 정의·사용 목적·기능 차이 질문에 공식 이용가이드 근거로 친절하게 답하는지 평가한다.",
+  "rubric": {
+    "expectedDefinitionSentenceConceptGroups": "직접 정의 질문은 첫 문장에서 용어 자체의 의미를 독립적으로 설명해야 한다.",
+    "expectedAnswerConceptGroups": "각 그룹에서 하나 이상의 표현이 답변에 포함되어야 한다.",
+    "minimumCitationCount": "COMPLETED 답변에는 최소 1개의 검증된 출처가 있어야 한다.",
+    "expectedCitationDocumentTitlesAny": "질문을 직접 설명하는 공식 이용가이드 문서 중 하나를 실제 출처로 사용해야 한다."
+  },
+  "cases": [
+    {
+      "id": "CS01",
+      "description": "외부 서비스의 사전식 설명 대신 뤼이도 안에서의 디스코드 역할과 가치를 안내",
+      "turns": [
+        {
+          "question": "디스코드는 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["팀", "사람", "사용자"],
+            ["소통", "커뮤니케이션"],
+            ["도구", "서비스"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["소통", "커뮤니케이션"],
+            ["뤼이도"],
+            ["연동", "연결"],
+            ["알림", "업데이트", "댓글", "논의", "기록"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["디스코드"]
+        }
+      ]
+    },
+    {
+      "id": "CS02",
+      "description": "슬랙 연동의 기능 나열뿐 아니라 사용하는 이유를 안내",
+      "turns": [
+        {
+          "question": "슬랙을 뤼이도와 연결하면 뭐가 좋아?",
+          "expectedStatus": "COMPLETED",
+          "expectedAnswerConceptGroups": [
+            ["슬랙"],
+            ["연동", "연결"],
+            ["알림", "업데이트"],
+            ["댓글", "논의", "기록", "정보"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["슬랙"]
+        }
+      ]
+    },
+    {
+      "id": "CS03",
+      "description": "스프린트의 쉬운 정의와 적합한 사용 목적을 함께 안내",
+      "turns": [
+        {
+          "question": "스프린트는 언제 사용하면 좋아?",
+          "expectedStatus": "COMPLETED",
+          "expectedAnswerConceptGroups": [
+            ["스프린트"],
+            ["주기", "기간"],
+            ["집중", "계획", "실행", "회고", "준비", "관리", "배정"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["스프린트", "핵심 개념"]
+        }
+      ]
+    },
+    {
+      "id": "CS04",
+      "description": "워크스페이스와 팀의 범위 및 역할 차이를 초보자 관점에서 설명",
+      "turns": [
+        {
+          "question": "워크스페이스랑 팀은 뭐가 달라?",
+          "expectedStatus": "COMPLETED",
+          "expectedAnswerConceptGroups": [
+            ["워크스페이스"],
+            ["기업", "조직"],
+            ["팀"],
+            ["작업", "프로젝트", "일하는 공간"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["핵심 개념", "팀", "워크스페이스"]
+        }
+      ]
+    },
+    {
+      "id": "CS05",
+      "description": "저장된 보기가 해결하는 반복 필터링 불편을 설명",
+      "turns": [
+        {
+          "question": "저장된 보기는 왜 쓰는 거야?",
+          "expectedStatus": "COMPLETED",
+          "expectedAnswerConceptGroups": [
+            ["필터", "조건"],
+            ["저장"],
+            ["반복", "빠르게", "효율", "번거로움"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["저장된 보기", "필터"]
+        }
+      ]
+    },
+    {
+      "id": "CS06",
+      "description": "비공개 팀이 필요한 상황과 접근 제한을 함께 안내",
+      "turns": [
+        {
+          "question": "비공개 팀은 어떤 상황에서 사용해?",
+          "expectedStatus": "COMPLETED",
+          "expectedAnswerConceptGroups": [
+            ["고객", "HR", "재무", "민감"],
+            ["일부", "참여 중", "초대"],
+            ["접근", "볼 수 없", "안전"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["비공개 팀"]
+        }
+      ]
+    },
+    {
+      "id": "CS07",
+      "description": "대시보드가 제공하는 전체 현황 파악과 우선순위 판단 가치를 설명",
+      "turns": [
+        {
+          "question": "팀 대시보드는 왜 필요한 거야?",
+          "expectedStatus": "COMPLETED",
+          "expectedAnswerConceptGroups": [
+            ["작업", "업무"],
+            ["현황", "진행"],
+            ["한눈", "빠르게"],
+            ["우선순위", "병목", "리스크", "방향"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["대시보드", "핵심 개념"]
+        }
+      ]
+    },
+    {
+      "id": "CS08",
+      "description": "뤼이도 미팅이 단순 기록이 아니라 실행과 연결되는 이유를 설명",
+      "turns": [
+        {
+          "question": "뤼이도 미팅은 일반 회의록이랑 뭐가 달라?",
+          "expectedStatus": "COMPLETED",
+          "expectedAnswerConceptGroups": [
+            ["미팅", "회의"],
+            ["프로젝트", "목표", "작업"],
+            ["연결"],
+            ["실행", "추적", "전환"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["미팅"]
+        }
+      ]
+    },
+    {
+      "id": "CS09",
+      "description": "작업 관계도의 구조 시각화 목적과 확인 가능한 관계를 설명",
+      "turns": [
+        {
+          "question": "작업 관계도는 언제 보면 유용해?",
+          "expectedStatus": "COMPLETED",
+          "expectedAnswerConceptGroups": [
+            ["프로젝트"],
+            ["목표"],
+            ["작업"],
+            ["트리", "구조", "관계"],
+            ["한눈", "전체", "위치", "흐름"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["작업 관계도"]
+        }
+      ]
+    },
+    {
+      "id": "CS10",
+      "description": "구글 캘린더 연동이 해결하는 중복 일정 관리 문제를 설명",
+      "turns": [
+        {
+          "question": "구글 캘린더 연동은 왜 필요한 거야?",
+          "expectedStatus": "COMPLETED",
+          "expectedAnswerConceptGroups": [
+            ["구글 캘린더"],
+            ["뤼이도"],
+            ["미팅", "일정"],
+            ["동기화"],
+            ["중복", "두 번", "놓치", "최신"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구글 캘린더"]
+        }
+      ]
+    },
+    {
+      "id": "CS11",
+      "description": "필터가 많은 작업에서 필요한 정보를 찾도록 돕는 목적을 설명",
+      "turns": [
+        {
+          "question": "필터는 어떤 때 쓰면 돼?",
+          "expectedStatus": "COMPLETED",
+          "expectedAnswerConceptGroups": [
+            ["필터"],
+            ["담당자", "상태", "마감일", "조건"],
+            ["찾", "골라", "원하는", "필요한"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["필터"]
+        }
+      ]
+    },
+    {
+      "id": "CS12",
+      "description": "프로젝트·목표·작업을 큰 방향에서 실행 단위까지 구분",
+      "turns": [
+        {
+          "question": "프로젝트, 목표, 작업은 각각 뭐가 달라?",
+          "expectedStatus": "COMPLETED",
+          "expectedAnswerConceptGroups": [
+            ["프로젝트"],
+            ["큰 단위", "큰 방향"],
+            ["목표"],
+            ["중간", "달성"],
+            ["작업"],
+            ["실행 단위", "실제로 수행"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["실행: 작업", "핵심 개념"]
+        }
+      ]
+    },
+    {
+      "id": "CS13",
+      "description": "슬랙이라는 용어 자체를 먼저 설명한 뒤 뤼이도 연동 역할을 안내",
+      "turns": [
+        {
+          "question": "슬랙은 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["팀", "사람", "사용자"],
+            ["소통", "커뮤니케이션"],
+            ["도구", "서비스"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["슬랙"],
+            ["뤼이도"],
+            ["연동", "연결"],
+            ["알림", "업데이트", "댓글", "논의", "기록"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["슬랙"]
+        }
+      ]
+    },
+    {
+      "id": "CS14",
+      "description": "스프린트의 기간 기반 업무 단위 의미를 먼저 설명한 뒤 활용 가치를 안내",
+      "turns": [
+        {
+          "question": "스프린트가 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["기간", "주기"],
+            ["작업", "업무"],
+            ["단위"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["스프린트"],
+            ["계획", "실행", "집중", "회고"],
+            ["뤼이도"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["스프린트", "핵심 개념"]
+        }
+      ]
+    },
+    {
+      "id": "CS15",
+      "description": "저장된 보기의 필터 조건 저장 기능을 먼저 정의한 뒤 사용 이점을 안내",
+      "turns": [
+        {
+          "question": "저장된 보기가 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedDefinitionSentenceConceptGroups": [
+            ["필터", "조건"],
+            ["저장"],
+            ["보기", "기능"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["저장된 보기"],
+            ["반복", "빠르게", "효율", "번거로움"],
+            ["개인", "팀", "공유"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["저장된 보기"]
+        }
+      ]
+    }
+  ]
+}

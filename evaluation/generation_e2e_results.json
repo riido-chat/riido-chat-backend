@@ -1,5 +1,29 @@
 {
+  "executed_at": "2026-09-01T08:33:45.937584+00:00",
+  "repository_revision": "ffe8a68105248d671b550bdf0e3a4153946d90d7",
   "model": "gpt-5.4-mini",
+  "models": {
+    "embedding": "text-embedding-3-large",
+    "generation": "gpt-5.4-mini"
+  },
+  "prompts": {
+    "generation": "v3"
+  },
+  "index_version": {
+    "id": 1121,
+    "version": "idx-20260829T100556338602Z-081f9c7a",
+    "status": "ACTIVE",
+    "created_at": "2026-08-29T10:05:56.338602+00:00",
+    "activated_at": "2026-08-29T10:06:01.248164+00:00"
+  },
+  "corpus": {
+    "document_count": 39,
+    "chunk_count": 142
+  },
+  "evaluation_set": {
+    "question_count": 30,
+    "relevant_section_count": 38
+  },
   "summary": {
     "total_count": 30,
     "execution_success_count": 30,
@@ -10,7 +34,7 @@
       "WITHHELD": 0,
       "ERROR": 0
     },
-    "average_generation_latency_seconds": 2.046
+    "average_generation_latency_seconds": 4.127
   },
   "results": [
     {
@@ -50,7 +74,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "새로 들어온 요청은 대기 작업에서 검토한 뒤, 진행하기로 결정하면 ‘승인’ 버튼을 클릭해 백로그나 작업으로 전환하실 수 있습니다. 승인된 작업은 선택한 단계로 이동됩니다.[1]\n\n대기 작업은 계획 단계이므로 여기서 바로 완료할 수는 없습니다. 진행하지 않기로 한 경우에는 ‘거절’을 눌러 상태를 거절됨으로 변경할 수 있습니다.[1]",
+      "answerMarkdown": "새로 들어온 요청은 **대기 작업**에서 검토한 뒤, 진행하기로 결정한 경우 **‘승인’** 버튼을 눌러 백로그나 작업으로 전환하시면 됩니다. 승인된 작업은 선택한 단계로 이동됩니다. [1]\n\n반대로 진행하지 않기로 한 요청은 **‘거절’**을 선택해 상태를 거절됨으로 변경할 수 있으며, 이때 사유를 작성해야 하고 입력한 내용은 댓글로 자동 기록됩니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -61,7 +85,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 4.561
+      "generation_latency_seconds": 2.803
     },
     {
       "question_id": "Q02",
@@ -100,18 +124,24 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "네, 프로젝트나 실제 작업으로 전환해도 기존 정보는 그대로 유지됩니다. ‘전환’ 버튼을 눌러 프로젝트, 목표, 작업으로 전환할 수 있고, 작업으로 전환 시에는 기존의 모든 정보가 그대로 유지되어 실행 단계에서 이어서 작업을 진행할 수 있습니다. [1]",
+      "answerMarkdown": "네, 백로그 항목을 작업으로 전환하면 기존의 모든 정보가 그대로 유지됩니다. [1]\n\n또한 한 번 작업으로 전환된 백로그는 사라지지 않으며, ‘전환된 백로그’ 페이지에서 해당 작업과 어떤 백로그에서 시작되었는지 연결 상태를 확인할 수 있습니다. [2]",
       "citations": [
         {
           "citationNumber": 1,
           "documentTitle": "계획: 백로그",
           "sectionPath": "계획: 백로그 > 작업으로 전환",
           "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+        },
+        {
+          "citationNumber": 2,
+          "documentTitle": "계획: 백로그",
+          "sectionPath": "계획: 백로그 > 전환된 백로그",
+          "sourceUrl": "https://docs.riido.io/issues/backlog.md"
         }
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.705
+      "generation_latency_seconds": 1.798
     },
     {
       "question_id": "Q03",
@@ -150,18 +180,24 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "현재 페이지에서 필터나 정렬 조건을 설정한 뒤, 우측 상단의 `저장된 보기 생성` 버튼을 클릭하시면 현재 적용된 조건이 그대로 저장됩니다. 이렇게 저장한 보기는 다음에 동일한 조건으로 다시 불러올 수 있습니다. [1]",
+      "answerMarkdown": "현재 적용한 필터와 정렬 조건은 백로그 또는 작업 페이지에서 설정한 뒤, 우측 상단의 `저장된 보기 생성` 버튼을 클릭하면 그대로 저장할 수 있습니다. 이렇게 저장하면 다음에도 동일한 조건을 다시 불러올 수 있습니다.[1]\n\n필터를 적용하면 우측에 `저장된 보기 생성` 버튼이 활성화되며, 현재 설정된 필터 조건이 그대로 저장됩니다.[2]",
       "citations": [
         {
           "citationNumber": 1,
           "documentTitle": "저장된 보기",
           "sectionPath": "저장된 보기 > 보기 생성하기",
           "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+        },
+        {
+          "citationNumber": 2,
+          "documentTitle": "필터",
+          "sectionPath": "필터 > 저장된 보기",
+          "sourceUrl": "https://docs.riido.io/data/filters.md"
         }
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 3.411
+      "generation_latency_seconds": 13.577
     },
     {
       "question_id": "Q04",
@@ -200,7 +236,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "빈 에디터를 클릭하면 팀에 등록된 템플릿 목록이 자동으로 표시됩니다. 여기서 원하는 템플릿을 클릭하면 문서에 바로 적용되고, 기본 구조와 형식이 자동으로 채워집니다. [1]",
+      "answerMarkdown": "빈 문서에서 에디터를 클릭하면 팀에 등록된 템플릿 목록이 자동으로 표시됩니다. 그중 원하는 템플릿을 클릭하시면 즉시 문서에 적용되고, 기본 구조와 형식이 자동으로 채워집니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -211,7 +247,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 2.078
+      "generation_latency_seconds": 1.823
     },
     {
       "question_id": "Q05",
@@ -250,7 +286,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "네, 가능합니다. 보관된 작업은 언제든 다시 활성화하여 실행 가능한 상태로 되돌릴 수 있습니다. [1]\n\n프로젝트나 목표 단위로만 다시 활성화할 수도 있으며, 이 경우 하위 작업은 보관 상태로 유지됩니다. [1]",
+      "answerMarkdown": "네, 보관된 작업은 언제든 다시 활성화하여 실행 가능한 상태로 되돌릴 수 있습니다. [1]\n\n프로젝트나 목표 단위로만 다시 활성화할 수도 있고, 이 경우 하위 작업은 보관 상태로 유지됩니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -261,7 +297,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.212
+      "generation_latency_seconds": 1.586
     },
     {
       "question_id": "Q06",
@@ -300,7 +336,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "실수로 삭제한 작업은 휴지통 또는 해당 페이지 상단 배너의 `복구` 버튼을 통해 즉시 되돌릴 수 있습니다. 복구된 항목은 삭제 이전의 위치, 예를 들어 원래 속한 프로젝트나 팀으로 자동 복원됩니다. [1]",
+      "answerMarkdown": "실수로 삭제한 작업은 휴지통 또는 해당 페이지 상단 배너의 ‘복구’ 버튼을 통해 즉시 되돌릴 수 있습니다. 복구된 항목은 삭제 이전의 위치, 예를 들어 원래 속한 프로젝트나 팀으로 자동 복원됩니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -311,7 +347,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.328
+      "generation_latency_seconds": 1.543
     },
     {
       "question_id": "Q07",
@@ -350,18 +386,24 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 설정 페이지의 `팀 설정 > 일반`에서 공개 범위를 `비공개`로 선택하시면 됩니다. 설정을 저장하면 즉시 비공개 팀으로 전환됩니다. [1]",
+      "answerMarkdown": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 설정 페이지의 `[팀 설정 > 일반]`에서 공개 범위를 `비공개`로 선택하시면 됩니다. 설정을 저장하면 즉시 팀이 비공개로 전환됩니다. [1]\n\n팀 설정 페이지는 우측 사이드바의 팀 이름에 마우스를 올렸을 때 나타나는 설정 아이콘을 클릭하거나, 설정 페이지에서 수정할 팀을 선택해 들어갈 수 있습니다. [2]",
       "citations": [
         {
           "citationNumber": 1,
           "documentTitle": "비공개 팀",
           "sectionPath": "비공개 팀 > 설정",
           "sourceUrl": "https://docs.riido.io/teams/private-teams.md"
+        },
+        {
+          "citationNumber": 2,
+          "documentTitle": "팀",
+          "sectionPath": "팀 > 팀 설정",
+          "sourceUrl": "https://docs.riido.io/teams/overview.md"
         }
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.433
+      "generation_latency_seconds": 2.703
     },
     {
       "question_id": "Q08",
@@ -400,7 +442,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "스프린트 시작 요일을 바꾸면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다. [1]\n\n또한 주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다. [1]",
+      "answerMarkdown": "스프린트 시작 요일을 바꾸면, 현재 스프린트는 설정한 요일까지 유지된 뒤 다음 스프린트가 새로 시작됩니다. [1]\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -411,7 +453,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 5.598
+      "generation_latency_seconds": 1.921
     },
     {
       "question_id": "Q09",
@@ -450,7 +492,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "다가올 스프린트 개수를 `3개`로 설정하시면 됩니다. 이 설정은 다가올 스프린트를 미리 생성해두는 기능으로, 예를 들어 ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다. [1]\n\n스프린트 설정은 `[팀 설정 > 스프린트]`에서 관리할 수 있습니다. [2]",
+      "answerMarkdown": "스프린트 설정에서 `다가올 스프린트 개수`를 3으로 설정하시면 됩니다. 이렇게 하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다. [1]\n\n스프린트 설정은 `[팀 설정 > 스프린트]`에서 관리할 수 있습니다. [2]",
       "citations": [
         {
           "citationNumber": 1,
@@ -467,7 +509,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 2.19
+      "generation_latency_seconds": 2.056
     },
     {
       "question_id": "Q10",
@@ -506,7 +548,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "특정 페이지나 댓글의 알림은 각각 개별로 끌 수 있습니다. 상세 페이지의 우측 상단 메뉴에서 `알림 끄기` 버튼을 클릭하면 페이지 알림을 비활성화할 수 있고, 댓글의 우측 상단 메뉴에서도 `알림 끄기` 버튼을 클릭하면 됩니다. 다시 알림을 받고 싶다면 같은 위치에서 `알림 받기` 버튼으로 재활성화할 수 있습니다. [1]",
+      "answerMarkdown": "특정 페이지나 댓글에서 알림을 끄려면, 해당 항목의 우측 상단 메뉴에서 `알림 끄기` 버튼을 클릭하시면 됩니다. 상세 페이지와 댓글 모두 개별적으로 알림 설정이 가능하며, 다시 알림을 받고 싶으면 같은 위치에서 `알림 받기` 버튼으로 재활성화할 수 있습니다.[1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -517,7 +559,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.603
+      "generation_latency_seconds": 1.566
     },
     {
       "question_id": "Q11",
@@ -556,7 +598,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "네, 가능합니다. 보기를 만들 때 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다. [1]\n\n- 팀 보기(공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다. [1]\n- 나만 보기(비공개): 개인 참고용이거나 실험적인 설정을 저장할 때 적합합니다. [1]\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다. [1]",
+      "answerMarkdown": "네, 가능합니다. 보기를 만들 때 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.[1]\n\n- 팀 보기(공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.[1]\n- 나만 보기(비공개): 개인 참고용이거나 실험적인 설정을 저장할 때 적합합니다.[1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -567,7 +609,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.882
+      "generation_latency_seconds": 1.825
     },
     {
       "question_id": "Q12",
@@ -606,7 +648,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "팀 설정 페이지의 **작업 상태** 메뉴에서 설정하시면 됩니다. 팀 설정 페이지에서는 작업 상태 추가 및 삭제를 관리할 수 있습니다. [1]\n\n작업 상태 화면에서는 ‘상태 추가’ 버튼으로 새 상태를 만들 수 있고, 기존 상태는 정보 편집이나 삭제가 가능합니다. 다만 첫 단계(계획)와 마지막 단계(운영)는 시스템 기본 영역이라 추가 및 삭제가 불가능합니다. [2]",
+      "answerMarkdown": "팀 설정 페이지의 **작업 상태** 메뉴에서 설정하시면 됩니다. 팀 설정 페이지에서는 작업 상태를 추가 및 삭제할 수 있습니다. [1]\n\n참고로 **‘상태 추가’ 버튼**을 눌러 새 상태를 만들 수 있고, 상태를 삭제하려면 **해당 상태에 적용된 작업이 없어야** 합니다. 또한 **첫 단계(계획)**와 **마지막 단계(운영)**는 시스템 기본 영역이라 추가 및 삭제가 불가능합니다. [2]",
       "citations": [
         {
           "citationNumber": 1,
@@ -623,7 +665,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 2.144
+      "generation_latency_seconds": 2.064
     },
     {
       "question_id": "Q13",
@@ -662,7 +704,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "슬랙 연동은 워크스페이스 단위로 진행한 뒤, 같은 페이지에서 팀별 알림 채널을 지정하시면 됩니다. [1]\n\n1. `설정 > 워크스페이스 > 외부 연동 > Slack` 페이지로 이동합니다. [1]\n2. `연동하기` 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다. [1]\n3. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다. [1]\n4. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되며, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다. [1]",
+      "answerMarkdown": "슬랙 연동은 워크스페이스 단위로 먼저 설정한 뒤, 같은 페이지에서 팀별 알림 채널을 지정하시면 됩니다. [1]\n\n1. `설정 > 워크스페이스 > 외부 연동 > Slack` 페이지로 이동합니다. [1]\n2. `연동하기` 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다. [1]\n3. 연동이 완료되면 같은 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다. [1]\n4. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되며, 해당 팀에서 발생한 활동은 지정된 채널로 전달됩니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -673,7 +715,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.795
+      "generation_latency_seconds": 2.048
     },
     {
       "question_id": "Q14",
@@ -712,7 +754,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "디스코드 연동은 워크스페이스 단위로 먼저 진행한 뒤, 같은 페이지에서 팀별 채널을 지정하시면 됩니다. [1]\n\n1. `[설정 > 워크스페이스 > 외부 연동 > Discord]` 페이지로 이동합니다. [1]\n2. `연동하기` 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다. [1]\n3. 연동이 완료되면 같은 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다. [1]\n4. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되며, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다. [1]",
+      "answerMarkdown": "디스코드 연동은 워크스페이스 단위로 먼저 연결한 뒤, 같은 페이지에서 팀별 채널을 지정하시면 됩니다. [1]\n\n1. `설정 > 워크스페이스 > 외부 연동 > Discord` 페이지로 이동합니다. [1]\n2. `연동하기` 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다. [1]\n3. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다. [1]\n\n참고로 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되며, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -723,7 +765,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 2.088
+      "generation_latency_seconds": 26.904
     },
     {
       "question_id": "Q15",
@@ -762,7 +804,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "구글 캘린더는 워크스페이스 단위로 먼저 연동한 뒤, 같은 페이지에서 팀별로 연결할 구글 캘린더를 선택하시면 됩니다. [1]\n\n1. `설정 > 워크스페이스 > 외부 연동 > Google Calendar`로 이동합니다. [1]\n2. `연동하기` 버튼을 클릭하고, 뤼이도와 연결할 구글 계정을 승인합니다. [1]\n3. 연동이 완료되면 동일한 페이지에서 팀별로 연결할 구글 캘린더를 선택합니다. [1]\n\n이때 각 팀은 하나의 구글 캘린더와 1:1로 연결됩니다. [1]",
+      "answerMarkdown": "구글 캘린더는 먼저 워크스페이스 단위로 연동한 뒤, 같은 페이지에서 팀별로 연결할 캘린더를 선택하시면 됩니다. [1]\n\n1. `설정 > 워크스페이스 > 외부 연동 > Google Calendar`로 이동합니다. [1]\n2. `연동하기` 버튼을 클릭하고, 뤼이도와 연결할 구글 계정을 승인합니다. [1]\n3. 연동이 완료되면 동일한 페이지에서 팀별로 연결할 구글 캘린더를 선택합니다. [1]\n\n각 팀은 하나의 구글 캘린더와 1:1로 연결되며, 해당 팀의 모든 미팅 일정이 연결된 캘린더와 동기화됩니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -773,7 +815,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.659
+      "generation_latency_seconds": 12.642
     },
     {
       "question_id": "Q16",
@@ -812,7 +854,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "깃허브 연동은 워크스페이스 단위로 설정하며, 연결할 Repository를 지정해야 합니다. 먼저 `[설정 > 워크스페이스 > 외부 연동 > Github]` 페이지로 이동한 뒤, `연동하기` 버튼을 클릭하고 뤼이도와 연결할 Github Organization을 선택합니다. [1]\n\n그 다음 Github 설정 업데이트에서 뤼이도가 접근할 Repository 권한을 `All repositories` 또는 `Only select repositories` 중 하나로 설정합니다. 이후 권한이 부여된 Repository 중에서 뤼이도와 연결할 Repository를 추가하시면 됩니다. [1]",
+      "answerMarkdown": "GitHub Organization과 Repository 연결은 워크스페이스 단위로 설정합니다. 먼저 `[설정 > 워크스페이스 > 외부 연동 > Github]` 페이지로 이동해 `연동하기` 버튼을 클릭한 뒤, 뤼이도와 연결할 Github Organization을 선택합니다. 이후 Github 설정에서 뤼이도가 접근할 Repository 권한을 `All repositories` 또는 `Only select repositories` 중 하나로 설정하고, 권한이 부여된 Repository 중에서 뤼이도와 연결할 Repository를 추가하시면 됩니다.[1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -823,7 +865,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.491
+      "generation_latency_seconds": 2.075
     },
     {
       "question_id": "Q17",
@@ -862,7 +904,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "피그마에서 뤼이도 플러그인을 설치한 뒤, 플러그인을 실행해 뤼이도 계정을 승인하시면 됩니다. [1]\n\n1. 피그마에서 `커뮤니티 > 플러그인 > Riido`로 이동하거나 전용 링크를 통해 뤼이도 플러그인을 설치합니다. [1]\n2. 설치한 플러그인을 실행하고, 피그마와 연결할 뤼이도 계정을 승인합니다. [1]",
+      "answerMarkdown": "피그마에서 뤼이도 플러그인을 설치한 뒤, 플러그인을 실행해 피그마와 연결할 뤼이도 계정을 승인하시면 됩니다. [1]\n\n1. 피그마에서 [커뮤니티 > 플러그인 > Riido]로 이동하거나 전용 링크를 통해 뤼이도 플러그인을 설치합니다. [1]\n2. 플러그인을 실행하고, 피그마와 연결할 뤼이도 계정을 승인합니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -873,7 +915,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 2.365
+      "generation_latency_seconds": 17.545
     },
     {
       "question_id": "Q18",
@@ -912,7 +954,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "ChatGPT에서 뤼이도 MCP를 연결하려면 **ChatGPT Pro 요금제 이상**이 필요합니다. [1]\n\n설정 순서는 다음과 같습니다. [1]\n1. `설정 > 연동 및 앱 커넥터 페이지 > 고급 설정`으로 이동합니다.\n2. `개발자 모드`를 활성화합니다.\n3. `연동 및 앱 커넥터 페이지`에서 `[앱 만들기]`를 선택합니다.\n4. 앱 정보를 입력한 뒤 `[만들기]`를 클릭합니다.\n5. 아래 값을 설정합니다.\n\n```text\nMCP 서버 URL: https://mcp.riido.io/mcp\n인증: OAuth\n```\n\n6. `연동 및 앱 커넥터 페이지`에서 Riido MCP 연결을 확인합니다.\n7. `[+]` 버튼을 클릭하여 Riido MCP를 사용합니다. [1]",
+      "answerMarkdown": "ChatGPT에서는 **Pro 요금제 이상**에서 사용할 수 있고, 설정에서 **개발자 모드**를 활성화한 뒤 Riido MCP 앱을 추가하시면 됩니다. [1]\n\n1. `설정 > 연동 및 앱 커넥터 페이지 > 고급 설정`으로 이동합니다. [1]\n2. `개발자 모드`를 활성화합니다. [1]\n3. `연동 및 앱 커넥터 페이지`에서 `[앱 만들기]`를 선택합니다. [1]\n4. 앱 정보 입력 후 `[만들기]`를 클릭합니다. 이때 다음 값을 입력합니다. [1]\n```text\nMCP 서버 URL: https://mcp.riido.io/mcp\n인증: OAuth\n```\n5. `연동 및 앱 커넥터 페이지`에서 Riido MCP 연결을 확인한 뒤, `[+]` 버튼을 클릭하여 사용합니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -923,7 +965,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 2.229
+      "generation_latency_seconds": 2.932
     },
     {
       "question_id": "Q19",
@@ -962,7 +1004,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "아니요, 연동 오류로 보기는 어렵습니다. 뤼이도 내부의 ‘미팅’만 구글 캘린더와 양방향 연동을 지원하며, 작업의 마감일이나 다른 일정 정보는 현재 연동 대상이 아닙니다. [1]",
+      "answerMarkdown": "아니요, 연동 오류가 아닙니다. 뤼이도 내부의 ‘미팅’만 구글 캘린더와 양방향 연동되며, 작업의 마감일이나 다른 일정 정보는 현재 연동 대상이 아닙니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -973,7 +1015,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.305
+      "generation_latency_seconds": 1.484
     },
     {
       "question_id": "Q20",
@@ -1012,7 +1054,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "네, 세부적인 알림 조정이 가능합니다. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리할 수 있고, 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭해 ‘알림 받기/끄기’로 설정하실 수 있습니다. [1]",
+      "answerMarkdown": "네, 세부적인 알림 조정이 가능합니다. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리하고, 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭해 ‘알림 받기/끄기’로 설정하실 수 있습니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -1023,7 +1065,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.56
+      "generation_latency_seconds": 1.738
     },
     {
       "question_id": "Q21",
@@ -1062,18 +1104,24 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "비공개 채널은 연결할 수 있습니다. 워크스페이스를 연동한 뒤, 연결하고자 하는 비공개 채널에서 뤼이도 봇을 언급해 초대하시면 뤼이도 슬랙 연동 채널 목록에 해당 채널이 표시됩니다. [1]",
+      "answerMarkdown": "가능합니다. 워크스페이스를 연동한 뒤, 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(`@riido`)하여 초대하시면 됩니다. 그러면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다. [1]\n\n추가로, 슬랙 연동은 워크스페이스 단위로 먼저 연결한 다음 팀별 채널을 설정하는 방식입니다. [2]",
       "citations": [
         {
           "citationNumber": 1,
           "documentTitle": "슬랙",
           "sectionPath": "슬랙 > 자주 묻는 질문 (FAQ)",
           "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+        },
+        {
+          "citationNumber": 2,
+          "documentTitle": "슬랙",
+          "sectionPath": "슬랙 > 연동 설정 가이드",
+          "sourceUrl": "https://docs.riido.io/integrations/slack.md"
         }
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.728
+      "generation_latency_seconds": 3.477
     },
     {
       "question_id": "Q22",
@@ -1112,7 +1160,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "기존 작업 상태가 삭제되지 않는 이유는, 해당 상태에 적용된 작업이 아직 남아 있기 때문입니다. 상태를 삭제하려면 그 상태에 연결된 작업이 없어야 합니다. [1]\n\n또한 첫 단계인 ‘계획’과 마지막 단계인 ‘운영’은 시스템 기본 영역이라 추가 및 삭제가 불가능합니다. [1]",
+      "answerMarkdown": "기존 작업 상태는 그 상태에 적용된 작업이 남아 있으면 삭제되지 않습니다. 삭제하려면 먼저 해당 상태에 연결된 작업이 없어야 합니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -1123,7 +1171,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.455
+      "generation_latency_seconds": 1.701
     },
     {
       "question_id": "Q23",
@@ -1162,7 +1210,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "아니요. 비활성화된 멤버는 완전히 삭제할 수 없고, 나중에 같은 멤버를 다시 초대하더라도 새 계정이 생성되지 않습니다. 이전 계정이 그대로 활성 상태로 전환됩니다.[1]",
+      "answerMarkdown": "비활성화된 워크스페이스 멤버는 완전히 삭제할 수 없고, 다시 초대하더라도 새 계정이 만들어지지 않습니다. 이전 계정이 그대로 활성 상태로 전환됩니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -1173,7 +1221,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.382
+      "generation_latency_seconds": 1.425
     },
     {
       "question_id": "Q24",
@@ -1223,7 +1271,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.166
+      "generation_latency_seconds": 1.428
     },
     {
       "question_id": "Q25",
@@ -1262,7 +1310,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "워크스페이스는 여러 팀과 프로젝트를 한 공간에서 관리할 수 있는 하나의 조직입니다. 하나의 조직에서는 하나의 워크스페이스를 운영하는 것을 권장합니다. [1]\n\n팀은 워크스페이스 안에서 여러 개를 만들 수 있는 단위이며, 워크스페이스를 처음 생성하면 워크스페이스와 동일한 이름의 팀이 기본으로 함께 만들어집니다. [2]\n\n즉, 워크스페이스가 상위 조직 단위이고, 팀은 그 워크스페이스 안에서 운영되는 단위라고 이해하시면 됩니다. [1][2]",
+      "answerMarkdown": "워크스페이스는 여러 팀과 프로젝트를 한 공간에서 관리할 수 있는 하나의 조직입니다. [1]\n\n팀은 워크스페이스 안에서 여러 개를 만들 수 있으며, 워크스페이스를 처음 생성하면 워크스페이스와 동일한 이름의 팀이 자동으로 함께 만들어집니다. [2]\n\n즉, 워크스페이스가 상위의 조직 단위이고, 팀은 그 워크스페이스 안에 속하는 단위로 이해하시면 됩니다. [1][2]",
       "citations": [
         {
           "citationNumber": 1,
@@ -1279,7 +1327,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.761
+      "generation_latency_seconds": 2.023
     },
     {
       "question_id": "Q26",
@@ -1318,7 +1366,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "대기 작업은 팀에 새로 들어온 아이디어나 요청을 처음 모아두는 계획 단계의 출발점이고, 백로그는 검토를 마친 작업들을 우선순위에 따라 정리해두는 공간입니다. [1][2]\n\n대기 작업에서는 각 작업의 중요도와 필요성을 판단해 다음 단계인 백로그나 작업으로 옮길지를 결정합니다. 반면 백로그에서는 어떤 작업부터 실행할지 계획을 세우며, 필요할 때 실행으로 옮길 수 있게 정리해둡니다. [1][2]\n\n또한 대기 작업은 아직 정제되지 않은 작업을 빠르게 선별해 이동시키는 곳이고, 백로그는 주주제별로 정리해 흐름을 놓치지 않도록 하는 데 도움이 됩니다. [1][3]",
+      "answerMarkdown": "대기 작업은 팀에 새로 들어온 아이디어나 요청을 처음 모아두는 공간이고, 백로그는 검토를 마친 작업들을 구조적으로 정리해두는 공간입니다. [1][2]\n\n대기 작업에서는 각 작업의 중요도와 필요성을 판단해 다음 단계인 백로그나 작업으로 옮길지 결정합니다. 반면 백로그에서는 우선순위를 정하고, 어떤 작업부터 실행할지 계획을 세울 수 있습니다. [1][2]\n\n즉, 대기 작업은 계획 단계의 출발점이고, 백로그는 검토를 마친 뒤 실행을 준비하는 단계에 사용하는 공간입니다. [1][2]",
       "citations": [
         {
           "citationNumber": 1,
@@ -1331,17 +1379,11 @@
           "documentTitle": "계획: 백로그",
           "sectionPath": "계획: 백로그 > 개요",
           "sourceUrl": "https://docs.riido.io/issues/backlog.md"
-        },
-        {
-          "citationNumber": 3,
-          "documentTitle": "계획: 백로그",
-          "sectionPath": "계획: 백로그 > 구조",
-          "sourceUrl": "https://docs.riido.io/issues/backlog.md"
         }
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 2.136
+      "generation_latency_seconds": 2.542
     },
     {
       "question_id": "Q27",
@@ -1380,7 +1422,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "프로젝트, 목표, 작업, 하위작업은 `프로젝트 → 목표 → 작업 → 하위작업`의 계층 구조로 구성됩니다. 프로젝트는 팀 전체가 집중해야 하는 큰 단위의 업무이고, 목표는 프로젝트 내 중간 목표, 작업은 실제 수행 단위, 하위작업은 작업을 더 세분화한 단위입니다. [1]",
+      "answerMarkdown": "프로젝트, 목표, 작업, 하위작업은 `프로젝트 → 목표 → 작업 → 하위작업` 순서의 계층 구조로 구성됩니다. [1]\n\n- 프로젝트: 팀 전체가 집중해야 하는 큰 단위의 업무입니다. [1]\n- 목표: 프로젝트 내에서 일정 기간 안에 달성해야 하는 중간 단위의 목표입니다. 하나 이상의 작업으로 구성됩니다. [1]\n- 작업: 실제로 수행되는 실행 단위의 업무입니다. [1]\n- 하위작업: 하나의 작업을 더 세분화한 단위입니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -1391,7 +1433,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 2.743
+      "generation_latency_seconds": 1.959
     },
     {
       "question_id": "Q28",
@@ -1430,7 +1472,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "‘차단 중’은 현재 작업이 다른 작업의 진행을 막고 있는 상태이고, ‘차단됨’은 다른 작업이 완료되어야 현재 작업을 진행할 수 있는 상태입니다. 예를 들어 “서버 배포”가 끝나야 “테스트 환경 점검”을 할 수 있다면, 전자는 차단 중, 후자는 차단됨으로 연결됩니다.[1]",
+      "answerMarkdown": "두 용어는 **진행을 막는 쪽과 막히는 쪽**의 차이입니다. [1]\n\n- **차단 중**: 한 작업이 다른 작업의 진행을 막고 있거나 의존하고 있는 경우입니다. 예를 들어 ‘서버 배포’가 끝나야 ‘테스트 환경 점검’을 할 수 있다면, 전자가 차단 중입니다. [1]\n- **차단됨**: 다른 작업이 완료되어야 현재 작업을 진행할 수 있는 상태입니다. 위 예시에서는 후자인 ‘테스트 환경 점검’이 차단됨입니다. [1]\n\n즉, **막는 작업이 차단 중**, **막혀 있는 작업이 차단됨**입니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -1441,7 +1483,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.497
+      "generation_latency_seconds": 2.447
     },
     {
       "question_id": "Q29",
@@ -1480,7 +1522,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "보라색 점선은 작업이 완료되어야 하는 기준선으로, 스프린트 전체 기간을 기준으로 전체 작업이 균등하게 완료된다고 가정했을 때의 이상적인 진행 속도를 보여줍니다. [1]\n\n보라색 실선은 실제로 완료된 작업의 누적 개수이며, 기준선과 비교해 현재 속도가 계획 대비 빠른지 느린지 바로 파악할 수 있습니다. [1]",
+      "answerMarkdown": "보라색 점선은 작업이 완료되어야 하는 기준선입니다. 스프린트 전체 기간을 기준으로, 전체 작업이 균등하게 완료된다고 가정했을 때의 이상적인 진행 속도를 보여줍니다. [1]\n\n보라색 실선은 실제로 완료된 작업의 누적 개수입니다. 기준선과 비교해 현재 속도가 계획보다 빠른지, 느린지를 바로 확인할 수 있습니다. [1]",
       "citations": [
         {
           "citationNumber": 1,
@@ -1491,7 +1533,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 1.793
+      "generation_latency_seconds": 1.762
     },
     {
       "question_id": "Q30",
@@ -1530,7 +1572,7 @@
       ],
       "expected_section_in_top_5": true,
       "final_status": "COMPLETED",
-      "answerMarkdown": "뤼이도 AI 에이전트는 이미 사용 중인 AI(Codex, Claude Code, Cursor Agent, OpenClaw 등)를 그대로 에이전트로 등록해, 별도의 설명 없이도 워크스페이스·팀·작업의 맥락을 이해한 상태로 작업을 진행한다는 점이 다릅니다. [1]\n\n또한 에이전트는 작업 상세 페이지에서 할당받아 댓글로 작업 내역을 공유하고, 확인이 필요한 부분은 댓글에서 사람과 소통하며 진행합니다. [2]",
+      "answerMarkdown": "뤼이도 AI 에이전트는 이미 사용 중인 AI(Codex, Claude Code, Cursor Agent, OpenClaw 등)를 그대로 에이전트로 등록해, 매번 프로젝트 맥락을 다시 설명하지 않아도 워크스페이스·팀·작업의 맥락을 이해한 상태로 작업을 진행한다는 점이 다릅니다. [1]\n\n또한 에이전트를 맡기면 작업 상세 페이지에서 참여자로 할당하고, 에이전트가 댓글로 작업 내역을 공유하며 필요하면 댓글에서 사람과 소통하면서 진행합니다. [2]",
       "citations": [
         {
           "citationNumber": 1,
@@ -1547,7 +1589,7 @@
       ],
       "withheld_reason": null,
       "error_code": null,
-      "generation_latency_seconds": 2.085
+      "generation_latency_seconds": 2.416
     }
   ]
 }
