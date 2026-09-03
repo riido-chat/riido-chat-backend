@@ -48,6 +48,7 @@ from app.rag.chat_service import ChatService
 from app.rag.generation_service import GenerationService
 from app.rag.log_store import (
     CitationLog,
+    CONVERSATION_EXPIRE_AFTER,
     ConversationBusyError,
     ConversationUnavailableError,
     FeedbackNotAllowedError,
@@ -1170,6 +1171,41 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         refreshed = await self.store.get_conversation(expired.id)
         self.assertEqual(ConversationStatus.EXPIRED, refreshed.status)
         self.assertIsNotNone(refreshed.closed_at)
+
+    async def test_inactive_conversation_expires_lazily_on_next_turn(self) -> None:
+        conversation = await self.store.create_conversation()
+        conversation.last_active_at = _now() - CONVERSATION_EXPIRE_AFTER - timedelta(
+            seconds=1
+        )
+        await self.session.flush()
+
+        with self.assertRaisesRegex(ConversationUnavailableError, "후속 질문"):
+            await self.store.start_rag_run(
+                conversation.id,
+                user_query="24시간 지난 대화 질문",
+                index_version_id=self.index_version_id,
+            )
+
+        refreshed = await self.store.get_conversation(conversation.id)
+        self.assertEqual(ConversationStatus.EXPIRED, refreshed.status)
+        self.assertIsNotNone(refreshed.closed_at)
+
+    async def test_recently_active_conversation_is_not_expired(self) -> None:
+        conversation = await self.store.create_conversation()
+        conversation.last_active_at = _now() - CONVERSATION_EXPIRE_AFTER + timedelta(
+            seconds=1
+        )
+        await self.session.flush()
+
+        run = await self.store.start_rag_run(
+            conversation.id,
+            user_query="23시간대 후속 질문",
+            index_version_id=self.index_version_id,
+        )
+
+        self.assertEqual(1, run.turn_no)
+        refreshed = await self.store.get_conversation(conversation.id)
+        self.assertEqual(ConversationStatus.ACTIVE, refreshed.status)
 
 
 class RagLogStoreConcurrencyDbTest(unittest.IsolatedAsyncioTestCase):

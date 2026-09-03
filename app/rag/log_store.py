@@ -56,6 +56,9 @@ MAX_CITATIONS = 3
 
 # 외부 호출 timeout보다 충분히 길게 두고, 이 시간이 지난 고아 실행만 복구한다.
 RAG_RUN_STALE_AFTER = timedelta(minutes=10)
+
+# 이 시간 동안 활동이 없으면 다음 요청 시점에 대화를 EXPIRED로 마감한다.
+CONVERSATION_EXPIRE_AFTER = timedelta(hours=24)
 STALE_RAG_RUN_ERROR_CODE = "INTERNAL_ERROR"
 STALE_MODEL_CALL_ERROR_MESSAGE = (
     "10분 이상 완료되지 않아 stale recovery로 실패 처리되었습니다."
@@ -216,12 +219,20 @@ class RagLogStore:
             raise ConversationUnavailableError(
                 f"존재하지 않는 대화입니다: {conversation_id}"
             )
+
+        now = _utcnow()
+        if (
+            conversation.status == ConversationStatus.ACTIVE
+            and now - conversation.last_active_at > CONVERSATION_EXPIRE_AFTER
+        ):
+            conversation.status = ConversationStatus.EXPIRED
+            conversation.closed_at = now
+
         if conversation.status != ConversationStatus.ACTIVE:
             raise ConversationUnavailableError(
                 f"후속 질문을 받을 수 없는 대화입니다: {conversation.status}"
             )
 
-        now = _utcnow()
         processing_runs = list(
             (
                 await self._session.scalars(
