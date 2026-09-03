@@ -9,12 +9,12 @@ from openai import APITimeoutError
 from pydantic import ValidationError
 
 from generation.generator import (
-    ANSWER_PROMPT_V5,
+    ANSWER_PROMPT_V6,
     GENERATION_PROMPT_VERSION,
     MAX_CONTEXT_SOURCES,
     MAX_PLANNED_CITATIONS,
     OPENAI_GENERATION_MODEL,
-    SOURCE_PLANNING_PROMPT_V5,
+    SOURCE_PLANNING_PROMPT_V6,
     OpenAIGenerator,
     build_answer_input,
     build_generation_context,
@@ -258,49 +258,56 @@ class GenerationContextTest(unittest.TestCase):
         self.assertNotIn(r"\[설정", generation_input)
 
     def test_source_planning_prompt_preserves_scope_and_all_evidence(self) -> None:
-        self.assertIn("질문이 직접 요구한 정보 단위만", SOURCE_PLANNING_PROMPT_V5)
-        self.assertIn("필요한 SOURCE 수에 상한은 없습니다", SOURCE_PLANNING_PROMPT_V5)
-        self.assertIn("절대로 일부를 빼지 마세요", SOURCE_PLANNING_PROMPT_V5)
-        self.assertIn("정보 단위 하나라도", SOURCE_PLANNING_PROMPT_V5)
-        self.assertIn("INSUFFICIENT_EVIDENCE", SOURCE_PLANNING_PROMPT_V5)
-        self.assertIn("자동화", SOURCE_PLANNING_PROMPT_V5)
+        self.assertIn("질문이 직접 요구한 정보 단위만", SOURCE_PLANNING_PROMPT_V6)
+        self.assertIn("필요한 SOURCE 수에 상한은 없습니다", SOURCE_PLANNING_PROMPT_V6)
+        self.assertIn("절대로 일부를 빼지 마세요", SOURCE_PLANNING_PROMPT_V6)
+        self.assertIn("정보 단위 하나라도", SOURCE_PLANNING_PROMPT_V6)
+        self.assertIn("INSUFFICIENT_EVIDENCE", SOURCE_PLANNING_PROMPT_V6)
+        self.assertIn("자동화", SOURCE_PLANNING_PROMPT_V6)
 
     def test_answer_prompt_avoids_partial_or_duplicate_answers(self) -> None:
-        self.assertIn("모든 정보 단위에 답하세요", ANSWER_PROMPT_V5)
-        self.assertIn("정보 단위를 생략하거나", ANSWER_PROMPT_V5)
-        self.assertIn("반드시 가장 직접적인 SOURCE 하나만 선택", ANSWER_PROMPT_V5)
-        self.assertIn("중복 SOURCE는 사용하거나 인용하지 마세요", ANSWER_PROMPT_V5)
-        self.assertIn("SOURCE별로 답변 문단을 만들거나", ANSWER_PROMPT_V5)
-        self.assertIn("필요한 최소한의 SOURCE만 인용", ANSWER_PROMPT_V5)
+        self.assertIn("모든 정보 단위에 답하세요", ANSWER_PROMPT_V6)
+        self.assertIn("정보 단위를 생략하거나", ANSWER_PROMPT_V6)
+        self.assertIn("반드시 가장 직접적인 SOURCE 하나만 선택", ANSWER_PROMPT_V6)
+        self.assertIn("중복 SOURCE는 사용하거나 인용하지 마세요", ANSWER_PROMPT_V6)
+        self.assertIn("SOURCE별로 답변 문단을 만들거나", ANSWER_PROMPT_V6)
+        self.assertIn("필요한 최소한의 SOURCE만 인용", ANSWER_PROMPT_V6)
+
+    def test_prompt_forbids_multiline_content_inside_table_cells(self) -> None:
+        self.assertIn("표를 사용하지 말고", ANSWER_PROMPT_V6)
+        self.assertIn("항목별 소제목이나 목록으로 설명하세요", ANSWER_PROMPT_V6)
+        self.assertIn("모든 셀은 반드시 한 줄로 끝내고", ANSWER_PROMPT_V6)
+        self.assertIn("코드 블록이나", ANSWER_PROMPT_V6)
+        self.assertIn("줄바꿈을 절대 넣지 마세요", ANSWER_PROMPT_V6)
 
     def test_prompt_defines_terms_before_riido_role_and_value(self) -> None:
-        self.assertIn("용어의 의미를 직접 물으면", ANSWER_PROMPT_V5)
-        self.assertIn("첫 문장에 그 용어 자체의 쉬운 의미", ANSWER_PROMPT_V5)
-        self.assertIn("그 용어가 어떤 종류인지", ANSWER_PROMPT_V5)
-        self.assertIn("핵심 사용 주체나 목적", ANSWER_PROMPT_V5)
-        self.assertIn("첫 문장만으로 이해할 수 있게 끝내고", ANSWER_PROMPT_V5)
-        self.assertIn("같은 문장에", ANSWER_PROMPT_V5)
-        self.assertIn("이어 붙이지 마세요", ANSWER_PROMPT_V5)
-        self.assertIn("둘째 문장으로 미루지 마세요", ANSWER_PROMPT_V5)
-        self.assertIn("용어 의미를 먼저 설명한 뒤", ANSWER_PROMPT_V5)
-        self.assertIn("뤼이도에서의 역할과 사용 가치", ANSWER_PROMPT_V5)
+        self.assertIn("용어의 의미를 직접 물으면", ANSWER_PROMPT_V6)
+        self.assertIn("첫 문장에 그 용어 자체의 쉬운 의미", ANSWER_PROMPT_V6)
+        self.assertIn("그 용어가 어떤 종류인지", ANSWER_PROMPT_V6)
+        self.assertIn("핵심 사용 주체나 목적", ANSWER_PROMPT_V6)
+        self.assertIn("첫 문장만으로 이해할 수 있게 끝내고", ANSWER_PROMPT_V6)
+        self.assertIn("같은 문장에", ANSWER_PROMPT_V6)
+        self.assertIn("이어 붙이지 마세요", ANSWER_PROMPT_V6)
+        self.assertIn("둘째 문장으로 미루지 마세요", ANSWER_PROMPT_V6)
+        self.assertIn("용어 의미를 먼저 설명한 뒤", ANSWER_PROMPT_V6)
+        self.assertIn("뤼이도에서의 역할과 사용 가치", ANSWER_PROMPT_V6)
 
     def test_prompt_does_not_invent_unsupported_term_definitions(self) -> None:
-        self.assertIn("일반 지식으로 정의를 보완하지 말고", ANSWER_PROMPT_V5)
-        self.assertIn("WITHHELD 여부를 판단하세요", ANSWER_PROMPT_V5)
+        self.assertIn("일반 지식으로 정의를 보완하지 말고", ANSWER_PROMPT_V6)
+        self.assertIn("WITHHELD 여부를 판단하세요", ANSWER_PROMPT_V6)
 
     def test_prompt_forbids_links_urls_and_html(self) -> None:
-        self.assertEqual("v5", GENERATION_PROMPT_VERSION)
+        self.assertEqual("v6", GENERATION_PROMPT_VERSION)
         self.assertIn(
             "Markdown 링크 문법과 HTML을 사용하지 마세요",
-            ANSWER_PROMPT_V5,
+            ANSWER_PROMPT_V6,
         )
         self.assertIn(
             "코드 블록이나 백틱 인라인 코드 안에 넣고",
-            ANSWER_PROMPT_V5,
+            ANSWER_PROMPT_V6,
         )
-        self.assertIn("그 밖의 URL은 본문에 쓰지 마세요", ANSWER_PROMPT_V5)
-        self.assertIn("별도 citations 영역", ANSWER_PROMPT_V5)
+        self.assertIn("그 밖의 URL은 본문에 쓰지 마세요", ANSWER_PROMPT_V6)
+        self.assertIn("별도 citations 영역", ANSWER_PROMPT_V6)
 
     def test_selects_required_sources_in_first_evidence_order(self) -> None:
         sources = build_generation_context(
@@ -382,7 +389,7 @@ class GenerationContextTest(unittest.TestCase):
 
 
 class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
-    async def test_selects_sources_before_requesting_answer_with_prompt_v5(
+    async def test_selects_sources_before_requesting_answer_with_prompt_v6(
         self,
     ) -> None:
         plan = self._answerable_plan("SOURCE_1")
@@ -398,13 +405,13 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
             [
                 call(
                     model=OPENAI_GENERATION_MODEL,
-                    instructions=SOURCE_PLANNING_PROMPT_V5,
+                    instructions=SOURCE_PLANNING_PROMPT_V6,
                     input=build_generation_input("질문", sources),
                     text_format=GenerationSourcePlan,
                 ),
                 call(
                     model=OPENAI_GENERATION_MODEL,
-                    instructions=ANSWER_PROMPT_V5,
+                    instructions=ANSWER_PROMPT_V6,
                     input=build_answer_input("질문", sources, plan),
                     text_format=GenerationResult,
                 ),

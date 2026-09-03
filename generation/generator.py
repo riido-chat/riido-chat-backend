@@ -22,12 +22,12 @@ from retrieval.models import HybridRetrievalResult
 
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.4-mini"
-GENERATION_PROMPT_VERSION = "v5"
+GENERATION_PROMPT_VERSION = "v6"
 MAX_CONTEXT_SOURCES = 5
 MAX_PLANNED_CITATIONS = 3
 MAX_GENERATION_ATTEMPTS = 2
 
-SOURCE_PLANNING_PROMPT_V5 = """당신은 뤼이도 공식 이용가이드 답변에 필요한 근거를 판정합니다.
+SOURCE_PLANNING_PROMPT_V6 = """당신은 뤼이도 공식 이용가이드 답변에 필요한 근거를 판정합니다.
 
 ## Scope rules
 - 먼저 SOURCE를 보지 말고 질문이 직접 요구한 정보 단위만 나누세요.
@@ -71,7 +71,7 @@ SOURCE_PLANNING_PROMPT_V5 = """당신은 뤼이도 공식 이용가이드 답변
 - WITHHELD이면 evidence_requirements는 비우고 withheld_reason을 작성합니다.
 """
 
-ANSWER_PROMPT_V5 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하는 안내 챗봇입니다.
+ANSWER_PROMPT_V6 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하는 안내 챗봇입니다.
 
 ## Grounding rules
 - 제공된 Context에 명시된 사실만 사용하세요.
@@ -101,6 +101,10 @@ ANSWER_PROMPT_V5 = """당신은 뤼이도 공식 이용가이드만을 근거로
 - Context에 용어 자체의 의미가 없다면 일반 지식으로 정의를 보완하지 말고
   Answerability rules에 따라 WITHHELD 여부를 판단하세요.
 - 절차형 질문은 필요한 경우 단계별로 안내하고 최소한의 Markdown만 사용하세요.
+- 비교 항목 중 하나라도 코드, 여러 단계, 여러 문장이 필요하면 표를 사용하지 말고
+  항목별 소제목이나 목록으로 설명하세요.
+- 표를 사용하기로 했다면 모든 셀은 반드시 한 줄로 끝내고, 셀 안에 코드 블록이나
+  줄바꿈을 절대 넣지 마세요.
 - answer_markdown에 Markdown 링크 문법과 HTML을 사용하지 마세요.
   사용자가 입력하거나 확인해야 하는 설정값과 엔드포인트 URL은
   코드 블록이나 백틱 인라인 코드 안에 넣고, 그 밖의 URL은 본문에 쓰지 마세요.
@@ -308,7 +312,7 @@ class OpenAIGenerator:
         total_output_tokens: Optional[int] = None
 
         plan_call = await self._parse_with_retry(
-            instructions=SOURCE_PLANNING_PROMPT_V5,
+            instructions=SOURCE_PLANNING_PROMPT_V6,
             input_text=build_generation_input(question, sources),
             text_format=GenerationSourcePlan,
         )
@@ -378,7 +382,7 @@ class OpenAIGenerator:
             )
 
         answer_call = await self._parse_with_retry(
-            instructions=ANSWER_PROMPT_V5,
+            instructions=ANSWER_PROMPT_V6,
             input_text=build_answer_input(question, selected_sources, plan),
             text_format=GenerationResult,
         )
