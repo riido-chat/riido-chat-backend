@@ -4,21 +4,21 @@ from unittest.mock import AsyncMock, patch
 import httpx
 from openai import APITimeoutError
 
-from app.rag.generation_service import (
+from app.answering.service import (
     CITATION_VALIDATION_ERROR_CODE,
     INTERNAL_ERROR_CODE,
     UPSTREAM_ERROR_CODE,
     WITHHELD_RESPONSES,
     GenerationService,
 )
-from app.rag.model_trace import ModelCallTrace
-from generation.generator import (
+from app.core.model_trace import ModelCallTrace
+from app.answering.generator import (
     GENERATION_PROMPT_VERSION,
     OPENAI_GENERATION_MODEL,
     OPENAI_GENERATION_PROVIDER,
     OpenAIGenerator,
 )
-from generation.models import (
+from app.answering.models import (
     FinalAnswerStatus,
     FinalWithheldReason,
     GenerationCall,
@@ -26,7 +26,7 @@ from generation.models import (
     GenerationStatus,
     GenerationWithheldReason,
 )
-from retrieval.models import HybridRetrievalResult, RetrievalChunk
+from app.retrieval.models import HybridRetrievalResult, RetrievalChunk
 
 
 def _trace(succeeded: bool = True) -> ModelCallTrace:
@@ -106,7 +106,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "app.rag.generation_service.time.perf_counter",
+            "app.answering.service.time.perf_counter",
             side_effect=[10.0, 12.5],
         ):
             result = await self.service.generate_answer(
@@ -472,7 +472,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "app.rag.generation_service.validate_citations",
+            "app.answering.service.validate_citations",
             side_effect=RuntimeError("validation failure"),
         ):
             result = await self.service.generate_answer("질문", [self._result(1)])

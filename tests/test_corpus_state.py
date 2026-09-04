@@ -1,8 +1,8 @@
 import unittest
 from pathlib import Path
 
-from app.rag.corpus_state import CorpusNotLoadedError, CorpusState
-from retrieval.models import RetrievalChunk
+from app.retrieval.corpus_state import CorpusNotLoadedError, CorpusState
+from app.retrieval.models import RetrievalChunk
 
 
 class CorpusStateTest(unittest.TestCase):

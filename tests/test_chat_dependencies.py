@@ -10,14 +10,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db_session
 from app.main import create_app
-from app.rag.chat_service import ChatService
-from app.rag.dependencies import get_chat_service
-from app.rag.generation_service import GenerationService
-from app.rag.query_rewrite import QueryRewriteService
-from generation.generator import OpenAIGenerator
-from retrieval.bm25_retriever import BM25Retriever
-from retrieval.embedding import OpenAIEmbedder
-from retrieval.models import RetrievalChunk
+from app.chat.service import ChatService
+from app.chat.dependencies import get_chat_service
+from app.answering.service import GenerationService
+from app.chat.query_rewrite import QueryRewriteService
+from app.answering.generator import OpenAIGenerator
+from app.retrieval.bm25_retriever import BM25Retriever
+from app.retrieval.embedding import OpenAIEmbedder
+from app.retrieval.models import RetrievalChunk
 
 
 class ChatDependencyLifecycleTest(unittest.TestCase):
@@ -184,7 +184,7 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
                 return_value=store,
             ),
             "bm25": patch(
-                "app.rag.corpus_state.BM25Retriever",
+                "app.retrieval.corpus_state.BM25Retriever",
                 return_value=self.bm25_retriever,
             ),
             "embedder": patch(

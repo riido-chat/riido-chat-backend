@@ -7,39 +7,39 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.admin.ingestion_service import AdminApiError
-from app.api.admin_documents import router as admin_documents_router
-from app.api.admin_schema import AdminErrorCode, AdminErrorResponse
-from app.api.chat import corpus_unavailable_response
-from app.api.chat import router as chat_router
-from app.api.feedback import (
+from app.document.ingestion_service import AdminApiError
+from app.admin.router import router as admin_documents_router
+from app.admin.schema import AdminErrorCode, AdminErrorResponse
+from app.chat.router import corpus_unavailable_response
+from app.chat.router import router as chat_router
+from app.chat.feedback import (
     feedback_not_allowed_response,
     rag_run_not_found_response,
 )
-from app.api.feedback import router as feedback_router
+from app.chat.feedback import router as feedback_router
 from app.api.health import router as health_router
 from app.api.internal import router as internal_router
-from app.api.rag_run import rag_run_result_not_found_response
-from app.api.rag_run import router as rag_run_router
+from app.chat.rag_run import rag_run_result_not_found_response
+from app.chat.rag_run import router as rag_run_router
 from app.core.config import get_settings
 from app.database.session import dispose_engine, get_session_factory
-from app.rag.chat_service import (
+from app.chat.service import (
     ConversationNotFoundError,
     conversation_busy_response,
     conversation_not_found_response,
 )
-from app.rag.corpus_state import CorpusNotLoadedError, CorpusState
-from app.rag.generation_service import GenerationService
-from app.rag.log_store import (
+from app.retrieval.corpus_state import CorpusNotLoadedError, CorpusState
+from app.answering.service import GenerationService
+from app.chat.log_store import (
     ConversationBusyError,
     FeedbackNotAllowedError,
     RagRunNotFoundError,
 )
-from app.rag.query_rewrite import QueryRewriteService
-from app.rag.rag_run_view import RagRunResultNotFoundError
-from generation.generator import OpenAIGenerator
-from retrieval.embedding import OpenAIEmbedder
-from retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
+from app.chat.query_rewrite import QueryRewriteService
+from app.chat.rag_run_view import RagRunResultNotFoundError
+from app.answering.generator import OpenAIGenerator
+from app.retrieval.embedding import OpenAIEmbedder
+from app.retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
 
 
 logger = logging.getLogger(__name__)

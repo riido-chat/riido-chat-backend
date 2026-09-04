@@ -21,13 +21,13 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from app.database.models import IndexVersion
 from app.database.session import dispose_engine, get_session_factory
-from app.rag.log_store import RagLogStore
-from app.rag.query_rewrite import (
+from app.chat.log_store import RagLogStore
+from app.chat.query_rewrite import (
     OPENAI_QUERY_REWRITE_MODEL,
     QUERY_REWRITE_PROMPT_VERSION,
 )
-from generation.generator import GENERATION_PROMPT_VERSION, OPENAI_GENERATION_MODEL
-from retrieval.embedding import OPENAI_EMBEDDING_MODEL
+from app.answering.generator import GENERATION_PROMPT_VERSION, OPENAI_GENERATION_MODEL
+from app.retrieval.embedding import OPENAI_EMBEDDING_MODEL
 
 
 DEFAULT_BASE_URL = "http://localhost:8000"

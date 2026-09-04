@@ -8,9 +8,9 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db_session
-from app.rag.corpus_state import CorpusSnapshot, CorpusState
-from app.rag.dependencies import get_corpus_state
-from retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
+from app.retrieval.corpus_state import CorpusSnapshot, CorpusState
+from app.chat.dependencies import get_corpus_state
+from app.retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
 
 
 router = APIRouter(prefix="/internal", tags=["internal"])

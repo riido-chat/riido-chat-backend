@@ -1,7 +1,7 @@
 import unittest
 
-from pipeline.document.models import NormalizedDocument
-from pipeline.document.section_parser import (
+from app.document.models import NormalizedDocument
+from app.document.section_parser import (
     create_section_identity_hash,
     parse_sections,
 )

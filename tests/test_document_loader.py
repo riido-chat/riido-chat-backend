@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from pipeline.document.loader import load_normalized_documents
+from app.document.loader import load_normalized_documents
 
 
 class NormalizedDocumentLoaderTest(unittest.TestCase):

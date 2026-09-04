@@ -10,7 +10,7 @@ import httpx
 from openai import APITimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.chat_schema import (
+from app.chat.schema import (
     ChatCompletedResponse,
     ChatErrorCode,
     ChatErrorResponse,
@@ -19,20 +19,20 @@ from app.api.chat_schema import (
     ChatWithheldResponse,
 )
 from app.database.models import ContextStrategy, ExecutionStatus
-from app.rag.chat_service import (
+from app.chat.service import (
     ChatService,
     ConversationNotFoundError,
 )
-from app.rag.generation_service import WITHHELD_RESPONSES, GenerationService
-from app.rag.log_store import (
+from app.answering.service import WITHHELD_RESPONSES, GenerationService
+from app.chat.log_store import (
     CANCELLED_RUN_MODEL_CALL_ERROR_MESSAGE,
     ConversationBusyError,
     ConversationUnavailableError,
     RagLogStore,
 )
-from app.rag.model_trace import ModelCallTrace
-from app.rag.progress import ProgressStage
-from app.rag.query_rewrite import (
+from app.core.model_trace import ModelCallTrace
+from app.chat.progress import ProgressStage
+from app.chat.query_rewrite import (
     QUERY_REWRITE_PROMPT_VERSION,
     QueryResolution,
     QueryRewriteCall,
@@ -41,14 +41,14 @@ from app.rag.query_rewrite import (
     QueryRewriteService,
     QueryRewriteTurnStatus,
 )
-from generation.models import (
+from app.answering.models import (
     Citation,
     FinalAnswerStatus,
     FinalGenerationResult,
     FinalWithheldReason,
 )
-from retrieval.hybrid_retriever import HybridRetriever
-from retrieval.models import (
+from app.retrieval.hybrid_retriever import HybridRetriever
+from app.retrieval.models import (
     HybridRetrievalResult,
     HybridSearchCall,
     RetrievalChunk,

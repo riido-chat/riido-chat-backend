@@ -14,7 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from app.admin.document_key import (
+from app.document.document_key import (
     DEFAULT_DOCUMENT_GROUP_KEY,
     SOURCE_TYPE_GITBOOK,
     SOURCE_TYPE_UPLOAD,

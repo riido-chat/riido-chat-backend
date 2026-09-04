@@ -34,12 +34,12 @@ from app.database.models import (
 )
 from app.database.session import get_db_session
 from app.main import create_app
-from app.rag.chat_service import ChatService
-from app.rag.dependencies import get_chat_service, get_rag_log_store
-from app.rag.generation_service import GenerationService
-from app.rag.log_store import RagLogStore
-from app.rag.model_trace import ModelCallTrace
-from app.rag.query_rewrite import (
+from app.chat.service import ChatService
+from app.chat.dependencies import get_chat_service, get_rag_log_store
+from app.answering.service import GenerationService
+from app.chat.log_store import RagLogStore
+from app.core.model_trace import ModelCallTrace
+from app.chat.query_rewrite import (
     MODEL_OUTPUT_INVALID_ERROR_CODE,
     QUERY_REWRITE_PROMPT_VERSION,
     QueryResolution,
@@ -48,14 +48,14 @@ from app.rag.query_rewrite import (
     QueryRewriteService,
     QueryRewriteTurnStatus,
 )
-from generation.models import (
+from app.answering.models import (
     Citation,
     FinalAnswerStatus,
     FinalGenerationResult,
     FinalWithheldReason,
 )
-from retrieval.hybrid_retriever import HybridRetriever
-from retrieval.models import (
+from app.retrieval.hybrid_retriever import HybridRetriever
+from app.retrieval.models import (
     HybridRetrievalResult,
     HybridSearchCall,
     RetrievalChunk,

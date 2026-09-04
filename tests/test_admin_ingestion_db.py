@@ -8,13 +8,13 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.admin.ingestion_service import (
+from app.document.ingestion_service import (
     AdminIngestionService,
     AdminJobInProgressError,
     DocumentAlreadyExistsError,
     run_admin_ingestion,
 )
-from app.admin.document_key import (
+from app.document.document_key import (
     DEFAULT_DOCUMENT_GROUP_KEY,
     SOURCE_TYPE_UPLOAD,
     build_console_canonical_uri,

@@ -18,8 +18,8 @@ from app.database.models import (
     IndexVersion,
     IndexVersionStatus,
 )
-from pipeline.document.models import NormalizedDocument
-from retrieval.index_vector_corpus import run_reindex
+from app.document.models import NormalizedDocument
+from app.indexing.index_vector_corpus import run_reindex
 
 
 async def _check_database_available(url: str) -> bool:

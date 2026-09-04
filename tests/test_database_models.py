@@ -38,7 +38,7 @@ from app.database.models import (
     ModelCallPurpose,
     RagRun,
 )
-from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
+from app.retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 
 
 ERD_TABLE_NAMES = {

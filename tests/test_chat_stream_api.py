@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.api.chat_schema import (
+from app.chat.schema import (
     ChatAnswer,
     ChatCitation,
     ChatCompletedResponse,
@@ -21,11 +21,11 @@ from app.api.chat_schema import (
     ChatWithheldResponse,
 )
 from app.main import create_app
-from app.rag.chat_service import ChatService, ConversationNotFoundError
-from app.rag.corpus_state import CorpusNotLoadedError
-from app.rag.dependencies import get_chat_service
-from app.rag.log_store import ConversationBusyError
-from app.rag.progress import ProgressStage
+from app.chat.service import ChatService, ConversationNotFoundError
+from app.retrieval.corpus_state import CorpusNotLoadedError
+from app.chat.dependencies import get_chat_service
+from app.chat.log_store import ConversationBusyError
+from app.chat.progress import ProgressStage
 
 
 CONVERSATION_ID = uuid.UUID("6b401388-b1ca-410a-9430-dd9beee85460")
@@ -110,7 +110,7 @@ class ChatStreamApiTest(unittest.TestCase):
         async def scope(*_args, **_kwargs):
             yield self.stream_service
 
-        patcher = patch("app.api.chat_stream._chat_service_scope", scope)
+        patcher = patch("app.chat.stream._chat_service_scope", scope)
         patcher.start()
         self.addCleanup(patcher.stop)
 

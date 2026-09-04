@@ -4,16 +4,16 @@ from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
-from pipeline.document.models import NormalizedDocument
-from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
-from retrieval.index_vector_corpus import (
+from app.document.models import NormalizedDocument
+from app.retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
+from app.indexing.index_vector_corpus import (
     ReindexResult,
     build_index_items,
     main,
     reindex_vector_corpus,
     run_reindex,
 )
-from retrieval.models import RetrievalChunk
+from app.retrieval.models import RetrievalChunk
 
 
 class VectorIndexItemTest(unittest.TestCase):
@@ -103,8 +103,8 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         ]
         self.session = AsyncMock()
 
-    @patch("retrieval.index_vector_corpus.build_document_retrieval_chunks")
-    @patch("retrieval.index_vector_corpus.PgVectorStore")
+    @patch("app.indexing.index_vector_corpus.build_document_retrieval_chunks")
+    @patch("app.indexing.index_vector_corpus.PgVectorStore")
     async def test_commits_each_checkpoint_and_finishes_success(
         self,
         store_class: Mock,
@@ -142,8 +142,8 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, result.document_count)
         self.assertEqual(1, result.chunk_count)
 
-    @patch("retrieval.index_vector_corpus.build_document_retrieval_chunks")
-    @patch("retrieval.index_vector_corpus.PgVectorStore")
+    @patch("app.indexing.index_vector_corpus.build_document_retrieval_chunks")
+    @patch("app.indexing.index_vector_corpus.PgVectorStore")
     async def test_marks_ingestion_failed_when_document_pipeline_fails(
         self,
         store_class: Mock,
@@ -164,8 +164,8 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(2, self.session.commit.await_count)
         self.session.rollback.assert_awaited_once_with()
 
-    @patch("retrieval.index_vector_corpus.build_document_retrieval_chunks")
-    @patch("retrieval.index_vector_corpus.PgVectorStore")
+    @patch("app.indexing.index_vector_corpus.build_document_retrieval_chunks")
+    @patch("app.indexing.index_vector_corpus.PgVectorStore")
     async def test_marks_index_failed_when_embedding_fails(
         self,
         store_class: Mock,
@@ -195,8 +195,8 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(4, self.session.commit.await_count)
         self.session.rollback.assert_awaited_once_with()
 
-    @patch("retrieval.index_vector_corpus.build_document_retrieval_chunks")
-    @patch("retrieval.index_vector_corpus.PgVectorStore")
+    @patch("app.indexing.index_vector_corpus.build_document_retrieval_chunks")
+    @patch("app.indexing.index_vector_corpus.PgVectorStore")
     async def test_marks_index_failed_when_validation_fails(
         self,
         store_class: Mock,
@@ -228,9 +228,9 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
 
 
 class VectorIndexMainTest(unittest.TestCase):
-    @patch("retrieval.index_vector_corpus.reindex_vector_corpus")
-    @patch("retrieval.index_vector_corpus.OpenAIEmbedder")
-    @patch("retrieval.index_vector_corpus.load_normalized_documents")
+    @patch("app.indexing.index_vector_corpus.reindex_vector_corpus")
+    @patch("app.indexing.index_vector_corpus.OpenAIEmbedder")
+    @patch("app.indexing.index_vector_corpus.load_normalized_documents")
     def test_runs_reindex_and_prints_active_index(
         self,
         load_documents: Mock,
@@ -258,9 +258,9 @@ class VectorIndexMainTest(unittest.TestCase):
 
 
 class VectorCorpusReplacementTest(unittest.IsolatedAsyncioTestCase):
-    @patch("retrieval.index_vector_corpus.dispose_engine")
-    @patch("retrieval.index_vector_corpus.run_reindex")
-    @patch("retrieval.index_vector_corpus.get_session_factory")
+    @patch("app.indexing.index_vector_corpus.dispose_engine")
+    @patch("app.indexing.index_vector_corpus.run_reindex")
+    @patch("app.indexing.index_vector_corpus.get_session_factory")
     async def test_reuses_session_and_disposes_engine(
         self,
         get_session_factory: Mock,

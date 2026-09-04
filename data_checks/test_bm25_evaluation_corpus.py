@@ -10,8 +10,8 @@ from evaluation.run_bm25_evaluation import (
     load_questions,
     print_evaluation_results,
 )
-from retrieval.bm25_retriever import BM25Retriever
-from retrieval.corpus import build_retrieval_chunks
+from app.retrieval.bm25_retriever import BM25Retriever
+from app.retrieval.corpus import build_retrieval_chunks
 
 
 class BM25EvaluationCorpusCheck(unittest.TestCase):

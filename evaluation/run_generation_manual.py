@@ -13,15 +13,15 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.database.session import dispose_engine, get_session_factory
-from app.rag.generation_service import GenerationService
-from generation.generator import OpenAIGenerator
-from generation.models import FinalGenerationResult
-from retrieval.bm25_retriever import BM25Retriever
-from retrieval.embedding import OpenAIEmbedder
-from retrieval.hybrid_retriever import HybridRetriever
-from retrieval.models import HybridRetrievalResult
-from retrieval.pgvector_store import PgVectorStore
-from retrieval.vector_retriever import VectorRetriever
+from app.answering.service import GenerationService
+from app.answering.generator import OpenAIGenerator
+from app.answering.models import FinalGenerationResult
+from app.retrieval.bm25_retriever import BM25Retriever
+from app.retrieval.embedding import OpenAIEmbedder
+from app.retrieval.hybrid_retriever import HybridRetriever
+from app.retrieval.models import HybridRetrievalResult
+from app.retrieval.pgvector_store import PgVectorStore
+from app.retrieval.vector_retriever import VectorRetriever
 
 
 def print_hybrid_results(results: Sequence[HybridRetrievalResult]) -> None:

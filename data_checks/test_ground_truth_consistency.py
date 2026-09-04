@@ -6,7 +6,7 @@ import json
 import unittest
 from pathlib import Path
 
-from retrieval.corpus import build_retrieval_chunks
+from app.retrieval.corpus import build_retrieval_chunks
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]

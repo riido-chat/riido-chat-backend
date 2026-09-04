@@ -9,7 +9,7 @@ import httpx
 from openai import APIStatusError, APITimeoutError
 from pydantic import ValidationError
 
-from app.rag.query_rewrite import (
+from app.chat.query_rewrite import (
     CONTEXT_SNAPSHOT_SCHEMA_VERSION,
     MAX_QUERY_LENGTH,
     MAX_QUERY_REWRITE_TURNS,
@@ -33,7 +33,7 @@ from app.rag.query_rewrite import (
     build_query_rewrite_input,
     resolve_query_rewrite_output,
 )
-from generation.models import FinalWithheldReason
+from app.answering.models import FinalWithheldReason
 
 
 class QueryRewriteCandidateTurnTest(unittest.TestCase):
@@ -546,7 +546,7 @@ class QueryRewriteServiceTest(unittest.IsolatedAsyncioTestCase):
         service = QueryRewriteService(client=client)
 
         with patch(
-            "app.rag.query_rewrite.time.perf_counter",
+            "app.chat.query_rewrite.time.perf_counter",
             side_effect=[10.0, 12.5],
         ):
             call = await service.rewrite("새 질문", [])
@@ -786,16 +786,16 @@ class QueryRewriteServiceTest(unittest.IsolatedAsyncioTestCase):
 
     def test_requires_api_key_and_disables_sdk_retry_with_timeout(self) -> None:
         with patch(
-            "app.rag.query_rewrite.get_settings",
+            "app.chat.query_rewrite.get_settings",
             return_value=SimpleNamespace(openai_api_key=None),
         ):
             with self.assertRaisesRegex(ValueError, "OPENAI_API_KEY"):
                 QueryRewriteService()
 
         with patch(
-            "app.rag.query_rewrite.get_settings",
+            "app.chat.query_rewrite.get_settings",
             return_value=SimpleNamespace(openai_api_key="test-key"),
-        ), patch("app.rag.query_rewrite.AsyncOpenAI") as client_class:
+        ), patch("app.chat.query_rewrite.AsyncOpenAI") as client_class:
             QueryRewriteService()
 
         client_class.assert_called_once_with(

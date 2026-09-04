@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import AsyncMock
 
 from evaluation.run_hybrid_evaluation import run_hybrid_evaluation
-from retrieval.hybrid_retriever import HybridRetriever
-from retrieval.models import HybridRetrievalResult, RetrievalChunk
+from app.retrieval.hybrid_retriever import HybridRetriever
+from app.retrieval.models import HybridRetrievalResult, RetrievalChunk
 
 
 class HybridEvaluationTest(unittest.IsolatedAsyncioTestCase):

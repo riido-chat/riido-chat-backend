@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import AsyncMock
 
 from evaluation.run_vector_evaluation import run_vector_evaluation
-from retrieval.models import RetrievalChunk, RetrievalResult
-from retrieval.vector_retriever import VectorRetriever
+from app.retrieval.models import RetrievalChunk, RetrievalResult
+from app.retrieval.vector_retriever import VectorRetriever
 
 
 class VectorEvaluationTest(unittest.IsolatedAsyncioTestCase):

@@ -6,13 +6,13 @@ from unittest.mock import Mock, patch
 import httpx
 from openai import InternalServerError, OpenAI
 
-from retrieval.embedding import (
+from app.retrieval.embedding import (
     OPENAI_EMBEDDING_DIMENSIONS,
     OPENAI_EMBEDDING_MODEL,
     OpenAIEmbedder,
     build_embedding_text,
 )
-from retrieval.models import RetrievalChunk
+from app.retrieval.models import RetrievalChunk
 
 
 class EmbeddingTextTest(unittest.TestCase):
@@ -272,8 +272,8 @@ class OpenAIEmbedderTest(unittest.TestCase):
     def test_configures_default_client_without_timeout_override(self) -> None:
         settings = SimpleNamespace(openai_api_key="test-key")
 
-        with patch("retrieval.embedding.get_settings", return_value=settings):
-            with patch("retrieval.embedding.OpenAI") as client_class:
+        with patch("app.retrieval.embedding.get_settings", return_value=settings):
+            with patch("app.retrieval.embedding.OpenAI") as client_class:
                 OpenAIEmbedder()
 
         client_class.assert_called_once_with(api_key="test-key")
@@ -281,7 +281,7 @@ class OpenAIEmbedderTest(unittest.TestCase):
     def test_requires_api_key_when_client_is_not_injected(self) -> None:
         settings = SimpleNamespace(openai_api_key=None)
 
-        with patch("retrieval.embedding.get_settings", return_value=settings):
+        with patch("app.retrieval.embedding.get_settings", return_value=settings):
             with self.assertRaisesRegex(ValueError, "OPENAI_API_KEY"):
                 OpenAIEmbedder()
 

@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.admin.document_key import SOURCE_TYPE_GITBOOK
+from app.document.document_key import SOURCE_TYPE_GITBOOK
 from app.database.models import (
     ContentNode,
     DocumentChunk,
@@ -15,10 +15,10 @@ from app.database.models import (
     DocumentVersion,
     IndexVersion,
 )
-from pipeline.document.models import NormalizedDocument
-from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
-from retrieval.models import RetrievalChunk
-from retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
+from app.document.models import NormalizedDocument
+from app.retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
+from app.retrieval.models import RetrievalChunk
+from app.retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
 
 
 class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):

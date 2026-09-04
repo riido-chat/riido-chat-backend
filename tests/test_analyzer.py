@@ -1,6 +1,6 @@
 import unittest
 
-from retrieval.analyzer import KiwiAnalyzer
+from app.retrieval.analyzer import KiwiAnalyzer
 
 
 class KiwiAnalyzerTest(unittest.TestCase):
