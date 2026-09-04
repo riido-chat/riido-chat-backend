@@ -2,13 +2,13 @@
 
 import asyncio
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Callable
 
 from fastapi import APIRouter, Depends, File, Request, UploadFile, status
 
 from app.admin.dependencies import (
     get_admin_ingestion_service,
-    get_chunk_embedder,
+    get_chunk_embedder_factory,
 )
 from app.document.ingestion_service import (
     INTERNAL_ERROR,
@@ -75,7 +75,9 @@ async def create_admin_document(
     upload: Annotated[AdminDocumentUploadRequest, File()],
     http_request: Request,
     service: AdminIngestionService = Depends(get_admin_ingestion_service),
-    embedder: OpenAIEmbedder = Depends(get_chunk_embedder),
+    embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
+        get_chunk_embedder_factory
+    ),
 ) -> AdminIngestionAcceptedResponse:
     """파일을 검증한 뒤 수집 실행을 확정하고 background task를 시작한다."""
 
@@ -87,7 +89,11 @@ async def create_admin_document(
         filename=filename,
     )
     task = asyncio.create_task(
-        run_admin_ingestion(accepted.ingestion_run_id, raw_content, embedder)
+        run_admin_ingestion(
+            accepted.ingestion_run_id,
+            raw_content,
+            embedder_factory,
+        )
     )
     register_pipeline_task(http_request.app, task)
     return AdminIngestionAcceptedResponse(

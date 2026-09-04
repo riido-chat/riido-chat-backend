@@ -21,7 +21,7 @@ from app.document.document_key import (
     build_upload_document_key,
 )
 from app.core.config import get_settings
-from app.admin.dependencies import get_chunk_embedder
+from app.admin.dependencies import get_chunk_embedder_factory
 from app.retrieval.embedding import (
     OPENAI_EMBEDDING_DIMENSIONS,
     EmbeddingResponse,
@@ -132,7 +132,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         await run_admin_ingestion(
             accepted.ingestion_run_id,
             raw_content,
-            _StubEmbedder(),
+            _StubEmbedder,
         )
 
         async with self.session_factory() as session:
@@ -191,7 +191,9 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         active_before = await self._active_index_ids()
         app = create_app()
         # 실제 embedding 호출 없이 업로드 전 구간을 확인한다
-        app.dependency_overrides[get_chunk_embedder] = _StubEmbedder
+        app.dependency_overrides[get_chunk_embedder_factory] = (
+            lambda: _StubEmbedder
+        )
 
         async with AsyncClient(
             transport=ASGITransport(app=app),
@@ -241,7 +243,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         await run_admin_ingestion(
             accepted.ingestion_run_id,
             "# 문서\n\n## 본문\n\n키 확인\n",
-            _StubEmbedder(),
+            _StubEmbedder,
         )
 
         document_key = build_upload_document_key(title)
@@ -262,7 +264,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         await run_admin_ingestion(
             first.ingestion_run_id,
             "# 제목만 있는 문서\n",
-            _StubEmbedder(),
+            _StubEmbedder,
         )
 
         async with self.session_factory() as session:
@@ -283,7 +285,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         await run_admin_ingestion(
             second.ingestion_run_id,
             "# 문서\n\n## 본문\n\n재시도 성공\n",
-            _StubEmbedder(),
+            _StubEmbedder,
         )
         async with self.session_factory() as session:
             succeeded = await session.get(IngestionRun, second.ingestion_run_id)
@@ -295,7 +297,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         await run_admin_ingestion(
             accepted.ingestion_run_id,
             "# 문서\n\n## 본문\n\n성공\n",
-            _StubEmbedder(),
+            _StubEmbedder,
         )
 
         with self.assertRaises(DocumentAlreadyExistsError):
@@ -312,7 +314,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         await run_admin_ingestion(
             first.ingestion_run_id,
             "# 문서\n\n## 본문\n\n처리 완료\n",
-            _StubEmbedder(),
+            _StubEmbedder,
         )
 
     async def _start(self, title: str):

@@ -7,7 +7,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import Optional
+from typing import Callable, Optional
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -313,11 +313,12 @@ class AdminIngestionService:
 async def run_admin_ingestion(
     ingestion_run_id: int,
     raw_content: str,
-    embedder: Optional[OpenAIEmbedder] = None,
+    embedder_factory: Callable[[], OpenAIEmbedder] = OpenAIEmbedder,
 ) -> None:
     """독립 세션에서 업로드 원문을 READY DocumentVersion까지 처리한다.
 
-    embedder를 주입하면 테스트에서 외부 호출 없이 실행할 수 있다.
+    embedder는 실제로 필요한 시점에 만든다. 생성자를 주입하면 테스트에서
+    외부 호출 없이 실행할 수 있다.
     """
 
     async with get_session_factory()() as session:
@@ -345,7 +346,7 @@ async def run_admin_ingestion(
                 store,
                 ingestion_run_id,
                 chunks,
-                embedder if embedder is not None else OpenAIEmbedder(),
+                embedder_factory(),
             )
 
             failed_stage = "PERSISTING"
