@@ -68,6 +68,7 @@ from app.chat.query_rewrite import (
 )
 from app.answering.models import (
     Citation,
+    CitationSourceKind,
     FinalAnswerStatus,
     FinalGenerationResult,
 )
@@ -627,6 +628,7 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
                         document_title="테스트 문서",
                         section_path=("테스트 문서", "섹션"),
                         source_url="https://docs.riido.io/test.md",
+                        source_kind=CitationSourceKind.GITBOOK,
                         chunk_id=self.chunk_id,
                         document_version_id=self.document_version_id,
                     ),

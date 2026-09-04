@@ -29,10 +29,18 @@ from app.database.models import AnswerCitation, AnswerStatus, RagRun
 
 # 동기 응답과 같은 규칙을 쓰려고 원본 헬퍼를 그대로 참조한다. 복제하면 한쪽만
 # 고쳐질 위험이 있어 비공개 심볼이라도 재사용한다. public alias 정리는 별도 건이다.
-from app.chat.service import _internal_error_response, _to_response_section_path
+from app.chat.service import (
+    _internal_error_response,
+    _to_response_section_path,
+    _to_response_source_url,
+)
 from app.answering.service import WITHHELD_RESPONSES
 from app.chat.log_store import RagLogStore, RagRunDetail
-from app.answering.models import Citation, FinalWithheldReason
+from app.answering.models import (
+    Citation,
+    CitationSourceKind,
+    FinalWithheldReason,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -150,9 +158,10 @@ def _to_chat_citation(
     document_title = row.document_title_snapshot
     source_url = row.source_uri_snapshot
     if document_title is None or source_url is None:
-        # 인용 행을 빼면 citationNumber 연속성이 깨지므로 빈 문자열로 채우고 남긴다.
+        # 인용 행을 빼면 citationNumber 연속성이 깨지므로 남긴다. 제목은 빈
+        # 문자열로 채우고, 링크로 쓸 수 없는 출처는 응답에서 null이 된다.
         logger.warning(
-            "인용 스냅샷이 비어 있어 빈 문자열로 대체합니다: "
+            "인용 스냅샷이 비어 있어 대체합니다: "
             "rag_run_id=%s, citation_order=%s",
             rag_run_id,
             row.citation_order,
@@ -164,12 +173,14 @@ def _to_chat_citation(
         document_title=document_title or "",
         section_path=_split_section_path(row.node_path_snapshot),
         source_url=source_url or "",
+        source_kind=CitationSourceKind.from_canonical_uri(source_url or ""),
     )
     return ChatCitation(
         citation_number=citation.citation_number,
         document_title=citation.document_title,
         section_path=_to_response_section_path(citation),
-        source_url=citation.source_url,
+        source_url=_to_response_source_url(citation),
+        source_kind=citation.source_kind,
     )
 
 

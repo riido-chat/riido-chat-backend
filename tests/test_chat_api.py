@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 
+from app.answering.models import CitationSourceKind
 from app.chat.schema import (
     ChatAnswer,
     ChatCitation,
@@ -65,6 +66,7 @@ class ChatApiTest(unittest.TestCase):
                     document_title="멤버 관리",
                     section_path=["워크스페이스", "멤버 초대"],
                     source_url="https://docs.riido.io/member/invite",
+                    source_kind=CitationSourceKind.GITBOOK,
                 )
             ],
         )
@@ -88,6 +90,7 @@ class ChatApiTest(unittest.TestCase):
                         "documentTitle": "멤버 관리",
                         "sectionPath": ["워크스페이스", "멤버 초대"],
                         "sourceUrl": "https://docs.riido.io/member/invite",
+                        "sourceKind": "GITBOOK",
                     }
                 ],
             },

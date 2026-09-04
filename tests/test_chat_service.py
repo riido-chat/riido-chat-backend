@@ -31,6 +31,12 @@ from app.chat.log_store import (
     RagLogStore,
 )
 from app.core.model_trace import ModelCallTrace
+from app.document.document_key import (
+    CONSOLE_URI_SCHEME,
+    DEFAULT_DOCUMENT_GROUP_KEY,
+    build_console_canonical_uri,
+    build_upload_document_key,
+)
 from app.chat.progress import ProgressStage
 from app.chat.query_rewrite import (
     QUERY_REWRITE_PROMPT_VERSION,
@@ -43,6 +49,7 @@ from app.chat.query_rewrite import (
 )
 from app.answering.models import (
     Citation,
+    CitationSourceKind,
     FinalAnswerStatus,
     FinalGenerationResult,
     FinalWithheldReason,
@@ -230,6 +237,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
                     document_title="문서 1",
                     section_path=("문서 1",),
                     source_url="https://docs.riido.io/1",
+                    source_kind=CitationSourceKind.GITBOOK,
                     chunk_id=1,
                     document_version_id=101,
                 ),
@@ -241,6 +249,49 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertIsInstance(response, ChatCompletedResponse)
         self.assertEqual([], response.citations[0].section_path)
+
+    async def test_console_citation_hides_internal_source_url(self) -> None:
+        console_uri = build_console_canonical_uri(
+            DEFAULT_DOCUMENT_GROUP_KEY,
+            build_upload_document_key("업로드 문서"),
+        )
+        self._generation_result = FinalGenerationResult(
+            status=FinalAnswerStatus.COMPLETED,
+            answer_markdown="콘솔 문서 근거입니다. [1]",
+            citations=(
+                Citation(
+                    citation_number=1,
+                    document_title="업로드 문서",
+                    section_path=("업로드 문서", "섹션 1"),
+                    source_url=console_uri,
+                    source_kind=CitationSourceKind.CONSOLE,
+                    chunk_id=1,
+                    document_version_id=101,
+                ),
+            ),
+            model_call=_generation_trace(),
+        )
+
+        response = await self.service.answer_question("업로드 문서를 알려주세요.")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        citation = response.citations[0]
+        self.assertEqual(CitationSourceKind.CONSOLE, citation.source_kind)
+        self.assertIsNone(citation.source_url)
+        self.assertNotIn(
+            CONSOLE_URI_SCHEME,
+            response.model_dump_json(by_alias=True),
+        )
+
+    async def test_gitbook_citation_keeps_source_url(self) -> None:
+        self._generation_result = self._completed()
+
+        response = await self.service.answer_question("문서 개요를 알려주세요.")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        citation = response.citations[0]
+        self.assertEqual(CitationSourceKind.GITBOOK, citation.source_kind)
+        self.assertEqual("https://docs.riido.io/2", citation.source_url)
 
     async def test_withheld_response_carries_both_identifiers(self) -> None:
         for reason in FinalWithheldReason:
@@ -1282,6 +1333,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
                     document_title="문서 2",
                     section_path=("문서 2", "섹션 2"),
                     source_url="https://docs.riido.io/2",
+                    source_kind=CitationSourceKind.GITBOOK,
                     chunk_id=2,
                     document_version_id=102,
                 ),
@@ -1290,6 +1342,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
                     document_title="문서 1",
                     section_path=("문서 1", "섹션 1"),
                     source_url="https://docs.riido.io/1",
+                    source_kind=CitationSourceKind.GITBOOK,
                     chunk_id=1,
                     document_version_id=101,
                 ),

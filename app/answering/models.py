@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.model_trace import ModelCallTrace
+from app.document.document_key import CONSOLE_URI_SCHEME
 from app.retrieval.models import RetrievalChunk
 
 
@@ -127,6 +128,24 @@ class GenerationContextSource:
     chunk: RetrievalChunk
 
 
+class CitationSourceKind(str, Enum):
+    """인용 출처의 종류. 클라이언트가 외부 링크 노출 여부를 판단한다."""
+
+    GITBOOK = "GITBOOK"
+    CONSOLE = "CONSOLE"
+
+    @classmethod
+    def from_canonical_uri(cls, canonical_uri: str) -> "CitationSourceKind":
+        """원문 위치자의 스킴으로 출처 종류를 판별한다.
+
+        콘솔 업로드 문서만 내부 스킴을 쓰므로, 그 외는 GitBook 문서로 본다.
+        """
+
+        if canonical_uri.startswith(f"{CONSOLE_URI_SCHEME}://"):
+            return cls.CONSOLE
+        return cls.GITBOOK
+
+
 @dataclass(frozen=True)
 class Citation:
     """사용자에게 제공할 검증된 출처.
@@ -139,6 +158,7 @@ class Citation:
     document_title: str
     section_path: Tuple[str, ...]
     source_url: str
+    source_kind: CitationSourceKind
     chunk_id: Optional[int] = None
     document_version_id: Optional[int] = None
 

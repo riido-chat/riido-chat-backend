@@ -17,6 +17,7 @@ from app.answering.generator import (
 )
 from app.answering.models import (
     Citation,
+    CitationSourceKind,
     FinalAnswerStatus,
     FinalGenerationResult,
     FinalWithheldReason,
@@ -181,6 +182,9 @@ def validate_citations(
                     document_title=source.chunk.document_title,
                     section_path=source.chunk.section_path,
                     source_url=source.chunk.source_url,
+                    source_kind=CitationSourceKind.from_canonical_uri(
+                        source.chunk.source_url
+                    ),
                     chunk_id=source.chunk.chunk_id,
                     document_version_id=source.chunk.document_version_id,
                 )

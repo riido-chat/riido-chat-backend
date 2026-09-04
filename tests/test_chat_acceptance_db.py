@@ -50,6 +50,7 @@ from app.chat.query_rewrite import (
 )
 from app.answering.models import (
     Citation,
+    CitationSourceKind,
     FinalAnswerStatus,
     FinalGenerationResult,
     FinalWithheldReason,
@@ -274,6 +275,7 @@ class ChatApiDbAcceptanceTest(unittest.IsolatedAsyncioTestCase):
                     document_title="스프린트",
                     section_path=("스프린트", "설정"),
                     source_url="https://docs.riido.io/projects/sprints.md",
+                    source_kind=CitationSourceKind.GITBOOK,
                     chunk_id=self.chunk_id,
                     document_version_id=self.document_version_id,
                 ),
