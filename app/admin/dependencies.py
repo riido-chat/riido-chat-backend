@@ -6,6 +6,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.document.ingestion_service import AdminIngestionService
+from app.indexing.index_service import IndexReindexService
 from app.database.session import get_db_session
 from app.retrieval.embedding import OpenAIEmbedder
 
@@ -14,6 +15,12 @@ def get_admin_ingestion_service(
     session: AsyncSession = Depends(get_db_session),
 ) -> AdminIngestionService:
     return AdminIngestionService(session)
+
+
+def get_index_reindex_service(
+    session: AsyncSession = Depends(get_db_session),
+) -> IndexReindexService:
+    return IndexReindexService(session)
 
 
 def get_chunk_embedder_factory() -> Callable[[], OpenAIEmbedder]:

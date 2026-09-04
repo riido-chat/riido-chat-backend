@@ -2,13 +2,14 @@
 
 import asyncio
 from pathlib import Path
-from typing import Annotated, Callable
+from typing import Annotated, Callable, Optional
 
 from fastapi import APIRouter, Depends, File, Request, UploadFile, status
 
 from app.admin.dependencies import (
     get_admin_ingestion_service,
     get_chunk_embedder_factory,
+    get_index_reindex_service,
 )
 from app.document.ingestion_service import (
     INTERNAL_ERROR,
@@ -21,6 +22,14 @@ from app.document.ingestion_service import (
 )
 from app.admin.schema import (
     AdminDocumentUploadRequest,
+    AdminIndexRunAcceptedResponse,
+    AdminIndexRunFailedResponse,
+    AdminIndexRunProcessingResponse,
+    AdminIndexRunResponse,
+    AdminIndexRunError,
+    AdminIndexRunSuccessResponse,
+    AdminIndexVersionSummary,
+    IndexRunErrorCode,
     AdminError,
     AdminErrorCode,
     AdminErrorResponse,
@@ -31,7 +40,14 @@ from app.admin.schema import (
     AdminIngestionStatus,
     AdminIngestionSuccessResponse,
 )
+from app.chat.dependencies import get_corpus_state
 from app.core.task_registry import register_pipeline_task
+from app.indexing.index_job import run_admin_index_job
+from app.indexing.index_service import (
+    IndexReindexService,
+    IndexRunDetail,
+)
+from app.retrieval.corpus_state import CorpusState
 from app.retrieval.embedding import OpenAIEmbedder
 from app.database.models import ExecutionStatus
 
@@ -202,3 +218,177 @@ def _to_ingestion_response(detail: IngestionRunDetail) -> AdminIngestionRunRespo
             finishedAt=detail.finished_at,
         )
     raise RuntimeError(f"지원하지 않는 수집 실행 상태입니다: {detail.status}")
+
+
+INDEX_RUN_ERROR_RESPONSES = {
+    status.HTTP_404_NOT_FOUND: {
+        "model": AdminErrorResponse,
+        "description": "`NOT_FOUND`: 대상 그룹 또는 실행이 존재하지 않는 경우입니다.",
+    },
+    status.HTTP_409_CONFLICT: {
+        "model": AdminErrorResponse,
+        "description": (
+            "`JOB_IN_PROGRESS`: 같은 그룹에 실행 중 작업이 있는 경우입니다. "
+            "`REINDEX_NOT_REQUIRED`: 반영할 변경이 없는 경우입니다. "
+            "`NO_READY_DOCUMENTS`: 준비된 문서가 없는 경우입니다. "
+            "`RETRY_NOT_ALLOWED`: 적용 단계 실패가 아니거나 후보가 READY가 "
+            "아닌 경우입니다."
+        ),
+    },
+}
+
+
+@router.post(
+    "/document-groups/{group_id}/reindex",
+    response_model=AdminIndexRunAcceptedResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    responses=INDEX_RUN_ERROR_RESPONSES,
+    summary="검색에 반영하기",
+)
+async def start_reindex(
+    group_id: int,
+    http_request: Request,
+    service: IndexReindexService = Depends(get_index_reindex_service),
+    corpus_state: CorpusState = Depends(get_corpus_state),
+) -> AdminIndexRunAcceptedResponse:
+    """최신 READY 문서 조합으로 후보 색인을 만들고 적용까지 진행한다."""
+
+    accepted = await service.start_reindex(group_id)
+    _start_index_job(http_request, accepted.index_run_id, corpus_state)
+    return _to_accepted_response(accepted)
+
+
+@router.post(
+    "/index-runs/{index_run_id}/retry-apply",
+    response_model=AdminIndexRunAcceptedResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    responses=INDEX_RUN_ERROR_RESPONSES,
+    summary="적용 다시 시도",
+)
+async def retry_apply_index_run(
+    index_run_id: int,
+    http_request: Request,
+    service: IndexReindexService = Depends(get_index_reindex_service),
+    corpus_state: CorpusState = Depends(get_corpus_state),
+) -> AdminIndexRunAcceptedResponse:
+    """적용 단계에서 실패한 실행의 READY 후보에 적용만 다시 시도한다."""
+
+    accepted = await service.start_retry_apply(index_run_id)
+    _start_index_job(http_request, accepted.index_run_id, corpus_state)
+    return _to_accepted_response(accepted)
+
+
+@router.get(
+    "/index-runs/{index_run_id}",
+    response_model=AdminIndexRunResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": AdminErrorResponse,
+            "description": (
+                "`NOT_FOUND`: 요청한 indexRunId에 해당하는 실행이 존재하지 "
+                "않는 경우입니다."
+            ),
+        }
+    },
+    summary="검색 반영 실행 상태 조회",
+)
+async def get_index_run(
+    index_run_id: int,
+    service: IndexReindexService = Depends(get_index_reindex_service),
+) -> AdminIndexRunResponse:
+    detail = await service.get_index_run(index_run_id)
+    return _to_index_run_response(detail)
+
+
+def _start_index_job(
+    http_request: Request,
+    index_run_id: int,
+    corpus_state: CorpusState,
+) -> None:
+    task = asyncio.create_task(run_admin_index_job(index_run_id, corpus_state))
+    register_pipeline_task(http_request.app, task)
+
+
+def _to_accepted_response(accepted) -> AdminIndexRunAcceptedResponse:
+    return AdminIndexRunAcceptedResponse(
+        indexRunId=accepted.index_run_id,
+        indexVersionId=accepted.index_version_id,
+        groupId=accepted.group_id,
+        operationType=accepted.operation_type,
+        triggerType=accepted.trigger_type,
+        status=AdminIngestionStatus.PROCESSING,
+        stage=accepted.stage,
+        retryOfIndexRunId=accepted.retry_of_index_run_id,
+    )
+
+
+def _to_index_version_summary(summary) -> AdminIndexVersionSummary:
+    return AdminIndexVersionSummary(
+        indexVersionId=summary.index_version_id,
+        versionNo=summary.version_no,
+        status=summary.status,
+        activatedAt=summary.activated_at,
+    )
+
+
+def _to_index_run_response(detail: IndexRunDetail) -> AdminIndexRunResponse:
+    if detail.status == ExecutionStatus.PROCESSING:
+        return AdminIndexRunProcessingResponse(
+            indexRunId=detail.index_run_id,
+            groupId=detail.group_id,
+            indexVersionId=detail.index_version_id,
+            operationType=detail.operation_type,
+            triggerType=detail.trigger_type,
+            status=AdminIngestionStatus.PROCESSING,
+            stage=detail.stage,
+            startedAt=detail.started_at,
+        )
+
+    if detail.status == ExecutionStatus.FAILED:
+        return AdminIndexRunFailedResponse(
+            indexRunId=detail.index_run_id,
+            groupId=detail.group_id,
+            indexVersionId=detail.index_version_id,
+            operationType=detail.operation_type,
+            triggerType=detail.trigger_type,
+            status=AdminIngestionStatus.FAILED,
+            stage=detail.stage,
+            error=AdminIndexRunError(
+                code=_to_index_run_error_code(detail.error_code),
+                message=detail.error_message or "검색 반영에 실패했습니다.",
+            ),
+            indexVersion=_to_index_version_summary(detail.index_version),
+            retryable=bool(detail.retryable),
+            startedAt=detail.started_at,
+            finishedAt=detail.finished_at,
+        )
+
+    return AdminIndexRunSuccessResponse(
+        indexRunId=detail.index_run_id,
+        groupId=detail.group_id,
+        indexVersionId=detail.index_version_id,
+        operationType=detail.operation_type,
+        triggerType=detail.trigger_type,
+        status=AdminIngestionStatus.SUCCESS,
+        stage=detail.stage,
+        indexVersion=_to_index_version_summary(detail.index_version),
+        previousIndexVersion=(
+            None
+            if detail.previous_index_version is None
+            else _to_index_version_summary(detail.previous_index_version)
+        ),
+        documentCount=detail.document_count or 0,
+        chunkCount=detail.chunk_count or 0,
+        startedAt=detail.started_at,
+        finishedAt=detail.finished_at,
+    )
+
+
+def _to_index_run_error_code(error_code: Optional[str]) -> IndexRunErrorCode:
+    """기록되지 않았거나 모르는 코드는 내부 오류로 내린다."""
+
+    try:
+        return IndexRunErrorCode(error_code)
+    except ValueError:
+        return IndexRunErrorCode.INTERNAL_ERROR

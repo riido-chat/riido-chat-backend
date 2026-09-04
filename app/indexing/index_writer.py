@@ -225,6 +225,7 @@ class IndexWriter:
             for document_version_id in document_version_ids
         )
         index_version.status = IndexVersionStatus.VALIDATING
+        run.stage = IndexRunStage.VALIDATING
         run.summary = {
             "stage": "VALIDATING",
             "document_count": len(document_version_ids),
@@ -234,8 +235,12 @@ class IndexWriter:
         await self._session.flush()
         return index_version
 
-    async def activate_index(self, index_run_id: int) -> IndexVersion:
-        """저장 건수를 검증하고 새 색인을 ACTIVE로 원자 전환한다."""
+    async def mark_index_ready(self, index_run_id: int) -> IndexVersion:
+        """저장 건수를 검증하고 적용 후보를 READY로 전이한다.
+
+        version_no는 이 시점에 그룹 안에서 부여한다. 빌드에 실패한 후보에는
+        번호가 남지 않아야 하기 때문이다.
+        """
 
         run = await self._get_processing_index_run(index_run_id)
         index_version = await self._session.get(
@@ -247,12 +252,88 @@ class IndexWriter:
             raise ValueError(f"존재하지 않는 색인 버전입니다: {run.index_version_id}")
         if index_version.status != IndexVersionStatus.VALIDATING:
             raise ValueError(
-                "VALIDATING 색인 버전만 활성화할 수 있습니다: "
+                "VALIDATING 색인 버전만 READY로 전이할 수 있습니다: "
                 f"{index_version.status}"
             )
 
         await self._validate_stored_index(index_version, run.summary or {})
+        current_version_no = await self._session.scalar(
+            select(func.max(IndexVersion.version_no)).where(
+                IndexVersion.document_group_id == index_version.document_group_id
+            )
+        )
+        index_version.version_no = (current_version_no or 0) + 1
+        index_version.status = IndexVersionStatus.READY
+        run.summary = {**(run.summary or {}), "stage": "READY"}
+        await self._session.flush()
+        return index_version
+
+    async def start_apply_run(
+        self,
+        index_version_id: int,
+        *,
+        trigger_type: str = DEFAULT_TRIGGER_TYPE,
+        actor_id: Optional[str] = None,
+    ) -> IndexRun:
+        """READY 후보에 적용 전용 실행을 새로 만든다.
+
+        적용에 실패해도 후보는 READY로 남으므로 같은 검색 버전에 실행만
+        다시 붙여 재시도한다.
+        """
+
+        if not trigger_type:
+            raise ValueError("trigger_type은 비어 있을 수 없습니다.")
+
+        index_version = await self._session.get(
+            IndexVersion,
+            index_version_id,
+            with_for_update=True,
+        )
+        if index_version is None:
+            raise ValueError(f"존재하지 않는 색인 버전입니다: {index_version_id}")
+        if index_version.status != IndexVersionStatus.READY:
+            raise ValueError(
+                "READY 색인 버전만 적용할 수 있습니다: "
+                f"{index_version.status}"
+            )
+
         now = datetime.now(timezone.utc)
+        run = IndexRun(
+            index_version_id=index_version.id,
+            trigger_type=trigger_type,
+            operation_type=IndexOperationType.APPLY,
+            stage=IndexRunStage.APPLYING,
+            actor_id=actor_id,
+            status=ExecutionStatus.PROCESSING,
+            summary={"stage": "APPLYING"},
+            started_at=now,
+        )
+        self._session.add(run)
+        await self._session.flush()
+        return run
+
+    async def apply_index(self, index_run_id: int) -> IndexVersion:
+        """READY 후보를 ACTIVE로 원자 전환한다.
+
+        같은 문서 그룹의 기존 ACTIVE만 INACTIVE로 내린다.
+        """
+
+        run = await self._get_processing_index_run(index_run_id)
+        index_version = await self._session.get(
+            IndexVersion,
+            run.index_version_id,
+            with_for_update=True,
+        )
+        if index_version is None:
+            raise ValueError(f"존재하지 않는 색인 버전입니다: {run.index_version_id}")
+        if index_version.status != IndexVersionStatus.READY:
+            raise ValueError(
+                "READY 색인 버전만 활성화할 수 있습니다: "
+                f"{index_version.status}"
+            )
+
+        now = datetime.now(timezone.utc)
+        run.stage = IndexRunStage.APPLYING
         await self._session.execute(
             update(IndexVersion)
             .where(
@@ -264,11 +345,19 @@ class IndexWriter:
         )
         index_version.status = IndexVersionStatus.ACTIVE
         index_version.activated_at = now
+        await self._session.flush()
+        return index_version
+
+    async def finish_apply_run(self, index_run_id: int) -> IndexRun:
+        """적용과 corpus 재적재까지 끝난 실행을 SUCCESS로 마감한다."""
+
+        run = await self._get_processing_index_run(index_run_id)
+        now = datetime.now(timezone.utc)
         run.status = ExecutionStatus.SUCCESS
         run.summary = {**(run.summary or {}), "stage": "ACTIVE"}
         run.finished_at = now
         await self._session.flush()
-        return index_version
+        return run
 
     async def fail_index(
         self,
@@ -276,8 +365,13 @@ class IndexWriter:
         error: Exception,
         *,
         failed_stage: str,
+        error_code: Optional[str] = None,
     ) -> IndexRun:
-        """PROCESSING 색인 실행과 연결 버전을 FAILED로 마감한다."""
+        """PROCESSING 색인 실행을 FAILED로 마감한다.
+
+        READY 후보는 그대로 남긴다. 적용에 실패해도 다시 시도할 수 있어야
+        하므로 실행만 마감하고 검색 버전은 건드리지 않는다.
+        """
 
         run = await self._get_processing_index_run(index_run_id)
         index_version = await self._session.get(
@@ -291,13 +385,17 @@ class IndexWriter:
             raise ValueError("ACTIVE 색인 버전은 실패 처리할 수 없습니다.")
 
         now = datetime.now(timezone.utc)
-        index_version.status = IndexVersionStatus.FAILED
+        if index_version.status != IndexVersionStatus.READY:
+            # 적용 단계 실패는 후보를 READY로 남겨 재시도할 수 있게 한다.
+            # 빌드나 검증 단계 실패는 후보 자체를 쓸 수 없으므로 마감한다.
+            index_version.status = IndexVersionStatus.FAILED
         run.status = ExecutionStatus.FAILED
         run.summary = {
             **(run.summary or {}),
             "stage": "FAILED",
             "failed_stage": failed_stage,
         }
+        run.error_code = error_code
         run.error_message = sanitize_error_message(error)
         run.finished_at = now
         await self._session.flush()
@@ -328,7 +426,10 @@ class IndexWriter:
 
         index_run = await self.start_index(persisted_chunks)
         await self.store_index_items(index_run.id, persisted_chunks)
-        return await self.activate_index(index_run.id)
+        await self.mark_index_ready(index_run.id)
+        index_version = await self.apply_index(index_run.id)
+        await self.finish_apply_run(index_run.id)
+        return index_version
 
     async def _get_processing_index_run(self, index_run_id: int) -> IndexRun:
         run = await self._session.get(
