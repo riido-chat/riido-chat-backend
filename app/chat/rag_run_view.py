@@ -158,9 +158,10 @@ def _to_chat_citation(
     document_title = row.document_title_snapshot
     source_url = row.source_uri_snapshot
     if document_title is None or source_url is None:
-        # 인용 행을 빼면 citationNumber 연속성이 깨지므로 빈 문자열로 채우고 남긴다.
+        # 인용 행을 빼면 citationNumber 연속성이 깨지므로 남긴다. 제목은 빈
+        # 문자열로 채우고, 링크로 쓸 수 없는 출처는 응답에서 null이 된다.
         logger.warning(
-            "인용 스냅샷이 비어 있어 빈 문자열로 대체합니다: "
+            "인용 스냅샷이 비어 있어 대체합니다: "
             "rag_run_id=%s, citation_order=%s",
             rag_run_id,
             row.citation_order,

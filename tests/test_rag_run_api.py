@@ -230,7 +230,7 @@ class RagRunApiTest(unittest.TestCase):
         self.assertEqual("INTERNAL_ERROR", response.json()["error"]["code"])
         self.assertIn("외부 표현이 없는 답변 상태", logs.output[0])
 
-    def test_null_snapshot_fields_fall_back_to_empty_string(self) -> None:
+    def test_null_snapshot_hides_source_url_and_keeps_title_empty(self) -> None:
         self._detail_returns(
             self._completed_run(),
             citations=[
@@ -248,7 +248,9 @@ class RagRunApiTest(unittest.TestCase):
         citation = response.json()["citations"][0]
         self.assertEqual(200, response.status_code)
         self.assertEqual("", citation["documentTitle"])
-        self.assertEqual("", citation["sourceUrl"])
+        # 출처를 알 수 없으면 링크로 쓸 수 없으므로 sourceUrl을 내리지 않는다
+        self.assertIsNone(citation["sourceUrl"])
+        self.assertEqual("GITBOOK", citation["sourceKind"])
         self.assertEqual([], citation["sectionPath"])
         # 번호 연속성을 지키려고 인용 행 자체는 남긴다
         self.assertEqual(1, citation["citationNumber"])
