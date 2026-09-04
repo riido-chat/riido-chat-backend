@@ -7,7 +7,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import Optional
+from typing import Callable, Optional
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -31,8 +31,10 @@ from app.database.session import get_session_factory
 from app.document.models import NormalizedDocument
 from app.document.clean import normalize_markdown
 from app.retrieval.corpus import build_document_retrieval_chunks
+from app.retrieval.embedding import OpenAIEmbedder
 from app.retrieval.models import RetrievalChunk
-from app.retrieval.pgvector_store import PARSER_NAME, PARSER_VERSION, PgVectorStore
+from app.document.document_store import PARSER_NAME, PARSER_VERSION, DocumentStore
+from app.document.ingestion import prepare_chunk_embeddings
 
 
 logger = logging.getLogger(__name__)
@@ -311,11 +313,16 @@ class AdminIngestionService:
 async def run_admin_ingestion(
     ingestion_run_id: int,
     raw_content: str,
+    embedder_factory: Callable[[], OpenAIEmbedder] = OpenAIEmbedder,
 ) -> None:
-    """독립 세션에서 업로드 원문을 READY DocumentVersion까지 처리한다."""
+    """독립 세션에서 업로드 원문을 READY DocumentVersion까지 처리한다.
+
+    embedder는 실제로 필요한 시점에 만든다. 생성자를 주입하면 테스트에서
+    외부 호출 없이 실행할 수 있다.
+    """
 
     async with get_session_factory()() as session:
-        store = PgVectorStore(session)
+        store = DocumentStore(session)
         failed_stage = "LOADING"
         try:
             source_values = await _load_processing_source_values(
@@ -333,11 +340,21 @@ async def run_admin_ingestion(
                 **source_values,
             )
 
+            failed_stage = "EMBEDDING"
+            embeddings = await prepare_chunk_embeddings(
+                session,
+                store,
+                ingestion_run_id,
+                chunks,
+                embedder_factory(),
+            )
+
             failed_stage = "PERSISTING"
             await store.complete_ingestion(
                 ingestion_run_id,
                 document,
                 chunks,
+                embeddings,
             )
             await session.commit()
         except _UploadedMarkdownInvalidError as error:
@@ -448,7 +465,7 @@ def _build_uploaded_document(
 
 async def _record_ingestion_failure(
     session: AsyncSession,
-    store: PgVectorStore,
+    store: DocumentStore,
     ingestion_run_id: int,
     error: Exception,
     *,

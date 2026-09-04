@@ -12,7 +12,7 @@ from app.retrieval.embedding import (
     OpenAIEmbedder,
 )
 from app.retrieval.models import RetrievalChunk, RetrievalResult
-from app.retrieval.pgvector_store import PgVectorStore
+from app.retrieval.search_reader import SearchReader
 from app.retrieval.vector_retriever import (
     QUERY_EMBEDDING_TIMEOUT_SECONDS,
     VectorRetriever,
@@ -22,7 +22,7 @@ from app.retrieval.vector_retriever import (
 class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.embedder = Mock(spec=OpenAIEmbedder)
-        self.store = AsyncMock(spec=PgVectorStore)
+        self.store = AsyncMock(spec=SearchReader)
         self.retriever = VectorRetriever(self.embedder, self.store)
         self.embedding = [0.1] * OPENAI_EMBEDDING_DIMENSIONS
         self.embedder.embed_many_with_usage.return_value = EmbeddingResponse(

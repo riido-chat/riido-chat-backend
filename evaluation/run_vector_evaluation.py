@@ -25,7 +25,7 @@ from evaluation.run_bm25_evaluation import (
 )
 from app.retrieval.embedding import OpenAIEmbedder
 from app.retrieval.models import RetrievalResult
-from app.retrieval.pgvector_store import PgVectorStore
+from app.retrieval.search_reader import SearchReader
 from app.retrieval.vector_retriever import VectorRetriever
 
 
@@ -79,7 +79,7 @@ async def create_vector_candidates(
         async with get_session_factory()() as session:
             retriever = VectorRetriever(
                 OpenAIEmbedder(),
-                PgVectorStore(session),
+                SearchReader(session),
             )
             return await run_vector_evaluation(questions, retriever)
     finally:

@@ -41,10 +41,9 @@ class VectorIndexItemTest(unittest.TestCase):
         self.assertEqual(self.chunks, [chunk for chunk, _ in items])
         self.assertEqual(self.embeddings, [embedding for _, embedding in items])
 
-    def test_rejects_empty_corpus_without_embedding(self) -> None:
-        with self.assertRaisesRegex(ValueError, "하나 이상"):
-            build_index_items([], self.embedder)
-
+    def test_skips_embedding_when_nothing_is_missing(self) -> None:
+        # embedding은 접수 시점에 만들어지므로 색인 단계에서 채울 것이 없는 상태가 정상이다
+        self.assertEqual([], build_index_items([], self.embedder))
         self.embedder.embed_many.assert_not_called()
 
     def test_propagates_multi_input_embedding_failure(self) -> None:
@@ -97,28 +96,34 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
             chunk_id=101,
             document_version_id=201,
         )
+        self.embedding = [0.1] * OPENAI_EMBEDDING_DIMENSIONS
         self.embedder = Mock()
-        self.embedder.embed_many.return_value = [
-            [0.1] * OPENAI_EMBEDDING_DIMENSIONS
-        ]
+        self.embedder.embed_many.return_value = [self.embedding]
         self.session = AsyncMock()
 
+    @patch("app.indexing.index_vector_corpus.prepare_chunk_embeddings")
     @patch("app.indexing.index_vector_corpus.build_document_retrieval_chunks")
-    @patch("app.indexing.index_vector_corpus.PgVectorStore")
+    @patch("app.indexing.index_vector_corpus.IndexWriter")
+    @patch("app.indexing.index_vector_corpus.DocumentStore")
     async def test_commits_each_checkpoint_and_finishes_success(
         self,
         store_class: Mock,
+        writer_class: Mock,
         build_chunks: Mock,
+        prepare_embeddings: Mock,
     ) -> None:
+        prepare_embeddings.return_value = [self.embedding]
         store = store_class.return_value
+        writer = writer_class.return_value
         store.start_ingestion = AsyncMock(return_value=SimpleNamespace(id=11))
         store.complete_ingestion = AsyncMock(
             return_value=[self.persisted_chunk]
         )
-        store.start_index = AsyncMock(return_value=SimpleNamespace(id=21))
-        store.store_index_items = AsyncMock()
+        writer.start_index = AsyncMock(return_value=SimpleNamespace(id=21))
+        writer.list_chunks_missing_embedding = AsyncMock(return_value=[])
+        writer.store_index_items = AsyncMock()
         index_version = SimpleNamespace(id=77)
-        store.activate_index = AsyncMock(return_value=index_version)
+        writer.activate_index = AsyncMock(return_value=index_version)
         build_chunks.return_value = [self.chunk]
 
         result = await run_reindex(
@@ -134,23 +139,30 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
             11,
             self.document,
             [self.chunk],
+            [self.embedding],
         )
-        store.start_index.assert_awaited_once_with([self.persisted_chunk])
-        store.store_index_items.assert_awaited_once()
-        store.activate_index.assert_awaited_once_with(21)
+        writer.start_index.assert_awaited_once_with([self.persisted_chunk])
+        writer.store_index_items.assert_awaited_once()
+        writer.activate_index.assert_awaited_once_with(21)
         self.assertIs(index_version, result.index_version)
         self.assertEqual(1, result.document_count)
         self.assertEqual(1, result.chunk_count)
 
+    @patch("app.indexing.index_vector_corpus.prepare_chunk_embeddings")
     @patch("app.indexing.index_vector_corpus.build_document_retrieval_chunks")
-    @patch("app.indexing.index_vector_corpus.PgVectorStore")
+    @patch("app.indexing.index_vector_corpus.IndexWriter")
+    @patch("app.indexing.index_vector_corpus.DocumentStore")
     async def test_marks_ingestion_failed_when_document_pipeline_fails(
         self,
         store_class: Mock,
+        writer_class: Mock,
         build_chunks: Mock,
+        prepare_embeddings: Mock,
     ) -> None:
+        prepare_embeddings.return_value = [self.embedding]
         failure = RuntimeError("parser unavailable")
         store = store_class.return_value
+        writer = writer_class.return_value
         store.start_ingestion = AsyncMock(return_value=SimpleNamespace(id=11))
         store.fail_ingestion = AsyncMock()
         build_chunks.side_effect = failure
@@ -160,65 +172,81 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertIs(failure, context.exception)
         store.fail_ingestion.assert_awaited_once_with(11, failure)
-        store.start_index.assert_not_called()
+        writer.start_index.assert_not_called()
         self.assertEqual(2, self.session.commit.await_count)
         self.session.rollback.assert_awaited_once_with()
 
+    @patch("app.indexing.index_vector_corpus.prepare_chunk_embeddings")
     @patch("app.indexing.index_vector_corpus.build_document_retrieval_chunks")
-    @patch("app.indexing.index_vector_corpus.PgVectorStore")
+    @patch("app.indexing.index_vector_corpus.IndexWriter")
+    @patch("app.indexing.index_vector_corpus.DocumentStore")
     async def test_marks_index_failed_when_embedding_fails(
         self,
         store_class: Mock,
+        writer_class: Mock,
         build_chunks: Mock,
+        prepare_embeddings: Mock,
     ) -> None:
+        prepare_embeddings.return_value = [self.embedding]
         failure = RuntimeError("embedding unavailable")
         self.embedder.embed_many.side_effect = failure
         store = store_class.return_value
+        writer = writer_class.return_value
         store.start_ingestion = AsyncMock(return_value=SimpleNamespace(id=11))
         store.complete_ingestion = AsyncMock(
             return_value=[self.persisted_chunk]
         )
-        store.start_index = AsyncMock(return_value=SimpleNamespace(id=21))
-        store.fail_index = AsyncMock()
+        writer.start_index = AsyncMock(return_value=SimpleNamespace(id=21))
+        writer.list_chunks_missing_embedding = AsyncMock(
+            return_value=[self.persisted_chunk]
+        )
+        writer.fail_index = AsyncMock()
         build_chunks.return_value = [self.chunk]
 
         with self.assertRaises(RuntimeError) as context:
             await run_reindex([self.document], self.embedder, self.session)
 
         self.assertIs(failure, context.exception)
-        store.fail_index.assert_awaited_once_with(
+        writer.fail_index.assert_awaited_once_with(
             21,
             failure,
             failed_stage="EMBEDDING",
         )
-        store.store_index_items.assert_not_called()
+        writer.store_index_items.assert_not_called()
         self.assertEqual(4, self.session.commit.await_count)
         self.session.rollback.assert_awaited_once_with()
 
+    @patch("app.indexing.index_vector_corpus.prepare_chunk_embeddings")
     @patch("app.indexing.index_vector_corpus.build_document_retrieval_chunks")
-    @patch("app.indexing.index_vector_corpus.PgVectorStore")
+    @patch("app.indexing.index_vector_corpus.IndexWriter")
+    @patch("app.indexing.index_vector_corpus.DocumentStore")
     async def test_marks_index_failed_when_validation_fails(
         self,
         store_class: Mock,
+        writer_class: Mock,
         build_chunks: Mock,
+        prepare_embeddings: Mock,
     ) -> None:
+        prepare_embeddings.return_value = [self.embedding]
         failure = RuntimeError("stored count mismatch")
         store = store_class.return_value
+        writer = writer_class.return_value
         store.start_ingestion = AsyncMock(return_value=SimpleNamespace(id=11))
         store.complete_ingestion = AsyncMock(
             return_value=[self.persisted_chunk]
         )
-        store.start_index = AsyncMock(return_value=SimpleNamespace(id=21))
-        store.store_index_items = AsyncMock()
-        store.activate_index = AsyncMock(side_effect=failure)
-        store.fail_index = AsyncMock()
+        writer.start_index = AsyncMock(return_value=SimpleNamespace(id=21))
+        writer.list_chunks_missing_embedding = AsyncMock(return_value=[])
+        writer.store_index_items = AsyncMock()
+        writer.activate_index = AsyncMock(side_effect=failure)
+        writer.fail_index = AsyncMock()
         build_chunks.return_value = [self.chunk]
 
         with self.assertRaises(RuntimeError) as context:
             await run_reindex([self.document], self.embedder, self.session)
 
         self.assertIs(failure, context.exception)
-        store.fail_index.assert_awaited_once_with(
+        writer.fail_index.assert_awaited_once_with(
             21,
             failure,
             failed_stage="VALIDATING",

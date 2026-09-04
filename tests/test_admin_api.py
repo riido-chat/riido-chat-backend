@@ -2,7 +2,7 @@ import unittest
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, patch
+from unittest.mock import ANY, AsyncMock, patch
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -70,6 +70,7 @@ class AdminDocumentApiTest(unittest.TestCase):
         run.assert_awaited_once_with(
             101,
             "# 문서\n\n## 안내\n\n본문",
+            ANY,
         )
 
     def test_accepts_upload_without_source_url(self) -> None:

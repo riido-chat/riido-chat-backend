@@ -28,7 +28,8 @@ from app.retrieval.bm25_retriever import BM25Retriever
 from app.retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS, EmbeddingResponse
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import RetrievalChunk
-from app.retrieval.pgvector_store import PgVectorStore
+from app.indexing.index_writer import IndexWriter
+from app.retrieval.search_reader import SearchReader
 from app.retrieval.vector_retriever import (
     QUERY_EMBEDDING_TIMEOUT_SECONDS,
     VectorRetriever,
@@ -81,7 +82,8 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
         self.connection = await self.engine.connect()
         self.transaction = await self.connection.begin()
         self.session = AsyncSession(bind=self.connection, expire_on_commit=False)
-        self.store = PgVectorStore(self.session)
+        self.writer = IndexWriter(self.session)
+        self.reader = SearchReader(self.session)
 
     async def asyncTearDown(self) -> None:
         await self.session.close()
@@ -107,15 +109,15 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
             self._source_document(suffix, document=2),
         ]
 
-        first_index = await self.store.replace_all(items, documents)
+        first_index = await self.writer.replace_all(items, documents)
 
         self.assertEqual(IndexVersionStatus.ACTIVE, first_index.status)
-        self.assertEqual(first_index.id, await self.store.get_active_index_version_id())
+        self.assertEqual(first_index.id, await self.reader.get_active_index_version_id())
         await self._assert_active_chain(first_index, chunks)
         await self._assert_successful_run_logs(first_index, document_count=2)
         first_node_hashes = await self._active_node_hashes(first_index)
 
-        active_chunks = await self.store.load_active_chunks()
+        active_chunks = await self.reader.load_active_chunks()
         self.assertEqual(3, len(active_chunks))
         self.assertEqual(
             [chunk.section_id for chunk in chunks],
@@ -130,7 +132,7 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
             {chunk.index_version_id for chunk in active_chunks},
         )
 
-        vector_results = await self.store.similarity_search(
+        vector_results = await self.reader.similarity_search(
             [0.1] * OPENAI_EMBEDDING_DIMENSIONS,
             top_k=3,
         )
@@ -141,7 +143,7 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
 
         hybrid_results = await HybridRetriever(
             BM25Retriever(active_chunks),
-            VectorRetriever(_StubEmbedder(), self.store),
+            VectorRetriever(_StubEmbedder(), self.reader),
         ).search("본문", top_k=3)
         self.assertEqual(3, len(hybrid_results))
         self.assertTrue(
@@ -165,7 +167,7 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
             documents[1],
         ]
 
-        second_index = await self.store.replace_all(
+        second_index = await self.writer.replace_all(
             changed_items,
             changed_documents,
         )
@@ -173,7 +175,7 @@ class ErdRetrievalDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertNotEqual(first_index.id, second_index.id)
         self.assertEqual(IndexVersionStatus.INACTIVE, first_index.status)
         self.assertEqual(IndexVersionStatus.ACTIVE, second_index.status)
-        self.assertEqual(second_index.id, await self.store.get_active_index_version_id())
+        self.assertEqual(second_index.id, await self.reader.get_active_index_version_id())
         active_count = await self.session.scalar(
             select(func.count())
             .select_from(IndexVersion)

@@ -1,7 +1,7 @@
 """Retrieval 계층에서 사용하는 데이터 모델"""
 
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional, Sequence, Tuple
 
 from app.core.model_trace import ModelCallTrace
 from app.document.models import Chunk, NormalizedDocument
@@ -46,6 +46,10 @@ class RetrievalChunk:
             category=document.category,
             content=chunk.content,
         )
+
+
+StoredEmbedding = Tuple[RetrievalChunk, Sequence[float]]
+SimilarityResult = Tuple[RetrievalChunk, float]
 
 
 @dataclass(frozen=True)

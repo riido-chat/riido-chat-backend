@@ -17,6 +17,8 @@ from app.database.models import (
     IndexRun,
     IndexVersion,
     IndexVersionStatus,
+    ModelCall,
+    ModelCallPurpose,
 )
 from app.document.models import NormalizedDocument
 from app.indexing.index_vector_corpus import run_reindex
@@ -35,6 +37,9 @@ async def _check_database_available(url: str) -> bool:
 
 class _FailingEmbedder:
     def embed_many(self, texts):
+        raise RuntimeError("embedding unavailable")
+
+    def embed_many_with_usage(self, texts):
         raise RuntimeError("embedding unavailable")
 
 
@@ -86,7 +91,7 @@ class IndexRunLoggingDbTest(unittest.IsolatedAsyncioTestCase):
             await session.commit()
         await self.engine.dispose()
 
-    async def test_embedding_failure_preserves_runs_and_existing_active_index(
+    async def test_embedding_failure_fails_ingestion_before_any_index_run(
         self,
     ) -> None:
         suffix = uuid.uuid4().hex[:8]
@@ -138,27 +143,38 @@ class IndexRunLoggingDbTest(unittest.IsolatedAsyncioTestCase):
                     IngestionRun.document_source_id == source.id
                 )
             )
-            self.assertEqual(ExecutionStatus.SUCCESS, ingestion_run.status)
-            self.assertIsNotNone(ingestion_run.produced_version_id)
+            # embedding은 접수 시점에 만들어지므로 실패도 수집 실행에서 마감된다
+            self.assertEqual(ExecutionStatus.FAILED, ingestion_run.status)
+            self.assertIsNone(ingestion_run.produced_version_id)
             self.assertIsNotNone(ingestion_run.finished_at)
+            self.assertIn("embedding unavailable", ingestion_run.error_message)
 
             index_runs = list((await session.execute(select(IndexRun))).scalars())
             created_runs = [
                 run for run in index_runs if run.id not in index_run_ids_before
             ]
-            self.assertEqual(1, len(created_runs))
-            index_run = created_runs[0]
-            self.index_version_id = index_run.index_version_id
-            self.assertEqual(ExecutionStatus.FAILED, index_run.status)
-            self.assertEqual("EMBEDDING", index_run.summary["failed_stage"])
-            self.assertIn("embedding unavailable", index_run.error_message)
-            self.assertIsNotNone(index_run.finished_at)
+            self.assertEqual([], created_runs)
 
-            index_version = await session.get(
-                IndexVersion,
-                index_run.index_version_id,
+            # 호출 직전 checkpoint commit 덕분에 실패 기록이 롤백에 쓸려가지 않는다
+            model_calls = list(
+                (
+                    await session.execute(
+                        select(ModelCall).where(
+                            ModelCall.ingestion_run_id == ingestion_run.id
+                        )
+                    )
+                ).scalars()
             )
-            self.assertEqual(IndexVersionStatus.FAILED, index_version.status)
+            self.assertEqual(1, len(model_calls))
+            self.assertEqual(
+                ModelCallPurpose.CHUNK_EMBEDDING,
+                model_calls[0].purpose,
+            )
+            self.assertEqual(ExecutionStatus.FAILED, model_calls[0].status)
+            self.assertIn(
+                "embedding unavailable",
+                model_calls[0].error_message,
+            )
             active_after = set(
                 (
                     await session.execute(
