@@ -250,11 +250,19 @@ async def start_reindex(
     http_request: Request,
     service: IndexReindexService = Depends(get_index_reindex_service),
     corpus_state: CorpusState = Depends(get_corpus_state),
+    embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
+        get_chunk_embedder_factory
+    ),
 ) -> AdminIndexRunAcceptedResponse:
     """최신 READY 문서 조합으로 후보 색인을 만들고 적용까지 진행한다."""
 
     accepted = await service.start_reindex(group_id)
-    _start_index_job(http_request, accepted.index_run_id, corpus_state)
+    _start_index_job(
+        http_request,
+        accepted.index_run_id,
+        corpus_state,
+        embedder_factory,
+    )
     return _to_accepted_response(accepted)
 
 
@@ -270,11 +278,19 @@ async def retry_apply_index_run(
     http_request: Request,
     service: IndexReindexService = Depends(get_index_reindex_service),
     corpus_state: CorpusState = Depends(get_corpus_state),
+    embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
+        get_chunk_embedder_factory
+    ),
 ) -> AdminIndexRunAcceptedResponse:
     """적용 단계에서 실패한 실행의 READY 후보에 적용만 다시 시도한다."""
 
     accepted = await service.start_retry_apply(index_run_id)
-    _start_index_job(http_request, accepted.index_run_id, corpus_state)
+    _start_index_job(
+        http_request,
+        accepted.index_run_id,
+        corpus_state,
+        embedder_factory,
+    )
     return _to_accepted_response(accepted)
 
 
@@ -305,8 +321,11 @@ def _start_index_job(
     http_request: Request,
     index_run_id: int,
     corpus_state: CorpusState,
+    embedder_factory: Callable[[], OpenAIEmbedder],
 ) -> None:
-    task = asyncio.create_task(run_admin_index_job(index_run_id, corpus_state))
+    task = asyncio.create_task(
+        run_admin_index_job(index_run_id, corpus_state, embedder_factory)
+    )
     register_pipeline_task(http_request.app, task)
 
 

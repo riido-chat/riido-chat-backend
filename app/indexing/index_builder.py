@@ -8,10 +8,12 @@
 전환 순서와 실패 처리 규칙은 그대로 따른다.
 """
 
+import asyncio
 import logging
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Callable, Dict, List, Optional, Set, Tuple
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,12 +31,15 @@ from app.database.models import (
     IndexVersion,
     IndexVersionStatus,
 )
+from app.core.error_message import sanitize_error_message
+from app.core.hashing import sha256_hex
 from app.document.chunking_config import get_or_create_chunking_config
 from app.document.document_group import get_document_group
 from app.indexing.index_writer import IndexWriter
 from app.retrieval.corpus_state import CorpusState
+from app.retrieval.embedding import OpenAIEmbedder, build_embedding_text
 from app.retrieval.models import RetrievalChunk
-from app.retrieval.search_reader import ActiveIndexNotFoundError, SearchReader
+from app.retrieval.search_reader import SearchReader
 
 
 logger = logging.getLogger(__name__)
@@ -250,6 +255,7 @@ async def run_index_job(
     session: AsyncSession,
     corpus_state: CorpusState,
     index_run_id: int,
+    embedder_factory: Callable[[], OpenAIEmbedder] = OpenAIEmbedder,
 ) -> None:
     """시작된 실행을 단계대로 끝까지 진행한다.
 
@@ -271,7 +277,7 @@ async def run_index_job(
         return
 
     if run.stage != IndexRunStage.APPLYING:
-        built = await _build(session, writer, index_run_id)
+        built = await _build(session, writer, index_run_id, embedder_factory)
         if not built:
             return
     await _apply(session, writer, corpus_state, index_run_id)
@@ -281,8 +287,13 @@ async def _build(
     session: AsyncSession,
     writer: IndexWriter,
     index_run_id: int,
+    embedder_factory: Callable[[], OpenAIEmbedder],
 ) -> bool:
-    """조합을 적재하고 검증을 통과하면 후보를 READY로 만든다."""
+    """조합을 적재하고 검증을 통과하면 후보를 READY로 만든다.
+
+    임베딩은 접수 시점에 만들어지므로 보통 채울 것이 없다. 접수 이전에
+    적재된 판이나 설정이 바뀐 경우에만 이 단계에서 채운다.
+    """
 
     failed_stage = "BUILDING"
     error_code = INTERNAL_ERROR
@@ -292,19 +303,26 @@ async def _build(
             index_run_id,
             chunks,
         )
-        failed_stage = "VALIDATING"
-        if missing:
-            error_code = VALIDATION_FAILED
-            raise MissingEmbeddingError(
-                f"임베딩이 없는 Chunk가 {len(missing)}개 남아 있습니다."
-            )
-
-        failed_stage = "BUILDING"
-        error_code = INTERNAL_ERROR
-        await writer.store_index_items(index_run_id, chunks)
+        items = await _fill_missing_embeddings(
+            session,
+            writer,
+            index_run_id,
+            missing,
+            embedder_factory,
+        )
+        await writer.store_index_items(index_run_id, chunks, items)
         await session.commit()
 
         failed_stage = "VALIDATING"
+        remaining = await writer.list_chunks_missing_embedding(
+            index_run_id,
+            chunks,
+        )
+        if remaining:
+            error_code = VALIDATION_FAILED
+            raise MissingEmbeddingError(
+                f"임베딩이 없는 Chunk가 {len(remaining)}개 남아 있습니다."
+            )
         await writer.mark_index_ready(index_run_id)
         await session.commit()
         return True
@@ -391,6 +409,82 @@ async def _restore_corpus(
         chunks = await SearchReader(session).load_active_chunks()
         corpus_state.replace(chunks)
         return True
-    except (ActiveIndexNotFoundError, ValueError):
-        logger.warning("적용 실패 후 corpus를 복구하지 못했습니다.")
+    except Exception:
+        # 복구는 최선 노력이다. 여기서 난 오류가 원래 실패를 가리면 안 된다.
+        logger.warning("적용 실패 후 corpus를 복구하지 못했습니다.", exc_info=True)
         return False
+
+
+async def _fill_missing_embeddings(
+    session: AsyncSession,
+    writer: IndexWriter,
+    index_run_id: int,
+    missing: List[RetrievalChunk],
+    embedder_factory: Callable[[], OpenAIEmbedder],
+) -> List[Tuple[RetrievalChunk, List[float]]]:
+    """임베딩이 없는 Chunk만 채운다.
+
+    같은 입력 해시로 이미 저장된 vector가 있으면 복사하고, 남은 것만
+    한 번의 요청으로 만든다. 외부 호출을 하면 model_calls에 기록한다.
+    """
+
+    if not missing:
+        return []
+
+    embedding_config_id = await writer.get_embedding_config_id(index_run_id)
+    inputs = [build_embedding_text(chunk) for chunk in missing]
+    input_hashes = [sha256_hex(text) for text in inputs]
+    reusable = await writer.load_reusable_embeddings(
+        embedding_config_id,
+        input_hashes,
+    )
+
+    positions = [
+        position
+        for position, input_hash in enumerate(input_hashes)
+        if input_hash not in reusable
+    ]
+    if not positions:
+        return [
+            (chunk, list(reusable[input_hash]))
+            for chunk, input_hash in zip(missing, input_hashes)
+        ]
+
+    call = await writer.start_embedding_model_call(index_run_id)
+    model_call_id = call.id
+    await session.commit()
+
+    started_at = time.monotonic()
+    try:
+        response = await asyncio.to_thread(
+            embedder_factory().embed_many_with_usage,
+            [inputs[position] for position in positions],
+        )
+    except Exception as error:
+        await writer.finish_embedding_model_call(
+            model_call_id,
+            status=ExecutionStatus.FAILED,
+            latency_ms=int((time.monotonic() - started_at) * 1000),
+            error_message=sanitize_error_message(error),
+        )
+        await session.commit()
+        raise
+
+    await writer.finish_embedding_model_call(
+        model_call_id,
+        status=ExecutionStatus.SUCCESS,
+        latency_ms=int((time.monotonic() - started_at) * 1000),
+        input_tokens=response.input_tokens,
+        retry_count=response.retry_count,
+    )
+
+    generated = dict(zip(positions, response.embeddings))
+    return [
+        (
+            chunk,
+            list(generated[position])
+            if position in generated
+            else list(reusable[input_hashes[position]]),
+        )
+        for position, chunk in enumerate(missing)
+    ]

@@ -3,7 +3,7 @@
 import uuid
 from collections import defaultdict
 from datetime import datetime, timezone
-from typing import DefaultDict, List, Optional, Sequence
+from typing import DefaultDict, Dict, List, Optional, Sequence
 
 from sqlalchemy import and_, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,13 +21,20 @@ from app.database.models import (
     IndexRunStage,
     IndexVersion,
     IndexVersionStatus,
+    ModelCall,
+    ModelCallPurpose,
 )
 from app.document.chunking_config import get_or_create_chunking_config
 from app.document.document_group import get_document_group
 from app.document.document_store import DEFAULT_TRIGGER_TYPE, DocumentStore
 from app.document.models import NormalizedDocument
-from app.retrieval.embedding import build_embedding_text
+from app.retrieval.embedding import (
+    OPENAI_EMBEDDING_MODEL,
+    OPENAI_EMBEDDING_PROVIDER,
+    build_embedding_text,
+)
 from app.retrieval.embedding_config import (
+    EMBEDDING_INPUT_TEMPLATE_VERSION,
     get_or_create_embedding_config,
     validate_embedding_dimension,
 )
@@ -312,6 +319,87 @@ class IndexWriter:
         await self._session.flush()
         return run
 
+    async def start_embedding_model_call(self, index_run_id: int) -> ModelCall:
+        """누락 임베딩을 채우기 전에 PROCESSING 행을 만든다.
+
+        호출자가 checkpoint commit 한 뒤 외부 호출을 시작한다.
+        """
+
+        call = ModelCall(
+            index_run_id=index_run_id,
+            purpose=ModelCallPurpose.CHUNK_EMBEDDING,
+            provider=OPENAI_EMBEDDING_PROVIDER,
+            model_name=OPENAI_EMBEDDING_MODEL,
+            prompt_version=EMBEDDING_INPUT_TEMPLATE_VERSION,
+            status=ExecutionStatus.PROCESSING,
+            retry_count=0,
+            created_at=datetime.now(timezone.utc),
+        )
+        self._session.add(call)
+        await self._session.flush()
+        return call
+
+    async def finish_embedding_model_call(
+        self,
+        model_call_id: int,
+        *,
+        status: ExecutionStatus,
+        latency_ms: int,
+        input_tokens: Optional[int] = None,
+        retry_count: int = 0,
+        error_message: Optional[str] = None,
+    ) -> ModelCall:
+        """PROCESSING 임베딩 호출을 같은 행에서 마감한다."""
+
+        if status not in (ExecutionStatus.SUCCESS, ExecutionStatus.FAILED):
+            raise ValueError(f"모델 호출의 최종 상태가 아닙니다: {status}")
+
+        call = await self._session.get(ModelCall, model_call_id)
+        if call is None:
+            raise ValueError(f"존재하지 않는 모델 호출입니다: {model_call_id}")
+
+        call.status = status
+        call.latency_ms = latency_ms
+        call.input_tokens = input_tokens
+        call.retry_count = retry_count
+        call.error_message = error_message
+        await self._session.flush()
+        return call
+
+    async def load_reusable_embeddings(
+        self,
+        embedding_config_id: int,
+        embedding_input_hashes: Sequence[str],
+    ) -> Dict[str, List[float]]:
+        """같은 입력 해시로 이미 저장된 vector를 찾는다.
+
+        문서 원본을 가리지 않는다. 색인은 그룹 전체를 다루기 때문이다.
+        """
+
+        if not embedding_input_hashes:
+            return {}
+
+        statement = select(
+            ChunkEmbedding.embedding_input_hash,
+            ChunkEmbedding.embedding,
+        ).where(
+            ChunkEmbedding.embedding_config_id == embedding_config_id,
+            ChunkEmbedding.embedding_input_hash.in_(set(embedding_input_hashes)),
+        )
+        reusable: Dict[str, List[float]] = {}
+        for input_hash, embedding in (await self._session.execute(statement)).all():
+            reusable.setdefault(input_hash, list(embedding))
+        return reusable
+
+    async def get_embedding_config_id(self, index_run_id: int) -> int:
+        """실행이 쓰는 임베딩 설정 ID를 읽는다."""
+
+        run = await self._get_processing_index_run(index_run_id)
+        index_version = await self._session.get(IndexVersion, run.index_version_id)
+        if index_version is None:
+            raise ValueError(f"존재하지 않는 색인 버전입니다: {run.index_version_id}")
+        return index_version.embedding_config_id
+
     async def apply_index(self, index_run_id: int) -> IndexVersion:
         """READY 후보를 ACTIVE로 원자 전환한다.
 
@@ -334,10 +422,21 @@ class IndexWriter:
 
         now = datetime.now(timezone.utc)
         run.stage = IndexRunStage.APPLYING
+        previous_active_id = await self._session.scalar(
+            select(IndexVersion.id).where(
+                IndexVersion.status == IndexVersionStatus.ACTIVE,
+                IndexVersion.document_group_id == index_version.document_group_id,
+                IndexVersion.id != index_version.id,
+            )
+        )
+        # 직전 ACTIVE 와 함께, 적용되지 못하고 남은 READY 후보도 함께 내린다.
+        # 후보 정리는 새 후보가 READY 가 될 때가 아니라 ACTIVE 가 될 때 한다.
         await self._session.execute(
             update(IndexVersion)
             .where(
-                IndexVersion.status == IndexVersionStatus.ACTIVE,
+                IndexVersion.status.in_(
+                    (IndexVersionStatus.ACTIVE, IndexVersionStatus.READY)
+                ),
                 IndexVersion.document_group_id == index_version.document_group_id,
                 IndexVersion.id != index_version.id,
             )
@@ -345,6 +444,10 @@ class IndexWriter:
         )
         index_version.status = IndexVersionStatus.ACTIVE
         index_version.activated_at = now
+        run.summary = {
+            **(run.summary or {}),
+            "previous_index_version_id": previous_active_id,
+        }
         await self._session.flush()
         return index_version
 
@@ -385,6 +488,12 @@ class IndexWriter:
             raise ValueError("ACTIVE 색인 버전은 실패 처리할 수 없습니다.")
 
         now = datetime.now(timezone.utc)
+        # 롤백으로 되돌아간 단계를 실패 지점으로 다시 새긴다.
+        # 조회 응답의 retryable 판정이 이 값을 쓴다.
+        try:
+            run.stage = IndexRunStage(failed_stage)
+        except ValueError:
+            pass
         if index_version.status != IndexVersionStatus.READY:
             # 적용 단계 실패는 후보를 READY로 남겨 재시도할 수 있게 한다.
             # 빌드나 검증 단계 실패는 후보 자체를 쓸 수 없으므로 마감한다.

@@ -264,29 +264,26 @@ class IndexReindexService:
         return replace(
             detail,
             index_version=summary,
-            previous_index_version=await self._previous_active(index_version),
+            previous_index_version=await self._previous_active(run_summary),
             document_count=document_count,
             chunk_count=run_summary.get("chunk_count"),
         )
 
     async def _previous_active(
         self,
-        index_version: IndexVersion,
+        run_summary: dict,
     ) -> Optional[IndexVersionSummary]:
-        """이번 적용으로 INACTIVE 가 된 직전 ACTIVE 를 찾는다."""
+        """이번 적용이 끌어내린 직전 ACTIVE 를 실행 기록에서 읽는다.
 
-        statement = (
-            select(IndexVersion)
-            .where(
-                IndexVersion.document_group_id == index_version.document_group_id,
-                IndexVersion.status == IndexVersionStatus.INACTIVE,
-                IndexVersion.id != index_version.id,
-                IndexVersion.activated_at.is_not(None),
-            )
-            .order_by(IndexVersion.activated_at.desc())
-            .limit(1)
-        )
-        previous = await self._session.scalar(statement)
+        현재 상태에서 역산하면 이후 다른 적용이 일어났을 때 과거 실행의
+        조회 결과가 달라진다. 적용 시점에 남긴 값을 그대로 쓴다.
+        """
+
+        previous_id = run_summary.get("previous_index_version_id")
+        if previous_id is None:
+            return None
+
+        previous = await self._session.get(IndexVersion, previous_id)
         if previous is None:
             return None
         return IndexVersionSummary(
