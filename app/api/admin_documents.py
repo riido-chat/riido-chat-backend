@@ -46,7 +46,7 @@ ADMIN_ERROR_RESPONSES = {
     status.HTTP_409_CONFLICT: {
         "model": AdminErrorResponse,
         "description": (
-            "`DOCUMENT_ALREADY_EXISTS`: 같은 sourceUrl의 문서를 다시 업로드한 경우입니다. "
+            "`DOCUMENT_ALREADY_EXISTS`: 같은 문서명의 문서를 다시 업로드한 경우입니다. "
             "`JOB_IN_PROGRESS`: 다른 업로드나 재색인이 진행 중인 경우입니다."
         ),
     },
@@ -77,7 +77,7 @@ async def create_admin_document(
     filename, raw_content = await _read_markdown_file(upload.file)
     accepted = await service.start_new_document(
         title=upload.title,
-        source_url=str(upload.source_url),
+        source_url=None if upload.source_url is None else str(upload.source_url),
         category=upload.category,
         filename=filename,
     )

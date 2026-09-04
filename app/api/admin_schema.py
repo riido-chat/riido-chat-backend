@@ -24,7 +24,10 @@ class AdminDocumentUploadRequest(BaseModel):
     model_config = ADMIN_UPLOAD_DTO_CONFIG
 
     title: str = Field(min_length=1, max_length=300)
-    source_url: AnyHttpUrl = Field(alias="sourceUrl", max_length=1_000)
+    # 문서는 (문서 그룹, document_key)로 식별한다. sourceUrl은 선택 입력으로만 남긴다.
+    source_url: Optional[AnyHttpUrl] = Field(
+        default=None, alias="sourceUrl", max_length=1_000
+    )
     category: Optional[str] = Field(default=None, max_length=100)
     file: UploadFile
 
