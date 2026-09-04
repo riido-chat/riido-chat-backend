@@ -123,7 +123,9 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         writer.list_chunks_missing_embedding = AsyncMock(return_value=[])
         writer.store_index_items = AsyncMock()
         index_version = SimpleNamespace(id=77)
-        writer.activate_index = AsyncMock(return_value=index_version)
+        writer.mark_index_ready = AsyncMock()
+        writer.apply_index = AsyncMock(return_value=index_version)
+        writer.finish_apply_run = AsyncMock()
         build_chunks.return_value = [self.chunk]
 
         result = await run_reindex(
@@ -132,7 +134,8 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
             self.session,
         )
 
-        self.assertEqual(5, self.session.commit.await_count)
+        # 수집 2회, 색인 시작·저장·READY·적용으로 6회다
+        self.assertEqual(6, self.session.commit.await_count)
         self.session.rollback.assert_not_awaited()
         store.start_ingestion.assert_awaited_once_with(self.document)
         store.complete_ingestion.assert_awaited_once_with(
@@ -143,7 +146,8 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         )
         writer.start_index.assert_awaited_once_with([self.persisted_chunk])
         writer.store_index_items.assert_awaited_once()
-        writer.activate_index.assert_awaited_once_with(21)
+        writer.mark_index_ready.assert_awaited_once_with(21)
+        writer.apply_index.assert_awaited_once_with(21)
         self.assertIs(index_version, result.index_version)
         self.assertEqual(1, result.document_count)
         self.assertEqual(1, result.chunk_count)
@@ -238,7 +242,7 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         writer.start_index = AsyncMock(return_value=SimpleNamespace(id=21))
         writer.list_chunks_missing_embedding = AsyncMock(return_value=[])
         writer.store_index_items = AsyncMock()
-        writer.activate_index = AsyncMock(side_effect=failure)
+        writer.mark_index_ready = AsyncMock(side_effect=failure)
         writer.fail_index = AsyncMock()
         build_chunks.return_value = [self.chunk]
 
