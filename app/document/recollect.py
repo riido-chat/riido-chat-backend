@@ -31,6 +31,7 @@ from app.document.document_group import get_document_group
 from app.document.document_key import (
     SOURCE_TYPE_GITBOOK,
     build_gitbook_document_key,
+    normalize_gitbook_root_url,
 )
 from app.document.document_store import PARSER_NAME, PARSER_VERSION
 from app.document.gitbook.client import GitBookPage, fetch_page, list_pages
@@ -57,6 +58,7 @@ class AcceptedRecollect:
 async def accept_recollect_batch(
     session: AsyncSession,
     group_id: int,
+    root_url: str,
     pages: List[GitBookPage],
 ) -> AcceptedRecollect:
     """읽어 온 목록으로 페이지별 실행과 제거 표시를 만든다.
@@ -66,13 +68,14 @@ async def accept_recollect_batch(
 
     batch_id = uuid.uuid4()
     now = datetime.now(timezone.utc)
+    root = normalize_gitbook_root_url(root_url)
     group = await get_document_group(session)
 
-    existing = await _load_gitbook_sources(session, group.id)
+    existing = await _load_gitbook_sources(session, group.id, root)
     seen_keys = set()
 
     for page in pages:
-        document_key = build_gitbook_document_key(page.url)
+        document_key = build_gitbook_document_key(page.url, root)
         seen_keys.add(document_key)
         source = existing.get(document_key)
         if source is None:
@@ -118,6 +121,8 @@ async def accept_recollect_batch(
             )
         )
 
+    # 사라진 페이지 판정은 이번에 수집한 루트 아래 문서로만 한정한다.
+    # 다른 GitBook 이나 콘솔 문서를 건드리면 안 된다.
     for document_key, source in existing.items():
         if document_key in seen_keys or not source.enabled:
             continue
@@ -187,12 +192,16 @@ async def run_recollect_batch(
 async def _load_gitbook_sources(
     session: AsyncSession,
     group_id: int,
+    root_url: str,
 ) -> Dict[str, DocumentSource]:
+    """이번 루트 아래에 있는 GitBook 문서만 모은다."""
+
     rows = (
         await session.execute(
             select(DocumentSource).where(
                 DocumentSource.document_group_id == group_id,
                 DocumentSource.source_type == SOURCE_TYPE_GITBOOK,
+                DocumentSource.canonical_uri.startswith(f"{root_url}/"),
             )
         )
     ).scalars()

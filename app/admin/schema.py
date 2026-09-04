@@ -70,6 +70,7 @@ class AdminErrorCode(str, Enum):
     NO_READY_DOCUMENTS = "NO_READY_DOCUMENTS"
     RETRY_NOT_ALLOWED = "RETRY_NOT_ALLOWED"
     SOURCE_LIST_FAILED = "SOURCE_LIST_FAILED"
+    GITBOOK_ROOT_MISMATCH = "GITBOOK_ROOT_MISMATCH"
     NOT_FOUND = "NOT_FOUND"
     INTERNAL_ERROR = "INTERNAL_ERROR"
 
@@ -331,6 +332,22 @@ AdminIndexRunResponse = Union[
 ]
 
 
+class AdminGitBookSyncRequest(BaseModel):
+    """GitBook 수집 요청. 루트 URL 하나를 받는다."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    source_url: str = Field(alias="sourceUrl", min_length=1, max_length=1_000)
+
+    @field_validator("source_url")
+    @classmethod
+    def require_https(cls, source_url: str) -> str:
+        value = source_url.strip().rstrip("/")
+        if not value.startswith("https://"):
+            raise ValueError("GitBook 루트 URL은 https 여야 합니다.")
+        return value
+
+
 class RecollectStageValue(str, Enum):
     """재탐색 배치의 단계."""
 
@@ -378,6 +395,7 @@ class AdminRecollectFailure(BaseModel):
     model_config = HTTP_DTO_CONFIG
 
     document_key: str = Field(alias="documentKey")
+    title: str
     ingestion_run_id: int = Field(alias="ingestionRunId")
     stage: IngestionStageValue
     error_code: Optional[IngestionErrorCode] = Field(alias="errorCode")

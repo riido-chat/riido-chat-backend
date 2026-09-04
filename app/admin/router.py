@@ -45,6 +45,7 @@ from app.admin.schema import (
     AdminIngestionRunResponse,
     AdminIngestionStatus,
     AdminIngestionSuccessResponse,
+    AdminGitBookSyncRequest,
     AdminRecollectAcceptedResponse,
     AdminRecollectBatchResponse,
     AdminRecollectCounts,
@@ -516,23 +517,27 @@ RECOLLECT_ERROR_RESPONSES = {
 
 
 @router.post(
-    "/document-groups/{group_id}/recollect",
+    "/document-groups/{group_id}/gitbook-sync",
     response_model=AdminRecollectAcceptedResponse,
     status_code=status.HTTP_202_ACCEPTED,
     responses=RECOLLECT_ERROR_RESPONSES,
-    summary="GitBook 재탐색 시작",
+    summary="GitBook 수집",
 )
-async def start_recollect(
+async def start_gitbook_sync(
     group_id: int,
+    request: AdminGitBookSyncRequest,
     http_request: Request,
     service: RecollectService = Depends(get_recollect_service),
     embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
         get_chunk_embedder_factory
     ),
 ) -> AdminRecollectAcceptedResponse:
-    """페이지 목록을 읽어 페이지별 실행을 만들고 배치를 시작한다."""
+    """루트 URL의 페이지 목록을 읽어 페이지별 실행을 만들고 배치를 시작한다.
 
-    accepted = await service.start_recollect(group_id)
+    같은 루트로 다시 부르면 재탐색이 된다.
+    """
+
+    accepted = await service.start_sync(group_id, request.source_url)
     task = asyncio.create_task(
         run_recollect_batch(accepted.batch_id, embedder_factory)
     )
@@ -599,6 +604,7 @@ def _to_recollect_response(
         failures=[
             AdminRecollectFailure(
                 documentKey=failure.document_key,
+                title=failure.title,
                 ingestionRunId=failure.ingestion_run_id,
                 stage=failure.stage,
                 errorCode=_to_ingestion_error_code(failure.error_code),
