@@ -23,10 +23,10 @@ from app.database.models import (
 )
 from app.document.document_group import get_document_group
 from app.document.ingestion_service import (
-    ADMIN_JOB_LOCK_KEY,
     AdminApiError,
     AdminJobInProgressError,
 )
+from app.document.job_gate import acquire_group_job_gate, find_processing_job
 from app.indexing.index_builder import (
     compute_pending_documents,
     load_latest_ready_versions,
@@ -144,8 +144,8 @@ class IndexReindexService:
         """반영 대기 변경을 확인하고 BUILD_AND_APPLY 실행을 시작한다."""
 
         group = await self._get_group(group_id)
-        await self._acquire_group_gate()
-        await self._ensure_no_processing_job()
+        await self._acquire_group_gate(group.id)
+        await self._ensure_no_processing_job(group.id)
 
         if not await load_latest_ready_versions(self._session):
             raise NoReadyDocumentsError()
@@ -177,13 +177,14 @@ class IndexReindexService:
         if failed_run is None:
             raise IndexRunNotFoundError()
 
-        await self._acquire_group_gate()
-        await self._ensure_no_processing_job()
-
         index_version = await self._session.get(
             IndexVersion,
             failed_run.index_version_id,
         )
+        if index_version is not None:
+            await self._acquire_group_gate(index_version.document_group_id)
+            await self._ensure_no_processing_job(index_version.document_group_id)
+
         if (
             failed_run.status != ExecutionStatus.FAILED
             or failed_run.stage != IndexRunStage.APPLYING
@@ -299,21 +300,9 @@ class IndexReindexService:
             raise DocumentGroupNotFoundError()
         return group
 
-    async def _acquire_group_gate(self) -> None:
-        await self._session.execute(
-            select(func.pg_advisory_xact_lock(ADMIN_JOB_LOCK_KEY))
-        )
+    async def _acquire_group_gate(self, group_id: int) -> None:
+        await acquire_group_job_gate(self._session, group_id)
 
-    async def _ensure_no_processing_job(self) -> None:
-        ingestion_run_id = await self._session.scalar(
-            select(IngestionRun.id)
-            .where(IngestionRun.status == ExecutionStatus.PROCESSING)
-            .limit(1)
-        )
-        index_run_id = await self._session.scalar(
-            select(IndexRun.id)
-            .where(IndexRun.status == ExecutionStatus.PROCESSING)
-            .limit(1)
-        )
-        if ingestion_run_id is not None or index_run_id is not None:
+    async def _ensure_no_processing_job(self, group_id: int) -> None:
+        if await find_processing_job(self._session, group_id) is not None:
             raise AdminJobInProgressError()

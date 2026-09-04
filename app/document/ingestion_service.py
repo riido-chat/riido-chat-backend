@@ -10,9 +10,12 @@ from http import HTTPStatus
 from typing import Callable, Optional
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.document.job_gate import (
+    acquire_group_job_gate,
+    find_processing_job,
+)
 from app.document.document_key import (
     DEFAULT_DOCUMENT_GROUP_KEY,
     SOURCE_TYPE_UPLOAD,
@@ -23,9 +26,12 @@ from app.database.models import (
     DocumentGroup,
     DocumentSource,
     DocumentVersion,
+    DocumentVersionStatus,
     ExecutionStatus,
     IndexRun,
+    IngestionResultCode,
     IngestionRun,
+    IngestionStage,
 )
 from app.database.session import get_session_factory
 from app.document.models import NormalizedDocument
@@ -39,14 +45,12 @@ from app.document.ingestion import prepare_chunk_embeddings
 
 logger = logging.getLogger(__name__)
 
-ADMIN_JOB_LOCK_KEY = 0x524949444F
 ADMIN_SOURCE_TYPE = SOURCE_TYPE_UPLOAD
 ADMIN_TRIGGER_TYPE = "ADMIN_UPLOAD"
-DOCUMENT_SOURCE_KEY_CONSTRAINT = "uq_document_sources_document_group_id_document_key"
 
 INVALID_FILE = "INVALID_FILE"
 FILE_TOO_LARGE = "FILE_TOO_LARGE"
-DOCUMENT_ALREADY_EXISTS = "DOCUMENT_ALREADY_EXISTS"
+DOCUMENT_NOT_REVISABLE = "DOCUMENT_NOT_REVISABLE"
 JOB_IN_PROGRESS = "JOB_IN_PROGRESS"
 NOT_FOUND = "NOT_FOUND"
 INTERNAL_ERROR = "INTERNAL_ERROR"
@@ -55,16 +59,29 @@ INTERNAL_ERROR = "INTERNAL_ERROR"
 class AdminApiError(RuntimeError):
     """Admin API가 상태 코드와 오류 응답으로 변환할 수 있는 예외."""
 
-    def __init__(self, code: str, message: str, status_code: int) -> None:
+    def __init__(
+        self,
+        code: str,
+        message: str,
+        status_code: int,
+        stage: Optional[str] = None,
+    ) -> None:
         super().__init__(message)
         self.code = code
         self.message = message
         self.status_code = status_code
+        # 접수 전 거절에만 붙는다. FE가 3-4 원인 문구 변형을 고를 때 쓴다.
+        self.stage = stage
 
 
 class InvalidUploadFileError(AdminApiError):
     def __init__(self, message: str = "올바른 Markdown 파일이 아닙니다.") -> None:
-        super().__init__(INVALID_FILE, message, HTTPStatus.UNPROCESSABLE_ENTITY)
+        super().__init__(
+            INVALID_FILE,
+            message,
+            HTTPStatus.UNPROCESSABLE_ENTITY,
+            stage=IngestionStage.VALIDATING.value,
+        )
 
 
 class UploadFileTooLargeError(AdminApiError):
@@ -76,12 +93,30 @@ class UploadFileTooLargeError(AdminApiError):
         )
 
 
-class DocumentAlreadyExistsError(AdminApiError):
+class DocumentNotFoundError(AdminApiError):
     def __init__(self) -> None:
         super().__init__(
-            DOCUMENT_ALREADY_EXISTS,
-            "같은 문서명의 문서가 이미 존재합니다.",
+            NOT_FOUND,
+            "존재하지 않는 문서입니다.",
+            HTTPStatus.NOT_FOUND,
+        )
+
+
+class DocumentNotRevisableError(AdminApiError):
+    def __init__(self) -> None:
+        super().__init__(
+            DOCUMENT_NOT_REVISABLE,
+            "GitBook 문서에는 수정본을 올릴 수 없습니다.",
             HTTPStatus.CONFLICT,
+        )
+
+
+class DocumentGroupNotFoundError(AdminApiError):
+    def __init__(self) -> None:
+        super().__init__(
+            NOT_FOUND,
+            "존재하지 않는 문서 그룹입니다.",
+            HTTPStatus.NOT_FOUND,
         )
 
 
@@ -114,10 +149,19 @@ class AcceptedIngestion:
 
 
 @dataclass(frozen=True)
+class DuplicateDocument:
+    """같은 본문을 이미 가진 문서."""
+
+    document_id: int
+    title: str
+
+
+@dataclass(frozen=True)
 class IngestionRunDetail:
     ingestion_run_id: int
     document_source_id: int
     status: ExecutionStatus
+    stage: str
     document_version_id: Optional[int]
     version_no: Optional[int]
     section_count: Optional[int]
@@ -126,6 +170,9 @@ class IngestionRunDetail:
     error_message: Optional[str]
     started_at: datetime
     finished_at: Optional[datetime]
+    result_code: Optional[str] = None
+    chunk_stats: Optional[dict] = None
+    duplicate_of: Optional[DuplicateDocument] = None
 
 
 class AdminIngestionService:
@@ -137,50 +184,93 @@ class AdminIngestionService:
     async def start_new_document(
         self,
         *,
+        group_id: int,
         title: str,
-        source_url: Optional[str] = None,
-        category: Optional[str],
+        category: Optional[str] = None,
         filename: str,
     ) -> AcceptedIngestion:
-        """전역 작업 gate 안에서 Source와 PROCESSING 실행을 확정한다.
+        """그룹 작업 gate 안에서 문서 원본과 PROCESSING 실행을 확정한다.
 
-        문서는 (문서 그룹, document_key)로 식별하므로 요청의 source_url은
-        받기만 하고 사용하지 않는다. 입력 필드 제거는 후속 계약 변경에서 한다.
+        같은 문서명의 콘솔 문서가 이미 있으면 거절하지 않고 그 문서의 새 판
+        후보가 된다. 결과는 처리 뒤 result_code 로 구분한다.
         """
 
         try:
-            await self._acquire_admin_job_gate()
-            await self._ensure_no_processing_job()
-            source = await self._find_or_create_new_source(
+            group = await self._get_group(group_id)
+            await self._acquire_group_gate(group.id)
+            await self._ensure_no_processing_job(group.id)
+            source = await self._find_or_create_upload_source(
+                group,
                 title=title,
                 category=category,
             )
-            now = datetime.now(timezone.utc)
-            run = IngestionRun(
-                document_source_id=source.id,
-                trigger_type=ADMIN_TRIGGER_TYPE,
-                parser_name=PARSER_NAME,
-                parser_version=PARSER_VERSION,
-                status=ExecutionStatus.PROCESSING,
-                summary={"stage": "RECEIVED", "filename": filename},
-                started_at=now,
-            )
-            self._session.add(run)
-            await self._session.flush()
-            result = AcceptedIngestion(
-                ingestion_run_id=run.id,
-                document_source_id=source.id,
-            )
-            await self._session.commit()
-            return result
-        except IntegrityError as error:
-            await self._session.rollback()
-            if self._constraint_name(error) == DOCUMENT_SOURCE_KEY_CONSTRAINT:
-                raise DocumentAlreadyExistsError() from error
-            raise
+            return await self._accept(source, filename)
         except Exception:
             await self._session.rollback()
             raise
+
+    async def start_document_revision(
+        self,
+        *,
+        document_id: int,
+        filename: str,
+    ) -> AcceptedIngestion:
+        """기존 콘솔 문서를 대상으로 수정본 실행을 확정한다.
+
+        GitBook 문서는 재탐색으로만 새 판이 생기므로 거절한다.
+        """
+
+        try:
+            source = await self._session.get(DocumentSource, document_id)
+            if source is None:
+                raise DocumentNotFoundError()
+
+            await self._acquire_group_gate(source.document_group_id)
+            await self._ensure_no_processing_job(source.document_group_id)
+            if source.source_type != ADMIN_SOURCE_TYPE:
+                raise DocumentNotRevisableError()
+
+            has_ready_version = await self._session.scalar(
+                select(DocumentVersion.id)
+                .where(
+                    DocumentVersion.document_source_id == source.id,
+                    DocumentVersion.status == DocumentVersionStatus.READY,
+                )
+                .limit(1)
+            )
+            if has_ready_version is None:
+                # 판이 없는 원본은 목록에 보이지 않으므로 대상이 될 수 없다.
+                raise DocumentNotFoundError()
+
+            return await self._accept(source, filename)
+        except Exception:
+            await self._session.rollback()
+            raise
+
+    async def _accept(
+        self,
+        source: DocumentSource,
+        filename: str,
+    ) -> AcceptedIngestion:
+        now = datetime.now(timezone.utc)
+        run = IngestionRun(
+            document_source_id=source.id,
+            trigger_type=ADMIN_TRIGGER_TYPE,
+            parser_name=PARSER_NAME,
+            parser_version=PARSER_VERSION,
+            status=ExecutionStatus.PROCESSING,
+            stage=IngestionStage.RECEIVING,
+            summary={"stage": "RECEIVING", "filename": filename},
+            started_at=now,
+        )
+        self._session.add(run)
+        await self._session.flush()
+        result = AcceptedIngestion(
+            ingestion_run_id=run.id,
+            document_source_id=source.id,
+        )
+        await self._session.commit()
+        return result
 
     async def get_ingestion_run(self, ingestion_run_id: int) -> IngestionRunDetail:
         """수집 실행과 성공 시 생성한 문서 버전을 함께 조회한다."""
@@ -203,34 +293,72 @@ class AdminIngestionService:
             ingestion_run_id=run.id,
             document_source_id=run.document_source_id,
             status=run.status,
+            stage=run.stage.value,
             document_version_id=None if version is None else version.id,
-            version_no=None if version is None else version.version_no,
+            version_no=await self._version_no_for(run, version),
             section_count=summary.get("section_count"),
             chunk_count=summary.get("chunk_count"),
-            error_code=summary.get("error_code"),
+            error_code=run.error_code or summary.get("error_code"),
             error_message=run.error_message,
             started_at=run.started_at,
             finished_at=run.finished_at,
+            result_code=(
+                None if run.result_code is None else run.result_code.value
+            ),
+            chunk_stats=_chunk_stats_of(summary),
+            duplicate_of=await self._duplicate_of(run),
         )
 
-    async def _acquire_admin_job_gate(self) -> None:
-        await self._session.execute(
-            select(func.pg_advisory_xact_lock(ADMIN_JOB_LOCK_KEY))
+    async def _version_no_for(
+        self,
+        run: IngestionRun,
+        version: Optional[DocumentVersion],
+    ) -> Optional[int]:
+        """새 판이 있으면 그 번호, 없으면 대상 문서의 현재 판 번호다."""
+
+        if version is not None:
+            return version.version_no
+        if run.result_code not in (
+            IngestionResultCode.NO_CHANGE,
+            IngestionResultCode.DUPLICATE_CONTENT,
+        ):
+            return None
+        return await self._session.scalar(
+            select(func.max(DocumentVersion.version_no)).where(
+                DocumentVersion.document_source_id == run.document_source_id,
+                DocumentVersion.status == DocumentVersionStatus.READY,
+            )
         )
 
-    async def _ensure_no_processing_job(self) -> None:
-        ingestion_run_id = await self._session.scalar(
-            select(IngestionRun.id)
-            .where(IngestionRun.status == ExecutionStatus.PROCESSING)
-            .limit(1)
+    async def _duplicate_of(
+        self,
+        run: IngestionRun,
+    ) -> Optional[DuplicateDocument]:
+        if run.duplicate_of_document_source_id is None:
+            return None
+        source = await self._session.get(
+            DocumentSource,
+            run.duplicate_of_document_source_id,
         )
-        index_run_id = await self._session.scalar(
-            select(IndexRun.id)
-            .where(IndexRun.status == ExecutionStatus.PROCESSING)
-            .limit(1)
+        if source is None:
+            return None
+        return DuplicateDocument(
+            document_id=source.id,
+            title=source.title or "",
         )
-        if ingestion_run_id is not None or index_run_id is not None:
+
+    async def _acquire_group_gate(self, group_id: int) -> None:
+        await acquire_group_job_gate(self._session, group_id)
+
+    async def _ensure_no_processing_job(self, group_id: int) -> None:
+        if await find_processing_job(self._session, group_id) is not None:
             raise AdminJobInProgressError()
+
+    async def _get_group(self, group_id: int) -> DocumentGroup:
+        group = await self._get_document_group()
+        if group.id != group_id:
+            raise DocumentGroupNotFoundError()
+        return group
 
     async def _get_document_group(self) -> DocumentGroup:
         """1차 문서 그룹을 조회한다. migration 20260904_06이 seed한다."""
@@ -246,13 +374,13 @@ class AdminIngestionService:
             )
         return group
 
-    async def _find_or_create_new_source(
+    async def _find_or_create_upload_source(
         self,
+        group: DocumentGroup,
         *,
         title: str,
         category: Optional[str],
     ) -> DocumentSource:
-        group = await self._get_document_group()
         document_key = build_upload_document_key(title)
         source = await self._session.scalar(
             select(DocumentSource).where(
@@ -283,15 +411,11 @@ class AdminIngestionService:
             await self._session.flush()
             return source
 
-        version_count = await self._session.scalar(
-            select(func.count())
-            .select_from(DocumentVersion)
-            .where(DocumentVersion.document_source_id == source.id)
-        )
-        if source.source_type != ADMIN_SOURCE_TYPE or version_count:
-            raise DocumentAlreadyExistsError()
+        if source.source_type != ADMIN_SOURCE_TYPE:
+            # 업로드 키는 upload/ 접두가 붙어 GitBook 키와 겹치지 않는다.
+            raise DocumentNotRevisableError()
 
-        # 이전 신규 업로드가 실패해 Source만 남은 경우 같은 문서로 재시도한다.
+        # 같은 문서명의 콘솔 문서는 그 문서의 새 판 후보가 된다.
         metadata = source.metadata_ or {}
         document_id = metadata.get("document_id")
         if not isinstance(document_id, str) or not document_id:
@@ -303,27 +427,22 @@ class AdminIngestionService:
         await self._session.flush()
         return source
 
-    @staticmethod
-    def _constraint_name(error: IntegrityError) -> Optional[str]:
-        original = getattr(error, "orig", None)
-        diagnostic = getattr(original, "diag", None)
-        return getattr(diagnostic, "constraint_name", None)
-
-
 async def run_admin_ingestion(
     ingestion_run_id: int,
     raw_content: str,
     embedder_factory: Callable[[], OpenAIEmbedder] = OpenAIEmbedder,
 ) -> None:
-    """독립 세션에서 업로드 원문을 READY DocumentVersion까지 처리한다.
+    """독립 세션에서 업로드 원문을 판정하고 결과까지 기록한다.
 
-    embedder는 실제로 필요한 시점에 만든다. 생성자를 주입하면 테스트에서
-    외부 호출 없이 실행할 수 있다.
+    같은 내용 재업로드와 다른 문서와 같은 내용은 오류가 아니라 결과다.
+    판을 만들지 않고 result_code 로 구분해 마감한다.
+
+    진행 단계는 폴링 조회가 볼 수 있도록 단계마다 커밋한다.
     """
 
     async with get_session_factory()() as session:
         store = DocumentStore(session)
-        failed_stage = "LOADING"
+        failed_stage = IngestionStage.RECEIVING.value
         try:
             source_values = await _load_processing_source_values(
                 session,
@@ -333,14 +452,43 @@ async def run_admin_ingestion(
                 return
             await session.rollback()
 
-            failed_stage = "NORMALIZING"
+            failed_stage = IngestionStage.NORMALIZING.value
+            await store.set_stage(ingestion_run_id, IngestionStage.NORMALIZING)
+            await session.commit()
+            normalized_content = await asyncio.to_thread(
+                _normalize_uploaded_markdown,
+                raw_content,
+            )
+            normalized_content_hash = _sha256(normalized_content)
+
+            decided = await _decide_without_new_version(
+                session,
+                store,
+                ingestion_run_id,
+                source_values["document_source_id"],
+                normalized_content_hash,
+            )
+            if decided:
+                return
+
+            failed_stage = IngestionStage.PARSING.value
+            await store.set_stage(ingestion_run_id, IngestionStage.PARSING)
+            await session.commit()
             document, chunks = await asyncio.to_thread(
                 _build_uploaded_document,
                 raw_content,
-                **source_values,
+                normalized_content,
+                normalized_content_hash,
+                **{
+                    key: value
+                    for key, value in source_values.items()
+                    if key != "document_source_id"
+                },
             )
 
-            failed_stage = "EMBEDDING"
+            failed_stage = IngestionStage.EMBEDDING.value
+            await store.set_stage(ingestion_run_id, IngestionStage.EMBEDDING)
+            await session.commit()
             embeddings = await prepare_chunk_embeddings(
                 session,
                 store,
@@ -349,12 +497,18 @@ async def run_admin_ingestion(
                 embedder_factory(),
             )
 
-            failed_stage = "PERSISTING"
+            failed_stage = IngestionStage.PERSISTING.value
+            await store.set_stage(ingestion_run_id, IngestionStage.PERSISTING)
+            result_code = await _result_code_for_new_version(
+                store,
+                source_values["document_source_id"],
+            )
             await store.complete_ingestion(
                 ingestion_run_id,
                 document,
                 chunks,
                 embeddings,
+                result_code=result_code,
             )
             await session.commit()
         except _UploadedMarkdownInvalidError as error:
@@ -383,10 +537,61 @@ async def run_admin_ingestion(
             )
 
 
+async def _decide_without_new_version(
+    session: AsyncSession,
+    store: DocumentStore,
+    ingestion_run_id: int,
+    document_source_id: int,
+    normalized_content_hash: str,
+) -> bool:
+    """판을 만들지 않고 끝나는 결과인지 판정하고, 그렇다면 마감한다."""
+
+    latest = await store.find_latest_ready_version(document_source_id)
+    if (
+        latest is not None
+        and latest.normalized_content_hash == normalized_content_hash
+    ):
+        await store.complete_without_new_version(
+            ingestion_run_id,
+            IngestionResultCode.NO_CHANGE,
+        )
+        await session.commit()
+        return True
+
+    duplicate = await store.find_duplicate_source(
+        document_source_id,
+        normalized_content_hash,
+    )
+    if duplicate is not None:
+        await store.complete_without_new_version(
+            ingestion_run_id,
+            IngestionResultCode.DUPLICATE_CONTENT,
+            duplicate_of_document_source_id=duplicate.id,
+        )
+        await session.commit()
+        return True
+
+    return False
+
+
+async def _result_code_for_new_version(
+    store: DocumentStore,
+    document_source_id: int,
+) -> IngestionResultCode:
+    """첫 판이면 CREATED, 이미 판이 있으면 UPDATED 다."""
+
+    latest = await store.find_latest_ready_version(document_source_id)
+    return (
+        IngestionResultCode.CREATED
+        if latest is None
+        else IngestionResultCode.UPDATED
+    )
+
+
 async def _load_processing_source_values(
     session: AsyncSession,
     ingestion_run_id: int,
-) -> Optional[dict[str, Optional[str]]]:
+) -> Optional[dict]:
     statement = (
         select(IngestionRun, DocumentSource)
         .join(
@@ -420,6 +625,7 @@ async def _load_processing_source_values(
         raise RuntimeError("DocumentSource category metadata 형식이 올바르지 않습니다.")
 
     return {
+        "document_source_id": source.id,
         "document_id": document_id,
         "title": source.title,
         "source_url": source.canonical_uri,
@@ -427,8 +633,23 @@ async def _load_processing_source_values(
     }
 
 
+def _normalize_uploaded_markdown(raw_content: str) -> str:
+    """업로드 원문을 정제한다. 결과가 비면 접수 뒤 실패로 다룬다."""
+
+    try:
+        normalized_content, _ = normalize_markdown(raw_content)
+    except ValueError as error:
+        raise _UploadedMarkdownInvalidError(str(error)) from error
+
+    if not normalized_content.strip():
+        raise _UploadedMarkdownInvalidError("정제 후 유효한 본문이 없습니다.")
+    return normalized_content
+
+
 def _build_uploaded_document(
     raw_content: str,
+    normalized_content: str,
+    normalized_content_hash: str,
     *,
     document_id: str,
     title: str,
@@ -436,7 +657,6 @@ def _build_uploaded_document(
     category: Optional[str],
 ) -> tuple[NormalizedDocument, list[RetrievalChunk]]:
     try:
-        normalized_content, _ = normalize_markdown(raw_content)
         document = NormalizedDocument(
             document_id=document_id,
             title=title,
@@ -445,7 +665,7 @@ def _build_uploaded_document(
             content=normalized_content,
             raw_content_uri=None,
             raw_content_hash=_sha256(raw_content),
-            normalized_content_hash=_sha256(normalized_content),
+            normalized_content_hash=normalized_content_hash,
             raw_content=raw_content,
         )
         chunks = [
@@ -458,7 +678,7 @@ def _build_uploaded_document(
 
     if not chunks:
         raise _UploadedMarkdownInvalidError(
-            "정제·청킹 후 유효한 본문이 없습니다."
+            "정제와 청킹 후 유효한 본문이 없습니다."
         )
     return document, chunks
 
@@ -490,3 +710,12 @@ async def _record_ingestion_failure(
 
 def _sha256(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _chunk_stats_of(summary: dict) -> Optional[dict]:
+    """실행 summary에 청크 통계가 모두 있으면 그대로 돌려준다."""
+
+    keys = ("added", "changed", "deleted", "reused")
+    if not all(key in summary for key in keys):
+        return None
+    return {key: summary[key] for key in keys}

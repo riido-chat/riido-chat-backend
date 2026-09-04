@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Annotated, Literal, Optional, Union
 
 from fastapi import UploadFile
-from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.chat.schema import HTTP_DTO_CONFIG
 
@@ -19,15 +19,15 @@ ADMIN_UPLOAD_DTO_CONFIG = ConfigDict(
 
 
 class AdminDocumentUploadRequest(BaseModel):
-    """POST /api/admin/documents multipart 요청."""
+    """신규 문서 업로드 multipart 요청.
+
+    문서는 (문서 그룹, document_key)로 식별하므로 sourceUrl은 받지 않는다.
+    콘솔 문서의 canonical_uri는 서버가 만들고 API로 노출하지 않는다.
+    """
 
     model_config = ADMIN_UPLOAD_DTO_CONFIG
 
     title: str = Field(min_length=1, max_length=300)
-    # 문서는 (문서 그룹, document_key)로 식별한다. sourceUrl은 선택 입력으로만 남긴다.
-    source_url: Optional[AnyHttpUrl] = Field(
-        default=None, alias="sourceUrl", max_length=1_000
-    )
     category: Optional[str] = Field(default=None, max_length=100)
     file: UploadFile
 
@@ -46,6 +46,14 @@ class AdminDocumentUploadRequest(BaseModel):
         return category
 
 
+class AdminDocumentRevisionRequest(BaseModel):
+    """수정본 업로드 multipart 요청. 대상은 경로가 정하므로 파일만 받는다."""
+
+    model_config = ADMIN_UPLOAD_DTO_CONFIG
+
+    file: UploadFile
+
+
 class AdminIngestionStatus(str, Enum):
     PROCESSING = "PROCESSING"
     SUCCESS = "SUCCESS"
@@ -55,8 +63,7 @@ class AdminIngestionStatus(str, Enum):
 class AdminErrorCode(str, Enum):
     INVALID_FILE = "INVALID_FILE"
     FILE_TOO_LARGE = "FILE_TOO_LARGE"
-    DOCUMENT_NOT_FOUND = "DOCUMENT_NOT_FOUND"
-    DOCUMENT_ALREADY_EXISTS = "DOCUMENT_ALREADY_EXISTS"
+    DOCUMENT_NOT_REVISABLE = "DOCUMENT_NOT_REVISABLE"
     JOB_IN_PROGRESS = "JOB_IN_PROGRESS"
     REINDEX_NOT_REQUIRED = "REINDEX_NOT_REQUIRED"
     NO_READY_DOCUMENTS = "NO_READY_DOCUMENTS"
@@ -77,6 +84,20 @@ class AdminErrorResponse(BaseModel):
 
     code: AdminErrorCode
     message: str
+    # 접수 전 거절에만 붙는다. FE가 3-4 원인 문구 변형을 고를 때 쓴다.
+    stage: Optional[str] = None
+
+
+class IngestionStageValue(str, Enum):
+    """업로드 실행의 진행 단계. FE는 이 값으로 3-4 원인 문구를 고른다."""
+
+    RECEIVING = "RECEIVING"
+    VALIDATING = "VALIDATING"
+    NORMALIZING = "NORMALIZING"
+    PARSING = "PARSING"
+    CHUNKING = "CHUNKING"
+    EMBEDDING = "EMBEDDING"
+    PERSISTING = "PERSISTING"
 
 
 class AdminIngestionAcceptedResponse(BaseModel):
@@ -85,6 +106,53 @@ class AdminIngestionAcceptedResponse(BaseModel):
     ingestion_run_id: int = Field(alias="ingestionRunId")
     document_id: int = Field(alias="documentId")
     status: Literal[AdminIngestionStatus.PROCESSING]
+    stage: IngestionStageValue
+
+
+class IngestionResultCodeValue(str, Enum):
+    """업로드 결과. 같은 내용 재업로드와 중복은 오류가 아니라 결과다."""
+
+    CREATED = "CREATED"
+    UPDATED = "UPDATED"
+    NO_CHANGE = "NO_CHANGE"
+    DUPLICATE_CONTENT = "DUPLICATE_CONTENT"
+
+
+class IngestionErrorCode(str, Enum):
+    """업로드 실행 이력에 남는 실패 원인."""
+
+    INVALID_FILE = "INVALID_FILE"
+    UPSTREAM_ERROR = "UPSTREAM_ERROR"
+    INTERNAL_ERROR = "INTERNAL_ERROR"
+
+
+class AdminIngestionError(BaseModel):
+    """업로드 실행의 실패 원인. HTTP 오류 코드와 별개다."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    code: IngestionErrorCode
+    message: str
+
+
+class AdminChunkStats(BaseModel):
+    """이전 판 대비 청크 변화."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    added: int = Field(ge=0)
+    changed: int = Field(ge=0)
+    deleted: int = Field(ge=0)
+    reused: int = Field(ge=0)
+
+
+class AdminDuplicateDocument(BaseModel):
+    """같은 본문을 이미 가진 문서."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    document_id: int = Field(alias="documentId")
+    title: str
 
 
 class AdminIngestionProcessingResponse(BaseModel):
@@ -93,6 +161,7 @@ class AdminIngestionProcessingResponse(BaseModel):
     ingestion_run_id: int = Field(alias="ingestionRunId")
     document_id: int = Field(alias="documentId")
     status: Literal[AdminIngestionStatus.PROCESSING]
+    stage: IngestionStageValue
     started_at: datetime = Field(alias="startedAt")
 
 
@@ -102,11 +171,14 @@ class AdminIngestionSuccessResponse(BaseModel):
     ingestion_run_id: int = Field(alias="ingestionRunId")
     document_id: int = Field(alias="documentId")
     status: Literal[AdminIngestionStatus.SUCCESS]
-    document_version_id: int = Field(alias="documentVersionId")
-    version_no: int = Field(alias="versionNo", ge=1)
-    changed: Literal[True]
-    section_count: int = Field(alias="sectionCount", ge=1)
-    chunk_count: int = Field(alias="chunkCount", ge=1)
+    result_code: IngestionResultCodeValue = Field(alias="resultCode")
+    stage: IngestionStageValue
+    document_version_id: Optional[int] = Field(alias="documentVersionId")
+    version_no: Optional[int] = Field(alias="versionNo", ge=1)
+    section_count: Optional[int] = Field(alias="sectionCount", ge=0)
+    chunk_count: Optional[int] = Field(alias="chunkCount", ge=0)
+    chunk_stats: Optional[AdminChunkStats] = Field(alias="chunkStats")
+    duplicate_of: Optional[AdminDuplicateDocument] = Field(alias="duplicateOf")
     started_at: datetime = Field(alias="startedAt")
     finished_at: datetime = Field(alias="finishedAt")
 
@@ -117,7 +189,8 @@ class AdminIngestionFailedResponse(BaseModel):
     ingestion_run_id: int = Field(alias="ingestionRunId")
     document_id: int = Field(alias="documentId")
     status: Literal[AdminIngestionStatus.FAILED]
-    error: AdminError
+    stage: IngestionStageValue
+    error: AdminIngestionError
     started_at: datetime = Field(alias="startedAt")
     finished_at: datetime = Field(alias="finishedAt")
 
