@@ -31,8 +31,10 @@ from app.database.session import get_session_factory
 from app.document.models import NormalizedDocument
 from app.document.clean import normalize_markdown
 from app.retrieval.corpus import build_document_retrieval_chunks
+from app.retrieval.embedding import OpenAIEmbedder
 from app.retrieval.models import RetrievalChunk
 from app.document.document_store import PARSER_NAME, PARSER_VERSION, DocumentStore
+from app.document.ingestion import prepare_chunk_embeddings
 
 
 logger = logging.getLogger(__name__)
@@ -311,8 +313,12 @@ class AdminIngestionService:
 async def run_admin_ingestion(
     ingestion_run_id: int,
     raw_content: str,
+    embedder: Optional[OpenAIEmbedder] = None,
 ) -> None:
-    """독립 세션에서 업로드 원문을 READY DocumentVersion까지 처리한다."""
+    """독립 세션에서 업로드 원문을 READY DocumentVersion까지 처리한다.
+
+    embedder를 주입하면 테스트에서 외부 호출 없이 실행할 수 있다.
+    """
 
     async with get_session_factory()() as session:
         store = DocumentStore(session)
@@ -333,12 +339,28 @@ async def run_admin_ingestion(
                 **source_values,
             )
 
+            failed_stage = "EMBEDDING"
+            embeddings, call = await prepare_chunk_embeddings(
+                store,
+                ingestion_run_id,
+                chunks,
+                embedder if embedder is not None else OpenAIEmbedder(),
+            )
+
             failed_stage = "PERSISTING"
             await store.complete_ingestion(
                 ingestion_run_id,
                 document,
                 chunks,
+                embeddings,
             )
+            if call is not None:
+                await store.record_embedding_model_call(
+                    ingestion_run_id,
+                    input_tokens=call.input_tokens,
+                    retry_count=call.retry_count,
+                    latency_ms=call.latency_ms,
+                )
             await session.commit()
         except _UploadedMarkdownInvalidError as error:
             await session.rollback()

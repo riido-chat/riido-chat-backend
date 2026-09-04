@@ -21,7 +21,13 @@ from app.document.document_key import (
     build_upload_document_key,
 )
 from app.core.config import get_settings
+from app.admin.dependencies import get_chunk_embedder
+from app.retrieval.embedding import (
+    OPENAI_EMBEDDING_DIMENSIONS,
+    EmbeddingResponse,
+)
 from app.database.models import (
+    ChunkEmbedding,
     ContentNode,
     DocumentGroup,
     DocumentChunk,
@@ -32,6 +38,8 @@ from app.database.models import (
     IndexVersion,
     IndexVersionStatus,
     IngestionRun,
+    ModelCall,
+    ModelCallPurpose,
 )
 from app.database.session import dispose_engine
 from app.main import create_app
@@ -46,6 +54,23 @@ async def _check_database_available(url: str) -> bool:
         return False
     finally:
         await engine.dispose()
+
+
+class _StubEmbedder:
+    """테스트에서 외부 embedding 호출을 막는 stub."""
+
+    def __init__(self) -> None:
+        self.calls = []
+
+    def embed_many_with_usage(self, texts):
+        self.calls.append(list(texts))
+        return EmbeddingResponse(
+            embeddings=[
+                [0.1] * OPENAI_EMBEDDING_DIMENSIONS for _ in texts
+            ],
+            input_tokens=len(texts) * 10,
+            retry_count=0,
+        )
 
 
 class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
@@ -104,7 +129,11 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         active_before = await self._active_index_ids()
 
         accepted = await self._start(title)
-        await run_admin_ingestion(accepted.ingestion_run_id, raw_content)
+        await run_admin_ingestion(
+            accepted.ingestion_run_id,
+            raw_content,
+            _StubEmbedder(),
+        )
 
         async with self.session_factory() as session:
             run = await session.get(IngestionRun, accepted.ingestion_run_id)
@@ -120,6 +149,23 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
                 .join(ContentNode, ContentNode.id == DocumentChunk.id)
                 .where(ContentNode.document_version_id == version.id)
             )
+            embedding_count = await session.scalar(
+                select(func.count())
+                .select_from(ChunkEmbedding)
+                .join(DocumentChunk, DocumentChunk.id == ChunkEmbedding.chunk_id)
+                .join(ContentNode, ContentNode.id == DocumentChunk.id)
+                .where(ContentNode.document_version_id == version.id)
+            )
+            model_calls = list(
+                (
+                    await session.execute(
+                        select(ModelCall).where(
+                            ModelCall.ingestion_run_id
+                            == accepted.ingestion_run_id
+                        )
+                    )
+                ).scalars()
+            )
 
         self.assertEqual(ExecutionStatus.SUCCESS, run.status)
         self.assertEqual(DocumentVersionStatus.READY, version.status)
@@ -128,6 +174,15 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(raw_content, version.raw_content)
         self.assertEqual(1, node_count)
         self.assertEqual(1, chunk_count)
+        # READY는 청크와 embedding이 모두 준비된 상태를 뜻한다
+        self.assertEqual(1, embedding_count)
+        self.assertEqual(1, len(model_calls))
+        self.assertEqual(
+            ModelCallPurpose.CHUNK_EMBEDDING,
+            model_calls[0].purpose,
+        )
+        self.assertEqual(ExecutionStatus.SUCCESS, model_calls[0].status)
+        self.assertEqual(10, model_calls[0].input_tokens)
         self.assertEqual(active_before, await self._active_index_ids())
 
     async def test_http_upload_and_polling_complete_end_to_end(self) -> None:
@@ -135,6 +190,8 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         raw_content = "# API 업로드\n\n## 이용 방법\n\n실제 multipart 본문\n"
         active_before = await self._active_index_ids()
         app = create_app()
+        # 실제 embedding 호출 없이 업로드 전 구간을 확인한다
+        app.dependency_overrides[get_chunk_embedder] = _StubEmbedder
 
         async with AsyncClient(
             transport=ASGITransport(app=app),
@@ -184,6 +241,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         await run_admin_ingestion(
             accepted.ingestion_run_id,
             "# 문서\n\n## 본문\n\n키 확인\n",
+            _StubEmbedder(),
         )
 
         document_key = build_upload_document_key(title)
@@ -201,7 +259,11 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         title = self._new_title()
         first = await self._start(title)
 
-        await run_admin_ingestion(first.ingestion_run_id, "# 제목만 있는 문서\n")
+        await run_admin_ingestion(
+            first.ingestion_run_id,
+            "# 제목만 있는 문서\n",
+            _StubEmbedder(),
+        )
 
         async with self.session_factory() as session:
             failed = await session.get(IngestionRun, first.ingestion_run_id)
@@ -221,6 +283,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         await run_admin_ingestion(
             second.ingestion_run_id,
             "# 문서\n\n## 본문\n\n재시도 성공\n",
+            _StubEmbedder(),
         )
         async with self.session_factory() as session:
             succeeded = await session.get(IngestionRun, second.ingestion_run_id)
@@ -232,6 +295,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         await run_admin_ingestion(
             accepted.ingestion_run_id,
             "# 문서\n\n## 본문\n\n성공\n",
+            _StubEmbedder(),
         )
 
         with self.assertRaises(DocumentAlreadyExistsError):
@@ -248,6 +312,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         await run_admin_ingestion(
             first.ingestion_run_id,
             "# 문서\n\n## 본문\n\n처리 완료\n",
+            _StubEmbedder(),
         )
 
     async def _start(self, title: str):

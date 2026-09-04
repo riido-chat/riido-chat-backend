@@ -128,14 +128,52 @@ class IndexWriter:
         await self._session.flush()
         return run
 
+    async def list_chunks_missing_embedding(
+        self,
+        index_run_id: int,
+        chunks: Sequence[RetrievalChunk],
+    ) -> List[RetrievalChunk]:
+        """색인 범위 Chunk 중 이 버전의 설정으로 만든 embedding이 없는 것만 고른다.
+
+        embedding은 접수 시점에 만들어지므로 보통 비어 있다. 접수 이전에 적재된
+        판이나 embedding 설정이 바뀐 경우에만 채울 것이 남는다.
+        """
+
+        self._validate_persisted_chunks(chunks)
+        run = await self._get_processing_index_run(index_run_id)
+        index_version = await self._session.get(IndexVersion, run.index_version_id)
+        if index_version is None:
+            raise ValueError(f"존재하지 않는 색인 버전입니다: {run.index_version_id}")
+
+        chunk_ids = [chunk.chunk_id for chunk in chunks]
+        embedded_chunk_ids = set(
+            (
+                await self._session.execute(
+                    select(ChunkEmbedding.chunk_id).where(
+                        ChunkEmbedding.chunk_id.in_(chunk_ids),
+                        ChunkEmbedding.embedding_config_id
+                        == index_version.embedding_config_id,
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        return [
+            chunk for chunk in chunks if chunk.chunk_id not in embedded_chunk_ids
+        ]
+
     async def store_index_items(
         self,
         index_run_id: int,
-        items: Sequence[StoredEmbedding],
+        chunks: Sequence[RetrievalChunk],
+        items: Sequence[StoredEmbedding] = (),
     ) -> IndexVersion:
-        """Chunk Embedding과 포함 문서를 저장하고 VALIDATING으로 전이한다."""
+        """색인 범위 문서를 연결하고 누락 embedding만 채운 뒤 VALIDATING으로 전이한다."""
 
-        self._validate_index_items(items)
+        self._validate_persisted_chunks(chunks)
+        if items:
+            self._validate_index_items(items)
         run = await self._get_processing_index_run(index_run_id)
         index_version = await self._session.get(IndexVersion, run.index_version_id)
         if index_version is None:
@@ -147,32 +185,36 @@ class IndexWriter:
             )
 
         now = datetime.now(timezone.utc)
-        embeddings = []
-        document_version_ids = set()
-        for chunk, embedding in items:
-            embedding_input = build_embedding_text(chunk)
-            embeddings.append(
-                ChunkEmbedding(
-                    chunk_id=chunk.chunk_id,
-                    embedding_config_id=index_version.embedding_config_id,
-                    embedding=list(embedding),
-                    embedding_input_hash=sha256_hex(embedding_input),
-                    created_at=now,
-                )
+        embeddings = [
+            ChunkEmbedding(
+                chunk_id=chunk.chunk_id,
+                embedding_config_id=index_version.embedding_config_id,
+                embedding=list(embedding),
+                embedding_input_hash=sha256_hex(build_embedding_text(chunk)),
+                created_at=now,
             )
-            document_version_ids.add(chunk.document_version_id)
+            for chunk, embedding in items
+        ]
+        document_version_ids = {chunk.document_version_id for chunk in chunks}
 
         expected_documents = (run.summary or {}).get("document_count")
         expected_chunks = (run.summary or {}).get("chunk_count")
         if (
             len(document_version_ids) != expected_documents
-            or len(items) != expected_chunks
+            or len(chunks) != expected_chunks
         ):
             raise RuntimeError(
                 "색인 입력 건수가 시작 시점과 일치하지 않습니다: "
                 f"문서 {len(document_version_ids)}/{expected_documents}, "
-                f"Chunk {len(items)}/{expected_chunks}"
+                f"Chunk {len(chunks)}/{expected_chunks}"
             )
+
+        indexed_chunk_ids = {chunk.chunk_id for chunk in chunks}
+        outside = [
+            chunk for chunk, _ in items if chunk.chunk_id not in indexed_chunk_ids
+        ]
+        if outside:
+            raise ValueError("색인 범위 밖 Chunk의 embedding은 저장할 수 없습니다.")
 
         self._session.add_all(embeddings)
         self._session.add_all(
@@ -186,7 +228,7 @@ class IndexWriter:
         run.summary = {
             "stage": "VALIDATING",
             "document_count": len(document_version_ids),
-            "chunk_count": len(items),
+            "chunk_count": len(chunks),
             "embedding_count": len(embeddings),
         }
         await self._session.flush()
@@ -270,27 +312,22 @@ class IndexWriter:
         for item in items:
             items_by_document[item[0].document_id].append(item)
 
-        persisted_items = []
+        # embedding은 접수 시점에 함께 적재되므로 색인 단계에서 채울 것이 남지 않는다.
+        persisted_chunks: List[RetrievalChunk] = []
         for document in documents:
             document_items = items_by_document[document.document_id]
             ingestion_run = await self._documents.start_ingestion(document)
-            persisted_chunks = await self._documents.complete_ingestion(
-                ingestion_run.id,
-                document,
-                [chunk for chunk, _ in document_items],
-            )
-            persisted_items.extend(
-                (persisted_chunk, embedding)
-                for persisted_chunk, (_, embedding) in zip(
-                    persisted_chunks,
-                    document_items,
+            persisted_chunks.extend(
+                await self._documents.complete_ingestion(
+                    ingestion_run.id,
+                    document,
+                    [chunk for chunk, _ in document_items],
+                    [embedding for _, embedding in document_items],
                 )
             )
 
-        index_run = await self.start_index(
-            [chunk for chunk, _ in persisted_items]
-        )
-        await self.store_index_items(index_run.id, persisted_items)
+        index_run = await self.start_index(persisted_chunks)
+        await self.store_index_items(index_run.id, persisted_chunks)
         return await self.activate_index(index_run.id)
 
     async def _get_processing_index_run(self, index_run_id: int) -> IndexRun:

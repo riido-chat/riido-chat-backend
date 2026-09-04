@@ -15,6 +15,7 @@ from app.retrieval.corpus import build_document_retrieval_chunks
 from app.retrieval.embedding import OpenAIEmbedder, build_embedding_text
 from app.retrieval.models import RetrievalChunk
 from app.document.document_store import DocumentStore
+from app.document.ingestion import prepare_chunk_embeddings
 from app.indexing.index_writer import IndexWriter
 from app.retrieval.models import StoredEmbedding
 
@@ -35,10 +36,13 @@ def build_index_items(
     chunks: Sequence[RetrievalChunk],
     embedder: OpenAIEmbedder,
 ) -> List[StoredEmbedding]:
-    """모든 Chunk의 embedding이 준비된 저장 목록을 생성한다."""
+    """embedding이 없는 Chunk만 채운 저장 목록을 생성한다.
+
+    embedding은 접수 시점에 만들어지므로 보통 빈 목록이 된다.
+    """
 
     if not chunks:
-        raise ValueError("Vector indexing할 Chunk가 하나 이상이어야 합니다.")
+        return []
 
     embedding_texts = [build_embedding_text(chunk) for chunk in chunks]
     embeddings = embedder.embed_many(embedding_texts)
@@ -114,13 +118,27 @@ async def run_reindex(
             checkpoint_committed = True
 
             chunks = build_document_retrieval_chunks(document)
+            embeddings, call = await prepare_chunk_embeddings(
+                store,
+                ingestion_run_id,
+                chunks,
+                embedder,
+            )
             persisted_chunks.extend(
                 await store.complete_ingestion(
                     ingestion_run_id,
                     document,
                     chunks,
+                    embeddings,
                 )
             )
+            if call is not None:
+                await store.record_embedding_model_call(
+                    ingestion_run_id,
+                    input_tokens=call.input_tokens,
+                    retry_count=call.retry_count,
+                    latency_ms=call.latency_ms,
+                )
             await session.commit()
         except Exception as error:
             await session.rollback()
@@ -143,10 +161,14 @@ async def run_reindex(
         checkpoint_committed = True
 
         failed_stage = "EMBEDDING"
-        items = build_index_items(persisted_chunks, embedder)
+        missing = await writer.list_chunks_missing_embedding(
+            index_run_id,
+            persisted_chunks,
+        )
+        items = build_index_items(missing, embedder)
 
         failed_stage = "PERSISTING"
-        await writer.store_index_items(index_run_id, items)
+        await writer.store_index_items(index_run_id, persisted_chunks, items)
         await session.commit()
 
         failed_stage = "VALIDATING"
