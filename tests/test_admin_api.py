@@ -11,7 +11,7 @@ from app.admin.dependencies import get_admin_ingestion_service
 from app.document.ingestion_service import (
     AcceptedIngestion,
     AdminIngestionService,
-    DocumentAlreadyExistsError,
+    DocumentNotRevisableError,
     IngestionRunDetail,
 )
 from app.database.models import ExecutionStatus
@@ -58,12 +58,13 @@ class AdminDocumentApiTest(unittest.TestCase):
                 "ingestionRunId": 101,
                 "documentId": 42,
                 "status": "PROCESSING",
+                "stage": "RECEIVING",
             },
             response.json(),
         )
         self.service.start_new_document.assert_awaited_once_with(
+            group_id=1,
             title="문서 제목",
-            source_url="https://docs.riido.io/new-guide",
             category="guide",
             filename="guide.md",
         )
@@ -73,7 +74,7 @@ class AdminDocumentApiTest(unittest.TestCase):
             ANY,
         )
 
-    def test_accepts_upload_without_source_url(self) -> None:
+    def test_accepts_upload_without_category(self) -> None:
         self.service.start_new_document.return_value = AcceptedIngestion(
             ingestion_run_id=102,
             document_source_id=43,
@@ -84,18 +85,32 @@ class AdminDocumentApiTest(unittest.TestCase):
             new=AsyncMock(),
         ):
             response = self.client.post(
-                "/api/admin/documents",
-                data={"title": "문서 제목", "category": "guide"},
+                "/api/admin/document-groups/1/documents",
+                data={"title": "문서 제목"},
                 files={"file": ("guide.md", b"# guide", "text/markdown")},
             )
 
         self.assertEqual(202, response.status_code)
+        self.assertEqual("RECEIVING", response.json()["stage"])
         self.service.start_new_document.assert_awaited_once_with(
+            group_id=1,
             title="문서 제목",
-            source_url=None,
-            category="guide",
+            category=None,
             filename="guide.md",
         )
+
+    def test_rejects_source_url_field(self) -> None:
+        # 콘솔 문서의 canonical_uri 는 서버가 만든다. 입력으로 받지 않는다
+        response = self.client.post(
+            "/api/admin/document-groups/1/documents",
+            data={
+                "title": "문서 제목",
+                "sourceUrl": "https://docs.riido.io/new-guide",
+            },
+            files={"file": ("guide.md", b"# guide", "text/markdown")},
+        )
+
+        self.assertEqual(422, response.status_code)
 
     def test_rejects_non_markdown_extension(self) -> None:
         response = self._upload("guide.html", b"<h1>guide</h1>")
@@ -127,10 +142,9 @@ class AdminDocumentApiTest(unittest.TestCase):
 
     def test_rejects_extra_multipart_field(self) -> None:
         response = self.client.post(
-            "/api/admin/documents",
+            "/api/admin/document-groups/1/documents",
             data={
                 "title": "문서 제목",
-                "sourceUrl": "https://docs.riido.io/new-guide",
                 "category": "guide",
                 "extra": "not-allowed",
             },
@@ -140,19 +154,18 @@ class AdminDocumentApiTest(unittest.TestCase):
         self.assertEqual(422, response.status_code)
         self.service.start_new_document.assert_not_awaited()
 
-    def test_returns_admin_error_contract_for_duplicate_document(self) -> None:
-        self.service.start_new_document.side_effect = DocumentAlreadyExistsError()
+    def test_revision_upload_rejects_gitbook_document(self) -> None:
+        self.service.start_document_revision.side_effect = (
+            DocumentNotRevisableError()
+        )
 
-        response = self._upload("guide.md", b"# guide")
+        response = self.client.post(
+            "/api/admin/documents/42/versions",
+            files={"file": ("guide.md", b"# guide", "text/markdown")},
+        )
 
         self.assertEqual(409, response.status_code)
-        self.assertEqual(
-            {
-                "code": "DOCUMENT_ALREADY_EXISTS",
-                "message": "같은 문서명의 문서가 이미 존재합니다.",
-            },
-            response.json(),
-        )
+        self.assertEqual("DOCUMENT_NOT_REVISABLE", response.json()["code"])
 
     def test_returns_processing_ingestion_run(self) -> None:
         started_at = datetime(2026, 8, 31, tzinfo=timezone.utc)
@@ -160,6 +173,7 @@ class AdminDocumentApiTest(unittest.TestCase):
             ingestion_run_id=101,
             document_source_id=42,
             status=ExecutionStatus.PROCESSING,
+            stage="CHUNKING",
             document_version_id=None,
             version_no=None,
             section_count=None,
@@ -183,6 +197,9 @@ class AdminDocumentApiTest(unittest.TestCase):
             ingestion_run_id=101,
             document_source_id=42,
             status=ExecutionStatus.SUCCESS,
+            stage="PERSISTING",
+            result_code="CREATED",
+            chunk_stats={"added": 2, "changed": 0, "deleted": 0, "reused": 0},
             document_version_id=77,
             version_no=1,
             section_count=2,
@@ -198,7 +215,8 @@ class AdminDocumentApiTest(unittest.TestCase):
         self.assertEqual("SUCCESS", body["status"])
         self.assertEqual(77, body["documentVersionId"])
         self.assertEqual(1, body["versionNo"])
-        self.assertTrue(body["changed"])
+        self.assertEqual("CREATED", body["resultCode"])
+        self.assertEqual(2, body["chunkStats"]["added"])
         self.assertEqual(2, body["chunkCount"])
 
     def test_returns_failed_ingestion_run(self) -> None:
@@ -208,6 +226,7 @@ class AdminDocumentApiTest(unittest.TestCase):
             ingestion_run_id=101,
             document_source_id=42,
             status=ExecutionStatus.FAILED,
+            stage="PARSING",
             document_version_id=None,
             version_no=None,
             section_count=None,
@@ -225,7 +244,9 @@ class AdminDocumentApiTest(unittest.TestCase):
         self.assertIn("유효한 본문", body["error"]["message"])
 
     def test_openapi_documents_multipart_request_and_accepted_response(self) -> None:
-        operation = self.app.openapi()["paths"]["/api/admin/documents"]["post"]
+        operation = self.app.openapi()["paths"][
+            "/api/admin/document-groups/{group_id}/documents"
+        ]["post"]
 
         self.assertIn("multipart/form-data", operation["requestBody"]["content"])
         self.assertIn("202", operation["responses"])
@@ -233,7 +254,7 @@ class AdminDocumentApiTest(unittest.TestCase):
         self.assertIn("413", operation["responses"])
         self.assertIn("FILE_TOO_LARGE", operation["responses"]["413"]["description"])
         self.assertIn(
-            "DOCUMENT_ALREADY_EXISTS",
+            "JOB_IN_PROGRESS",
             operation["responses"]["409"]["description"],
         )
         self.assertIn("INVALID_FILE", operation["responses"]["422"]["description"])
@@ -245,10 +266,9 @@ class AdminDocumentApiTest(unittest.TestCase):
 
     def _upload(self, filename: str, content: bytes):
         return self.client.post(
-            "/api/admin/documents",
+            "/api/admin/document-groups/1/documents",
             data={
                 "title": " 문서 제목 ",
-                "sourceUrl": "https://docs.riido.io/new-guide",
                 "category": " guide ",
             },
             files={"file": (filename, content, "application/octet-stream")},

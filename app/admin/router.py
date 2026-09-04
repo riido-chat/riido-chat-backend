@@ -21,7 +21,11 @@ from app.document.ingestion_service import (
     run_admin_ingestion,
 )
 from app.admin.schema import (
+    AdminChunkStats,
+    AdminDocumentRevisionRequest,
     AdminDocumentUploadRequest,
+    AdminDuplicateDocument,
+    AdminIngestionError,
     AdminIndexRunAcceptedResponse,
     AdminIndexRunFailedResponse,
     AdminIndexRunProcessingResponse,
@@ -39,6 +43,8 @@ from app.admin.schema import (
     AdminIngestionRunResponse,
     AdminIngestionStatus,
     AdminIngestionSuccessResponse,
+    IngestionErrorCode,
+    IngestionStageValue,
 )
 from app.chat.dependencies import get_corpus_state
 from app.core.task_registry import register_pipeline_task
@@ -66,28 +72,33 @@ ADMIN_ERROR_RESPONSES = {
     status.HTTP_409_CONFLICT: {
         "model": AdminErrorResponse,
         "description": (
-            "`DOCUMENT_ALREADY_EXISTS`: 같은 문서명의 문서를 다시 업로드한 경우입니다. "
-            "`JOB_IN_PROGRESS`: 다른 업로드나 재색인이 진행 중인 경우입니다."
+            "`JOB_IN_PROGRESS`: 같은 그룹에 진행 중 작업이 있는 경우입니다. "
+            "`DOCUMENT_NOT_REVISABLE`: GitBook 문서에 수정본을 올린 경우입니다."
         ),
     },
     status.HTTP_422_UNPROCESSABLE_ENTITY: {
         "model": AdminErrorResponse,
         "description": (
             "`INVALID_FILE`: .md 파일이 아니거나 UTF-8이 아니거나, "
-            "파일 내용이 비어 있는 경우입니다."
+            "파일 내용이 비어 있는 경우입니다. 본문에 `stage`가 함께 붙습니다."
         ),
+    },
+    status.HTTP_404_NOT_FOUND: {
+        "model": AdminErrorResponse,
+        "description": "`NOT_FOUND`: 대상 그룹 또는 문서가 없는 경우입니다.",
     },
 }
 
 
 @router.post(
-    "/documents",
+    "/document-groups/{group_id}/documents",
     response_model=AdminIngestionAcceptedResponse,
     status_code=status.HTTP_202_ACCEPTED,
     responses=ADMIN_ERROR_RESPONSES,
     summary="Markdown 신규 문서 업로드",
 )
 async def create_admin_document(
+    group_id: int,
     upload: Annotated[AdminDocumentUploadRequest, File()],
     http_request: Request,
     service: AdminIngestionService = Depends(get_admin_ingestion_service),
@@ -99,23 +110,70 @@ async def create_admin_document(
 
     filename, raw_content = await _read_markdown_file(upload.file)
     accepted = await service.start_new_document(
+        group_id=group_id,
         title=upload.title,
-        source_url=None if upload.source_url is None else str(upload.source_url),
         category=upload.category,
         filename=filename,
     )
+    _start_ingestion_job(
+        http_request,
+        accepted.ingestion_run_id,
+        raw_content,
+        embedder_factory,
+    )
+    return _to_accepted_ingestion_response(accepted)
+
+
+@router.post(
+    "/documents/{document_id}/versions",
+    response_model=AdminIngestionAcceptedResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    responses=ADMIN_ERROR_RESPONSES,
+    summary="Markdown 수정본 업로드",
+)
+async def create_admin_document_version(
+    document_id: int,
+    upload: Annotated[AdminDocumentRevisionRequest, File()],
+    http_request: Request,
+    service: AdminIngestionService = Depends(get_admin_ingestion_service),
+    embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
+        get_chunk_embedder_factory
+    ),
+) -> AdminIngestionAcceptedResponse:
+    """대상 문서를 고정하고 파일만 받아 새 판 후보를 접수한다."""
+
+    filename, raw_content = await _read_markdown_file(upload.file)
+    accepted = await service.start_document_revision(
+        document_id=document_id,
+        filename=filename,
+    )
+    _start_ingestion_job(
+        http_request,
+        accepted.ingestion_run_id,
+        raw_content,
+        embedder_factory,
+    )
+    return _to_accepted_ingestion_response(accepted)
+
+
+def _start_ingestion_job(
+    http_request: Request,
+    ingestion_run_id: int,
+    raw_content: str,
+    embedder_factory: Callable[[], OpenAIEmbedder],
+) -> None:
     task = asyncio.create_task(
-        run_admin_ingestion(
-            accepted.ingestion_run_id,
-            raw_content,
-            embedder_factory,
-        )
+        run_admin_ingestion(ingestion_run_id, raw_content, embedder_factory)
     )
     register_pipeline_task(http_request.app, task)
+
+
+def _to_accepted_ingestion_response(accepted) -> AdminIngestionAcceptedResponse:
     return AdminIngestionAcceptedResponse(
         ingestionRunId=accepted.ingestion_run_id,
         documentId=accepted.document_source_id,
         status=AdminIngestionStatus.PROCESSING,
+        stage=IngestionStageValue.RECEIVING,
     )
 
 
@@ -173,6 +231,7 @@ def _to_ingestion_response(detail: IngestionRunDetail) -> AdminIngestionRunRespo
     common = {
         "ingestionRunId": detail.ingestion_run_id,
         "documentId": detail.document_source_id,
+        "stage": detail.stage,
         "startedAt": detail.started_at,
     }
     if detail.status == ExecutionStatus.PROCESSING:
@@ -180,45 +239,54 @@ def _to_ingestion_response(detail: IngestionRunDetail) -> AdminIngestionRunRespo
             **common,
             status=AdminIngestionStatus.PROCESSING,
         )
-    if detail.status == ExecutionStatus.SUCCESS:
-        if (
-            detail.document_version_id is None
-            or detail.version_no is None
-            or detail.section_count is None
-            or detail.chunk_count is None
-            or detail.finished_at is None
-        ):
-            raise RuntimeError("SUCCESS 수집 실행의 결과 정보가 불완전합니다.")
-        return AdminIngestionSuccessResponse(
-            **common,
-            status=AdminIngestionStatus.SUCCESS,
-            documentVersionId=detail.document_version_id,
-            versionNo=detail.version_no,
-            changed=True,
-            sectionCount=detail.section_count,
-            chunkCount=detail.chunk_count,
-            finishedAt=detail.finished_at,
-        )
+    if detail.finished_at is None:
+        raise RuntimeError("마감된 수집 실행에 종료 시각이 없습니다.")
+
     if detail.status == ExecutionStatus.FAILED:
-        if detail.finished_at is None:
-            raise RuntimeError("FAILED 수집 실행에 finished_at이 없습니다.")
-        code = detail.error_code or INTERNAL_ERROR
-        try:
-            external_code = AdminErrorCode(code)
-        except ValueError:
-            external_code = AdminErrorCode.INTERNAL_ERROR
-        if code == INVALID_FILE and detail.error_message:
-            message = detail.error_message
-        else:
-            message = "문서를 처리하는 중 오류가 발생했습니다."
         return AdminIngestionFailedResponse(
             **common,
             status=AdminIngestionStatus.FAILED,
-            error=AdminError(code=external_code, message=message),
+            error=AdminIngestionError(
+                code=_to_ingestion_error_code(detail.error_code),
+                message=detail.error_message or "문서를 처리하지 못했습니다.",
+            ),
             finishedAt=detail.finished_at,
         )
-    raise RuntimeError(f"지원하지 않는 수집 실행 상태입니다: {detail.status}")
 
+    if detail.result_code is None:
+        raise RuntimeError("SUCCESS 수집 실행에 결과 코드가 없습니다.")
+    return AdminIngestionSuccessResponse(
+        **common,
+        status=AdminIngestionStatus.SUCCESS,
+        resultCode=detail.result_code,
+        documentVersionId=detail.document_version_id,
+        versionNo=detail.version_no,
+        sectionCount=detail.section_count,
+        chunkCount=detail.chunk_count,
+        chunkStats=(
+            None
+            if detail.chunk_stats is None
+            else AdminChunkStats(**detail.chunk_stats)
+        ),
+        duplicateOf=(
+            None
+            if detail.duplicate_of is None
+            else AdminDuplicateDocument(
+                documentId=detail.duplicate_of.document_id,
+                title=detail.duplicate_of.title,
+            )
+        ),
+        finishedAt=detail.finished_at,
+    )
+
+
+def _to_ingestion_error_code(error_code) -> IngestionErrorCode:
+    """기록되지 않았거나 모르는 코드는 내부 오류로 내린다."""
+
+    try:
+        return IngestionErrorCode(error_code)
+    except ValueError:
+        return IngestionErrorCode.INTERNAL_ERROR
 
 INDEX_RUN_ERROR_RESPONSES = {
     status.HTTP_404_NOT_FOUND: {

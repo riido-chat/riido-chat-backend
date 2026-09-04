@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from app.document.ingestion_service import (
     AdminIngestionService,
     AdminJobInProgressError,
-    DocumentAlreadyExistsError,
     run_admin_ingestion,
 )
 from app.document.document_key import (
@@ -42,6 +41,7 @@ from app.database.models import (
     ModelCallPurpose,
 )
 from app.database.session import dispose_engine
+from app.document.document_group import get_document_group
 from app.main import create_app
 
 
@@ -125,7 +125,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_upload_persists_ready_version_and_keeps_active_index(self) -> None:
         title = self._new_title()
-        raw_content = "# 새 문서\n\n## 이용 방법\n\n관리자 업로드 본문\n"
+        raw_content = f"# 새 문서\n\n## 이용 방법\n\n관리자 업로드 본문 {title}\n"
         active_before = await self._active_index_ids()
 
         accepted = await self._start(title)
@@ -187,7 +187,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_http_upload_and_polling_complete_end_to_end(self) -> None:
         title = self._new_title()
-        raw_content = "# API 업로드\n\n## 이용 방법\n\n실제 multipart 본문\n"
+        raw_content = f"# API 업로드\n\n## 이용 방법\n\n실제 multipart 본문 {title}\n"
         active_before = await self._active_index_ids()
         app = create_app()
         # 실제 embedding 호출 없이 업로드 전 구간을 확인한다
@@ -200,7 +200,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
             base_url="http://testserver",
         ) as client:
             accepted_response = await client.post(
-                "/api/admin/documents",
+                "/api/admin/document-groups/1/documents",
                 data={"title": title, "category": "test"},
                 files={
                     "file": (
@@ -226,6 +226,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertIsNotNone(result)
         self.assertEqual("SUCCESS", result["status"])
+        self.assertEqual("CREATED", result["resultCode"])
         self.assertEqual(accepted["documentId"], result["documentId"])
 
         async with self.session_factory() as session:
@@ -291,7 +292,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
             succeeded = await session.get(IngestionRun, second.ingestion_run_id)
         self.assertEqual(ExecutionStatus.SUCCESS, succeeded.status)
 
-    async def test_successful_source_is_rejected_as_duplicate(self) -> None:
+    async def test_same_title_upload_targets_the_existing_document(self) -> None:
         title = self._new_title()
         accepted = await self._start(title)
         await run_admin_ingestion(
@@ -300,8 +301,9 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
             _StubEmbedder,
         )
 
-        with self.assertRaises(DocumentAlreadyExistsError):
-            await self._start(title)
+        # 같은 문서명은 거절이 아니라 그 문서의 새 판 후보가 된다
+        second = await self._start(title)
+        self.assertEqual(accepted.document_source_id, second.document_source_id)
 
     async def test_processing_run_blocks_another_admin_job(self) -> None:
         first_title = self._new_title()
@@ -319,7 +321,9 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
 
     async def _start(self, title: str):
         async with self.session_factory() as session:
+            group = await get_document_group(session)
             return await AdminIngestionService(session).start_new_document(
+                group_id=group.id,
                 title=title,
                 category="test",
                 filename="guide.md",

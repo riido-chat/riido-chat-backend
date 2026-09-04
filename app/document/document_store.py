@@ -19,7 +19,9 @@ from app.database.models import (
     DocumentVersion,
     DocumentVersionStatus,
     ExecutionStatus,
+    IngestionResultCode,
     IngestionRun,
+    IngestionStage,
     ModelCall,
     ModelCallPurpose,
 )
@@ -88,6 +90,8 @@ class DocumentStore:
         document: NormalizedDocument,
         chunks: Sequence[RetrievalChunk],
         embeddings: Sequence[Sequence[float]],
+        *,
+        result_code: IngestionResultCode = IngestionResultCode.CREATED,
     ) -> List[RetrievalChunk]:
         """정제 문서와 Chunk, embedding을 적재하고 실행을 SUCCESS로 마감한다.
 
@@ -126,6 +130,11 @@ class DocumentStore:
         self._session.add(document_version)
         await self._session.flush()
 
+        chunk_stats = await self._compare_with_previous_version(
+            source.id,
+            document_version.id,
+            chunks,
+        )
         persisted_chunks = await self._create_document_chunks(
             chunks,
             document_version,
@@ -146,11 +155,15 @@ class DocumentStore:
         document_version.status = DocumentVersionStatus.READY
         run.produced_version_id = document_version.id
         run.status = ExecutionStatus.SUCCESS
+        run.result_code = result_code
+        run.stage = IngestionStage.PERSISTING
         run.summary = {
+            **(run.summary or {}),
             "stage": "COMPLETED",
             "section_count": len(chunks),
             "chunk_count": len(persisted_chunks),
             "embedding_count": len(embeddings),
+            **chunk_stats,
         }
         run.finished_at = now
         await self._session.flush()
@@ -248,6 +261,96 @@ class DocumentStore:
         await self._session.flush()
         return call
 
+    async def set_stage(
+        self,
+        ingestion_run_id: int,
+        stage: IngestionStage,
+    ) -> IngestionRun:
+        """진행 단계를 기록한다.
+
+        폴링 조회가 현재 단계를 보려면 호출자가 이 값을 커밋해야 한다.
+        """
+
+        run = await self._get_processing_ingestion_run(ingestion_run_id)
+        run.stage = stage
+        run.summary = {**(run.summary or {}), "stage": stage.value}
+        await self._session.flush()
+        return run
+
+    async def find_latest_ready_version(
+        self,
+        document_source_id: int,
+    ) -> Optional[DocumentVersion]:
+        """문서 원본의 가장 최근 READY 판을 찾는다."""
+
+        return await self._session.scalar(
+            select(DocumentVersion)
+            .where(
+                DocumentVersion.document_source_id == document_source_id,
+                DocumentVersion.status == DocumentVersionStatus.READY,
+            )
+            .order_by(DocumentVersion.version_no.desc())
+            .limit(1)
+        )
+
+    async def find_duplicate_source(
+        self,
+        document_source_id: int,
+        normalized_content_hash: str,
+    ) -> Optional[DocumentSource]:
+        """그룹 안 다른 문서가 같은 정제 본문을 이미 가지고 있는지 찾는다."""
+
+        source = await self._session.get(DocumentSource, document_source_id)
+        if source is None:
+            raise ValueError(f"존재하지 않는 문서 원본입니다: {document_source_id}")
+
+        return await self._session.scalar(
+            select(DocumentSource)
+            .join(
+                DocumentVersion,
+                DocumentVersion.document_source_id == DocumentSource.id,
+            )
+            .where(
+                DocumentSource.document_group_id == source.document_group_id,
+                DocumentSource.id != source.id,
+                DocumentVersion.status == DocumentVersionStatus.READY,
+                DocumentVersion.normalized_content_hash
+                == normalized_content_hash,
+            )
+            .order_by(DocumentSource.id)
+            .limit(1)
+        )
+
+    async def complete_without_new_version(
+        self,
+        ingestion_run_id: int,
+        result_code: IngestionResultCode,
+        *,
+        duplicate_of_document_source_id: Optional[int] = None,
+    ) -> IngestionRun:
+        """판을 만들지 않고 실행을 SUCCESS로 마감한다.
+
+        같은 내용 재업로드(NO_CHANGE)와 다른 문서와 같은 내용(DUPLICATE_CONTENT)이
+        여기에 해당한다. 둘 다 오류가 아니라 결과다.
+        """
+
+        if result_code not in (
+            IngestionResultCode.NO_CHANGE,
+            IngestionResultCode.DUPLICATE_CONTENT,
+        ):
+            raise ValueError(f"판 없이 마감할 수 없는 결과입니다: {result_code}")
+
+        run = await self._get_processing_ingestion_run(ingestion_run_id)
+        now = datetime.now(timezone.utc)
+        run.status = ExecutionStatus.SUCCESS
+        run.result_code = result_code
+        run.stage = IngestionStage.PERSISTING
+        run.duplicate_of_document_source_id = duplicate_of_document_source_id
+        run.summary = {**(run.summary or {}), "stage": "COMPLETED"}
+        run.finished_at = now
+        await self._session.flush()
+        return run
+
     async def fail_ingestion(
         self,
         ingestion_run_id: int,
@@ -260,7 +363,15 @@ class DocumentStore:
 
         run = await self._get_processing_ingestion_run(ingestion_run_id)
         run.status = ExecutionStatus.FAILED
+        if failed_stage is not None:
+            # 실패 지점을 컬럼에도 새긴다. 조회 응답이 이 값으로 화면을 고른다.
+            try:
+                run.stage = IngestionStage(failed_stage)
+            except ValueError:
+                pass
+        run.error_code = error_code
         run.summary = {
+            **(run.summary or {}),
             "stage": "FAILED",
             **(
                 {"failed_stage": failed_stage}
@@ -345,6 +456,72 @@ class DocumentStore:
         self._session.add_all(document_chunks)
         await self._session.flush()
         return persisted_chunks
+
+    async def _compare_with_previous_version(
+        self,
+        document_source_id: int,
+        document_version_id: int,
+        chunks: Sequence[RetrievalChunk],
+    ) -> dict:
+        """이전 판과 견주어 청크 추가, 변경, 삭제, 재사용 수를 센다.
+
+        같은 섹션인지는 node_identity_hash 로, 내용이 같은지는 content_hash 로
+        판단한다. 첫 판이면 전부 추가다.
+        """
+
+        new_by_identity = {
+            create_section_identity_hash(
+                chunk.document_id,
+                chunk.section_path[1:],
+            ): sha256_hex(chunk.content)
+            for chunk in chunks
+        }
+
+        previous_version = await self._session.scalar(
+            select(DocumentVersion)
+            .where(
+                DocumentVersion.document_source_id == document_source_id,
+                DocumentVersion.id != document_version_id,
+                DocumentVersion.status == DocumentVersionStatus.READY,
+            )
+            .order_by(DocumentVersion.version_no.desc())
+            .limit(1)
+        )
+        if previous_version is None:
+            return {
+                "added": len(new_by_identity),
+                "changed": 0,
+                "deleted": 0,
+                "reused": 0,
+            }
+
+        rows = (
+            await self._session.execute(
+                select(
+                    ContentNode.node_identity_hash,
+                    ContentNode.content_hash,
+                ).where(ContentNode.document_version_id == previous_version.id)
+            )
+        ).all()
+        old_by_identity = {identity: content for identity, content in rows}
+
+        added = 0
+        changed = 0
+        reused = 0
+        for identity, content_hash in new_by_identity.items():
+            if identity not in old_by_identity:
+                added += 1
+            elif old_by_identity[identity] == content_hash:
+                reused += 1
+            else:
+                changed += 1
+        deleted = len(set(old_by_identity) - set(new_by_identity))
+        return {
+            "added": added,
+            "changed": changed,
+            "deleted": deleted,
+            "reused": reused,
+        }
 
     async def _get_or_create_document_source(
         self,

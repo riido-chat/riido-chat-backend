@@ -127,7 +127,8 @@ def create_app() -> FastAPI:
             content=AdminErrorResponse(
                 code=AdminErrorCode(exc.code),
                 message=exc.message,
-            ).model_dump(mode="json", by_alias=True),
+                stage=getattr(exc, "stage", None),
+            ).model_dump(mode="json", by_alias=True, exclude_none=True),
         )
 
     @app.exception_handler(CorpusNotLoadedError)
