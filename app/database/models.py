@@ -26,6 +26,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
@@ -35,6 +36,15 @@ from app.database.base import Base
 
 # 확정된 임베딩 차원. OpenAI text embedding 1536차원으로 고정한다
 EMBEDDING_DIMENSIONS = 1536
+
+# 명명 규칙(uq_%(table_name)s_%(column_0_N_name)s)을 따르지만 부분 unique index라
+# 선언 시점에 이름을 직접 지정한다.
+ACTIVE_INDEX_VERSION_CONSTRAINT = "uq_index_versions_document_group_id"
+INDEX_VERSION_NO_CONSTRAINT = "uq_index_versions_document_group_id_version_no"
+# 명명 규칙대로 referred table까지 붙이면 66자가 되어 식별자 63자 제한을 넘는다.
+DUPLICATE_DOCUMENT_SOURCE_CONSTRAINT = (
+    "fk_ingestion_runs_duplicate_of_document_source_id"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -57,9 +67,51 @@ class IndexVersionStatus(str, enum.Enum):
 
     BUILDING = "BUILDING"
     VALIDATING = "VALIDATING"
+    READY = "READY"
     ACTIVE = "ACTIVE"
     FAILED = "FAILED"
     INACTIVE = "INACTIVE"
+
+
+class IndexRunStage(str, enum.Enum):
+    """색인 실행 한 건이 현재 수행 중인 단계를 나타낸다."""
+
+    BUILDING = "BUILDING"
+    VALIDATING = "VALIDATING"
+    APPLYING = "APPLYING"
+
+
+class IndexOperationType(str, enum.Enum):
+    """색인 실행이 요청받은 작업 범위를 나타낸다.
+
+    1차에서 실제로 사용하는 값은 BUILD_AND_APPLY와 APPLY다.
+    BUILD는 후보 생성만 수행하는 2차 확장을 위해 값만 미리 둔다.
+    """
+
+    BUILD_AND_APPLY = "BUILD_AND_APPLY"
+    BUILD = "BUILD"
+    APPLY = "APPLY"
+
+
+class IngestionResultCode(str, enum.Enum):
+    """수집 실행 한 건이 문서에 만든 결과를 나타낸다."""
+
+    CREATED = "CREATED"
+    UPDATED = "UPDATED"
+    NO_CHANGE = "NO_CHANGE"
+    DUPLICATE_CONTENT = "DUPLICATE_CONTENT"
+
+
+class IngestionStage(str, enum.Enum):
+    """수집 실행 한 건이 현재 수행 중인 단계를 나타낸다."""
+
+    RECEIVING = "RECEIVING"
+    VALIDATING = "VALIDATING"
+    NORMALIZING = "NORMALIZING"
+    PARSING = "PARSING"
+    CHUNKING = "CHUNKING"
+    EMBEDDING = "EMBEDDING"
+    PERSISTING = "PERSISTING"
 
 
 class ExecutionStatus(str, enum.Enum):
@@ -149,16 +201,42 @@ def _status_enum(
 # ---------------------------------------------------------------------------
 
 
+class DocumentGroup(Base):
+    """문서와 검색 버전을 독립적으로 관리하는 확장 단위."""
+
+    __tablename__ = "document_groups"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    group_key: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    consumer_key: Mapped[str] = mapped_column(String(50), nullable=False)
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 class DocumentSource(Base):
     """문서 원본의 고정 식별자와 수집 위치."""
 
     __tablename__ = "document_sources"
+    __table_args__ = (
+        UniqueConstraint("document_group_id", "document_key"),
+        UniqueConstraint("document_group_id", "canonical_uri"),
+        Index(None, "document_group_id"),
+    )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
-    source_type: Mapped[str] = mapped_column(String(30), nullable=False)
-    canonical_uri: Mapped[str] = mapped_column(
-        String(1000), nullable=False, unique=True
+    document_group_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("document_groups.id", ondelete="RESTRICT"),
+        nullable=False,
     )
+    document_key: Mapped[str] = mapped_column(String(300), nullable=False)
+    source_type: Mapped[str] = mapped_column(String(30), nullable=False)
+    canonical_uri: Mapped[str] = mapped_column(String(1000), nullable=False)
     title: Mapped[Optional[str]] = mapped_column(String(300))
     metadata_: Mapped[Optional[dict[str, Any]]] = mapped_column("metadata", JSONB)
     enabled: Mapped[bool] = mapped_column(
@@ -183,6 +261,7 @@ class DocumentVersion(Base):
         ),
         UniqueConstraint("document_source_id", "version_no"),
         Index(None, "document_source_id", "normalized_content_hash"),
+        Index(None, "normalized_content_hash"),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
@@ -214,6 +293,7 @@ class IngestionRun(Base):
     """문서 수집과 파싱 실행 이력."""
 
     __tablename__ = "ingestion_runs"
+    __table_args__ = (Index(None, "batch_id"),)
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     document_source_id: Mapped[int] = mapped_column(
@@ -224,12 +304,29 @@ class IngestionRun(Base):
     produced_version_id: Mapped[Optional[int]] = mapped_column(
         BigInteger, ForeignKey("document_versions.id", ondelete="SET NULL")
     )
+    # 명명 규칙대로 referred table까지 붙이면 식별자 63자 제한을 넘어 이름만 줄인다.
+    duplicate_of_document_source_id: Mapped[Optional[int]] = mapped_column(
+        BigInteger,
+        ForeignKey(
+            "document_sources.id",
+            ondelete="SET NULL",
+            name=DUPLICATE_DOCUMENT_SOURCE_CONSTRAINT,
+        ),
+    )
     trigger_type: Mapped[str] = mapped_column(String(30), nullable=False)
     parser_name: Mapped[str] = mapped_column(String(100), nullable=False)
     parser_version: Mapped[str] = mapped_column(String(50), nullable=False)
     status: Mapped[ExecutionStatus] = mapped_column(
         _status_enum(ExecutionStatus, "ingestion_execution_status"), nullable=False
     )
+    result_code: Mapped[Optional[IngestionResultCode]] = mapped_column(
+        _status_enum(IngestionResultCode, "ingestion_result_code")
+    )
+    stage: Mapped[Optional[IngestionStage]] = mapped_column(
+        _status_enum(IngestionStage, "ingestion_stage")
+    )
+    error_code: Mapped[Optional[str]] = mapped_column(String(50))
+    batch_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True))
     summary: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB)
     error_message: Mapped[Optional[str]] = mapped_column(Text)
     started_at: Mapped[Any] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
@@ -368,9 +465,33 @@ class IndexVersion(Base):
     """검색에 사용할 문서와 검색 설정의 버전."""
 
     __tablename__ = "index_versions"
+    __table_args__ = (
+        Index(None, "document_group_id"),
+        # 그룹마다 ACTIVE 색인은 최대 하나다.
+        Index(
+            ACTIVE_INDEX_VERSION_CONSTRAINT,
+            "document_group_id",
+            unique=True,
+            postgresql_where=text("status = 'ACTIVE'"),
+        ),
+        # 번호는 READY 시점에 부여하므로 그 전에는 NULL이다.
+        Index(
+            INDEX_VERSION_NO_CONSTRAINT,
+            "document_group_id",
+            "version_no",
+            unique=True,
+            postgresql_where=text("version_no IS NOT NULL"),
+        ),
+    )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    document_group_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("document_groups.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
     version: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+    version_no: Mapped[Optional[int]] = mapped_column(Integer)
     status: Mapped[IndexVersionStatus] = mapped_column(
         _status_enum(IndexVersionStatus, "index_version_status"), nullable=False
     )
@@ -413,6 +534,7 @@ class IndexRun(Base):
     """색인 생성, 검증, 활성화 실행 이력."""
 
     __tablename__ = "index_runs"
+    __table_args__ = (Index(None, "index_version_id", "started_at"),)
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     index_version_id: Mapped[int] = mapped_column(
@@ -421,10 +543,17 @@ class IndexRun(Base):
         nullable=False,
     )
     trigger_type: Mapped[str] = mapped_column(String(30), nullable=False)
+    operation_type: Mapped[IndexOperationType] = mapped_column(
+        _status_enum(IndexOperationType, "index_operation_type"), nullable=False
+    )
+    stage: Mapped[IndexRunStage] = mapped_column(
+        _status_enum(IndexRunStage, "index_run_stage"), nullable=False
+    )
     actor_id: Mapped[Optional[str]] = mapped_column(String(100))
     status: Mapped[ExecutionStatus] = mapped_column(
         _status_enum(ExecutionStatus, "index_execution_status"), nullable=False
     )
+    error_code: Mapped[Optional[str]] = mapped_column(String(50))
     summary: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB)
     error_message: Mapped[Optional[str]] = mapped_column(Text)
     started_at: Mapped[Any] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
@@ -582,6 +711,9 @@ class ModelCall(Base):
     )
     index_run_id: Mapped[Optional[int]] = mapped_column(
         BigInteger, ForeignKey("index_runs.id", ondelete="CASCADE")
+    )
+    ingestion_run_id: Mapped[Optional[int]] = mapped_column(
+        BigInteger, ForeignKey("ingestion_runs.id", ondelete="CASCADE")
     )
     purpose: Mapped[ModelCallPurpose] = mapped_column(
         _status_enum(ModelCallPurpose, "model_call_purpose", length=40),
