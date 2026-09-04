@@ -43,6 +43,7 @@ from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import HybridSearchCall
 from app.answering.models import (
     Citation,
+    CitationSourceKind,
     FinalAnswerStatus,
     FinalGenerationResult,
 )
@@ -65,6 +66,7 @@ def completed_response() -> ChatCompletedResponse:
                 document_title="문서",
                 section_path=[],
                 source_url="https://docs.riido.io/1",
+                source_kind=CitationSourceKind.GITBOOK,
             )
         ],
     )
@@ -324,6 +326,7 @@ class CoreHookNeutralityTest(unittest.IsolatedAsyncioTestCase):
                     document_title="문서 1",
                     section_path=("문서 1", "섹션 1"),
                     source_url="https://docs.riido.io/1",
+                    source_kind=CitationSourceKind.GITBOOK,
                     chunk_id=1,
                     document_version_id=101,
                 ),

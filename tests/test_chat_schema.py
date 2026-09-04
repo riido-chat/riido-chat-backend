@@ -18,7 +18,7 @@ from app.chat.schema import (
     ChatWithheldResponse,
     MAX_QUESTION_LENGTH,
 )
-from app.answering.models import FinalGenerationResult
+from app.answering.models import CitationSourceKind, FinalGenerationResult
 
 
 class ChatRequestTest(unittest.TestCase):
@@ -74,6 +74,7 @@ class ChatResponseTest(unittest.TestCase):
                     document_title="멤버 관리",
                     section_path=["워크스페이스", "멤버 초대"],
                     source_url="https://docs.riido.io/member/invite",
+                    source_kind=CitationSourceKind.GITBOOK,
                 )
             ],
         )
@@ -90,6 +91,7 @@ class ChatResponseTest(unittest.TestCase):
                         "documentTitle": "멤버 관리",
                         "sectionPath": ["워크스페이스", "멤버 초대"],
                         "sourceUrl": "https://docs.riido.io/member/invite",
+                        "sourceKind": "GITBOOK",
                     }
                 ],
             },
@@ -109,6 +111,7 @@ class ChatResponseTest(unittest.TestCase):
                         "documentTitle": "문서",
                         "sectionPath": ["문서", "섹션"],
                         "sourceUrl": "https://docs.riido.io/guide",
+                        "sourceKind": "GITBOOK",
                     }
                 ],
             }
@@ -196,6 +199,7 @@ class ChatResponseTest(unittest.TestCase):
                         "documentTitle": "문서",
                         "sectionPath": ["문서", "섹션"],
                         "sourceUrl": "https://docs.riido.io/guide",
+                        "sourceKind": "GITBOOK",
                     }
                 ],
             },
@@ -214,6 +218,7 @@ class ChatResponseTest(unittest.TestCase):
                         "documentTitle": "문서",
                         "sectionPath": ["문서", "섹션"],
                         "sourceUrl": "https://docs.riido.io/guide",
+                        "sourceKind": "GITBOOK",
                     }
                 ],
             },
@@ -231,6 +236,7 @@ class ChatResponseTest(unittest.TestCase):
                         "documentTitle": "문서",
                         "sectionPath": ["문서", "섹션"],
                         "sourceUrl": "https://docs.riido.io/guide",
+                        "sourceKind": "GITBOOK",
                     }
                 ],
             },

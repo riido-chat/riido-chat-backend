@@ -12,6 +12,11 @@ from app.answering.service import (
     GenerationService,
 )
 from app.core.model_trace import ModelCallTrace
+from app.document.document_key import (
+    DEFAULT_DOCUMENT_GROUP_KEY,
+    build_console_canonical_uri,
+    build_upload_document_key,
+)
 from app.answering.generator import (
     GENERATION_PROMPT_VERSION,
     OPENAI_GENERATION_MODEL,
@@ -19,6 +24,7 @@ from app.answering.generator import (
     OpenAIGenerator,
 )
 from app.answering.models import (
+    CitationSourceKind,
     FinalAnswerStatus,
     FinalWithheldReason,
     GenerationCall,
@@ -151,6 +157,31 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIsNone(result.withheld_reason)
         self.assertIsNone(result.error_code)
+
+    async def test_marks_citation_source_kind_by_canonical_uri_scheme(self) -> None:
+        console = self._result(
+            1,
+            source_url=build_console_canonical_uri(
+                DEFAULT_DOCUMENT_GROUP_KEY,
+                build_upload_document_key("업로드 문서"),
+            ),
+        )
+        gitbook = self._result(2)
+        self.generator.generate_with_trace.return_value = _call(
+            self._answerable("콘솔 근거 [SOURCE_1] 깃북 근거 [SOURCE_2]")
+        )
+
+        result = await self.service.generate_answer("질문", [console, gitbook])
+
+        self.assertEqual(
+            [CitationSourceKind.CONSOLE, CitationSourceKind.GITBOOK],
+            [item.source_kind for item in result.citations],
+        )
+        # 내부 인용에는 원문 위치자를 그대로 남긴다. 감추는 일은 응답 변환이 맡는다.
+        self.assertEqual(
+            console.chunk.source_url,
+            result.citations[0].source_url,
+        )
 
     async def test_merges_different_source_ids_with_same_source_identity(self) -> None:
         first = self._result(
