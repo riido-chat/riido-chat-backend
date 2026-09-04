@@ -23,9 +23,6 @@ WORKDIR /app
 COPY alembic.ini ./
 COPY alembic ./alembic
 COPY app ./app
-COPY generation ./generation
-COPY pipeline ./pipeline
-COPY retrieval ./retrieval
 
 # corpus는 이미지에 포함하지 않고 호스트 볼륨으로 마운트한다
 RUN useradd --create-home riido \
