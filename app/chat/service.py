@@ -57,6 +57,7 @@ from app.chat.query_rewrite import (
 )
 from app.answering.models import (
     Citation,
+    CitationSourceKind,
     FinalAnswerStatus,
     FinalGenerationResult,
     FinalWithheldReason,
@@ -173,6 +174,18 @@ def _to_response_section_path(citation: Citation) -> List[str]:
     return list(section_path)
 
 
+def _to_response_source_url(citation: Citation) -> Optional[str]:
+    """외부에 링크로 노출할 수 있는 출처만 남긴다.
+
+    콘솔 업로드 문서의 원문 위치자는 내부 스킴이라 null로 내리고, 클라이언트는
+    sourceKind로 링크 표시 여부를 판단한다.
+    """
+
+    if citation.source_kind == CitationSourceKind.CONSOLE:
+        return None
+    return citation.source_url
+
+
 def _to_chat_response(
     result: FinalGenerationResult,
     conversation_id: uuid.UUID,
@@ -192,7 +205,8 @@ def _to_chat_response(
                     citation_number=citation.citation_number,
                     document_title=citation.document_title,
                     section_path=_to_response_section_path(citation),
-                    source_url=citation.source_url,
+                    source_url=_to_response_source_url(citation),
+                    source_kind=citation.source_kind,
                 )
                 for citation in result.citations
             ],

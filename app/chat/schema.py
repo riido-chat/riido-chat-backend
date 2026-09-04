@@ -6,6 +6,8 @@ from typing import Annotated, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.answering.models import CitationSourceKind
+
 
 HTTP_DTO_CONFIG = ConfigDict(
     extra="forbid",
@@ -83,7 +85,9 @@ class ChatCitation(BaseModel):
     citation_number: int = Field(alias="citationNumber", ge=1, le=3)
     document_title: str = Field(alias="documentTitle")
     section_path: List[str] = Field(alias="sectionPath")
-    source_url: str = Field(alias="sourceUrl")
+    # 콘솔 업로드 문서의 원문 위치자는 내부 스킴이라 외부로 내리지 않는다.
+    source_url: Optional[str] = Field(alias="sourceUrl")
+    source_kind: CitationSourceKind = Field(alias="sourceKind")
 
 
 class ChatWithheld(BaseModel):
