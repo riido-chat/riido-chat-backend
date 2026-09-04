@@ -118,7 +118,8 @@ async def run_reindex(
             checkpoint_committed = True
 
             chunks = build_document_retrieval_chunks(document)
-            embeddings, call = await prepare_chunk_embeddings(
+            embeddings = await prepare_chunk_embeddings(
+                session,
                 store,
                 ingestion_run_id,
                 chunks,
@@ -132,13 +133,6 @@ async def run_reindex(
                     embeddings,
                 )
             )
-            if call is not None:
-                await store.record_embedding_model_call(
-                    ingestion_run_id,
-                    input_tokens=call.input_tokens,
-                    retry_count=call.retry_count,
-                    latency_ms=call.latency_ms,
-                )
             await session.commit()
         except Exception as error:
             await session.rollback()

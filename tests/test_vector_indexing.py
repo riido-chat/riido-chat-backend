@@ -112,7 +112,7 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         build_chunks: Mock,
         prepare_embeddings: Mock,
     ) -> None:
-        prepare_embeddings.return_value = ([self.embedding], None)
+        prepare_embeddings.return_value = [self.embedding]
         store = store_class.return_value
         writer = writer_class.return_value
         store.start_ingestion = AsyncMock(return_value=SimpleNamespace(id=11))
@@ -159,7 +159,7 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         build_chunks: Mock,
         prepare_embeddings: Mock,
     ) -> None:
-        prepare_embeddings.return_value = ([self.embedding], None)
+        prepare_embeddings.return_value = [self.embedding]
         failure = RuntimeError("parser unavailable")
         store = store_class.return_value
         writer = writer_class.return_value
@@ -187,7 +187,7 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         build_chunks: Mock,
         prepare_embeddings: Mock,
     ) -> None:
-        prepare_embeddings.return_value = ([self.embedding], None)
+        prepare_embeddings.return_value = [self.embedding]
         failure = RuntimeError("embedding unavailable")
         self.embedder.embed_many.side_effect = failure
         store = store_class.return_value
@@ -227,7 +227,7 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         build_chunks: Mock,
         prepare_embeddings: Mock,
     ) -> None:
-        prepare_embeddings.return_value = ([self.embedding], None)
+        prepare_embeddings.return_value = [self.embedding]
         failure = RuntimeError("stored count mismatch")
         store = store_class.return_value
         writer = writer_class.return_value

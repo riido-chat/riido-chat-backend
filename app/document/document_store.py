@@ -200,15 +200,12 @@ class DocumentStore:
             reusable.setdefault(input_hash, list(embedding))
         return reusable
 
-    async def record_embedding_model_call(
-        self,
-        ingestion_run_id: int,
-        *,
-        input_tokens: Optional[int],
-        retry_count: int,
-        latency_ms: int,
-    ) -> ModelCall:
-        """접수 중 발생한 청크 embedding 호출을 수집 실행에 붙여 기록한다."""
+    async def start_embedding_model_call(self, ingestion_run_id: int) -> ModelCall:
+        """청크 embedding 호출 직전에 PROCESSING 행을 만든다.
+
+        호출자가 이 행을 checkpoint commit 한 뒤 외부 호출을 시작한다.
+        그래야 호출이 실패해 트랜잭션을 롤백해도 기록이 남는다.
+        """
 
         call = ModelCall(
             ingestion_run_id=ingestion_run_id,
@@ -216,13 +213,38 @@ class DocumentStore:
             provider=OPENAI_EMBEDDING_PROVIDER,
             model_name=OPENAI_EMBEDDING_MODEL,
             prompt_version=EMBEDDING_INPUT_TEMPLATE_VERSION,
-            input_tokens=input_tokens,
-            status=ExecutionStatus.SUCCESS,
-            retry_count=retry_count,
-            latency_ms=latency_ms,
+            status=ExecutionStatus.PROCESSING,
+            retry_count=0,
             created_at=datetime.now(timezone.utc),
         )
         self._session.add(call)
+        await self._session.flush()
+        return call
+
+    async def finish_embedding_model_call(
+        self,
+        model_call_id: int,
+        *,
+        status: ExecutionStatus,
+        latency_ms: int,
+        input_tokens: Optional[int] = None,
+        retry_count: int = 0,
+        error_message: Optional[str] = None,
+    ) -> ModelCall:
+        """PROCESSING 청크 embedding 호출을 같은 행에서 마감한다."""
+
+        if status not in (ExecutionStatus.SUCCESS, ExecutionStatus.FAILED):
+            raise ValueError(f"모델 호출의 최종 상태가 아닙니다: {status}")
+
+        call = await self._session.get(ModelCall, model_call_id)
+        if call is None:
+            raise ValueError(f"존재하지 않는 모델 호출입니다: {model_call_id}")
+
+        call.status = status
+        call.latency_ms = latency_ms
+        call.input_tokens = input_tokens
+        call.retry_count = retry_count
+        call.error_message = error_message
         await self._session.flush()
         return call
 

@@ -17,6 +17,8 @@ from app.database.models import (
     IndexRun,
     IndexVersion,
     IndexVersionStatus,
+    ModelCall,
+    ModelCallPurpose,
 )
 from app.document.models import NormalizedDocument
 from app.indexing.index_vector_corpus import run_reindex
@@ -152,6 +154,27 @@ class IndexRunLoggingDbTest(unittest.IsolatedAsyncioTestCase):
                 run for run in index_runs if run.id not in index_run_ids_before
             ]
             self.assertEqual([], created_runs)
+
+            # 호출 직전 checkpoint commit 덕분에 실패 기록이 롤백에 쓸려가지 않는다
+            model_calls = list(
+                (
+                    await session.execute(
+                        select(ModelCall).where(
+                            ModelCall.ingestion_run_id == ingestion_run.id
+                        )
+                    )
+                ).scalars()
+            )
+            self.assertEqual(1, len(model_calls))
+            self.assertEqual(
+                ModelCallPurpose.CHUNK_EMBEDDING,
+                model_calls[0].purpose,
+            )
+            self.assertEqual(ExecutionStatus.FAILED, model_calls[0].status)
+            self.assertIn(
+                "embedding unavailable",
+                model_calls[0].error_message,
+            )
             active_after = set(
                 (
                     await session.execute(
