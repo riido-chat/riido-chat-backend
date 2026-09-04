@@ -70,9 +70,11 @@ class _StubCorpusState:
     def __init__(self, error: Exception = None, fail_times: int = 1) -> None:
         self.error = error
         self.remaining_failures = fail_times if error is not None else 0
+        self.attempts = 0
         self.replaced_index_version_ids = []
 
     def replace(self, chunks):
+        self.attempts += 1
         if self.remaining_failures > 0:
             self.remaining_failures -= 1
             raise self.error
@@ -247,6 +249,9 @@ class IndexApplyDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(ExecutionStatus.FAILED, failed_run.status)
         self.assertEqual(IndexRunStage.APPLYING, failed_run.stage)
         self.assertEqual(CORPUS_RELOAD_FAILED, failed_run.error_code)
+        # corpus 를 바꾸기 전에 실패했으므로 되돌릴 것이 없다.
+        # 복구를 시도하면 ACTIVE 가 없는 첫 반영에서 오판이 생긴다
+        self.assertEqual(1, failing.attempts)
         # 후보는 READY 로 남아 다시 시도할 수 있다
         self.assertEqual(IndexVersionStatus.READY, candidate.status)
         self.assertIsNotNone(candidate.version_no)

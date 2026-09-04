@@ -352,18 +352,22 @@ async def _apply(
     모두 이전 세대로 남기고 후보는 READY 로 유지한다.
     """
 
+    corpus_replaced = False
     error_code = CORPUS_RELOAD_FAILED
     try:
         await writer.apply_index(index_run_id)
         chunks = await SearchReader(session).load_active_chunks()
         corpus_state.replace(chunks)
+        corpus_replaced = True
         await writer.finish_apply_run(index_run_id)
         await session.commit()
         return
     except Exception as error:
         logger.exception("색인 적용에 실패했습니다: index_run_id=%s", index_run_id)
         await session.rollback()
-        if not await _restore_corpus(session, corpus_state):
+        # corpus 를 바꾸기 전에 실패했으면 DB 와 메모리가 모두 이전 세대다.
+        # 되돌릴 것이 없으므로 복구를 시도하지 않는다.
+        if corpus_replaced and not await _restore_corpus(session, corpus_state):
             error_code = CORPUS_OUT_OF_SYNC
         await _record_failure(
             session,
