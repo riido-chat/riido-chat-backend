@@ -12,7 +12,7 @@ from app.retrieval.embedding import (
     OpenAIEmbedder,
 )
 from app.retrieval.models import RetrievalResult, VectorSearchCall
-from app.retrieval.pgvector_store import PgVectorStore
+from app.retrieval.search_reader import SearchReader
 
 
 QUERY_EMBEDDING_MAX_ATTEMPTS = 3
@@ -34,7 +34,7 @@ class VectorRetriever:
     def __init__(
         self,
         embedder: OpenAIEmbedder,
-        store: PgVectorStore,
+        store: SearchReader,
     ) -> None:
         self._embedder = embedder
         self._store = store

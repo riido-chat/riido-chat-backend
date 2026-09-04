@@ -32,7 +32,7 @@ from app.document.models import NormalizedDocument
 from app.document.clean import normalize_markdown
 from app.retrieval.corpus import build_document_retrieval_chunks
 from app.retrieval.models import RetrievalChunk
-from app.retrieval.pgvector_store import PARSER_NAME, PARSER_VERSION, PgVectorStore
+from app.document.document_store import PARSER_NAME, PARSER_VERSION, DocumentStore
 
 
 logger = logging.getLogger(__name__)
@@ -315,7 +315,7 @@ async def run_admin_ingestion(
     """독립 세션에서 업로드 원문을 READY DocumentVersion까지 처리한다."""
 
     async with get_session_factory()() as session:
-        store = PgVectorStore(session)
+        store = DocumentStore(session)
         failed_stage = "LOADING"
         try:
             source_values = await _load_processing_source_values(
@@ -448,7 +448,7 @@ def _build_uploaded_document(
 
 async def _record_ingestion_failure(
     session: AsyncSession,
-    store: PgVectorStore,
+    store: DocumentStore,
     ingestion_run_id: int,
     error: Exception,
     *,

@@ -180,7 +180,7 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
                 return_value=session_factory,
             ),
             "store_class": patch(
-                "app.main.PgVectorStore",
+                "app.main.SearchReader",
                 return_value=store,
             ),
             "bm25": patch(

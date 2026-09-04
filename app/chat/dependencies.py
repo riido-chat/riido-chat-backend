@@ -12,7 +12,7 @@ from app.chat.query_rewrite import QueryRewriteService
 from app.retrieval.bm25_retriever import BM25Retriever
 from app.retrieval.embedding import OpenAIEmbedder
 from app.retrieval.hybrid_retriever import HybridRetriever
-from app.retrieval.pgvector_store import PgVectorStore
+from app.retrieval.search_reader import SearchReader
 from app.retrieval.vector_retriever import VectorRetriever
 
 
@@ -75,7 +75,7 @@ def get_vector_retriever(
 
     return VectorRetriever(
         embedder=embedder,
-        store=PgVectorStore(session),
+        store=SearchReader(session),
     )
 
 
@@ -137,7 +137,7 @@ def build_chat_service(
             bm25_retriever=corpus_state.get_retriever(),
             vector_retriever=VectorRetriever(
                 embedder=embedder,
-                store=PgVectorStore(session),
+                store=SearchReader(session),
             ),
         ),
         generation_service=generation_service,

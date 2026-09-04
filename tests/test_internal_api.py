@@ -14,7 +14,7 @@ from app.retrieval.corpus_state import (
     CorpusSnapshot,
     CorpusState,
 )
-from app.retrieval.pgvector_store import ActiveIndexNotFoundError
+from app.retrieval.search_reader import ActiveIndexNotFoundError
 
 
 @asynccontextmanager
@@ -45,7 +45,7 @@ class InternalCorpusApiTest(unittest.TestCase):
         self.store = Mock()
         self.store.load_active_chunks = AsyncMock(return_value=self.active_chunks)
         self.store_patcher = patch(
-            "app.api.internal.PgVectorStore",
+            "app.api.internal.SearchReader",
             return_value=self.store,
         )
         self.store_patcher.start()

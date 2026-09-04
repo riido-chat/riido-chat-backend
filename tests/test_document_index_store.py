@@ -18,17 +18,22 @@ from app.database.models import (
 from app.document.models import NormalizedDocument
 from app.retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 from app.retrieval.models import RetrievalChunk
-from app.retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
+from app.core.error_message import sanitize_error_message
+from app.document.document_store import DocumentStore
+from app.indexing.index_writer import IndexWriter
+from app.retrieval.search_reader import ActiveIndexNotFoundError, SearchReader
 
 
-class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
+class DocumentIndexStoreTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.session = AsyncMock(spec=AsyncSession)
         self.session.in_transaction.return_value = False
         self.transaction = AsyncMock()
         self.transaction.__aexit__.return_value = False
         self.session.begin.return_value = self.transaction
-        self.store = PgVectorStore(self.session)
+        self.store = DocumentStore(self.session)
+        self.writer = IndexWriter(self.session)
+        self.reader = SearchReader(self.session)
         self.chunk = RetrievalChunk(
             document_id="document-id",
             section_id="section-id",
@@ -60,7 +65,7 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
         self.assertIs(self.session, self.store._session)
 
     async def test_redacts_openai_key_from_failure_message(self) -> None:
-        message = self.store._safe_error_message(
+        message = sanitize_error_message(
             RuntimeError("request failed with sk-secret_123456789")
         )
 
@@ -73,11 +78,11 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
         expected = Mock(spec=IndexVersion)
 
         with patch.object(
-            self.store,
+            self.writer,
             "_replace_rows",
             new=AsyncMock(return_value=expected),
         ) as replace_rows:
-            result = await self.store.replace_all(
+            result = await self.writer.replace_all(
                 [(self.chunk, self.embedding)],
                 [self.document],
             )
@@ -93,11 +98,11 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
         expected = Mock(spec=IndexVersion)
 
         with patch.object(
-            self.store,
+            self.writer,
             "_replace_rows",
             new=AsyncMock(return_value=expected),
         ) as replace_rows:
-            result = await self.store.replace_all(
+            result = await self.writer.replace_all(
                 [(self.chunk, self.embedding)],
                 [self.document],
             )
@@ -110,12 +115,12 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
         failure = RuntimeError("document chunk insert failed")
 
         with patch.object(
-            self.store,
+            self.writer,
             "_replace_rows",
             new=AsyncMock(side_effect=failure),
         ):
             with self.assertRaises(RuntimeError) as context:
-                await self.store.replace_all(
+                await self.writer.replace_all(
                     [(self.chunk, self.embedding)],
                     [self.document],
                 )
@@ -127,19 +132,19 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_validates_reindex_input_before_transaction(self) -> None:
         with self.assertRaisesRegex(ValueError, "하나 이상"):
-            await self.store.replace_all([], [])
+            await self.writer.replace_all([], [])
         with self.assertRaisesRegex(ValueError, "1536차원"):
-            await self.store.replace_all([(self.chunk, [0.1])], [self.document])
+            await self.writer.replace_all([(self.chunk, [0.1])], [self.document])
 
         persisted = self._runtime_chunk()
         with self.assertRaisesRegex(ValueError, "DB 식별자"):
-            await self.store.replace_all(
+            await self.writer.replace_all(
                 [(persisted, self.embedding)],
                 [self.document],
             )
 
         with self.assertRaisesRegex(ValueError, "중복 section_id"):
-            await self.store.replace_all(
+            await self.writer.replace_all(
                 [(self.chunk, self.embedding), (self.chunk, self.embedding)],
                 [self.document],
             )
@@ -155,7 +160,7 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
             normalized_content_hash=self.document.normalized_content_hash,
         )
         with self.assertRaisesRegex(ValueError, "document_id"):
-            await self.store.replace_all(
+            await self.writer.replace_all(
                 [(self.chunk, self.embedding)],
                 [other_document],
             )
@@ -204,7 +209,7 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
         result.scalars.return_value.all.return_value = [self.active_index]
         self.session.execute.return_value = result
 
-        index_version_id = await self.store.get_active_index_version_id()
+        index_version_id = await self.reader.get_active_index_version_id()
 
         self.assertEqual(7, index_version_id)
 
@@ -214,14 +219,14 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
 
         result.scalars.return_value.all.return_value = []
         with self.assertRaises(ActiveIndexNotFoundError):
-            await self.store.get_active_index_version_id()
+            await self.reader.get_active_index_version_id()
 
         result.scalars.return_value.all.return_value = [
             self.active_index,
             SimpleNamespace(id=8),
         ]
         with self.assertRaisesRegex(RuntimeError, "둘 이상"):
-            await self.store.get_active_index_version_id()
+            await self.reader.get_active_index_version_id()
 
     async def test_builds_new_erd_cosine_similarity_query(self) -> None:
         result = Mock()
@@ -229,11 +234,11 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
         self.session.execute.return_value = result
 
         with patch.object(
-            self.store,
+            self.reader,
             "_get_active_index_version",
             new=AsyncMock(return_value=self.active_index),
         ):
-            await self.store.similarity_search(self.embedding, top_k=3)
+            await self.reader.similarity_search(self.embedding, top_k=3)
 
         statement = self.session.execute.await_args.args[0]
         compiled = statement.compile(dialect=postgresql.dialect())
@@ -256,11 +261,11 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
         self.session.execute.return_value = result
 
         with patch.object(
-            self.store,
+            self.reader,
             "_get_active_index_version",
             new=AsyncMock(return_value=self.active_index),
         ):
-            chunks = await self.store.load_active_chunks()
+            chunks = await self.reader.load_active_chunks()
 
         self.assertEqual([self._runtime_chunk()], chunks)
         statement = self.session.execute.await_args.args[0]
@@ -277,11 +282,11 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
         self.session.execute.return_value = result
 
         with patch.object(
-            self.store,
+            self.reader,
             "_get_active_index_version",
             new=AsyncMock(return_value=self.active_index),
         ):
-            results = await self.store.similarity_search(self.embedding)
+            results = await self.reader.similarity_search(self.embedding)
 
         restored_chunk, score = results[0]
         self.assertEqual(self._runtime_chunk(), restored_chunk)
@@ -292,9 +297,9 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_validates_similarity_search_input(self) -> None:
         with self.assertRaisesRegex(ValueError, "top_k"):
-            await self.store.similarity_search(self.embedding, top_k=0)
+            await self.reader.similarity_search(self.embedding, top_k=0)
         with self.assertRaisesRegex(ValueError, "1536차원"):
-            await self.store.similarity_search([0.1])
+            await self.reader.similarity_search([0.1])
 
         self.session.execute.assert_not_awaited()
 

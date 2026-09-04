@@ -20,7 +20,7 @@ from app.retrieval.bm25_retriever import BM25Retriever
 from app.retrieval.embedding import OpenAIEmbedder
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import HybridRetrievalResult
-from app.retrieval.pgvector_store import PgVectorStore
+from app.retrieval.search_reader import SearchReader
 from app.retrieval.vector_retriever import VectorRetriever
 
 
@@ -60,7 +60,7 @@ def print_generation_result(
 async def run(question: str) -> None:
     try:
         async with get_session_factory()() as session:
-            store = PgVectorStore(session)
+            store = SearchReader(session)
             bm25_retriever = BM25Retriever(await store.load_active_chunks())
             vector_retriever = VectorRetriever(
                 OpenAIEmbedder(),

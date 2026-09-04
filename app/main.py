@@ -39,7 +39,7 @@ from app.chat.query_rewrite import QueryRewriteService
 from app.chat.rag_run_view import RagRunResultNotFoundError
 from app.answering.generator import OpenAIGenerator
 from app.retrieval.embedding import OpenAIEmbedder
-from app.retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
+from app.retrieval.search_reader import ActiveIndexNotFoundError, SearchReader
 
 
 logger = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ async def _load_corpus_if_available(corpus_state: CorpusState) -> None:
 
     try:
         async with get_session_factory()() as session:
-            chunks = await PgVectorStore(session).load_active_chunks()
+            chunks = await SearchReader(session).load_active_chunks()
         snapshot = corpus_state.replace(chunks)
     except (ActiveIndexNotFoundError, ValueError) as exc:
         logger.warning("corpus 미적재 상태로 기동합니다: %s", exc)

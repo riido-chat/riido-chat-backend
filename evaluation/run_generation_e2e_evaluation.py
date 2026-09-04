@@ -33,7 +33,7 @@ from app.retrieval.bm25_retriever import BM25Retriever
 from app.retrieval.embedding import OPENAI_EMBEDDING_MODEL, OpenAIEmbedder
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import HybridRetrievalResult
-from app.retrieval.pgvector_store import PgVectorStore
+from app.retrieval.search_reader import SearchReader
 from app.retrieval.vector_retriever import VectorRetriever
 
 
@@ -253,7 +253,7 @@ async def run_evaluation() -> Path:
 
     try:
         async with get_session_factory()() as session:
-            store = PgVectorStore(session)
+            store = SearchReader(session)
             active_chunks = await store.load_active_chunks()
             active_index_id = await store.get_active_index_version_id()
             active_index = await session.get(IndexVersion, active_index_id)

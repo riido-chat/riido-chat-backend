@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.session import get_db_session
 from app.retrieval.corpus_state import CorpusSnapshot, CorpusState
 from app.chat.dependencies import get_corpus_state
-from app.retrieval.pgvector_store import ActiveIndexNotFoundError, PgVectorStore
+from app.retrieval.search_reader import ActiveIndexNotFoundError, SearchReader
 
 
 router = APIRouter(prefix="/internal", tags=["internal"])
@@ -53,7 +53,7 @@ async def reload_corpus(
     """ACTIVE index의 Chunk로 BM25 인덱스를 교체한다."""
 
     try:
-        chunks = await PgVectorStore(session).load_active_chunks()
+        chunks = await SearchReader(session).load_active_chunks()
         snapshot = corpus_state.replace(chunks)
     except (ActiveIndexNotFoundError, ValueError) as exc:
         raise HTTPException(
