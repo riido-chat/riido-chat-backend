@@ -1,6 +1,6 @@
 """ACTIVE 색인에서 검색에 필요한 Chunk를 읽는다."""
 
-from typing import List, Sequence
+from typing import List, Optional, Sequence
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -178,7 +178,7 @@ class SearchReader:
         content_node: ContentNode,
         document_version: DocumentVersion,
         document_source: DocumentSource,
-        index_version_id: int,
+        index_version_id: Optional[int],
     ) -> RetrievalChunk:
         metadata = content_node.metadata_ or {}
         document_id = metadata.get("document_id")

@@ -166,8 +166,12 @@ async def run_reindex(
         await session.commit()
 
         failed_stage = "VALIDATING"
-        index_version = await writer.activate_index(index_run_id)
-        failed_stage = "ACTIVATING"
+        await writer.mark_index_ready(index_run_id)
+        await session.commit()
+
+        failed_stage = "APPLYING"
+        index_version = await writer.apply_index(index_run_id)
+        await writer.finish_apply_run(index_run_id)
         await session.commit()
         return ReindexResult(
             index_version=index_version,
