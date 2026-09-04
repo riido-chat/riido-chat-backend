@@ -20,7 +20,7 @@ from openai import APITimeoutError
 from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
-from app.api.chat_schema import ChatCompletedResponse, ChatErrorResponse
+from app.chat.schema import ChatCompletedResponse, ChatErrorResponse
 from app.core.config import get_settings
 from app.database.models import (
     AnswerStatus,
@@ -45,9 +45,9 @@ from app.database.models import (
     RagRun,
     RetrieverType,
 )
-from app.rag.chat_service import ChatService
-from app.rag.generation_service import GenerationService
-from app.rag.log_store import (
+from app.chat.service import ChatService
+from app.answering.service import GenerationService
+from app.chat.log_store import (
     CitationLog,
     CONVERSATION_EXPIRE_AFTER,
     ConversationBusyError,
@@ -57,8 +57,8 @@ from app.rag.log_store import (
     RagRunNotFoundError,
     RetrievalCandidateLog,
 )
-from app.rag.model_trace import ModelCallTrace
-from app.rag.query_rewrite import (
+from app.core.model_trace import ModelCallTrace
+from app.chat.query_rewrite import (
     QUERY_REWRITE_PROMPT_VERSION,
     QueryResolution,
     QueryRewriteCall,
@@ -66,13 +66,13 @@ from app.rag.query_rewrite import (
     QueryRewriteService,
     QueryRewriteTurnStatus,
 )
-from generation.models import (
+from app.answering.models import (
     Citation,
     FinalAnswerStatus,
     FinalGenerationResult,
 )
-from retrieval.hybrid_retriever import HybridRetriever
-from retrieval.models import (
+from app.retrieval.hybrid_retriever import HybridRetriever
+from app.retrieval.models import (
     HybridRetrievalResult,
     HybridSearchCall,
     RetrievalChunk,

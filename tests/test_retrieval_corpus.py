@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from retrieval.corpus import build_retrieval_chunks
+from app.retrieval.corpus import build_retrieval_chunks
 
 
 class RetrievalCorpusTest(unittest.TestCase):

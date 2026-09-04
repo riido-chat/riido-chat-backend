@@ -17,7 +17,7 @@ from typing import Optional, Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-from app.admin.document_key import (
+from app.document.document_key import (
     DEFAULT_DOCUMENT_GROUP_CONSUMER_KEY,
     DEFAULT_DOCUMENT_GROUP_KEY,
     DEFAULT_DOCUMENT_GROUP_NAME,

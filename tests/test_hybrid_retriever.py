@@ -1,17 +1,17 @@
 import unittest
 from unittest.mock import AsyncMock, Mock
 
-from retrieval.bm25_retriever import BM25Retriever
-from retrieval.hybrid_retriever import (
+from app.retrieval.bm25_retriever import BM25Retriever
+from app.retrieval.hybrid_retriever import (
     CANDIDATE_K,
     DEFAULT_FINAL_TOP_K,
     RRF_RANK_CONSTANT,
     HybridRetriever,
     fuse_rrf_results,
 )
-from app.rag.model_trace import ModelCallTrace
-from retrieval.models import RetrievalChunk, RetrievalResult, VectorSearchCall
-from retrieval.vector_retriever import VectorRetriever
+from app.core.model_trace import ModelCallTrace
+from app.retrieval.models import RetrievalChunk, RetrievalResult, VectorSearchCall
+from app.retrieval.vector_retriever import VectorRetriever
 
 
 class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):

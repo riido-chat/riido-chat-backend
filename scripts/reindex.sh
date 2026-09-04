@@ -41,16 +41,16 @@ rm -rf "$STAGING_DIR"
 mkdir -p "$STAGING_DIR"
 
 log "1/5 문서 목록 수집"
-run_stage pipeline.collect.list_urls
+run_stage app.document.gitbook.list_urls
 
 log "2/5 원문 수집 (39건, 1초 간격)"
-run_stage pipeline.collect.fetch_pages
+run_stage app.document.gitbook.fetch_pages
 
 log "3/5 정제"
-run_stage pipeline.preprocess.clean
+run_stage app.document.clean
 
 log "4/5 벡터 색인"
-run_stage retrieval.index_vector_corpus
+run_stage app.indexing.index_vector_corpus
 
 # 앱 컨테이너의 볼륨 마운트는 시작 시점의 디렉터리를 붙들고 있다.
 # 디렉터리를 통째로 교체하면 컨테이너가 옛 디렉터리를 계속 보게 되므로 내용만 바꾼다.

@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.models import Feedback, FeedbackRating
 from app.database.session import get_db_session
 from app.main import create_app
-from app.rag.dependencies import get_rag_log_store
-from app.rag.log_store import (
+from app.chat.dependencies import get_rag_log_store
+from app.chat.log_store import (
     FeedbackNotAllowedError,
     RagLogStore,
     RagRunNotFoundError,

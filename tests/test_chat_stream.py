@@ -15,13 +15,13 @@ from unittest.mock import AsyncMock, patch
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.chat_schema import (
+from app.chat.schema import (
     ChatAnswer,
     ChatCitation,
     ChatCompletedResponse,
     ChatResponseStatus,
 )
-from app.api.chat_stream import (
+from app.chat.stream import (
     ErrorEvent,
     ResultEvent,
     RunEvent,
@@ -33,15 +33,15 @@ from app.api.chat_stream import (
 )
 from app.database.models import ConversationStatus
 from app.main import _drain_pipeline_tasks
-from app.rag.chat_service import ChatService
-from app.rag.generation_service import GenerationService
-from app.rag.query_rewrite import QueryRewriteService
-from app.rag.log_store import RagLogStore
-from app.rag.model_trace import ModelCallTrace
-from app.rag.progress import ProgressStage
-from retrieval.hybrid_retriever import HybridRetriever
-from retrieval.models import HybridSearchCall
-from generation.models import (
+from app.chat.service import ChatService
+from app.answering.service import GenerationService
+from app.chat.query_rewrite import QueryRewriteService
+from app.chat.log_store import RagLogStore
+from app.core.model_trace import ModelCallTrace
+from app.chat.progress import ProgressStage
+from app.retrieval.hybrid_retriever import HybridRetriever
+from app.retrieval.models import HybridSearchCall
+from app.answering.models import (
     Citation,
     FinalAnswerStatus,
     FinalGenerationResult,
@@ -88,7 +88,7 @@ class ProduceTurnTest(unittest.IsolatedAsyncioTestCase):
         async def scope(*_args, **_kwargs):
             yield self.service
 
-        patcher = patch("app.api.chat_stream._chat_service_scope", scope)
+        patcher = patch("app.chat.stream._chat_service_scope", scope)
         patcher.start()
         self.addCleanup(patcher.stop)
 

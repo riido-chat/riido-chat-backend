@@ -6,11 +6,11 @@ import json
 import unittest
 from pathlib import Path
 
-from pipeline.document.chunker import create_chunks
-from pipeline.document.loader import load_normalized_documents
-from pipeline.document.section_parser import parse_sections
-from retrieval.bm25_retriever import BM25Retriever
-from retrieval.models import RetrievalChunk
+from app.document.chunker import create_chunks
+from app.document.loader import load_normalized_documents
+from app.document.section_parser import parse_sections
+from app.retrieval.bm25_retriever import BM25Retriever
+from app.retrieval.models import RetrievalChunk
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]

@@ -22,14 +22,14 @@ from app.database.models import (
     IndexVersion,
     IndexVersionStatus,
 )
-from pipeline.document.models import NormalizedDocument
-from pipeline.document.section_parser import create_section_identity_hash
-from retrieval.bm25_retriever import BM25Retriever
-from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS, EmbeddingResponse
-from retrieval.hybrid_retriever import HybridRetriever
-from retrieval.models import RetrievalChunk
-from retrieval.pgvector_store import PgVectorStore
-from retrieval.vector_retriever import (
+from app.document.models import NormalizedDocument
+from app.document.section_parser import create_section_identity_hash
+from app.retrieval.bm25_retriever import BM25Retriever
+from app.retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS, EmbeddingResponse
+from app.retrieval.hybrid_retriever import HybridRetriever
+from app.retrieval.models import RetrievalChunk
+from app.retrieval.pgvector_store import PgVectorStore
+from app.retrieval.vector_retriever import (
     QUERY_EMBEDDING_TIMEOUT_SECONDS,
     VectorRetriever,
 )

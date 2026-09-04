@@ -23,10 +23,10 @@ from evaluation.run_bm25_evaluation import (
     DEFAULT_QUESTIONS_PATH,
     load_questions,
 )
-from retrieval.embedding import OpenAIEmbedder
-from retrieval.models import RetrievalResult
-from retrieval.pgvector_store import PgVectorStore
-from retrieval.vector_retriever import VectorRetriever
+from app.retrieval.embedding import OpenAIEmbedder
+from app.retrieval.models import RetrievalResult
+from app.retrieval.pgvector_store import PgVectorStore
+from app.retrieval.vector_retriever import VectorRetriever
 
 
 DEFAULT_CANDIDATES_PATH = (

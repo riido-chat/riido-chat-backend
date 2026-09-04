@@ -17,24 +17,24 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from app.database.models import IndexVersion
 from app.database.session import dispose_engine, get_session_factory
-from app.rag.generation_service import GenerationService
+from app.answering.service import GenerationService
 from evaluation.evaluate_retrieval import DEFAULT_GROUND_TRUTH_PATH
 from evaluation.run_bm25_evaluation import (
     DEFAULT_QUESTIONS_PATH,
     load_questions,
 )
-from generation.generator import (
+from app.answering.generator import (
     GENERATION_PROMPT_VERSION,
     OPENAI_GENERATION_MODEL,
     OpenAIGenerator,
 )
-from generation.models import FinalGenerationResult
-from retrieval.bm25_retriever import BM25Retriever
-from retrieval.embedding import OPENAI_EMBEDDING_MODEL, OpenAIEmbedder
-from retrieval.hybrid_retriever import HybridRetriever
-from retrieval.models import HybridRetrievalResult
-from retrieval.pgvector_store import PgVectorStore
-from retrieval.vector_retriever import VectorRetriever
+from app.answering.models import FinalGenerationResult
+from app.retrieval.bm25_retriever import BM25Retriever
+from app.retrieval.embedding import OPENAI_EMBEDDING_MODEL, OpenAIEmbedder
+from app.retrieval.hybrid_retriever import HybridRetriever
+from app.retrieval.models import HybridRetrievalResult
+from app.retrieval.pgvector_store import PgVectorStore
+from app.retrieval.vector_retriever import VectorRetriever
 
 
 DEFAULT_OUTPUT_PATH = PROJECT_ROOT / "evaluation/generation_e2e_results.json"

@@ -1,8 +1,8 @@
 import unittest
 
-from pipeline.document.models import Chunk, NormalizedDocument
-from retrieval.bm25_retriever import BM25Retriever
-from retrieval.models import RetrievalChunk
+from app.document.models import Chunk, NormalizedDocument
+from app.retrieval.bm25_retriever import BM25Retriever
+from app.retrieval.models import RetrievalChunk
 
 
 class BM25RetrieverTest(unittest.TestCase):

@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.admin.dependencies import get_admin_ingestion_service
-from app.admin.ingestion_service import (
+from app.document.ingestion_service import (
     AcceptedIngestion,
     AdminIngestionService,
     DocumentAlreadyExistsError,
@@ -44,7 +44,7 @@ class AdminDocumentApiTest(unittest.TestCase):
         )
 
         with patch(
-            "app.api.admin_documents.run_admin_ingestion",
+            "app.admin.router.run_admin_ingestion",
             new=AsyncMock(),
         ) as run:
             response = self._upload(
@@ -79,7 +79,7 @@ class AdminDocumentApiTest(unittest.TestCase):
         )
 
         with patch(
-            "app.api.admin_documents.run_admin_ingestion",
+            "app.admin.router.run_admin_ingestion",
             new=AsyncMock(),
         ):
             response = self.client.post(

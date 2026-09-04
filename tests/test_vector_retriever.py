@@ -4,16 +4,16 @@ from unittest.mock import AsyncMock, Mock, call, patch
 import httpx
 from openai import APIConnectionError
 
-from retrieval.embedding import (
+from app.retrieval.embedding import (
     OPENAI_EMBEDDING_DIMENSIONS,
     OPENAI_EMBEDDING_MODEL,
     OPENAI_EMBEDDING_PROVIDER,
     EmbeddingResponse,
     OpenAIEmbedder,
 )
-from retrieval.models import RetrievalChunk, RetrievalResult
-from retrieval.pgvector_store import PgVectorStore
-from retrieval.vector_retriever import (
+from app.retrieval.models import RetrievalChunk, RetrievalResult
+from app.retrieval.pgvector_store import PgVectorStore
+from app.retrieval.vector_retriever import (
     QUERY_EMBEDDING_TIMEOUT_SECONDS,
     VectorRetriever,
 )
@@ -197,7 +197,7 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         self.store.similarity_search.return_value = [(self.chunks[0], 0.9)]
 
         with patch(
-            "retrieval.vector_retriever.asyncio.sleep",
+            "app.retrieval.vector_retriever.asyncio.sleep",
             new_callable=AsyncMock,
         ) as sleep:
             result = await self.retriever.search_with_trace("질문")
@@ -217,10 +217,10 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
         ]
 
         with patch(
-            "retrieval.vector_retriever.asyncio.sleep",
+            "app.retrieval.vector_retriever.asyncio.sleep",
             new_callable=AsyncMock,
         ), patch(
-            "retrieval.vector_retriever.time.perf_counter",
+            "app.retrieval.vector_retriever.time.perf_counter",
             side_effect=[10.0, 13.0, 13.0],
         ):
             result = await self.retriever.search_with_trace("질문")

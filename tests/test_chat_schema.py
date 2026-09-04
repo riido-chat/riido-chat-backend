@@ -3,7 +3,7 @@ import uuid
 
 from pydantic import TypeAdapter, ValidationError
 
-from app.api.chat_schema import (
+from app.chat.schema import (
     ChatAnswer,
     ChatCitation,
     ChatCompletedResponse,
@@ -18,7 +18,7 @@ from app.api.chat_schema import (
     ChatWithheldResponse,
     MAX_QUESTION_LENGTH,
 )
-from generation.models import FinalGenerationResult
+from app.answering.models import FinalGenerationResult
 
 
 class ChatRequestTest(unittest.TestCase):

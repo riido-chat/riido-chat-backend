@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.api.chat_schema import (
+from app.chat.schema import (
     ChatAnswer,
     ChatCitation,
     ChatCompletedResponse,
@@ -26,13 +26,13 @@ from app.database.models import (
     RetrieverType,
 )
 from app.main import create_app
-from app.rag.dependencies import get_rag_log_store
-from app.rag.generation_service import WITHHELD_RESPONSES
-from app.rag.log_store import RagLogStore, RagRunDetail
-from generation.models import FinalWithheldReason
+from app.chat.dependencies import get_rag_log_store
+from app.answering.service import WITHHELD_RESPONSES
+from app.chat.log_store import RagLogStore, RagRunDetail
+from app.answering.models import FinalWithheldReason
 
 
-VIEW_LOGGER = "app.rag.rag_run_view"
+VIEW_LOGGER = "app.chat.rag_run_view"
 
 ANSWER_MARKDOWN = "멤버를 초대할 수 있습니다. [1]"
 DOCUMENT_TITLE = "멤버 관리"

@@ -15,7 +15,7 @@ from app.database.models import (
     ModelCallPurpose,
     RagRun,
 )
-from app.rag.log_store import (
+from app.chat.log_store import (
     FeedbackNotAllowedError,
     RagLogStore,
     RagRunNotFoundError,

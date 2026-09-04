@@ -7,14 +7,14 @@ from unittest.mock import AsyncMock, Mock, patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.api.chat_schema import ChatErrorCode, ChatResponseStatus
+from app.chat.schema import ChatErrorCode, ChatResponseStatus
 from app.main import create_app
-from app.rag.corpus_state import (
+from app.retrieval.corpus_state import (
     CorpusNotLoadedError,
     CorpusSnapshot,
     CorpusState,
 )
-from retrieval.pgvector_store import ActiveIndexNotFoundError
+from app.retrieval.pgvector_store import ActiveIndexNotFoundError
 
 
 @asynccontextmanager

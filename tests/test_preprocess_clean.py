@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from pipeline.preprocess import clean
+from app.document import clean
 
 
 class CleanManifestTest(unittest.TestCase):

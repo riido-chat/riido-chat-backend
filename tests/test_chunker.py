@@ -1,7 +1,7 @@
 import unittest
 
-from pipeline.document.chunker import create_chunks
-from pipeline.document.models import Section, Subsection
+from app.document.chunker import create_chunks
+from app.document.models import Section, Subsection
 
 
 class ChunkerTest(unittest.TestCase):

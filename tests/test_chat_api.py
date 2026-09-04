@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 
-from app.api.chat_schema import (
+from app.chat.schema import (
     ChatAnswer,
     ChatCitation,
     ChatCompletedResponse,
@@ -20,16 +20,16 @@ from app.api.chat_schema import (
     ChatWithheldReasonCode,
     ChatWithheldResponse,
 )
-from app.api.chat import _answer_until_disconnect
+from app.chat.router import _answer_until_disconnect
 from app.main import create_app
-from app.rag.chat_service import (
+from app.chat.service import (
     ChatService,
     ConversationNotFoundError,
     chat_error_response,
 )
-from app.rag.corpus_state import CorpusNotLoadedError
-from app.rag.dependencies import get_chat_service
-from app.rag.log_store import ConversationBusyError
+from app.retrieval.corpus_state import CorpusNotLoadedError
+from app.chat.dependencies import get_chat_service
+from app.chat.log_store import ConversationBusyError
 
 
 CONVERSATION_ID = "8f4b2c1a-9d3e-4f7a-b6c5-2e8d9a0f1b3c"

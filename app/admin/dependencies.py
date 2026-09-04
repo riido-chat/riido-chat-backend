@@ -3,7 +3,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.admin.ingestion_service import AdminIngestionService
+from app.document.ingestion_service import AdminIngestionService
 from app.database.session import get_db_session
 
 

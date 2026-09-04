@@ -8,7 +8,7 @@ import httpx
 from openai import APITimeoutError
 from pydantic import ValidationError
 
-from generation.generator import (
+from app.answering.generator import (
     ANSWER_PROMPT_V6,
     GENERATION_PROMPT_VERSION,
     MAX_CONTEXT_SOURCES,
@@ -22,7 +22,7 @@ from generation.generator import (
     count_distinct_citations,
     select_required_sources,
 )
-from generation.models import (
+from app.answering.models import (
     GenerationAnswerScope,
     GenerationEvidenceRequirement,
     GenerationResult,
@@ -30,7 +30,7 @@ from generation.models import (
     GenerationStatus,
     GenerationWithheldReason,
 )
-from retrieval.models import HybridRetrievalResult, RetrievalChunk
+from app.retrieval.models import HybridRetrievalResult, RetrievalChunk
 
 
 class GenerationResultTest(unittest.TestCase):
@@ -542,16 +542,16 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
 
     def test_requires_api_key_and_configures_client_retry_and_timeout(self) -> None:
         with patch(
-            "generation.generator.get_settings",
+            "app.answering.generator.get_settings",
             return_value=SimpleNamespace(openai_api_key=None),
         ):
             with self.assertRaisesRegex(ValueError, "OPENAI_API_KEY"):
                 OpenAIGenerator()
 
         with patch(
-            "generation.generator.get_settings",
+            "app.answering.generator.get_settings",
             return_value=SimpleNamespace(openai_api_key="test-key"),
-        ), patch("generation.generator.AsyncOpenAI") as client_class:
+        ), patch("app.answering.generator.AsyncOpenAI") as client_class:
             OpenAIGenerator()
 
         client_class.assert_called_once_with(
