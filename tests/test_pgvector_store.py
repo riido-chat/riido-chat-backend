@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.admin.document_key import SOURCE_TYPE_GITBOOK
 from app.database.models import (
     ContentNode,
     DocumentChunk,
@@ -321,7 +322,9 @@ class PgVectorStoreTest(unittest.IsolatedAsyncioTestCase):
         document_version = DocumentVersion(id=201, document_source_id=301)
         document_source = DocumentSource(
             id=301,
-            source_type="GITBOOK_MARKDOWN",
+            document_group_id=1,
+            document_key="document",
+            source_type=SOURCE_TYPE_GITBOOK,
             canonical_uri="https://docs.riido.io/document.md",
             title="문서 제목",
             metadata_={"document_id": "document-id", "category": "guide"},

@@ -11,11 +11,17 @@ from typing import DefaultDict, List, Optional, Sequence, Tuple
 from sqlalchemy import and_, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.admin.document_key import (
+    DEFAULT_DOCUMENT_GROUP_KEY,
+    SOURCE_TYPE_GITBOOK,
+    build_gitbook_document_key,
+)
 from app.database.models import (
     ChunkEmbedding,
     ChunkingConfig,
     ContentNode,
     DocumentChunk,
+    DocumentGroup,
     DocumentSource,
     DocumentVersion,
     DocumentVersionStatus,
@@ -23,7 +29,9 @@ from app.database.models import (
     ExecutionStatus,
     IngestionRun,
     IndexDocument,
+    IndexOperationType,
     IndexRun,
+    IndexRunStage,
     IndexVersion,
     IndexVersionStatus,
 )
@@ -204,9 +212,11 @@ class PgVectorStore:
             raise ValueError("trigger_type은 비어 있을 수 없습니다.")
 
         now = datetime.now(timezone.utc)
+        group = await self._get_document_group()
         chunking_config = await self._get_or_create_chunking_config(now)
         embedding_config = await self._get_or_create_embedding_config(now)
         index_version = IndexVersion(
+            document_group_id=group.id,
             version=self._new_index_version_name(now),
             status=IndexVersionStatus.BUILDING,
             chunking_config_id=chunking_config.id,
@@ -233,6 +243,8 @@ class PgVectorStore:
         run = IndexRun(
             index_version_id=index_version.id,
             trigger_type=trigger_type,
+            operation_type=IndexOperationType.BUILD_AND_APPLY,
+            stage=IndexRunStage.BUILDING,
             actor_id=actor_id,
             status=ExecutionStatus.PROCESSING,
             summary={
@@ -335,6 +347,7 @@ class PgVectorStore:
             update(IndexVersion)
             .where(
                 IndexVersion.status == IndexVersionStatus.ACTIVE,
+                IndexVersion.document_group_id == index_version.document_group_id,
                 IndexVersion.id != index_version.id,
             )
             .values(status=IndexVersionStatus.INACTIVE)
@@ -676,14 +689,31 @@ class PgVectorStore:
         await self._session.flush()
         return persisted_chunks
 
+    async def _get_document_group(self) -> DocumentGroup:
+        """1차 문서 그룹을 조회한다. migration 20260904_06이 seed한다."""
+
+        group = await self._session.scalar(
+            select(DocumentGroup).where(
+                DocumentGroup.group_key == DEFAULT_DOCUMENT_GROUP_KEY
+            )
+        )
+        if group is None:
+            raise ValueError(
+                f"문서 그룹을 찾을 수 없습니다: {DEFAULT_DOCUMENT_GROUP_KEY}"
+            )
+        return group
+
     async def _get_or_create_document_source(
         self,
         document: NormalizedDocument,
         now: datetime,
     ) -> DocumentSource:
+        group = await self._get_document_group()
+        document_key = build_gitbook_document_key(document.source_url)
         source = await self._session.scalar(
             select(DocumentSource).where(
-                DocumentSource.canonical_uri == document.source_url
+                DocumentSource.document_group_id == group.id,
+                DocumentSource.document_key == document_key,
             )
         )
         source_metadata = {
@@ -692,7 +722,9 @@ class PgVectorStore:
         }
         if source is None:
             source = DocumentSource(
-                source_type="GITBOOK_MARKDOWN",
+                document_group_id=group.id,
+                document_key=document_key,
+                source_type=SOURCE_TYPE_GITBOOK,
                 canonical_uri=document.source_url,
                 title=document.title,
                 metadata_=source_metadata,
@@ -704,6 +736,7 @@ class PgVectorStore:
             await self._session.flush()
             return source
 
+        source.canonical_uri = document.source_url
         source.title = document.title
         source.metadata_ = source_metadata
         source.enabled = True

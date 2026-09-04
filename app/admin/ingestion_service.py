@@ -13,7 +13,14 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.admin.document_key import (
+    DEFAULT_DOCUMENT_GROUP_KEY,
+    SOURCE_TYPE_UPLOAD,
+    build_console_canonical_uri,
+    build_upload_document_key,
+)
 from app.database.models import (
+    DocumentGroup,
     DocumentSource,
     DocumentVersion,
     ExecutionStatus,
@@ -31,9 +38,9 @@ from retrieval.pgvector_store import PARSER_NAME, PARSER_VERSION, PgVectorStore
 logger = logging.getLogger(__name__)
 
 ADMIN_JOB_LOCK_KEY = 0x524949444F
-ADMIN_SOURCE_TYPE = "ADMIN_MARKDOWN"
+ADMIN_SOURCE_TYPE = SOURCE_TYPE_UPLOAD
 ADMIN_TRIGGER_TYPE = "ADMIN_UPLOAD"
-DOCUMENT_SOURCE_URI_CONSTRAINT = "uq_document_sources_canonical_uri"
+DOCUMENT_SOURCE_KEY_CONSTRAINT = "uq_document_sources_document_group_id_document_key"
 
 INVALID_FILE = "INVALID_FILE"
 FILE_TOO_LARGE = "FILE_TOO_LARGE"
@@ -71,7 +78,7 @@ class DocumentAlreadyExistsError(AdminApiError):
     def __init__(self) -> None:
         super().__init__(
             DOCUMENT_ALREADY_EXISTS,
-            "같은 원문 URL의 문서가 이미 존재합니다.",
+            "같은 문서명의 문서가 이미 존재합니다.",
             HTTPStatus.CONFLICT,
         )
 
@@ -129,18 +136,21 @@ class AdminIngestionService:
         self,
         *,
         title: str,
-        source_url: str,
+        source_url: Optional[str] = None,
         category: Optional[str],
         filename: str,
     ) -> AcceptedIngestion:
-        """전역 작업 gate 안에서 Source와 PROCESSING 실행을 확정한다."""
+        """전역 작업 gate 안에서 Source와 PROCESSING 실행을 확정한다.
+
+        문서는 (문서 그룹, document_key)로 식별하므로 요청의 source_url은
+        받기만 하고 사용하지 않는다. 입력 필드 제거는 후속 계약 변경에서 한다.
+        """
 
         try:
             await self._acquire_admin_job_gate()
             await self._ensure_no_processing_job()
             source = await self._find_or_create_new_source(
                 title=title,
-                source_url=source_url,
                 category=category,
             )
             now = datetime.now(timezone.utc)
@@ -163,7 +173,7 @@ class AdminIngestionService:
             return result
         except IntegrityError as error:
             await self._session.rollback()
-            if self._constraint_name(error) == DOCUMENT_SOURCE_URI_CONSTRAINT:
+            if self._constraint_name(error) == DOCUMENT_SOURCE_KEY_CONSTRAINT:
                 raise DocumentAlreadyExistsError() from error
             raise
         except Exception:
@@ -220,23 +230,44 @@ class AdminIngestionService:
         if ingestion_run_id is not None or index_run_id is not None:
             raise AdminJobInProgressError()
 
+    async def _get_document_group(self) -> DocumentGroup:
+        """1차 문서 그룹을 조회한다. migration 20260904_06이 seed한다."""
+
+        group = await self._session.scalar(
+            select(DocumentGroup).where(
+                DocumentGroup.group_key == DEFAULT_DOCUMENT_GROUP_KEY
+            )
+        )
+        if group is None:
+            raise RuntimeError(
+                f"문서 그룹을 찾을 수 없습니다: {DEFAULT_DOCUMENT_GROUP_KEY}"
+            )
+        return group
+
     async def _find_or_create_new_source(
         self,
         *,
         title: str,
-        source_url: str,
         category: Optional[str],
     ) -> DocumentSource:
+        group = await self._get_document_group()
+        document_key = build_upload_document_key(title)
         source = await self._session.scalar(
             select(DocumentSource).where(
-                DocumentSource.canonical_uri == source_url
+                DocumentSource.document_group_id == group.id,
+                DocumentSource.document_key == document_key,
             )
         )
         if source is None:
             now = datetime.now(timezone.utc)
             source = DocumentSource(
+                document_group_id=group.id,
+                document_key=document_key,
                 source_type=ADMIN_SOURCE_TYPE,
-                canonical_uri=source_url,
+                canonical_uri=build_console_canonical_uri(
+                    group.group_key,
+                    document_key,
+                ),
                 title=title,
                 metadata_={
                     "document_id": f"admin-{uuid.uuid4().hex}",

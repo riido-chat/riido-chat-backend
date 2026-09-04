@@ -14,9 +14,16 @@ from app.admin.ingestion_service import (
     DocumentAlreadyExistsError,
     run_admin_ingestion,
 )
+from app.admin.document_key import (
+    DEFAULT_DOCUMENT_GROUP_KEY,
+    SOURCE_TYPE_UPLOAD,
+    build_console_canonical_uri,
+    build_upload_document_key,
+)
 from app.core.config import get_settings
 from app.database.models import (
     ContentNode,
+    DocumentGroup,
     DocumentChunk,
     DocumentSource,
     DocumentVersion,
@@ -56,14 +63,21 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
             self.engine,
             expire_on_commit=False,
         )
-        self.source_urls: list[str] = []
+        self.titles: list[str] = []
 
     async def asyncTearDown(self) -> None:
         async with self.session_factory() as session:
-            for source_url in self.source_urls:
+            group_id = await session.scalar(
+                select(DocumentGroup.id).where(
+                    DocumentGroup.group_key == DEFAULT_DOCUMENT_GROUP_KEY
+                )
+            )
+            for title in self.titles:
                 source = await session.scalar(
                     select(DocumentSource).where(
-                        DocumentSource.canonical_uri == source_url
+                        DocumentSource.document_group_id == group_id,
+                        DocumentSource.document_key
+                        == build_upload_document_key(title),
                     )
                 )
                 if source is None:
@@ -85,11 +99,11 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         await dispose_engine()
 
     async def test_upload_persists_ready_version_and_keeps_active_index(self) -> None:
-        source_url = self._new_source_url()
+        title = self._new_title()
         raw_content = "# 새 문서\n\n## 이용 방법\n\n관리자 업로드 본문\n"
         active_before = await self._active_index_ids()
 
-        accepted = await self._start(source_url)
+        accepted = await self._start(title)
         await run_admin_ingestion(accepted.ingestion_run_id, raw_content)
 
         async with self.session_factory() as session:
@@ -117,7 +131,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(active_before, await self._active_index_ids())
 
     async def test_http_upload_and_polling_complete_end_to_end(self) -> None:
-        source_url = self._new_source_url()
+        title = self._new_title()
         raw_content = "# API 업로드\n\n## 이용 방법\n\n실제 multipart 본문\n"
         active_before = await self._active_index_ids()
         app = create_app()
@@ -128,11 +142,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         ) as client:
             accepted_response = await client.post(
                 "/api/admin/documents",
-                data={
-                    "title": "API 종단 테스트",
-                    "sourceUrl": source_url,
-                    "category": "test",
-                },
+                data={"title": title, "category": "test"},
                 files={
                     "file": (
                         "api-smoke.md",
@@ -168,9 +178,28 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(raw_content, version.raw_content)
         self.assertEqual(active_before, await self._active_index_ids())
 
+    async def test_upload_source_uses_document_key_and_console_uri(self) -> None:
+        title = self._new_title()
+        accepted = await self._start(title)
+        await run_admin_ingestion(
+            accepted.ingestion_run_id,
+            "# 문서\n\n## 본문\n\n키 확인\n",
+        )
+
+        document_key = build_upload_document_key(title)
+        async with self.session_factory() as session:
+            source = await session.get(DocumentSource, accepted.document_source_id)
+
+        self.assertEqual(document_key, source.document_key)
+        self.assertEqual(SOURCE_TYPE_UPLOAD, source.source_type)
+        self.assertEqual(
+            build_console_canonical_uri(DEFAULT_DOCUMENT_GROUP_KEY, document_key),
+            source.canonical_uri,
+        )
+
     async def test_failed_empty_pipeline_can_retry_same_source(self) -> None:
-        source_url = self._new_source_url()
-        first = await self._start(source_url)
+        title = self._new_title()
+        first = await self._start(title)
 
         await run_admin_ingestion(first.ingestion_run_id, "# 제목만 있는 문서\n")
 
@@ -185,7 +214,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual("INVALID_FILE", failed.summary["error_code"])
         self.assertEqual(0, version_count)
 
-        second = await self._start(source_url)
+        second = await self._start(title)
         self.assertEqual(first.document_source_id, second.document_source_id)
         self.assertNotEqual(first.ingestion_run_id, second.ingestion_run_id)
 
@@ -198,34 +227,33 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(ExecutionStatus.SUCCESS, succeeded.status)
 
     async def test_successful_source_is_rejected_as_duplicate(self) -> None:
-        source_url = self._new_source_url()
-        accepted = await self._start(source_url)
+        title = self._new_title()
+        accepted = await self._start(title)
         await run_admin_ingestion(
             accepted.ingestion_run_id,
             "# 문서\n\n## 본문\n\n성공\n",
         )
 
         with self.assertRaises(DocumentAlreadyExistsError):
-            await self._start(source_url)
+            await self._start(title)
 
     async def test_processing_run_blocks_another_admin_job(self) -> None:
-        first_url = self._new_source_url()
-        second_url = self._new_source_url()
-        first = await self._start(first_url)
+        first_title = self._new_title()
+        second_title = self._new_title()
+        first = await self._start(first_title)
 
         with self.assertRaises(AdminJobInProgressError):
-            await self._start(second_url)
+            await self._start(second_title)
 
         await run_admin_ingestion(
             first.ingestion_run_id,
             "# 문서\n\n## 본문\n\n처리 완료\n",
         )
 
-    async def _start(self, source_url: str):
+    async def _start(self, title: str):
         async with self.session_factory() as session:
             return await AdminIngestionService(session).start_new_document(
-                title="관리자 업로드 문서",
-                source_url=source_url,
+                title=title,
                 category="test",
                 filename="guide.md",
             )
@@ -242,10 +270,10 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
                 ).scalars()
             )
 
-    def _new_source_url(self) -> str:
-        source_url = f"https://docs.riido.io/admin-test-{uuid.uuid4().hex}.md"
-        self.source_urls.append(source_url)
-        return source_url
+    def _new_title(self) -> str:
+        title = f"admin-test-{uuid.uuid4().hex}"
+        self.titles.append(title)
+        return title
 
 
 if __name__ == "__main__":
