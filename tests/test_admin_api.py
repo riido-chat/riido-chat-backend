@@ -72,6 +72,30 @@ class AdminDocumentApiTest(unittest.TestCase):
             "# 문서\n\n## 안내\n\n본문",
         )
 
+    def test_accepts_upload_without_source_url(self) -> None:
+        self.service.start_new_document.return_value = AcceptedIngestion(
+            ingestion_run_id=102,
+            document_source_id=43,
+        )
+
+        with patch(
+            "app.api.admin_documents.run_admin_ingestion",
+            new=AsyncMock(),
+        ):
+            response = self.client.post(
+                "/api/admin/documents",
+                data={"title": "문서 제목", "category": "guide"},
+                files={"file": ("guide.md", b"# guide", "text/markdown")},
+            )
+
+        self.assertEqual(202, response.status_code)
+        self.service.start_new_document.assert_awaited_once_with(
+            title="문서 제목",
+            source_url=None,
+            category="guide",
+            filename="guide.md",
+        )
+
     def test_rejects_non_markdown_extension(self) -> None:
         response = self._upload("guide.html", b"<h1>guide</h1>")
 
@@ -124,7 +148,7 @@ class AdminDocumentApiTest(unittest.TestCase):
         self.assertEqual(
             {
                 "code": "DOCUMENT_ALREADY_EXISTS",
-                "message": "같은 원문 URL의 문서가 이미 존재합니다.",
+                "message": "같은 문서명의 문서가 이미 존재합니다.",
             },
             response.json(),
         )

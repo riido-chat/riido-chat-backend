@@ -30,6 +30,7 @@ from app.database.models import (
     ConversationStatus,
     ContextStrategy,
     DocumentChunk,
+    DocumentGroup,
     DocumentSource,
     DocumentVersion,
     DocumentVersionStatus,
@@ -144,7 +145,17 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
             input_template_version="v1",
             created_at=_now(),
         )
+        group = DocumentGroup(
+            group_key=f"TEST-{suffix}"[:50],
+            name="RAG 로그 테스트 그룹",
+            consumer_key="TEST",
+        )
+        self.session.add(group)
+        await self.session.flush()
+
         source = DocumentSource(
+            document_group_id=group.id,
+            document_key=f"test/{suffix}",
             source_type="LLMS_TXT",
             canonical_uri=f"https://docs.riido.io/test/{suffix}.md",
             title="테스트 문서",
@@ -193,6 +204,7 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
             created_at=_now(),
         )
         index_version = IndexVersion(
+            document_group_id=group.id,
             version=f"test-index-{suffix}",
             status=IndexVersionStatus.ACTIVE,
             chunking_config_id=chunking.id,
@@ -238,10 +250,16 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
                     input_template_version="v1",
                     created_at=_now(),
                 )
-                setup_session.add_all([chunking, embedding])
+                group = DocumentGroup(
+                    group_key=f"CHECKPOINT-{suffix}"[:50],
+                    name="checkpoint 테스트 그룹",
+                    consumer_key="TEST",
+                )
+                setup_session.add_all([chunking, embedding, group])
                 await setup_session.flush()
 
                 index_version = IndexVersion(
+                    document_group_id=group.id,
                     version=f"checkpoint-index-{suffix}",
                     status=IndexVersionStatus.INACTIVE,
                     chunking_config_id=chunking.id,
@@ -1241,10 +1259,16 @@ class RagLogStoreConcurrencyDbTest(unittest.IsolatedAsyncioTestCase):
                 input_template_version="v1",
                 created_at=_now(),
             )
-            session.add_all([chunking, embedding])
+            group = DocumentGroup(
+                group_key=f"CONCURRENCY-{suffix}"[:50],
+                name="동시성 테스트 그룹",
+                consumer_key="TEST",
+            )
+            session.add_all([chunking, embedding, group])
             await session.flush()
 
             index_version = IndexVersion(
+                document_group_id=group.id,
                 version=f"concurrency-index-{suffix}",
                 status=IndexVersionStatus.INACTIVE,
                 chunking_config_id=chunking.id,

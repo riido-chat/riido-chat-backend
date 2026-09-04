@@ -21,6 +21,7 @@ from app.database.models import (
     ContentNode,
     ContextStrategy,
     DocumentChunk,
+    DocumentGroup,
     DocumentSource,
     DocumentVersion,
     DocumentVersionStatus,
@@ -142,7 +143,17 @@ class ChatApiDbAcceptanceTest(unittest.IsolatedAsyncioTestCase):
             input_template_version="v1",
             created_at=_now(),
         )
+        group = DocumentGroup(
+            group_key=f"ACCEPTANCE-{suffix}"[:50],
+            name="인수 테스트 그룹",
+            consumer_key="TEST",
+        )
+        self.session.add(group)
+        await self.session.flush()
+
         source = DocumentSource(
+            document_group_id=group.id,
+            document_key=f"acceptance/{suffix}",
             source_type="LLMS_TXT",
             canonical_uri=f"https://docs.riido.io/acceptance/{suffix}.md",
             title="스프린트",
@@ -191,6 +202,7 @@ class ChatApiDbAcceptanceTest(unittest.IsolatedAsyncioTestCase):
             created_at=_now(),
         )
         index_version = IndexVersion(
+            document_group_id=group.id,
             version=f"acceptance-index-{suffix}",
             status=IndexVersionStatus.ACTIVE,
             chunking_config_id=chunking.id,

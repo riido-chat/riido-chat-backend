@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from app.core.config import get_settings
 from app.database.models import (
+    DocumentGroup,
     DocumentSource,
     DocumentVersion,
     DocumentVersionStatus,
@@ -45,7 +46,17 @@ class DocumentVersionRawContentDbTest(unittest.IsolatedAsyncioTestCase):
         self.session = AsyncSession(bind=self.connection, expire_on_commit=False)
 
         suffix = uuid.uuid4().hex
+        group = DocumentGroup(
+            group_key=f"RAW-{suffix}"[:50],
+            name="원문 저장 테스트 그룹",
+            consumer_key="TEST",
+        )
+        self.session.add(group)
+        await self.session.flush()
+
         self.source = DocumentSource(
+            document_group_id=group.id,
+            document_key=f"test/{suffix}",
             source_type="TEST_MARKDOWN",
             canonical_uri=f"https://example.com/{suffix}",
             title="테스트 문서",

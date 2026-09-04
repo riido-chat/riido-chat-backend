@@ -5,6 +5,8 @@ from sqlalchemy import (
     BigInteger,
     CheckConstraint,
     Enum as SAEnum,
+    Integer,
+    String,
     Text,
     UniqueConstraint,
 )
@@ -12,12 +14,24 @@ from sqlalchemy.dialects.postgresql import ARRAY, UUID
 
 from app.database.base import Base
 from app.database.models import (
+    ACTIVE_INDEX_VERSION_CONSTRAINT,
+    INDEX_VERSION_NO_CONSTRAINT,
     AnswerStatus,
     ChunkEmbedding,
     ContentNode,
     ContextStrategy,
     DocumentChunk,
+    DocumentGroup,
+    DocumentSource,
     DocumentVersion,
+    IndexOperationType,
+    IndexRun,
+    IndexRunStage,
+    IndexVersion,
+    IndexVersionStatus,
+    IngestionResultCode,
+    IngestionRun,
+    IngestionStage,
     LegacyChunkEmbedding,
     LegacyDocumentChunk,
     ModelCall,
@@ -28,6 +42,7 @@ from retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 
 
 ERD_TABLE_NAMES = {
+    "document_groups",
     "document_sources",
     "ingestion_runs",
     "document_versions",
@@ -144,6 +159,166 @@ class DatabaseModelTest(unittest.TestCase):
             "ck_document_versions_raw_content_storage",
             constraint_names,
         )
+
+    def test_document_group_defines_console_extension_unit(self) -> None:
+        table = DocumentGroup.__table__
+        unique_constraints = {
+            constraint.name: tuple(constraint.columns.keys())
+            for constraint in table.constraints
+            if isinstance(constraint, UniqueConstraint)
+        }
+
+        self.assertEqual(
+            {
+                "id",
+                "group_key",
+                "name",
+                "consumer_key",
+                "created_at",
+                "updated_at",
+            },
+            set(table.columns.keys()),
+        )
+        self.assertEqual(
+            ("group_key",),
+            unique_constraints["uq_document_groups_group_key"],
+        )
+        self.assertFalse(table.c.consumer_key.nullable)
+
+    def test_document_source_is_identified_by_group_and_document_key(self) -> None:
+        table = DocumentSource.__table__
+        unique_constraints = {
+            constraint.name: tuple(constraint.columns.keys())
+            for constraint in table.constraints
+            if isinstance(constraint, UniqueConstraint)
+        }
+        foreign_key = next(iter(table.c.document_group_id.foreign_keys))
+
+        self.assertFalse(table.c.document_group_id.nullable)
+        self.assertFalse(table.c.document_key.nullable)
+        self.assertIsInstance(table.c.document_key.type, String)
+        self.assertEqual(300, table.c.document_key.type.length)
+        self.assertEqual("document_groups.id", foreign_key.target_fullname)
+        self.assertEqual("RESTRICT", foreign_key.ondelete)
+        self.assertEqual(
+            ("document_group_id", "document_key"),
+            unique_constraints["uq_document_sources_document_group_id_document_key"],
+        )
+        self.assertEqual(
+            ("document_group_id", "canonical_uri"),
+            unique_constraints["uq_document_sources_document_group_id_canonical_uri"],
+        )
+        # canonical_uri 전역 unique는 그룹 단위 unique로 대체한다.
+        self.assertNotIn("uq_document_sources_canonical_uri", unique_constraints)
+        self.assertFalse(table.c.canonical_uri.nullable)
+
+    def test_document_version_indexes_normalized_content_hash(self) -> None:
+        index_names = {index.name for index in DocumentVersion.__table__.indexes}
+
+        self.assertIn("ix_document_versions_normalized_content_hash", index_names)
+
+    def test_index_version_adds_ready_status_and_group_scoped_numbers(self) -> None:
+        table = IndexVersion.__table__
+        status_type = table.c.status.type
+        indexes = {index.name: index for index in table.indexes}
+
+        self.assertEqual(
+            {"BUILDING", "VALIDATING", "READY", "ACTIVE", "FAILED", "INACTIVE"},
+            {member.value for member in IndexVersionStatus},
+        )
+        self.assertIsInstance(status_type, SAEnum)
+        self.assertEqual(
+            {"BUILDING", "VALIDATING", "READY", "ACTIVE", "FAILED", "INACTIVE"},
+            set(status_type.enums),
+        )
+        self.assertFalse(table.c.document_group_id.nullable)
+        self.assertTrue(table.c.version_no.nullable)
+        self.assertIsInstance(table.c.version_no.type, Integer)
+
+        active_index = indexes[ACTIVE_INDEX_VERSION_CONSTRAINT]
+        self.assertTrue(active_index.unique)
+        self.assertEqual(["document_group_id"], list(active_index.columns.keys()))
+
+        numbered_index = indexes[INDEX_VERSION_NO_CONSTRAINT]
+        self.assertTrue(numbered_index.unique)
+        self.assertEqual(
+            ["document_group_id", "version_no"],
+            list(numbered_index.columns.keys()),
+        )
+
+    def test_index_run_records_stage_and_operation_type(self) -> None:
+        table = IndexRun.__table__
+        constraint_names = {
+            constraint.name
+            for constraint in table.constraints
+            if isinstance(constraint, CheckConstraint)
+        }
+        index_names = {index.name for index in table.indexes}
+
+        self.assertEqual(
+            {"BUILDING", "VALIDATING", "APPLYING"},
+            {member.value for member in IndexRunStage},
+        )
+        self.assertEqual(
+            {"BUILD_AND_APPLY", "BUILD", "APPLY"},
+            {member.value for member in IndexOperationType},
+        )
+        self.assertFalse(table.c.stage.nullable)
+        self.assertFalse(table.c.operation_type.nullable)
+        self.assertTrue(table.c.error_code.nullable)
+        self.assertIn("ck_index_runs_index_run_stage", constraint_names)
+        self.assertIn("ck_index_runs_index_operation_type", constraint_names)
+        self.assertIn("ix_index_runs_index_version_id_started_at", index_names)
+
+    def test_ingestion_run_records_result_code_stage_and_batch(self) -> None:
+        table = IngestionRun.__table__
+        constraint_names = {
+            constraint.name
+            for constraint in table.constraints
+            if isinstance(constraint, CheckConstraint)
+        }
+        duplicate_fk = next(
+            iter(table.c.duplicate_of_document_source_id.foreign_keys)
+        )
+
+        self.assertEqual(
+            {"CREATED", "UPDATED", "NO_CHANGE", "DUPLICATE_CONTENT"},
+            {member.value for member in IngestionResultCode},
+        )
+        self.assertEqual(
+            {
+                "RECEIVING",
+                "VALIDATING",
+                "NORMALIZING",
+                "PARSING",
+                "CHUNKING",
+                "EMBEDDING",
+                "PERSISTING",
+            },
+            {member.value for member in IngestionStage},
+        )
+        self.assertTrue(table.c.result_code.nullable)
+        self.assertTrue(table.c.stage.nullable)
+        self.assertTrue(table.c.error_code.nullable)
+        self.assertTrue(table.c.batch_id.nullable)
+        self.assertFalse(table.c.document_source_id.nullable)
+        self.assertIn("ck_ingestion_runs_ingestion_result_code", constraint_names)
+        self.assertIn("ck_ingestion_runs_ingestion_stage", constraint_names)
+        self.assertIn(
+            "ix_ingestion_runs_batch_id",
+            {index.name for index in table.indexes},
+        )
+        self.assertEqual("document_sources.id", duplicate_fk.target_fullname)
+        self.assertEqual("SET NULL", duplicate_fk.ondelete)
+
+    def test_model_call_links_ingestion_run(self) -> None:
+        table = ModelCall.__table__
+        foreign_key = next(iter(table.c.ingestion_run_id.foreign_keys))
+
+        self.assertTrue(table.c.ingestion_run_id.nullable)
+        self.assertIsInstance(table.c.ingestion_run_id.type, BigInteger)
+        self.assertEqual("ingestion_runs.id", foreign_key.target_fullname)
+        self.assertEqual("CASCADE", foreign_key.ondelete)
 
     def test_rag_run_uses_uuid_identifiers_and_answer_status(self) -> None:
         table = RagRun.__table__
