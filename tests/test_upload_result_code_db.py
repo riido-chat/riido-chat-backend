@@ -237,6 +237,19 @@ class UploadResultCodeDbTest(unittest.IsolatedAsyncioTestCase):
                     filename="guide.md",
                 )
 
+    async def test_body_less_markdown_fails_at_chunking_stage(self) -> None:
+        title = self._new_title()
+        # 제목만 있으면 정제는 통과하고 검색 단위를 만들 때 실패한다
+        accepted = await self._upload(title, "# 제목만 있는 문서\n")
+
+        run = await self._run(accepted.ingestion_run_id)
+
+        self.assertEqual(ExecutionStatus.FAILED, run.status)
+        # FE 는 이 stage 로 3-4 원인 문구를 고른다
+        self.assertEqual(IngestionStage.CHUNKING, run.stage)
+        self.assertEqual("INVALID_FILE", run.error_code)
+        self.assertIsNone(run.produced_version_id)
+
     async def test_revision_rejects_unknown_document(self) -> None:
         async with self.session_factory() as session:
             with self.assertRaises(DocumentNotFoundError):

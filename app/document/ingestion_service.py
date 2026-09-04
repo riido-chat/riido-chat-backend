@@ -36,7 +36,8 @@ from app.database.models import (
 from app.database.session import get_session_factory
 from app.document.models import NormalizedDocument
 from app.document.clean import normalize_markdown
-from app.retrieval.corpus import build_document_retrieval_chunks
+from app.document.chunker import create_chunks
+from app.document.section_parser import parse_sections
 from app.retrieval.embedding import OpenAIEmbedder
 from app.retrieval.models import RetrievalChunk
 from app.document.document_store import PARSER_NAME, PARSER_VERSION, DocumentStore
@@ -474,8 +475,8 @@ async def run_admin_ingestion(
             failed_stage = IngestionStage.PARSING.value
             await store.set_stage(ingestion_run_id, IngestionStage.PARSING)
             await session.commit()
-            document, chunks = await asyncio.to_thread(
-                _build_uploaded_document,
+            document, sections = await asyncio.to_thread(
+                _parse_uploaded_document,
                 raw_content,
                 normalized_content,
                 normalized_content_hash,
@@ -484,6 +485,15 @@ async def run_admin_ingestion(
                     for key, value in source_values.items()
                     if key != "document_source_id"
                 },
+            )
+
+            failed_stage = IngestionStage.CHUNKING.value
+            await store.set_stage(ingestion_run_id, IngestionStage.CHUNKING)
+            await session.commit()
+            chunks = await asyncio.to_thread(
+                _chunk_uploaded_document,
+                document,
+                sections,
             )
 
             failed_stage = IngestionStage.EMBEDDING.value
@@ -646,7 +656,7 @@ def _normalize_uploaded_markdown(raw_content: str) -> str:
     return normalized_content
 
 
-def _build_uploaded_document(
+def _parse_uploaded_document(
     raw_content: str,
     normalized_content: str,
     normalized_content_hash: str,
@@ -655,32 +665,47 @@ def _build_uploaded_document(
     title: str,
     source_url: str,
     category: Optional[str],
-) -> tuple[NormalizedDocument, list[RetrievalChunk]]:
+) -> tuple[NormalizedDocument, list]:
+    """정제 문서를 만들고 Section 구조를 분석한다."""
+
+    document = NormalizedDocument(
+        document_id=document_id,
+        title=title,
+        source_url=source_url,
+        category=category,
+        content=normalized_content,
+        raw_content_uri=None,
+        raw_content_hash=_sha256(raw_content),
+        normalized_content_hash=normalized_content_hash,
+        raw_content=raw_content,
+    )
     try:
-        document = NormalizedDocument(
-            document_id=document_id,
-            title=title,
-            source_url=source_url,
-            category=category,
-            content=normalized_content,
-            raw_content_uri=None,
-            raw_content_hash=_sha256(raw_content),
-            normalized_content_hash=normalized_content_hash,
-            raw_content=raw_content,
-        )
+        sections = parse_sections(document)
+    except ValueError as error:
+        raise _UploadedMarkdownInvalidError(str(error)) from error
+    return document, sections
+
+
+def _chunk_uploaded_document(
+    document: NormalizedDocument,
+    sections: list,
+) -> list[RetrievalChunk]:
+    """Section을 검색 단위 Chunk로 나눈다."""
+
+    try:
         chunks = [
-            chunk
-            for chunk in build_document_retrieval_chunks(document)
-            if chunk.content.strip()
+            RetrievalChunk.from_document_chunk(document, chunk)
+            for chunk in create_chunks(sections)
         ]
     except ValueError as error:
         raise _UploadedMarkdownInvalidError(str(error)) from error
 
+    chunks = [chunk for chunk in chunks if chunk.content.strip()]
     if not chunks:
         raise _UploadedMarkdownInvalidError(
             "정제와 청킹 후 유효한 본문이 없습니다."
         )
-    return document, chunks
+    return chunks
 
 
 async def _record_ingestion_failure(
