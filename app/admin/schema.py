@@ -63,6 +63,8 @@ class AdminIngestionStatus(str, Enum):
 
 class AdminErrorCode(str, Enum):
     INVALID_FILE = "INVALID_FILE"
+    # 요청 본문이나 필드 형식이 잘못된 경우. 422 를 다른 오류와 같은 형식으로 돌려준다.
+    INVALID_REQUEST = "INVALID_REQUEST"
     FILE_TOO_LARGE = "FILE_TOO_LARGE"
     DOCUMENT_NOT_REVISABLE = "DOCUMENT_NOT_REVISABLE"
     JOB_IN_PROGRESS = "JOB_IN_PROGRESS"
@@ -365,6 +367,7 @@ class AdminRecollectAcceptedResponse(BaseModel):
     root_url: str = Field(alias="rootUrl")
     status: Literal[AdminIngestionStatus.PROCESSING]
     stage: RecollectStageValue
+    # 빈 목록은 list_pages 가 502 SOURCE_LIST_FAILED 로 먼저 막으므로 0 은 오지 않는다.
     page_count: int = Field(alias="pageCount", ge=1)
 
 

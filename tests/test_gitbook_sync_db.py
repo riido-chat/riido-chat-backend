@@ -244,6 +244,50 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, batch.counts["updated"])
         self.assertEqual(0, batch.counts["created"])
 
+    async def test_same_body_on_two_urls_creates_two_documents(self) -> None:
+        """URL 이 다르면 본문이 같아도 각각 문서로 둔다."""
+
+        pages = [self._page("ai/mcp"), self._page("integrations/mcp")]
+        shared = self._body("같은 본문")
+        bodies = {pages[0].url: shared, pages[1].url: shared}
+
+        accepted = await self._sync(pages, bodies)
+        batch = await self._batch(accepted.batch_id)
+
+        self.assertEqual(2, batch.counts["total"])
+        self.assertEqual(2, batch.counts["created"])
+        self.assertEqual(0, batch.counts["no_change"])
+
+        for page in pages:
+            source = await self._source_of(page)
+            self.assertIsNotNone(source, page.url)
+            async with self.session_factory() as session:
+                version = await session.scalar(
+                    select(DocumentVersion).where(
+                        DocumentVersion.document_source_id == source.id
+                    )
+                )
+            self.assertIsNotNone(version, page.url)
+
+    async def test_counts_add_up_to_total(self) -> None:
+        """다섯 갈래의 합은 total 과 같아야 한다."""
+
+        pages = [self._page("intro"), self._page("guide")]
+        shared = self._body("같은 본문")
+        accepted = await self._sync(
+            pages,
+            {pages[0].url: shared, pages[1].url: shared},
+        )
+        counts = (await self._batch(accepted.batch_id)).counts
+
+        self.assertEqual(
+            counts["total"],
+            counts["created"]
+            + counts["updated"]
+            + counts["no_change"]
+            + counts["failed"],
+        )
+
     async def test_disappeared_page_is_disabled_and_restored(self) -> None:
         pages = [self._page("intro"), self._page("guide")]
         bodies = {
