@@ -212,7 +212,12 @@ def _count_results(runs: List[IngestionRun]) -> Dict[str, int]:
             counts["created"] += 1
         elif run.result_code == IngestionResultCode.UPDATED:
             counts["updated"] += 1
-        elif run.result_code == IngestionResultCode.NO_CHANGE:
+        elif run.result_code in (
+            IngestionResultCode.NO_CHANGE,
+            # 중복은 코퍼스에 아무 변화를 만들지 않으므로 변경 없음으로 센다.
+            # 중복 여부는 개별 실행의 result_code 로 확인한다.
+            IngestionResultCode.DUPLICATE_CONTENT,
+        ):
             counts["no_change"] += 1
     return counts
 

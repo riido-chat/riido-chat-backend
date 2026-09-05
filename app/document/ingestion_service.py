@@ -19,6 +19,7 @@ from app.document.job_gate import (
 )
 from app.document.document_key import (
     DEFAULT_DOCUMENT_GROUP_KEY,
+    SOURCE_TYPE_GITBOOK,
     SOURCE_TYPE_UPLOAD,
     build_console_canonical_uri,
     build_upload_document_key,
@@ -457,6 +458,7 @@ async def run_admin_ingestion(
                 ingestion_run_id,
                 source_values["document_source_id"],
                 normalized_content_hash,
+                source_values["source_type"],
             )
             if decided:
                 return
@@ -472,7 +474,7 @@ async def run_admin_ingestion(
                 **{
                     key: value
                     for key, value in source_values.items()
-                    if key != "document_source_id"
+                    if key not in ("document_source_id", "source_type")
                 },
             )
 
@@ -542,6 +544,7 @@ async def _decide_without_new_version(
     ingestion_run_id: int,
     document_source_id: int,
     normalized_content_hash: str,
+    source_type: str,
 ) -> bool:
     """판을 만들지 않고 끝나는 결과인지 판정하고, 그렇다면 마감한다."""
 
@@ -556,6 +559,11 @@ async def _decide_without_new_version(
         )
         await session.commit()
         return True
+
+    if source_type == SOURCE_TYPE_GITBOOK:
+        # GitBook 문서의 정체성은 원천이 준 URL 이다.
+        # 다른 URL 이면 본문이 같아도 각각 문서로 둔다.
+        return False
 
     duplicate = await store.find_duplicate_source(
         document_source_id,
@@ -629,6 +637,7 @@ async def _load_processing_source_values(
         "title": source.title,
         "source_url": source.canonical_uri,
         "category": category,
+        "source_type": source.source_type,
     }
 
 
