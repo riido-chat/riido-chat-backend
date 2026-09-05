@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.admin.dependencies import get_recollect_service
+from app.admin.schema import AdminGitBookSyncRequest
 from app.database.models import ExecutionStatus
 from app.document.recollect import AcceptedRecollect
 from app.document.recollect_service import (
@@ -170,3 +171,48 @@ class AdminGitBookSyncApiTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AdminValidationErrorFormatTest(unittest.TestCase):
+    """422 도 다른 오류와 같은 {code, message} 형식으로 나가야 한다."""
+
+    def setUp(self) -> None:
+        app = create_app()
+        app.router.lifespan_context = test_lifespan
+        self.client = TestClient(app)
+
+    def test_admin_422_uses_error_response_shape(self) -> None:
+        response = self.client.post(
+            "/api/admin/document-groups/1/gitbook-sync",
+            json={"sourceUrl": "http://docs.riido.io"},
+        )
+
+        self.assertEqual(422, response.status_code)
+        body = response.json()
+        self.assertEqual("INVALID_REQUEST", body["code"])
+        self.assertIn("message", body)
+        self.assertNotIn("detail", body)
+
+    def test_admin_422_on_missing_field(self) -> None:
+        response = self.client.post(
+            "/api/admin/document-groups/1/gitbook-sync",
+            json={},
+        )
+
+        self.assertEqual(422, response.status_code)
+        self.assertEqual("INVALID_REQUEST", response.json()["code"])
+
+    def test_non_admin_path_keeps_default_shape(self) -> None:
+        """콘솔 밖 경로는 FastAPI 기본 형식을 유지한다."""
+
+        app = create_app()
+        app.router.lifespan_context = test_lifespan
+
+        @app.post("/probe")
+        def probe(payload: AdminGitBookSyncRequest) -> dict:
+            return {}
+
+        response = TestClient(app).post("/probe", json={})
+
+        self.assertEqual(422, response.status_code)
+        self.assertIn("detail", response.json())

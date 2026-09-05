@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -44,6 +45,21 @@ from app.retrieval.search_reader import ActiveIndexNotFoundError, SearchReader
 
 
 logger = logging.getLogger(__name__)
+
+# 운영자 콘솔 경로만 오류 형식을 통일한다. 챗봇 경로는 기존 계약을 유지한다.
+ADMIN_PATH_PREFIX = "/api/admin"
+
+
+def _validation_message(exc: RequestValidationError) -> str:
+    """첫 오류 하나만 사람이 읽을 문장으로 만든다."""
+
+    errors = exc.errors()
+    if not errors:
+        return "요청 형식이 올바르지 않습니다."
+    first = errors[0]
+    field = ".".join(str(part) for part in first.get("loc", ()) if part != "body")
+    reason = first.get("msg", "값이 올바르지 않습니다.")
+    return f"{field}: {reason}" if field else reason
 
 
 @asynccontextmanager
@@ -144,6 +160,32 @@ def create_app() -> FastAPI:
                 code=AdminErrorCode(exc.code),
                 message=exc.message,
                 stage=getattr(exc, "stage", None),
+            ).model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def handle_request_validation_error(
+        request: Request,
+        exc: RequestValidationError,
+    ) -> JSONResponse:
+        """운영자 API 의 422 를 다른 오류와 같은 형식으로 돌려준다.
+
+        FastAPI 기본 응답은 {"detail": [...]} 라 code 를 읽는 FE 공통 처리가
+        422 에서만 깨진다. 콘솔 밖 경로는 기본 형식을 그대로 둔다.
+        """
+
+        if not request.url.path.startswith(ADMIN_PATH_PREFIX):
+            return JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content={"detail": exc.errors()},
+            )
+
+        logger.info("Admin 요청 형식이 올바르지 않습니다: %s", exc.errors())
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content=AdminErrorResponse(
+                code=AdminErrorCode.INVALID_REQUEST,
+                message=_validation_message(exc),
             ).model_dump(mode="json", by_alias=True, exclude_none=True),
         )
 
