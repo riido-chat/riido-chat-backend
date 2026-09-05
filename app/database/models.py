@@ -218,14 +218,67 @@ class DocumentGroup(Base):
     )
 
 
+class SourceProvider(str, enum.Enum):
+    """수집 원천의 제공자."""
+
+    GITBOOK = "GITBOOK"
+
+
+class DocumentGroupSource(Base):
+    """문서 그룹이 문서를 끌어오는 외부 원천.
+
+    콘솔 업로드처럼 밀어 넣는 문서에는 원천이 없다.
+    """
+
+    __tablename__ = "document_group_sources"
+    __table_args__ = (UniqueConstraint("document_group_id", "root_url"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    document_group_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("document_groups.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    provider: Mapped[SourceProvider] = mapped_column(
+        _status_enum(SourceProvider, "source_provider", length=20),
+        nullable=False,
+    )
+    root_url: Mapped[str] = mapped_column(String(1000), nullable=False)
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="true"
+    )
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 class DocumentSource(Base):
     """문서 원본의 고정 식별자와 수집 위치."""
 
     __tablename__ = "document_sources"
     __table_args__ = (
-        UniqueConstraint("document_group_id", "document_key"),
+        # 끌어오는 문서는 원천 안에서, 밀어 넣는 문서는 그룹 안에서 유일하다.
+        # 두 GitBook 이 같은 경로 키를 가져도 서로 다른 문서로 남는다.
+        Index(
+            "uq_document_sources_group_source_id_document_key",
+            "group_source_id",
+            "document_key",
+            unique=True,
+            postgresql_where=text("group_source_id IS NOT NULL"),
+        ),
+        Index(
+            "uq_document_sources_document_group_id_document_key",
+            "document_group_id",
+            "document_key",
+            unique=True,
+            postgresql_where=text("group_source_id IS NULL"),
+        ),
         UniqueConstraint("document_group_id", "canonical_uri"),
         Index(None, "document_group_id"),
+        Index(None, "group_source_id"),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
@@ -233,6 +286,10 @@ class DocumentSource(Base):
         BigInteger,
         ForeignKey("document_groups.id", ondelete="RESTRICT"),
         nullable=False,
+    )
+    group_source_id: Mapped[Optional[int]] = mapped_column(
+        BigInteger,
+        ForeignKey("document_group_sources.id", ondelete="RESTRICT"),
     )
     document_key: Mapped[str] = mapped_column(String(300), nullable=False)
     source_type: Mapped[str] = mapped_column(String(30), nullable=False)

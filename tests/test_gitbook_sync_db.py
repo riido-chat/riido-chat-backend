@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
 from app.database.models import (
+    DocumentGroupSource,
     DocumentSource,
     DocumentVersion,
     ExecutionStatus,
@@ -28,7 +29,6 @@ from app.document.gitbook.client import GitBookListError, GitBookPage
 from app.document.ingestion_service import AdminIngestionService
 from app.document.recollect import run_recollect_batch
 from app.document.recollect_service import (
-    GitBookRootMismatchError,
     RecollectBatchNotFoundError,
     RecollectService,
     SourceListFailedError,
@@ -82,6 +82,7 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
         self.suffix = uuid.uuid4().hex[:8]
         self.keys = []
         self.console_titles = []
+        self.other_root = None
         async with self.session_factory() as session:
             self.group_id = (await get_document_group(session)).id
             # 수집은 목록에 없는 GitBook 문서를 사라진 것으로 보고 비활성화한다.
@@ -127,6 +128,33 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
                     )
                 )
                 await session.delete(source)
+            if self.other_root is not None:
+                other_source = await session.scalar(
+                    select(DocumentGroupSource).where(
+                        DocumentGroupSource.root_url == self.other_root
+                    )
+                )
+                if other_source is not None:
+                    for source in (
+                        await session.execute(
+                            select(DocumentSource).where(
+                                DocumentSource.group_source_id == other_source.id
+                            )
+                        )
+                    ).scalars():
+                        await session.execute(
+                            delete(IngestionRun).where(
+                                IngestionRun.document_source_id == source.id
+                            )
+                        )
+                        await session.execute(
+                            delete(DocumentVersion).where(
+                                DocumentVersion.document_source_id == source.id
+                            )
+                        )
+                        await session.delete(source)
+                    await session.flush()
+                    await session.delete(other_source)
             if self.enabled_before:
                 await session.execute(
                     update(DocumentSource)
@@ -323,29 +351,32 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
             )
         self.assertEqual(before, after)
 
-    async def test_other_gitbook_root_is_rejected(self) -> None:
+    async def test_second_gitbook_keeps_the_first_untouched(self) -> None:
         page = self._page("intro")
         await self._sync([page], {page.url: self._body("소개")})
 
+        other_root = f"https://docs.example-{self.suffix}.com"
+        # 두 GitBook 이 같은 경로 키를 가져도 원천이 달라 서로 다른 문서다
         other = GitBookPage(
-            title="다른 GitBook",
-            url="https://docs.example.com/guide/intro.md",
-            category="guide",
+            title=f"다른 GitBook {self.suffix}",
+            url=f"{other_root}/{self.keys[0]}.md",
+            category="synctest",
         )
-        with patch(
-            "app.document.recollect_service.list_pages",
-            return_value=[other],
-        ):
-            async with self.session_factory() as session:
-                with self.assertRaises(GitBookRootMismatchError):
-                    await RecollectService(session).start_sync(
-                        self.group_id,
-                        "https://docs.example.com",
-                    )
+        self.other_root = other_root
+        await self._sync(
+            [other],
+            {other.url: self._body("다른 GitBook 본문")},
+            root_url=other_root,
+        )
 
-        # 거절된 요청은 기존 문서를 건드리지 않는다
-        untouched = await self._source_of(page)
-        self.assertTrue(untouched.enabled)
+        first = await self._source_of(page)
+        second = await self._source_of(other)
+
+        self.assertNotEqual(first.id, second.id)
+        self.assertEqual(first.document_key, second.document_key)
+        self.assertNotEqual(first.group_source_id, second.group_source_id)
+        # 다른 원천을 수집해도 앞선 GitBook 문서는 그대로다
+        self.assertTrue(first.enabled)
 
     async def test_unknown_batch_is_not_found(self) -> None:
         async with self.session_factory() as session:

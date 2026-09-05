@@ -383,9 +383,11 @@ class AdminIngestionService:
         category: Optional[str],
     ) -> DocumentSource:
         document_key = build_upload_document_key(title)
+        # 콘솔 문서는 밀어 넣는 문서라 수집 원천이 없다. 키는 그룹 안에서 유일하다.
         source = await self._session.scalar(
             select(DocumentSource).where(
                 DocumentSource.document_group_id == group.id,
+                DocumentSource.group_source_id.is_(None),
                 DocumentSource.document_key == document_key,
             )
         )

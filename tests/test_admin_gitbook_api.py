@@ -12,7 +12,6 @@ from app.admin.dependencies import get_recollect_service
 from app.database.models import ExecutionStatus
 from app.document.recollect import AcceptedRecollect
 from app.document.recollect_service import (
-    GitBookRootMismatchError,
     RecollectBatchDetail,
     RecollectBatchNotFoundError,
     RecollectFailure,
@@ -88,19 +87,6 @@ class AdminGitBookSyncApiTest(unittest.TestCase):
 
         self.assertEqual(502, response.status_code)
         self.assertEqual("SOURCE_LIST_FAILED", response.json()["code"])
-
-    def test_other_root_returns_409(self) -> None:
-        self.service.start_sync.side_effect = GitBookRootMismatchError(
-            "https://docs.riido.io"
-        )
-
-        response = self._sync("https://docs.example.com")
-
-        self.assertEqual(409, response.status_code)
-        body = response.json()
-        self.assertEqual("GITBOOK_ROOT_MISMATCH", body["code"])
-        # 기존 루트를 알려 줘야 운영자가 이유를 안다
-        self.assertIn("docs.riido.io", body["message"])
 
     def test_processing_batch_returns_progress(self) -> None:
         self.service.get_batch.return_value = RecollectBatchDetail(
