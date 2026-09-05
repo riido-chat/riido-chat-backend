@@ -25,7 +25,7 @@ from app.database.models import (
     ModelCallPurpose,
 )
 from app.document.chunking_config import get_or_create_chunking_config
-from app.document.document_group import get_document_group
+from app.document.document_group import get_default_document_group
 from app.document.document_store import DEFAULT_TRIGGER_TYPE, DocumentStore
 from app.document.models import NormalizedDocument
 from app.retrieval.embedding import (
@@ -58,6 +58,8 @@ class IndexWriter:
         self,
         items: Sequence[StoredEmbedding],
         documents: Sequence[NormalizedDocument],
+        *,
+        group_id: Optional[int] = None,
     ) -> IndexVersion:
         """호출자 transaction 안에서 전체 적재 단계를 한 번에 실행한다.
 
@@ -67,16 +69,19 @@ class IndexWriter:
 
         self._validate_new_index_items(items)
         self._validate_reindex_documents(items, documents)
+        if group_id is None:
+            group_id = (await get_default_document_group(self._session)).id
         if self._session.in_transaction():
-            return await self._replace_rows(items, documents)
+            return await self._replace_rows(items, documents, group_id)
 
         async with self._session.begin():
-            return await self._replace_rows(items, documents)
+            return await self._replace_rows(items, documents, group_id)
 
     async def start_index(
         self,
         chunks: Sequence[RetrievalChunk],
         *,
+        group_id: int,
         trigger_type: str = DEFAULT_TRIGGER_TYPE,
         actor_id: Optional[str] = None,
     ) -> IndexRun:
@@ -87,11 +92,10 @@ class IndexWriter:
             raise ValueError("trigger_type은 비어 있을 수 없습니다.")
 
         now = datetime.now(timezone.utc)
-        group = await get_document_group(self._session)
         chunking_config = await get_or_create_chunking_config(self._session, now)
         embedding_config = await get_or_create_embedding_config(self._session, now)
         index_version = IndexVersion(
-            document_group_id=group.id,
+            document_group_id=group_id,
             version=self._new_index_version_name(now),
             status=IndexVersionStatus.BUILDING,
             chunking_config_id=chunking_config.id,
@@ -514,6 +518,7 @@ class IndexWriter:
         self,
         items: Sequence[StoredEmbedding],
         documents: Sequence[NormalizedDocument],
+        group_id: int,
     ) -> IndexVersion:
         items_by_document: DefaultDict[str, List[StoredEmbedding]] = defaultdict(list)
         for item in items:
@@ -523,7 +528,10 @@ class IndexWriter:
         persisted_chunks: List[RetrievalChunk] = []
         for document in documents:
             document_items = items_by_document[document.document_id]
-            ingestion_run = await self._documents.start_ingestion(document)
+            ingestion_run = await self._documents.start_ingestion(
+                document,
+                group_id=group_id,
+            )
             persisted_chunks.extend(
                 await self._documents.complete_ingestion(
                     ingestion_run.id,
@@ -533,7 +541,10 @@ class IndexWriter:
                 )
             )
 
-        index_run = await self.start_index(persisted_chunks)
+        index_run = await self.start_index(
+            persisted_chunks,
+            group_id=group_id,
+        )
         await self.store_index_items(index_run.id, persisted_chunks)
         await self.mark_index_ready(index_run.id)
         index_version = await self.apply_index(index_run.id)

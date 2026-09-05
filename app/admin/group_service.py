@@ -124,8 +124,8 @@ class DocumentGroupService:
         )
         summaries = []
         for group in groups:
-            latest = await load_latest_ready_versions(self._session)
-            pending = await load_pending_documents(self._session)
+            latest = await load_latest_ready_versions(self._session, group.id)
+            pending = await load_pending_documents(self._session, group.id)
             active = await self._active_index_version(group.id)
             summaries.append(
                 GroupSummary(
@@ -153,9 +153,9 @@ class DocumentGroupService:
         if group is None:
             raise DocumentGroupNotFoundError()
 
-        latest = await load_latest_ready_versions(self._session)
-        pending = await load_pending_documents(self._session)
-        applied = await self._applied_version_no_by_source()
+        latest = await load_latest_ready_versions(self._session, group.id)
+        pending = await load_pending_documents(self._session, group.id)
+        applied = await self._applied_version_no_by_source(group.id)
         documents = await self._documents(latest, applied)
 
         return GroupDetail(
@@ -244,10 +244,13 @@ class DocumentGroupService:
             finished_at=run.finished_at,
         )
 
-    async def _applied_version_no_by_source(self) -> Dict[int, int]:
+    async def _applied_version_no_by_source(self, group_id: int) -> Dict[int, int]:
         """ACTIVE 색인에 든 문서의 판 번호를 원본별로 모은다."""
 
-        active_version_ids = await load_active_document_versions(self._session)
+        active_version_ids = await load_active_document_versions(
+            self._session,
+            group_id,
+        )
         if not active_version_ids:
             return {}
 

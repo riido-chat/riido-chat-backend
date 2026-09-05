@@ -41,7 +41,7 @@ from app.database.models import (
     ModelCallPurpose,
 )
 from app.database.session import dispose_engine
-from app.document.document_group import get_document_group
+from app.document.document_group import get_default_document_group
 from app.main import create_app
 
 
@@ -321,7 +321,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
 
     async def _start(self, title: str):
         async with self.session_factory() as session:
-            group = await get_document_group(session)
+            group = await get_default_document_group(session)
             return await AdminIngestionService(session).start_new_document(
                 group_id=group.id,
                 title=title,

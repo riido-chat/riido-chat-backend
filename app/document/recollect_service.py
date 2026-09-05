@@ -178,8 +178,8 @@ class RecollectService:
         )
 
     async def _get_group(self, group_id: int):
-        group = await get_document_group(self._session)
-        if group.id != group_id:
+        group = await get_document_group(self._session, group_id)
+        if group is None:
             raise DocumentGroupNotFoundError()
         return group
 

@@ -20,6 +20,7 @@ from app.database.models import (
     IndexVersionStatus,
     IngestionRun,
 )
+from app.document.document_group import get_default_document_group
 from app.document.document_store import DocumentStore
 from app.document.models import NormalizedDocument
 from app.indexing.index_builder import (
@@ -100,6 +101,8 @@ class IndexApplyDbTest(unittest.IsolatedAsyncioTestCase):
         self.suffix = uuid.uuid4().hex[:8]
         self.source_url = f"https://docs.riido.io/apply-test-{self.suffix}.md"
         self.index_version_ids = []
+        async with self.session_factory() as session:
+            self.group_id = (await get_default_document_group(session)).id
         self.active_before = await self._active_index_ids()
         await self._ingest_document()
 
@@ -168,7 +171,7 @@ class IndexApplyDbTest(unittest.IsolatedAsyncioTestCase):
         chunks = build_document_retrieval_chunks(document)
         async with self.session_factory() as session:
             store = DocumentStore(session)
-            run = await store.start_ingestion(document)
+            run = await store.start_ingestion(document, group_id=self.group_id)
             await store.complete_ingestion(
                 run.id,
                 document,
@@ -179,7 +182,7 @@ class IndexApplyDbTest(unittest.IsolatedAsyncioTestCase):
 
     async def _start_and_run(self, corpus_state) -> int:
         async with self.session_factory() as session:
-            run = await start_reindex_run(session)
+            run = await start_reindex_run(session, self.group_id)
             index_run_id = run.id
             self.index_version_ids.append(run.index_version_id)
             await session.commit()

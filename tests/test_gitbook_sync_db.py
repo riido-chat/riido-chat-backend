@@ -24,7 +24,7 @@ from app.database.models import (
     IngestionStage,
 )
 from app.database.session import dispose_engine
-from app.document.document_group import get_document_group
+from app.document.document_group import get_default_document_group
 from app.document.document_key import SOURCE_TYPE_GITBOOK
 from app.document.gitbook.client import GitBookListError, GitBookPage
 from app.document.ingestion_service import AdminIngestionService
@@ -85,7 +85,7 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
         self.console_titles = []
         self.other_root = None
         async with self.session_factory() as session:
-            self.group_id = (await get_document_group(session)).id
+            self.group_id = (await get_default_document_group(session)).id
             # 수집은 목록에 없는 GitBook 문서를 사라진 것으로 보고 비활성화한다.
             # stub 목록에는 이 테스트의 페이지만 있으므로 기존 문서가 전부
             # 꺼진다. 원래 켜져 있던 문서를 기억해 두었다가 teardown 에서

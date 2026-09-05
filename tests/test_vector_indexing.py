@@ -2,7 +2,7 @@ import hashlib
 import unittest
 from dataclasses import replace
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import ANY, AsyncMock, Mock, patch
 
 from app.document.models import NormalizedDocument
 from app.retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
@@ -137,14 +137,20 @@ class VectorReindexRunnerTest(unittest.IsolatedAsyncioTestCase):
         # 수집 2회, 색인 시작·저장·READY·적용으로 6회다
         self.assertEqual(6, self.session.commit.await_count)
         self.session.rollback.assert_not_awaited()
-        store.start_ingestion.assert_awaited_once_with(self.document)
+        store.start_ingestion.assert_awaited_once_with(
+            self.document,
+            group_id=ANY,
+        )
         store.complete_ingestion.assert_awaited_once_with(
             11,
             self.document,
             [self.chunk],
             [self.embedding],
         )
-        writer.start_index.assert_awaited_once_with([self.persisted_chunk])
+        writer.start_index.assert_awaited_once_with(
+            [self.persisted_chunk],
+            group_id=ANY,
+        )
         writer.store_index_items.assert_awaited_once()
         writer.mark_index_ready.assert_awaited_once_with(21)
         writer.apply_index.assert_awaited_once_with(21)

@@ -34,7 +34,6 @@ from app.database.models import (
 from app.core.error_message import sanitize_error_message
 from app.core.hashing import sha256_hex
 from app.document.chunking_config import get_or_create_chunking_config
-from app.document.document_group import get_document_group
 from app.indexing.index_writer import IndexWriter
 from app.retrieval.corpus_state import CorpusState
 from app.retrieval.embedding import OpenAIEmbedder, build_embedding_text
@@ -94,13 +93,13 @@ class PendingDocuments:
 
 async def load_latest_ready_versions(
     session: AsyncSession,
+    group_id: int,
 ) -> Dict[int, Tuple[int, int]]:
     """사용 중인 문서 원본마다 가장 최근 READY 판을 찾는다.
 
     반환은 document_source_id 를 키로, (document_version_id, version_no) 다.
     """
 
-    group = await get_document_group(session)
     statement = (
         select(
             DocumentVersion.document_source_id,
@@ -113,7 +112,7 @@ async def load_latest_ready_versions(
             DocumentSource.id == DocumentVersion.document_source_id,
         )
         .where(
-            DocumentSource.document_group_id == group.id,
+            DocumentSource.document_group_id == group_id,
             DocumentSource.enabled.is_(True),
             DocumentVersion.status == DocumentVersionStatus.READY,
         )
@@ -129,10 +128,12 @@ async def load_latest_ready_versions(
     }
 
 
-async def load_active_document_versions(session: AsyncSession) -> Set[int]:
+async def load_active_document_versions(
+    session: AsyncSession,
+    group_id: int,
+) -> Set[int]:
     """그룹의 ACTIVE 색인에 연결된 문서 판 집합을 읽는다."""
 
-    group = await get_document_group(session)
     statement = (
         select(IndexDocument.document_version_id)
         .join(
@@ -140,7 +141,7 @@ async def load_active_document_versions(session: AsyncSession) -> Set[int]:
             IndexVersion.id == IndexDocument.index_version_id,
         )
         .where(
-            IndexVersion.document_group_id == group.id,
+            IndexVersion.document_group_id == group_id,
             IndexVersion.status == IndexVersionStatus.ACTIVE,
         )
     )
@@ -149,6 +150,7 @@ async def load_active_document_versions(session: AsyncSession) -> Set[int]:
 
 async def load_pending_documents(
     session: AsyncSession,
+    group_id: int,
 ) -> List["PendingDocument"]:
     """반영 대기 문서를 종류와 함께 모은다.
 
@@ -156,8 +158,8 @@ async def load_pending_documents(
     ACTIVE 조합에만 남아 있으면 REMOVED 다.
     """
 
-    latest = await load_latest_ready_versions(session)
-    active_version_ids = await load_active_document_versions(session)
+    latest = await load_latest_ready_versions(session, group_id)
+    active_version_ids = await load_active_document_versions(session, group_id)
     active_source_ids = await _source_ids_of(session, active_version_ids)
 
     pending = []
@@ -191,10 +193,13 @@ async def load_pending_documents(
     ]
 
 
-async def compute_pending_documents(session: AsyncSession) -> PendingDocuments:
+async def compute_pending_documents(
+    session: AsyncSession,
+    group_id: int,
+) -> PendingDocuments:
     """반영 대기 문서 수를 센다."""
 
-    pending = await load_pending_documents(session)
+    pending = await load_pending_documents(session, group_id)
     return PendingDocuments(
         new=sum(1 for item in pending if item.change_type == NEW_CHANGE),
         updated=sum(1 for item in pending if item.change_type == UPDATED_CHANGE),
@@ -216,10 +221,11 @@ async def _source_ids_of(
 
 async def load_indexable_chunks(
     session: AsyncSession,
+    group_id: int,
 ) -> List[RetrievalChunk]:
     """색인 대상 문서 판의 Chunk를 BM25 corpus 순서로 모은다."""
 
-    latest = await load_latest_ready_versions(session)
+    latest = await load_latest_ready_versions(session, group_id)
     version_ids = [version_id for version_id, _ in latest.values()]
     if not version_ids:
         return []
@@ -260,6 +266,7 @@ async def load_indexable_chunks(
 
 async def start_reindex_run(
     session: AsyncSession,
+    group_id: int,
     *,
     actor_id: Optional[str] = None,
 ) -> IndexRun:
@@ -268,10 +275,11 @@ async def start_reindex_run(
     실제 적재와 적용은 background task 가 이어서 수행한다.
     """
 
-    chunks = await load_indexable_chunks(session)
+    chunks = await load_indexable_chunks(session, group_id)
     writer = IndexWriter(session)
     return await writer.start_index(
         chunks,
+        group_id=group_id,
         trigger_type=MANUAL_TRIGGER_TYPE,
         actor_id=actor_id,
     )
@@ -318,8 +326,19 @@ async def run_index_job(
         )
         return
 
+    index_version = await session.get(IndexVersion, run.index_version_id)
+    if index_version is None:
+        logger.error("존재하지 않는 색인 버전입니다: index_run_id=%s", index_run_id)
+        return
+
     if run.stage != IndexRunStage.APPLYING:
-        built = await _build(session, writer, index_run_id, embedder_factory)
+        built = await _build(
+            session,
+            writer,
+            index_run_id,
+            index_version.document_group_id,
+            embedder_factory,
+        )
         if not built:
             return
     await _apply(session, writer, corpus_state, index_run_id)
@@ -329,6 +348,7 @@ async def _build(
     session: AsyncSession,
     writer: IndexWriter,
     index_run_id: int,
+    group_id: int,
     embedder_factory: Callable[[], OpenAIEmbedder],
 ) -> bool:
     """조합을 적재하고 검증을 통과하면 후보를 READY로 만든다.
@@ -340,7 +360,7 @@ async def _build(
     failed_stage = "BUILDING"
     error_code = INTERNAL_ERROR
     try:
-        chunks = await load_indexable_chunks(session)
+        chunks = await load_indexable_chunks(session, group_id)
         missing = await writer.list_chunks_missing_embedding(
             index_run_id,
             chunks,

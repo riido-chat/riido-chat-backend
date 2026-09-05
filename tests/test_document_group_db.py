@@ -10,11 +10,13 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.admin.group_service import (
     SEARCH_STATUS_IN_PROGRESS,
+    SEARCH_STATUS_NO_DOCUMENTS,
     SEARCH_STATUS_REINDEX_REQUIRED,
     DocumentGroupService,
 )
 from app.core.config import get_settings
 from app.database.models import (
+    DocumentGroup,
     DocumentSource,
     DocumentVersion,
     ExecutionStatus,
@@ -28,7 +30,7 @@ from app.database.models import (
 )
 from app.database.session import dispose_engine
 from app.document.chunking_config import get_or_create_chunking_config
-from app.document.document_group import get_document_group
+from app.document.document_group import get_default_document_group
 from app.document.document_key import SOURCE_TYPE_UPLOAD
 from app.document.ingestion_service import (
     AdminIngestionService,
@@ -81,8 +83,9 @@ class DocumentGroupDbTest(unittest.IsolatedAsyncioTestCase):
         self.suffix = uuid.uuid4().hex[:8]
         self.titles = []
         self.index_version_ids = []
+        self.other_group_id = None
         async with self.session_factory() as session:
-            self.group_id = (await get_document_group(session)).id
+            self.group_id = (await get_default_document_group(session)).id
 
     async def asyncTearDown(self) -> None:
         async with self.session_factory() as session:
@@ -107,6 +110,12 @@ class DocumentGroupDbTest(unittest.IsolatedAsyncioTestCase):
                 await session.execute(
                     delete(IndexVersion).where(
                         IndexVersion.id == index_version_id
+                    )
+                )
+            if self.other_group_id is not None:
+                await session.execute(
+                    delete(DocumentGroup).where(
+                        DocumentGroup.id == self.other_group_id
                     )
                 )
             await session.commit()
@@ -251,6 +260,38 @@ class DocumentGroupDbTest(unittest.IsolatedAsyncioTestCase):
                 document.applied_version_no,
                 document.document_version_no,
             )
+
+    async def test_second_group_is_served_by_its_own_id(self) -> None:
+        """요청의 groupId 로 동작해야 한다.
+
+        상수로 그룹을 찾으면 새 그룹이 있어도 코드가 보지 못하고,
+        존재하는 그룹에 404 를 낸다.
+        """
+
+        now = datetime.now(timezone.utc)
+        async with self.session_factory() as session:
+            other = DocumentGroup(
+                group_key=f"TEST_GROUP_{self.suffix}",
+                name=f"테스트 그룹 {self.suffix}",
+                consumer_key=f"TEST_{self.suffix}",
+                created_at=now,
+                updated_at=now,
+            )
+            session.add(other)
+            await session.commit()
+            self.other_group_id = other.id
+
+        async with self.session_factory() as session:
+            service = await self._service(session)
+            groups = await service.list_groups()
+            detail = await service.get_group_detail(self.other_group_id)
+
+        self.assertIn(self.other_group_id, {g.group_id for g in groups})
+        self.assertEqual(self.other_group_id, detail.group_id)
+        # 새 그룹에는 문서가 없다. 기본 그룹의 문서가 섞이면 안 된다
+        self.assertEqual([], detail.documents)
+        self.assertEqual([], detail.sources)
+        self.assertEqual(SEARCH_STATUS_NO_DOCUMENTS, detail.search_status)
 
     async def test_unknown_group_is_not_found(self) -> None:
         async with self.session_factory() as session:
