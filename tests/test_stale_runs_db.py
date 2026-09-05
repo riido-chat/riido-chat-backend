@@ -21,7 +21,7 @@ from app.database.models import (
     IngestionStage,
 )
 from app.document.chunking_config import get_or_create_chunking_config
-from app.document.document_group import get_document_group
+from app.document.document_group import get_default_document_group
 from app.document.document_key import SOURCE_TYPE_GITBOOK
 from app.document.job_gate import find_processing_job
 from app.document.stale_runs import close_interrupted_runs
@@ -58,7 +58,7 @@ class StaleRunsDbTest(unittest.IsolatedAsyncioTestCase):
         self.source_id = None
         self.index_version_ids = []
         async with self.session_factory() as session:
-            self.group_id = (await get_document_group(session)).id
+            self.group_id = (await get_default_document_group(session)).id
 
     async def asyncTearDown(self) -> None:
         async with self.session_factory() as session:

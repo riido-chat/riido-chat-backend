@@ -147,13 +147,17 @@ class IndexReindexService:
         await self._acquire_group_gate(group.id)
         await self._ensure_no_processing_job(group.id)
 
-        if not await load_latest_ready_versions(self._session):
+        if not await load_latest_ready_versions(self._session, group.id):
             raise NoReadyDocumentsError()
-        pending = await compute_pending_documents(self._session)
+        pending = await compute_pending_documents(self._session, group.id)
         if pending.total == 0:
             raise ReindexNotRequiredError()
 
-        run = await start_reindex_run(self._session, actor_id=actor_id)
+        run = await start_reindex_run(
+            self._session,
+            group.id,
+            actor_id=actor_id,
+        )
         accepted = AcceptedIndexRun(
             index_run_id=run.id,
             index_version_id=run.index_version_id,
@@ -295,8 +299,8 @@ class IndexReindexService:
         )
 
     async def _get_group(self, group_id: int):
-        group = await get_document_group(self._session)
-        if group.id != group_id:
+        group = await get_document_group(self._session, group_id)
+        if group is None:
             raise DocumentGroupNotFoundError()
         return group
 

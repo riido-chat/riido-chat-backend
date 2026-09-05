@@ -57,6 +57,8 @@ class AdminGitBookSyncApiTest(unittest.TestCase):
             batch_id=BATCH_ID,
             group_id=1,
             page_count=41,
+            group_source_id=1,
+            root_url="https://docs.riido.io",
         )
 
         response = self._sync()
@@ -66,6 +68,8 @@ class AdminGitBookSyncApiTest(unittest.TestCase):
             {
                 "batchId": str(BATCH_ID),
                 "groupId": 1,
+                "groupSourceId": 1,
+                "rootUrl": "https://docs.riido.io",
                 "status": "PROCESSING",
                 "stage": "PROCESSING",
                 "pageCount": 41,
@@ -92,6 +96,8 @@ class AdminGitBookSyncApiTest(unittest.TestCase):
         self.service.get_batch.return_value = RecollectBatchDetail(
             batch_id=BATCH_ID,
             group_id=1,
+            group_source_id=1,
+            root_url="https://docs.riido.io",
             status=ExecutionStatus.PROCESSING,
             total=41,
             processed=17,
@@ -108,6 +114,8 @@ class AdminGitBookSyncApiTest(unittest.TestCase):
         self.service.get_batch.return_value = RecollectBatchDetail(
             batch_id=BATCH_ID,
             group_id=1,
+            group_source_id=1,
+            root_url="https://docs.riido.io",
             status=ExecutionStatus.SUCCESS,
             total=41,
             processed=41,
@@ -135,6 +143,7 @@ class AdminGitBookSyncApiTest(unittest.TestCase):
         body = self.client.get(f"/api/admin/recollect-batches/{BATCH_ID}").json()
 
         self.assertEqual("SUCCESS", body["status"])
+        self.assertEqual("https://docs.riido.io", body["rootUrl"])
         self.assertEqual(35, body["counts"]["noChange"])
         self.assertEqual(1, body["counts"]["removed"])
         failure = body["failures"][0]

@@ -26,7 +26,6 @@ from app.database.models import (
     ModelCallPurpose,
 )
 from app.document.chunking_config import get_or_create_chunking_config
-from app.document.document_group import get_document_group
 from app.document.document_key import (
     DEFAULT_GITBOOK_ROOT_URL,
     SOURCE_TYPE_GITBOOK,
@@ -64,6 +63,7 @@ class DocumentStore:
         self,
         document: NormalizedDocument,
         *,
+        group_id: int,
         trigger_type: str = DEFAULT_TRIGGER_TYPE,
     ) -> IngestionRun:
         """문서 한 건의 DB 적재 실행을 PROCESSING 상태로 시작한다."""
@@ -72,7 +72,11 @@ class DocumentStore:
             raise ValueError("trigger_type은 비어 있을 수 없습니다.")
 
         now = datetime.now(timezone.utc)
-        source = await self._get_or_create_document_source(document, now)
+        source = await self._get_or_create_document_source(
+            document,
+            group_id,
+            now,
+        )
         run = IngestionRun(
             document_source_id=source.id,
             trigger_type=trigger_type,
@@ -528,12 +532,12 @@ class DocumentStore:
     async def _get_or_create_document_source(
         self,
         document: NormalizedDocument,
+        group_id: int,
         now: datetime,
     ) -> DocumentSource:
-        group = await get_document_group(self._session)
         group_source = await get_or_create_gitbook_source(
             self._session,
-            group.id,
+            group_id,
             DEFAULT_GITBOOK_ROOT_URL,
         )
         document_key = build_gitbook_document_key(document.source_url)
@@ -549,7 +553,7 @@ class DocumentStore:
         }
         if source is None:
             source = DocumentSource(
-                document_group_id=group.id,
+                document_group_id=group_id,
                 group_source_id=group_source.id,
                 document_key=document_key,
                 source_type=SOURCE_TYPE_GITBOOK,

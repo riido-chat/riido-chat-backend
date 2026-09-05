@@ -18,7 +18,7 @@ from app.database.models import (
     IngestionStage,
 )
 from app.database.session import dispose_engine
-from app.document.document_group import get_document_group
+from app.document.document_group import get_default_document_group
 from app.document.ingestion_service import (
     AdminIngestionService,
     DocumentNotFoundError,
@@ -71,7 +71,7 @@ class UploadResultCodeDbTest(unittest.IsolatedAsyncioTestCase):
         self.suffix = uuid.uuid4().hex[:8]
         self.titles = []
         async with self.session_factory() as session:
-            self.group_id = (await get_document_group(session)).id
+            self.group_id = (await get_default_document_group(session)).id
 
     async def asyncTearDown(self) -> None:
         async with self.session_factory() as session:

@@ -9,9 +9,10 @@ import unittest
 import uuid
 from unittest.mock import patch
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, or_, select, update
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+from app.admin.group_service import DocumentGroupService
 from app.core.config import get_settings
 from app.database.models import (
     DocumentGroupSource,
@@ -23,7 +24,7 @@ from app.database.models import (
     IngestionStage,
 )
 from app.database.session import dispose_engine
-from app.document.document_group import get_document_group
+from app.document.document_group import get_default_document_group
 from app.document.document_key import SOURCE_TYPE_GITBOOK
 from app.document.gitbook.client import GitBookListError, GitBookPage
 from app.document.ingestion_service import AdminIngestionService
@@ -84,7 +85,7 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
         self.console_titles = []
         self.other_root = None
         async with self.session_factory() as session:
-            self.group_id = (await get_document_group(session)).id
+            self.group_id = (await get_default_document_group(session)).id
             # 수집은 목록에 없는 GitBook 문서를 사라진 것으로 보고 비활성화한다.
             # stub 목록에는 이 테스트의 페이지만 있으므로 기존 문서가 전부
             # 꺼진다. 원래 켜져 있던 문서를 기억해 두었다가 teardown 에서
@@ -102,21 +103,15 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
 
     async def asyncTearDown(self) -> None:
         async with self.session_factory() as session:
-            titles = list(self.console_titles)
-            for key in self.keys:
-                source = await session.scalar(
-                    select(DocumentSource).where(
-                        DocumentSource.document_key == key
-                    )
+            # 같은 키가 원천마다 하나씩 있을 수 있으므로 전부 지운다.
+            # 하나만 집으면 다른 원천의 문서가 DB 에 남는다.
+            statement = select(DocumentSource).where(
+                or_(
+                    DocumentSource.document_key.in_(self.keys or [""]),
+                    DocumentSource.title.in_(self.console_titles or [""]),
                 )
-                if source is not None:
-                    titles.append(source.title)
-            for title in titles:
-                source = await session.scalar(
-                    select(DocumentSource).where(DocumentSource.title == title)
-                )
-                if source is None:
-                    continue
+            )
+            for source in (await session.execute(statement)).scalars().all():
                 await session.execute(
                     delete(IngestionRun).where(
                         IngestionRun.document_source_id == source.id
@@ -128,6 +123,7 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
                     )
                 )
                 await session.delete(source)
+            await session.flush()
             if self.other_root is not None:
                 other_source = await session.scalar(
                     select(DocumentGroupSource).where(
@@ -377,6 +373,34 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertNotEqual(first.group_source_id, second.group_source_id)
         # 다른 원천을 수집해도 앞선 GitBook 문서는 그대로다
         self.assertTrue(first.enabled)
+
+        # 응답에 원천이 없으면 표에서 두 문서를 구분할 수 없다
+        async with self.session_factory() as session:
+            detail = await DocumentGroupService(session).get_group_detail(
+                self.group_id
+            )
+        roots = {source.root_url for source in detail.sources}
+        self.assertIn(other_root, roots)
+
+        by_id = {row.document_id: row for row in detail.documents}
+        self.assertEqual(
+            first.group_source_id,
+            by_id[first.id].group_source_id,
+        )
+        self.assertEqual(
+            second.group_source_id,
+            by_id[second.id].group_source_id,
+        )
+
+    async def test_batch_reports_which_gitbook_was_collected(self) -> None:
+        page = self._page("intro")
+        accepted = await self._sync([page], {page.url: self._body("소개")})
+
+        batch = await self._batch(accepted.batch_id)
+
+        # 새로고침 뒤 재진입해도 어느 GitBook 수집인지 알 수 있어야 한다
+        self.assertEqual(ROOT_URL, batch.root_url)
+        self.assertEqual(accepted.group_source_id, batch.group_source_id)
 
     async def test_unknown_batch_is_not_found(self) -> None:
         async with self.session_factory() as session:

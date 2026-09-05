@@ -27,7 +27,6 @@ from app.database.models import (
     IngestionStage,
 )
 from app.database.session import get_session_factory
-from app.document.document_group import get_document_group
 from app.document.group_source import get_or_create_gitbook_source
 from app.document.document_key import (
     SOURCE_TYPE_GITBOOK,
@@ -54,6 +53,8 @@ class AcceptedRecollect:
     batch_id: uuid.UUID
     group_id: int
     page_count: int
+    group_source_id: int
+    root_url: str
 
 
 async def accept_recollect_batch(
@@ -70,8 +71,7 @@ async def accept_recollect_batch(
     batch_id = uuid.uuid4()
     now = datetime.now(timezone.utc)
     root = normalize_gitbook_root_url(root_url)
-    group = await get_document_group(session)
-    group_source = await get_or_create_gitbook_source(session, group.id, root)
+    group_source = await get_or_create_gitbook_source(session, group_id, root)
 
     existing = await _load_source_documents(session, group_source.id)
     seen_keys = set()
@@ -82,7 +82,7 @@ async def accept_recollect_batch(
         source = existing.get(document_key)
         if source is None:
             source = DocumentSource(
-                document_group_id=group.id,
+                document_group_id=group_id,
                 group_source_id=group_source.id,
                 document_key=document_key,
                 source_type=SOURCE_TYPE_GITBOOK,
@@ -154,8 +154,10 @@ async def accept_recollect_batch(
     await session.flush()
     accepted = AcceptedRecollect(
         batch_id=batch_id,
-        group_id=group.id,
+        group_id=group_id,
         page_count=len(pages),
+        group_source_id=group_source.id,
+        root_url=group_source.root_url,
     )
     await session.commit()
     return accepted

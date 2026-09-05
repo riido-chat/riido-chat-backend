@@ -36,6 +36,7 @@ from app.admin.schema import (
     AdminDocumentGroupSummary,
     AdminGroupDocument,
     AdminGroupInfo,
+    AdminGroupSourceItem,
     AdminGroupSummary,
     AdminLatestIndexRun,
     AdminPendingDocument,
@@ -561,6 +562,8 @@ async def start_gitbook_sync(
     return AdminRecollectAcceptedResponse(
         batchId=accepted.batch_id,
         groupId=accepted.group_id,
+        groupSourceId=accepted.group_source_id,
+        rootUrl=accepted.root_url,
         status=AdminIngestionStatus.PROCESSING,
         stage=RecollectStageValue.PROCESSING,
         pageCount=accepted.page_count,
@@ -594,6 +597,8 @@ def _to_recollect_response(
         return AdminRecollectProcessingResponse(
             batchId=detail.batch_id,
             groupId=detail.group_id,
+            groupSourceId=detail.group_source_id,
+            rootUrl=detail.root_url,
             status=AdminIngestionStatus.PROCESSING,
             stage=RecollectStageValue.PROCESSING,
             progress=AdminRecollectProgress(
@@ -607,6 +612,8 @@ def _to_recollect_response(
     return AdminRecollectSuccessResponse(
         batchId=detail.batch_id,
         groupId=detail.group_id,
+        groupSourceId=detail.group_source_id,
+        rootUrl=detail.root_url,
         status=AdminIngestionStatus.SUCCESS,
         stage=RecollectStageValue.PROCESSING,
         counts=AdminRecollectCounts(
@@ -689,6 +696,16 @@ def _to_group_detail(detail: GroupDetail) -> AdminDocumentGroupDetailResponse:
             name=detail.name,
             consumerKey=detail.consumer_key,
         ),
+        sources=[
+            AdminGroupSourceItem(
+                groupSourceId=source.group_source_id,
+                provider=source.provider,
+                rootUrl=source.root_url,
+                enabled=source.enabled,
+                documentCount=source.document_count,
+            )
+            for source in detail.sources
+        ],
         summary=AdminGroupSummary(
             activeIndexVersion=(
                 None
@@ -716,6 +733,7 @@ def _to_group_detail(detail: GroupDetail) -> AdminDocumentGroupDetailResponse:
                 documentKey=document.document_key,
                 title=document.title,
                 sourceType=document.source_type,
+                groupSourceId=document.group_source_id,
                 documentVersionNo=document.document_version_no,
                 appliedVersionNo=document.applied_version_no,
                 processingStatus=document.processing_status,
@@ -732,6 +750,8 @@ def _to_group_detail(detail: GroupDetail) -> AdminDocumentGroupDetailResponse:
                 documentId=running.document_source_id,
                 indexRunId=running.index_run_id,
                 batchId=running.batch_id,
+                groupSourceId=running.group_source_id,
+                rootUrl=running.root_url,
             )
         ),
         latestIndexRun=(

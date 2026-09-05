@@ -20,6 +20,7 @@ from app.admin.group_service import (
 )
 from app.database.models import ExecutionStatus
 from app.document.ingestion_service import DocumentGroupNotFoundError
+from app.document.group_source import GroupSourceView
 from app.document.job_gate import RunningJob
 from app.main import create_app
 
@@ -53,6 +54,15 @@ class AdminDocumentGroupApiTest(unittest.TestCase):
             "group_key": "HELP_CHATBOT",
             "name": "도움말 챗봇 이용가이드",
             "consumer_key": "HELP_CHATBOT",
+            "sources": [
+                GroupSourceView(
+                    group_source_id=1,
+                    provider="GITBOOK",
+                    root_url="https://docs.riido.io",
+                    enabled=True,
+                    document_count=39,
+                )
+            ],
             "active_index_version": ActiveIndexVersion(
                 index_version_id=57,
                 version_no=12,
@@ -113,6 +123,7 @@ class AdminDocumentGroupApiTest(unittest.TestCase):
                     document_key="upload/자주-묻는-질문",
                     title="자주 묻는 질문",
                     source_type="UPLOAD",
+                    group_source_id=None,
                     document_version_no=4,
                     applied_version_no=3,
                     processing_status="READY",
@@ -126,10 +137,15 @@ class AdminDocumentGroupApiTest(unittest.TestCase):
         self.assertEqual(1, body["summary"]["pendingCount"])
         self.assertEqual("NEW", body["summary"]["pendingDocuments"][0]["changeType"])
         self.assertEqual("REINDEX_REQUIRED", body["summary"]["searchStatus"])
+        source = body["sources"][0]
+        self.assertEqual("https://docs.riido.io", source["rootUrl"])
+        self.assertEqual(39, source["documentCount"])
         document = body["documents"][0]
         self.assertEqual("UPLOAD", document["sourceType"])
         self.assertEqual(4, document["documentVersionNo"])
         self.assertEqual(3, document["appliedVersionNo"])
+        # 콘솔 업로드 문서는 수집 원천이 없다
+        self.assertIsNone(document["groupSourceId"])
         self.assertIsNone(body["runningJob"])
         self.assertIsNone(body["latestIndexRun"])
 
@@ -141,6 +157,8 @@ class AdminDocumentGroupApiTest(unittest.TestCase):
                 job_type="RECOLLECT",
                 stage="PROCESSING",
                 batch_id=batch_id,
+                group_source_id=1,
+                root_url="https://docs.riido.io",
             ),
         )
 
@@ -150,6 +168,8 @@ class AdminDocumentGroupApiTest(unittest.TestCase):
         self.assertEqual("RECOLLECT", running["jobType"])
         self.assertEqual(str(batch_id), running["batchId"])
         self.assertIsNone(running["ingestionRunId"])
+        # 새로고침 뒤에도 어느 GitBook 수집인지 알 수 있어야 한다
+        self.assertEqual("https://docs.riido.io", running["rootUrl"])
 
     def test_detail_reports_failed_apply_for_modal_restore(self) -> None:
         self.service.get_group_detail.return_value = self._detail(

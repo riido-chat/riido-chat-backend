@@ -12,6 +12,7 @@ from typing import Callable, Optional
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.document.document_group import get_document_group
 from app.document.job_gate import (
     acquire_group_job_gate,
     find_processing_job,
@@ -356,23 +357,9 @@ class AdminIngestionService:
             raise AdminJobInProgressError()
 
     async def _get_group(self, group_id: int) -> DocumentGroup:
-        group = await self._get_document_group()
-        if group.id != group_id:
-            raise DocumentGroupNotFoundError()
-        return group
-
-    async def _get_document_group(self) -> DocumentGroup:
-        """1차 문서 그룹을 조회한다. migration 20260904_06이 seed한다."""
-
-        group = await self._session.scalar(
-            select(DocumentGroup).where(
-                DocumentGroup.group_key == DEFAULT_DOCUMENT_GROUP_KEY
-            )
-        )
+        group = await get_document_group(self._session, group_id)
         if group is None:
-            raise RuntimeError(
-                f"문서 그룹을 찾을 수 없습니다: {DEFAULT_DOCUMENT_GROUP_KEY}"
-            )
+            raise DocumentGroupNotFoundError()
         return group
 
     async def _find_or_create_upload_source(

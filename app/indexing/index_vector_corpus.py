@@ -14,6 +14,7 @@ from app.document.models import NormalizedDocument
 from app.retrieval.corpus import build_document_retrieval_chunks
 from app.retrieval.embedding import OpenAIEmbedder, build_embedding_text
 from app.retrieval.models import RetrievalChunk
+from app.document.document_group import get_default_document_group
 from app.document.document_store import DocumentStore
 from app.document.ingestion import prepare_chunk_embeddings
 from app.indexing.index_writer import IndexWriter
@@ -106,13 +107,18 @@ async def run_reindex(
 
     store = DocumentStore(session)
     writer = IndexWriter(session)
+    # CLI 시드는 요청 맥락이 없으므로 기본 그룹을 쓴다.
+    group_id = (await get_default_document_group(session)).id
     persisted_chunks = []
 
     for document in documents:
         ingestion_run_id = None
         checkpoint_committed = False
         try:
-            ingestion_run = await store.start_ingestion(document)
+            ingestion_run = await store.start_ingestion(
+                document,
+                group_id=group_id,
+            )
             ingestion_run_id = ingestion_run.id
             await session.commit()
             checkpoint_committed = True
@@ -149,7 +155,10 @@ async def run_reindex(
     checkpoint_committed = False
     failed_stage = "STARTING"
     try:
-        index_run = await writer.start_index(persisted_chunks)
+        index_run = await writer.start_index(
+            persisted_chunks,
+            group_id=group_id,
+        )
         index_run_id = index_run.id
         await session.commit()
         checkpoint_committed = True

@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from app.core.config import get_settings
 from app.database.models import DocumentSource, DocumentVersion, IngestionRun
 from app.database.session import dispose_engine
-from app.document.document_group import get_document_group
+from app.document.document_group import get_default_document_group
 from app.document.ingestion_service import (
     AdminIngestionService,
     AdminJobInProgressError,
@@ -54,7 +54,7 @@ class AdminJobGateDbTest(unittest.IsolatedAsyncioTestCase):
         )
         self.titles = []
         async with self.session_factory() as session:
-            self.group_id = (await get_document_group(session)).id
+            self.group_id = (await get_default_document_group(session)).id
 
     async def asyncTearDown(self) -> None:
         async with self.session_factory() as session:

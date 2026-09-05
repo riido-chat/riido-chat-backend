@@ -12,6 +12,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models import (
+    DocumentGroupSource,
     DocumentSource,
     ExecutionStatus,
     IndexRun,
@@ -38,6 +39,8 @@ class RunningJob:
     document_source_id: Optional[int] = None
     index_run_id: Optional[int] = None
     batch_id: Optional[UUID] = None
+    group_source_id: Optional[int] = None
+    root_url: Optional[str] = None
 
 
 # advisory lock 의 두 인자 형태를 쓴다. 첫 인자는 이 프로젝트의 잠금 종류,
@@ -71,10 +74,16 @@ async def load_running_job(
                 IngestionRun.document_source_id,
                 IngestionRun.stage,
                 IngestionRun.batch_id,
+                DocumentGroupSource.id,
+                DocumentGroupSource.root_url,
             )
             .join(
                 DocumentSource,
                 DocumentSource.id == IngestionRun.document_source_id,
+            )
+            .outerjoin(
+                DocumentGroupSource,
+                DocumentGroupSource.id == DocumentSource.group_source_id,
             )
             .where(
                 DocumentSource.document_group_id == group_id,
@@ -85,12 +94,14 @@ async def load_running_job(
         )
     ).first()
     if row is not None:
-        run_id, source_id, stage, batch_id = row
+        run_id, source_id, stage, batch_id, group_source_id, root_url = row
         if batch_id is not None:
             return RunningJob(
                 job_type=RECOLLECT_JOB,
                 stage="PROCESSING",
                 batch_id=batch_id,
+                group_source_id=group_source_id,
+                root_url=root_url,
             )
         return RunningJob(
             job_type=INGESTION_JOB,
