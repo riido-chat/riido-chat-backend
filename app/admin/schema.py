@@ -361,6 +361,8 @@ class AdminRecollectAcceptedResponse(BaseModel):
 
     batch_id: UUID = Field(alias="batchId")
     group_id: int = Field(alias="groupId")
+    group_source_id: int = Field(alias="groupSourceId")
+    root_url: str = Field(alias="rootUrl")
     status: Literal[AdminIngestionStatus.PROCESSING]
     stage: RecollectStageValue
     page_count: int = Field(alias="pageCount", ge=1)
@@ -407,6 +409,8 @@ class AdminRecollectProcessingResponse(BaseModel):
 
     batch_id: UUID = Field(alias="batchId")
     group_id: int = Field(alias="groupId")
+    group_source_id: Optional[int] = Field(alias="groupSourceId")
+    root_url: Optional[str] = Field(alias="rootUrl")
     status: Literal[AdminIngestionStatus.PROCESSING]
     stage: RecollectStageValue
     progress: AdminRecollectProgress
@@ -420,6 +424,8 @@ class AdminRecollectSuccessResponse(BaseModel):
 
     batch_id: UUID = Field(alias="batchId")
     group_id: int = Field(alias="groupId")
+    group_source_id: Optional[int] = Field(alias="groupSourceId")
+    root_url: Optional[str] = Field(alias="rootUrl")
     status: Literal[AdminIngestionStatus.SUCCESS]
     stage: RecollectStageValue
     counts: AdminRecollectCounts
@@ -482,6 +488,18 @@ class AdminDocumentGroupListResponse(BaseModel):
     groups: List[AdminDocumentGroupSummary]
 
 
+class AdminGroupSourceItem(BaseModel):
+    """그룹이 문서를 끌어오는 수집 원천 하나."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    group_source_id: int = Field(alias="groupSourceId")
+    provider: str
+    root_url: str = Field(alias="rootUrl")
+    enabled: bool
+    document_count: int = Field(alias="documentCount", ge=0)
+
+
 class AdminGroupInfo(BaseModel):
     model_config = HTTP_DTO_CONFIG
 
@@ -531,6 +549,8 @@ class AdminGroupDocument(BaseModel):
     document_key: str = Field(alias="documentKey")
     title: str
     source_type: SourceTypeValue = Field(alias="sourceType")
+    # 어느 수집 원천에서 왔는지. 콘솔 업로드 문서는 null 이다.
+    group_source_id: Optional[int] = Field(alias="groupSourceId")
     document_version_no: int = Field(alias="documentVersionNo", ge=1)
     applied_version_no: Optional[int] = Field(alias="appliedVersionNo")
     processing_status: str = Field(alias="processingStatus")
@@ -547,6 +567,8 @@ class AdminRunningJob(BaseModel):
     document_id: Optional[int] = Field(default=None, alias="documentId")
     index_run_id: Optional[int] = Field(default=None, alias="indexRunId")
     batch_id: Optional[UUID] = Field(default=None, alias="batchId")
+    group_source_id: Optional[int] = Field(default=None, alias="groupSourceId")
+    root_url: Optional[str] = Field(default=None, alias="rootUrl")
 
 
 class AdminLatestIndexRun(BaseModel):
@@ -568,6 +590,7 @@ class AdminDocumentGroupDetailResponse(BaseModel):
     model_config = HTTP_DTO_CONFIG
 
     group: AdminGroupInfo
+    sources: List[AdminGroupSourceItem]
     summary: AdminGroupSummary
     documents: List[AdminGroupDocument]
     running_job: Optional[AdminRunningJob] = Field(alias="runningJob")

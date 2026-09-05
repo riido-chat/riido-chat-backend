@@ -54,6 +54,8 @@ class AcceptedRecollect:
     batch_id: uuid.UUID
     group_id: int
     page_count: int
+    group_source_id: int
+    root_url: str
 
 
 async def accept_recollect_batch(
@@ -156,6 +158,8 @@ async def accept_recollect_batch(
         batch_id=batch_id,
         group_id=group.id,
         page_count=len(pages),
+        group_source_id=group_source.id,
+        root_url=group_source.root_url,
     )
     await session.commit()
     return accepted

@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models import (
+    DocumentGroupSource,
     DocumentSource,
     ExecutionStatus,
     IngestionResultCode,
@@ -67,6 +68,8 @@ class RecollectBatchDetail:
 
     batch_id: uuid.UUID
     group_id: int
+    group_source_id: Optional[int]
+    root_url: Optional[str]
     status: ExecutionStatus
     total: int
     processed: int
@@ -119,10 +122,14 @@ class RecollectService:
 
         rows = (
             await self._session.execute(
-                select(IngestionRun, DocumentSource)
+                select(IngestionRun, DocumentSource, DocumentGroupSource)
                 .join(
                     DocumentSource,
                     DocumentSource.id == IngestionRun.document_source_id,
+                )
+                .outerjoin(
+                    DocumentGroupSource,
+                    DocumentGroupSource.id == DocumentSource.group_source_id,
                 )
                 .where(IngestionRun.batch_id == batch_id)
                 .order_by(IngestionRun.id)
@@ -131,11 +138,17 @@ class RecollectService:
         if not rows:
             raise RecollectBatchNotFoundError()
 
-        runs = [run for run, _ in rows]
+        runs = [run for run, _, _ in rows]
+        group_source = next(
+            (source for _, _, source in rows if source is not None),
+            None,
+        )
         finished = [run for run in runs if run.status != ExecutionStatus.PROCESSING]
         detail = RecollectBatchDetail(
             batch_id=batch_id,
             group_id=rows[0][1].document_group_id,
+            group_source_id=None if group_source is None else group_source.id,
+            root_url=None if group_source is None else group_source.root_url,
             status=(
                 ExecutionStatus.PROCESSING
                 if len(finished) < len(runs)
@@ -151,6 +164,8 @@ class RecollectService:
         return RecollectBatchDetail(
             batch_id=detail.batch_id,
             group_id=detail.group_id,
+            group_source_id=detail.group_source_id,
+            root_url=detail.root_url,
             status=detail.status,
             total=detail.total,
             processed=detail.processed,
@@ -211,6 +226,6 @@ def _failures_of(rows) -> List[RecollectFailure]:
             stage=run.stage.value,
             error_code=run.error_code,
         )
-        for run, source in rows
+        for run, source, _ in rows
         if run.status == ExecutionStatus.FAILED
     ]

@@ -21,6 +21,7 @@ from app.database.models import (
     IndexVersionStatus,
 )
 from app.document.ingestion_service import DocumentGroupNotFoundError
+from app.document.group_source import GroupSourceView, list_group_sources
 from app.document.job_gate import RunningJob, load_running_job
 from app.indexing.index_builder import (
     load_active_document_versions,
@@ -70,6 +71,7 @@ class GroupDocument:
     document_key: str
     title: str
     source_type: str
+    group_source_id: Optional[int]
     document_version_no: int
     applied_version_no: Optional[int]
     processing_status: str
@@ -95,6 +97,7 @@ class GroupDetail:
     group_key: str
     name: str
     consumer_key: str
+    sources: List[GroupSourceView]
     active_index_version: Optional[ActiveIndexVersion]
     pending_documents: List[PendingDocumentView]
     search_status: str
@@ -160,6 +163,7 @@ class DocumentGroupService:
             group_key=group.group_key,
             name=group.name,
             consumer_key=group.consumer_key,
+            sources=await list_group_sources(self._session, group.id),
             active_index_version=await self._active_index_version(group.id),
             pending_documents=[
                 PendingDocumentView(
@@ -282,6 +286,7 @@ class DocumentGroupService:
                 document_key=source.document_key,
                 title=source.title or "",
                 source_type=source.source_type,
+                group_source_id=source.group_source_id,
                 document_version_no=latest[source.id][1],
                 applied_version_no=applied.get(source.id),
                 processing_status="READY",
