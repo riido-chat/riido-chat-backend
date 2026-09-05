@@ -231,6 +231,7 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         index_version_id = None
         chunking_config_id = None
         embedding_config_id = None
+        document_group_id = None
 
         try:
             async with AsyncSession(
@@ -258,6 +259,7 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
                 )
                 setup_session.add_all([chunking, embedding, group])
                 await setup_session.flush()
+                document_group_id = group.id
 
                 index_version = IndexVersion(
                     document_group_id=group.id,
@@ -361,6 +363,13 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
                     await cleanup_session.execute(
                         delete(EmbeddingConfig).where(
                             EmbeddingConfig.id == embedding_config_id
+                        )
+                    )
+                # 그룹을 남기면 그룹 목록 조회에 테스트 데이터가 섞인다
+                if document_group_id is not None:
+                    await cleanup_session.execute(
+                        delete(DocumentGroup).where(
+                            DocumentGroup.id == document_group_id
                         )
                     )
                 await cleanup_session.commit()
@@ -1284,6 +1293,7 @@ class RagLogStoreConcurrencyDbTest(unittest.IsolatedAsyncioTestCase):
             first_conversation = await store.create_conversation()
             second_conversation = await store.create_conversation()
             self.index_version_id = index_version.id
+            self.document_group_id = group.id
             self.chunking_config_id = chunking.id
             self.embedding_config_id = embedding.id
             self.conversation_ids = (
@@ -1310,6 +1320,12 @@ class RagLogStoreConcurrencyDbTest(unittest.IsolatedAsyncioTestCase):
             await session.execute(
                 delete(EmbeddingConfig).where(
                     EmbeddingConfig.id == self.embedding_config_id
+                )
+            )
+            # 그룹을 남기면 그룹 목록 조회에 테스트 데이터가 섞인다
+            await session.execute(
+                delete(DocumentGroup).where(
+                    DocumentGroup.id == self.document_group_id
                 )
             )
             await session.commit()
