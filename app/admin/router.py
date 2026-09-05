@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, File, Request, UploadFile, status
 from app.admin.dependencies import (
     get_admin_ingestion_service,
     get_chunk_embedder_factory,
+    get_document_group_service,
     get_index_reindex_service,
     get_recollect_service,
 )
@@ -22,8 +23,23 @@ from app.document.ingestion_service import (
     UploadFileTooLargeError,
     run_admin_ingestion,
 )
+from app.admin.group_service import (
+    DocumentGroupService,
+    GroupDetail,
+    GroupSummary,
+)
 from app.admin.schema import (
+    AdminActiveIndexVersion,
     AdminChunkStats,
+    AdminDocumentGroupDetailResponse,
+    AdminDocumentGroupListResponse,
+    AdminDocumentGroupSummary,
+    AdminGroupDocument,
+    AdminGroupInfo,
+    AdminGroupSummary,
+    AdminLatestIndexRun,
+    AdminPendingDocument,
+    AdminRunningJob,
     AdminDocumentRevisionRequest,
     AdminDocumentUploadRequest,
     AdminDuplicateDocument,
@@ -613,4 +629,125 @@ def _to_recollect_response(
         ],
         startedAt=detail.started_at,
         finishedAt=detail.finished_at,
+    )
+
+
+@router.get(
+    "/document-groups",
+    response_model=AdminDocumentGroupListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="문서 그룹 목록 조회",
+)
+async def list_document_groups(
+    service: DocumentGroupService = Depends(get_document_group_service),
+) -> AdminDocumentGroupListResponse:
+    summaries = await service.list_groups()
+    return AdminDocumentGroupListResponse(
+        groups=[_to_group_summary(summary) for summary in summaries],
+    )
+
+
+@router.get(
+    "/document-groups/{group_id}",
+    response_model=AdminDocumentGroupDetailResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": AdminErrorResponse,
+            "description": "`NOT_FOUND`: 존재하지 않는 groupId 입니다.",
+        }
+    },
+    summary="문서 그룹 상세 조회",
+)
+async def get_document_group(
+    group_id: int,
+    service: DocumentGroupService = Depends(get_document_group_service),
+) -> AdminDocumentGroupDetailResponse:
+    return _to_group_detail(await service.get_group_detail(group_id))
+
+
+def _to_group_summary(summary: GroupSummary) -> AdminDocumentGroupSummary:
+    return AdminDocumentGroupSummary(
+        groupId=summary.group_id,
+        groupKey=summary.group_key,
+        name=summary.name,
+        consumerKey=summary.consumer_key,
+        documentCount=summary.document_count,
+        activeIndexVersionNo=summary.active_index_version_no,
+        searchStatus=summary.search_status,
+    )
+
+
+def _to_group_detail(detail: GroupDetail) -> AdminDocumentGroupDetailResponse:
+    active = detail.active_index_version
+    running = detail.running_job
+    latest = detail.latest_index_run
+    return AdminDocumentGroupDetailResponse(
+        group=AdminGroupInfo(
+            groupId=detail.group_id,
+            groupKey=detail.group_key,
+            name=detail.name,
+            consumerKey=detail.consumer_key,
+        ),
+        summary=AdminGroupSummary(
+            activeIndexVersion=(
+                None
+                if active is None
+                else AdminActiveIndexVersion(
+                    indexVersionId=active.index_version_id,
+                    versionNo=active.version_no,
+                    activatedAt=active.activated_at,
+                )
+            ),
+            pendingCount=len(detail.pending_documents),
+            pendingDocuments=[
+                AdminPendingDocument(
+                    documentId=item.document_id,
+                    title=item.title,
+                    changeType=item.change_type,
+                )
+                for item in detail.pending_documents
+            ],
+            searchStatus=detail.search_status,
+        ),
+        documents=[
+            AdminGroupDocument(
+                documentId=document.document_id,
+                documentKey=document.document_key,
+                title=document.title,
+                sourceType=document.source_type,
+                documentVersionNo=document.document_version_no,
+                appliedVersionNo=document.applied_version_no,
+                processingStatus=document.processing_status,
+            )
+            for document in detail.documents
+        ],
+        runningJob=(
+            None
+            if running is None
+            else AdminRunningJob(
+                jobType=running.job_type,
+                stage=running.stage,
+                ingestionRunId=running.ingestion_run_id,
+                documentId=running.document_source_id,
+                indexRunId=running.index_run_id,
+                batchId=running.batch_id,
+            )
+        ),
+        latestIndexRun=(
+            None
+            if latest is None
+            else AdminLatestIndexRun(
+                indexRunId=latest.index_run_id,
+                indexVersionId=latest.index_version_id,
+                operationType=latest.operation_type,
+                status=latest.status.value,
+                stage=latest.stage,
+                errorCode=_to_index_run_error_code(latest.error_code)
+                if latest.error_code
+                else None,
+                startedAt=latest.started_at,
+                finishedAt=latest.finished_at,
+            )
+        ),
     )
