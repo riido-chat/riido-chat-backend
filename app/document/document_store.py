@@ -28,9 +28,11 @@ from app.database.models import (
 from app.document.chunking_config import get_or_create_chunking_config
 from app.document.document_group import get_document_group
 from app.document.document_key import (
+    DEFAULT_GITBOOK_ROOT_URL,
     SOURCE_TYPE_GITBOOK,
     build_gitbook_document_key,
 )
+from app.document.group_source import get_or_create_gitbook_source
 from app.document.models import NormalizedDocument
 from app.document.section_parser import create_section_identity_hash
 from app.retrieval.embedding import (
@@ -529,10 +531,15 @@ class DocumentStore:
         now: datetime,
     ) -> DocumentSource:
         group = await get_document_group(self._session)
+        group_source = await get_or_create_gitbook_source(
+            self._session,
+            group.id,
+            DEFAULT_GITBOOK_ROOT_URL,
+        )
         document_key = build_gitbook_document_key(document.source_url)
         source = await self._session.scalar(
             select(DocumentSource).where(
-                DocumentSource.document_group_id == group.id,
+                DocumentSource.group_source_id == group_source.id,
                 DocumentSource.document_key == document_key,
             )
         )
@@ -543,6 +550,7 @@ class DocumentStore:
         if source is None:
             source = DocumentSource(
                 document_group_id=group.id,
+                group_source_id=group_source.id,
                 document_key=document_key,
                 source_type=SOURCE_TYPE_GITBOOK,
                 canonical_uri=document.source_url,

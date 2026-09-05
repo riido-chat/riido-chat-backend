@@ -28,6 +28,7 @@ from app.database.models import (
 )
 from app.database.session import get_session_factory
 from app.document.document_group import get_document_group
+from app.document.group_source import get_or_create_gitbook_source
 from app.document.document_key import (
     SOURCE_TYPE_GITBOOK,
     build_gitbook_document_key,
@@ -70,8 +71,9 @@ async def accept_recollect_batch(
     now = datetime.now(timezone.utc)
     root = normalize_gitbook_root_url(root_url)
     group = await get_document_group(session)
+    group_source = await get_or_create_gitbook_source(session, group.id, root)
 
-    existing = await _load_gitbook_sources(session, group.id, root)
+    existing = await _load_source_documents(session, group_source.id)
     seen_keys = set()
 
     for page in pages:
@@ -81,6 +83,7 @@ async def accept_recollect_batch(
         if source is None:
             source = DocumentSource(
                 document_group_id=group.id,
+                group_source_id=group_source.id,
                 document_key=document_key,
                 source_type=SOURCE_TYPE_GITBOOK,
                 canonical_uri=page.url,
@@ -121,7 +124,7 @@ async def accept_recollect_batch(
             )
         )
 
-    # 사라진 페이지 판정은 이번에 수집한 루트 아래 문서로만 한정한다.
+    # 사라진 페이지 판정은 이번에 수집한 원천의 문서로만 한정한다.
     # 다른 GitBook 이나 콘솔 문서를 건드리면 안 된다.
     for document_key, source in existing.items():
         if document_key in seen_keys or not source.enabled:
@@ -189,19 +192,16 @@ async def run_recollect_batch(
         )
 
 
-async def _load_gitbook_sources(
+async def _load_source_documents(
     session: AsyncSession,
-    group_id: int,
-    root_url: str,
+    group_source_id: int,
 ) -> Dict[str, DocumentSource]:
-    """이번 루트 아래에 있는 GitBook 문서만 모은다."""
+    """이번 원천에서 들여온 문서만 모은다."""
 
     rows = (
         await session.execute(
             select(DocumentSource).where(
-                DocumentSource.document_group_id == group_id,
-                DocumentSource.source_type == SOURCE_TYPE_GITBOOK,
-                DocumentSource.canonical_uri.startswith(f"{root_url}/"),
+                DocumentSource.group_source_id == group_source_id
             )
         )
     ).scalars()

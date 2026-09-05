@@ -43,6 +43,7 @@ from app.retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 
 ERD_TABLE_NAMES = {
     "document_groups",
+    "document_group_sources",
     "document_sources",
     "ingestion_runs",
     "document_versions",
@@ -200,9 +201,28 @@ class DatabaseModelTest(unittest.TestCase):
         self.assertEqual(300, table.c.document_key.type.length)
         self.assertEqual("document_groups.id", foreign_key.target_fullname)
         self.assertEqual("RESTRICT", foreign_key.ondelete)
+        # 끌어오는 문서는 원천 안에서, 밀어 넣는 문서는 그룹 안에서 유일하다
+        partial_unique = {
+            index.name: (
+                tuple(index.columns.keys()),
+                str(index.dialect_options["postgresql"]["where"]),
+            )
+            for index in table.indexes
+            if index.unique
+        }
         self.assertEqual(
-            ("document_group_id", "document_key"),
-            unique_constraints["uq_document_sources_document_group_id_document_key"],
+            (
+                ("group_source_id", "document_key"),
+                "group_source_id IS NOT NULL",
+            ),
+            partial_unique["uq_document_sources_group_source_id_document_key"],
+        )
+        self.assertEqual(
+            (
+                ("document_group_id", "document_key"),
+                "group_source_id IS NULL",
+            ),
+            partial_unique["uq_document_sources_document_group_id_document_key"],
         )
         self.assertEqual(
             ("document_group_id", "canonical_uri"),

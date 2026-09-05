@@ -15,10 +15,7 @@ from app.database.models import (
     IngestionRun,
 )
 from app.document.document_group import get_document_group
-from app.document.document_key import (
-    SOURCE_TYPE_GITBOOK,
-    normalize_gitbook_root_url,
-)
+from app.document.document_key import normalize_gitbook_root_url
 from app.document.gitbook.client import GitBookListError, list_pages
 from app.document.ingestion_service import (
     AdminApiError,
@@ -34,7 +31,6 @@ from app.document.recollect import (
 
 
 SOURCE_LIST_FAILED = "SOURCE_LIST_FAILED"
-GITBOOK_ROOT_MISMATCH = "GITBOOK_ROOT_MISMATCH"
 NOT_FOUND = "NOT_FOUND"
 
 
@@ -44,16 +40,6 @@ class SourceListFailedError(AdminApiError):
             SOURCE_LIST_FAILED,
             f"docs.riido.io 페이지 목록을 읽지 못했습니다: {message}",
             HTTPStatus.BAD_GATEWAY,
-        )
-
-
-class GitBookRootMismatchError(AdminApiError):
-    def __init__(self, existing_root: str) -> None:
-        super().__init__(
-            GITBOOK_ROOT_MISMATCH,
-            f"이 그룹은 이미 {existing_root} 문서를 담고 있습니다. "
-            "다른 GitBook 을 같은 그룹에 넣을 수 없습니다.",
-            HTTPStatus.CONFLICT,
         )
 
 
@@ -107,13 +93,13 @@ class RecollectService:
         실행을 하나도 만들지 않고 요청 자체를 거절한다.
         """
 
+        # 한 그룹이 여러 GitBook 을 가질 수 있다. 문서 키는 원천 안에서만
+        # 유일하므로 서로 다른 GitBook 이 같은 경로를 가져도 겹치지 않는다.
         root = normalize_gitbook_root_url(root_url)
         group = await self._get_group(group_id)
         await acquire_group_job_gate(self._session, group.id)
         if await find_processing_job(self._session, group.id) is not None:
             raise AdminJobInProgressError()
-
-        await self._ensure_single_gitbook_root(group.id, root)
 
         try:
             pages = list_pages(root)
@@ -127,37 +113,6 @@ class RecollectService:
             root,
             pages,
         )
-
-    async def _ensure_single_gitbook_root(
-        self,
-        group_id: int,
-        root_url: str,
-    ) -> None:
-        """한 그룹에 서로 다른 GitBook 이 섞이지 않게 막는다.
-
-        임시 방편이다. 그룹이 어느 GitBook 을 수집하는지는 그룹의 연결 설정이
-        가져야 할 사실인데 지금은 그 자리가 없어 문서의 canonical_uri 에서
-        역산한다. 문서 키가 루트 기준 상대 경로라, 다른 GitBook 을 같은 그룹에
-        넣으면 서로 다른 문서가 같은 키로 병합된다.
-
-        수집 원천을 1급 개념(document_group_sources)으로 만들면 이 함수는
-        connection_id 조회로 바뀐다. 그때 이 검사를 지운다.
-        """
-
-        outside = await self._session.scalar(
-            select(DocumentSource.canonical_uri)
-            .where(
-                DocumentSource.document_group_id == group_id,
-                DocumentSource.source_type == SOURCE_TYPE_GITBOOK,
-                ~DocumentSource.canonical_uri.startswith(f"{root_url}/"),
-            )
-            .limit(1)
-        )
-        if outside is None:
-            return
-
-        existing_root = outside.rsplit("/", 1)[0]
-        raise GitBookRootMismatchError(existing_root)
 
     async def get_batch(self, batch_id: uuid.UUID) -> RecollectBatchDetail:
         """배치에 묶인 수집 실행에서 진행과 집계를 조립한다."""
