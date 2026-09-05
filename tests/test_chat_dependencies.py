@@ -175,6 +175,11 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
         store = Mock()
         store.load_active_chunks = AsyncMock(return_value=self.corpus)
         patches = {
+            # 기동 시 중단 실행 정리는 이 테스트의 관심사가 아니다
+            "close_interrupted_runs": patch(
+                "app.main.close_interrupted_runs",
+                new=AsyncMock(return_value=(0, 0)),
+            ),
             "session_factory": patch(
                 "app.main.get_session_factory",
                 return_value=session_factory,

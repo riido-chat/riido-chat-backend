@@ -23,6 +23,7 @@ from app.chat.rag_run import rag_run_result_not_found_response
 from app.chat.rag_run import router as rag_run_router
 from app.core.config import get_settings
 from app.database.session import dispose_engine, get_session_factory
+from app.document.stale_runs import close_interrupted_runs
 from app.chat.service import (
     ConversationNotFoundError,
     conversation_busy_response,
@@ -50,6 +51,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # 응답 스트림보다 오래 사는 파이프라인 task를 앱이 소유한다.
     app.state.pipeline_tasks = set()
     try:
+        await _close_interrupted_runs()
         corpus_state = CorpusState(get_settings().corpus_dir)
         app.state.corpus_state = corpus_state
         await _load_corpus_if_available(corpus_state)
@@ -61,6 +63,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         # 살아 있는 파이프라인이 끝난 뒤에 engine을 정리해야 세션이 깨지지 않는다.
         await _drain_pipeline_tasks(app)
         await dispose_engine()
+
+
+async def _close_interrupted_runs() -> None:
+    """이전 프로세스가 남긴 PROCESSING 실행을 마감한다.
+
+    마감하지 않으면 작업 잠금이 그 행을 보고 그룹을 영구히 막는다.
+    실패해도 기동은 계속한다. 잠금이 막힐 뿐 서비스는 답할 수 있다.
+    """
+
+    try:
+        async with get_session_factory()() as session:
+            await close_interrupted_runs(session)
+    except Exception:
+        logger.exception("중단된 실행을 정리하지 못했습니다.")
 
 
 async def _drain_pipeline_tasks(app: FastAPI) -> None:

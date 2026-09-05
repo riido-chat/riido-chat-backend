@@ -2,7 +2,8 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, Literal, Optional, Union
+from typing import Annotated, List, Literal, Optional, Union
+from uuid import UUID
 
 from fastapi import UploadFile
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -68,6 +69,8 @@ class AdminErrorCode(str, Enum):
     REINDEX_NOT_REQUIRED = "REINDEX_NOT_REQUIRED"
     NO_READY_DOCUMENTS = "NO_READY_DOCUMENTS"
     RETRY_NOT_ALLOWED = "RETRY_NOT_ALLOWED"
+    SOURCE_LIST_FAILED = "SOURCE_LIST_FAILED"
+    GITBOOK_ROOT_MISMATCH = "GITBOOK_ROOT_MISMATCH"
     NOT_FOUND = "NOT_FOUND"
     INTERNAL_ERROR = "INTERNAL_ERROR"
 
@@ -326,4 +329,107 @@ AdminIndexRunResponse = Union[
     AdminIndexRunProcessingResponse,
     AdminIndexRunSuccessResponse,
     AdminIndexRunFailedResponse,
+]
+
+
+class AdminGitBookSyncRequest(BaseModel):
+    """GitBook 수집 요청. 루트 URL 하나를 받는다."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    source_url: str = Field(alias="sourceUrl", min_length=1, max_length=1_000)
+
+    @field_validator("source_url")
+    @classmethod
+    def require_https(cls, source_url: str) -> str:
+        value = source_url.strip().rstrip("/")
+        if not value.startswith("https://"):
+            raise ValueError("GitBook 루트 URL은 https 여야 합니다.")
+        return value
+
+
+class RecollectStageValue(str, Enum):
+    """재탐색 배치의 단계."""
+
+    LISTING = "LISTING"
+    PROCESSING = "PROCESSING"
+
+
+class AdminRecollectAcceptedResponse(BaseModel):
+    """재탐색 접수 결과."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    batch_id: UUID = Field(alias="batchId")
+    group_id: int = Field(alias="groupId")
+    status: Literal[AdminIngestionStatus.PROCESSING]
+    stage: RecollectStageValue
+    page_count: int = Field(alias="pageCount", ge=1)
+
+
+class AdminRecollectProgress(BaseModel):
+    """페이지 처리 진행."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    total: int = Field(ge=0)
+    processed: int = Field(ge=0)
+
+
+class AdminRecollectCounts(BaseModel):
+    """배치 결과 집계."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    total: int = Field(ge=0)
+    created: int = Field(ge=0)
+    updated: int = Field(ge=0)
+    no_change: int = Field(alias="noChange", ge=0)
+    removed: int = Field(ge=0)
+    failed: int = Field(ge=0)
+
+
+class AdminRecollectFailure(BaseModel):
+    """실패한 페이지 한 건."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    document_key: str = Field(alias="documentKey")
+    title: str
+    ingestion_run_id: int = Field(alias="ingestionRunId")
+    stage: IngestionStageValue
+    error_code: Optional[IngestionErrorCode] = Field(alias="errorCode")
+
+
+class AdminRecollectProcessingResponse(BaseModel):
+    """진행 중인 재탐색 배치."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    batch_id: UUID = Field(alias="batchId")
+    group_id: int = Field(alias="groupId")
+    status: Literal[AdminIngestionStatus.PROCESSING]
+    stage: RecollectStageValue
+    progress: AdminRecollectProgress
+    started_at: datetime = Field(alias="startedAt")
+
+
+class AdminRecollectSuccessResponse(BaseModel):
+    """끝난 재탐색 배치. 일부 페이지가 실패해도 배치는 성공이다."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    batch_id: UUID = Field(alias="batchId")
+    group_id: int = Field(alias="groupId")
+    status: Literal[AdminIngestionStatus.SUCCESS]
+    stage: RecollectStageValue
+    counts: AdminRecollectCounts
+    failures: List[AdminRecollectFailure]
+    started_at: datetime = Field(alias="startedAt")
+    finished_at: datetime = Field(alias="finishedAt")
+
+
+AdminRecollectBatchResponse = Union[
+    AdminRecollectProcessingResponse,
+    AdminRecollectSuccessResponse,
 ]

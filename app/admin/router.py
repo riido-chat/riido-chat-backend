@@ -3,6 +3,7 @@
 import asyncio
 from pathlib import Path
 from typing import Annotated, Callable, Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Request, UploadFile, status
 
@@ -10,6 +11,7 @@ from app.admin.dependencies import (
     get_admin_ingestion_service,
     get_chunk_embedder_factory,
     get_index_reindex_service,
+    get_recollect_service,
 )
 from app.document.ingestion_service import (
     INTERNAL_ERROR,
@@ -43,11 +45,25 @@ from app.admin.schema import (
     AdminIngestionRunResponse,
     AdminIngestionStatus,
     AdminIngestionSuccessResponse,
+    AdminGitBookSyncRequest,
+    AdminRecollectAcceptedResponse,
+    AdminRecollectBatchResponse,
+    AdminRecollectCounts,
+    AdminRecollectFailure,
+    AdminRecollectProcessingResponse,
+    AdminRecollectProgress,
+    AdminRecollectSuccessResponse,
     IngestionErrorCode,
     IngestionStageValue,
+    RecollectStageValue,
 )
 from app.chat.dependencies import get_corpus_state
 from app.core.task_registry import register_pipeline_task
+from app.document.recollect import run_recollect_batch
+from app.document.recollect_service import (
+    RecollectBatchDetail,
+    RecollectService,
+)
 from app.indexing.index_job import run_admin_index_job
 from app.indexing.index_service import (
     IndexReindexService,
@@ -479,3 +495,122 @@ def _to_index_run_error_code(error_code: Optional[str]) -> IndexRunErrorCode:
         return IndexRunErrorCode(error_code)
     except ValueError:
         return IndexRunErrorCode.INTERNAL_ERROR
+
+
+RECOLLECT_ERROR_RESPONSES = {
+    status.HTTP_404_NOT_FOUND: {
+        "model": AdminErrorResponse,
+        "description": "`NOT_FOUND`: 대상 그룹 또는 배치가 없는 경우입니다.",
+    },
+    status.HTTP_409_CONFLICT: {
+        "model": AdminErrorResponse,
+        "description": "`JOB_IN_PROGRESS`: 같은 그룹에 진행 중 작업이 있는 경우입니다.",
+    },
+    status.HTTP_502_BAD_GATEWAY: {
+        "model": AdminErrorResponse,
+        "description": (
+            "`SOURCE_LIST_FAILED`: docs.riido.io 페이지 목록을 읽지 못한 "
+            "경우입니다. 배치를 시작하지 않습니다."
+        ),
+    },
+}
+
+
+@router.post(
+    "/document-groups/{group_id}/gitbook-sync",
+    response_model=AdminRecollectAcceptedResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    responses=RECOLLECT_ERROR_RESPONSES,
+    summary="GitBook 수집",
+)
+async def start_gitbook_sync(
+    group_id: int,
+    request: AdminGitBookSyncRequest,
+    http_request: Request,
+    service: RecollectService = Depends(get_recollect_service),
+    embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
+        get_chunk_embedder_factory
+    ),
+) -> AdminRecollectAcceptedResponse:
+    """루트 URL의 페이지 목록을 읽어 페이지별 실행을 만들고 배치를 시작한다.
+
+    같은 루트로 다시 부르면 재탐색이 된다.
+    """
+
+    accepted = await service.start_sync(group_id, request.source_url)
+    task = asyncio.create_task(
+        run_recollect_batch(accepted.batch_id, embedder_factory)
+    )
+    register_pipeline_task(http_request.app, task)
+    return AdminRecollectAcceptedResponse(
+        batchId=accepted.batch_id,
+        groupId=accepted.group_id,
+        status=AdminIngestionStatus.PROCESSING,
+        stage=RecollectStageValue.PROCESSING,
+        pageCount=accepted.page_count,
+    )
+
+
+@router.get(
+    "/recollect-batches/{batch_id}",
+    response_model=AdminRecollectBatchResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": AdminErrorResponse,
+            "description": "`NOT_FOUND`: 존재하지 않는 batchId 입니다.",
+        }
+    },
+    summary="재탐색 배치 조회",
+)
+async def get_recollect_batch(
+    batch_id: UUID,
+    service: RecollectService = Depends(get_recollect_service),
+) -> AdminRecollectBatchResponse:
+    detail = await service.get_batch(batch_id)
+    return _to_recollect_response(detail)
+
+
+def _to_recollect_response(
+    detail: RecollectBatchDetail,
+) -> AdminRecollectBatchResponse:
+    if detail.status == ExecutionStatus.PROCESSING:
+        return AdminRecollectProcessingResponse(
+            batchId=detail.batch_id,
+            groupId=detail.group_id,
+            status=AdminIngestionStatus.PROCESSING,
+            stage=RecollectStageValue.PROCESSING,
+            progress=AdminRecollectProgress(
+                total=detail.total,
+                processed=detail.processed,
+            ),
+            startedAt=detail.started_at,
+        )
+
+    counts = detail.counts or {}
+    return AdminRecollectSuccessResponse(
+        batchId=detail.batch_id,
+        groupId=detail.group_id,
+        status=AdminIngestionStatus.SUCCESS,
+        stage=RecollectStageValue.PROCESSING,
+        counts=AdminRecollectCounts(
+            total=counts.get("total", 0),
+            created=counts.get("created", 0),
+            updated=counts.get("updated", 0),
+            noChange=counts.get("no_change", 0),
+            removed=counts.get("removed", 0),
+            failed=counts.get("failed", 0),
+        ),
+        failures=[
+            AdminRecollectFailure(
+                documentKey=failure.document_key,
+                title=failure.title,
+                ingestionRunId=failure.ingestion_run_id,
+                stage=failure.stage,
+                errorCode=_to_ingestion_error_code(failure.error_code),
+            )
+            for failure in detail.failures
+        ],
+        startedAt=detail.started_at,
+        finishedAt=detail.finished_at,
+    )

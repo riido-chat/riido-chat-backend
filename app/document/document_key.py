@@ -22,7 +22,7 @@ SOURCE_TYPE_UPLOAD = "UPLOAD"
 CONSOLE_URI_SCHEME = "riido-doc"
 
 UPLOAD_DOCUMENT_KEY_PREFIX = "upload/"
-GITBOOK_DOCUMENT_URL_PREFIX = re.compile(r"^https?://docs\.riido\.io/")
+DEFAULT_GITBOOK_ROOT_URL = "https://docs.riido.io"
 GITBOOK_DOCUMENT_URL_SUFFIX = re.compile(r"\.md$")
 
 _WHITESPACE = re.compile(r"\s+")
@@ -52,10 +52,25 @@ def build_upload_document_key(title: str) -> str:
     return f"{UPLOAD_DOCUMENT_KEY_PREFIX}{normalize_document_title(title)}"
 
 
-def build_gitbook_document_key(canonical_uri: str) -> str:
-    """GitBook 페이지 URL에서 그룹 내 문서 키(URL 경로)를 만든다."""
+def normalize_gitbook_root_url(root_url: str) -> str:
+    """GitBook 루트 URL의 끝 슬래시를 떼어 비교 가능한 형태로 만든다."""
 
-    path = GITBOOK_DOCUMENT_URL_PREFIX.sub("", canonical_uri)
+    normalized = root_url.strip().rstrip("/")
+    if not normalized:
+        raise ValueError("GitBook 루트 URL이 비어 있습니다.")
+    return normalized
+
+
+def build_gitbook_document_key(
+    canonical_uri: str,
+    root_url: str = DEFAULT_GITBOOK_ROOT_URL,
+) -> str:
+    """GitBook 페이지 URL에서 그룹 내 문서 키(루트 기준 상대 경로)를 만든다."""
+
+    root = normalize_gitbook_root_url(root_url)
+    path = canonical_uri
+    if path.startswith(f"{root}/"):
+        path = path[len(root) + 1 :]
     return GITBOOK_DOCUMENT_URL_SUFFIX.sub("", path)
 
 
