@@ -65,6 +65,20 @@ class CorpusOutOfSyncError(RuntimeError):
     """전환을 되돌린 뒤 corpus 복구까지 실패했을 때 발생한다."""
 
 
+NEW_CHANGE = "NEW"
+UPDATED_CHANGE = "UPDATED"
+REMOVED_CHANGE = "REMOVED"
+
+
+@dataclass(frozen=True)
+class PendingDocument:
+    """반영 대기 문서 한 건."""
+
+    document_source_id: int
+    title: str
+    change_type: str
+
+
 @dataclass(frozen=True)
 class PendingDocuments:
     """ACTIVE 조합과 최신 READY 조합의 차이."""
@@ -133,8 +147,10 @@ async def load_active_document_versions(session: AsyncSession) -> Set[int]:
     return set((await session.execute(statement)).scalars())
 
 
-async def compute_pending_documents(session: AsyncSession) -> PendingDocuments:
-    """반영 대기 문서 수를 센다.
+async def load_pending_documents(
+    session: AsyncSession,
+) -> List["PendingDocument"]:
+    """반영 대기 문서를 종류와 함께 모은다.
 
     ACTIVE 조합에 없는 원본은 NEW, 판이 더 새로우면 UPDATED,
     ACTIVE 조합에만 남아 있으면 REMOVED 다.
@@ -144,19 +160,45 @@ async def compute_pending_documents(session: AsyncSession) -> PendingDocuments:
     active_version_ids = await load_active_document_versions(session)
     active_source_ids = await _source_ids_of(session, active_version_ids)
 
-    new_count = 0
-    updated_count = 0
+    pending = []
     for source_id, (version_id, _) in latest.items():
         if source_id not in active_source_ids:
-            new_count += 1
+            pending.append((source_id, NEW_CHANGE))
         elif version_id not in active_version_ids:
-            updated_count += 1
+            pending.append((source_id, UPDATED_CHANGE))
+    for source_id in sorted(active_source_ids - set(latest)):
+        pending.append((source_id, REMOVED_CHANGE))
 
-    removed_count = len(active_source_ids - set(latest))
+    if not pending:
+        return []
+
+    titles = dict(
+        (
+            await session.execute(
+                select(DocumentSource.id, DocumentSource.title).where(
+                    DocumentSource.id.in_([source_id for source_id, _ in pending])
+                )
+            )
+        ).all()
+    )
+    return [
+        PendingDocument(
+            document_source_id=source_id,
+            title=titles.get(source_id) or "",
+            change_type=change_type,
+        )
+        for source_id, change_type in pending
+    ]
+
+
+async def compute_pending_documents(session: AsyncSession) -> PendingDocuments:
+    """반영 대기 문서 수를 센다."""
+
+    pending = await load_pending_documents(session)
     return PendingDocuments(
-        new=new_count,
-        updated=updated_count,
-        removed=removed_count,
+        new=sum(1 for item in pending if item.change_type == NEW_CHANGE),
+        updated=sum(1 for item in pending if item.change_type == UPDATED_CHANGE),
+        removed=sum(1 for item in pending if item.change_type == REMOVED_CHANGE),
     )
 
 

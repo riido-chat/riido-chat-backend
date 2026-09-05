@@ -433,3 +433,145 @@ AdminRecollectBatchResponse = Union[
     AdminRecollectProcessingResponse,
     AdminRecollectSuccessResponse,
 ]
+
+
+class SearchStatusValue(str, Enum):
+    """그룹 단위 검색 반영 상태. 저장하지 않고 계산한다."""
+
+    UP_TO_DATE = "UP_TO_DATE"
+    REINDEX_REQUIRED = "REINDEX_REQUIRED"
+    IN_PROGRESS = "IN_PROGRESS"
+    NO_DOCUMENTS = "NO_DOCUMENTS"
+
+
+class ChangeTypeValue(str, Enum):
+    """반영 대기 문서의 변경 종류."""
+
+    NEW = "NEW"
+    UPDATED = "UPDATED"
+    REMOVED = "REMOVED"
+
+
+class SourceTypeValue(str, Enum):
+    GITBOOK = "GITBOOK"
+    UPLOAD = "UPLOAD"
+
+
+class JobTypeValue(str, Enum):
+    INGESTION = "INGESTION"
+    RECOLLECT = "RECOLLECT"
+    INDEX = "INDEX"
+
+
+class AdminDocumentGroupSummary(BaseModel):
+    """문서 그룹 목록 한 줄."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    group_id: int = Field(alias="groupId")
+    group_key: str = Field(alias="groupKey")
+    name: str
+    consumer_key: str = Field(alias="consumerKey")
+    document_count: int = Field(alias="documentCount", ge=0)
+    active_index_version_no: Optional[int] = Field(alias="activeIndexVersionNo")
+    search_status: SearchStatusValue = Field(alias="searchStatus")
+
+
+class AdminDocumentGroupListResponse(BaseModel):
+    model_config = HTTP_DTO_CONFIG
+
+    groups: List[AdminDocumentGroupSummary]
+
+
+class AdminGroupInfo(BaseModel):
+    model_config = HTTP_DTO_CONFIG
+
+    group_id: int = Field(alias="groupId")
+    group_key: str = Field(alias="groupKey")
+    name: str
+    consumer_key: str = Field(alias="consumerKey")
+
+
+class AdminActiveIndexVersion(BaseModel):
+    model_config = HTTP_DTO_CONFIG
+
+    index_version_id: int = Field(alias="indexVersionId")
+    version_no: Optional[int] = Field(alias="versionNo")
+    activated_at: Optional[datetime] = Field(alias="activatedAt")
+
+
+class AdminPendingDocument(BaseModel):
+    model_config = HTTP_DTO_CONFIG
+
+    document_id: int = Field(alias="documentId")
+    title: str
+    change_type: ChangeTypeValue = Field(alias="changeType")
+
+
+class AdminGroupSummary(BaseModel):
+    """상세 화면의 요약 카드."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    active_index_version: Optional[AdminActiveIndexVersion] = Field(
+        alias="activeIndexVersion"
+    )
+    pending_count: int = Field(alias="pendingCount", ge=0)
+    pending_documents: List[AdminPendingDocument] = Field(
+        alias="pendingDocuments"
+    )
+    search_status: SearchStatusValue = Field(alias="searchStatus")
+
+
+class AdminGroupDocument(BaseModel):
+    """상세 표의 한 행."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    document_id: int = Field(alias="documentId")
+    document_key: str = Field(alias="documentKey")
+    title: str
+    source_type: SourceTypeValue = Field(alias="sourceType")
+    document_version_no: int = Field(alias="documentVersionNo", ge=1)
+    applied_version_no: Optional[int] = Field(alias="appliedVersionNo")
+    processing_status: str = Field(alias="processingStatus")
+
+
+class AdminRunningJob(BaseModel):
+    """진행 중인 작업. 있으면 콘솔의 실행 버튼이 모두 비활성이다."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    job_type: JobTypeValue = Field(alias="jobType")
+    stage: str
+    ingestion_run_id: Optional[int] = Field(default=None, alias="ingestionRunId")
+    document_id: Optional[int] = Field(default=None, alias="documentId")
+    index_run_id: Optional[int] = Field(default=None, alias="indexRunId")
+    batch_id: Optional[UUID] = Field(default=None, alias="batchId")
+
+
+class AdminLatestIndexRun(BaseModel):
+    """재진입 시 4-2 또는 4-4 모달 복원 근거."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    index_run_id: int = Field(alias="indexRunId")
+    index_version_id: int = Field(alias="indexVersionId")
+    operation_type: IndexOperationTypeValue = Field(alias="operationType")
+    status: AdminIngestionStatus
+    stage: IndexRunStageValue
+    error_code: Optional[IndexRunErrorCode] = Field(alias="errorCode")
+    started_at: datetime = Field(alias="startedAt")
+    finished_at: Optional[datetime] = Field(alias="finishedAt")
+
+
+class AdminDocumentGroupDetailResponse(BaseModel):
+    model_config = HTTP_DTO_CONFIG
+
+    group: AdminGroupInfo
+    summary: AdminGroupSummary
+    documents: List[AdminGroupDocument]
+    running_job: Optional[AdminRunningJob] = Field(alias="runningJob")
+    latest_index_run: Optional[AdminLatestIndexRun] = Field(
+        alias="latestIndexRun"
+    )
