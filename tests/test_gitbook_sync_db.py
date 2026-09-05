@@ -71,6 +71,8 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
             )
 
     async def asyncSetUp(self) -> None:
+        # 앞선 테스트가 다른 event loop 에서 만든 전역 engine 을 물려받지 않는다
+        await dispose_engine()
         self.engine = create_async_engine(self.database_url)
         self.session_factory = async_sessionmaker(
             self.engine,
