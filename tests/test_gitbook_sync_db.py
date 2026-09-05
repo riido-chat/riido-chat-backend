@@ -9,7 +9,7 @@ import unittest
 import uuid
 from unittest.mock import patch
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
@@ -23,6 +23,7 @@ from app.database.models import (
 )
 from app.database.session import dispose_engine
 from app.document.document_group import get_document_group
+from app.document.document_key import SOURCE_TYPE_GITBOOK
 from app.document.gitbook.client import GitBookListError, GitBookPage
 from app.document.ingestion_service import AdminIngestionService
 from app.document.recollect import run_recollect_batch
@@ -83,6 +84,20 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
         self.console_titles = []
         async with self.session_factory() as session:
             self.group_id = (await get_document_group(session)).id
+            # 수집은 목록에 없는 GitBook 문서를 사라진 것으로 보고 비활성화한다.
+            # stub 목록에는 이 테스트의 페이지만 있으므로 기존 문서가 전부
+            # 꺼진다. 원래 켜져 있던 문서를 기억해 두었다가 teardown 에서
+            # 되돌린다.
+            self.enabled_before = set(
+                (
+                    await session.execute(
+                        select(DocumentSource.id).where(
+                            DocumentSource.source_type == SOURCE_TYPE_GITBOOK,
+                            DocumentSource.enabled.is_(True),
+                        )
+                    )
+                ).scalars()
+            )
 
     async def asyncTearDown(self) -> None:
         async with self.session_factory() as session:
@@ -112,6 +127,12 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
                     )
                 )
                 await session.delete(source)
+            if self.enabled_before:
+                await session.execute(
+                    update(DocumentSource)
+                    .where(DocumentSource.id.in_(self.enabled_before))
+                    .values(enabled=True)
+                )
             await session.commit()
         await self.engine.dispose()
         await dispose_engine()
@@ -174,17 +195,12 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
         batch = await self._batch(accepted.batch_id)
 
         self.assertEqual(ExecutionStatus.SUCCESS, batch.status)
-        self.assertEqual(
-            {
-                "total": 2,
-                "created": 2,
-                "updated": 0,
-                "no_change": 0,
-                "removed": 0,
-                "failed": 0,
-            },
-            batch.counts,
-        )
+        # removed 는 그룹에 이미 있던 문서에 좌우되므로 단정하지 않는다
+        self.assertEqual(2, batch.counts["total"])
+        self.assertEqual(2, batch.counts["created"])
+        self.assertEqual(0, batch.counts["updated"])
+        self.assertEqual(0, batch.counts["no_change"])
+        self.assertEqual(0, batch.counts["failed"])
         self.assertEqual((), batch.failures)
 
     async def test_second_sync_reports_no_change_and_updated(self) -> None:
