@@ -396,6 +396,10 @@ class ChatApiDbAcceptanceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, len(rewrite_candidates))
         self.assertEqual(1, rewrite_candidates[0].turn_no)
         self.assertEqual("스프린트가 뭐야?", rewrite_candidates[0].user_query)
+        self.assertEqual(
+            "스프린트가 뭐야?",
+            rewrite_candidates[0].resolved_query,
+        )
 
         detail = await self.store.get_rag_run_detail(
             uuid.UUID(second.json()["ragRunId"])

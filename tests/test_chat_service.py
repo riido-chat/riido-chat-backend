@@ -513,7 +513,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(1, resolution_log["context_turn_count"])
         self.assertEqual(
-            "v1",
+            "v2",
             resolution_log["context_snapshot"]["schemaVersion"],
         )
         self.assertEqual(

@@ -25,16 +25,16 @@ from app.retrieval.models import HybridRetrievalResult
 
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.4-mini"
-GENERATION_PROMPT_VERSION = "v19"
-SOURCE_PLANNING_PROMPT_VERSION = "v10"
-SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v10-repair-1"
+GENERATION_PROMPT_VERSION = "v20"
+SOURCE_PLANNING_PROMPT_VERSION = "v11"
+SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v11-repair-1"
 ANSWER_PROMPT_VERSION = "v17"
 ANSWER_REPAIR_PROMPT_VERSION = "v17-repair-1"
 MAX_CONTEXT_SOURCES = 5
 MAX_GENERATION_ATTEMPTS = 2
 MAX_SOURCE_PLANNING_REGENERATIONS = 1
 
-SOURCE_PLANNING_PROMPT_V10 = """당신은 뤼이도 공식 이용가이드 답변에 필요한 근거를 판정합니다.
+SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답변에 필요한 근거를 판정합니다.
 
 ## Scope rules
 - SOURCE를 선택하기 전에 질문을 answer_type으로 분류하세요.
@@ -83,7 +83,11 @@ SOURCE_PLANNING_PROMPT_V10 = """당신은 뤼이도 공식 이용가이드 답�
   별도로 연결하세요. 하나의 SOURCE를 여러 정보 단위에 연결해도 됩니다.
 - 정보 단위 하나라도 제공된 SOURCE가 완전하게 뒷받침하지 못하면, 근거가 있는
   정보 단위만 남기지 말고 전체를 INSUFFICIENT_EVIDENCE로 WITHHELD 처리하세요.
-- 이용가이드 범위 밖 질문은 OUT_OF_SCOPE으로 WITHHELD를 선택하세요.
+- 뤼이도 제품의 기능·설정·사용 가능 여부를 묻는 질문은 이용가이드와 관련된 질문입니다.
+  제공된 SOURCE에서 답을 확인할 수 없으면 OUT_OF_SCOPE이 아니라
+  INSUFFICIENT_EVIDENCE로 WITHHELD를 선택하세요.
+- 날씨, 일반 지식, 다른 제품 사용법처럼 뤼이도 제품이나 이용가이드의 주제 자체와
+  무관한 질문만 OUT_OF_SCOPE으로 WITHHELD를 선택하세요.
 
 ## Scope examples
 - "스프린트는 어떻게 설정하나요?" → SUMMARY, 정보 단위는 "스프린트 설정 방법"
@@ -102,7 +106,7 @@ SOURCE_PLANNING_PROMPT_V10 = """당신은 뤼이도 공식 이용가이드 답�
 - WITHHELD이면 evidence_requirements는 비우고 withheld_reason을 작성합니다.
 """
 
-SOURCE_PLANNING_REPAIR_PROMPT_V10 = SOURCE_PLANNING_PROMPT_V10 + """
+SOURCE_PLANNING_REPAIR_PROMPT_V11 = SOURCE_PLANNING_PROMPT_V11 + """
 
 ## Backend structure validation retry
 - 직전 Source Plan이 Backend 구조 검증에 실패했습니다.
@@ -435,7 +439,7 @@ class OpenAIGenerator:
 
         generation_input = build_generation_input(question, sources)
         plan_call = await self._parse_with_retry(
-            instructions=SOURCE_PLANNING_PROMPT_V10,
+            instructions=SOURCE_PLANNING_PROMPT_V11,
             input_text=generation_input,
             text_format=GenerationSourcePlan,
         )
@@ -451,7 +455,7 @@ class OpenAIGenerator:
         ):
             repair_started = time.perf_counter()
             repair_call = await self._parse_with_retry(
-                instructions=SOURCE_PLANNING_REPAIR_PROMPT_V10,
+                instructions=SOURCE_PLANNING_REPAIR_PROMPT_V11,
                 input_text=build_source_planning_repair_input(
                     question,
                     sources,

@@ -729,7 +729,7 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
             detail.run.context_strategy,
         )
         self.assertEqual(1, detail.run.context_turn_count)
-        self.assertEqual("v1", detail.run.context_snapshot["schemaVersion"])
+        self.assertEqual("v2", detail.run.context_snapshot["schemaVersion"])
         self.assertEqual(
             [1],
             [
@@ -827,7 +827,7 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         # 인용 검증에 도달하지 못한 보류는 판정 자체가 없다
         self.assertIsNone(runs[0].citation_validated)
 
-    async def test_query_rewrite_candidates_use_latest_five_valid_turns(self) -> None:
+    async def test_query_rewrite_candidates_use_latest_valid_turn(self) -> None:
         conversation = await self.store.create_conversation()
         previous_runs = []
         for turn_no in range(1, 7):
@@ -875,29 +875,19 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
 
         candidates = await self.store.get_query_rewrite_candidates(current.id)
 
-        self.assertEqual([2, 3, 4, 5, 6], [turn.turn_no for turn in candidates])
+        self.assertEqual([6], [turn.turn_no for turn in candidates])
         self.assertEqual(
-            [
-                QueryRewriteTurnStatus.COMPLETED,
-                QueryRewriteTurnStatus.WITHHELD,
-                QueryRewriteTurnStatus.COMPLETED,
-                QueryRewriteTurnStatus.WITHHELD,
-                QueryRewriteTurnStatus.COMPLETED,
-            ],
+            [QueryRewriteTurnStatus.COMPLETED],
             [turn.status for turn in candidates],
         )
-        self.assertEqual("이전 답변 2", candidates[0].answer_content)
+        self.assertEqual("이전 답변 6", candidates[0].answer_content)
         self.assertIsNone(candidates[0].withheld_reason_code)
-        self.assertIsNone(candidates[1].answer_content)
-        self.assertEqual(
-            "OUT_OF_SCOPE",
-            candidates[1].withheld_reason_code.value,
-        )
+        self.assertIsNone(candidates[0].resolved_query)
         self.assertNotIn(1, [turn.turn_no for turn in candidates])
         self.assertNotIn(failed.id, [turn.rag_run_id for turn in candidates])
         self.assertNotIn(cancelled.id, [turn.rag_run_id for turn in candidates])
 
-    async def test_records_v1_query_resolution_snapshot_consistently(self) -> None:
+    async def test_records_v2_query_resolution_snapshot_consistently(self) -> None:
         conversation = await self.store.create_conversation()
         previous = await self.store.start_rag_run(
             conversation.id,
@@ -914,13 +904,14 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
             index_version_id=self.index_version_id,
         )
         snapshot = {
-            "schemaVersion": "v1",
+            "schemaVersion": "v2",
             "selectedTurns": [
                 {
                     "ragRunId": str(previous.id),
                     "turnNo": previous.turn_no,
                     "status": "WITHHELD",
                     "userQuery": previous.user_query,
+                    "resolvedQuery": previous.resolved_query,
                     "answerContent": None,
                     "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
                 }
@@ -943,13 +934,17 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, resolved.context_turn_count)
         self.assertEqual(snapshot, resolved.context_snapshot)
 
+        mismatched_snapshot = {
+            **snapshot,
+            "selectedTurns": [],
+        }
         with self.assertRaisesRegex(ValueError, "selectedTurns 길이"):
             await self.store.record_query_resolution(
                 current.id,
                 resolved_query="잘못된 기록",
                 context_strategy=ContextStrategy.FOLLOW_UP_WINDOW,
-                context_turn_count=2,
-                context_snapshot=snapshot,
+                context_turn_count=1,
+                context_snapshot=mismatched_snapshot,
             )
 
     async def test_fresh_run_is_busy_then_stale_run_and_calls_are_recovered(

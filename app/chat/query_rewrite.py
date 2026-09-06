@@ -12,7 +12,6 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    StrictInt,
     ValidationError,
     field_validator,
     model_validator,
@@ -26,19 +25,19 @@ from app.answering.models import FinalWithheldReason
 
 OPENAI_QUERY_REWRITE_PROVIDER = "openai"
 OPENAI_QUERY_REWRITE_MODEL = "gpt-5.4-mini"
-QUERY_REWRITE_PROMPT_VERSION = "v3"
+QUERY_REWRITE_PROMPT_VERSION = "v4"
 QUERY_REWRITE_TIMEOUT_SECONDS = 30.0
 QUERY_REWRITE_MAX_OUTPUT_TOKENS = 512
 MAX_QUERY_REWRITE_ATTEMPTS = 2
-MAX_QUERY_REWRITE_TURNS = 5
+MAX_QUERY_REWRITE_TURNS = 1
 MAX_QUERY_LENGTH = 4000
-CONTEXT_SNAPSHOT_SCHEMA_VERSION = "v1"
+CONTEXT_SNAPSHOT_SCHEMA_VERSION = "v2"
 
 MODEL_OUTPUT_INVALID_ERROR_CODE = "MODEL_OUTPUT_INVALID"
 UPSTREAM_ERROR_CODE = "UPSTREAM_ERROR"
 INTERNAL_ERROR_CODE = "INTERNAL_ERROR"
 
-QUERY_REWRITE_PROMPT_V3 = """당신은 현재 질문이 새 주제인지 후속 질문인지 판별하고,
+QUERY_REWRITE_PROMPT_V4 = """당신은 현재 질문이 새 주제인지 후속 질문인지 판별하고,
 필요한 경우 문맥 없이 검색할 수 있는 독립 질문으로 재작성하는 분류기입니다.
 
 ## Security boundary
@@ -50,41 +49,44 @@ QUERY_REWRITE_PROMPT_V3 = """당신은 현재 질문이 새 주제인지 후속 
 ## Decision rules
 - NEW_TOPIC: 현재 질문만으로 검색할 수 있고 이전 턴이 필요하지 않습니다.
 - FOLLOW_UP_RESOLVED: 이전 턴을 이용하면 현재 질문을 독립 검색 질의로 명확히 바꿀 수 있습니다.
-- FOLLOW_UP_UNRESOLVED: 후속 질문이지만 후보 문맥만으로 대상을 하나로 확정할 수 없습니다.
+- FOLLOW_UP_UNRESOLVED: 후속 질문이지만 previousTurn만으로 대상을 하나로 확정할 수 없습니다.
 - 주제가 이어지는지보다 이전 턴이 현재 질문의 해석에 반드시 필요한지를 판정하세요.
-- 후보 턴을 모두 지워도 현재 질문과 같은 중심 대상·범위의 검색 질의를 만들 수 있다면
+- previousTurn을 지워도 현재 질문과 같은 중심 대상·범위의 검색 질의를 만들 수 있다면
   관련된 주제여도 반드시 NEW_TOPIC입니다.
-- FOLLOW_UP_RESOLVED는 후보 턴에서 빠진 구체적인 대상이나 서비스 범위를 실제로 보충한 경우에만
+- FOLLOW_UP_RESOLVED는 previousTurn에서 빠진 구체적인 대상이나 서비스 범위를 실제로 보충한 경우에만
   선택하세요. resolvedQuery가 현재 질문의 존댓말 변환이나 단순한 문장 다듬기에 그친다면
   후보가 필요하지 않았으므로 NEW_TOPIC입니다.
 - 첫 문장이 짧다는 이유만으로 후속 질문으로 분류하지 말고, 실제 생략된 문맥이 있는지 판단하세요.
-- 후보를 보기 전에 현재 질문만으로 중심 대상과 질문 의도가 완결되는지 먼저 검사하세요.
+- previousTurn을 보기 전에 현재 질문만으로 중심 대상과 질문 의도가 완결되는지 먼저 검사하세요.
 - 현재 질문이 `슬랙 연동은 어떻게 해?`, `댓글은 어떻게 작성해?`처럼 구체적인 중심 대상을
-  직접 명시하고 대명사나 생략된 범위가 없다면 NEW_TOPIC입니다. 후보 답변에 같은 단어 또는
+  직접 명시하고 대명사나 생략된 범위가 없다면 NEW_TOPIC입니다. previousTurn 답변에 같은 단어 또는
   연관 개념이 등장했다는 이유로 현재 질문의 명시된 대상을 과거 주제에 붙이지 마세요.
-- 현재 질문에 명시된 중심 대상을 후보의 다른 대상으로 교체하거나, 후보 문맥만으로 임의로
+- 현재 질문에 명시된 중심 대상을 previousTurn의 다른 대상으로 교체하거나, previousTurn만으로 임의로
   범위를 좁히지 마세요.
 - 현재 질문이 문법적으로 검색 가능해 보여도, 어떤 서비스·기능에 관한 질문인지 빠져 있고
   직전 턴이 그 범위를 하나로 정한다면 FOLLOW_UP_RESOLVED입니다.
 
-## Central topic rules
-- 먼저 후보 턴의 userQuery가 무엇을 질문했는지 보고 중심 주제를 판단하세요.
-- `그 연동`, `그 기능`, `그 설정`처럼 지시 표현이 있고 바로 직전 턴의 userQuery가 같은 종류의
-  중심 대상을 하나만 명시했다면 그 직전 대상을 선택하세요. 더 오래된 턴에 같은 종류의 대상이
-  있다는 이유만으로 모호하다고 보거나 오래된 대상을 선택하지 마세요.
-- 후보 userQuery가 하나의 대상을 명시했다면 그 대상이 중심 주제입니다. answerContent에 나온
+## Previous turn rules
+- previousTurn은 바로 이전의 유효한 대화 턴 하나이거나 null입니다. 다른 과거 턴을 추측하지 마세요.
+- previousTurn.resolvedQuery가 있으면 이전 턴에서 이미 확정된 독립 질문이므로 중심 주제를 판단할 때
+  userQuery보다 우선하세요.
+- `그 연동`, `그 기능`, `그 설정`처럼 지시 표현이 있고 previousTurn의 중심 대상이 하나라면
+  그 대상을 사용해 FOLLOW_UP_RESOLVED로 재작성하세요.
+- 현재 질문에서 무엇을 추가·삭제·설정하는지 목적어가 생략됐고 previousTurn의 중심 대상이
+  하나라면, 그 중심 대상을 목적어로 보충해 FOLLOW_UP_RESOLVED로 재작성하세요.
+- previousTurn의 질문이 하나의 대상을 명시했다면 그 대상이 중심 주제입니다. answerContent에 나온
   속성, 구성 요소, 연관 개념은 현재 질문이 대명사나 생략 표현으로 직접 가리키지 않는 한
   별도 지시 대상이 아닙니다. 현재 질문이 그 개념의 이름을 새 중심 대상으로 직접 명시한 것은
   과거 답변을 가리킨 것이 아닙니다.
 - 따라서 단일 중심 주제에 대한 답변에 여러 관련 명사가 있다는 이유만으로
   FOLLOW_UP_UNRESOLVED를 선택하지 마세요.
-- 반대로 후보 userQuery 자체가 `프로젝트와 목표`, `슬랙과 디스코드`처럼 동등한 대상을
+- 반대로 previousTurn의 질문 자체가 `프로젝트와 목표`, `슬랙과 디스코드`처럼 동등한 대상을
   둘 이상 묻고 현재 질문이 하나를 고르지 않으면 FOLLOW_UP_UNRESOLVED입니다.
 - 현재 질문이 `알림이 너무 많으면 어떻게 줄여?`처럼 여러 서비스에서 가능한 공통 기능만
   말하고 직전 턴이 슬랙 연동 하나를 다뤘다면, 생략된 범위는 슬랙 연동입니다.
 
 ## WITHHELD context rules
-- WITHHELD 턴의 userQuery도 대명사와 생략된 대상을 해석하는 언어적 문맥으로 사용할 수 있습니다.
+- WITHHELD 턴의 resolvedQuery나 userQuery도 대명사와 생략된 대상을 해석하는 언어적 문맥으로 사용할 수 있습니다.
 - withheldReasonCode는 이전 질문의 답을 확정하는 사실 근거가 아닙니다. 이전 질문의 중심 주제만
   사용해 독립 검색 질의를 만들고, 실제 답변 가능 여부는 이후 Retrieval과 Generation이 판단하게 하세요.
 - WITHHELD였다는 이유만으로 FOLLOW_UP_UNRESOLVED를 선택하지 마세요.
@@ -92,10 +94,10 @@ QUERY_REWRITE_PROMPT_V3 = """당신은 현재 질문이 새 주제인지 후속 
 ## Mandatory ambiguity gate
 - FOLLOW_UP_RESOLVED를 선택하기 전에 생략된 대상을 정확히 하나의 구체적인 명사로
   확정할 수 있는지 먼저 검사하세요.
-- 후보 userQuery의 중심 대상이 둘 이상이고 현재 질문만으로 하나를 고를 수 없다면 반드시
-  FOLLOW_UP_UNRESOLVED입니다. 후보 턴을 선택했다는 사실만으로 그 턴 안의 동등한 대상 중
+- previousTurn 질문의 중심 대상이 둘 이상이고 현재 질문만으로 하나를 고를 수 없다면 반드시
+  FOLLOW_UP_UNRESOLVED입니다. previousTurn이 있다는 사실만으로 그 턴 안의 동등한 대상 중
   하나까지 확정된 것은 아닙니다.
-- 하나의 후보 턴 안에 동등한 대상이 여러 개라면 최근에 언급됐거나 문장에 먼저 나온 대상이라는
+- previousTurn 안에 동등한 대상이 여러 개라면 문장에 먼저 나온 대상이라는
   이유만으로 임의 선택하지 마세요. 이 규칙은 바로 직전의 단일 중심 대상을 잇는 대명사에는
   적용하지 않습니다.
 - 한 답변에 여러 계층이나 항목이 나열됐다는 이유로 그 목록 전체를 하나의 대상으로
@@ -110,29 +112,26 @@ QUERY_REWRITE_PROMPT_V3 = """당신은 현재 질문이 새 주제인지 후속 
   `앞서 말한 것`처럼 여전히 대상을 하나로 확정하지 못하는 표현을 남기지 마세요.
   이런 표현을 정확한 명사 하나로 치환할 수 없으면 FOLLOW_UP_UNRESOLVED입니다.
 
-## Selection rules
-- selectedTurnNos에는 후보 중 해석에 실제로 필요한 최소 턴만 선택하세요.
-- 후보에 없는 턴이나 같은 턴을 두 번 선택하지 마세요.
-- 과거 대화 전체를 습관적으로 선택하지 마세요.
-
 ## Result semantics
-- NEW_TOPIC은 selectedTurnNos를 비우고 resolvedQuery를 null로 둡니다.
-- FOLLOW_UP_RESOLVED는 후보 턴을 하나 이상 선택하고, 공백이 아닌 독립 질문을
-  resolvedQuery에 작성합니다.
-- FOLLOW_UP_UNRESOLVED는 selectedTurnNos를 비우고 resolvedQuery를 null로 둡니다.
+- NEW_TOPIC은 resolvedQuery를 null로 둡니다.
+- FOLLOW_UP_RESOLVED는 previousTurn의 문맥을 이용해 공백이 아닌 독립 질문을 resolvedQuery에 작성합니다.
+- FOLLOW_UP_RESOLVED의 contextPhrase에는 previousTurn의 resolvedQuery에서 현재 질문 해석에
+  사용한 전체 대상 명칭을 철자와 띄어쓰기를 바꾸지 않고 그대로 복사하세요. resolvedQuery에도
+  같은 contextPhrase를 그대로 포함하세요.
+- FOLLOW_UP_UNRESOLVED는 resolvedQuery를 null로 둡니다.
 - resolvedQuery는 4,000자 이하여야 하며 질문에 직접 답하지 마세요.
 
 ## Classification examples
-- 후보가 스프린트에 관한 내용이어도 현재 질문이 `슬랙 연동은 어떻게 해?`라면 중심 대상과
+- previousTurn이 스프린트에 관한 내용이어도 현재 질문이 `슬랙 연동은 어떻게 해?`라면 중심 대상과
   의도가 이미 완결되므로 NEW_TOPIC입니다. `스프린트는 어떻게 연동하나요?`로 바꾸지 마세요.
-- 후보 답변에 댓글이 언급됐더라도 현재 질문이 `댓글은 어떻게 작성해?`라면 대명사나 생략된
+- previousTurn 답변에 댓글이 언급됐더라도 현재 질문이 `댓글은 어떻게 작성해?`라면 대명사나 생략된
   서비스 범위가 없는 독립 질문이므로 NEW_TOPIC입니다. `슬랙 연동에서 댓글은 어떻게
   작성하나요?`처럼 후보의 범위를 새로 덧붙이지 마세요.
-- 후보에 슬랙 연동이 있더라도 현재 질문이 `구글 캘린더 연동은 어떤 기능이야?`라면 현재
+- previousTurn이 슬랙 연동이어도 현재 질문이 `구글 캘린더 연동은 어떤 기능이야?`라면 현재
   질문만으로 대상과 의도가 완결되므로 NEW_TOPIC입니다.
-- 여러 이전 턴에 슬랙 연동과 구글 캘린더 연동이 각각 있더라도 바로 직전 질문이
-  `구글 캘린더 연동은 어떤 기능이야?`이고 현재 질문이 `그 연동에서 작업 마감일도 동기화돼?`라면
-  바로 직전의 구글 캘린더 연동을 선택해 FOLLOW_UP_RESOLVED로 처리하세요.
+- previousTurn이 `구글 캘린더 연동은 어떤 기능이야?`이고 현재 질문이
+  `그 연동에서 작업 마감일도 동기화돼?`라면 구글 캘린더 연동을 사용해
+  FOLLOW_UP_RESOLVED로 처리하세요.
 - 후보가 `스프린트가 뭐야?`이고 현재 질문이 `그건 어떻게 설정해?`라면 이전 답변에
   기간, 프로젝트, 목표, 작업이 언급되어도 중심 주제는 스프린트 하나입니다.
   FOLLOW_UP_RESOLVED이며 resolvedQuery는 `스프린트는 어떻게 설정하나요?`입니다.
@@ -189,6 +188,11 @@ class QueryRewriteCandidateTurn(BaseModel):
     turn_no: int = Field(alias="turnNo", ge=1)
     status: QueryRewriteTurnStatus
     user_query: str = Field(alias="userQuery", min_length=1, max_length=MAX_QUERY_LENGTH)
+    resolved_query: Optional[str] = Field(
+        default=None,
+        alias="resolvedQuery",
+        max_length=MAX_QUERY_LENGTH,
+    )
     answer_content: Optional[str] = Field(alias="answerContent")
     withheld_reason_code: Optional[FinalWithheldReason] = Field(
         alias="withheldReasonCode"
@@ -199,6 +203,18 @@ class QueryRewriteCandidateTurn(BaseModel):
     def validate_user_query(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("후보 턴의 userQuery는 비어 있을 수 없습니다.")
+        return value
+
+    @field_validator("resolved_query", mode="before")
+    @classmethod
+    def strip_resolved_query(cls, value: object) -> object:
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("resolved_query")
+    @classmethod
+    def reject_blank_resolved_query(cls, value: Optional[str]) -> Optional[str]:
+        if value == "":
+            raise ValueError("후보 턴의 resolvedQuery는 공백일 수 없습니다.")
         return value
 
     @model_validator(mode="after")
@@ -220,7 +236,7 @@ class QueryRewriteCandidateTurn(BaseModel):
 
 
 class QueryRewriteOutput(BaseModel):
-    """OpenAI Structured Output으로 전달받는 3필드 결과."""
+    """OpenAI Structured Output으로 전달받는 분류와 독립 질문."""
 
     model_config = ConfigDict(
         extra="forbid",
@@ -229,39 +245,33 @@ class QueryRewriteOutput(BaseModel):
     )
 
     decision: QueryRewriteDecision
-    selected_turn_nos: Tuple[StrictInt, ...] = Field(
-        alias="selectedTurnNos",
-        max_length=MAX_QUERY_REWRITE_TURNS,
+    context_phrase: Optional[str] = Field(
+        alias="contextPhrase",
+        max_length=MAX_QUERY_LENGTH,
     )
     resolved_query: Optional[str] = Field(
         alias="resolvedQuery",
         max_length=MAX_QUERY_LENGTH,
     )
 
-    @field_validator("resolved_query", mode="before")
+    @field_validator("context_phrase", "resolved_query", mode="before")
     @classmethod
     def strip_resolved_query(cls, value: object) -> object:
         return value.strip() if isinstance(value, str) else value
 
     @model_validator(mode="after")
     def validate_decision_fields(self) -> "QueryRewriteOutput":
-        selected_turn_nos = self.selected_turn_nos
-        if any(turn_no < 1 for turn_no in selected_turn_nos):
-            raise ValueError("selectedTurnNos는 양의 turn 번호만 허용합니다.")
-        if len(selected_turn_nos) != len(set(selected_turn_nos)):
-            raise ValueError("selectedTurnNos에는 중복 턴을 사용할 수 없습니다.")
-
         if self.decision == QueryRewriteDecision.NEW_TOPIC:
-            if selected_turn_nos or self.resolved_query is not None:
+            if self.context_phrase is not None or self.resolved_query is not None:
                 raise ValueError(
-                    "NEW_TOPIC은 빈 selectedTurnNos와 null resolvedQuery가 필요합니다."
+                    "NEW_TOPIC은 null contextPhrase와 resolvedQuery가 필요합니다."
                 )
             return self
 
         if self.decision == QueryRewriteDecision.FOLLOW_UP_RESOLVED:
-            if not selected_turn_nos:
+            if self.context_phrase is None or not self.context_phrase:
                 raise ValueError(
-                    "FOLLOW_UP_RESOLVED는 하나 이상의 selectedTurnNos가 필요합니다."
+                    "FOLLOW_UP_RESOLVED는 공백이 아닌 contextPhrase가 필요합니다."
                 )
             if self.resolved_query is None or not self.resolved_query:
                 raise ValueError(
@@ -269,10 +279,9 @@ class QueryRewriteOutput(BaseModel):
                 )
             return self
 
-        if selected_turn_nos or self.resolved_query is not None:
+        if self.context_phrase is not None or self.resolved_query is not None:
             raise ValueError(
-                "FOLLOW_UP_UNRESOLVED는 빈 selectedTurnNos와 null resolvedQuery가 "
-                "필요합니다."
+                "FOLLOW_UP_UNRESOLVED는 null contextPhrase와 resolvedQuery가 필요합니다."
             )
         return self
 
@@ -341,7 +350,7 @@ def _ordered_candidates(
     if len(rag_run_ids) != len(set(rag_run_ids)):
         raise ValueError("Query Rewrite 후보 rag_run_id는 중복될 수 없습니다.")
 
-    return tuple(sorted(candidate_turns, key=lambda candidate: candidate.turn_no))
+    return candidate_turns
 
 
 def _candidate_input(candidate: QueryRewriteCandidateTurn) -> dict:
@@ -349,6 +358,7 @@ def _candidate_input(candidate: QueryRewriteCandidateTurn) -> dict:
         "turnNo": candidate.turn_no,
         "status": candidate.status.value,
         "userQuery": candidate.user_query,
+        "resolvedQuery": candidate.resolved_query,
     }
     if candidate.status == QueryRewriteTurnStatus.COMPLETED:
         value["answerContent"] = candidate.answer_content
@@ -365,9 +375,11 @@ def _prepare_query_rewrite_input(
     ordered_candidates = _ordered_candidates(candidates)
     payload = {
         "currentUserQuery": normalized_query,
-        "candidateTurns": [
-            _candidate_input(candidate) for candidate in ordered_candidates
-        ],
+        "previousTurn": (
+            _candidate_input(ordered_candidates[0])
+            if ordered_candidates
+            else None
+        ),
     }
     return (
         normalized_query,
@@ -380,7 +392,7 @@ def build_query_rewrite_input(
     user_query: str,
     candidates: Sequence[QueryRewriteCandidateTurn],
 ) -> str:
-    """현재 질문과 최대 5개 이전 턴을 시간순 JSON 데이터로 직렬화한다."""
+    """현재 질문과 바로 이전의 유효한 한 턴을 JSON 데이터로 직렬화한다."""
 
     return _prepare_query_rewrite_input(user_query, candidates)[2]
 
@@ -410,25 +422,31 @@ def _resolve_query_rewrite_output(
     output: object,
 ) -> QueryResolution:
     parsed = _validated_output(output)
-    candidate_by_turn_no = {
-        candidate.turn_no: candidate for candidate in candidates
-    }
-    unknown_turn_nos = [
-        turn_no
-        for turn_no in parsed.selected_turn_nos
-        if turn_no not in candidate_by_turn_no
-    ]
-    if unknown_turn_nos:
+    if (
+        parsed.decision == QueryRewriteDecision.FOLLOW_UP_RESOLVED
+        and not candidates
+    ):
         raise QueryRewriteOutputInvalidError(
-            "selectedTurnNos에 후보가 아닌 턴이 포함됐습니다: "
-            f"{unknown_turn_nos}"
+            "FOLLOW_UP_RESOLVED에는 바로 이전의 유효한 턴이 필요합니다."
         )
 
-    selected_turn_no_set = set(parsed.selected_turn_nos)
-    selected_turns = tuple(
-        candidate
-        for candidate in candidates
-        if candidate.turn_no in selected_turn_no_set
+    if parsed.decision == QueryRewriteDecision.FOLLOW_UP_RESOLVED:
+        previous_turn = candidates[0]
+        previous_query = previous_turn.resolved_query or previous_turn.user_query
+        context_phrase = parsed.context_phrase or ""
+        if context_phrase not in previous_query:
+            raise QueryRewriteOutputInvalidError(
+                "contextPhrase가 이전 resolvedQuery에 그대로 존재하지 않습니다."
+            )
+        if context_phrase not in (parsed.resolved_query or ""):
+            raise QueryRewriteOutputInvalidError(
+                "resolvedQuery가 contextPhrase를 그대로 보존하지 않았습니다."
+            )
+
+    selected_turns = (
+        candidates
+        if parsed.decision == QueryRewriteDecision.FOLLOW_UP_RESOLVED
+        else ()
     )
 
     if parsed.decision == QueryRewriteDecision.NEW_TOPIC:
@@ -462,7 +480,7 @@ def resolve_query_rewrite_output(
 def build_context_snapshot(
     resolution: QueryResolution,
 ) -> Optional[dict[str, Any]]:
-    """실제로 선택된 이전 턴만 감사 가능한 v1 snapshot으로 만든다."""
+    """실제로 선택된 이전 턴만 감사 가능한 v2 snapshot으로 만든다."""
 
     if not resolution.selected_turns:
         return None
@@ -575,7 +593,7 @@ class QueryRewriteService:
             try:
                 response = await self._client.responses.parse(
                     model=OPENAI_QUERY_REWRITE_MODEL,
-                    instructions=QUERY_REWRITE_PROMPT_V3,
+                    instructions=QUERY_REWRITE_PROMPT_V4,
                     input=query_input,
                     text_format=QueryRewriteOutput,
                     max_output_tokens=QUERY_REWRITE_MAX_OUTPUT_TOKENS,
