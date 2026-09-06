@@ -1,4 +1,6 @@
 import unittest
+from dataclasses import replace
+from typing import Optional
 from unittest.mock import AsyncMock, patch
 
 import httpx
@@ -22,13 +24,19 @@ from app.answering.generator import (
     OPENAI_GENERATION_MODEL,
     OPENAI_GENERATION_PROVIDER,
     OpenAIGenerator,
+    build_generation_context,
 )
 from app.answering.models import (
     CitationSourceKind,
     FinalAnswerStatus,
     FinalWithheldReason,
+    GenerationAnswerType,
+    GenerationAnswerScope,
     GenerationCall,
+    GenerationEvidenceRequirement,
     GenerationResult,
+    GenerationSourcePlan,
+    GenerationStageTrace,
     GenerationStatus,
     GenerationWithheldReason,
 )
@@ -50,8 +58,15 @@ def _failed_trace() -> ModelCallTrace:
     return _trace(succeeded=False)
 
 
-def _call(result: GenerationResult) -> GenerationCall:
-    return GenerationCall(trace=_trace(), result=result)
+def _call(
+    result: GenerationResult,
+    stage_trace: Optional[GenerationStageTrace] = None,
+) -> GenerationCall:
+    return GenerationCall(
+        trace=_trace(),
+        result=result,
+        stage_trace=stage_trace,
+    )
 
 
 class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
@@ -135,11 +150,16 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_completes_with_first_marker_order_and_repeated_source(self) -> None:
         results = [self._result(1), self._result(2)]
+        generated = self._answerable(
+            "두 번째 근거입니다. [SOURCE_2] 첫 번째 근거입니다. "
+            "[SOURCE_1] 다시 두 번째입니다. [SOURCE_2]"
+        )
+        stage_trace = GenerationStageTrace(
+            pre_validation_result=generated,
+        )
         self.generator.generate_with_trace.return_value = _call(
-            self._answerable(
-                "두 번째 근거입니다. [SOURCE_2] 첫 번째 근거입니다. "
-                "[SOURCE_1] 다시 두 번째입니다. [SOURCE_2]"
-            )
+            generated,
+            stage_trace,
         )
 
         result = await self.service.generate_answer("질문", results)
@@ -157,6 +177,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIsNone(result.withheld_reason)
         self.assertIsNone(result.error_code)
+        self.assertIs(stage_trace, result.stage_trace)
 
     async def test_marks_citation_source_kind_by_canonical_uri_scheme(self) -> None:
         console = self._result(
@@ -216,7 +237,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(2, len(result.citations))
         self.assertEqual([1, 2], [item.citation_number for item in result.citations])
 
-    async def test_checks_citation_limit_after_merging_duplicates(self) -> None:
+    async def test_merges_duplicates_among_four_selected_sources(self) -> None:
         first = self._result(
             1,
             source_url="https://same",
@@ -262,7 +283,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(2, len(result.citations))
         self.assertEqual("A 근거 [1] B 근거 [2]", result.answer_markdown)
 
-    async def test_removes_only_invalid_sources_when_valid_citation_remains(
+    async def test_withholds_mixed_valid_and_invalid_source_markers(
         self,
     ) -> None:
         self.generator.generate_with_trace.return_value = _call(
@@ -274,19 +295,137 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
 
         result = await self.service.generate_answer("질문", [self._result(1)])
 
-        self.assertEqual(FinalAnswerStatus.COMPLETED, result.status)
+        self.assertEqual(FinalAnswerStatus.WITHHELD, result.status)
         self.assertEqual(
-            "잘못된 근거, 유효한 근거[1], 잘못된 형식",
-            result.answer_markdown,
+            FinalWithheldReason.UNVERIFIABLE_ANSWER,
+            result.withheld_reason,
         )
-        self.assertEqual(1, len(result.citations))
-        self.assertEqual(1, result.citations[0].citation_number)
+        self.assertEqual((), result.citations)
+        self.generator.regenerate_answer_with_trace.assert_not_awaited()
+
+    async def test_validates_against_selected_sources_and_regenerates_answer_once(
+        self,
+    ) -> None:
+        results = [self._result(1), self._result(2)]
+        generated = self._answerable("미선택 근거 [SOURCE_2]")
+        stage_trace = self._stage_trace(results[:1], generated)
+        repaired = self._answerable("선택 근거 [SOURCE_1]")
+        initial_trace = replace(
+            _trace(),
+            input_tokens=100,
+            output_tokens=20,
+        )
+        self.generator.generate_with_trace.return_value = GenerationCall(
+            trace=initial_trace,
+            result=generated,
+            stage_trace=stage_trace,
+        )
+
+        async def regenerate(_question, failed_trace, _reason):
+            repair_trace = replace(
+                _trace(),
+                input_tokens=30,
+                output_tokens=10,
+            )
+            return GenerationCall(
+                trace=repair_trace,
+                result=repaired,
+                stage_trace=replace(
+                    failed_trace,
+                    validation_regeneration_result=repaired,
+                    validation_regeneration_count=1,
+                    validation_regeneration_model_call=repair_trace,
+                ),
+            )
+
+        self.generator.regenerate_answer_with_trace.side_effect = regenerate
+
+        result = await self.service.generate_answer("질문", results)
+
+        self.assertEqual(FinalAnswerStatus.COMPLETED, result.status)
+        self.assertEqual("선택 근거 [1]", result.answer_markdown)
+        self.assertEqual(1, result.stage_trace.validation_regeneration_count)
+        self.assertEqual(generated, result.stage_trace.pre_validation_result)
+        self.assertEqual(
+            repaired,
+            result.stage_trace.validation_regeneration_result,
+        )
+        self.assertEqual(1, len(result.stage_trace.validation_errors))
+        self.assertIn("SOURCE_2", result.stage_trace.validation_errors[0])
+        self.assertEqual(240, result.model_call.latency_ms)
+        self.assertEqual(130, result.model_call.input_tokens)
+        self.assertEqual(30, result.model_call.output_tokens)
+        self.assertEqual(
+            30,
+            result.stage_trace.validation_regeneration_model_call.input_tokens,
+        )
+        self.generator.regenerate_answer_with_trace.assert_awaited_once()
+
+    async def test_withholds_when_regenerated_answer_is_still_unverifiable(
+        self,
+    ) -> None:
+        results = [self._result(1), self._result(2)]
+        generated = self._answerable("미선택 근거 [SOURCE_2]")
+        stage_trace = self._stage_trace(results[:1], generated)
+        self.generator.generate_with_trace.return_value = _call(
+            generated,
+            stage_trace,
+        )
+
+        async def regenerate(_question, failed_trace, _reason):
+            return GenerationCall(
+                trace=_trace(),
+                result=generated,
+                stage_trace=replace(
+                    failed_trace,
+                    validation_regeneration_result=generated,
+                    validation_regeneration_count=1,
+                ),
+            )
+
+        self.generator.regenerate_answer_with_trace.side_effect = regenerate
+
+        result = await self.service.generate_answer("질문", results)
+
+        self.assertEqual(FinalAnswerStatus.WITHHELD, result.status)
+        self.assertEqual(
+            FinalWithheldReason.UNVERIFIABLE_ANSWER,
+            result.withheld_reason,
+        )
+        self.assertEqual(2, len(result.stage_trace.validation_errors))
+        self.generator.regenerate_answer_with_trace.assert_awaited_once()
+
+    async def test_returns_error_when_validation_regeneration_api_fails(
+        self,
+    ) -> None:
+        results = [self._result(1), self._result(2)]
+        generated = self._answerable("미선택 근거 [SOURCE_2]")
+        stage_trace = self._stage_trace(results[:1], generated)
+        self.generator.generate_with_trace.return_value = _call(
+            generated,
+            stage_trace,
+        )
+        error = RuntimeError("repair API failure")
+        self.generator.regenerate_answer_with_trace.return_value = GenerationCall(
+            trace=_failed_trace(),
+            error=error,
+            stage_trace=replace(
+                stage_trace,
+                validation_regeneration_count=1,
+            ),
+        )
+
+        result = await self.service.generate_answer("질문", results)
+
+        self.assertEqual(FinalAnswerStatus.ERROR, result.status)
+        self.assertEqual(INTERNAL_ERROR_CODE, result.error_code)
+        self.assertFalse(result.model_call.succeeded)
+        self.generator.regenerate_answer_with_trace.assert_awaited_once()
 
     async def test_withholds_unverifiable_answers_without_citations(self) -> None:
         cases = (
             "marker가 없는 답변",
             "존재하지 않는 근거 [SOURCE_9]",
-            "근거 [SOURCE_1] [SOURCE_2] [SOURCE_3] [SOURCE_4]",
         )
 
         for answer_markdown in cases:
@@ -314,6 +453,25 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
                 )
                 self.assertEqual((), result.citations)
                 self.assertIsNone(result.error_code)
+
+    async def test_completes_with_four_and_five_valid_citations(self) -> None:
+        for count in (4, 5):
+            with self.subTest(count=count):
+                results = [self._result(index) for index in range(1, count + 1)]
+                generated = self._answerable(
+                    " ".join(f"근거 [SOURCE_{index}]" for index in range(1, count + 1))
+                )
+                self.generator.generate_with_trace.return_value = _call(
+                    generated, self._stage_trace(results, generated)
+                )
+                result = await self.service.generate_answer("질문", results)
+                self.assertEqual(FinalAnswerStatus.COMPLETED, result.status)
+                self.assertEqual(count, len(result.citations))
+                self.assertEqual(
+                    list(range(1, count + 1)),
+                    [citation.citation_number for citation in result.citations],
+                )
+                self.generator.regenerate_answer_with_trace.assert_not_awaited()
 
     async def test_withholds_answers_containing_links_or_html(self) -> None:
         cases = (
@@ -457,6 +615,8 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(WITHHELD_RESPONSES[final_reason], result.answer_markdown)
                 self.assertEqual((), result.citations)
 
+        self.generator.regenerate_answer_with_trace.assert_not_awaited()
+
     def test_keeps_exact_backend_withheld_responses(self) -> None:
         self.assertEqual(
             {
@@ -498,8 +658,11 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
     async def test_returns_error_when_citation_validation_processing_fails(
         self,
     ) -> None:
+        generated = self._answerable("답변 [SOURCE_1]")
+        stage_trace = GenerationStageTrace(pre_validation_result=generated)
         self.generator.generate_with_trace.return_value = _call(
-            self._answerable("답변 [SOURCE_1]")
+            generated,
+            stage_trace,
         )
 
         with patch(
@@ -512,6 +675,14 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(CITATION_VALIDATION_ERROR_CODE, result.error_code)
         self.assertIsNone(result.answer_markdown)
         self.assertEqual((), result.citations)
+        self.assertEqual(
+            "validation failure",
+            result.stage_trace.validation_error,
+        )
+        self.assertEqual(
+            generated,
+            result.stage_trace.pre_validation_result,
+        )
 
     async def test_citations_carry_chunk_identifiers_for_logging(self) -> None:
         results = [self._result(1), self._result(2)]
@@ -591,6 +762,35 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
             final_rank=index,
             bm25_rank=index,
             vector_rank=index,
+        )
+
+    @staticmethod
+    def _stage_trace(
+        results: list[HybridRetrievalResult],
+        generated: GenerationResult,
+    ) -> GenerationStageTrace:
+        sources = tuple(build_generation_context(results))
+        return GenerationStageTrace(
+            source_plan=GenerationSourcePlan(
+                status=GenerationStatus.ANSWERABLE,
+                answer_type=GenerationAnswerType.PROCEDURE,
+                answer_scope=(
+                    GenerationAnswerScope.SUMMARY
+                    if len(sources) == 1
+                    else GenerationAnswerScope.MULTI_DETAIL
+                ),
+                evidence_requirements=[
+                    GenerationEvidenceRequirement(
+                        information_unit="답변 정보",
+                        source_ids=[source.source_id for source in sources],
+                    )
+                ],
+                withheld_reason=None,
+            ),
+            selected_sources=sources,
+            pre_validation_result=generated,
+            planning_attempt_count=1,
+            answer_attempt_count=1,
         )
 
 

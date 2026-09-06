@@ -5,7 +5,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, replace
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -61,12 +61,18 @@ from app.answering.models import (
     FinalAnswerStatus,
     FinalGenerationResult,
     FinalWithheldReason,
+    GenerationStageTrace,
 )
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import HybridSearchCall, RetrievalResult
 
 
 logger = logging.getLogger(__name__)
+
+OnGenerationStageTraceHook = Callable[
+    [uuid.UUID, GenerationStageTrace],
+    None,
+]
 
 UPSTREAM_ERROR_MESSAGE = (
     "AI 서비스 연결이 원활하지 않습니다. 잠시 후 다시 시도해주세요."
@@ -310,6 +316,9 @@ class ChatService:
         *,
         on_turn_started: Optional[OnTurnStartedHook] = None,
         on_progress_stage: Optional[OnProgressStageHook] = None,
+        on_generation_stage_trace: Optional[
+            OnGenerationStageTraceHook
+        ] = None,
     ) -> ChatResponse:
         """질문을 검색·생성 파이프라인에 전달하고 실행 로그와 함께 응답한다."""
 
@@ -341,6 +350,7 @@ class ChatService:
                 turn,
                 started,
                 on_progress_stage=on_progress_stage,
+                on_generation_stage_trace=on_generation_stage_trace,
             )
         except asyncio.CancelledError:
             await self._cancel_quietly(turn.rag_run_id)
@@ -365,6 +375,9 @@ class ChatService:
         started: float,
         *,
         on_progress_stage: Optional[OnProgressStageHook] = None,
+        on_generation_stage_trace: Optional[
+            OnGenerationStageTraceHook
+        ] = None,
     ) -> ChatResponse:
         conversation_id = turn.conversation_id
         rag_run_id = turn.rag_run_id
@@ -497,6 +510,22 @@ class ChatService:
                         missing_trace_error,
                     ),
                 )
+
+            if (
+                on_generation_stage_trace is not None
+                and generation_result.stage_trace is not None
+            ):
+                try:
+                    on_generation_stage_trace(
+                        rag_run_id,
+                        generation_result.stage_trace,
+                    )
+                except Exception:
+                    logger.exception(
+                        "평가용 Generation 단계 trace 전달에 실패했습니다: "
+                        "rag_run_id=%s",
+                        rag_run_id,
+                    )
 
             response = _to_chat_response(
                 generation_result,

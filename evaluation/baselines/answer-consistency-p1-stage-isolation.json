@@ -1,0 +1,1191 @@
+{
+  "schemaVersion": "stage-consistency-v1",
+  "executedAt": "2026-09-06T05:48:29.281299+00:00",
+  "baselineRevision": "4ec0c8a",
+  "model": "gpt-5.4-mini",
+  "temperature": "OMITTED",
+  "prompt": {
+    "sourcePlanningVersion": "v6",
+    "sourcePlanningSha256": "4226a1b9aecb9e194c246c634f9ac5b306c48b52f3fdbe41a942e14b221e4ff1",
+    "answerVersion": "v7",
+    "answerSha256": "e9a10510005ecd3f909686efec777af91f99483dd746338f8401af29490f6135"
+  },
+  "cases": {
+    "AC01": {
+      "question": "디스코드는 뭐야?",
+      "fixedTop5": [
+        {
+          "sourceId": "SOURCE_1",
+          "chunkId": 3340,
+          "documentTitle": "디스코드",
+          "sectionPath": [
+            "디스코드",
+            "개요"
+          ],
+          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+          "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+        },
+        {
+          "sourceId": "SOURCE_2",
+          "chunkId": 3341,
+          "documentTitle": "디스코드",
+          "sectionPath": [
+            "디스코드",
+            "디스코드 연동으로 얻는 핵심 가치"
+          ],
+          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다."
+        },
+        {
+          "sourceId": "SOURCE_3",
+          "chunkId": 3343,
+          "documentTitle": "디스코드",
+          "sectionPath": [
+            "디스코드",
+            "자주 묻는 질문 (FAQ)"
+          ],
+          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+          "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 디스코드 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 디스코드 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요."
+        },
+        {
+          "sourceId": "SOURCE_4",
+          "chunkId": 3342,
+          "documentTitle": "디스코드",
+          "sectionPath": [
+            "디스코드",
+            "연동 설정 가이드"
+          ],
+          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+          "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다."
+        },
+        {
+          "sourceId": "SOURCE_5",
+          "chunkId": 3355,
+          "documentTitle": "알림",
+          "sectionPath": [
+            "알림",
+            "참고"
+          ],
+          "sourceUrl": "https://docs.riido.io/data/notifications.md",
+          "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다."
+        }
+      ],
+      "planning": {
+        "repeatCount": 10,
+        "uniqueStructuredOutputCount": 5,
+        "sourceSetCounts": {
+          "SOURCE_1,SOURCE_2": 6,
+          "SOURCE_1": 2,
+          "SOURCE_1,SOURCE_2,SOURCE_4": 1,
+          "SOURCE_1,SOURCE_2,SOURCE_4,SOURCE_5": 1
+        },
+        "overThreeCitationCount": 1,
+        "calls": [
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "디스코드가 무엇인지",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2572,
+            "outputTokens": 56
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "디스코드가 무엇인지",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2572,
+            "outputTokens": 56
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "디스코드가 무엇인지",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2572,
+            "outputTokens": 52
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "디스코드는 뭐야",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2572,
+            "outputTokens": 55
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "디스코드는 뭐야",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2572,
+            "outputTokens": 65
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "디스코드가 무엇인지",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2572,
+            "outputTokens": 56
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "디스코드가 무엇인지",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_4",
+                    "SOURCE_5"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2572,
+            "outputTokens": 64
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "디스코드가 무엇인지",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2572,
+            "outputTokens": 56
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "디스코드가 무엇인지",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2572,
+            "outputTokens": 52
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "디스코드가 무엇인지",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2572,
+            "outputTokens": 56
+          }
+        ]
+      },
+      "answer": {
+        "repeatCount": 10,
+        "fixedPlanOrigin": "P1_PASSING_EXECUTION",
+        "fixedPlan": {
+          "status": "ANSWERABLE",
+          "answer_scope": "SUMMARY",
+          "evidence_requirements": [
+            {
+              "information_unit": "디스코드가 무엇인지",
+              "source_ids": [
+                "SOURCE_1",
+                "SOURCE_2"
+              ]
+            }
+          ],
+          "withheld_reason": null
+        },
+        "selectedSourceIds": [
+          "SOURCE_1",
+          "SOURCE_2"
+        ],
+        "passedCount": 3,
+        "failureCounts": {
+          "첫 문장 개념 누락: ['도구', '서비스']": 7,
+          "답변 개념 누락: ['연동', '연결']": 5
+        },
+        "calls": [
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 공간입니다. 뤼이도와 연동되면 디스코드에서의 논의가 뤼이도에 자동으로 기록되고, 뤼이도의 핵심 업데이트도 실시간으로 디스코드에 전달됩니다. [SOURCE_1] [SOURCE_2]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1909,
+            "outputTokens": 101,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "디스코드는 팀이 주요 소통에 사용하는 커뮤니케이션 공간입니다. 뤼이도 가이드에서는 디스코드를 주요 소통 도구로 사용하는 팀을 전제로 설명하고 있습니다. [SOURCE_1]\n\n뤼이도와 디스코드를 연동하면 뤼이도의 핵심 업데이트가 디스코드에 실시간으로 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. 또한 실시간 알림 발송, 양방향 댓글 동기화, 일일 리포트, 협업 채널 일원화 기능의 가치를 설명하고 있습니다. [SOURCE_1] [SOURCE_2]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1909,
+            "outputTokens": 177,
+            "failures": [
+              "첫 문장 개념 누락: ['도구', '서비스']"
+            ]
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "디스코드는 팀이 주요 소통에 사용하는 공간입니다. 뤼이도 안내에서는 디스코드에서 논의가 이루어지고, 작업 정보가 오가는 소통 도구로 설명하고 있습니다. [SOURCE_1] [SOURCE_2]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1909,
+            "outputTokens": 82,
+            "failures": [
+              "첫 문장 개념 누락: ['도구', '서비스']",
+              "답변 개념 누락: ['연동', '연결']"
+            ]
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "디스코드는 팀이 주요 소통에 사용하는 공간입니다. 뤼이도 안내에서는 디스코드를 중심으로 논의하고, 그 내용이 뤼이도에 자동으로 기록되거나 업데이트가 전달되는 소통 도구로 설명하고 있습니다. [SOURCE_1] [SOURCE_2]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1909,
+            "outputTokens": 93,
+            "failures": [
+              "첫 문장 개념 누락: ['도구', '서비스']",
+              "답변 개념 누락: ['연동', '연결']"
+            ]
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "디스코드는 팀이 주요 소통에 사용하는 공간입니다. 제공된 가이드에서는 프로젝트 관리 툴과 뤼이도 사이의 정보 단절이 생기기 쉬운 소통 도구로 설명하고 있습니다. [SOURCE_1] [SOURCE_2]\n\n뤼이도에서는 디스코드에서 이루어진 논의가 자동으로 기록되고, 뤼이도의 핵심 업데이트가 실시간으로 전달됩니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1909,
+            "outputTokens": 127,
+            "failures": [
+              "첫 문장 개념 누락: ['도구', '서비스']",
+              "답변 개념 누락: ['연동', '연결']"
+            ]
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "디스코드는 팀이 주요 소통에 사용하는 커뮤니케이션 공간입니다. 뤼이도 안내에서는 디스코드에서 논의가 이루어지고, 그 내용이 뤼이도에 자동으로 기록되는 소통 도구로 설명합니다.[SOURCE_1][SOURCE_2]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1909,
+            "outputTokens": 91,
+            "failures": [
+              "첫 문장 개념 누락: ['도구', '서비스']",
+              "답변 개념 누락: ['연동', '연결']"
+            ]
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 공간입니다. 뤼이도와 연동하면 작업 논의와 업데이트를 디스코드에서 이어가면서 정보 단절을 줄일 수 있습니다. [SOURCE_1] [SOURCE_2]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1909,
+            "outputTokens": 83,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "디스코드는 팀이 주요 소통에 사용하는 커뮤니케이션 공간입니다. [SOURCE_1]\n\n뤼이도 안내에서는 디스코드에서 논의한 내용이 뤼이도에 자동으로 기록되고, 작업 변경 사항을 실시간으로 공유하는 데 쓰인다고 설명합니다. [SOURCE_1] [SOURCE_2]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1909,
+            "outputTokens": 103,
+            "failures": [
+              "첫 문장 개념 누락: ['도구', '서비스']",
+              "답변 개념 누락: ['연동', '연결']"
+            ]
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "디스코드는 팀이 주요 소통에 사용하는 소통 도구입니다. [SOURCE_1]\n\n뤼이도와 연동되면 디스코드에서 논의한 내용이 뤼이도에 자동으로 기록되고, 뤼이도의 핵심 업데이트도 실시간으로 디스코드에 전달됩니다. [SOURCE_1] [SOURCE_2]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1909,
+            "outputTokens": 109,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "디스코드는 팀이 주요 소통을 하는 커뮤니케이션 공간입니다. 제공된 가이드에서는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 생길 수 있는 공간으로 설명하며, 뤼이도 연동을 통해 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록된다고 안내합니다. [SOURCE_1] [SOURCE_2]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1909,
+            "outputTokens": 117,
+            "failures": [
+              "첫 문장 개념 누락: ['도구', '서비스']"
+            ]
+          }
+        ]
+      }
+    },
+    "AC02": {
+      "question": "스프린트는 어떻게 설정해?",
+      "fixedTop5": [
+        {
+          "sourceId": "SOURCE_1",
+          "chunkId": 3300,
+          "documentTitle": "스프린트",
+          "sectionPath": [
+            "스프린트",
+            "스프린트 설정"
+          ],
+          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+          "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다."
+        },
+        {
+          "sourceId": "SOURCE_2",
+          "chunkId": 3302,
+          "documentTitle": "스프린트",
+          "sectionPath": [
+            "스프린트",
+            "스프린트 시작 요일"
+          ],
+          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+          "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다."
+        },
+        {
+          "sourceId": "SOURCE_3",
+          "chunkId": 3303,
+          "documentTitle": "스프린트",
+          "sectionPath": [
+            "스프린트",
+            "미리 생성할 다가올 스프린트 개수"
+          ],
+          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+          "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다."
+        },
+        {
+          "sourceId": "SOURCE_4",
+          "chunkId": 3301,
+          "documentTitle": "스프린트",
+          "sectionPath": [
+            "스프린트",
+            "스프린트 기간"
+          ],
+          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+          "content": "하나의 스프린트가 지속되는 기간입니다. 주 단위로 설정할 수 있으며, 최소 1주부터 최대 8주까지 설정 가능합니다.\n\n* 일반적으로 1\\~2주는 짧은 반복과 빠른 실행에 적합합니다.\n* 3주 이상은 중장기 프로젝트의 진행 추적에 유용합니다.\n\n팀 규모와 업무 성격에 따라 적정 주기를 설정하는 것을 권장합니다.\n\n예: 초기 스타트업 팀 — 1주 / 대규모 프로젝트 팀 — 2\\~3주"
+        },
+        {
+          "sourceId": "SOURCE_5",
+          "chunkId": 3309,
+          "documentTitle": "자동화",
+          "sectionPath": [
+            "자동화",
+            "개요"
+          ],
+          "sourceUrl": "https://docs.riido.io/sprints/automations.md",
+          "content": "스프린트를 시작하거나 종료할 때마다 반복되는 작업이 있다면, 자동화 기능을 통해 한 번의 설정으로 처리할 수 있습니다. 작업을 일일이 수동으로 정리하지 않아도 되기 때문에 팀은 실행에 더 집중할 수 있고, 스프린트 리듬도 자연스럽게 유지됩니다."
+        }
+      ],
+      "planning": {
+        "repeatCount": 10,
+        "uniqueStructuredOutputCount": 3,
+        "sourceSetCounts": {
+          "SOURCE_1,SOURCE_2,SOURCE_3,SOURCE_4": 5,
+          "SOURCE_1": 5
+        },
+        "overThreeCitationCount": 5,
+        "calls": [
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "스프린트 설정 방법",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_4",
+                    "SOURCE_2",
+                    "SOURCE_3"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 1981,
+            "outputTokens": 69
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "스프린트 설정 방법",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 1981,
+            "outputTokens": 57
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "스프린트 설정 방법",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_4",
+                    "SOURCE_2",
+                    "SOURCE_3"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 1981,
+            "outputTokens": 69
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "스프린트 설정 방법",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_4",
+                    "SOURCE_2",
+                    "SOURCE_3"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 1981,
+            "outputTokens": 69
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "스프린트 설정 방법",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_4",
+                    "SOURCE_2",
+                    "SOURCE_3"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 1981,
+            "outputTokens": 69
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "스프린트 설정 방법",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 1981,
+            "outputTokens": 57
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "스프린트 설정 방법",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 1981,
+            "outputTokens": 57
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "스프린트 설정 방법",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 1981,
+            "outputTokens": 57
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "스프린트 설정 방법",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 1981,
+            "outputTokens": 57
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "스프린트 설정 방법",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_3",
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 1981,
+            "outputTokens": 69
+          }
+        ]
+      },
+      "answer": {
+        "repeatCount": 10,
+        "fixedPlanOrigin": "P1_PASSING_EXECUTION",
+        "fixedPlan": {
+          "status": "ANSWERABLE",
+          "answer_scope": "SUMMARY",
+          "evidence_requirements": [
+            {
+              "information_unit": "스프린트 설정 방법",
+              "source_ids": [
+                "SOURCE_1"
+              ]
+            }
+          ],
+          "withheld_reason": null
+        },
+        "selectedSourceIds": [
+          "SOURCE_1"
+        ],
+        "passedCount": 10,
+        "failureCounts": {},
+        "calls": [
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "스프린트 설정은 `팀 설정 > 스프린트`에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1381,
+            "outputTokens": 83,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "스프린트 설정은 `[팀 설정 > 스프린트]`에서 관리하실 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.[SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1381,
+            "outputTokens": 84,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "스프린트 설정은 `팀 설정 > 스프린트`에서 관리하실 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.[SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1381,
+            "outputTokens": 83,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "스프린트 설정은 `팀 설정 > 스프린트`에서 관리하실 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 스프린트가 자동으로 활성화됩니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1381,
+            "outputTokens": 84,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "스프린트 설정은 `팀 설정 > 스프린트`에서 관리하실 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1381,
+            "outputTokens": 84,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "스프린트 설정은 `팀 설정 > 스프린트`에서 관리하실 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1381,
+            "outputTokens": 84,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "스프린트 설정은 `팀 설정 > 스프린트`에서 관리하실 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1381,
+            "outputTokens": 84,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "스프린트 설정은 `팀 설정 > 스프린트`에서 관리하실 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1381,
+            "outputTokens": 84,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "스프린트 설정은 팀 설정의 스프린트 메뉴에서 관리하실 수 있습니다. 여기서 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1381,
+            "outputTokens": 85,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "스프린트 설정은 `팀 설정 > 스프린트`에서 관리하실 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1381,
+            "outputTokens": 84,
+            "failures": []
+          }
+        ]
+      }
+    },
+    "AC07": {
+      "question": "슬랙 연동은 어떤 기능을 제공해?",
+      "fixedTop5": [
+        {
+          "sourceId": "SOURCE_1",
+          "chunkId": 3337,
+          "documentTitle": "슬랙",
+          "sectionPath": [
+            "슬랙",
+            "슬랙 연동으로 얻는 핵심 가치"
+          ],
+          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**"
+        },
+        {
+          "sourceId": "SOURCE_2",
+          "chunkId": 3338,
+          "documentTitle": "슬랙",
+          "sectionPath": [
+            "슬랙",
+            "연동 설정 가이드"
+          ],
+          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+          "content": "슬랙 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### **1) 워크스페이스 연동:**\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Slack] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.\n\n#### **2) 팀별 채널 연결:**\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### **3) 사용자 연결:**\n\n1. 뤼이도 계정과 슬랙 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다."
+        },
+        {
+          "sourceId": "SOURCE_3",
+          "chunkId": 3339,
+          "documentTitle": "슬랙",
+          "sectionPath": [
+            "슬랙",
+            "자주 묻는 질문 (FAQ)"
+          ],
+          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+          "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요."
+        },
+        {
+          "sourceId": "SOURCE_4",
+          "chunkId": 3336,
+          "documentTitle": "슬랙",
+          "sectionPath": [
+            "슬랙",
+            "개요"
+          ],
+          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+          "content": "많은 팀이 슬랙을 주요 커뮤니케이션 도구로 사용하지만, 이로 인해 메신저와 프로젝트 관리 툴 간 정보가 파편화되는 문제가 발생합니다. 슬랙에서 논의하고, 뤼이도에서 작업 상태를 업데이트하는 이중 작업은 비효율적이며, 중요한 논의가 특정 툴 안에 갇히는 문제도 발생합니다.\n\n뤼이도의 슬랙 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+        },
+        {
+          "sourceId": "SOURCE_5",
+          "chunkId": 3293,
+          "documentTitle": "댓글",
+          "sectionPath": [
+            "댓글",
+            "개요"
+          ],
+          "sourceUrl": "https://docs.riido.io/docs/comments.md",
+          "content": "뤼이도의 모든 작업 단위(대기 작업, 백로그, 작업, 미팅)에는 댓글 기능이 포함되어 있어, 별도의 외부 채널 없이도 실시간 소통이 가능합니다. 작업 담당자뿐 아니라 관련된 모든 멤버가 의견을 나누고, 이모지 반응으로 빠르게 피드백을 주고받을 수 있습니다.\n\n슬랙이나 디스코드와 연동되어 댓글 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다."
+        }
+      ],
+      "planning": {
+        "repeatCount": 10,
+        "uniqueStructuredOutputCount": 2,
+        "sourceSetCounts": {
+          "SOURCE_1,SOURCE_2,SOURCE_3,SOURCE_4": 10
+        },
+        "overThreeCitationCount": 10,
+        "calls": [
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "슬랙 연동이 제공하는 기능",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_3",
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2701,
+            "outputTokens": 71
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "슬랙 연동이 제공하는 기능",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_3",
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2701,
+            "outputTokens": 71
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "슬랙 연동이 제공하는 기능",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_3",
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2701,
+            "outputTokens": 65
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "슬랙 연동이 제공하는 기능",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_3",
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2701,
+            "outputTokens": 71
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "슬랙 연동이 제공하는 기능",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_4",
+                    "SOURCE_2",
+                    "SOURCE_3"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2701,
+            "outputTokens": 71
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "슬랙 연동이 제공하는 기능",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_3",
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2701,
+            "outputTokens": 71
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "슬랙 연동이 제공하는 기능",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_3",
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2701,
+            "outputTokens": 71
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "슬랙 연동이 제공하는 기능",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_3",
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2701,
+            "outputTokens": 65
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "슬랙 연동이 제공하는 기능",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_3",
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2701,
+            "outputTokens": 65
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "슬랙 연동이 제공하는 기능",
+                  "source_ids": [
+                    "SOURCE_1",
+                    "SOURCE_2",
+                    "SOURCE_3",
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "inputTokens": 2701,
+            "outputTokens": 71
+          }
+        ]
+      },
+      "answer": {
+        "repeatCount": 10,
+        "fixedPlanOrigin": "HUMAN_FIXED_MINIMAL_DIRECT_SOURCE",
+        "fixedPlan": {
+          "status": "ANSWERABLE",
+          "answer_scope": "SUMMARY",
+          "evidence_requirements": [
+            {
+              "information_unit": "슬랙 연동이 제공하는 기능",
+              "source_ids": [
+                "SOURCE_1"
+              ]
+            }
+          ],
+          "withheld_reason": null
+        },
+        "selectedSourceIds": [
+          "SOURCE_1"
+        ],
+        "passedCount": 10,
+        "failureCounts": {},
+        "calls": [
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "슬랙 연동은 다음 기능을 제공합니다. 작업 변경 사항을 즉시 팀에 공유하는 **실시간 알림 발송**, 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되는 **양방향 댓글 동기화**, 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달하는 **일일 리포트**, 그리고 PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 같은 정보를 공유하는 **협업 채널 일원화**입니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1690,
+            "outputTokens": 155,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "슬랙 연동은 다음 기능을 제공합니다. [SOURCE_1]\n\n- 실시간 알림 발송\n- 양방향 댓글 동기화\n- 일일 리포트\n- 협업 채널 일원화 [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1690,
+            "outputTokens": 79,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "슬랙 연동은 다음 기능을 제공합니다. [SOURCE_1]\n\n- **실시간 알림 발송**: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [SOURCE_1]\n- **양방향 댓글 동기화**: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [SOURCE_1]\n- **일일 리포트**: 당일 오전의 미팅과 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달됩니다. [SOURCE_1]\n- **협업 채널 일원화**: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1690,
+            "outputTokens": 208,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "슬랙 연동은 다음 기능을 제공합니다. [SOURCE_1]\n\n- 실시간 알림 발송\n- 양방향 댓글 동기화\n- 일일 리포트\n- 협업 채널 일원화 [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1690,
+            "outputTokens": 79,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "슬랙 연동은 다음 기능을 제공합니다. [SOURCE_1]\n\n- 실시간 알림 발송\n- 양방향 댓글 동기화\n- 일일 리포트\n- 협업 채널 일원화 [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1690,
+            "outputTokens": 79,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "슬랙 연동은 다음 기능을 제공합니다. [SOURCE_1]\n\n- **실시간 알림 발송**: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [SOURCE_1]\n- **양방향 댓글 동기화**: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [SOURCE_1]\n- **일일 리포트**: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달됩니다. [SOURCE_1]\n- **협업 채널 일원화**: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1690,
+            "outputTokens": 207,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "슬랙 연동은 다음 기능을 제공합니다.\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다.\n- 양방향 댓글 동기화: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록됩니다.\n- 일일 리포트: 당일 오전의 미팅과 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달됩니다.\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있습니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1690,
+            "outputTokens": 174,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "슬랙 연동은 **실시간 알림 발송**, **양방향 댓글 동기화**, **일일 리포트**, **협업 채널 일원화** 기능을 제공합니다. [SOURCE_1]\n\n- **실시간 알림 발송**: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [SOURCE_1]\n- **양방향 댓글 동기화**: 슬랙에서 논의한 내용이 작업 맥락과 함께 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [SOURCE_1]\n- **일일 리포트**: 당일 오전의 미팅과 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달됩니다. [SOURCE_1]\n- **협업 채널 일원화**: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있습니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1690,
+            "outputTokens": 243,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "슬랙 연동은 다음 기능을 제공합니다. [SOURCE_1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [SOURCE_1]\n- 양방향 댓글 동기화: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록됩니다. [SOURCE_1]\n- 일일 리포트: 당일 오전에 미팅과 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달됩니다. [SOURCE_1]\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1690,
+            "outputTokens": 192,
+            "failures": []
+          },
+          {
+            "output": {
+              "status": "ANSWERABLE",
+              "answer_markdown": "슬랙 연동은 다음 기능을 제공합니다. [SOURCE_1]\n\n- 실시간 알림 발송\n- 양방향 댓글 동기화\n- 일일 리포트\n- 협업 채널 일원화 [SOURCE_1]",
+              "withheld_reason": null
+            },
+            "inputTokens": 1690,
+            "outputTokens": 79,
+            "failures": []
+          }
+        ]
+      }
+    }
+  }
+}

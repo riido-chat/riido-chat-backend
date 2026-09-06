@@ -1,6 +1,7 @@
 import asyncio
 import unittest
 import uuid
+from dataclasses import replace
 from itertools import count
 from types import SimpleNamespace
 from typing import Optional
@@ -53,6 +54,7 @@ from app.answering.models import (
     FinalAnswerStatus,
     FinalGenerationResult,
     FinalWithheldReason,
+    GenerationStageTrace,
 )
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import (
@@ -215,6 +217,27 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             [1, 2],
             [citation.citation_number for citation in response.citations],
+        )
+
+    async def test_delivers_internal_generation_trace_without_exposing_it(self) -> None:
+        stage_trace = GenerationStageTrace()
+        self._generation_result = replace(
+            self._completed(),
+            stage_trace=stage_trace,
+        )
+        observed = []
+
+        response = await self.service.answer_question(
+            "질문",
+            on_generation_stage_trace=lambda rag_run_id, trace: observed.append(
+                (rag_run_id, trace)
+            ),
+        )
+
+        self.assertEqual([(self.rag_run_id, stage_trace)], observed)
+        self.assertNotIn(
+            "stageTrace",
+            response.model_dump(mode="json", by_alias=True),
         )
 
     async def test_response_section_path_excludes_document_title(self) -> None:

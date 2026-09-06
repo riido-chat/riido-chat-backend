@@ -1,0 +1,3617 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-06T09:39:19.773760+00:00",
+  "casesVersion": "v3",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "4ec0c8a00423b51d0b624319caa314983d033301",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.4-mini"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v3",
+        "sha256": "7bc9d807d37827d2a8f2b2e8bc9b184191c5cc4b947b3c78c9dd991da2d8c801"
+      },
+      "sourcePlanning": {
+        "version": "v10",
+        "sha256": "d40cfa917d38d02a13123b1f405a3d7a2faad1078cba6edec89c16389291fe5d"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v10-repair-1",
+        "sha256": "abbb615171d68a265b0a54137052ef0e9997bef1a78cf5149165c6fef5da0dcf"
+      },
+      "answer": {
+        "version": "v17",
+        "sha256": "80cef0103ccf34c25d627ed255eafd7281dca8afe161d6655ac33d50aec76b10"
+      },
+      "answerValidationRegeneration": {
+        "version": "v17-repair-1",
+        "sha256": "ef07e7aaaaf3b0b54aba075deba6225fa2e7287a58eb0a13e5ccb0bab18cc589"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "4ec0c8a00423b51d0b624319caa314983d033301",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v19"
+      },
+      {
+        "purpose": "QUERY_REWRITE",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v3"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 5,
+    "uniqueCaseCount": 1,
+    "totalCaseExecutionCount": 5,
+    "passedCaseExecutionCount": 5,
+    "failedCaseExecutionCount": 0,
+    "perCase": [
+      {
+        "id": "MT09",
+        "executionCount": 5,
+        "passedCount": 5,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 5,
+        "passedCount": 5,
+        "failedCount": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-06T09:38:36.082405+00:00",
+      "results": [
+        {
+          "id": "MT09",
+          "description": "슬랙 연동 뒤 알림 범위 조정 질문",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "c1dc8d6c-6f4c-40eb-a4ff-f02ce621ccf1",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "슬랙 연동은 어떤 기능을 제공해?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "c1dc8d6c-6f4c-40eb-a4ff-f02ce621ccf1",
+                "ragRunId": "87701f95-acb6-403c-93ac-23e7be8ffac8",
+                "answer": {
+                  "answerMarkdown": "슬랙 연동은 작업 관련 정보를 슬랙과 뤼이도 사이에서 바로 공유하고 정리해 주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄여 줍니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자와 실무자가 각자 쓰는 툴 안에서 동일한 정보를 공유할 수 있게 합니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "슬랙",
+                    "sectionPath": [
+                      "슬랙 연동으로 얻는 핵심 가치"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                "resolvedQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4052,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 19,
+                    "outputTokens": null,
+                    "latencyMs": 374,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5894,
+                    "outputTokens": 286,
+                    "latencyMs": 3591,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "슬랙"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "슬랙 연동은 어떤 기능을 제공해?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "슬랙 연동은 어떤 기능을 제공해?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3337,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:6ec68508c108",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "슬랙 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "0b5aacd673fabf0730dcdb2836ab2f2a86cc1e3e85ca73a408039bb8822f5b67",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 10.030843490118848,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5783078630737264,
+                            "latencyMs": 404
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3338,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:b60d8edf2d0a",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "8b644a3e6c74d6f4ef564ed09316e5b37382aa63562617001b7ce590e2fe5882",
+                        "content": "슬랙 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### **1) 워크스페이스 연동:**\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Slack] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.\n\n#### **2) 팀별 채널 연결:**\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### **3) 사용자 연결:**\n\n1. 뤼이도 계정과 슬랙 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 8.251724871238888,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5521861762212575,
+                            "latencyMs": 404
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.428097061492327,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5389940347232509,
+                            "latencyMs": 404
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3336,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:4fdacd7803e6",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "575352ca15539f2c67683f2a09a69d5bacb885902131aa33f58889e8697bd716",
+                        "content": "많은 팀이 슬랙을 주요 커뮤니케이션 도구로 사용하지만, 이로 인해 메신저와 프로젝트 관리 툴 간 정보가 파편화되는 문제가 발생합니다. 슬랙에서 논의하고, 뤼이도에서 작업 상태를 업데이트하는 이중 작업은 비효율적이며, 중요한 논의가 특정 툴 안에 갇히는 문제도 발생합니다.\n\n뤼이도의 슬랙 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 7.517221187340791,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5045131082774692,
+                            "latencyMs": 404
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3293,
+                        "documentVersionId": 2431,
+                        "documentId": "854f9556fa9d",
+                        "sectionId": "854f9556fa9d:f59ce20fded2",
+                        "documentTitle": "댓글",
+                        "sectionPath": [
+                          "댓글",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/docs/comments.md",
+                        "contentHash": "457248463deeb3c3266357009f9597238a88138634f1cf45f93fb869224aca16",
+                        "content": "뤼이도의 모든 작업 단위(대기 작업, 백로그, 작업, 미팅)에는 댓글 기능이 포함되어 있어, 별도의 외부 채널 없이도 실시간 소통이 가능합니다. 작업 담당자뿐 아니라 관련된 모든 멤버가 의견을 나누고, 이모지 반응으로 빠르게 피드백을 주고받을 수 있습니다.\n\n슬랙이나 디스코드와 연동되어 댓글 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.077977472155234,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.3731847809111719,
+                            "latencyMs": 404
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5894,
+                        "outputTokens": 286,
+                        "latencyMs": 3591,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "FEATURE_SUMMARY",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "슬랙 연동은 어떤 기능을 제공해",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3337,
+                          "documentVersionId": 2443,
+                          "documentId": "43e5e2414349",
+                          "sectionId": "43e5e2414349:6ec68508c108",
+                          "documentTitle": "슬랙",
+                          "sectionPath": [
+                            "슬랙",
+                            "슬랙 연동으로 얻는 핵심 가치"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**"
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "슬랙 연동은 작업 관련 정보를 슬랙과 뤼이도 사이에서 바로 공유하고 정리해 주는 기능을 제공합니다. [SOURCE_1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄여 줍니다. [SOURCE_1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [SOURCE_1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [SOURCE_1]\n- 협업 채널 일원화: PM/관리자와 실무자가 각자 쓰는 툴 안에서 동일한 정보를 공유할 수 있게 합니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "슬랙 연동은 작업 관련 정보를 슬랙과 뤼이도 사이에서 바로 공유하고 정리해 주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄여 줍니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자와 실무자가 각자 쓰는 툴 안에서 동일한 정보를 공유할 수 있게 합니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "알림이 너무 많으면 어떻게 줄여?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "c1dc8d6c-6f4c-40eb-a4ff-f02ce621ccf1",
+                "ragRunId": "64b4aded-49ee-4fca-b177-46ddfb08525d",
+                "answer": {
+                  "answerMarkdown": "슬랙 연동 알림은 워크스페이스 전체 알림과 페이지·댓글 단위 알림으로 나눠서 조정하실 수 있습니다. [1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다. [1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭한 뒤 `알림 받기/끄기`로 설정합니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "슬랙",
+                    "sectionPath": [
+                      "자주 묻는 질문 (FAQ)"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "알림이 너무 많으면 어떻게 줄여?",
+                "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 3981,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v3",
+                    "inputTokens": 3041,
+                    "outputTokens": 43,
+                    "latencyMs": 1248,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 30,
+                    "outputTokens": null,
+                    "latencyMs": 185,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5748,
+                    "outputTokens": 211,
+                    "latencyMs": 2469,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "슬랙"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "알림이 너무 많으면 어떻게 줄여?",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "87701f95-acb6-403c-93ac-23e7be8ffac8",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                        "answerContent": "슬랙 연동은 작업 관련 정보를 슬랙과 뤼이도 사이에서 바로 공유하고 정리해 주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄여 줍니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자와 실무자가 각자 쓰는 툴 안에서 동일한 정보를 공유할 수 있게 합니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "87701f95-acb6-403c-93ac-23e7be8ffac8",
+                        "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                        "answerContent": "슬랙 연동은 작업 관련 정보를 슬랙과 뤼이도 사이에서 바로 공유하고 정리해 주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄여 줍니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자와 실무자가 각자 쓰는 툴 안에서 동일한 정보를 공유할 수 있게 합니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.435393470027527,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5438849669719709,
+                            "latencyMs": 198
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 10.127108460659139,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5478241699176569,
+                            "latencyMs": 198
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3336,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:4fdacd7803e6",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "575352ca15539f2c67683f2a09a69d5bacb885902131aa33f58889e8697bd716",
+                        "content": "많은 팀이 슬랙을 주요 커뮤니케이션 도구로 사용하지만, 이로 인해 메신저와 프로젝트 관리 툴 간 정보가 파편화되는 문제가 발생합니다. 슬랙에서 논의하고, 뤼이도에서 작업 상태를 업데이트하는 이중 작업은 비효율적이며, 중요한 논의가 특정 툴 안에 갇히는 문제도 발생합니다.\n\n뤼이도의 슬랙 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 10.286818805153558,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.44529256626220426,
+                            "latencyMs": 198
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3338,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:b60d8edf2d0a",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "8b644a3e6c74d6f4ef564ed09316e5b37382aa63562617001b7ce590e2fe5882",
+                        "content": "슬랙 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### **1) 워크스페이스 연동:**\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Slack] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.\n\n#### **2) 팀별 채널 연결:**\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### **3) 사용자 연결:**\n\n1. 뤼이도 계정과 슬랙 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 9.86007775696309,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5246987168744144,
+                            "latencyMs": 198
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3337,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:6ec68508c108",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "슬랙 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "0b5aacd673fabf0730dcdb2836ab2f2a86cc1e3e85ca73a408039bb8822f5b67",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**",
+                        "fusedRank": 5,
+                        "fusedScore": 0.031009615384615385,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 9.84648992876543,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5217153256466146,
+                            "latencyMs": 198
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5748,
+                        "outputTokens": 211,
+                        "latencyMs": 2469,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "슬랙 연동 알림이 너무 많을 때 줄이는 방법",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3339,
+                          "documentVersionId": 2443,
+                          "documentId": "43e5e2414349",
+                          "sectionId": "43e5e2414349:9976bd5ed072",
+                          "documentTitle": "슬랙",
+                          "sectionPath": [
+                            "슬랙",
+                            "자주 묻는 질문 (FAQ)"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                          "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "슬랙 연동 알림은 워크스페이스 전체 알림과 페이지·댓글 단위 알림으로 나눠서 조정하실 수 있습니다. [SOURCE_1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다. [SOURCE_1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭한 뒤 `알림 받기/끄기`로 설정합니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "슬랙 연동 알림은 워크스페이스 전체 알림과 페이지·댓글 단위 알림으로 나눠서 조정하실 수 있습니다. [1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다. [1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭한 뒤 `알림 받기/끄기`로 설정합니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    },
+    {
+      "repeatNo": 2,
+      "executedAt": "2026-09-06T09:38:44.220508+00:00",
+      "results": [
+        {
+          "id": "MT09",
+          "description": "슬랙 연동 뒤 알림 범위 조정 질문",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "005f93c5-810b-456b-a424-2435ef4a72d6",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "슬랙 연동은 어떤 기능을 제공해?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "005f93c5-810b-456b-a424-2435ef4a72d6",
+                "ragRunId": "514ff5f4-b3e5-498b-84ed-ef16079fb738",
+                "answer": {
+                  "answerMarkdown": "슬랙 연동은 작업 변경 사항을 슬랙으로 바로 알리고, 슬랙에서의 논의를 뤼이도 작업 맥락에 자동으로 반영하는 기능을 제공합니다. 또한 일일 리포트를 개인 슬랙 채널로 전달해 중요한 일정을 놓치지 않도록 돕고, PM/관리자와 실무자가 각자 쓰는 툴 안에서 동일한 정보를 공유할 수 있게 합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지 없이도 알릴 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 뤼이도 작업 맥락에 자동 기록되어 정보 누락을 줄입니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "슬랙",
+                    "sectionPath": [
+                      "슬랙 연동으로 얻는 핵심 가치"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                "resolvedQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4619,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 19,
+                    "outputTokens": null,
+                    "latencyMs": 144,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 6044,
+                    "outputTokens": 339,
+                    "latencyMs": 4420,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "슬랙"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "슬랙 연동은 어떤 기능을 제공해?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "슬랙 연동은 어떤 기능을 제공해?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3337,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:6ec68508c108",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "슬랙 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "0b5aacd673fabf0730dcdb2836ab2f2a86cc1e3e85ca73a408039bb8822f5b67",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 10.030843490118848,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5783078630737264,
+                            "latencyMs": 160
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3338,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:b60d8edf2d0a",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "8b644a3e6c74d6f4ef564ed09316e5b37382aa63562617001b7ce590e2fe5882",
+                        "content": "슬랙 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### **1) 워크스페이스 연동:**\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Slack] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.\n\n#### **2) 팀별 채널 연결:**\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### **3) 사용자 연결:**\n\n1. 뤼이도 계정과 슬랙 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 8.251724871238888,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5521861762212575,
+                            "latencyMs": 160
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.428097061492327,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5389940347232509,
+                            "latencyMs": 160
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3336,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:4fdacd7803e6",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "575352ca15539f2c67683f2a09a69d5bacb885902131aa33f58889e8697bd716",
+                        "content": "많은 팀이 슬랙을 주요 커뮤니케이션 도구로 사용하지만, 이로 인해 메신저와 프로젝트 관리 툴 간 정보가 파편화되는 문제가 발생합니다. 슬랙에서 논의하고, 뤼이도에서 작업 상태를 업데이트하는 이중 작업은 비효율적이며, 중요한 논의가 특정 툴 안에 갇히는 문제도 발생합니다.\n\n뤼이도의 슬랙 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 7.517221187340791,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5045131082774692,
+                            "latencyMs": 160
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3293,
+                        "documentVersionId": 2431,
+                        "documentId": "854f9556fa9d",
+                        "sectionId": "854f9556fa9d:f59ce20fded2",
+                        "documentTitle": "댓글",
+                        "sectionPath": [
+                          "댓글",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/docs/comments.md",
+                        "contentHash": "457248463deeb3c3266357009f9597238a88138634f1cf45f93fb869224aca16",
+                        "content": "뤼이도의 모든 작업 단위(대기 작업, 백로그, 작업, 미팅)에는 댓글 기능이 포함되어 있어, 별도의 외부 채널 없이도 실시간 소통이 가능합니다. 작업 담당자뿐 아니라 관련된 모든 멤버가 의견을 나누고, 이모지 반응으로 빠르게 피드백을 주고받을 수 있습니다.\n\n슬랙이나 디스코드와 연동되어 댓글 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.077977472155234,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.3731847809111719,
+                            "latencyMs": 160
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 6044,
+                        "outputTokens": 339,
+                        "latencyMs": 4420,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "FEATURE_SUMMARY",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "슬랙 연동 기능",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3337,
+                          "documentVersionId": 2443,
+                          "documentId": "43e5e2414349",
+                          "sectionId": "43e5e2414349:6ec68508c108",
+                          "documentTitle": "슬랙",
+                          "sectionPath": [
+                            "슬랙",
+                            "슬랙 연동으로 얻는 핵심 가치"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**"
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "슬랙 연동은 작업 변경 사항을 슬랙으로 바로 알리고, 슬랙에서의 논의를 뤼이도 작업 맥락에 자동으로 반영하는 기능을 제공합니다. 또한 일일 리포트를 개인 슬랙 채널로 전달해 중요한 일정을 놓치지 않도록 돕고, PM/관리자와 실무자가 각자 쓰는 툴 안에서 동일한 정보를 공유할 수 있게 합니다. [SOURCE_1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지 없이도 알릴 수 있습니다. [SOURCE_1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 뤼이도 작업 맥락에 자동 기록되어 정보 누락을 줄입니다. [SOURCE_1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [SOURCE_1]\n- 협업 채널 일원화: PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있습니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 2,
+                    "planningRegenerationCount": 1,
+                    "planningRegenerationModelCall": {
+                      "purpose": "SOURCE_PLAN_REGENERATION",
+                      "status": "SUCCESS",
+                      "provider": "openai",
+                      "requestedModel": "gpt-5.4-mini",
+                      "responseModel": null,
+                      "responseModelAvailability": "UNAVAILABLE",
+                      "promptVersion": "v10-repair-1",
+                      "inputTokens": 3511,
+                      "outputTokens": 57,
+                      "latencyMs": 1124,
+                      "retryCount": 0,
+                      "errorMessage": null
+                    },
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": {
+                      "status": "ANSWERABLE",
+                      "answer_type": "FEATURE_SUMMARY",
+                      "answer_scope": "SUMMARY",
+                      "evidence_requirements": [
+                        {
+                          "information_unit": "슬랙 연동 기능",
+                          "source_ids": [
+                            "SOURCE_1"
+                          ]
+                        }
+                      ],
+                      "withheld_reason": null
+                    },
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "슬랙 연동은 작업 변경 사항을 슬랙으로 바로 알리고, 슬랙에서의 논의를 뤼이도 작업 맥락에 자동으로 반영하는 기능을 제공합니다. 또한 일일 리포트를 개인 슬랙 채널로 전달해 중요한 일정을 놓치지 않도록 돕고, PM/관리자와 실무자가 각자 쓰는 툴 안에서 동일한 정보를 공유할 수 있게 합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지 없이도 알릴 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 뤼이도 작업 맥락에 자동 기록되어 정보 누락을 줄입니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "알림이 너무 많으면 어떻게 줄여?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "005f93c5-810b-456b-a424-2435ef4a72d6",
+                "ragRunId": "023f6d89-abf4-4c71-b12d-71da40ca3e36",
+                "answer": {
+                  "answerMarkdown": "슬랙 연동 알림은 세부적으로 조정하실 수 있습니다. [1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리하시면 됩니다. [1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭한 뒤 `알림 받기/끄기`로 설정하시면 됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "슬랙",
+                    "sectionPath": [
+                      "자주 묻는 질문 (FAQ)"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "알림이 너무 많으면 어떻게 줄여?",
+                "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4518,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v3",
+                    "inputTokens": 3105,
+                    "outputTokens": 43,
+                    "latencyMs": 1373,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 30,
+                    "outputTokens": null,
+                    "latencyMs": 204,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5744,
+                    "outputTokens": 199,
+                    "latencyMs": 2858,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "슬랙"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "알림이 너무 많으면 어떻게 줄여?",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "514ff5f4-b3e5-498b-84ed-ef16079fb738",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                        "answerContent": "슬랙 연동은 작업 변경 사항을 슬랙으로 바로 알리고, 슬랙에서의 논의를 뤼이도 작업 맥락에 자동으로 반영하는 기능을 제공합니다. 또한 일일 리포트를 개인 슬랙 채널로 전달해 중요한 일정을 놓치지 않도록 돕고, PM/관리자와 실무자가 각자 쓰는 툴 안에서 동일한 정보를 공유할 수 있게 합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지 없이도 알릴 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 뤼이도 작업 맥락에 자동 기록되어 정보 누락을 줄입니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있습니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "514ff5f4-b3e5-498b-84ed-ef16079fb738",
+                        "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                        "answerContent": "슬랙 연동은 작업 변경 사항을 슬랙으로 바로 알리고, 슬랙에서의 논의를 뤼이도 작업 맥락에 자동으로 반영하는 기능을 제공합니다. 또한 일일 리포트를 개인 슬랙 채널로 전달해 중요한 일정을 놓치지 않도록 돕고, PM/관리자와 실무자가 각자 쓰는 툴 안에서 동일한 정보를 공유할 수 있게 합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지 없이도 알릴 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 뤼이도 작업 맥락에 자동 기록되어 정보 누락을 줄입니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있습니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.435393470027527,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5438849669719709,
+                            "latencyMs": 219
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 10.127108460659139,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5478241699176569,
+                            "latencyMs": 219
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3336,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:4fdacd7803e6",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "575352ca15539f2c67683f2a09a69d5bacb885902131aa33f58889e8697bd716",
+                        "content": "많은 팀이 슬랙을 주요 커뮤니케이션 도구로 사용하지만, 이로 인해 메신저와 프로젝트 관리 툴 간 정보가 파편화되는 문제가 발생합니다. 슬랙에서 논의하고, 뤼이도에서 작업 상태를 업데이트하는 이중 작업은 비효율적이며, 중요한 논의가 특정 툴 안에 갇히는 문제도 발생합니다.\n\n뤼이도의 슬랙 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 10.286818805153558,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.44529256626220426,
+                            "latencyMs": 219
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3338,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:b60d8edf2d0a",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "8b644a3e6c74d6f4ef564ed09316e5b37382aa63562617001b7ce590e2fe5882",
+                        "content": "슬랙 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### **1) 워크스페이스 연동:**\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Slack] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.\n\n#### **2) 팀별 채널 연결:**\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### **3) 사용자 연결:**\n\n1. 뤼이도 계정과 슬랙 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 9.86007775696309,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5246987168744144,
+                            "latencyMs": 219
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3337,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:6ec68508c108",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "슬랙 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "0b5aacd673fabf0730dcdb2836ab2f2a86cc1e3e85ca73a408039bb8822f5b67",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**",
+                        "fusedRank": 5,
+                        "fusedScore": 0.031009615384615385,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 9.84648992876543,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5217153256466146,
+                            "latencyMs": 219
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5744,
+                        "outputTokens": 199,
+                        "latencyMs": 2858,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "슬랙 연동 알림을 줄이는 방법",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3339,
+                          "documentVersionId": 2443,
+                          "documentId": "43e5e2414349",
+                          "sectionId": "43e5e2414349:9976bd5ed072",
+                          "documentTitle": "슬랙",
+                          "sectionPath": [
+                            "슬랙",
+                            "자주 묻는 질문 (FAQ)"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                          "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "슬랙 연동 알림은 세부적으로 조정하실 수 있습니다. [SOURCE_1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리하시면 됩니다. [SOURCE_1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭한 뒤 `알림 받기/끄기`로 설정하시면 됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "슬랙 연동 알림은 세부적으로 조정하실 수 있습니다. [1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리하시면 됩니다. [1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭한 뒤 `알림 받기/끄기`로 설정하시면 됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        }
+      ]
+    },
+    {
+      "repeatNo": 3,
+      "executedAt": "2026-09-06T09:38:53.432998+00:00",
+      "results": [
+        {
+          "id": "MT09",
+          "description": "슬랙 연동 뒤 알림 범위 조정 질문",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "bd992a3b-6e73-4010-971a-4494fd7890f3",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "슬랙 연동은 어떤 기능을 제공해?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "bd992a3b-6e73-4010-971a-4494fd7890f3",
+                "ragRunId": "7aae29f3-b2d0-4e15-800b-f5c5b478f798",
+                "answer": {
+                  "answerMarkdown": "슬랙 연동은 작업 변경과 협업 내용을 슬랙에서 바로 확인하고 공유할 수 있게 해주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록됩니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달됩니다. [1]\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 같은 정보를 공유할 수 있습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "슬랙",
+                    "sectionPath": [
+                      "슬랙 연동으로 얻는 핵심 가치"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                "resolvedQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2656,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 19,
+                    "outputTokens": null,
+                    "latencyMs": 176,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5892,
+                    "outputTokens": 265,
+                    "latencyMs": 2419,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "슬랙"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "슬랙 연동은 어떤 기능을 제공해?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "슬랙 연동은 어떤 기능을 제공해?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3337,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:6ec68508c108",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "슬랙 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "0b5aacd673fabf0730dcdb2836ab2f2a86cc1e3e85ca73a408039bb8822f5b67",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 10.030843490118848,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5783078630737264,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3338,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:b60d8edf2d0a",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "8b644a3e6c74d6f4ef564ed09316e5b37382aa63562617001b7ce590e2fe5882",
+                        "content": "슬랙 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### **1) 워크스페이스 연동:**\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Slack] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.\n\n#### **2) 팀별 채널 연결:**\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### **3) 사용자 연결:**\n\n1. 뤼이도 계정과 슬랙 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 8.251724871238888,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5521861762212575,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.428097061492327,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5389940347232509,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3336,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:4fdacd7803e6",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "575352ca15539f2c67683f2a09a69d5bacb885902131aa33f58889e8697bd716",
+                        "content": "많은 팀이 슬랙을 주요 커뮤니케이션 도구로 사용하지만, 이로 인해 메신저와 프로젝트 관리 툴 간 정보가 파편화되는 문제가 발생합니다. 슬랙에서 논의하고, 뤼이도에서 작업 상태를 업데이트하는 이중 작업은 비효율적이며, 중요한 논의가 특정 툴 안에 갇히는 문제도 발생합니다.\n\n뤼이도의 슬랙 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 7.517221187340791,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5045131082774692,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3293,
+                        "documentVersionId": 2431,
+                        "documentId": "854f9556fa9d",
+                        "sectionId": "854f9556fa9d:f59ce20fded2",
+                        "documentTitle": "댓글",
+                        "sectionPath": [
+                          "댓글",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/docs/comments.md",
+                        "contentHash": "457248463deeb3c3266357009f9597238a88138634f1cf45f93fb869224aca16",
+                        "content": "뤼이도의 모든 작업 단위(대기 작업, 백로그, 작업, 미팅)에는 댓글 기능이 포함되어 있어, 별도의 외부 채널 없이도 실시간 소통이 가능합니다. 작업 담당자뿐 아니라 관련된 모든 멤버가 의견을 나누고, 이모지 반응으로 빠르게 피드백을 주고받을 수 있습니다.\n\n슬랙이나 디스코드와 연동되어 댓글 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.077977472155234,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.3731847809111719,
+                            "latencyMs": 191
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5892,
+                        "outputTokens": 265,
+                        "latencyMs": 2419,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "FEATURE_SUMMARY",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "슬랙 연동이 제공하는 기능",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3337,
+                          "documentVersionId": 2443,
+                          "documentId": "43e5e2414349",
+                          "sectionId": "43e5e2414349:6ec68508c108",
+                          "documentTitle": "슬랙",
+                          "sectionPath": [
+                            "슬랙",
+                            "슬랙 연동으로 얻는 핵심 가치"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**"
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "슬랙 연동은 작업 변경과 협업 내용을 슬랙에서 바로 확인하고 공유할 수 있게 해주는 기능을 제공합니다. [SOURCE_1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [SOURCE_1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록됩니다. [SOURCE_1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달됩니다. [SOURCE_1]\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 같은 정보를 공유할 수 있습니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "슬랙 연동은 작업 변경과 협업 내용을 슬랙에서 바로 확인하고 공유할 수 있게 해주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록됩니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달됩니다. [1]\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 같은 정보를 공유할 수 있습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "알림이 너무 많으면 어떻게 줄여?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "bd992a3b-6e73-4010-971a-4494fd7890f3",
+                "ragRunId": "89746b73-b2b9-4e64-9815-a012d67381eb",
+                "answer": {
+                  "answerMarkdown": "슬랙 연동 알림은 워크스페이스 전체 알림과 페이지·댓글 단위 알림을 각각 조정해서 줄일 수 있습니다. [1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다. [1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭한 뒤 `알림 받기/끄기`로 설정합니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "슬랙",
+                    "sectionPath": [
+                      "자주 묻는 질문 (FAQ)"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "알림이 너무 많으면 어떻게 줄여?",
+                "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 8069,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v3",
+                    "inputTokens": 3022,
+                    "outputTokens": 43,
+                    "latencyMs": 1802,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 30,
+                    "outputTokens": null,
+                    "latencyMs": 200,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5743,
+                    "outputTokens": 210,
+                    "latencyMs": 5983,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "슬랙"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "알림이 너무 많으면 어떻게 줄여?",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "7aae29f3-b2d0-4e15-800b-f5c5b478f798",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                        "answerContent": "슬랙 연동은 작업 변경과 협업 내용을 슬랙에서 바로 확인하고 공유할 수 있게 해주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록됩니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달됩니다. [1]\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 같은 정보를 공유할 수 있습니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "7aae29f3-b2d0-4e15-800b-f5c5b478f798",
+                        "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                        "answerContent": "슬랙 연동은 작업 변경과 협업 내용을 슬랙에서 바로 확인하고 공유할 수 있게 해주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록됩니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달됩니다. [1]\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 같은 정보를 공유할 수 있습니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.435393470027527,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5438849669719709,
+                            "latencyMs": 218
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 10.127108460659139,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5478241699176569,
+                            "latencyMs": 218
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3336,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:4fdacd7803e6",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "575352ca15539f2c67683f2a09a69d5bacb885902131aa33f58889e8697bd716",
+                        "content": "많은 팀이 슬랙을 주요 커뮤니케이션 도구로 사용하지만, 이로 인해 메신저와 프로젝트 관리 툴 간 정보가 파편화되는 문제가 발생합니다. 슬랙에서 논의하고, 뤼이도에서 작업 상태를 업데이트하는 이중 작업은 비효율적이며, 중요한 논의가 특정 툴 안에 갇히는 문제도 발생합니다.\n\n뤼이도의 슬랙 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 10.286818805153558,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.44529256626220426,
+                            "latencyMs": 218
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3338,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:b60d8edf2d0a",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "8b644a3e6c74d6f4ef564ed09316e5b37382aa63562617001b7ce590e2fe5882",
+                        "content": "슬랙 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### **1) 워크스페이스 연동:**\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Slack] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.\n\n#### **2) 팀별 채널 연결:**\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### **3) 사용자 연결:**\n\n1. 뤼이도 계정과 슬랙 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 9.86007775696309,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5246987168744144,
+                            "latencyMs": 218
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3337,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:6ec68508c108",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "슬랙 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "0b5aacd673fabf0730dcdb2836ab2f2a86cc1e3e85ca73a408039bb8822f5b67",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**",
+                        "fusedRank": 5,
+                        "fusedScore": 0.031009615384615385,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 9.84648992876543,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5217153256466146,
+                            "latencyMs": 218
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5743,
+                        "outputTokens": 210,
+                        "latencyMs": 5983,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "슬랙 연동 알림 줄이는 방법",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3339,
+                          "documentVersionId": 2443,
+                          "documentId": "43e5e2414349",
+                          "sectionId": "43e5e2414349:9976bd5ed072",
+                          "documentTitle": "슬랙",
+                          "sectionPath": [
+                            "슬랙",
+                            "자주 묻는 질문 (FAQ)"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                          "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "슬랙 연동 알림은 워크스페이스 전체 알림과 페이지·댓글 단위 알림을 각각 조정해서 줄일 수 있습니다. [SOURCE_1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다. [SOURCE_1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭한 뒤 `알림 받기/끄기`로 설정합니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "슬랙 연동 알림은 워크스페이스 전체 알림과 페이지·댓글 단위 알림을 각각 조정해서 줄일 수 있습니다. [1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다. [1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 클릭한 뒤 `알림 받기/끄기`로 설정합니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        }
+      ]
+    },
+    {
+      "repeatNo": 4,
+      "executedAt": "2026-09-06T09:39:04.239418+00:00",
+      "results": [
+        {
+          "id": "MT09",
+          "description": "슬랙 연동 뒤 알림 범위 조정 질문",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "3da510b1-6175-4a62-93e2-29877433cd25",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "슬랙 연동은 어떤 기능을 제공해?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "3da510b1-6175-4a62-93e2-29877433cd25",
+                "ragRunId": "06985dec-31da-49fe-b2ba-7165071ecbc3",
+                "answer": {
+                  "answerMarkdown": "슬랙 연동은 작업 정보를 슬랙과 뤼이도 사이에서 빠르게 공유하고, 논의 내용을 함께 기록해 협업을 돕는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄여줍니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "슬랙",
+                    "sectionPath": [
+                      "슬랙 연동으로 얻는 핵심 가치"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                "resolvedQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2704,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 19,
+                    "outputTokens": null,
+                    "latencyMs": 242,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5889,
+                    "outputTokens": 242,
+                    "latencyMs": 2413,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "슬랙"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "슬랙 연동은 어떤 기능을 제공해?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "슬랙 연동은 어떤 기능을 제공해?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3337,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:6ec68508c108",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "슬랙 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "0b5aacd673fabf0730dcdb2836ab2f2a86cc1e3e85ca73a408039bb8822f5b67",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 10.030843490118848,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5783078630737264,
+                            "latencyMs": 253
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3338,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:b60d8edf2d0a",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "8b644a3e6c74d6f4ef564ed09316e5b37382aa63562617001b7ce590e2fe5882",
+                        "content": "슬랙 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### **1) 워크스페이스 연동:**\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Slack] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.\n\n#### **2) 팀별 채널 연결:**\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### **3) 사용자 연결:**\n\n1. 뤼이도 계정과 슬랙 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 8.251724871238888,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5521861762212575,
+                            "latencyMs": 253
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.428097061492327,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5389940347232509,
+                            "latencyMs": 253
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3336,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:4fdacd7803e6",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "575352ca15539f2c67683f2a09a69d5bacb885902131aa33f58889e8697bd716",
+                        "content": "많은 팀이 슬랙을 주요 커뮤니케이션 도구로 사용하지만, 이로 인해 메신저와 프로젝트 관리 툴 간 정보가 파편화되는 문제가 발생합니다. 슬랙에서 논의하고, 뤼이도에서 작업 상태를 업데이트하는 이중 작업은 비효율적이며, 중요한 논의가 특정 툴 안에 갇히는 문제도 발생합니다.\n\n뤼이도의 슬랙 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 7.517221187340791,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5045131082774692,
+                            "latencyMs": 253
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3293,
+                        "documentVersionId": 2431,
+                        "documentId": "854f9556fa9d",
+                        "sectionId": "854f9556fa9d:f59ce20fded2",
+                        "documentTitle": "댓글",
+                        "sectionPath": [
+                          "댓글",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/docs/comments.md",
+                        "contentHash": "457248463deeb3c3266357009f9597238a88138634f1cf45f93fb869224aca16",
+                        "content": "뤼이도의 모든 작업 단위(대기 작업, 백로그, 작업, 미팅)에는 댓글 기능이 포함되어 있어, 별도의 외부 채널 없이도 실시간 소통이 가능합니다. 작업 담당자뿐 아니라 관련된 모든 멤버가 의견을 나누고, 이모지 반응으로 빠르게 피드백을 주고받을 수 있습니다.\n\n슬랙이나 디스코드와 연동되어 댓글 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.077977472155234,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.3731847809111719,
+                            "latencyMs": 253
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5889,
+                        "outputTokens": 242,
+                        "latencyMs": 2413,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "FEATURE_SUMMARY",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "슬랙 연동 기능",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3337,
+                          "documentVersionId": 2443,
+                          "documentId": "43e5e2414349",
+                          "sectionId": "43e5e2414349:6ec68508c108",
+                          "documentTitle": "슬랙",
+                          "sectionPath": [
+                            "슬랙",
+                            "슬랙 연동으로 얻는 핵심 가치"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**"
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "슬랙 연동은 작업 정보를 슬랙과 뤼이도 사이에서 빠르게 공유하고, 논의 내용을 함께 기록해 협업을 돕는 기능을 제공합니다. [SOURCE_1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄여줍니다. [SOURCE_1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [SOURCE_1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "슬랙 연동은 작업 정보를 슬랙과 뤼이도 사이에서 빠르게 공유하고, 논의 내용을 함께 기록해 협업을 돕는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄여줍니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "알림이 너무 많으면 어떻게 줄여?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "3da510b1-6175-4a62-93e2-29877433cd25",
+                "ragRunId": "dd3a5179-600c-4948-b7a9-dbf002b13547",
+                "answer": {
+                  "answerMarkdown": "알림이 너무 많으면 워크스페이스 전체 알림과 페이지·댓글 단위 알림을 각각 조정하시면 됩니다.[1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다.[1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 눌러 `알림 받기/끄기`로 설정합니다.[1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "슬랙",
+                    "sectionPath": [
+                      "자주 묻는 질문 (FAQ)"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "알림이 너무 많으면 어떻게 줄여?",
+                "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 3978,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v3",
+                    "inputTokens": 3010,
+                    "outputTokens": 43,
+                    "latencyMs": 1012,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 30,
+                    "outputTokens": null,
+                    "latencyMs": 162,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5748,
+                    "outputTokens": 209,
+                    "latencyMs": 2736,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "슬랙"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "알림이 너무 많으면 어떻게 줄여?",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "06985dec-31da-49fe-b2ba-7165071ecbc3",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                        "answerContent": "슬랙 연동은 작업 정보를 슬랙과 뤼이도 사이에서 빠르게 공유하고, 논의 내용을 함께 기록해 협업을 돕는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄여줍니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "06985dec-31da-49fe-b2ba-7165071ecbc3",
+                        "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                        "answerContent": "슬랙 연동은 작업 정보를 슬랙과 뤼이도 사이에서 빠르게 공유하고, 논의 내용을 함께 기록해 협업을 돕는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄여줍니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 뤼이도에 자동 기록되어 정보 누락을 방지합니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.435393470027527,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5438849669719709,
+                            "latencyMs": 174
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 10.127108460659139,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5478241699176569,
+                            "latencyMs": 174
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3336,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:4fdacd7803e6",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "575352ca15539f2c67683f2a09a69d5bacb885902131aa33f58889e8697bd716",
+                        "content": "많은 팀이 슬랙을 주요 커뮤니케이션 도구로 사용하지만, 이로 인해 메신저와 프로젝트 관리 툴 간 정보가 파편화되는 문제가 발생합니다. 슬랙에서 논의하고, 뤼이도에서 작업 상태를 업데이트하는 이중 작업은 비효율적이며, 중요한 논의가 특정 툴 안에 갇히는 문제도 발생합니다.\n\n뤼이도의 슬랙 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 10.286818805153558,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.44529256626220426,
+                            "latencyMs": 174
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3338,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:b60d8edf2d0a",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "8b644a3e6c74d6f4ef564ed09316e5b37382aa63562617001b7ce590e2fe5882",
+                        "content": "슬랙 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### **1) 워크스페이스 연동:**\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Slack] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.\n\n#### **2) 팀별 채널 연결:**\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### **3) 사용자 연결:**\n\n1. 뤼이도 계정과 슬랙 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 9.86007775696309,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5246987168744144,
+                            "latencyMs": 174
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3337,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:6ec68508c108",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "슬랙 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "0b5aacd673fabf0730dcdb2836ab2f2a86cc1e3e85ca73a408039bb8822f5b67",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**",
+                        "fusedRank": 5,
+                        "fusedScore": 0.031009615384615385,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 9.84648992876543,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5217153256466146,
+                            "latencyMs": 174
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5748,
+                        "outputTokens": 209,
+                        "latencyMs": 2736,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "슬랙 연동 알림이 너무 많을 때 줄이는 방법",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3339,
+                          "documentVersionId": 2443,
+                          "documentId": "43e5e2414349",
+                          "sectionId": "43e5e2414349:9976bd5ed072",
+                          "documentTitle": "슬랙",
+                          "sectionPath": [
+                            "슬랙",
+                            "자주 묻는 질문 (FAQ)"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                          "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "알림이 너무 많으면 워크스페이스 전체 알림과 페이지·댓글 단위 알림을 각각 조정하시면 됩니다.[SOURCE_1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다.[SOURCE_1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 눌러 `알림 받기/끄기`로 설정합니다.[SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "알림이 너무 많으면 워크스페이스 전체 알림과 페이지·댓글 단위 알림을 각각 조정하시면 됩니다.[1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다.[1]\n2. 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 눌러 `알림 받기/끄기`로 설정합니다.[1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 4
+        }
+      ]
+    },
+    {
+      "repeatNo": 5,
+      "executedAt": "2026-09-06T09:39:10.979077+00:00",
+      "results": [
+        {
+          "id": "MT09",
+          "description": "슬랙 연동 뒤 알림 범위 조정 질문",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "eba61567-7774-453f-8331-0bad1b4456e2",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "슬랙 연동은 어떤 기능을 제공해?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "eba61567-7774-453f-8331-0bad1b4456e2",
+                "ragRunId": "c00a1f6f-caf2-44b9-8878-6566b7326333",
+                "answer": {
+                  "answerMarkdown": "슬랙 연동은 작업과 협업 내용을 슬랙에서 바로 확인하고 공유할 수 있게 해주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 자동 기록됩니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 같은 정보를 공유할 수 있습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "슬랙",
+                    "sectionPath": [
+                      "슬랙 연동으로 얻는 핵심 가치"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                "resolvedQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2802,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 19,
+                    "outputTokens": null,
+                    "latencyMs": 159,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5892,
+                    "outputTokens": 258,
+                    "latencyMs": 2584,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "슬랙"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "슬랙 연동은 어떤 기능을 제공해?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "슬랙 연동은 어떤 기능을 제공해?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3337,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:6ec68508c108",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "슬랙 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "0b5aacd673fabf0730dcdb2836ab2f2a86cc1e3e85ca73a408039bb8822f5b67",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 10.030843490118848,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5783078630737264,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3338,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:b60d8edf2d0a",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "8b644a3e6c74d6f4ef564ed09316e5b37382aa63562617001b7ce590e2fe5882",
+                        "content": "슬랙 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### **1) 워크스페이스 연동:**\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Slack] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.\n\n#### **2) 팀별 채널 연결:**\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### **3) 사용자 연결:**\n\n1. 뤼이도 계정과 슬랙 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 8.251724871238888,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5521861762212575,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.428097061492327,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5389940347232509,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3336,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:4fdacd7803e6",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "575352ca15539f2c67683f2a09a69d5bacb885902131aa33f58889e8697bd716",
+                        "content": "많은 팀이 슬랙을 주요 커뮤니케이션 도구로 사용하지만, 이로 인해 메신저와 프로젝트 관리 툴 간 정보가 파편화되는 문제가 발생합니다. 슬랙에서 논의하고, 뤼이도에서 작업 상태를 업데이트하는 이중 작업은 비효율적이며, 중요한 논의가 특정 툴 안에 갇히는 문제도 발생합니다.\n\n뤼이도의 슬랙 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 7.517221187340791,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5045131082774692,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3293,
+                        "documentVersionId": 2431,
+                        "documentId": "854f9556fa9d",
+                        "sectionId": "854f9556fa9d:f59ce20fded2",
+                        "documentTitle": "댓글",
+                        "sectionPath": [
+                          "댓글",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/docs/comments.md",
+                        "contentHash": "457248463deeb3c3266357009f9597238a88138634f1cf45f93fb869224aca16",
+                        "content": "뤼이도의 모든 작업 단위(대기 작업, 백로그, 작업, 미팅)에는 댓글 기능이 포함되어 있어, 별도의 외부 채널 없이도 실시간 소통이 가능합니다. 작업 담당자뿐 아니라 관련된 모든 멤버가 의견을 나누고, 이모지 반응으로 빠르게 피드백을 주고받을 수 있습니다.\n\n슬랙이나 디스코드와 연동되어 댓글 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.077977472155234,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.3731847809111719,
+                            "latencyMs": 176
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5892,
+                        "outputTokens": 258,
+                        "latencyMs": 2584,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "FEATURE_SUMMARY",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "슬랙 연동이 제공하는 기능",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3337,
+                          "documentVersionId": 2443,
+                          "documentId": "43e5e2414349",
+                          "sectionId": "43e5e2414349:6ec68508c108",
+                          "documentTitle": "슬랙",
+                          "sectionPath": [
+                            "슬랙",
+                            "슬랙 연동으로 얻는 핵심 가치"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**"
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "슬랙 연동은 작업과 협업 내용을 슬랙에서 바로 확인하고 공유할 수 있게 해주는 기능을 제공합니다. [SOURCE_1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [SOURCE_1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 자동 기록됩니다. [SOURCE_1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [SOURCE_1]\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 같은 정보를 공유할 수 있습니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "슬랙 연동은 작업과 협업 내용을 슬랙에서 바로 확인하고 공유할 수 있게 해주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 자동 기록됩니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 같은 정보를 공유할 수 있습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "알림이 너무 많으면 어떻게 줄여?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "eba61567-7774-453f-8331-0bad1b4456e2",
+                "ragRunId": "03c64994-69b2-4d05-af56-dd76820e37cd",
+                "answer": {
+                  "answerMarkdown": "슬랙 연동 알림은 세부적으로 조정해서 줄일 수 있습니다. [1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다. [1]\n2. 페이지나 댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 눌러 `알림 받기/끄기`로 설정합니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "슬랙",
+                    "sectionPath": [
+                      "자주 묻는 질문 (FAQ)"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "알림이 너무 많으면 어떻게 줄여?",
+                "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 5909,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v3",
+                    "inputTokens": 3015,
+                    "outputTokens": 43,
+                    "latencyMs": 1098,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 30,
+                    "outputTokens": null,
+                    "latencyMs": 157,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5747,
+                    "outputTokens": 199,
+                    "latencyMs": 4564,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "슬랙"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "알림이 너무 많으면 어떻게 줄여?",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "c00a1f6f-caf2-44b9-8878-6566b7326333",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                        "answerContent": "슬랙 연동은 작업과 협업 내용을 슬랙에서 바로 확인하고 공유할 수 있게 해주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 자동 기록됩니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 같은 정보를 공유할 수 있습니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "c00a1f6f-caf2-44b9-8878-6566b7326333",
+                        "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+                        "answerContent": "슬랙 연동은 작업과 협업 내용을 슬랙에서 바로 확인하고 공유할 수 있게 해주는 기능을 제공합니다. [1]\n\n- 실시간 알림 발송: 작업 변경 사항을 즉시 팀에 공유할 수 있습니다. [1]\n- 양방향 댓글 동기화: 슬랙에서 논의한 내용이 작업 맥락으로 자동 기록됩니다. [1]\n- 일일 리포트: 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 슬랙 채널로 전달합니다. [1]\n- 협업 채널 일원화: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 같은 정보를 공유할 수 있습니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.435393470027527,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5438849669719709,
+                            "latencyMs": 175
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 10.127108460659139,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5478241699176569,
+                            "latencyMs": 175
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3336,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:4fdacd7803e6",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "575352ca15539f2c67683f2a09a69d5bacb885902131aa33f58889e8697bd716",
+                        "content": "많은 팀이 슬랙을 주요 커뮤니케이션 도구로 사용하지만, 이로 인해 메신저와 프로젝트 관리 툴 간 정보가 파편화되는 문제가 발생합니다. 슬랙에서 논의하고, 뤼이도에서 작업 상태를 업데이트하는 이중 작업은 비효율적이며, 중요한 논의가 특정 툴 안에 갇히는 문제도 발생합니다.\n\n뤼이도의 슬랙 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 슬랙에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 10.286818805153558,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.44529256626220426,
+                            "latencyMs": 175
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3338,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:b60d8edf2d0a",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "8b644a3e6c74d6f4ef564ed09316e5b37382aa63562617001b7ce590e2fe5882",
+                        "content": "슬랙 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### **1) 워크스페이스 연동:**\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Slack] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.\n\n#### **2) 팀별 채널 연결:**\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### **3) 사용자 연결:**\n\n1. 뤼이도 계정과 슬랙 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 9.86007775696309,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5246987168744144,
+                            "latencyMs": 175
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3337,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:6ec68508c108",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "슬랙 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "0b5aacd673fabf0730dcdb2836ab2f2a86cc1e3e85ca73a408039bb8822f5b67",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 슬랙에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 슬랙에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 슬랙 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 슬랙에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 슬랙과 툴을 끊임없이 오가야 했습니다.\n\n**실시간 알림 발송**\n\n**양방향 댓글 동기화**\n\n**일일 리포트**",
+                        "fusedRank": 5,
+                        "fusedScore": 0.031009615384615385,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 9.84648992876543,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5217153256466146,
+                            "latencyMs": 175
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5747,
+                        "outputTokens": 199,
+                        "latencyMs": 4564,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "슬랙 연동 알림이 너무 많으면 줄이는 방법",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3339,
+                          "documentVersionId": 2443,
+                          "documentId": "43e5e2414349",
+                          "sectionId": "43e5e2414349:9976bd5ed072",
+                          "documentTitle": "슬랙",
+                          "sectionPath": [
+                            "슬랙",
+                            "자주 묻는 질문 (FAQ)"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                          "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "슬랙 연동 알림은 세부적으로 조정해서 줄일 수 있습니다. [SOURCE_1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다. [SOURCE_1]\n2. 페이지나 댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 눌러 `알림 받기/끄기`로 설정합니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "슬랙 연동 알림은 세부적으로 조정해서 줄일 수 있습니다. [1]\n\n1. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리합니다. [1]\n2. 페이지나 댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼을 눌러 `알림 받기/끄기`로 설정합니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 5
+        }
+      ]
+    }
+  ]
+}

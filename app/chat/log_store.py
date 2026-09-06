@@ -50,9 +50,8 @@ WITHHELD_REASON_CODES = (
     UNVERIFIABLE_ANSWER_REASON_CODE,
 )
 
-# 확정 규칙: COMPLETED 답변의 유효 출처는 1~3개
+# COMPLETED 답변에는 최소 하나의 유효 출처가 필요하다.
 MIN_CITATIONS = 1
-MAX_CITATIONS = 3
 
 # 외부 호출 timeout보다 충분히 길게 두고, 이 시간이 지난 고아 실행만 복구한다.
 RAG_RUN_STALE_AFTER = timedelta(minutes=10)
@@ -449,11 +448,11 @@ class RagLogStore:
         answer_schema_version: Optional[str] = None,
         total_latency_ms: Optional[int] = None,
     ) -> RagRun:
-        """정상 답변 완료 — COMPLETED. 유효 인용 1~3개를 함께 기록한다."""
+        """정상 답변 완료 — COMPLETED. 사용한 유효 인용을 함께 기록한다."""
 
-        if not (MIN_CITATIONS <= len(citations) <= MAX_CITATIONS):
+        if len(citations) < MIN_CITATIONS:
             raise ValueError(
-                f"COMPLETED 답변의 인용은 {MIN_CITATIONS}~{MAX_CITATIONS}개여야 "
+                f"COMPLETED 답변의 인용은 최소 {MIN_CITATIONS}개여야 "
                 f"합니다: {len(citations)}개"
             )
 

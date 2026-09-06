@@ -3,6 +3,7 @@
 import logging
 import re
 import time
+from dataclasses import replace
 from typing import Dict, Optional, Sequence, Tuple
 
 from app.core.model_trace import BeforeModelCallHook, ModelCallTrace
@@ -22,6 +23,7 @@ from app.answering.models import (
     FinalGenerationResult,
     FinalWithheldReason,
     GenerationContextSource,
+    GenerationStageTrace,
     GenerationStatus,
     ValidatedAnswer,
 )
@@ -155,11 +157,21 @@ def validate_citations(
         raise UnverifiableAnswerError("citation marker가 없습니다.")
 
     source_by_id = {source.source_id: source for source in sources}
+    invalid_source_ids = []
     used_source_ids = []
     for marker in markers:
         source_id = f"SOURCE_{marker.group(1)}"
-        if source_id in source_by_id and source_id not in used_source_ids:
+        if source_id not in source_by_id:
+            if source_id not in invalid_source_ids:
+                invalid_source_ids.append(source_id)
+        elif source_id not in used_source_ids:
             used_source_ids.append(source_id)
+
+    if invalid_source_ids:
+        raise UnverifiableAnswerError(
+            "전달되지 않은 citation marker가 있습니다: "
+            f"{', '.join(invalid_source_ids)}"
+        )
 
     if not used_source_ids:
         raise UnverifiableAnswerError("유효한 citation marker가 없습니다.")
@@ -192,13 +204,9 @@ def validate_citations(
 
         citation_number_by_source_id[source_id] = citation_number
 
-    if len(citations) > 3:
-        raise UnverifiableAnswerError("최종 Citation은 최대 3개까지 허용됩니다.")
-
     def replace_marker(marker: re.Match[str]) -> str:
         source_id = f"SOURCE_{marker.group(1)}"
-        citation_number = citation_number_by_source_id.get(source_id)
-        return "" if citation_number is None else f"[{citation_number}]"
+        return f"[{citation_number_by_source_id[source_id]}]"
 
     validated_markdown = SOURCE_MARKER_PATTERN.sub(
         replace_marker,
@@ -213,6 +221,7 @@ def validate_citations(
 def _withheld_result(
     reason: FinalWithheldReason,
     model_call: Optional[ModelCallTrace] = None,
+    stage_trace: Optional[GenerationStageTrace] = None,
 ) -> FinalGenerationResult:
     return FinalGenerationResult(
         status=FinalAnswerStatus.WITHHELD,
@@ -220,12 +229,14 @@ def _withheld_result(
         citations=(),
         withheld_reason=reason,
         model_call=model_call,
+        stage_trace=stage_trace,
     )
 
 
 def _error_result(
     error_code: str,
     model_call: Optional[ModelCallTrace] = None,
+    stage_trace: Optional[GenerationStageTrace] = None,
 ) -> FinalGenerationResult:
     return FinalGenerationResult(
         status=FinalAnswerStatus.ERROR,
@@ -233,6 +244,58 @@ def _error_result(
         citations=(),
         error_code=error_code,
         model_call=model_call,
+        stage_trace=stage_trace,
+    )
+
+
+def _with_validation_error(
+    stage_trace: Optional[GenerationStageTrace],
+    error: Exception,
+) -> GenerationStageTrace:
+    if stage_trace is None:
+        return GenerationStageTrace(
+            validation_error=str(error),
+            validation_errors=(str(error),),
+        )
+    return replace(
+        stage_trace,
+        validation_error=str(error),
+        validation_errors=(*stage_trace.validation_errors, str(error)),
+    )
+
+
+def _sum_optional(first: Optional[int], second: Optional[int]) -> Optional[int]:
+    if first is None and second is None:
+        return None
+    return (first or 0) + (second or 0)
+
+
+def _combine_model_traces(
+    initial: ModelCallTrace,
+    regeneration: ModelCallTrace,
+) -> ModelCallTrace:
+    """검증 재생성을 같은 논리적 ANSWER_GENERATION 호출에 합산한다."""
+
+    return ModelCallTrace(
+        provider=initial.provider,
+        model_name=initial.model_name,
+        succeeded=initial.succeeded and regeneration.succeeded,
+        latency_ms=initial.latency_ms + regeneration.latency_ms,
+        retry_count=initial.retry_count + regeneration.retry_count,
+        input_tokens=_sum_optional(
+            initial.input_tokens,
+            regeneration.input_tokens,
+        ),
+        output_tokens=_sum_optional(
+            initial.output_tokens,
+            regeneration.output_tokens,
+        ),
+        prompt_version=initial.prompt_version,
+        error_message=(
+            regeneration.error_message
+            if not regeneration.succeeded
+            else initial.error_message
+        ),
     )
 
 
@@ -286,12 +349,16 @@ class GenerationService:
             )
 
         if call.error is not None:
-            return _error_result(_generation_error_code(call.error), call.trace)
+            return _error_result(
+                _generation_error_code(call.error),
+                call.trace,
+                call.stage_trace,
+            )
 
         generation_result = call.result
         if generation_result.status == GenerationStatus.WITHHELD:
             reason = FinalWithheldReason(generation_result.withheld_reason.value)
-            return _withheld_result(reason, call.trace)
+            return _withheld_result(reason, call.trace, call.stage_trace)
 
         if on_progress_stage is not None:
             await on_progress_stage(ProgressStage.VALIDATING)
@@ -299,20 +366,103 @@ class GenerationService:
         try:
             validated_answer = validate_citations(
                 generation_result.answer_markdown,
-                sources,
+                (
+                    call.stage_trace.selected_sources
+                    if call.stage_trace is not None
+                    and call.stage_trace.selected_sources
+                    else sources
+                ),
             )
         except UnverifiableAnswerError as error:
-            logger.warning("답변 검증에 실패해 보류합니다: reason=%s", error)
-            return _withheld_result(
-                FinalWithheldReason.UNVERIFIABLE_ANSWER,
-                call.trace,
+            failed_stage_trace = _with_validation_error(call.stage_trace, error)
+            if (
+                failed_stage_trace.source_plan is None
+                or failed_stage_trace.pre_validation_result is None
+            ):
+                logger.warning("답변 검증에 실패해 보류합니다: reason=%s", error)
+                return _withheld_result(
+                    FinalWithheldReason.UNVERIFIABLE_ANSWER,
+                    call.trace,
+                    failed_stage_trace,
+                )
+
+            regeneration = await self._generator.regenerate_answer_with_trace(
+                question,
+                failed_stage_trace,
+                str(error),
             )
-        except Exception:
-            return _error_result(CITATION_VALIDATION_ERROR_CODE, call.trace)
+            combined_model_call = _combine_model_traces(
+                call.trace,
+                regeneration.trace,
+            )
+            regeneration_stage_trace = (
+                regeneration.stage_trace or failed_stage_trace
+            )
+            if regeneration.error is not None:
+                return _error_result(
+                    _generation_error_code(regeneration.error),
+                    combined_model_call,
+                    regeneration_stage_trace,
+                )
+
+            regenerated_result = regeneration.result
+            if regenerated_result.status == GenerationStatus.WITHHELD:
+                reason = FinalWithheldReason(
+                    regenerated_result.withheld_reason.value
+                )
+                return _withheld_result(
+                    reason,
+                    combined_model_call,
+                    regeneration_stage_trace,
+                )
+
+            try:
+                validated_answer = validate_citations(
+                    regenerated_result.answer_markdown,
+                    regeneration_stage_trace.selected_sources,
+                )
+            except UnverifiableAnswerError as retry_error:
+                retry_stage_trace = _with_validation_error(
+                    regeneration_stage_trace,
+                    retry_error,
+                )
+                logger.warning(
+                    "답변 재검증에 실패해 보류합니다: reason=%s",
+                    retry_error,
+                )
+                return _withheld_result(
+                    FinalWithheldReason.UNVERIFIABLE_ANSWER,
+                    combined_model_call,
+                    retry_stage_trace,
+                )
+            except Exception as retry_error:
+                return _error_result(
+                    CITATION_VALIDATION_ERROR_CODE,
+                    combined_model_call,
+                    _with_validation_error(
+                        regeneration_stage_trace,
+                        retry_error,
+                    ),
+                )
+
+            return FinalGenerationResult(
+                status=FinalAnswerStatus.COMPLETED,
+                answer_markdown=validated_answer.answer_markdown,
+                citations=validated_answer.citations,
+                model_call=combined_model_call,
+                stage_trace=regeneration_stage_trace,
+            )
+        except Exception as error:
+            return _error_result(
+                CITATION_VALIDATION_ERROR_CODE,
+                call.trace,
+                _with_validation_error(call.stage_trace, error),
+            )
 
         return FinalGenerationResult(
             status=FinalAnswerStatus.COMPLETED,
             answer_markdown=validated_answer.answer_markdown,
             citations=validated_answer.citations,
             model_call=call.trace,
+            stage_trace=call.stage_trace,
         )

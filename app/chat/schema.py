@@ -82,7 +82,7 @@ class ChatCitation(BaseModel):
 
     model_config = HTTP_DTO_CONFIG
 
-    citation_number: int = Field(alias="citationNumber", ge=1, le=3)
+    citation_number: int = Field(alias="citationNumber", ge=1)
     document_title: str = Field(alias="documentTitle")
     section_path: List[str] = Field(alias="sectionPath")
     # 콘솔 업로드 문서의 원문 위치자는 내부 스킴이라 외부로 내리지 않는다.
@@ -118,7 +118,7 @@ class ChatCompletedResponse(BaseModel):
     conversation_id: uuid.UUID = Field(alias="conversationId")
     rag_run_id: uuid.UUID = Field(alias="ragRunId")
     answer: ChatAnswer
-    citations: List[ChatCitation] = Field(min_length=1, max_length=3)
+    citations: List[ChatCitation] = Field(min_length=1)
 
 
 class ChatWithheldResponse(BaseModel):
