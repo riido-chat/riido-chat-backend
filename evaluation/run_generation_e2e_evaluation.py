@@ -1,5 +1,6 @@
 """30개 평가 질문의 실제 Retrieval과 Generation 결과를 저장한다."""
 
+import argparse
 import asyncio
 import json
 import os
@@ -237,7 +238,7 @@ def save_results(
     return output_path
 
 
-async def run_evaluation() -> Path:
+async def run_evaluation(output_path: Path = DEFAULT_OUTPUT_PATH) -> Path:
     """Hybrid Top-5부터 최종 Generation까지 30문항을 순차 평가한다."""
 
     questions = load_questions(DEFAULT_QUESTIONS_PATH)
@@ -325,7 +326,11 @@ async def run_evaluation() -> Path:
                     evaluation_result = to_execution_error(question, error)
 
                 evaluation_results.append(evaluation_result)
-                save_results(evaluation_results, metadata=metadata)
+                save_results(
+                    evaluation_results,
+                    output_path=output_path,
+                    metadata=metadata,
+                )
                 print(
                     f"[{index}/{len(questions)}] "
                     f"{question['id']} "
@@ -335,11 +340,18 @@ async def run_evaluation() -> Path:
     finally:
         await dispose_engine()
 
-    return save_results(evaluation_results, metadata=metadata)
+    return save_results(
+        evaluation_results,
+        output_path=output_path,
+        metadata=metadata,
+    )
 
 
 def main() -> None:
-    output_path = asyncio.run(run_evaluation())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
+    args = parser.parse_args()
+    output_path = asyncio.run(run_evaluation(args.output))
     print(f"결과 저장: {output_path}")
 
 

@@ -33,6 +33,15 @@ class GenerationAnswerScope(str, Enum):
     MULTI_DETAIL = "MULTI_DETAIL"
 
 
+class GenerationAnswerType(str, Enum):
+    """질문에 맞는 Source 정책과 답변 형식을 결정하는 내부 유형."""
+
+    DEFINITION = "DEFINITION"
+    FEATURE_SUMMARY = "FEATURE_SUMMARY"
+    PROCEDURE = "PROCEDURE"
+    GENERAL = "GENERAL"
+
+
 class GenerationEvidenceRequirement(BaseModel):
     """질문이 요구한 정보 단위와 이를 직접 뒷받침하는 Source."""
 
@@ -54,6 +63,7 @@ class GenerationSourcePlan(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     status: GenerationStatus
+    answer_type: GenerationAnswerType
     answer_scope: GenerationAnswerScope
     evidence_requirements: List[GenerationEvidenceRequirement] = Field(
         max_length=8
@@ -67,6 +77,18 @@ class GenerationSourcePlan(BaseModel):
                 raise ValueError("ANSWERABLE에는 정보 단위별 근거가 필요합니다.")
             if self.withheld_reason is not None:
                 raise ValueError("ANSWERABLE에는 withheld_reason을 사용할 수 없습니다.")
+            if self.answer_type in (
+                GenerationAnswerType.DEFINITION,
+                GenerationAnswerType.FEATURE_SUMMARY,
+            ) and self.answer_scope == GenerationAnswerScope.SUMMARY:
+                if len(self.evidence_requirements) != 1:
+                    raise ValueError(
+                        "정의와 기능 요약 SUMMARY에는 정보 단위가 정확히 하나여야 합니다."
+                    )
+                if len(self.evidence_requirements[0].source_ids) != 1:
+                    raise ValueError(
+                        "정의와 기능 요약 SUMMARY에는 Source가 정확히 하나여야 합니다."
+                    )
             return self
 
         if self.evidence_requirements:
@@ -180,11 +202,15 @@ class GenerationStageTrace:
     """
 
     source_plan: Optional[GenerationSourcePlan] = None
+    initial_source_plan: Optional[GenerationSourcePlan] = None
     selected_sources: Tuple[GenerationContextSource, ...] = ()
     pre_validation_result: Optional[GenerationResult] = None
     validation_error: Optional[str] = None
     validation_errors: Tuple[str, ...] = ()
     planning_attempt_count: int = 0
+    planning_regeneration_count: int = 0
+    planning_regeneration_model_call: Optional[ModelCallTrace] = None
+    planning_regeneration_result: Optional[GenerationSourcePlan] = None
     answer_attempt_count: int = 0
     validation_regeneration_count: int = 0
     validation_regeneration_model_call: Optional[ModelCallTrace] = None

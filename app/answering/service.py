@@ -204,9 +204,6 @@ def validate_citations(
 
         citation_number_by_source_id[source_id] = citation_number
 
-    if len(citations) > 3:
-        raise UnverifiableAnswerError("최종 Citation은 최대 3개까지 허용됩니다.")
-
     def replace_marker(marker: re.Match[str]) -> str:
         source_id = f"SOURCE_{marker.group(1)}"
         return f"[{citation_number_by_source_id[source_id]}]"

@@ -47,13 +47,18 @@ from app.chat.query_rewrite import (
     QueryRewriteTurnStatus,
 )
 from app.answering.generator import (
-    ANSWER_PROMPT_V7,
-    ANSWER_REPAIR_PROMPT_V7,
+    ANSWER_PROMPT_V17,
+    ANSWER_PROMPT_VERSION,
+    ANSWER_REPAIR_PROMPT_V17,
     ANSWER_REPAIR_PROMPT_VERSION,
     GENERATION_PROMPT_VERSION,
+    MAX_SOURCE_PLANNING_REGENERATIONS,
     OPENAI_GENERATION_MODEL,
     OpenAIGenerator,
-    SOURCE_PLANNING_PROMPT_V6,
+    SOURCE_PLANNING_PROMPT_VERSION,
+    SOURCE_PLANNING_REPAIR_PROMPT_VERSION,
+    SOURCE_PLANNING_REPAIR_PROMPT_V10,
+    SOURCE_PLANNING_PROMPT_V10,
 )
 from app.answering.models import (
     FinalAnswerStatus,
@@ -534,6 +539,11 @@ def generation_stage_trace_snapshot(
             if trace.source_plan is None
             else trace.source_plan.model_dump(mode="json")
         ),
+        "initialPlanningOutput": (
+            None
+            if trace.initial_source_plan is None
+            else trace.initial_source_plan.model_dump(mode="json")
+        ),
         "selectedSources": [
             {
                 "sourceId": source.source_id,
@@ -556,6 +566,20 @@ def generation_stage_trace_snapshot(
         "validationError": trace.validation_error,
         "validationErrors": list(trace.validation_errors),
         "planningAttemptCount": trace.planning_attempt_count,
+        "planningRegenerationCount": trace.planning_regeneration_count,
+        "planningRegenerationModelCall": (
+            None
+            if trace.planning_regeneration_model_call is None
+            else _model_trace_snapshot(
+                "SOURCE_PLAN_REGENERATION",
+                trace.planning_regeneration_model_call,
+            )
+        ),
+        "planningRegenerationResult": (
+            None
+            if trace.planning_regeneration_result is None
+            else trace.planning_regeneration_result.model_dump(mode="json")
+        ),
         "answerAttemptCount": trace.answer_attempt_count,
         "validationRegenerationCount": trace.validation_regeneration_count,
         "validationRegenerationModelCall": (
@@ -570,14 +594,6 @@ def generation_stage_trace_snapshot(
             None
             if trace.validation_regeneration_result is None
             else trace.validation_regeneration_result.model_dump(mode="json")
-        ),
-        "validationRegenerationModelCall": (
-            None
-            if trace.validation_regeneration_model_call is None
-            else _model_trace_snapshot(
-                "ANSWER_VALIDATION_REGENERATION",
-                trace.validation_regeneration_model_call,
-            )
         ),
     }
 
@@ -711,6 +727,30 @@ async def load_db_snapshot(
                         0
                         if generation_snapshot is None
                         else generation_snapshot["planningAttemptCount"]
+                    ),
+                    "planningRegenerationCount": (
+                        0
+                        if generation_snapshot is None
+                        else generation_snapshot["planningRegenerationCount"]
+                    ),
+                    "planningRegenerationModelCall": (
+                        None
+                        if generation_snapshot is None
+                        else generation_snapshot[
+                            "planningRegenerationModelCall"
+                        ]
+                    ),
+                    "initialPlanningOutput": (
+                        None
+                        if generation_snapshot is None
+                        else generation_snapshot["initialPlanningOutput"]
+                    ),
+                    "planningRegenerationOutput": (
+                        None
+                        if generation_snapshot is None
+                        else generation_snapshot[
+                            "planningRegenerationResult"
+                        ]
                     ),
                     "answerAttemptCount": (
                         0
@@ -1028,6 +1068,26 @@ def _generation_snapshot(
         ),
         "planningAttemptCount": (
             0 if trace_snapshot is None else trace_snapshot["planningAttemptCount"]
+        ),
+        "planningRegenerationCount": (
+            0
+            if trace_snapshot is None
+            else trace_snapshot["planningRegenerationCount"]
+        ),
+        "planningRegenerationModelCall": (
+            None
+            if trace_snapshot is None
+            else trace_snapshot["planningRegenerationModelCall"]
+        ),
+        "initialPlanningOutput": (
+            None
+            if trace_snapshot is None
+            else trace_snapshot["initialPlanningOutput"]
+        ),
+        "planningRegenerationOutput": (
+            None
+            if trace_snapshot is None
+            else trace_snapshot["planningRegenerationResult"]
         ),
         "answerAttemptCount": (
             0 if trace_snapshot is None else trace_snapshot["answerAttemptCount"]
@@ -1590,16 +1650,20 @@ async def run_evaluation(
                     "sha256": text_sha256(QUERY_REWRITE_PROMPT_V3),
                 },
                 "sourcePlanning": {
-                    "version": GENERATION_PROMPT_VERSION,
-                    "sha256": text_sha256(SOURCE_PLANNING_PROMPT_V6),
+                    "version": SOURCE_PLANNING_PROMPT_VERSION,
+                    "sha256": text_sha256(SOURCE_PLANNING_PROMPT_V10),
+                },
+                "sourcePlanningRegeneration": {
+                    "version": SOURCE_PLANNING_REPAIR_PROMPT_VERSION,
+                    "sha256": text_sha256(SOURCE_PLANNING_REPAIR_PROMPT_V10),
                 },
                 "answer": {
-                    "version": GENERATION_PROMPT_VERSION,
-                    "sha256": text_sha256(ANSWER_PROMPT_V7),
+                    "version": ANSWER_PROMPT_VERSION,
+                    "sha256": text_sha256(ANSWER_PROMPT_V17),
                 },
                 "answerValidationRegeneration": {
                     "version": ANSWER_REPAIR_PROMPT_VERSION,
-                    "sha256": text_sha256(ANSWER_REPAIR_PROMPT_V7),
+                    "sha256": text_sha256(ANSWER_REPAIR_PROMPT_V17),
                 },
             },
             "callSettings": {
@@ -1609,6 +1673,11 @@ async def run_evaluation(
                     "reasoning": "OMITTED",
                 },
                 "sourcePlanning": {
+                    "temperature": "OMITTED",
+                    "reasoning": "OMITTED",
+                },
+                "sourcePlanRegeneration": {
+                    "maxCount": MAX_SOURCE_PLANNING_REGENERATIONS,
                     "temperature": "OMITTED",
                     "reasoning": "OMITTED",
                 },

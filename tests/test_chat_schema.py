@@ -119,6 +119,31 @@ class ChatResponseTest(unittest.TestCase):
 
         self.assertIsInstance(response, ChatCompletedResponse)
 
+    def test_accepts_four_and_five_citations_in_completed_response(self) -> None:
+        for count in (4, 5):
+            with self.subTest(count=count):
+                payload = {
+                    "status": "COMPLETED",
+                    "conversationId": CONVERSATION_ID,
+                    "ragRunId": RAG_RUN_ID,
+                    "answer": {"answerMarkdown": "출처가 있는 답변입니다."},
+                    "citations": [
+                        {
+                            "citationNumber": index,
+                            "documentTitle": f"문서 {index}",
+                            "sectionPath": ["섹션"],
+                            "sourceUrl": f"https://docs.riido.io/guide/{index}",
+                            "sourceKind": "GITBOOK",
+                        }
+                        for index in range(1, count + 1)
+                    ],
+                }
+                response = self.response_adapter.validate_python(payload)
+                self.assertEqual(count, len(response.citations))
+                self.assertEqual(
+                    payload, response.model_dump(mode="json", by_alias=True)
+                )
+
     def test_validates_all_withheld_reasons(self) -> None:
         for reason in ChatWithheldReasonCode:
             with self.subTest(reason=reason):

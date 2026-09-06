@@ -16,6 +16,7 @@ from app.database.models import (
     RagRun,
 )
 from app.chat.log_store import (
+    CitationLog,
     FeedbackNotAllowedError,
     RagLogStore,
     RagRunNotFoundError,
@@ -35,6 +36,42 @@ class RagLogStoreModelCallTest(unittest.IsolatedAsyncioTestCase):
             conversation_id=self.conversation_id,
             status=AnswerStatus.PROCESSING,
         )
+
+    async def test_records_four_and_five_citations_without_count_rejection(self) -> None:
+        for count in (4, 5):
+            with self.subTest(count=count):
+                run = self._processing_run()
+                self.store._get_processing_run = AsyncMock(return_value=run)
+                self.store._touch_conversation = AsyncMock()
+                citations = [
+                    CitationLog(
+                        chunk_id=index,
+                        document_version_id=index,
+                        citation_order=index,
+                        document_title_snapshot=f"문서 {index}",
+                        node_path_snapshot="섹션",
+                        source_uri_snapshot=f"https://docs.riido.io/{index}",
+                    )
+                    for index in range(1, count + 1)
+                ]
+                result = await self.store.complete_rag_run(
+                    run.id, answer_content="근거 있는 답변", citations=citations
+                )
+                self.assertEqual(AnswerStatus.COMPLETED, result.status)
+                self.assertTrue(result.citation_validated)
+                saved = list(self.session.add_all.call_args.args[0])
+                self.assertEqual(count, len(saved))
+                self.assertEqual(
+                    list(range(1, count + 1)),
+                    [citation.citation_order for citation in saved],
+                )
+
+    async def test_rejects_completed_answer_without_citations(self) -> None:
+        with self.assertRaisesRegex(ValueError, "최소 1개"):
+            await self.store.complete_rag_run(
+                self.rag_run_id, answer_content="본문", citations=[]
+            )
+        self.session.add_all.assert_not_called()
 
     def _prepare_rag_run_lock(self, *, final_scalar=None) -> None:
         run = self._processing_run()

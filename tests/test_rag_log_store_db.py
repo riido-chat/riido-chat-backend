@@ -1178,8 +1178,8 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         with self.assertRaisesRegex(ValueError, "보류 사유"):
             await self.store.withhold_rag_run(run2.id, reason_code="UNKNOWN")
 
-        # COMPLETED는 인용 1~3개를 강제한다
-        with self.assertRaisesRegex(ValueError, "1~3개"):
+        # COMPLETED는 최소 하나의 인용을 요구한다.
+        with self.assertRaisesRegex(ValueError, "최소 1개"):
             await self.store.complete_rag_run(
                 run2.id, answer_content="본문", citations=[]
             )

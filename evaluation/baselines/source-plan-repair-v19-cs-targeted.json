@@ -1,0 +1,3495 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-06T09:38:15.563629+00:00",
+  "casesVersion": "cs-v3",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "4ec0c8a00423b51d0b624319caa314983d033301",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.4-mini"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v3",
+        "sha256": "7bc9d807d37827d2a8f2b2e8bc9b184191c5cc4b947b3c78c9dd991da2d8c801"
+      },
+      "sourcePlanning": {
+        "version": "v10",
+        "sha256": "d40cfa917d38d02a13123b1f405a3d7a2faad1078cba6edec89c16389291fe5d"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v10-repair-1",
+        "sha256": "abbb615171d68a265b0a54137052ef0e9997bef1a78cf5149165c6fef5da0dcf"
+      },
+      "answer": {
+        "version": "v17",
+        "sha256": "80cef0103ccf34c25d627ed255eafd7281dca8afe161d6655ac33d50aec76b10"
+      },
+      "answerValidationRegeneration": {
+        "version": "v17-repair-1",
+        "sha256": "ef07e7aaaaf3b0b54aba075deba6225fa2e7287a58eb0a13e5ccb0bab18cc589"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "4ec0c8a00423b51d0b624319caa314983d033301",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v19"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 5,
+    "uniqueCaseCount": 2,
+    "totalCaseExecutionCount": 10,
+    "passedCaseExecutionCount": 10,
+    "failedCaseExecutionCount": 0,
+    "perCase": [
+      {
+        "id": "CS07",
+        "executionCount": 5,
+        "passedCount": 5,
+        "failedCount": 0
+      },
+      {
+        "id": "CS10",
+        "executionCount": 5,
+        "passedCount": 5,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 10,
+        "passedCount": 10,
+        "failedCount": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-06T09:37:37.430489+00:00",
+      "results": [
+        {
+          "id": "CS07",
+          "description": "대시보드가 제공하는 전체 현황 파악과 우선순위 판단 가치를 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "39516848-8eee-4692-853f-dada8d20f274",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "팀 대시보드는 왜 필요한 거야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "39516848-8eee-4692-853f-dada8d20f274",
+                "ragRunId": "74b6be2a-2f5f-42c3-9cca-f40c365dca7f",
+                "answer": {
+                  "answerMarkdown": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지 한눈에 정리해 보여주기 때문에 필요합니다. [1]\n\n이를 통해 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동과 팀에서 활용 중인 주요 링크를 빠르게 확인할 수 있고, 협업의 방향과 우선순위를 명확히 정리하는 데 도움이 됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "대시보드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "팀 대시보드는 왜 필요한 거야?",
+                "resolvedQuery": "팀 대시보드는 왜 필요한 거야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 6612,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 16,
+                    "outputTokens": null,
+                    "latencyMs": 2655,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5374,
+                    "outputTokens": 183,
+                    "latencyMs": 3862,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "대시보드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "팀 대시보드는 왜 필요한 거야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "팀 대시보드는 왜 필요한 거야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3277,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:902d21f9245e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "d910ac88eb7555192e4b7d3b25694f7d432ab5c4d7ad895dd0cbd7b2398723ae",
+                        "content": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고, 어디에 집중하고 있는지 시각적으로 정리해 보여주는 공간입니다.\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도를 비롯해 최근 활동과 팀에서 활용 중인 주요 링크까지 한눈에 확인할 수 있습니다.\n\n이를 통해 팀은 지금의 업무 흐름을 빠르게 파악하고, 협업의 방향과 우선순위를 명확히 정리할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.003209616704834,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.755545741143496,
+                            "latencyMs": 2696
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3224,
+                        "documentVersionId": 2412,
+                        "documentId": "764f1bb9b2d9",
+                        "sectionId": "764f1bb9b2d9:f196ea27ae96",
+                        "documentTitle": "핵심 개념",
+                        "sectionPath": [
+                          "핵심 개념",
+                          "효율적인 프로젝트 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/getting-started/core-concepts.md",
+                        "contentHash": "b875910d002b81b8abc0b04e769be591f3ef241fcf4c3d57713d7ada839f37cf",
+                        "content": "### 스프린트\n\n팀이 하나의 목표를 향해 집중하고 실행할 수 있도록 도와주는 장치입니다. 스프린트는 반복적이며, 시작일과 스프린트 기간을 한 번 설정하면 정해진 주기에 따라 새 스프린트가 자동으로 생성됩니다.\n\n모든 팀에게 스프린트가 필수는 아니지만, 업무에 몰입하고 기한을 지키기 위한 수단으로 적극 활용하는 것을 권장합니다.\n\n### 미팅\n\nIT 프로젝트는 PM, 개발자, 디자이너 등 다양한 직군이 함께 만드는 과정입니다. 이로 인해 사용하는 툴, 업무 속도, 언어가 다르기 때문에 꾸준한 커뮤니케이션이 필수입니다. 그 중심에는 데일리 스탠드업(스크럼)과 같은 짧고 빈번한 회의가 있습니다.\n\n뤼이도는 기획 회의부터 데일리 스탠드업, 회고까지 모든 회의를 효과적으로 관리할 수 있도록 지원합니다. 회의 중에는 관련 프로젝트와 작업에 즉시 접근할 수 있고 필요하다면 즉시 작업을 만들 수 있어, 논의와 실행 사이의 간극을 최소화할 수 있습니다.\n\n### 대시보드\n\n대시보드는 수많은 작업과 멤버 속에서도 중요한 정보를 놓치지 않도록 도와줍니다. 프로젝트의 전체 흐름을 한눈에 파악하고, 우선순위가 높은 항목을 빠르게 확인할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 3.8972068139511826,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6199287030512004,
+                            "latencyMs": 2696
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3279,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:fca726772b8f",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "최근 활동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "8b65787522a58183fa8d6a079c09fc7b1bb9d8f99e5f0779b46461fad412f093",
+                        "content": "누가 언제 작업을 생성했는지, 수정했는지, 팀 내 주요 변경 이력을 시간 순으로 확인할 수 있습니다. 이 기록을 통해 작업 진행 흐름을 추적하거나 이슈 발생 시 어떤 변경이 있었는지 쉽게 찾아볼 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 4.18641817476964,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5860402214258832,
+                            "latencyMs": 2696
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3280,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:281921125b1e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "링크"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "06a8048e734d4f507e00a8d0a916de833fb901c300c0ef49d0d90de12c7a179f",
+                        "content": "팀에서 자주 사용하는 외부 리소스(API 문서, 데이터 대시보드, 인프라 페이지 등)를 한곳에 모아 관리할 수 있습니다.\n\n링크는 섹션 단위로 그룹화할 수 있어, 주제별로 체계적으로 정리하고 빠르게 접근할 수 있습니다. 이를 통해 파편화된 외부 정보를 모으고, 협업 효율을 높일 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031099324975891997,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 5.018553866069519,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.5233568748655447,
+                            "latencyMs": 2696
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3278,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:802f5a7b91ac",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "작업"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "90fae9551bda9339e78eb69cbc4dd1129cefca5018365ecc61b257e216621bd5",
+                        "content": "#### 작업 현황\n\n현재 진행 중인 모든 작업이 상태별 카드 형태로 상단에 표시됩니다. 이를 통해 마감일이 임박한 작업이나 지연된 작업을 빠르게 식별하고, 업무 병목이나 리스크를 사전에 조치할 수 있습니다.\n\n각 상태에 마우스를 올리면 세부 작업 목록이 나타나며, 작업명을 클릭하면 해당 작업 상세 페이지로 바로 이동할 수 있습니다.\n\n#### 멤버별 현황\n\n각 멤버의 담당 작업 수와 진행 상태를 시각적으로 확인할 수 있습니다. 작업 상태는 색상으로 구분되어, 팀 전체의 업무 분배와 균형을 직관적으로 파악할 수 있습니다.\n\n담당자가 지정되지 않은 작업은 ‘할당 안 됨’으로 별도로 표시되어 업무 누락을 방지하고 빠르게 담당자를 할당할 수 있습니다.\n\n#### 대기 및 백로그\n\n매일 새롭게 유입되는 대기 작업과 백로그를 한눈에 확인할 수 있습니다. 이를 통해 새로운 요청이 얼마나 쌓이고 있는지, 팀의 계획 대비 실행 속도가 어떤지 직관적으로 파악할 수 있습니다.\n\n#### 전체 작업 관계도\n\n현재 활성화된 모든 작업의 관계를 다이어그램 형태로 시각화하여 보여줍니다. 화면을 축소하면 전체 구조를, 확대하면 세부 내용을 확인할 수 있습니다. 이를 통해 팀은 프로젝트 간의 의존성, 병목, 중복 상태를 빠르게 파악하고 실행 흐름을 개선할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030798389007344232,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 2.208599389830493,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5917341321504063,
+                            "latencyMs": 2696
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5374,
+                        "outputTokens": 183,
+                        "latencyMs": 3862,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "팀 대시보드가 필요한 이유",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3277,
+                          "documentVersionId": 2426,
+                          "documentId": "1c0005b1dfeb",
+                          "sectionId": "1c0005b1dfeb:902d21f9245e",
+                          "documentTitle": "대시보드",
+                          "sectionPath": [
+                            "대시보드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                          "content": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고, 어디에 집중하고 있는지 시각적으로 정리해 보여주는 공간입니다.\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도를 비롯해 최근 활동과 팀에서 활용 중인 주요 링크까지 한눈에 확인할 수 있습니다.\n\n이를 통해 팀은 지금의 업무 흐름을 빠르게 파악하고, 협업의 방향과 우선순위를 명확히 정리할 수 있습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지 한눈에 정리해 보여주기 때문에 필요합니다. [SOURCE_1]\n\n이를 통해 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동과 팀에서 활용 중인 주요 링크를 빠르게 확인할 수 있고, 협업의 방향과 우선순위를 명확히 정리하는 데 도움이 됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지 한눈에 정리해 보여주기 때문에 필요합니다. [1]\n\n이를 통해 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동과 팀에서 활용 중인 주요 링크를 빠르게 확인할 수 있고, 협업의 방향과 우선순위를 명확히 정리하는 데 도움이 됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "CS10",
+          "description": "구글 캘린더 연동이 해결하는 중복 일정 관리 문제를 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "d5384fe5-3a30-4999-9be6-99c2ea665a99",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "구글 캘린더 연동은 왜 필요한 거야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "d5384fe5-3a30-4999-9be6-99c2ea665a99",
+                "ragRunId": "8a210539-2a42-46a1-a32b-ed0ddff1bd53",
+                "answer": {
+                  "answerMarkdown": "구글 캘린더 연동은 뤼이도와 구글 캘린더의 일정을 하나로 맞춰, 중복 입력이나 누락을 줄이기 위해 필요합니다. [1]\n- 양방향 동기화: 뤼이도와 구글 캘린더 어느 쪽에서 수정해도 즉시 서로 반영됩니다. [1]\n- 하나의 소스로 유지: 뤼이도 내부 미팅과 구글 캘린더 일정이 항상 같은 기준으로 관리됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "구글 캘린더",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+                "resolvedQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4080,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 21,
+                    "outputTokens": null,
+                    "latencyMs": 726,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5476,
+                    "outputTokens": 219,
+                    "latencyMs": 3298,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "구글 캘린더"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "구글 캘린더 연동은 왜 필요한 거야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "구글 캘린더 연동은 왜 필요한 거야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3345,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:b8b2000bc35a",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "8e1b55cfcdfe65e7ddba24792c5535486b021c4078d520ef8d7941a193baec1e",
+                        "content": "구글 캘린더 연동은 워크스페이스 단위에서 설정한 뒤, 팀별로 연결할 세부 캘린더를 지정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Google Calendar]로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 구글 계정을 승인합니다.\n\n#### 2) 팀별 캘린더 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 연결할 구글 캘린더를 선택합니다.\n2. 각 팀은 하나의 구글 캘린더와 1:1 연결되며, 해당 팀의 모든 미팅 일정이 연결된 캘린더와 동기화됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 구글 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 13.891015567446075,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5954341327535149,
+                            "latencyMs": 742
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3344,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:a731f8580273",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "cc4d2385308bd61e68fbab77462456d85f9b9fe37f0fbad450ddaa631231ff37",
+                        "content": "프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.\n\n뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.\n\n이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 12.783273921755155,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.672452696507023,
+                            "latencyMs": 742
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3317,
+                        "documentVersionId": 2436,
+                        "documentId": "d639f52b10eb",
+                        "sectionId": "d639f52b10eb:f9d910a50c33",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "구글 캘린더 연동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/meetings/automations.md",
+                        "contentHash": "ce996c4e6872bafd018408467bbdfa29b142f4127ecbff3840a1489e60b651b6",
+                        "content": "워크스페이스와 구글 계정을 연동하면, 뤼이도에서 생성된 미팅이 자동으로 구글 캘린더에 등록됩니다. 반대로 구글 캘린더에서 생성한 일정도 뤼이도 내 미팅 목록에 자동으로 표시됩니다. 미팅 제목, 참여자, 시간, 장소가 양방향으로 동기화됩니다. 구글 캘린더 연동 설정 방법은 [가이드](https://docs.riido.io/integrations/google-calendar.md)에서 자세히 확인할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 13.640346366188698,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.59936027520693,
+                            "latencyMs": 742
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3347,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:76d8211bc501",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "5eb9295658c9ef6be1eca8f5aeb06f4c133eb30401280ac79cfd8201f3944b60",
+                        "content": "### 작업의 마감일도 동기화되나요?\n\n아니요. 뤼이도 내부의 ‘미팅’만 구글 캘린더와 양방향 연동을 지원합니다. 작업의 마감일이나 다른 일정 정보는 현재 연동 대상이 아닙니다.\n\n### 미팅을 삭제하면 어떻게 되나요?\n\n뤼이도에서 미팅을 삭제하면 구글 캘린더 일정도 함께 삭제됩니다. 반대로 구글 캘린더에서 제거했을 때도 동일하게 반영됩니다.\n\n### 알림 설정은 어떻게 되나요?\n\n구글 캘린더 연동이 완료되면, 구글 캘린더에서 발생하는 알림은 구글의 알림 설정을 따르게 됩니다. 이는 뤼이도 내의 미팅 알림과 별개로 작동합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 13.692848557245199,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5738382788701748,
+                            "latencyMs": 742
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3346,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:0c33dc302925",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "미팅 일정 동기화 방식"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "3577c3e74d6918a026a69c07d181eb85627c1cef667111f719a65bd7b92ce626",
+                        "content": "연동이 활성화되면, 뤼이도와 구글 캘린더 모두에서 수정한 일정이 실시간으로 서로 반영됩니다. 즉, 팀원들은 평소처럼 구글 캘린더에서 일정을 관리해도 뤼이도에서 자동으로 최신 상태를 유지할 수 있습니다.\n\n#### 1) 뤼이도 → 구글 캘린더\n\n뤼이도에서 다음과 같은 변경이 발생하면 자동으로 구글 캘린더에 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거\n\n#### 2) 구글 캘린더 → 뤼이도\n\n구글 캘린더에서 일정을 수정하면 뤼이도에 자동으로 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거",
+                        "fusedRank": 5,
+                        "fusedScore": 0.031009615384615385,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 12.402347131931657,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5783265404464542,
+                            "latencyMs": 742
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5476,
+                        "outputTokens": 219,
+                        "latencyMs": 3298,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "FEATURE_SUMMARY",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "구글 캘린더 연동이 필요한 이유",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3344,
+                          "documentVersionId": 2445,
+                          "documentId": "5623097e1502",
+                          "sectionId": "5623097e1502:a731f8580273",
+                          "documentTitle": "구글 캘린더",
+                          "sectionPath": [
+                            "구글 캘린더",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                          "content": "프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.\n\n뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.\n\n이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "구글 캘린더 연동은 뤼이도와 구글 캘린더의 일정을 하나로 맞춰, 중복 입력이나 누락을 줄이기 위해 필요합니다. [SOURCE_2]\n- 양방향 동기화: 뤼이도와 구글 캘린더 어느 쪽에서 수정해도 즉시 서로 반영됩니다. [SOURCE_2]\n- 하나의 소스로 유지: 뤼이도 내부 미팅과 구글 캘린더 일정이 항상 같은 기준으로 관리됩니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "구글 캘린더 연동은 뤼이도와 구글 캘린더의 일정을 하나로 맞춰, 중복 입력이나 누락을 줄이기 위해 필요합니다. [1]\n- 양방향 동기화: 뤼이도와 구글 캘린더 어느 쪽에서 수정해도 즉시 서로 반영됩니다. [1]\n- 하나의 소스로 유지: 뤼이도 내부 미팅과 구글 캘린더 일정이 항상 같은 기준으로 관리됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    },
+    {
+      "repeatNo": 2,
+      "executedAt": "2026-09-06T09:37:48.224245+00:00",
+      "results": [
+        {
+          "id": "CS07",
+          "description": "대시보드가 제공하는 전체 현황 파악과 우선순위 판단 가치를 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "980bf362-88db-4f84-9390-36ae77264336",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "팀 대시보드는 왜 필요한 거야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "980bf362-88db-4f84-9390-36ae77264336",
+                "ragRunId": "6ffadb1b-d756-49b2-b68a-e048b1ab7be1",
+                "answer": {
+                  "answerMarkdown": "팀 대시보드는 팀이 현재 어떤 일을 하고 있는지와 어디에 집중하고 있는지를 한눈에 정리해 보여주기 때문에 필요합니다. 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 주요 링크를 함께 확인할 수 있어 업무 흐름을 빠르게 파악할 수 있습니다. [1]\n\n이렇게 보이는 정보를 바탕으로 협업의 방향과 우선순위를 더 명확하게 정리할 수 있습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "대시보드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "팀 대시보드는 왜 필요한 거야?",
+                "resolvedQuery": "팀 대시보드는 왜 필요한 거야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2992,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 16,
+                    "outputTokens": null,
+                    "latencyMs": 149,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5374,
+                    "outputTokens": 202,
+                    "latencyMs": 2785,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "대시보드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "팀 대시보드는 왜 필요한 거야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "팀 대시보드는 왜 필요한 거야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3277,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:902d21f9245e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "d910ac88eb7555192e4b7d3b25694f7d432ab5c4d7ad895dd0cbd7b2398723ae",
+                        "content": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고, 어디에 집중하고 있는지 시각적으로 정리해 보여주는 공간입니다.\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도를 비롯해 최근 활동과 팀에서 활용 중인 주요 링크까지 한눈에 확인할 수 있습니다.\n\n이를 통해 팀은 지금의 업무 흐름을 빠르게 파악하고, 협업의 방향과 우선순위를 명확히 정리할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.003209616704834,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.755545741143496,
+                            "latencyMs": 165
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3224,
+                        "documentVersionId": 2412,
+                        "documentId": "764f1bb9b2d9",
+                        "sectionId": "764f1bb9b2d9:f196ea27ae96",
+                        "documentTitle": "핵심 개념",
+                        "sectionPath": [
+                          "핵심 개념",
+                          "효율적인 프로젝트 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/getting-started/core-concepts.md",
+                        "contentHash": "b875910d002b81b8abc0b04e769be591f3ef241fcf4c3d57713d7ada839f37cf",
+                        "content": "### 스프린트\n\n팀이 하나의 목표를 향해 집중하고 실행할 수 있도록 도와주는 장치입니다. 스프린트는 반복적이며, 시작일과 스프린트 기간을 한 번 설정하면 정해진 주기에 따라 새 스프린트가 자동으로 생성됩니다.\n\n모든 팀에게 스프린트가 필수는 아니지만, 업무에 몰입하고 기한을 지키기 위한 수단으로 적극 활용하는 것을 권장합니다.\n\n### 미팅\n\nIT 프로젝트는 PM, 개발자, 디자이너 등 다양한 직군이 함께 만드는 과정입니다. 이로 인해 사용하는 툴, 업무 속도, 언어가 다르기 때문에 꾸준한 커뮤니케이션이 필수입니다. 그 중심에는 데일리 스탠드업(스크럼)과 같은 짧고 빈번한 회의가 있습니다.\n\n뤼이도는 기획 회의부터 데일리 스탠드업, 회고까지 모든 회의를 효과적으로 관리할 수 있도록 지원합니다. 회의 중에는 관련 프로젝트와 작업에 즉시 접근할 수 있고 필요하다면 즉시 작업을 만들 수 있어, 논의와 실행 사이의 간극을 최소화할 수 있습니다.\n\n### 대시보드\n\n대시보드는 수많은 작업과 멤버 속에서도 중요한 정보를 놓치지 않도록 도와줍니다. 프로젝트의 전체 흐름을 한눈에 파악하고, 우선순위가 높은 항목을 빠르게 확인할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 3.8972068139511826,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6199287030512004,
+                            "latencyMs": 165
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3279,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:fca726772b8f",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "최근 활동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "8b65787522a58183fa8d6a079c09fc7b1bb9d8f99e5f0779b46461fad412f093",
+                        "content": "누가 언제 작업을 생성했는지, 수정했는지, 팀 내 주요 변경 이력을 시간 순으로 확인할 수 있습니다. 이 기록을 통해 작업 진행 흐름을 추적하거나 이슈 발생 시 어떤 변경이 있었는지 쉽게 찾아볼 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 4.18641817476964,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5860402214258832,
+                            "latencyMs": 165
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3280,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:281921125b1e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "링크"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "06a8048e734d4f507e00a8d0a916de833fb901c300c0ef49d0d90de12c7a179f",
+                        "content": "팀에서 자주 사용하는 외부 리소스(API 문서, 데이터 대시보드, 인프라 페이지 등)를 한곳에 모아 관리할 수 있습니다.\n\n링크는 섹션 단위로 그룹화할 수 있어, 주제별로 체계적으로 정리하고 빠르게 접근할 수 있습니다. 이를 통해 파편화된 외부 정보를 모으고, 협업 효율을 높일 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031099324975891997,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 5.018553866069519,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.5233568748655447,
+                            "latencyMs": 165
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3278,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:802f5a7b91ac",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "작업"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "90fae9551bda9339e78eb69cbc4dd1129cefca5018365ecc61b257e216621bd5",
+                        "content": "#### 작업 현황\n\n현재 진행 중인 모든 작업이 상태별 카드 형태로 상단에 표시됩니다. 이를 통해 마감일이 임박한 작업이나 지연된 작업을 빠르게 식별하고, 업무 병목이나 리스크를 사전에 조치할 수 있습니다.\n\n각 상태에 마우스를 올리면 세부 작업 목록이 나타나며, 작업명을 클릭하면 해당 작업 상세 페이지로 바로 이동할 수 있습니다.\n\n#### 멤버별 현황\n\n각 멤버의 담당 작업 수와 진행 상태를 시각적으로 확인할 수 있습니다. 작업 상태는 색상으로 구분되어, 팀 전체의 업무 분배와 균형을 직관적으로 파악할 수 있습니다.\n\n담당자가 지정되지 않은 작업은 ‘할당 안 됨’으로 별도로 표시되어 업무 누락을 방지하고 빠르게 담당자를 할당할 수 있습니다.\n\n#### 대기 및 백로그\n\n매일 새롭게 유입되는 대기 작업과 백로그를 한눈에 확인할 수 있습니다. 이를 통해 새로운 요청이 얼마나 쌓이고 있는지, 팀의 계획 대비 실행 속도가 어떤지 직관적으로 파악할 수 있습니다.\n\n#### 전체 작업 관계도\n\n현재 활성화된 모든 작업의 관계를 다이어그램 형태로 시각화하여 보여줍니다. 화면을 축소하면 전체 구조를, 확대하면 세부 내용을 확인할 수 있습니다. 이를 통해 팀은 프로젝트 간의 의존성, 병목, 중복 상태를 빠르게 파악하고 실행 흐름을 개선할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030798389007344232,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 2.208599389830493,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5917341321504063,
+                            "latencyMs": 165
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5374,
+                        "outputTokens": 202,
+                        "latencyMs": 2785,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "팀 대시보드가 필요한 이유",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3277,
+                          "documentVersionId": 2426,
+                          "documentId": "1c0005b1dfeb",
+                          "sectionId": "1c0005b1dfeb:902d21f9245e",
+                          "documentTitle": "대시보드",
+                          "sectionPath": [
+                            "대시보드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                          "content": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고, 어디에 집중하고 있는지 시각적으로 정리해 보여주는 공간입니다.\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도를 비롯해 최근 활동과 팀에서 활용 중인 주요 링크까지 한눈에 확인할 수 있습니다.\n\n이를 통해 팀은 지금의 업무 흐름을 빠르게 파악하고, 협업의 방향과 우선순위를 명확히 정리할 수 있습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "팀 대시보드는 팀이 현재 어떤 일을 하고 있는지와 어디에 집중하고 있는지를 한눈에 정리해 보여주기 때문에 필요합니다. 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 주요 링크를 함께 확인할 수 있어 업무 흐름을 빠르게 파악할 수 있습니다. [SOURCE_1]\n\n이렇게 보이는 정보를 바탕으로 협업의 방향과 우선순위를 더 명확하게 정리할 수 있습니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "팀 대시보드는 팀이 현재 어떤 일을 하고 있는지와 어디에 집중하고 있는지를 한눈에 정리해 보여주기 때문에 필요합니다. 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 주요 링크를 함께 확인할 수 있어 업무 흐름을 빠르게 파악할 수 있습니다. [1]\n\n이렇게 보이는 정보를 바탕으로 협업의 방향과 우선순위를 더 명확하게 정리할 수 있습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        },
+        {
+          "id": "CS10",
+          "description": "구글 캘린더 연동이 해결하는 중복 일정 관리 문제를 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "dca2c84f-2647-4d93-8644-975209ea278c",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "구글 캘린더 연동은 왜 필요한 거야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "dca2c84f-2647-4d93-8644-975209ea278c",
+                "ragRunId": "6e8191be-8725-444b-a24b-64fa725e06d4",
+                "answer": {
+                  "answerMarkdown": "구글 캘린더 연동은 뤼이도와 구글 캘린더의 일정을 양방향으로 동기화해, 두 시스템의 일정이 항상 하나의 소스로 유지되게 하려는 데 필요합니다. [1]\n\n이렇게 하면 여러 툴에서 일정을 따로 관리할 때 생길 수 있는 일정 중복이나 누락 문제를 줄일 수 있고, 뤼이도나 구글 캘린더 어느 쪽에서 수정해도 서로 즉시 반영됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "구글 캘린더",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+                "resolvedQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 8186,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 21,
+                    "outputTokens": null,
+                    "latencyMs": 151,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5629,
+                    "outputTokens": 209,
+                    "latencyMs": 7982,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "구글 캘린더"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "구글 캘린더 연동은 왜 필요한 거야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "구글 캘린더 연동은 왜 필요한 거야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3345,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:b8b2000bc35a",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "8e1b55cfcdfe65e7ddba24792c5535486b021c4078d520ef8d7941a193baec1e",
+                        "content": "구글 캘린더 연동은 워크스페이스 단위에서 설정한 뒤, 팀별로 연결할 세부 캘린더를 지정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Google Calendar]로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 구글 계정을 승인합니다.\n\n#### 2) 팀별 캘린더 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 연결할 구글 캘린더를 선택합니다.\n2. 각 팀은 하나의 구글 캘린더와 1:1 연결되며, 해당 팀의 모든 미팅 일정이 연결된 캘린더와 동기화됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 구글 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 13.891015567446075,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5954341327535149,
+                            "latencyMs": 164
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3344,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:a731f8580273",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "cc4d2385308bd61e68fbab77462456d85f9b9fe37f0fbad450ddaa631231ff37",
+                        "content": "프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.\n\n뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.\n\n이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 12.783273921755155,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.672452696507023,
+                            "latencyMs": 164
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3317,
+                        "documentVersionId": 2436,
+                        "documentId": "d639f52b10eb",
+                        "sectionId": "d639f52b10eb:f9d910a50c33",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "구글 캘린더 연동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/meetings/automations.md",
+                        "contentHash": "ce996c4e6872bafd018408467bbdfa29b142f4127ecbff3840a1489e60b651b6",
+                        "content": "워크스페이스와 구글 계정을 연동하면, 뤼이도에서 생성된 미팅이 자동으로 구글 캘린더에 등록됩니다. 반대로 구글 캘린더에서 생성한 일정도 뤼이도 내 미팅 목록에 자동으로 표시됩니다. 미팅 제목, 참여자, 시간, 장소가 양방향으로 동기화됩니다. 구글 캘린더 연동 설정 방법은 [가이드](https://docs.riido.io/integrations/google-calendar.md)에서 자세히 확인할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 13.640346366188698,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.59936027520693,
+                            "latencyMs": 164
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3347,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:76d8211bc501",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "5eb9295658c9ef6be1eca8f5aeb06f4c133eb30401280ac79cfd8201f3944b60",
+                        "content": "### 작업의 마감일도 동기화되나요?\n\n아니요. 뤼이도 내부의 ‘미팅’만 구글 캘린더와 양방향 연동을 지원합니다. 작업의 마감일이나 다른 일정 정보는 현재 연동 대상이 아닙니다.\n\n### 미팅을 삭제하면 어떻게 되나요?\n\n뤼이도에서 미팅을 삭제하면 구글 캘린더 일정도 함께 삭제됩니다. 반대로 구글 캘린더에서 제거했을 때도 동일하게 반영됩니다.\n\n### 알림 설정은 어떻게 되나요?\n\n구글 캘린더 연동이 완료되면, 구글 캘린더에서 발생하는 알림은 구글의 알림 설정을 따르게 됩니다. 이는 뤼이도 내의 미팅 알림과 별개로 작동합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 13.692848557245199,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5738382788701748,
+                            "latencyMs": 164
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3346,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:0c33dc302925",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "미팅 일정 동기화 방식"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "3577c3e74d6918a026a69c07d181eb85627c1cef667111f719a65bd7b92ce626",
+                        "content": "연동이 활성화되면, 뤼이도와 구글 캘린더 모두에서 수정한 일정이 실시간으로 서로 반영됩니다. 즉, 팀원들은 평소처럼 구글 캘린더에서 일정을 관리해도 뤼이도에서 자동으로 최신 상태를 유지할 수 있습니다.\n\n#### 1) 뤼이도 → 구글 캘린더\n\n뤼이도에서 다음과 같은 변경이 발생하면 자동으로 구글 캘린더에 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거\n\n#### 2) 구글 캘린더 → 뤼이도\n\n구글 캘린더에서 일정을 수정하면 뤼이도에 자동으로 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거",
+                        "fusedRank": 5,
+                        "fusedScore": 0.031009615384615385,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 12.402347131931657,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5783265404464542,
+                            "latencyMs": 164
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5629,
+                        "outputTokens": 209,
+                        "latencyMs": 7982,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "구글 캘린더 연동이 필요한 이유",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3344,
+                          "documentVersionId": 2445,
+                          "documentId": "5623097e1502",
+                          "sectionId": "5623097e1502:a731f8580273",
+                          "documentTitle": "구글 캘린더",
+                          "sectionPath": [
+                            "구글 캘린더",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                          "content": "프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.\n\n뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.\n\n이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "구글 캘린더 연동은 뤼이도와 구글 캘린더의 일정을 양방향으로 동기화해, 두 시스템의 일정이 항상 하나의 소스로 유지되게 하려는 데 필요합니다. [SOURCE_2]\n\n이렇게 하면 여러 툴에서 일정을 따로 관리할 때 생길 수 있는 일정 중복이나 누락 문제를 줄일 수 있고, 뤼이도나 구글 캘린더 어느 쪽에서 수정해도 서로 즉시 반영됩니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 2,
+                    "planningRegenerationCount": 1,
+                    "planningRegenerationModelCall": {
+                      "purpose": "SOURCE_PLAN_REGENERATION",
+                      "status": "SUCCESS",
+                      "provider": "openai",
+                      "requestedModel": "gpt-5.4-mini",
+                      "responseModel": null,
+                      "responseModelAvailability": "UNAVAILABLE",
+                      "promptVersion": "v10-repair-1",
+                      "inputTokens": 3290,
+                      "outputTokens": 61,
+                      "latencyMs": 2533,
+                      "retryCount": 0,
+                      "errorMessage": null
+                    },
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": {
+                      "status": "ANSWERABLE",
+                      "answer_type": "GENERAL",
+                      "answer_scope": "SUMMARY",
+                      "evidence_requirements": [
+                        {
+                          "information_unit": "구글 캘린더 연동이 필요한 이유",
+                          "source_ids": [
+                            "SOURCE_2"
+                          ]
+                        }
+                      ],
+                      "withheld_reason": null
+                    },
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "구글 캘린더 연동은 뤼이도와 구글 캘린더의 일정을 양방향으로 동기화해, 두 시스템의 일정이 항상 하나의 소스로 유지되게 하려는 데 필요합니다. [1]\n\n이렇게 하면 여러 툴에서 일정을 따로 관리할 때 생길 수 있는 일정 중복이나 누락 문제를 줄일 수 있고, 뤼이도나 구글 캘린더 어느 쪽에서 수정해도 서로 즉시 반영됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        }
+      ]
+    },
+    {
+      "repeatNo": 3,
+      "executedAt": "2026-09-06T09:37:59.469096+00:00",
+      "results": [
+        {
+          "id": "CS07",
+          "description": "대시보드가 제공하는 전체 현황 파악과 우선순위 판단 가치를 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "648449a9-9372-49e8-94b0-922a931df5cd",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "팀 대시보드는 왜 필요한 거야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "648449a9-9372-49e8-94b0-922a931df5cd",
+                "ragRunId": "d6f969d1-136d-4ed8-9861-6a930b109aee",
+                "answer": {
+                  "answerMarkdown": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지 한눈에 정리해 보여주기 때문에 필요합니다. [1]\n\n이를 통해 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 주요 링크를 빠르게 확인할 수 있고, 업무 흐름을 파악해 협업의 방향과 우선순위를 정리할 수 있습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "대시보드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "팀 대시보드는 왜 필요한 거야?",
+                "resolvedQuery": "팀 대시보드는 왜 필요한 거야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2792,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 16,
+                    "outputTokens": null,
+                    "latencyMs": 306,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5374,
+                    "outputTokens": 187,
+                    "latencyMs": 2431,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "대시보드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "팀 대시보드는 왜 필요한 거야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "팀 대시보드는 왜 필요한 거야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3277,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:902d21f9245e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "d910ac88eb7555192e4b7d3b25694f7d432ab5c4d7ad895dd0cbd7b2398723ae",
+                        "content": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고, 어디에 집중하고 있는지 시각적으로 정리해 보여주는 공간입니다.\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도를 비롯해 최근 활동과 팀에서 활용 중인 주요 링크까지 한눈에 확인할 수 있습니다.\n\n이를 통해 팀은 지금의 업무 흐름을 빠르게 파악하고, 협업의 방향과 우선순위를 명확히 정리할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.003209616704834,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.755545741143496,
+                            "latencyMs": 320
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3224,
+                        "documentVersionId": 2412,
+                        "documentId": "764f1bb9b2d9",
+                        "sectionId": "764f1bb9b2d9:f196ea27ae96",
+                        "documentTitle": "핵심 개념",
+                        "sectionPath": [
+                          "핵심 개념",
+                          "효율적인 프로젝트 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/getting-started/core-concepts.md",
+                        "contentHash": "b875910d002b81b8abc0b04e769be591f3ef241fcf4c3d57713d7ada839f37cf",
+                        "content": "### 스프린트\n\n팀이 하나의 목표를 향해 집중하고 실행할 수 있도록 도와주는 장치입니다. 스프린트는 반복적이며, 시작일과 스프린트 기간을 한 번 설정하면 정해진 주기에 따라 새 스프린트가 자동으로 생성됩니다.\n\n모든 팀에게 스프린트가 필수는 아니지만, 업무에 몰입하고 기한을 지키기 위한 수단으로 적극 활용하는 것을 권장합니다.\n\n### 미팅\n\nIT 프로젝트는 PM, 개발자, 디자이너 등 다양한 직군이 함께 만드는 과정입니다. 이로 인해 사용하는 툴, 업무 속도, 언어가 다르기 때문에 꾸준한 커뮤니케이션이 필수입니다. 그 중심에는 데일리 스탠드업(스크럼)과 같은 짧고 빈번한 회의가 있습니다.\n\n뤼이도는 기획 회의부터 데일리 스탠드업, 회고까지 모든 회의를 효과적으로 관리할 수 있도록 지원합니다. 회의 중에는 관련 프로젝트와 작업에 즉시 접근할 수 있고 필요하다면 즉시 작업을 만들 수 있어, 논의와 실행 사이의 간극을 최소화할 수 있습니다.\n\n### 대시보드\n\n대시보드는 수많은 작업과 멤버 속에서도 중요한 정보를 놓치지 않도록 도와줍니다. 프로젝트의 전체 흐름을 한눈에 파악하고, 우선순위가 높은 항목을 빠르게 확인할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 3.8972068139511826,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6199287030512004,
+                            "latencyMs": 320
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3279,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:fca726772b8f",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "최근 활동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "8b65787522a58183fa8d6a079c09fc7b1bb9d8f99e5f0779b46461fad412f093",
+                        "content": "누가 언제 작업을 생성했는지, 수정했는지, 팀 내 주요 변경 이력을 시간 순으로 확인할 수 있습니다. 이 기록을 통해 작업 진행 흐름을 추적하거나 이슈 발생 시 어떤 변경이 있었는지 쉽게 찾아볼 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 4.18641817476964,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5860402214258832,
+                            "latencyMs": 320
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3280,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:281921125b1e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "링크"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "06a8048e734d4f507e00a8d0a916de833fb901c300c0ef49d0d90de12c7a179f",
+                        "content": "팀에서 자주 사용하는 외부 리소스(API 문서, 데이터 대시보드, 인프라 페이지 등)를 한곳에 모아 관리할 수 있습니다.\n\n링크는 섹션 단위로 그룹화할 수 있어, 주제별로 체계적으로 정리하고 빠르게 접근할 수 있습니다. 이를 통해 파편화된 외부 정보를 모으고, 협업 효율을 높일 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031099324975891997,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 5.018553866069519,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.5233568748655447,
+                            "latencyMs": 320
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3278,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:802f5a7b91ac",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "작업"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "90fae9551bda9339e78eb69cbc4dd1129cefca5018365ecc61b257e216621bd5",
+                        "content": "#### 작업 현황\n\n현재 진행 중인 모든 작업이 상태별 카드 형태로 상단에 표시됩니다. 이를 통해 마감일이 임박한 작업이나 지연된 작업을 빠르게 식별하고, 업무 병목이나 리스크를 사전에 조치할 수 있습니다.\n\n각 상태에 마우스를 올리면 세부 작업 목록이 나타나며, 작업명을 클릭하면 해당 작업 상세 페이지로 바로 이동할 수 있습니다.\n\n#### 멤버별 현황\n\n각 멤버의 담당 작업 수와 진행 상태를 시각적으로 확인할 수 있습니다. 작업 상태는 색상으로 구분되어, 팀 전체의 업무 분배와 균형을 직관적으로 파악할 수 있습니다.\n\n담당자가 지정되지 않은 작업은 ‘할당 안 됨’으로 별도로 표시되어 업무 누락을 방지하고 빠르게 담당자를 할당할 수 있습니다.\n\n#### 대기 및 백로그\n\n매일 새롭게 유입되는 대기 작업과 백로그를 한눈에 확인할 수 있습니다. 이를 통해 새로운 요청이 얼마나 쌓이고 있는지, 팀의 계획 대비 실행 속도가 어떤지 직관적으로 파악할 수 있습니다.\n\n#### 전체 작업 관계도\n\n현재 활성화된 모든 작업의 관계를 다이어그램 형태로 시각화하여 보여줍니다. 화면을 축소하면 전체 구조를, 확대하면 세부 내용을 확인할 수 있습니다. 이를 통해 팀은 프로젝트 간의 의존성, 병목, 중복 상태를 빠르게 파악하고 실행 흐름을 개선할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030798389007344232,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 2.208599389830493,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5917341321504063,
+                            "latencyMs": 320
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5374,
+                        "outputTokens": 187,
+                        "latencyMs": 2431,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "팀 대시보드는 왜 필요한가",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3277,
+                          "documentVersionId": 2426,
+                          "documentId": "1c0005b1dfeb",
+                          "sectionId": "1c0005b1dfeb:902d21f9245e",
+                          "documentTitle": "대시보드",
+                          "sectionPath": [
+                            "대시보드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                          "content": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고, 어디에 집중하고 있는지 시각적으로 정리해 보여주는 공간입니다.\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도를 비롯해 최근 활동과 팀에서 활용 중인 주요 링크까지 한눈에 확인할 수 있습니다.\n\n이를 통해 팀은 지금의 업무 흐름을 빠르게 파악하고, 협업의 방향과 우선순위를 명확히 정리할 수 있습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지 한눈에 정리해 보여주기 때문에 필요합니다. [SOURCE_1]\n\n이를 통해 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 주요 링크를 빠르게 확인할 수 있고, 업무 흐름을 파악해 협업의 방향과 우선순위를 정리할 수 있습니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지 한눈에 정리해 보여주기 때문에 필요합니다. [1]\n\n이를 통해 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 주요 링크를 빠르게 확인할 수 있고, 업무 흐름을 파악해 협업의 방향과 우선순위를 정리할 수 있습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        },
+        {
+          "id": "CS10",
+          "description": "구글 캘린더 연동이 해결하는 중복 일정 관리 문제를 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "931ffce4-bf6c-4f84-950f-5f595c47e0c5",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "구글 캘린더 연동은 왜 필요한 거야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "931ffce4-bf6c-4f84-950f-5f595c47e0c5",
+                "ragRunId": "8e84e9ed-6a68-4d91-9024-7ba321ab6d6c",
+                "answer": {
+                  "answerMarkdown": "구글 캘린더 연동은 뤼이도 내부 미팅과 구글 캘린더의 일정을 하나로 맞춰, 일정 중복이나 누락을 줄이기 위해 필요합니다. [1]\n- 양방향 동기화: 뤼이도나 구글 캘린더에서 수정한 내용이 즉시 서로 반영되어 두 시스템의 일정이 항상 같은 상태로 유지됩니다. [1]\n- 입력 반복 감소: 일정을 복사하거나 두 번 입력할 필요가 없습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "구글 캘린더",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+                "resolvedQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2831,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 21,
+                    "outputTokens": null,
+                    "latencyMs": 178,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5476,
+                    "outputTokens": 212,
+                    "latencyMs": 2596,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "구글 캘린더"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "구글 캘린더 연동은 왜 필요한 거야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "구글 캘린더 연동은 왜 필요한 거야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3345,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:b8b2000bc35a",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "8e1b55cfcdfe65e7ddba24792c5535486b021c4078d520ef8d7941a193baec1e",
+                        "content": "구글 캘린더 연동은 워크스페이스 단위에서 설정한 뒤, 팀별로 연결할 세부 캘린더를 지정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Google Calendar]로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 구글 계정을 승인합니다.\n\n#### 2) 팀별 캘린더 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 연결할 구글 캘린더를 선택합니다.\n2. 각 팀은 하나의 구글 캘린더와 1:1 연결되며, 해당 팀의 모든 미팅 일정이 연결된 캘린더와 동기화됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 구글 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 13.891015567446075,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5954341327535149,
+                            "latencyMs": 192
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3344,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:a731f8580273",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "cc4d2385308bd61e68fbab77462456d85f9b9fe37f0fbad450ddaa631231ff37",
+                        "content": "프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.\n\n뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.\n\n이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 12.783273921755155,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.672452696507023,
+                            "latencyMs": 192
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3317,
+                        "documentVersionId": 2436,
+                        "documentId": "d639f52b10eb",
+                        "sectionId": "d639f52b10eb:f9d910a50c33",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "구글 캘린더 연동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/meetings/automations.md",
+                        "contentHash": "ce996c4e6872bafd018408467bbdfa29b142f4127ecbff3840a1489e60b651b6",
+                        "content": "워크스페이스와 구글 계정을 연동하면, 뤼이도에서 생성된 미팅이 자동으로 구글 캘린더에 등록됩니다. 반대로 구글 캘린더에서 생성한 일정도 뤼이도 내 미팅 목록에 자동으로 표시됩니다. 미팅 제목, 참여자, 시간, 장소가 양방향으로 동기화됩니다. 구글 캘린더 연동 설정 방법은 [가이드](https://docs.riido.io/integrations/google-calendar.md)에서 자세히 확인할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 13.640346366188698,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.59936027520693,
+                            "latencyMs": 192
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3347,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:76d8211bc501",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "5eb9295658c9ef6be1eca8f5aeb06f4c133eb30401280ac79cfd8201f3944b60",
+                        "content": "### 작업의 마감일도 동기화되나요?\n\n아니요. 뤼이도 내부의 ‘미팅’만 구글 캘린더와 양방향 연동을 지원합니다. 작업의 마감일이나 다른 일정 정보는 현재 연동 대상이 아닙니다.\n\n### 미팅을 삭제하면 어떻게 되나요?\n\n뤼이도에서 미팅을 삭제하면 구글 캘린더 일정도 함께 삭제됩니다. 반대로 구글 캘린더에서 제거했을 때도 동일하게 반영됩니다.\n\n### 알림 설정은 어떻게 되나요?\n\n구글 캘린더 연동이 완료되면, 구글 캘린더에서 발생하는 알림은 구글의 알림 설정을 따르게 됩니다. 이는 뤼이도 내의 미팅 알림과 별개로 작동합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 13.692848557245199,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5738382788701748,
+                            "latencyMs": 192
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3346,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:0c33dc302925",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "미팅 일정 동기화 방식"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "3577c3e74d6918a026a69c07d181eb85627c1cef667111f719a65bd7b92ce626",
+                        "content": "연동이 활성화되면, 뤼이도와 구글 캘린더 모두에서 수정한 일정이 실시간으로 서로 반영됩니다. 즉, 팀원들은 평소처럼 구글 캘린더에서 일정을 관리해도 뤼이도에서 자동으로 최신 상태를 유지할 수 있습니다.\n\n#### 1) 뤼이도 → 구글 캘린더\n\n뤼이도에서 다음과 같은 변경이 발생하면 자동으로 구글 캘린더에 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거\n\n#### 2) 구글 캘린더 → 뤼이도\n\n구글 캘린더에서 일정을 수정하면 뤼이도에 자동으로 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거",
+                        "fusedRank": 5,
+                        "fusedScore": 0.031009615384615385,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 12.402347131931657,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5783265404464542,
+                            "latencyMs": 192
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5476,
+                        "outputTokens": 212,
+                        "latencyMs": 2596,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "FEATURE_SUMMARY",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "구글 캘린더 연동이 필요한 이유",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3344,
+                          "documentVersionId": 2445,
+                          "documentId": "5623097e1502",
+                          "sectionId": "5623097e1502:a731f8580273",
+                          "documentTitle": "구글 캘린더",
+                          "sectionPath": [
+                            "구글 캘린더",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                          "content": "프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.\n\n뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.\n\n이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "구글 캘린더 연동은 뤼이도 내부 미팅과 구글 캘린더의 일정을 하나로 맞춰, 일정 중복이나 누락을 줄이기 위해 필요합니다. [SOURCE_2]\n- 양방향 동기화: 뤼이도나 구글 캘린더에서 수정한 내용이 즉시 서로 반영되어 두 시스템의 일정이 항상 같은 상태로 유지됩니다. [SOURCE_2]\n- 입력 반복 감소: 일정을 복사하거나 두 번 입력할 필요가 없습니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "구글 캘린더 연동은 뤼이도 내부 미팅과 구글 캘린더의 일정을 하나로 맞춰, 일정 중복이나 누락을 줄이기 위해 필요합니다. [1]\n- 양방향 동기화: 뤼이도나 구글 캘린더에서 수정한 내용이 즉시 서로 반영되어 두 시스템의 일정이 항상 같은 상태로 유지됩니다. [1]\n- 입력 반복 감소: 일정을 복사하거나 두 번 입력할 필요가 없습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        }
+      ]
+    },
+    {
+      "repeatNo": 4,
+      "executedAt": "2026-09-06T09:38:05.169624+00:00",
+      "results": [
+        {
+          "id": "CS07",
+          "description": "대시보드가 제공하는 전체 현황 파악과 우선순위 판단 가치를 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "34d8fc71-abe4-486c-a36e-dcb098126194",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "팀 대시보드는 왜 필요한 거야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "34d8fc71-abe4-486c-a36e-dcb098126194",
+                "ragRunId": "46c0a741-ccb1-493e-810d-164bfe74cdcb",
+                "answer": {
+                  "answerMarkdown": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지를 한눈에 파악하기 위한 공간입니다. [1]\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 팀에서 활용 중인 주요 링크를 시각적으로 정리해 보여주기 때문에, 지금의 업무 흐름을 빠르게 파악하고 협업의 방향과 우선순위를 명확히 정리하는 데 필요합니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "대시보드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "팀 대시보드는 왜 필요한 거야?",
+                "resolvedQuery": "팀 대시보드는 왜 필요한 거야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2420,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 16,
+                    "outputTokens": null,
+                    "latencyMs": 199,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5376,
+                    "outputTokens": 195,
+                    "latencyMs": 2175,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "대시보드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "팀 대시보드는 왜 필요한 거야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "팀 대시보드는 왜 필요한 거야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3277,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:902d21f9245e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "d910ac88eb7555192e4b7d3b25694f7d432ab5c4d7ad895dd0cbd7b2398723ae",
+                        "content": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고, 어디에 집중하고 있는지 시각적으로 정리해 보여주는 공간입니다.\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도를 비롯해 최근 활동과 팀에서 활용 중인 주요 링크까지 한눈에 확인할 수 있습니다.\n\n이를 통해 팀은 지금의 업무 흐름을 빠르게 파악하고, 협업의 방향과 우선순위를 명확히 정리할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.003209616704834,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.755545741143496,
+                            "latencyMs": 208
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3224,
+                        "documentVersionId": 2412,
+                        "documentId": "764f1bb9b2d9",
+                        "sectionId": "764f1bb9b2d9:f196ea27ae96",
+                        "documentTitle": "핵심 개념",
+                        "sectionPath": [
+                          "핵심 개념",
+                          "효율적인 프로젝트 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/getting-started/core-concepts.md",
+                        "contentHash": "b875910d002b81b8abc0b04e769be591f3ef241fcf4c3d57713d7ada839f37cf",
+                        "content": "### 스프린트\n\n팀이 하나의 목표를 향해 집중하고 실행할 수 있도록 도와주는 장치입니다. 스프린트는 반복적이며, 시작일과 스프린트 기간을 한 번 설정하면 정해진 주기에 따라 새 스프린트가 자동으로 생성됩니다.\n\n모든 팀에게 스프린트가 필수는 아니지만, 업무에 몰입하고 기한을 지키기 위한 수단으로 적극 활용하는 것을 권장합니다.\n\n### 미팅\n\nIT 프로젝트는 PM, 개발자, 디자이너 등 다양한 직군이 함께 만드는 과정입니다. 이로 인해 사용하는 툴, 업무 속도, 언어가 다르기 때문에 꾸준한 커뮤니케이션이 필수입니다. 그 중심에는 데일리 스탠드업(스크럼)과 같은 짧고 빈번한 회의가 있습니다.\n\n뤼이도는 기획 회의부터 데일리 스탠드업, 회고까지 모든 회의를 효과적으로 관리할 수 있도록 지원합니다. 회의 중에는 관련 프로젝트와 작업에 즉시 접근할 수 있고 필요하다면 즉시 작업을 만들 수 있어, 논의와 실행 사이의 간극을 최소화할 수 있습니다.\n\n### 대시보드\n\n대시보드는 수많은 작업과 멤버 속에서도 중요한 정보를 놓치지 않도록 도와줍니다. 프로젝트의 전체 흐름을 한눈에 파악하고, 우선순위가 높은 항목을 빠르게 확인할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 3.8972068139511826,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6199287030512004,
+                            "latencyMs": 208
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3279,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:fca726772b8f",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "최근 활동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "8b65787522a58183fa8d6a079c09fc7b1bb9d8f99e5f0779b46461fad412f093",
+                        "content": "누가 언제 작업을 생성했는지, 수정했는지, 팀 내 주요 변경 이력을 시간 순으로 확인할 수 있습니다. 이 기록을 통해 작업 진행 흐름을 추적하거나 이슈 발생 시 어떤 변경이 있었는지 쉽게 찾아볼 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 4.18641817476964,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5860402214258832,
+                            "latencyMs": 208
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3280,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:281921125b1e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "링크"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "06a8048e734d4f507e00a8d0a916de833fb901c300c0ef49d0d90de12c7a179f",
+                        "content": "팀에서 자주 사용하는 외부 리소스(API 문서, 데이터 대시보드, 인프라 페이지 등)를 한곳에 모아 관리할 수 있습니다.\n\n링크는 섹션 단위로 그룹화할 수 있어, 주제별로 체계적으로 정리하고 빠르게 접근할 수 있습니다. 이를 통해 파편화된 외부 정보를 모으고, 협업 효율을 높일 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031099324975891997,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 5.018553866069519,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.5233568748655447,
+                            "latencyMs": 208
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3278,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:802f5a7b91ac",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "작업"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "90fae9551bda9339e78eb69cbc4dd1129cefca5018365ecc61b257e216621bd5",
+                        "content": "#### 작업 현황\n\n현재 진행 중인 모든 작업이 상태별 카드 형태로 상단에 표시됩니다. 이를 통해 마감일이 임박한 작업이나 지연된 작업을 빠르게 식별하고, 업무 병목이나 리스크를 사전에 조치할 수 있습니다.\n\n각 상태에 마우스를 올리면 세부 작업 목록이 나타나며, 작업명을 클릭하면 해당 작업 상세 페이지로 바로 이동할 수 있습니다.\n\n#### 멤버별 현황\n\n각 멤버의 담당 작업 수와 진행 상태를 시각적으로 확인할 수 있습니다. 작업 상태는 색상으로 구분되어, 팀 전체의 업무 분배와 균형을 직관적으로 파악할 수 있습니다.\n\n담당자가 지정되지 않은 작업은 ‘할당 안 됨’으로 별도로 표시되어 업무 누락을 방지하고 빠르게 담당자를 할당할 수 있습니다.\n\n#### 대기 및 백로그\n\n매일 새롭게 유입되는 대기 작업과 백로그를 한눈에 확인할 수 있습니다. 이를 통해 새로운 요청이 얼마나 쌓이고 있는지, 팀의 계획 대비 실행 속도가 어떤지 직관적으로 파악할 수 있습니다.\n\n#### 전체 작업 관계도\n\n현재 활성화된 모든 작업의 관계를 다이어그램 형태로 시각화하여 보여줍니다. 화면을 축소하면 전체 구조를, 확대하면 세부 내용을 확인할 수 있습니다. 이를 통해 팀은 프로젝트 간의 의존성, 병목, 중복 상태를 빠르게 파악하고 실행 흐름을 개선할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030798389007344232,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 2.208599389830493,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5917341321504063,
+                            "latencyMs": 208
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5376,
+                        "outputTokens": 195,
+                        "latencyMs": 2175,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "FEATURE_SUMMARY",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "팀 대시보드가 필요한 이유",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3277,
+                          "documentVersionId": 2426,
+                          "documentId": "1c0005b1dfeb",
+                          "sectionId": "1c0005b1dfeb:902d21f9245e",
+                          "documentTitle": "대시보드",
+                          "sectionPath": [
+                            "대시보드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                          "content": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고, 어디에 집중하고 있는지 시각적으로 정리해 보여주는 공간입니다.\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도를 비롯해 최근 활동과 팀에서 활용 중인 주요 링크까지 한눈에 확인할 수 있습니다.\n\n이를 통해 팀은 지금의 업무 흐름을 빠르게 파악하고, 협업의 방향과 우선순위를 명확히 정리할 수 있습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지를 한눈에 파악하기 위한 공간입니다. [SOURCE_1]\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 팀에서 활용 중인 주요 링크를 시각적으로 정리해 보여주기 때문에, 지금의 업무 흐름을 빠르게 파악하고 협업의 방향과 우선순위를 명확히 정리하는 데 필요합니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지를 한눈에 파악하기 위한 공간입니다. [1]\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 팀에서 활용 중인 주요 링크를 시각적으로 정리해 보여주기 때문에, 지금의 업무 흐름을 빠르게 파악하고 협업의 방향과 우선순위를 명확히 정리하는 데 필요합니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 4
+        },
+        {
+          "id": "CS10",
+          "description": "구글 캘린더 연동이 해결하는 중복 일정 관리 문제를 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "5d7790d1-ccfb-44f8-84f1-760f3e71c983",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "구글 캘린더 연동은 왜 필요한 거야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "5d7790d1-ccfb-44f8-84f1-760f3e71c983",
+                "ragRunId": "8d8c8b5c-68d4-49d2-97f0-f583bf1793f1",
+                "answer": {
+                  "answerMarkdown": "구글 캘린더 연동은 뤼이도 내부 미팅과 구글 캘린더의 일정을 양방향으로 동기화해, 두 시스템의 일정을 하나의 소스로 유지하기 위해 필요합니다. [1]\n\n이렇게 하면 일정을 복사하거나 두 번 입력할 필요가 줄고, 뤼이도나 구글 캘린더 어느 쪽에서 수정해도 즉시 서로 반영됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "구글 캘린더",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+                "resolvedQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2441,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 21,
+                    "outputTokens": null,
+                    "latencyMs": 164,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5476,
+                    "outputTokens": 194,
+                    "latencyMs": 2226,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "구글 캘린더"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "구글 캘린더 연동은 왜 필요한 거야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "구글 캘린더 연동은 왜 필요한 거야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3345,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:b8b2000bc35a",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "8e1b55cfcdfe65e7ddba24792c5535486b021c4078d520ef8d7941a193baec1e",
+                        "content": "구글 캘린더 연동은 워크스페이스 단위에서 설정한 뒤, 팀별로 연결할 세부 캘린더를 지정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Google Calendar]로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 구글 계정을 승인합니다.\n\n#### 2) 팀별 캘린더 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 연결할 구글 캘린더를 선택합니다.\n2. 각 팀은 하나의 구글 캘린더와 1:1 연결되며, 해당 팀의 모든 미팅 일정이 연결된 캘린더와 동기화됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 구글 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 13.891015567446075,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5954341327535149,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3344,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:a731f8580273",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "cc4d2385308bd61e68fbab77462456d85f9b9fe37f0fbad450ddaa631231ff37",
+                        "content": "프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.\n\n뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.\n\n이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 12.783273921755155,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.672452696507023,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3317,
+                        "documentVersionId": 2436,
+                        "documentId": "d639f52b10eb",
+                        "sectionId": "d639f52b10eb:f9d910a50c33",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "구글 캘린더 연동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/meetings/automations.md",
+                        "contentHash": "ce996c4e6872bafd018408467bbdfa29b142f4127ecbff3840a1489e60b651b6",
+                        "content": "워크스페이스와 구글 계정을 연동하면, 뤼이도에서 생성된 미팅이 자동으로 구글 캘린더에 등록됩니다. 반대로 구글 캘린더에서 생성한 일정도 뤼이도 내 미팅 목록에 자동으로 표시됩니다. 미팅 제목, 참여자, 시간, 장소가 양방향으로 동기화됩니다. 구글 캘린더 연동 설정 방법은 [가이드](https://docs.riido.io/integrations/google-calendar.md)에서 자세히 확인할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 13.640346366188698,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.59936027520693,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3347,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:76d8211bc501",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "5eb9295658c9ef6be1eca8f5aeb06f4c133eb30401280ac79cfd8201f3944b60",
+                        "content": "### 작업의 마감일도 동기화되나요?\n\n아니요. 뤼이도 내부의 ‘미팅’만 구글 캘린더와 양방향 연동을 지원합니다. 작업의 마감일이나 다른 일정 정보는 현재 연동 대상이 아닙니다.\n\n### 미팅을 삭제하면 어떻게 되나요?\n\n뤼이도에서 미팅을 삭제하면 구글 캘린더 일정도 함께 삭제됩니다. 반대로 구글 캘린더에서 제거했을 때도 동일하게 반영됩니다.\n\n### 알림 설정은 어떻게 되나요?\n\n구글 캘린더 연동이 완료되면, 구글 캘린더에서 발생하는 알림은 구글의 알림 설정을 따르게 됩니다. 이는 뤼이도 내의 미팅 알림과 별개로 작동합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 13.692848557245199,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5738382788701748,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3346,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:0c33dc302925",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "미팅 일정 동기화 방식"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "3577c3e74d6918a026a69c07d181eb85627c1cef667111f719a65bd7b92ce626",
+                        "content": "연동이 활성화되면, 뤼이도와 구글 캘린더 모두에서 수정한 일정이 실시간으로 서로 반영됩니다. 즉, 팀원들은 평소처럼 구글 캘린더에서 일정을 관리해도 뤼이도에서 자동으로 최신 상태를 유지할 수 있습니다.\n\n#### 1) 뤼이도 → 구글 캘린더\n\n뤼이도에서 다음과 같은 변경이 발생하면 자동으로 구글 캘린더에 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거\n\n#### 2) 구글 캘린더 → 뤼이도\n\n구글 캘린더에서 일정을 수정하면 뤼이도에 자동으로 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거",
+                        "fusedRank": 5,
+                        "fusedScore": 0.031009615384615385,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 12.402347131931657,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5783265404464542,
+                            "latencyMs": 176
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5476,
+                        "outputTokens": 194,
+                        "latencyMs": 2226,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "FEATURE_SUMMARY",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "구글 캘린더 연동이 필요한 이유",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3344,
+                          "documentVersionId": 2445,
+                          "documentId": "5623097e1502",
+                          "sectionId": "5623097e1502:a731f8580273",
+                          "documentTitle": "구글 캘린더",
+                          "sectionPath": [
+                            "구글 캘린더",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                          "content": "프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.\n\n뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.\n\n이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "구글 캘린더 연동은 뤼이도 내부 미팅과 구글 캘린더의 일정을 양방향으로 동기화해, 두 시스템의 일정을 하나의 소스로 유지하기 위해 필요합니다. [SOURCE_2]\n\n이렇게 하면 일정을 복사하거나 두 번 입력할 필요가 줄고, 뤼이도나 구글 캘린더 어느 쪽에서 수정해도 즉시 서로 반영됩니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "구글 캘린더 연동은 뤼이도 내부 미팅과 구글 캘린더의 일정을 양방향으로 동기화해, 두 시스템의 일정을 하나의 소스로 유지하기 위해 필요합니다. [1]\n\n이렇게 하면 일정을 복사하거나 두 번 입력할 필요가 줄고, 뤼이도나 구글 캘린더 어느 쪽에서 수정해도 즉시 서로 반영됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 4
+        }
+      ]
+    },
+    {
+      "repeatNo": 5,
+      "executedAt": "2026-09-06T09:38:10.103460+00:00",
+      "results": [
+        {
+          "id": "CS07",
+          "description": "대시보드가 제공하는 전체 현황 파악과 우선순위 판단 가치를 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "6b810a8b-3d02-44d7-bf0f-343392fb1ef5",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "팀 대시보드는 왜 필요한 거야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "6b810a8b-3d02-44d7-bf0f-343392fb1ef5",
+                "ragRunId": "1aa26684-4a9b-4e07-a48e-a150e274dbe4",
+                "answer": {
+                  "answerMarkdown": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지 한눈에 파악할 수 있게 해 주기 때문에 필요합니다. 이를 통해 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 주요 링크를 빠르게 확인할 수 있습니다. [1]\n\n이렇게 팀의 업무 흐름을 빠르게 파악하면 협업의 방향과 우선순위를 명확하게 정리하는 데 도움이 됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "대시보드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "팀 대시보드는 왜 필요한 거야?",
+                "resolvedQuery": "팀 대시보드는 왜 필요한 거야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2635,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 16,
+                    "outputTokens": null,
+                    "latencyMs": 164,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5375,
+                    "outputTokens": 194,
+                    "latencyMs": 2418,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "대시보드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "팀 대시보드는 왜 필요한 거야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "팀 대시보드는 왜 필요한 거야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3277,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:902d21f9245e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "d910ac88eb7555192e4b7d3b25694f7d432ab5c4d7ad895dd0cbd7b2398723ae",
+                        "content": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고, 어디에 집중하고 있는지 시각적으로 정리해 보여주는 공간입니다.\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도를 비롯해 최근 활동과 팀에서 활용 중인 주요 링크까지 한눈에 확인할 수 있습니다.\n\n이를 통해 팀은 지금의 업무 흐름을 빠르게 파악하고, 협업의 방향과 우선순위를 명확히 정리할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.003209616704834,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.755545741143496,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3224,
+                        "documentVersionId": 2412,
+                        "documentId": "764f1bb9b2d9",
+                        "sectionId": "764f1bb9b2d9:f196ea27ae96",
+                        "documentTitle": "핵심 개념",
+                        "sectionPath": [
+                          "핵심 개념",
+                          "효율적인 프로젝트 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/getting-started/core-concepts.md",
+                        "contentHash": "b875910d002b81b8abc0b04e769be591f3ef241fcf4c3d57713d7ada839f37cf",
+                        "content": "### 스프린트\n\n팀이 하나의 목표를 향해 집중하고 실행할 수 있도록 도와주는 장치입니다. 스프린트는 반복적이며, 시작일과 스프린트 기간을 한 번 설정하면 정해진 주기에 따라 새 스프린트가 자동으로 생성됩니다.\n\n모든 팀에게 스프린트가 필수는 아니지만, 업무에 몰입하고 기한을 지키기 위한 수단으로 적극 활용하는 것을 권장합니다.\n\n### 미팅\n\nIT 프로젝트는 PM, 개발자, 디자이너 등 다양한 직군이 함께 만드는 과정입니다. 이로 인해 사용하는 툴, 업무 속도, 언어가 다르기 때문에 꾸준한 커뮤니케이션이 필수입니다. 그 중심에는 데일리 스탠드업(스크럼)과 같은 짧고 빈번한 회의가 있습니다.\n\n뤼이도는 기획 회의부터 데일리 스탠드업, 회고까지 모든 회의를 효과적으로 관리할 수 있도록 지원합니다. 회의 중에는 관련 프로젝트와 작업에 즉시 접근할 수 있고 필요하다면 즉시 작업을 만들 수 있어, 논의와 실행 사이의 간극을 최소화할 수 있습니다.\n\n### 대시보드\n\n대시보드는 수많은 작업과 멤버 속에서도 중요한 정보를 놓치지 않도록 도와줍니다. 프로젝트의 전체 흐름을 한눈에 파악하고, 우선순위가 높은 항목을 빠르게 확인할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 3.8972068139511826,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6199287030512004,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3279,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:fca726772b8f",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "최근 활동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "8b65787522a58183fa8d6a079c09fc7b1bb9d8f99e5f0779b46461fad412f093",
+                        "content": "누가 언제 작업을 생성했는지, 수정했는지, 팀 내 주요 변경 이력을 시간 순으로 확인할 수 있습니다. 이 기록을 통해 작업 진행 흐름을 추적하거나 이슈 발생 시 어떤 변경이 있었는지 쉽게 찾아볼 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 4.18641817476964,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5860402214258832,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3280,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:281921125b1e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "링크"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "06a8048e734d4f507e00a8d0a916de833fb901c300c0ef49d0d90de12c7a179f",
+                        "content": "팀에서 자주 사용하는 외부 리소스(API 문서, 데이터 대시보드, 인프라 페이지 등)를 한곳에 모아 관리할 수 있습니다.\n\n링크는 섹션 단위로 그룹화할 수 있어, 주제별로 체계적으로 정리하고 빠르게 접근할 수 있습니다. 이를 통해 파편화된 외부 정보를 모으고, 협업 효율을 높일 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031099324975891997,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 5.018553866069519,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.5233568748655447,
+                            "latencyMs": 176
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3278,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:802f5a7b91ac",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "작업"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "90fae9551bda9339e78eb69cbc4dd1129cefca5018365ecc61b257e216621bd5",
+                        "content": "#### 작업 현황\n\n현재 진행 중인 모든 작업이 상태별 카드 형태로 상단에 표시됩니다. 이를 통해 마감일이 임박한 작업이나 지연된 작업을 빠르게 식별하고, 업무 병목이나 리스크를 사전에 조치할 수 있습니다.\n\n각 상태에 마우스를 올리면 세부 작업 목록이 나타나며, 작업명을 클릭하면 해당 작업 상세 페이지로 바로 이동할 수 있습니다.\n\n#### 멤버별 현황\n\n각 멤버의 담당 작업 수와 진행 상태를 시각적으로 확인할 수 있습니다. 작업 상태는 색상으로 구분되어, 팀 전체의 업무 분배와 균형을 직관적으로 파악할 수 있습니다.\n\n담당자가 지정되지 않은 작업은 ‘할당 안 됨’으로 별도로 표시되어 업무 누락을 방지하고 빠르게 담당자를 할당할 수 있습니다.\n\n#### 대기 및 백로그\n\n매일 새롭게 유입되는 대기 작업과 백로그를 한눈에 확인할 수 있습니다. 이를 통해 새로운 요청이 얼마나 쌓이고 있는지, 팀의 계획 대비 실행 속도가 어떤지 직관적으로 파악할 수 있습니다.\n\n#### 전체 작업 관계도\n\n현재 활성화된 모든 작업의 관계를 다이어그램 형태로 시각화하여 보여줍니다. 화면을 축소하면 전체 구조를, 확대하면 세부 내용을 확인할 수 있습니다. 이를 통해 팀은 프로젝트 간의 의존성, 병목, 중복 상태를 빠르게 파악하고 실행 흐름을 개선할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030798389007344232,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 2.208599389830493,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5917341321504063,
+                            "latencyMs": 176
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5375,
+                        "outputTokens": 194,
+                        "latencyMs": 2418,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "팀 대시보드는 왜 필요한 거야",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3277,
+                          "documentVersionId": 2426,
+                          "documentId": "1c0005b1dfeb",
+                          "sectionId": "1c0005b1dfeb:902d21f9245e",
+                          "documentTitle": "대시보드",
+                          "sectionPath": [
+                            "대시보드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                          "content": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고, 어디에 집중하고 있는지 시각적으로 정리해 보여주는 공간입니다.\n\n팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도를 비롯해 최근 활동과 팀에서 활용 중인 주요 링크까지 한눈에 확인할 수 있습니다.\n\n이를 통해 팀은 지금의 업무 흐름을 빠르게 파악하고, 협업의 방향과 우선순위를 명확히 정리할 수 있습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지 한눈에 파악할 수 있게 해 주기 때문에 필요합니다. 이를 통해 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 주요 링크를 빠르게 확인할 수 있습니다. [SOURCE_1]\n\n이렇게 팀의 업무 흐름을 빠르게 파악하면 협업의 방향과 우선순위를 명확하게 정리하는 데 도움이 됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "팀 대시보드는 팀이 현재 어떤 일을 하고 있고 어디에 집중하고 있는지 한눈에 파악할 수 있게 해 주기 때문에 필요합니다. 이를 통해 팀 전체의 작업 현황, 멤버별 진행 상태, 프로젝트 관계도, 최근 활동, 주요 링크를 빠르게 확인할 수 있습니다. [1]\n\n이렇게 팀의 업무 흐름을 빠르게 파악하면 협업의 방향과 우선순위를 명확하게 정리하는 데 도움이 됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 5
+        },
+        {
+          "id": "CS10",
+          "description": "구글 캘린더 연동이 해결하는 중복 일정 관리 문제를 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "3ae84877-cd3c-4670-a0ae-c207ced26ec5",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "구글 캘린더 연동은 왜 필요한 거야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "3ae84877-cd3c-4670-a0ae-c207ced26ec5",
+                "ragRunId": "0ba59909-a3a6-4a03-881b-4b9c37184654",
+                "answer": {
+                  "answerMarkdown": "구글 캘린더 연동은 뤼이도 내부 미팅과 구글 캘린더의 일정을 하나로 맞춰, 일정이 중복되거나 놓치는 문제를 줄이기 위해 필요합니다. [1]\n- 양방향 동기화: 뤼이도와 구글 캘린더 어디에서 수정해도 서로 즉시 반영되어, 일정이 항상 하나의 소스로 유지됩니다. [1]\n- 반복 입력 제거: 일정을 복사하거나 두 번 입력할 필요가 없어집니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "구글 캘린더",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+                "resolvedQuery": "구글 캘린더 연동은 왜 필요한 거야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2763,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 21,
+                    "outputTokens": null,
+                    "latencyMs": 182,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v19",
+                    "inputTokens": 5476,
+                    "outputTokens": 216,
+                    "latencyMs": 2524,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "구글 캘린더"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "구글 캘린더 연동은 왜 필요한 거야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "구글 캘린더 연동은 왜 필요한 거야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3345,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:b8b2000bc35a",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "8e1b55cfcdfe65e7ddba24792c5535486b021c4078d520ef8d7941a193baec1e",
+                        "content": "구글 캘린더 연동은 워크스페이스 단위에서 설정한 뒤, 팀별로 연결할 세부 캘린더를 지정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Google Calendar]로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 구글 계정을 승인합니다.\n\n#### 2) 팀별 캘린더 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 연결할 구글 캘린더를 선택합니다.\n2. 각 팀은 하나의 구글 캘린더와 1:1 연결되며, 해당 팀의 모든 미팅 일정이 연결된 캘린더와 동기화됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 구글 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 13.891015567446075,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5954341327535149,
+                            "latencyMs": 195
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3344,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:a731f8580273",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "cc4d2385308bd61e68fbab77462456d85f9b9fe37f0fbad450ddaa631231ff37",
+                        "content": "프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.\n\n뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.\n\n이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 12.783273921755155,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.672452696507023,
+                            "latencyMs": 195
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3317,
+                        "documentVersionId": 2436,
+                        "documentId": "d639f52b10eb",
+                        "sectionId": "d639f52b10eb:f9d910a50c33",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "구글 캘린더 연동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/meetings/automations.md",
+                        "contentHash": "ce996c4e6872bafd018408467bbdfa29b142f4127ecbff3840a1489e60b651b6",
+                        "content": "워크스페이스와 구글 계정을 연동하면, 뤼이도에서 생성된 미팅이 자동으로 구글 캘린더에 등록됩니다. 반대로 구글 캘린더에서 생성한 일정도 뤼이도 내 미팅 목록에 자동으로 표시됩니다. 미팅 제목, 참여자, 시간, 장소가 양방향으로 동기화됩니다. 구글 캘린더 연동 설정 방법은 [가이드](https://docs.riido.io/integrations/google-calendar.md)에서 자세히 확인할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 13.640346366188698,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.59936027520693,
+                            "latencyMs": 195
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3347,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:76d8211bc501",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "5eb9295658c9ef6be1eca8f5aeb06f4c133eb30401280ac79cfd8201f3944b60",
+                        "content": "### 작업의 마감일도 동기화되나요?\n\n아니요. 뤼이도 내부의 ‘미팅’만 구글 캘린더와 양방향 연동을 지원합니다. 작업의 마감일이나 다른 일정 정보는 현재 연동 대상이 아닙니다.\n\n### 미팅을 삭제하면 어떻게 되나요?\n\n뤼이도에서 미팅을 삭제하면 구글 캘린더 일정도 함께 삭제됩니다. 반대로 구글 캘린더에서 제거했을 때도 동일하게 반영됩니다.\n\n### 알림 설정은 어떻게 되나요?\n\n구글 캘린더 연동이 완료되면, 구글 캘린더에서 발생하는 알림은 구글의 알림 설정을 따르게 됩니다. 이는 뤼이도 내의 미팅 알림과 별개로 작동합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 13.692848557245199,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5738382788701748,
+                            "latencyMs": 195
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3346,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:0c33dc302925",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "미팅 일정 동기화 방식"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "3577c3e74d6918a026a69c07d181eb85627c1cef667111f719a65bd7b92ce626",
+                        "content": "연동이 활성화되면, 뤼이도와 구글 캘린더 모두에서 수정한 일정이 실시간으로 서로 반영됩니다. 즉, 팀원들은 평소처럼 구글 캘린더에서 일정을 관리해도 뤼이도에서 자동으로 최신 상태를 유지할 수 있습니다.\n\n#### 1) 뤼이도 → 구글 캘린더\n\n뤼이도에서 다음과 같은 변경이 발생하면 자동으로 구글 캘린더에 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거\n\n#### 2) 구글 캘린더 → 뤼이도\n\n구글 캘린더에서 일정을 수정하면 뤼이도에 자동으로 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거",
+                        "fusedRank": 5,
+                        "fusedScore": 0.031009615384615385,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 12.402347131931657,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5783265404464542,
+                            "latencyMs": 195
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v19",
+                        "inputTokens": 5476,
+                        "outputTokens": 216,
+                        "latencyMs": 2524,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "FEATURE_SUMMARY",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "구글 캘린더 연동이 필요한 이유",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3344,
+                          "documentVersionId": 2445,
+                          "documentId": "5623097e1502",
+                          "sectionId": "5623097e1502:a731f8580273",
+                          "documentTitle": "구글 캘린더",
+                          "sectionPath": [
+                            "구글 캘린더",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                          "content": "프로젝트 협업에서는 “누가, 언제, 어디서” 만나는지 빠르게 확인하는 것이 중요하지만, 여러 툴에서 일정을 따로 관리하면 일정이 중복되거나 놓치는 문제가 발생합니다.\n\n뤼이도의 구글 캘린더 연동은 이 문제를 완전히 해결합니다. 뤼이도 내부 미팅을 구글 캘린더와 양방향 동기화를 통해, 두 시스템의 일정이 항상 “하나의 소스”로 유지되도록 합니다.\n\n이제 더 이상 일정을 복사하거나 두 번 입력할 필요가 없습니다. 뤼이도와 구글 캘린더 어떤 곳에서 수정해도, 즉시 서로에게 반영됩니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "구글 캘린더 연동은 뤼이도 내부 미팅과 구글 캘린더의 일정을 하나로 맞춰, 일정이 중복되거나 놓치는 문제를 줄이기 위해 필요합니다. [SOURCE_2]\n- 양방향 동기화: 뤼이도와 구글 캘린더 어디에서 수정해도 서로 즉시 반영되어, 일정이 항상 하나의 소스로 유지됩니다. [SOURCE_2]\n- 반복 입력 제거: 일정을 복사하거나 두 번 입력할 필요가 없어집니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "구글 캘린더 연동은 뤼이도 내부 미팅과 구글 캘린더의 일정을 하나로 맞춰, 일정이 중복되거나 놓치는 문제를 줄이기 위해 필요합니다. [1]\n- 양방향 동기화: 뤼이도와 구글 캘린더 어디에서 수정해도 서로 즉시 반영되어, 일정이 항상 하나의 소스로 유지됩니다. [1]\n- 반복 입력 제거: 일정을 복사하거나 두 번 입력할 필요가 없어집니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 5
+        }
+      ]
+    }
+  ]
+}

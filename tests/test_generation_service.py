@@ -30,6 +30,7 @@ from app.answering.models import (
     CitationSourceKind,
     FinalAnswerStatus,
     FinalWithheldReason,
+    GenerationAnswerType,
     GenerationAnswerScope,
     GenerationCall,
     GenerationEvidenceRequirement,
@@ -236,7 +237,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(2, len(result.citations))
         self.assertEqual([1, 2], [item.citation_number for item in result.citations])
 
-    async def test_checks_citation_limit_after_merging_duplicates(self) -> None:
+    async def test_merges_duplicates_among_four_selected_sources(self) -> None:
         first = self._result(
             1,
             source_url="https://same",
@@ -425,7 +426,6 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         cases = (
             "marker가 없는 답변",
             "존재하지 않는 근거 [SOURCE_9]",
-            "근거 [SOURCE_1] [SOURCE_2] [SOURCE_3] [SOURCE_4]",
         )
 
         for answer_markdown in cases:
@@ -453,6 +453,25 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
                 )
                 self.assertEqual((), result.citations)
                 self.assertIsNone(result.error_code)
+
+    async def test_completes_with_four_and_five_valid_citations(self) -> None:
+        for count in (4, 5):
+            with self.subTest(count=count):
+                results = [self._result(index) for index in range(1, count + 1)]
+                generated = self._answerable(
+                    " ".join(f"근거 [SOURCE_{index}]" for index in range(1, count + 1))
+                )
+                self.generator.generate_with_trace.return_value = _call(
+                    generated, self._stage_trace(results, generated)
+                )
+                result = await self.service.generate_answer("질문", results)
+                self.assertEqual(FinalAnswerStatus.COMPLETED, result.status)
+                self.assertEqual(count, len(result.citations))
+                self.assertEqual(
+                    list(range(1, count + 1)),
+                    [citation.citation_number for citation in result.citations],
+                )
+                self.generator.regenerate_answer_with_trace.assert_not_awaited()
 
     async def test_withholds_answers_containing_links_or_html(self) -> None:
         cases = (
@@ -754,7 +773,12 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         return GenerationStageTrace(
             source_plan=GenerationSourcePlan(
                 status=GenerationStatus.ANSWERABLE,
-                answer_scope=GenerationAnswerScope.SUMMARY,
+                answer_type=GenerationAnswerType.PROCEDURE,
+                answer_scope=(
+                    GenerationAnswerScope.SUMMARY
+                    if len(sources) == 1
+                    else GenerationAnswerScope.MULTI_DETAIL
+                ),
                 evidence_requirements=[
                     GenerationEvidenceRequirement(
                         information_unit="답변 정보",

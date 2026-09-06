@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import AsyncMock, patch
 
 from app.answering.models import (
+    GenerationAnswerType,
     GenerationAnswerScope,
     GenerationContextSource,
     GenerationEvidenceRequirement,
@@ -157,6 +158,7 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
     def test_serializes_generation_stage_trace_for_evaluation(self) -> None:
         plan = GenerationSourcePlan(
             status=GenerationStatus.ANSWERABLE,
+            answer_type=GenerationAnswerType.PROCEDURE,
             answer_scope=GenerationAnswerScope.SUMMARY,
             evidence_requirements=[
                 GenerationEvidenceRequirement(
@@ -190,11 +192,24 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
         snapshot = generation_stage_trace_snapshot(
             GenerationStageTrace(
                 source_plan=plan,
+                initial_source_plan=plan,
                 selected_sources=(source,),
                 pre_validation_result=generated,
                 validation_error="잘못된 marker",
                 validation_errors=("잘못된 marker",),
-                planning_attempt_count=1,
+                planning_attempt_count=2,
+                planning_regeneration_count=1,
+                planning_regeneration_model_call=ModelCallTrace(
+                    provider="openai",
+                    model_name="gpt-5.4-mini",
+                    succeeded=True,
+                    latency_ms=90,
+                    retry_count=0,
+                    input_tokens=8,
+                    output_tokens=12,
+                    prompt_version="v10-plan-repair-1",
+                ),
+                planning_regeneration_result=plan,
                 answer_attempt_count=2,
                 validation_regeneration_count=1,
                 validation_regeneration_model_call=ModelCallTrace(
@@ -205,7 +220,7 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
                     retry_count=0,
                     input_tokens=10,
                     output_tokens=20,
-                    prompt_version="v7-repair-1",
+                    prompt_version="v11-repair-1",
                 ),
                 validation_regeneration_result=generated,
             )
@@ -219,7 +234,20 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual("잘못된 marker", snapshot["validationError"])
         self.assertEqual(["잘못된 marker"], snapshot["validationErrors"])
-        self.assertEqual(1, snapshot["planningAttemptCount"])
+        self.assertEqual(2, snapshot["planningAttemptCount"])
+        self.assertEqual(1, snapshot["planningRegenerationCount"])
+        self.assertEqual(
+            "ANSWERABLE",
+            snapshot["initialPlanningOutput"]["status"],
+        )
+        self.assertEqual(
+            "SOURCE_PLAN_REGENERATION",
+            snapshot["planningRegenerationModelCall"]["purpose"],
+        )
+        self.assertEqual(
+            "ANSWERABLE",
+            snapshot["planningRegenerationResult"]["status"],
+        )
         self.assertEqual(2, snapshot["answerAttemptCount"])
         self.assertEqual(1, snapshot["validationRegenerationCount"])
         self.assertEqual(
