@@ -1,7 +1,7 @@
 """Hybrid 검색 결과를 근거로 OpenAI 답변을 생성한다."""
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, List, Optional, Sequence
 
 from openai import AsyncOpenAI
@@ -14,6 +14,7 @@ from app.answering.models import (
     GenerationContextSource,
     GenerationResult,
     GenerationSourcePlan,
+    GenerationStageTrace,
     GenerationStatus,
     GenerationWithheldReason,
 )
@@ -22,7 +23,8 @@ from app.retrieval.models import HybridRetrievalResult
 
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.4-mini"
-GENERATION_PROMPT_VERSION = "v6"
+GENERATION_PROMPT_VERSION = "v7"
+ANSWER_REPAIR_PROMPT_VERSION = "v7-repair-1"
 MAX_CONTEXT_SOURCES = 5
 MAX_PLANNED_CITATIONS = 3
 MAX_GENERATION_ATTEMPTS = 2
@@ -71,7 +73,7 @@ SOURCE_PLANNING_PROMPT_V6 = """당신은 뤼이도 공식 이용가이드 답변
 - WITHHELD이면 evidence_requirements는 비우고 withheld_reason을 작성합니다.
 """
 
-ANSWER_PROMPT_V6 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하는 안내 챗봇입니다.
+ANSWER_PROMPT_V7 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하는 안내 챗봇입니다.
 
 ## Grounding rules
 - 제공된 Context에 명시된 사실만 사용하세요.
@@ -112,7 +114,9 @@ ANSWER_PROMPT_V6 = """당신은 뤼이도 공식 이용가이드만을 근거로
 
 ## Citation rules
 - ANSWERABLE 답변의 실제 근거 문장이나 문단 바로 뒤에 [SOURCE_n]을 작성하세요.
-- 제공된 SOURCE만 사용하고 서로 다른 SOURCE는 최대 3개만 사용하세요.
+- 제공된 SOURCE만 사용하세요.
+- 최종 고유 Citation은 최대 3개입니다. 같은 원문 URL과 Section Path를 가진 여러 SOURCE는
+  Backend에서 하나의 Citation으로 병합되므로, SOURCE 개수 자체를 3개로 제한하지 마세요.
 - 여러 SOURCE가 같은 사실이나 절차를 제공하면 반드시 가장 직접적인 SOURCE 하나만 선택하고
   중복 SOURCE는 사용하거나 인용하지 마세요.
 - SOURCE별로 답변 문단을 만들거나 같은 결론과 절차를 표현만 바꿔 반복하지 마세요.
@@ -123,6 +127,15 @@ ANSWER_PROMPT_V6 = """당신은 뤼이도 공식 이용가이드만을 근거로
 ## Structured Output contract
 - ANSWERABLE: answer_markdown은 비어 있지 않은 문자열, withheld_reason은 null입니다.
 - WITHHELD: answer_markdown은 null, withheld_reason은 세 가지 보류 사유 중 하나입니다.
+"""
+
+ANSWER_REPAIR_PROMPT_V7 = ANSWER_PROMPT_V7 + """
+
+## Backend validation retry
+- 직전 답변이 Backend 형식 또는 Citation marker 검증에 실패했습니다.
+- 아래 Validation Failure를 바로잡아 답변 전체를 다시 생성하세요.
+- 제공된 Context와 Required Answer Coverage는 처음 답변과 동일하게 유지됩니다.
+- 검증 실패한 직전 답변의 문장을 근거로 사용하지 마세요.
 """
 
 
@@ -191,6 +204,23 @@ def build_answer_input(
     )
 
 
+def build_answer_repair_input(
+    question: str,
+    sources: Sequence[GenerationContextSource],
+    plan: GenerationSourcePlan,
+    previous_result: GenerationResult,
+    validation_error: str,
+) -> str:
+    """같은 근거와 Coverage에 직전 검증 실패 정보만 추가한다."""
+
+    previous_answer = previous_result.answer_markdown or "답변 본문 없음"
+    return (
+        f"{build_answer_input(question, sources, plan)}"
+        f"\n\n## Validation Failure\n\n{validation_error}"
+        f"\n\n## Previous Invalid Answer\n\n{previous_answer}"
+    )
+
+
 def select_required_sources(
     plan: GenerationSourcePlan,
     sources: Sequence[GenerationContextSource],
@@ -255,6 +285,7 @@ def _generation_trace(
     input_tokens: Optional[int] = None,
     output_tokens: Optional[int] = None,
     error: Optional[Exception] = None,
+    prompt_version: str = GENERATION_PROMPT_VERSION,
 ) -> ModelCallTrace:
     """Source 선택과 답변 생성을 한 논리 호출의 관측값으로 합친다."""
 
@@ -266,7 +297,7 @@ def _generation_trace(
         retry_count=retry_count,
         input_tokens=input_tokens,
         output_tokens=output_tokens,
-        prompt_version=GENERATION_PROMPT_VERSION,
+        prompt_version=prompt_version,
         error_message=None if error is None else str(error),
     )
 
@@ -324,6 +355,9 @@ class OpenAIGenerator:
                 total_retry_count,
                 total_input_tokens,
                 total_output_tokens,
+                stage_trace=GenerationStageTrace(
+                    planning_attempt_count=plan_call.retry_count + 1,
+                ),
             )
 
         plan_response = plan_call.response
@@ -352,6 +386,10 @@ class OpenAIGenerator:
                     output_tokens=total_output_tokens,
                 ),
                 result=result,
+                stage_trace=GenerationStageTrace(
+                    source_plan=plan,
+                    planning_attempt_count=plan_call.retry_count + 1,
+                ),
             )
 
         try:
@@ -363,6 +401,10 @@ class OpenAIGenerator:
                 total_retry_count,
                 total_input_tokens,
                 total_output_tokens,
+                stage_trace=GenerationStageTrace(
+                    source_plan=plan,
+                    planning_attempt_count=plan_call.retry_count + 1,
+                ),
             )
 
         if count_distinct_citations(selected_sources) > MAX_PLANNED_CITATIONS:
@@ -379,10 +421,15 @@ class OpenAIGenerator:
                     output_tokens=total_output_tokens,
                 ),
                 result=result,
+                stage_trace=GenerationStageTrace(
+                    source_plan=plan,
+                    selected_sources=tuple(selected_sources),
+                    planning_attempt_count=plan_call.retry_count + 1,
+                ),
             )
 
         answer_call = await self._parse_with_retry(
-            instructions=ANSWER_PROMPT_V6,
+            instructions=ANSWER_PROMPT_V7,
             input_text=build_answer_input(question, selected_sources, plan),
             text_format=GenerationResult,
         )
@@ -394,6 +441,12 @@ class OpenAIGenerator:
                 total_retry_count,
                 total_input_tokens,
                 total_output_tokens,
+                stage_trace=GenerationStageTrace(
+                    source_plan=plan,
+                    selected_sources=tuple(selected_sources),
+                    planning_attempt_count=plan_call.retry_count + 1,
+                    answer_attempt_count=answer_call.retry_count + 1,
+                ),
             )
 
         answer_response = answer_call.response
@@ -406,6 +459,7 @@ class OpenAIGenerator:
             total_output_tokens,
             getattr(answer_usage, "output_tokens", None),
         )
+        result = answer_response.output_parsed
         return GenerationCall(
             trace=_generation_trace(
                 started,
@@ -413,7 +467,81 @@ class OpenAIGenerator:
                 input_tokens=total_input_tokens,
                 output_tokens=total_output_tokens,
             ),
-            result=answer_response.output_parsed,
+            result=result,
+            stage_trace=GenerationStageTrace(
+                source_plan=plan,
+                selected_sources=tuple(selected_sources),
+                pre_validation_result=result,
+                planning_attempt_count=plan_call.retry_count + 1,
+                answer_attempt_count=answer_call.retry_count + 1,
+            ),
+        )
+
+    async def regenerate_answer_with_trace(
+        self,
+        question: str,
+        stage_trace: GenerationStageTrace,
+        validation_error: str,
+    ) -> GenerationCall:
+        """같은 계획과 Source로 answer 단계만 한 번 다시 생성한다."""
+
+        plan = stage_trace.source_plan
+        previous_result = stage_trace.pre_validation_result
+        if plan is None or previous_result is None:
+            error = RuntimeError("답변 재생성에 필요한 Generation 단계 trace가 없습니다.")
+            return GenerationCall(
+                trace=_generation_trace(
+                    time.perf_counter(),
+                    retry_count=0,
+                    error=error,
+                    prompt_version=ANSWER_REPAIR_PROMPT_VERSION,
+                ),
+                error=error,
+                stage_trace=stage_trace,
+            )
+
+        started = time.perf_counter()
+        answer_call = await self._parse_with_retry(
+            instructions=ANSWER_REPAIR_PROMPT_V7,
+            input_text=build_answer_repair_input(
+                question,
+                stage_trace.selected_sources,
+                plan,
+                previous_result,
+                validation_error,
+            ),
+            text_format=GenerationResult,
+        )
+        usage = getattr(answer_call.response, "usage", None)
+        repair_trace = _generation_trace(
+            started,
+            retry_count=answer_call.retry_count,
+            input_tokens=getattr(usage, "input_tokens", None),
+            output_tokens=getattr(usage, "output_tokens", None),
+            error=answer_call.error,
+            prompt_version=ANSWER_REPAIR_PROMPT_VERSION,
+        )
+        result = (
+            None
+            if answer_call.response is None
+            else answer_call.response.output_parsed
+        )
+        updated_stage_trace = replace(
+            stage_trace,
+            answer_attempt_count=(
+                stage_trace.answer_attempt_count + answer_call.retry_count + 1
+            ),
+            validation_regeneration_count=(
+                stage_trace.validation_regeneration_count + 1
+            ),
+            validation_regeneration_model_call=repair_trace,
+            validation_regeneration_result=result,
+        )
+        return GenerationCall(
+            trace=repair_trace,
+            result=result,
+            error=answer_call.error,
+            stage_trace=updated_stage_trace,
         )
 
     async def _parse_with_retry(
@@ -456,6 +584,7 @@ class OpenAIGenerator:
         retry_count: int,
         input_tokens: Optional[int],
         output_tokens: Optional[int],
+        stage_trace: Optional[GenerationStageTrace] = None,
     ) -> GenerationCall:
         return GenerationCall(
             trace=_generation_trace(
@@ -466,4 +595,5 @@ class OpenAIGenerator:
                 error=error,
             ),
             error=error,
+            stage_trace=stage_trace,
         )

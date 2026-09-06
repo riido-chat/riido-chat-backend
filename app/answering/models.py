@@ -172,6 +172,26 @@ class ValidatedAnswer:
 
 
 @dataclass(frozen=True)
+class GenerationStageTrace:
+    """평가에서 단계별 변동을 찾기 위한 Generation 내부 관측값.
+
+    제품 응답이나 DB 로그 모델이 아니라, 한 요청 안에서 관측 hook으로 전달할
+    진단 정보다. 도달하지 못한 단계의 값은 None 또는 빈 tuple로 남긴다.
+    """
+
+    source_plan: Optional[GenerationSourcePlan] = None
+    selected_sources: Tuple[GenerationContextSource, ...] = ()
+    pre_validation_result: Optional[GenerationResult] = None
+    validation_error: Optional[str] = None
+    validation_errors: Tuple[str, ...] = ()
+    planning_attempt_count: int = 0
+    answer_attempt_count: int = 0
+    validation_regeneration_count: int = 0
+    validation_regeneration_model_call: Optional[ModelCallTrace] = None
+    validation_regeneration_result: Optional[GenerationResult] = None
+
+
+@dataclass(frozen=True)
 class GenerationCall:
     """Generator 호출 한 번의 결과와 model_calls 기록용 관측값.
 
@@ -182,6 +202,7 @@ class GenerationCall:
     trace: ModelCallTrace
     result: Optional[GenerationResult] = None
     error: Optional[Exception] = None
+    stage_trace: Optional[GenerationStageTrace] = None
 
 
 @dataclass(frozen=True)
@@ -194,3 +215,4 @@ class FinalGenerationResult:
     withheld_reason: Optional[FinalWithheldReason] = None
     error_code: Optional[str] = None
     model_call: Optional[ModelCallTrace] = None
+    stage_trace: Optional[GenerationStageTrace] = None
