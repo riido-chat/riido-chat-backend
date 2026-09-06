@@ -934,13 +934,17 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, resolved.context_turn_count)
         self.assertEqual(snapshot, resolved.context_snapshot)
 
+        mismatched_snapshot = {
+            **snapshot,
+            "selectedTurns": [],
+        }
         with self.assertRaisesRegex(ValueError, "selectedTurns 길이"):
             await self.store.record_query_resolution(
                 current.id,
                 resolved_query="잘못된 기록",
                 context_strategy=ContextStrategy.FOLLOW_UP_WINDOW,
-                context_turn_count=2,
-                context_snapshot=snapshot,
+                context_turn_count=1,
+                context_snapshot=mismatched_snapshot,
             )
 
     async def test_fresh_run_is_busy_then_stale_run_and_calls_are_recovered(
