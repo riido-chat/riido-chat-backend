@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Callable, Dict, List, Optional, Set, Tuple
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models import (
@@ -44,7 +44,6 @@ from app.retrieval.search_reader import SearchReader
 logger = logging.getLogger(__name__)
 
 MANUAL_TRIGGER_TYPE = "MANUAL"
-RETRY_TRIGGER_TYPE = "RETRY"
 
 VALIDATION_FAILED = "VALIDATION_FAILED"
 CORPUS_RELOAD_FAILED = "CORPUS_RELOAD_FAILED"
@@ -281,22 +280,6 @@ async def start_reindex_run(
         chunks,
         group_id=group_id,
         trigger_type=MANUAL_TRIGGER_TYPE,
-        actor_id=actor_id,
-    )
-
-
-async def start_retry_apply_run(
-    session: AsyncSession,
-    failed_index_run: IndexRun,
-    *,
-    actor_id: Optional[str] = None,
-) -> IndexRun:
-    """실패한 실행이 참조한 READY 후보에 적용 전용 실행을 만든다."""
-
-    writer = IndexWriter(session)
-    return await writer.start_apply_run(
-        failed_index_run.index_version_id,
-        trigger_type=RETRY_TRIGGER_TYPE,
         actor_id=actor_id,
     )
 

@@ -1,9 +1,8 @@
-"""Admin Markdown 신규 업로드와 수집 상태 조회 endpoint."""
+"""Admin Markdown 업로드와 검색 반영, GitBook 수집 endpoint."""
 
 import asyncio
 from pathlib import Path
 from typing import Annotated, Callable, Optional
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Request, UploadFile, status
 
@@ -15,10 +14,7 @@ from app.admin.dependencies import (
     get_recollect_service,
 )
 from app.document.ingestion_service import (
-    INTERNAL_ERROR,
-    INVALID_FILE,
     AdminIngestionService,
-    IngestionRunDetail,
     InvalidUploadFileError,
     UploadFileTooLargeError,
     run_admin_ingestion,
@@ -30,7 +26,6 @@ from app.admin.group_service import (
 )
 from app.admin.schema import (
     AdminActiveIndexVersion,
-    AdminChunkStats,
     AdminDocumentGroupDetailResponse,
     AdminDocumentGroupListResponse,
     AdminDocumentGroupSummary,
@@ -43,52 +38,24 @@ from app.admin.schema import (
     AdminRunningJob,
     AdminDocumentRevisionRequest,
     AdminDocumentUploadRequest,
-    AdminDuplicateDocument,
-    AdminIngestionError,
     AdminIndexRunAcceptedResponse,
-    AdminIndexRunFailedResponse,
-    AdminIndexRunProcessingResponse,
-    AdminIndexRunResponse,
-    AdminIndexRunError,
-    AdminIndexRunSuccessResponse,
-    AdminIndexVersionSummary,
     IndexRunErrorCode,
-    AdminError,
-    AdminErrorCode,
     AdminErrorResponse,
     AdminIngestionAcceptedResponse,
-    AdminIngestionFailedResponse,
-    AdminIngestionProcessingResponse,
-    AdminIngestionRunResponse,
     AdminIngestionStatus,
-    AdminIngestionSuccessResponse,
     AdminGitBookSyncRequest,
     AdminRecollectAcceptedResponse,
-    AdminRecollectBatchResponse,
-    AdminRecollectCounts,
-    AdminRecollectFailure,
-    AdminRecollectProcessingResponse,
-    AdminRecollectProgress,
-    AdminRecollectSuccessResponse,
-    IngestionErrorCode,
     IngestionStageValue,
     RecollectStageValue,
 )
 from app.chat.dependencies import get_corpus_state
 from app.core.task_registry import register_pipeline_task
 from app.document.recollect import run_recollect_batch
-from app.document.recollect_service import (
-    RecollectBatchDetail,
-    RecollectService,
-)
+from app.document.recollect_service import RecollectService
 from app.indexing.index_job import run_admin_index_job
-from app.indexing.index_service import (
-    IndexReindexService,
-    IndexRunDetail,
-)
+from app.indexing.index_service import IndexReindexService
 from app.retrieval.corpus_state import CorpusState
 from app.retrieval.embedding import OpenAIEmbedder
-from app.database.models import ExecutionStatus
 
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -210,29 +177,6 @@ def _to_accepted_ingestion_response(accepted) -> AdminIngestionAcceptedResponse:
     )
 
 
-@router.get(
-    "/ingestion-runs/{ingestion_run_id}",
-    response_model=AdminIngestionRunResponse,
-    status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            "model": AdminErrorResponse,
-            "description": (
-                "`NOT_FOUND`: 요청한 ingestionRunId에 해당하는 수집 실행이 "
-                "존재하지 않는 경우입니다."
-            ),
-        }
-    },
-    summary="문서 수집 실행 상태 조회",
-)
-async def get_admin_ingestion_run(
-    ingestion_run_id: int,
-    service: AdminIngestionService = Depends(get_admin_ingestion_service),
-) -> AdminIngestionRunResponse:
-    detail = await service.get_ingestion_run(ingestion_run_id)
-    return _to_ingestion_response(detail)
-
-
 async def _read_markdown_file(upload_file: UploadFile) -> tuple[str, str]:
     filename = Path(upload_file.filename or "").name
     if Path(filename).suffix.lower() != ".md":
@@ -259,67 +203,6 @@ async def _read_markdown_file(upload_file: UploadFile) -> tuple[str, str]:
         raise InvalidUploadFileError("빈 Markdown 파일은 업로드할 수 없습니다.")
     return filename, raw_content
 
-
-def _to_ingestion_response(detail: IngestionRunDetail) -> AdminIngestionRunResponse:
-    common = {
-        "ingestionRunId": detail.ingestion_run_id,
-        "documentId": detail.document_source_id,
-        "stage": detail.stage,
-        "startedAt": detail.started_at,
-    }
-    if detail.status == ExecutionStatus.PROCESSING:
-        return AdminIngestionProcessingResponse(
-            **common,
-            status=AdminIngestionStatus.PROCESSING,
-        )
-    if detail.finished_at is None:
-        raise RuntimeError("마감된 수집 실행에 종료 시각이 없습니다.")
-
-    if detail.status == ExecutionStatus.FAILED:
-        return AdminIngestionFailedResponse(
-            **common,
-            status=AdminIngestionStatus.FAILED,
-            error=AdminIngestionError(
-                code=_to_ingestion_error_code(detail.error_code),
-                message=detail.error_message or "문서를 처리하지 못했습니다.",
-            ),
-            finishedAt=detail.finished_at,
-        )
-
-    if detail.result_code is None:
-        raise RuntimeError("SUCCESS 수집 실행에 결과 코드가 없습니다.")
-    return AdminIngestionSuccessResponse(
-        **common,
-        status=AdminIngestionStatus.SUCCESS,
-        resultCode=detail.result_code,
-        documentVersionId=detail.document_version_id,
-        versionNo=detail.version_no,
-        sectionCount=detail.section_count,
-        chunkCount=detail.chunk_count,
-        chunkStats=(
-            None
-            if detail.chunk_stats is None
-            else AdminChunkStats(**detail.chunk_stats)
-        ),
-        duplicateOf=(
-            None
-            if detail.duplicate_of is None
-            else AdminDuplicateDocument(
-                documentId=detail.duplicate_of.document_id,
-                title=detail.duplicate_of.title,
-            )
-        ),
-        finishedAt=detail.finished_at,
-    )
-
-
-def _to_ingestion_error_code(error_code) -> IngestionErrorCode:
-    """기록되지 않았거나 모르는 코드는 내부 오류로 내린다."""
-
-    try:
-        return IngestionErrorCode(error_code)
-    except ValueError:
-        return IngestionErrorCode.INTERNAL_ERROR
 
 INDEX_RUN_ERROR_RESPONSES = {
     status.HTTP_404_NOT_FOUND: {
@@ -367,57 +250,6 @@ async def start_reindex(
     return _to_accepted_response(accepted)
 
 
-@router.post(
-    "/index-runs/{index_run_id}/retry-apply",
-    response_model=AdminIndexRunAcceptedResponse,
-    status_code=status.HTTP_202_ACCEPTED,
-    responses=INDEX_RUN_ERROR_RESPONSES,
-    summary="적용 다시 시도",
-)
-async def retry_apply_index_run(
-    index_run_id: int,
-    http_request: Request,
-    service: IndexReindexService = Depends(get_index_reindex_service),
-    corpus_state: CorpusState = Depends(get_corpus_state),
-    embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
-        get_chunk_embedder_factory
-    ),
-) -> AdminIndexRunAcceptedResponse:
-    """적용 단계에서 실패한 실행의 READY 후보에 적용만 다시 시도한다."""
-
-    accepted = await service.start_retry_apply(index_run_id)
-    _start_index_job(
-        http_request,
-        accepted.index_run_id,
-        corpus_state,
-        embedder_factory,
-    )
-    return _to_accepted_response(accepted)
-
-
-@router.get(
-    "/index-runs/{index_run_id}",
-    response_model=AdminIndexRunResponse,
-    status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            "model": AdminErrorResponse,
-            "description": (
-                "`NOT_FOUND`: 요청한 indexRunId에 해당하는 실행이 존재하지 "
-                "않는 경우입니다."
-            ),
-        }
-    },
-    summary="검색 반영 실행 상태 조회",
-)
-async def get_index_run(
-    index_run_id: int,
-    service: IndexReindexService = Depends(get_index_reindex_service),
-) -> AdminIndexRunResponse:
-    detail = await service.get_index_run(index_run_id)
-    return _to_index_run_response(detail)
-
-
 def _start_index_job(
     http_request: Request,
     index_run_id: int,
@@ -439,69 +271,6 @@ def _to_accepted_response(accepted) -> AdminIndexRunAcceptedResponse:
         triggerType=accepted.trigger_type,
         status=AdminIngestionStatus.PROCESSING,
         stage=accepted.stage,
-        retryOfIndexRunId=accepted.retry_of_index_run_id,
-    )
-
-
-def _to_index_version_summary(summary) -> AdminIndexVersionSummary:
-    return AdminIndexVersionSummary(
-        indexVersionId=summary.index_version_id,
-        versionNo=summary.version_no,
-        status=summary.status,
-        activatedAt=summary.activated_at,
-    )
-
-
-def _to_index_run_response(detail: IndexRunDetail) -> AdminIndexRunResponse:
-    if detail.status == ExecutionStatus.PROCESSING:
-        return AdminIndexRunProcessingResponse(
-            indexRunId=detail.index_run_id,
-            groupId=detail.group_id,
-            indexVersionId=detail.index_version_id,
-            operationType=detail.operation_type,
-            triggerType=detail.trigger_type,
-            status=AdminIngestionStatus.PROCESSING,
-            stage=detail.stage,
-            startedAt=detail.started_at,
-        )
-
-    if detail.status == ExecutionStatus.FAILED:
-        return AdminIndexRunFailedResponse(
-            indexRunId=detail.index_run_id,
-            groupId=detail.group_id,
-            indexVersionId=detail.index_version_id,
-            operationType=detail.operation_type,
-            triggerType=detail.trigger_type,
-            status=AdminIngestionStatus.FAILED,
-            stage=detail.stage,
-            error=AdminIndexRunError(
-                code=_to_index_run_error_code(detail.error_code),
-                message=detail.error_message or "검색 반영에 실패했습니다.",
-            ),
-            indexVersion=_to_index_version_summary(detail.index_version),
-            retryable=bool(detail.retryable),
-            startedAt=detail.started_at,
-            finishedAt=detail.finished_at,
-        )
-
-    return AdminIndexRunSuccessResponse(
-        indexRunId=detail.index_run_id,
-        groupId=detail.group_id,
-        indexVersionId=detail.index_version_id,
-        operationType=detail.operation_type,
-        triggerType=detail.trigger_type,
-        status=AdminIngestionStatus.SUCCESS,
-        stage=detail.stage,
-        indexVersion=_to_index_version_summary(detail.index_version),
-        previousIndexVersion=(
-            None
-            if detail.previous_index_version is None
-            else _to_index_version_summary(detail.previous_index_version)
-        ),
-        documentCount=detail.document_count or 0,
-        chunkCount=detail.chunk_count or 0,
-        startedAt=detail.started_at,
-        finishedAt=detail.finished_at,
     )
 
 
@@ -567,75 +336,6 @@ async def start_gitbook_sync(
         status=AdminIngestionStatus.PROCESSING,
         stage=RecollectStageValue.PROCESSING,
         pageCount=accepted.page_count,
-    )
-
-
-@router.get(
-    "/recollect-batches/{batch_id}",
-    response_model=AdminRecollectBatchResponse,
-    status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            "model": AdminErrorResponse,
-            "description": "`NOT_FOUND`: 존재하지 않는 batchId 입니다.",
-        }
-    },
-    summary="재탐색 배치 조회",
-)
-async def get_recollect_batch(
-    batch_id: UUID,
-    service: RecollectService = Depends(get_recollect_service),
-) -> AdminRecollectBatchResponse:
-    detail = await service.get_batch(batch_id)
-    return _to_recollect_response(detail)
-
-
-def _to_recollect_response(
-    detail: RecollectBatchDetail,
-) -> AdminRecollectBatchResponse:
-    if detail.status == ExecutionStatus.PROCESSING:
-        return AdminRecollectProcessingResponse(
-            batchId=detail.batch_id,
-            groupId=detail.group_id,
-            groupSourceId=detail.group_source_id,
-            rootUrl=detail.root_url,
-            status=AdminIngestionStatus.PROCESSING,
-            stage=RecollectStageValue.PROCESSING,
-            progress=AdminRecollectProgress(
-                total=detail.total,
-                processed=detail.processed,
-            ),
-            startedAt=detail.started_at,
-        )
-
-    counts = detail.counts or {}
-    return AdminRecollectSuccessResponse(
-        batchId=detail.batch_id,
-        groupId=detail.group_id,
-        groupSourceId=detail.group_source_id,
-        rootUrl=detail.root_url,
-        status=AdminIngestionStatus.SUCCESS,
-        stage=RecollectStageValue.PROCESSING,
-        counts=AdminRecollectCounts(
-            total=counts.get("total", 0),
-            created=counts.get("created", 0),
-            updated=counts.get("updated", 0),
-            noChange=counts.get("no_change", 0),
-            removed=counts.get("removed", 0),
-            failed=counts.get("failed", 0),
-        ),
-        failures=[
-            AdminRecollectFailure(
-                documentKey=failure.document_key,
-                title=failure.title,
-                ingestionRunId=failure.ingestion_run_id,
-                stage=failure.stage,
-                errorCode=_to_ingestion_error_code(failure.error_code),
-            )
-            for failure in detail.failures
-        ],
-        startedAt=detail.started_at,
-        finishedAt=detail.finished_at,
     )
 
 

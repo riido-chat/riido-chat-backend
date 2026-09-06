@@ -279,50 +279,6 @@ class IndexWriter:
         await self._session.flush()
         return index_version
 
-    async def start_apply_run(
-        self,
-        index_version_id: int,
-        *,
-        trigger_type: str = DEFAULT_TRIGGER_TYPE,
-        actor_id: Optional[str] = None,
-    ) -> IndexRun:
-        """READY 후보에 적용 전용 실행을 새로 만든다.
-
-        적용에 실패해도 후보는 READY로 남으므로 같은 검색 버전에 실행만
-        다시 붙여 재시도한다.
-        """
-
-        if not trigger_type:
-            raise ValueError("trigger_type은 비어 있을 수 없습니다.")
-
-        index_version = await self._session.get(
-            IndexVersion,
-            index_version_id,
-            with_for_update=True,
-        )
-        if index_version is None:
-            raise ValueError(f"존재하지 않는 색인 버전입니다: {index_version_id}")
-        if index_version.status != IndexVersionStatus.READY:
-            raise ValueError(
-                "READY 색인 버전만 적용할 수 있습니다: "
-                f"{index_version.status}"
-            )
-
-        now = datetime.now(timezone.utc)
-        run = IndexRun(
-            index_version_id=index_version.id,
-            trigger_type=trigger_type,
-            operation_type=IndexOperationType.APPLY,
-            stage=IndexRunStage.APPLYING,
-            actor_id=actor_id,
-            status=ExecutionStatus.PROCESSING,
-            summary={"stage": "APPLYING"},
-            started_at=now,
-        )
-        self._session.add(run)
-        await self._session.flush()
-        return run
-
     async def start_embedding_model_call(self, index_run_id: int) -> ModelCall:
         """누락 임베딩을 채우기 전에 PROCESSING 행을 만든다.
 
@@ -493,7 +449,6 @@ class IndexWriter:
 
         now = datetime.now(timezone.utc)
         # 롤백으로 되돌아간 단계를 실패 지점으로 다시 새긴다.
-        # 조회 응답의 retryable 판정이 이 값을 쓴다.
         try:
             run.stage = IndexRunStage(failed_stage)
         except ValueError:
