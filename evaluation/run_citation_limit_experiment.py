@@ -117,9 +117,9 @@ def install_experiment_generator(*, direct_section_selection: bool = False):
     exec(compile(source, module.__file__, "exec"), module.__dict__)
 
     # 현재 평가기의 import 이름과 연결하되 내용·버전·해시는 실제 P1 실험값을 쓴다.
-    module.SOURCE_PLANNING_PROMPT_V10 = module.SOURCE_PLANNING_PROMPT_V6
+    module.SOURCE_PLANNING_PROMPT_V11 = module.SOURCE_PLANNING_PROMPT_V6
     module.SOURCE_PLANNING_PROMPT_VERSION = planning_version
-    module.SOURCE_PLANNING_REPAIR_PROMPT_V10 = module.SOURCE_PLANNING_PROMPT_V6
+    module.SOURCE_PLANNING_REPAIR_PROMPT_V11 = module.SOURCE_PLANNING_PROMPT_V6
     module.SOURCE_PLANNING_REPAIR_PROMPT_VERSION = f"{planning_version}-repair-1"
     module.MAX_SOURCE_PLANNING_REGENERATIONS = 0
     module.ANSWER_PROMPT_V17 = module.ANSWER_PROMPT_V7

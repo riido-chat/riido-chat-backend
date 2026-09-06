@@ -16,8 +16,8 @@ from app.answering.generator import (
     MAX_CONTEXT_SOURCES,
     OPENAI_GENERATION_MODEL,
     SOURCE_PLANNING_REPAIR_PROMPT_VERSION,
-    SOURCE_PLANNING_REPAIR_PROMPT_V10,
-    SOURCE_PLANNING_PROMPT_V10,
+    SOURCE_PLANNING_REPAIR_PROMPT_V11,
+    SOURCE_PLANNING_PROMPT_V11,
     OpenAIGenerator,
     build_answer_input,
     build_answer_repair_input,
@@ -376,33 +376,35 @@ class GenerationContextTest(unittest.TestCase):
         self.assertNotIn(r"\[설정", generation_input)
 
     def test_source_planning_prompt_preserves_scope_and_all_evidence(self) -> None:
-        self.assertIn("질문을 answer_type으로 분류", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("DEFINITION", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("FEATURE_SUMMARY", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("PROCEDURE", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("GENERAL", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("가능 여부, 조건·제한, 공개 범위", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("사용자가 지금 해결하려는 핵심", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("대상의 의미 자체를 묻는 경우에만", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("여러 기능을 넓게 요청할 때만", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("GENERAL을 우선", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("질문이 직접 요구한 정보 단위만", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("질문 전체를 하나의 정보 단위", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("가장 직접적인 SOURCE 하나만", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("설정 위치·절차·설정 항목·값 범위", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("관련 없는", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("4~5개 SOURCE가 필요해도", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("정보 단위 하나라도", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("INSUFFICIENT_EVIDENCE", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("자동화", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("EvidenceRequirement와 source_ids를 각각", SOURCE_PLANNING_PROMPT_V10)
-        self.assertIn("정확히 하나만 작성", SOURCE_PLANNING_PROMPT_V10)
+        self.assertIn("질문을 answer_type으로 분류", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("DEFINITION", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("FEATURE_SUMMARY", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("PROCEDURE", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("GENERAL", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("가능 여부, 조건·제한, 공개 범위", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("사용자가 지금 해결하려는 핵심", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("대상의 의미 자체를 묻는 경우에만", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("여러 기능을 넓게 요청할 때만", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("GENERAL을 우선", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("질문이 직접 요구한 정보 단위만", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("질문 전체를 하나의 정보 단위", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("가장 직접적인 SOURCE 하나만", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("설정 위치·절차·설정 항목·값 범위", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("관련 없는", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("4~5개 SOURCE가 필요해도", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("정보 단위 하나라도", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("INSUFFICIENT_EVIDENCE", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("제품의 기능·설정·사용 가능 여부", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("주제 자체와", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("자동화", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("EvidenceRequirement와 source_ids를 각각", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("정확히 하나만 작성", SOURCE_PLANNING_PROMPT_V11)
 
     def test_source_planning_repair_prompt_only_corrects_structure(self) -> None:
-        self.assertIn(SOURCE_PLANNING_PROMPT_V10, SOURCE_PLANNING_REPAIR_PROMPT_V10)
-        self.assertIn("Backend 구조 검증에 실패", SOURCE_PLANNING_REPAIR_PROMPT_V10)
-        self.assertIn("질문의 의미와 정보 범위는 바꾸지 마세요", SOURCE_PLANNING_REPAIR_PROMPT_V10)
-        self.assertIn("각각 정확히 하나만", SOURCE_PLANNING_REPAIR_PROMPT_V10)
+        self.assertIn(SOURCE_PLANNING_PROMPT_V11, SOURCE_PLANNING_REPAIR_PROMPT_V11)
+        self.assertIn("Backend 구조 검증에 실패", SOURCE_PLANNING_REPAIR_PROMPT_V11)
+        self.assertIn("질문의 의미와 정보 범위는 바꾸지 마세요", SOURCE_PLANNING_REPAIR_PROMPT_V11)
+        self.assertIn("각각 정확히 하나만", SOURCE_PLANNING_REPAIR_PROMPT_V11)
 
     def test_answer_prompt_avoids_partial_or_duplicate_answers(self) -> None:
         self.assertIn("기본 답변은 간결하지만", ANSWER_PROMPT_V17)
@@ -493,7 +495,7 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn("WITHHELD 여부를 판단하세요", ANSWER_PROMPT_V17)
 
     def test_prompt_forbids_links_urls_and_html(self) -> None:
-        self.assertEqual("v19", GENERATION_PROMPT_VERSION)
+        self.assertEqual("v20", GENERATION_PROMPT_VERSION)
         self.assertIn(
             "Markdown 링크 문법과 HTML을 사용하지 마세요",
             ANSWER_PROMPT_V17,
@@ -605,7 +607,7 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
             [
                 call(
                     model=OPENAI_GENERATION_MODEL,
-                    instructions=SOURCE_PLANNING_PROMPT_V10,
+                    instructions=SOURCE_PLANNING_PROMPT_V11,
                     input=build_generation_input("질문", sources),
                     text_format=GenerationSourcePlan,
                 ),
@@ -753,7 +755,7 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
 
         repair_request = client.responses.parse.await_args_list[1].kwargs
         self.assertEqual(
-            SOURCE_PLANNING_REPAIR_PROMPT_V10,
+            SOURCE_PLANNING_REPAIR_PROMPT_V11,
             repair_request["instructions"],
         )
         self.assertEqual(

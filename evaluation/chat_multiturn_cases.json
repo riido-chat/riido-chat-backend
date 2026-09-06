@@ -229,7 +229,7 @@
         {
           "question": "뤼이도에서 직원 급여를 계산할 수 있어?",
           "expectedStatus": "WITHHELD",
-          "expectedWithheldReason": "OUT_OF_SCOPE"
+          "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"
         },
         {
           "question": "스프린트 시작 요일은 어떻게 바꿔?",
@@ -247,7 +247,7 @@
         {
           "question": "뤼이도에서 직원 급여를 계산할 수 있어?",
           "expectedStatus": "WITHHELD",
-          "expectedWithheldReason": "OUT_OF_SCOPE"
+          "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"
         },
         {
           "question": "그 기능은 어디서 설정해?",

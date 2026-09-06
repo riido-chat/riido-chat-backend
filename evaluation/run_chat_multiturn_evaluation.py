@@ -39,7 +39,7 @@ from app.chat.query_rewrite import (
     OPENAI_QUERY_REWRITE_MODEL,
     MAX_QUERY_REWRITE_TURNS,
     QUERY_REWRITE_MAX_OUTPUT_TOKENS,
-    QUERY_REWRITE_PROMPT_V3,
+    QUERY_REWRITE_PROMPT_V4,
     QUERY_REWRITE_PROMPT_VERSION,
     QueryRewriteCandidateTurn,
     QueryRewriteDecision,
@@ -57,8 +57,8 @@ from app.answering.generator import (
     OpenAIGenerator,
     SOURCE_PLANNING_PROMPT_VERSION,
     SOURCE_PLANNING_REPAIR_PROMPT_VERSION,
-    SOURCE_PLANNING_REPAIR_PROMPT_V10,
-    SOURCE_PLANNING_PROMPT_V10,
+    SOURCE_PLANNING_REPAIR_PROMPT_V11,
+    SOURCE_PLANNING_PROMPT_V11,
 )
 from app.answering.models import (
     FinalAnswerStatus,
@@ -788,7 +788,7 @@ async def _load_query_rewrite_candidates(
     session: Any,
     current_run: RagRun,
 ) -> List[Dict[str, Any]]:
-    """완료된 평가 턴을 기준으로 당시 Query Rewrite 후보를 복원한다."""
+    """완료된 평가 턴을 기준으로 당시 직전 문맥을 복원한다."""
 
     recent_runs = (
         (
@@ -814,6 +814,7 @@ async def _load_query_rewrite_candidates(
             "turnNo": run.turn_no,
             "status": run.status.value,
             "userQuery": run.user_query,
+            "resolvedQuery": run.resolved_query,
             "answerContent": (
                 run.answer_content
                 if run.status == AnswerStatus.COMPLETED
@@ -825,7 +826,7 @@ async def _load_query_rewrite_candidates(
                 else None
             ),
         }
-        for run in reversed(recent_runs)
+        for run in recent_runs
     ]
 
 
@@ -1180,7 +1181,7 @@ def _fixed_context_candidates(
         raise ValueError(f"fixedContext.candidateTurns가 필요합니다: {case['id']}")
 
     candidates = []
-    for raw in raw_candidates:
+    for raw in raw_candidates[-MAX_QUERY_REWRITE_TURNS:]:
         turn_no = raw["turnNo"]
         candidates.append(
             QueryRewriteCandidateTurn(
@@ -1191,6 +1192,7 @@ def _fixed_context_candidates(
                 turnNo=turn_no,
                 status=QueryRewriteTurnStatus(raw["status"]),
                 userQuery=raw["userQuery"],
+                resolvedQuery=raw.get("resolvedQuery", raw["userQuery"]),
                 answerContent=raw.get("answerContent"),
                 withheldReasonCode=raw.get("withheldReasonCode"),
             )
@@ -1647,15 +1649,15 @@ async def run_evaluation(
             "prompts": {
                 "queryRewrite": {
                     "version": QUERY_REWRITE_PROMPT_VERSION,
-                    "sha256": text_sha256(QUERY_REWRITE_PROMPT_V3),
+                    "sha256": text_sha256(QUERY_REWRITE_PROMPT_V4),
                 },
                 "sourcePlanning": {
                     "version": SOURCE_PLANNING_PROMPT_VERSION,
-                    "sha256": text_sha256(SOURCE_PLANNING_PROMPT_V10),
+                    "sha256": text_sha256(SOURCE_PLANNING_PROMPT_V11),
                 },
                 "sourcePlanningRegeneration": {
                     "version": SOURCE_PLANNING_REPAIR_PROMPT_VERSION,
-                    "sha256": text_sha256(SOURCE_PLANNING_REPAIR_PROMPT_V10),
+                    "sha256": text_sha256(SOURCE_PLANNING_REPAIR_PROMPT_V11),
                 },
                 "answer": {
                     "version": ANSWER_PROMPT_VERSION,
