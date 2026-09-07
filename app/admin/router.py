@@ -74,6 +74,8 @@ ADMIN_ERROR_RESPONSES = {
             "있는 경우입니다. "
             "`DUPLICATE_CONTENT`: 그룹 안 다른 콘솔 문서와 본문이 같은 "
             "경우입니다. "
+            "`NO_CHANGE`: 수정본이 대상 문서의 직전 판과 본문이 같은 "
+            "경우입니다. "
             "`JOB_IN_PROGRESS`: 같은 그룹에 진행 중 작업이 있는 경우입니다. "
             "`DOCUMENT_NOT_REVISABLE`: GitBook 문서에 수정본을 올린 경우입니다."
         ),
@@ -175,16 +177,11 @@ async def _run_ingestion(
     return AdminUploadResultResponse(
         ingestionRunId=detail.ingestion_run_id,
         documentId=detail.document_source_id,
-        resultCode=detail.result_code,
         documentVersionId=detail.document_version_id,
         versionNo=detail.version_no,
         sectionCount=detail.section_count,
         chunkCount=detail.chunk_count,
-        chunkStats=(
-            None
-            if detail.chunk_stats is None
-            else AdminChunkStats(**detail.chunk_stats)
-        ),
+        chunkStats=AdminChunkStats(**detail.chunk_stats),
     )
 
 

@@ -38,7 +38,6 @@ from app.database.models import (
     ExecutionStatus,
     IndexVersion,
     IndexVersionStatus,
-    IngestionResultCode,
     IngestionRun,
     ModelCall,
     ModelCallPurpose,
@@ -217,10 +216,11 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         # 폴링 없이 요청 하나로 끝난다
         self.assertEqual(200, response.status_code)
         body = response.json()
-        self.assertEqual(IngestionResultCode.CREATED.value, body["resultCode"])
         self.assertEqual(1, body["versionNo"])
+        # 200 은 언제나 새 판을 만든 경우다
         self.assertNotIn("status", body)
         self.assertNotIn("stage", body)
+        self.assertNotIn("resultCode", body)
 
         async with self.session_factory() as session:
             version = await session.get(
