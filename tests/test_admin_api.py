@@ -56,14 +56,12 @@ class AdminDocumentApiTest(unittest.TestCase):
             "error_message": None,
             "started_at": STARTED_AT,
             "finished_at": STARTED_AT,
-            "result_code": "CREATED",
             "chunk_stats": {
                 "added": 2,
                 "changed": 0,
                 "deleted": 0,
                 "reused": 0,
             },
-            "duplicate_of": None,
         }
         base.update(changes)
         return IngestionRunDetail(**base)
@@ -89,7 +87,6 @@ class AdminDocumentApiTest(unittest.TestCase):
             {
                 "ingestionRunId": 101,
                 "documentId": 42,
-                "resultCode": "CREATED",
                 "documentVersionId": 5001,
                 "versionNo": 1,
                 "sectionCount": 2,
@@ -154,7 +151,6 @@ class AdminDocumentApiTest(unittest.TestCase):
         )
         self.service.read_finished_run.return_value = self._success_detail(
             status=ExecutionStatus.FAILED,
-            result_code=None,
             document_version_id=None,
             version_no=None,
             section_count=None,
@@ -182,6 +178,33 @@ class AdminDocumentApiTest(unittest.TestCase):
 
         self.assertEqual(422, response.status_code)
         self.assertEqual("INVALID_FILE", response.json()["code"])
+
+    def test_no_change_revision_returns_409(self) -> None:
+        """같은 내용을 다시 올리면 결과가 아니라 거절이다."""
+
+        self.service.start_document_revision.return_value = AcceptedIngestion(
+            ingestion_run_id=101,
+            document_source_id=42,
+        )
+        self.service.read_finished_run.return_value = self._success_detail(
+            status=ExecutionStatus.FAILED,
+            document_version_id=None,
+            version_no=None,
+            section_count=None,
+            chunk_count=None,
+            chunk_stats=None,
+            error_code="NO_CHANGE",
+            error_message="기존 문서와 내용이 같습니다.",
+        )
+
+        with patch("app.admin.router.run_admin_ingestion", new=AsyncMock()):
+            response = self.client.post(
+                "/api/admin/documents/42/versions",
+                files={"file": ("guide.md", b"# guide", "text/markdown")},
+            )
+
+        self.assertEqual(409, response.status_code)
+        self.assertEqual("NO_CHANGE", response.json()["code"])
 
     def test_upload_rejects_category_field(self) -> None:
         """분류는 요청 필드가 아니다."""

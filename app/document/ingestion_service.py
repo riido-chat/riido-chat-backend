@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from http import HTTPStatus
 from typing import Callable, Optional
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.document.document_group import get_document_group
@@ -55,6 +55,7 @@ INVALID_FILE = "INVALID_FILE"
 FILE_TOO_LARGE = "FILE_TOO_LARGE"
 DOCUMENT_ALREADY_EXISTS = "DOCUMENT_ALREADY_EXISTS"
 DUPLICATE_CONTENT = "DUPLICATE_CONTENT"
+NO_CHANGE = "NO_CHANGE"
 DOCUMENT_NOT_REVISABLE = "DOCUMENT_NOT_REVISABLE"
 JOB_IN_PROGRESS = "JOB_IN_PROGRESS"
 NOT_FOUND = "NOT_FOUND"
@@ -137,6 +138,7 @@ class AdminJobInProgressError(AdminApiError):
 _FAILURE_STATUS = {
     INVALID_FILE: (INVALID_FILE, HTTPStatus.INTERNAL_SERVER_ERROR),
     DUPLICATE_CONTENT: (DUPLICATE_CONTENT, HTTPStatus.CONFLICT),
+    NO_CHANGE: (NO_CHANGE, HTTPStatus.CONFLICT),
 }
 
 
@@ -176,18 +178,14 @@ class _DuplicateContentError(RuntimeError):
     """그룹 안 다른 콘솔 문서와 본문이 같다. 판을 만들지 않는다."""
 
 
+class _NoChangeError(RuntimeError):
+    """대상 문서의 직전 판과 본문이 같다. 판을 만들지 않는다."""
+
+
 @dataclass(frozen=True)
 class AcceptedIngestion:
     ingestion_run_id: int
     document_source_id: int
-
-
-@dataclass(frozen=True)
-class DuplicateDocument:
-    """같은 본문을 이미 가진 문서."""
-
-    document_id: int
-    title: str
 
 
 @dataclass(frozen=True)
@@ -206,7 +204,6 @@ class IngestionRunDetail:
     finished_at: Optional[datetime]
     result_code: Optional[str] = None
     chunk_stats: Optional[dict] = None
-    duplicate_of: Optional[DuplicateDocument] = None
 
 
 class AdminIngestionService:
@@ -337,7 +334,7 @@ class AdminIngestionService:
             status=run.status,
             stage=run.stage.value,
             document_version_id=None if version is None else version.id,
-            version_no=await self._version_no_for(run, version),
+            version_no=None if version is None else version.version_no,
             section_count=summary.get("section_count"),
             chunk_count=summary.get("chunk_count"),
             error_code=run.error_code or summary.get("error_code"),
@@ -348,45 +345,6 @@ class AdminIngestionService:
                 None if run.result_code is None else run.result_code.value
             ),
             chunk_stats=_chunk_stats_of(summary),
-            duplicate_of=await self._duplicate_of(run),
-        )
-
-    async def _version_no_for(
-        self,
-        run: IngestionRun,
-        version: Optional[DocumentVersion],
-    ) -> Optional[int]:
-        """새 판이 있으면 그 번호, 없으면 대상 문서의 현재 판 번호다."""
-
-        if version is not None:
-            return version.version_no
-        if run.result_code not in (
-            IngestionResultCode.NO_CHANGE,
-            IngestionResultCode.DUPLICATE_CONTENT,
-        ):
-            return None
-        return await self._session.scalar(
-            select(func.max(DocumentVersion.version_no)).where(
-                DocumentVersion.document_source_id == run.document_source_id,
-                DocumentVersion.status == DocumentVersionStatus.READY,
-            )
-        )
-
-    async def _duplicate_of(
-        self,
-        run: IngestionRun,
-    ) -> Optional[DuplicateDocument]:
-        if run.duplicate_of_document_source_id is None:
-            return None
-        source = await self._session.get(
-            DocumentSource,
-            run.duplicate_of_document_source_id,
-        )
-        if source is None:
-            return None
-        return DuplicateDocument(
-            document_id=source.id,
-            title=source.title or "",
         )
 
     async def _acquire_group_gate(self, group_id: int) -> None:
@@ -569,6 +527,16 @@ async def run_admin_ingestion(
                 result_code=result_code,
             )
             await session.commit()
+        except _NoChangeError as error:
+            await session.rollback()
+            await _record_ingestion_failure(
+                session,
+                store,
+                ingestion_run_id,
+                error,
+                failed_stage=failed_stage,
+                error_code=NO_CHANGE,
+            )
         except _DuplicateContentError as error:
             await session.rollback()
             await _record_ingestion_failure(
@@ -620,12 +588,19 @@ async def _decide_without_new_version(
         latest is not None
         and latest.normalized_content_hash == normalized_content_hash
     ):
-        await store.complete_without_new_version(
-            ingestion_run_id,
-            IngestionResultCode.NO_CHANGE,
+        if source_type == SOURCE_TYPE_GITBOOK:
+            # 수집은 페이지마다 결과를 집계한다. 변경 없음은 정상 결과다.
+            await store.complete_without_new_version(
+                ingestion_run_id,
+                IngestionResultCode.NO_CHANGE,
+            )
+            await session.commit()
+            return True
+        # 콘솔 업로드는 같은 내용을 다시 올린 것이다. 결과가 아니라 거절이다.
+        raise _NoChangeError(
+            "기존 문서와 내용이 같습니다."
+            " 변경된 내용이 없어 새 버전을 생성하지 않았습니다."
         )
-        await session.commit()
-        return True
 
     if source_type == SOURCE_TYPE_GITBOOK:
         # GitBook 문서의 정체성은 원천이 준 URL 이다.

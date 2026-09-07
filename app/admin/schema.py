@@ -62,6 +62,8 @@ class AdminErrorCode(str, Enum):
     DOCUMENT_ALREADY_EXISTS = "DOCUMENT_ALREADY_EXISTS"
     # 그룹 안 다른 콘솔 문서와 본문이 같다. 판을 만들지 않는다.
     DUPLICATE_CONTENT = "DUPLICATE_CONTENT"
+    # 대상 문서의 직전 판과 본문이 같다. 수정본 업로드에만 나온다.
+    NO_CHANGE = "NO_CHANGE"
     DOCUMENT_NOT_REVISABLE = "DOCUMENT_NOT_REVISABLE"
     JOB_IN_PROGRESS = "JOB_IN_PROGRESS"
     REINDEX_NOT_REQUIRED = "REINDEX_NOT_REQUIRED"
@@ -135,18 +137,19 @@ class AdminUploadResultResponse(BaseModel):
     """업로드 처리를 끝내고 돌려주는 결과.
 
     실행이 동기라 접수 응답이 없다. 요청의 응답이 곧 결과다.
+    판을 만들지 않는 경우는 모두 거절이라 결과 코드를 두지 않는다.
     """
 
     model_config = HTTP_DTO_CONFIG
 
     ingestion_run_id: int = Field(alias="ingestionRunId")
     document_id: int = Field(alias="documentId")
-    result_code: IngestionResultCodeValue = Field(alias="resultCode")
-    document_version_id: Optional[int] = Field(alias="documentVersionId")
-    version_no: Optional[int] = Field(alias="versionNo", ge=1)
-    section_count: Optional[int] = Field(alias="sectionCount", ge=0)
-    chunk_count: Optional[int] = Field(alias="chunkCount", ge=0)
-    chunk_stats: Optional[AdminChunkStats] = Field(alias="chunkStats")
+    # 200 은 언제나 새 판을 만든 경우다. null 이 되는 필드가 없다.
+    document_version_id: int = Field(alias="documentVersionId")
+    version_no: int = Field(alias="versionNo", ge=1)
+    section_count: int = Field(alias="sectionCount", ge=0)
+    chunk_count: int = Field(alias="chunkCount", ge=0)
+    chunk_stats: AdminChunkStats = Field(alias="chunkStats")
 
 
 class IndexRunStageValue(str, Enum):

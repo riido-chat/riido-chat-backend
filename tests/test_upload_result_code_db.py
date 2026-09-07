@@ -191,7 +191,9 @@ class UploadResultCodeDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(ExecutionStatus.SUCCESS, run.status)
         self.assertEqual(IngestionResultCode.CREATED, run.result_code)
 
-    async def test_revision_of_same_content_is_no_change(self) -> None:
+    async def test_revision_of_same_content_is_rejected(self) -> None:
+        """같은 내용을 다시 올리면 결과가 아니라 거절이다."""
+
         title = self._new_title()
         body = self._body("같은 내용")
         first = await self._upload(title, body)
@@ -199,10 +201,11 @@ class UploadResultCodeDbTest(unittest.IsolatedAsyncioTestCase):
         second = await self._revise(first.document_source_id, body)
         run = await self._run(second.ingestion_run_id)
 
-        self.assertEqual(ExecutionStatus.SUCCESS, run.status)
-        self.assertEqual(IngestionResultCode.NO_CHANGE, run.result_code)
-        # 새 판을 만들지 않는다
+        # 판을 만들지 않고 실패로 마감한다. 라우터가 409 로 내보낸다
+        self.assertEqual(ExecutionStatus.FAILED, run.status)
+        self.assertEqual("NO_CHANGE", run.error_code)
         self.assertIsNone(run.produced_version_id)
+        self.assertIsNone(run.result_code)
 
     async def test_changed_content_revision_is_updated(self) -> None:
         title = self._new_title()
