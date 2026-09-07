@@ -1,0 +1,1628 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-07T15:24:12.037026+00:00",
+  "casesVersion": "procedure-evidence-v1",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "86dbe93c3b5100995d7da3f32f04b384940c4387",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.4-mini"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v4",
+        "sha256": "ddf49dae6d4ddcf3521d550040bc93a3fd398da026ab1cfbe1cba8075ec4bd8d"
+      },
+      "sourcePlanning": {
+        "version": "v13",
+        "sha256": "c1882075dbdf082c7756157590e0d54f17ab782626989cb0d6b593619bdb5c9c"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v13-repair-1",
+        "sha256": "ed3c38a724bd85cb96883b944599989baaccd4758dfd257e8f9714fc80faa68f"
+      },
+      "answer": {
+        "version": "v19",
+        "sha256": "fd85ed761a5ee2b75e71152326d8996125543120cc8ed1e74a94224a659f758d"
+      },
+      "answerValidationRegeneration": {
+        "version": "v19-repair-1",
+        "sha256": "2cd158c96ca9d39f2fdc9ed0ed1678ec302e68916ba2b3fd51f913c8e80ad509"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "86dbe93c3b5100995d7da3f32f04b384940c4387",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v22"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 5,
+    "uniqueCaseCount": 1,
+    "totalCaseExecutionCount": 5,
+    "passedCaseExecutionCount": 5,
+    "failedCaseExecutionCount": 0,
+    "perCase": [
+      {
+        "id": "PE01",
+        "executionCount": 5,
+        "passedCount": 5,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "NEW_CONVERSATION",
+        "executionCount": 5,
+        "passedCount": 5,
+        "failedCount": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-07T15:24:01.266122+00:00",
+      "results": [
+        {
+          "id": "PE01",
+          "description": "직접 절차 부족: 팀에 새로운 멤버 초대",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "96f6ea60-5fdf-4284-8e0b-cde763a9a0e7",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "96f6ea60-5fdf-4284-8e0b-cde763a9a0e7",
+                "ragRunId": "8b357515-ef91-48f3-a69f-daddeb16cee7",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                "resolvedQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2959,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 28,
+                    "outputTokens": null,
+                    "latencyMs": 784,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v22",
+                    "inputTokens": 3463,
+                    "outputTokens": 52,
+                    "latencyMs": 2083,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3243,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:26bbdd776a1e",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "4d4539e8b14b91e51d63fe24c71eb00ab812043bad06a5e7073815f72a1ebf67",
+                        "content": "#### 팀 생성 및 참여\n\n새로운 팀을 만들거나 기존 팀에 참여하려면, 설정 페이지의 \\[팀]에서 관리할 수 있습니다. 또는 설정 페이지의 좌측 사이드바 하단의 ‘팀 추가’ 버튼을 클릭하여 생성할 수도 있습니다. 단, 비공개 팀은 팀 관리자의 초대를 받아야 참여할 수 있습니다.\n\n팀의 생성 가능 개수는 워크스페이스의 요금제에 따라 제한이 있습니다.\n\n요금제: Free / 팀 개수: 2\n요금제: Pro / 팀 개수: 3\n요금제: Business / 팀 개수: 무제한\n요금제: Enterprise / 팀 개수: 무제한\n\n#### 팀 떠나기\n\n팀 멤버 설정 페이지에서 스스로를 비활성화하면, 팀에서 떠날 수 있습니다.\n\n#### 팀 삭제\n\n팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.430687808041977,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5104190791864373,
+                            "latencyMs": 814
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.27261121364616,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.45496570491846033,
+                            "latencyMs": 814
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3232,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:6a09b6285b28",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "멤버 비활성화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "3c7ba56137fad745d3f659f2eec123126b1ce27eca49c41ffb7c46d977e00ac9",
+                        "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.030886196246139225,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.6537402614886325,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.40014324077142094,
+                            "latencyMs": 814
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3230,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:dc7240487954",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "846aa225db6b21c0bcb70f94090ed47d8acead69e62aeba00e282185d8d8df9a",
+                        "content": "워크스페이스 멤버는 좌측 사이드바의 \\[워크스페이스 > 멤버] 또는 설정 페이지의 \\[워크스페이스 > 멤버] 페이지에서 확인할 수 있습니다. 해당 페이지에는 현재 활성화된 멤버와, 과거에 있었던 비활성화된 멤버가 모두 존재합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 4.034627495074495,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.41750844811910703,
+                            "latencyMs": 814
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030158730158730156,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 3.631118614225215,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.4488939425427504,
+                            "latencyMs": 814
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v22",
+                        "inputTokens": 3463,
+                        "outputTokens": 52,
+                        "latencyMs": 2083,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    },
+    {
+      "repeatNo": 2,
+      "executedAt": "2026-09-07T15:24:04.249095+00:00",
+      "results": [
+        {
+          "id": "PE01",
+          "description": "직접 절차 부족: 팀에 새로운 멤버 초대",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "5984adf5-f302-4704-847b-45049cf71911",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "5984adf5-f302-4704-847b-45049cf71911",
+                "ragRunId": "1ea994b1-efa5-4ada-9a7b-6fb52d2905ca",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                "resolvedQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 1813,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 28,
+                    "outputTokens": null,
+                    "latencyMs": 271,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v22",
+                    "inputTokens": 3463,
+                    "outputTokens": 46,
+                    "latencyMs": 1497,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3243,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:26bbdd776a1e",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "4d4539e8b14b91e51d63fe24c71eb00ab812043bad06a5e7073815f72a1ebf67",
+                        "content": "#### 팀 생성 및 참여\n\n새로운 팀을 만들거나 기존 팀에 참여하려면, 설정 페이지의 \\[팀]에서 관리할 수 있습니다. 또는 설정 페이지의 좌측 사이드바 하단의 ‘팀 추가’ 버튼을 클릭하여 생성할 수도 있습니다. 단, 비공개 팀은 팀 관리자의 초대를 받아야 참여할 수 있습니다.\n\n팀의 생성 가능 개수는 워크스페이스의 요금제에 따라 제한이 있습니다.\n\n요금제: Free / 팀 개수: 2\n요금제: Pro / 팀 개수: 3\n요금제: Business / 팀 개수: 무제한\n요금제: Enterprise / 팀 개수: 무제한\n\n#### 팀 떠나기\n\n팀 멤버 설정 페이지에서 스스로를 비활성화하면, 팀에서 떠날 수 있습니다.\n\n#### 팀 삭제\n\n팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.430687808041977,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5104190791864373,
+                            "latencyMs": 286
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.27261121364616,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.45496570491846033,
+                            "latencyMs": 286
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3232,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:6a09b6285b28",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "멤버 비활성화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "3c7ba56137fad745d3f659f2eec123126b1ce27eca49c41ffb7c46d977e00ac9",
+                        "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.030886196246139225,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.6537402614886325,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.40014324077142094,
+                            "latencyMs": 286
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3230,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:dc7240487954",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "846aa225db6b21c0bcb70f94090ed47d8acead69e62aeba00e282185d8d8df9a",
+                        "content": "워크스페이스 멤버는 좌측 사이드바의 \\[워크스페이스 > 멤버] 또는 설정 페이지의 \\[워크스페이스 > 멤버] 페이지에서 확인할 수 있습니다. 해당 페이지에는 현재 활성화된 멤버와, 과거에 있었던 비활성화된 멤버가 모두 존재합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 4.034627495074495,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.41750844811910703,
+                            "latencyMs": 286
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030158730158730156,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 3.631118614225215,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.4488939425427504,
+                            "latencyMs": 286
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v22",
+                        "inputTokens": 3463,
+                        "outputTokens": 46,
+                        "latencyMs": 1497,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        }
+      ]
+    },
+    {
+      "repeatNo": 3,
+      "executedAt": "2026-09-07T15:24:06.096298+00:00",
+      "results": [
+        {
+          "id": "PE01",
+          "description": "직접 절차 부족: 팀에 새로운 멤버 초대",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "c2bc3734-c75a-45fa-9029-0d83dce75a93",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "c2bc3734-c75a-45fa-9029-0d83dce75a93",
+                "ragRunId": "567fc02e-5fe0-4e7b-9170-7738b2a4f345",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                "resolvedQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 1744,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 28,
+                    "outputTokens": null,
+                    "latencyMs": 256,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v22",
+                    "inputTokens": 3463,
+                    "outputTokens": 46,
+                    "latencyMs": 1434,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3243,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:26bbdd776a1e",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "4d4539e8b14b91e51d63fe24c71eb00ab812043bad06a5e7073815f72a1ebf67",
+                        "content": "#### 팀 생성 및 참여\n\n새로운 팀을 만들거나 기존 팀에 참여하려면, 설정 페이지의 \\[팀]에서 관리할 수 있습니다. 또는 설정 페이지의 좌측 사이드바 하단의 ‘팀 추가’ 버튼을 클릭하여 생성할 수도 있습니다. 단, 비공개 팀은 팀 관리자의 초대를 받아야 참여할 수 있습니다.\n\n팀의 생성 가능 개수는 워크스페이스의 요금제에 따라 제한이 있습니다.\n\n요금제: Free / 팀 개수: 2\n요금제: Pro / 팀 개수: 3\n요금제: Business / 팀 개수: 무제한\n요금제: Enterprise / 팀 개수: 무제한\n\n#### 팀 떠나기\n\n팀 멤버 설정 페이지에서 스스로를 비활성화하면, 팀에서 떠날 수 있습니다.\n\n#### 팀 삭제\n\n팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.430687808041977,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5104190791864373,
+                            "latencyMs": 271
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.27261121364616,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.45496570491846033,
+                            "latencyMs": 271
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3232,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:6a09b6285b28",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "멤버 비활성화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "3c7ba56137fad745d3f659f2eec123126b1ce27eca49c41ffb7c46d977e00ac9",
+                        "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.030886196246139225,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.6537402614886325,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.40014324077142094,
+                            "latencyMs": 271
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3230,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:dc7240487954",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "846aa225db6b21c0bcb70f94090ed47d8acead69e62aeba00e282185d8d8df9a",
+                        "content": "워크스페이스 멤버는 좌측 사이드바의 \\[워크스페이스 > 멤버] 또는 설정 페이지의 \\[워크스페이스 > 멤버] 페이지에서 확인할 수 있습니다. 해당 페이지에는 현재 활성화된 멤버와, 과거에 있었던 비활성화된 멤버가 모두 존재합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 4.034627495074495,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.41750844811910703,
+                            "latencyMs": 271
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030158730158730156,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 3.631118614225215,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.4488939425427504,
+                            "latencyMs": 271
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v22",
+                        "inputTokens": 3463,
+                        "outputTokens": 46,
+                        "latencyMs": 1434,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        }
+      ]
+    },
+    {
+      "repeatNo": 4,
+      "executedAt": "2026-09-07T15:24:07.876576+00:00",
+      "results": [
+        {
+          "id": "PE01",
+          "description": "직접 절차 부족: 팀에 새로운 멤버 초대",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "dc8acf1b-93f3-41ac-a968-016ba883a80f",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "dc8acf1b-93f3-41ac-a968-016ba883a80f",
+                "ragRunId": "c10ce65a-ac0c-446e-a9ce-64001e7e890d",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                "resolvedQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 1667,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 28,
+                    "outputTokens": null,
+                    "latencyMs": 220,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v22",
+                    "inputTokens": 3463,
+                    "outputTokens": 46,
+                    "latencyMs": 1391,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3243,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:26bbdd776a1e",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "4d4539e8b14b91e51d63fe24c71eb00ab812043bad06a5e7073815f72a1ebf67",
+                        "content": "#### 팀 생성 및 참여\n\n새로운 팀을 만들거나 기존 팀에 참여하려면, 설정 페이지의 \\[팀]에서 관리할 수 있습니다. 또는 설정 페이지의 좌측 사이드바 하단의 ‘팀 추가’ 버튼을 클릭하여 생성할 수도 있습니다. 단, 비공개 팀은 팀 관리자의 초대를 받아야 참여할 수 있습니다.\n\n팀의 생성 가능 개수는 워크스페이스의 요금제에 따라 제한이 있습니다.\n\n요금제: Free / 팀 개수: 2\n요금제: Pro / 팀 개수: 3\n요금제: Business / 팀 개수: 무제한\n요금제: Enterprise / 팀 개수: 무제한\n\n#### 팀 떠나기\n\n팀 멤버 설정 페이지에서 스스로를 비활성화하면, 팀에서 떠날 수 있습니다.\n\n#### 팀 삭제\n\n팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.430687808041977,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5104190791864373,
+                            "latencyMs": 235
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.27261121364616,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.45496570491846033,
+                            "latencyMs": 235
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3232,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:6a09b6285b28",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "멤버 비활성화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "3c7ba56137fad745d3f659f2eec123126b1ce27eca49c41ffb7c46d977e00ac9",
+                        "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.030886196246139225,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.6537402614886325,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.40014324077142094,
+                            "latencyMs": 235
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3230,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:dc7240487954",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "846aa225db6b21c0bcb70f94090ed47d8acead69e62aeba00e282185d8d8df9a",
+                        "content": "워크스페이스 멤버는 좌측 사이드바의 \\[워크스페이스 > 멤버] 또는 설정 페이지의 \\[워크스페이스 > 멤버] 페이지에서 확인할 수 있습니다. 해당 페이지에는 현재 활성화된 멤버와, 과거에 있었던 비활성화된 멤버가 모두 존재합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 4.034627495074495,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.41750844811910703,
+                            "latencyMs": 235
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030158730158730156,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 3.631118614225215,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.4488939425427504,
+                            "latencyMs": 235
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v22",
+                        "inputTokens": 3463,
+                        "outputTokens": 46,
+                        "latencyMs": 1391,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 4
+        }
+      ]
+    },
+    {
+      "repeatNo": 5,
+      "executedAt": "2026-09-07T15:24:09.577245+00:00",
+      "results": [
+        {
+          "id": "PE01",
+          "description": "직접 절차 부족: 팀에 새로운 멤버 초대",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "8548df76-2aba-41b9-918e-ca35124cc8ed",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "8548df76-2aba-41b9-918e-ca35124cc8ed",
+                "ragRunId": "7c933492-9245-42df-bb15-4a5d29268309",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                "resolvedQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2425,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 28,
+                    "outputTokens": null,
+                    "latencyMs": 360,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v22",
+                    "inputTokens": 3463,
+                    "outputTokens": 46,
+                    "latencyMs": 2005,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3243,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:26bbdd776a1e",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "4d4539e8b14b91e51d63fe24c71eb00ab812043bad06a5e7073815f72a1ebf67",
+                        "content": "#### 팀 생성 및 참여\n\n새로운 팀을 만들거나 기존 팀에 참여하려면, 설정 페이지의 \\[팀]에서 관리할 수 있습니다. 또는 설정 페이지의 좌측 사이드바 하단의 ‘팀 추가’ 버튼을 클릭하여 생성할 수도 있습니다. 단, 비공개 팀은 팀 관리자의 초대를 받아야 참여할 수 있습니다.\n\n팀의 생성 가능 개수는 워크스페이스의 요금제에 따라 제한이 있습니다.\n\n요금제: Free / 팀 개수: 2\n요금제: Pro / 팀 개수: 3\n요금제: Business / 팀 개수: 무제한\n요금제: Enterprise / 팀 개수: 무제한\n\n#### 팀 떠나기\n\n팀 멤버 설정 페이지에서 스스로를 비활성화하면, 팀에서 떠날 수 있습니다.\n\n#### 팀 삭제\n\n팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.430687808041977,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5104190791864373,
+                            "latencyMs": 378
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.27261121364616,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.45496570491846033,
+                            "latencyMs": 378
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3232,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:6a09b6285b28",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "멤버 비활성화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "3c7ba56137fad745d3f659f2eec123126b1ce27eca49c41ffb7c46d977e00ac9",
+                        "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.030886196246139225,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.6537402614886325,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.40014324077142094,
+                            "latencyMs": 378
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3230,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:dc7240487954",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "846aa225db6b21c0bcb70f94090ed47d8acead69e62aeba00e282185d8d8df9a",
+                        "content": "워크스페이스 멤버는 좌측 사이드바의 \\[워크스페이스 > 멤버] 또는 설정 페이지의 \\[워크스페이스 > 멤버] 페이지에서 확인할 수 있습니다. 해당 페이지에는 현재 활성화된 멤버와, 과거에 있었던 비활성화된 멤버가 모두 존재합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 4.034627495074495,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.41750844811910703,
+                            "latencyMs": 378
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030158730158730156,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 3.631118614225215,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.4488939425427504,
+                            "latencyMs": 378
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v22",
+                        "inputTokens": 3463,
+                        "outputTokens": 46,
+                        "latencyMs": 2005,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 5
+        }
+      ]
+    }
+  ]
+}

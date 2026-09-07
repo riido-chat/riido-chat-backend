@@ -10,11 +10,14 @@ from pydantic import ValidationError
 
 from app.answering.generator import (
     ANSWER_PROMPT_V17,
+    ANSWER_PROMPT_VERSION,
     ANSWER_REPAIR_PROMPT_V17,
     ANSWER_REPAIR_PROMPT_VERSION,
     GENERATION_PROMPT_VERSION,
     MAX_CONTEXT_SOURCES,
     OPENAI_GENERATION_MODEL,
+    PROCEDURE_EVIDENCE_RULES,
+    SOURCE_PLANNING_PROMPT_VERSION,
     SOURCE_PLANNING_REPAIR_PROMPT_VERSION,
     SOURCE_PLANNING_REPAIR_PROMPT_V11,
     SOURCE_PLANNING_PROMPT_V11,
@@ -406,6 +409,17 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn("질문의 의미와 정보 범위는 바꾸지 마세요", SOURCE_PLANNING_REPAIR_PROMPT_V11)
         self.assertIn("각각 정확히 하나만", SOURCE_PLANNING_REPAIR_PROMPT_V11)
 
+    def test_procedure_evidence_rules_are_shared_by_planning_and_answer(self) -> None:
+        for prompt in (SOURCE_PLANNING_PROMPT_V11, ANSWER_PROMPT_V17):
+            with self.subTest(prompt=prompt[:30]):
+                self.assertIn(PROCEDURE_EVIDENCE_RULES, prompt)
+                self.assertIn("요청한 행동을 수행할 수 있을 때만", prompt)
+                self.assertIn("행동의 대상과 목적이 같아야", prompt)
+                self.assertIn("메뉴 이름, 사용 가능 여부", prompt)
+                self.assertIn("수행할 핵심 동작이 필요", prompt)
+                self.assertIn("한 단계로 충분", prompt)
+                self.assertIn("관련 안내로 질문 범위를 바꾸거나", prompt)
+
     def test_answer_prompt_avoids_partial_or_duplicate_answers(self) -> None:
         self.assertIn("기본 답변은 간결하지만", ANSWER_PROMPT_V17)
         self.assertIn('"자세히", "전부",', ANSWER_PROMPT_V17)
@@ -495,7 +509,11 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn("WITHHELD 여부를 판단하세요", ANSWER_PROMPT_V17)
 
     def test_prompt_forbids_links_urls_and_html(self) -> None:
-        self.assertEqual("v20", GENERATION_PROMPT_VERSION)
+        self.assertEqual("v22", GENERATION_PROMPT_VERSION)
+        self.assertEqual("v13", SOURCE_PLANNING_PROMPT_VERSION)
+        self.assertEqual("v13-repair-1", SOURCE_PLANNING_REPAIR_PROMPT_VERSION)
+        self.assertEqual("v19", ANSWER_PROMPT_VERSION)
+        self.assertEqual("v19-repair-1", ANSWER_REPAIR_PROMPT_VERSION)
         self.assertIn(
             "Markdown 링크 문법과 HTML을 사용하지 마세요",
             ANSWER_PROMPT_V17,

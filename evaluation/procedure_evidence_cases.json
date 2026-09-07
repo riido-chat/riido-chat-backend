@@ -1,0 +1,59 @@
+{
+  "version": "procedure-evidence-v1",
+  "purpose": "절차형 질문에서 실행 가능한 직접 근거와 관련 설명·조건만 있는 불충분한 근거를 구분한다.",
+  "cases": [
+    {
+      "id": "PE01",
+      "mode": "NEW_CONVERSATION",
+      "description": "직접 절차 부족: 팀에 새로운 멤버 초대",
+      "turns": [
+        {
+          "question": "팀에 새로운 멤버를 초대하려면 어떻게 하나요?",
+          "expectedStatus": "WITHHELD",
+          "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+          "expectedPlanningStatus": "WITHHELD"
+        }
+      ]
+    },
+    {
+      "id": "PE02",
+      "mode": "NEW_CONVERSATION",
+      "description": "직접 절차 존재: 팀을 비공개로 전환",
+      "turns": [
+        {
+          "question": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [
+            ["팀 설정"],
+            ["일반"],
+            ["공개 범위"],
+            ["비공개"],
+            ["저장"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["비공개 팀"]
+        }
+      ]
+    },
+    {
+      "id": "PE03",
+      "mode": "NEW_CONVERSATION",
+      "description": "직접 절차 존재: 워크스페이스 멤버 비활성화",
+      "turns": [
+        {
+          "question": "워크스페이스 멤버를 비활성화하려면 어떻게 해야 하나요?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [
+            ["멤버 페이지"],
+            ["점 3개"],
+            ["비활성화"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["멤버"]
+        }
+      ]
+    }
+  ]
+}
