@@ -180,7 +180,8 @@ class AdminValidationErrorFormatTest(unittest.TestCase):
         self.assertEqual(422, response.status_code)
         body = response.json()
         self.assertEqual("INVALID_REQUEST", body["code"])
-        self.assertIn("message", body)
+        # validator 가 쓴 문장이 필드명 접두 없이 그대로 나간다
+        self.assertEqual("https 주소만 입력할 수 있습니다.", body["message"])
         self.assertNotIn("detail", body)
 
     def test_admin_422_on_missing_field(self) -> None:

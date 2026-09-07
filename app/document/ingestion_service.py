@@ -73,6 +73,8 @@ class AdminApiError(RuntimeError):
 
 
 class InvalidUploadFileError(AdminApiError):
+    """접수 전 파일 거절. 원인마다 문장이 다르다."""
+
     def __init__(self, message: str = "올바른 Markdown 파일이 아닙니다.") -> None:
         super().__init__(
             INVALID_FILE,
@@ -85,7 +87,7 @@ class UploadFileTooLargeError(AdminApiError):
     def __init__(self) -> None:
         super().__init__(
             FILE_TOO_LARGE,
-            "Markdown 파일은 5MB 이하여야 합니다.",
+            "파일 용량이 5MB 를 넘습니다.",
             HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
         )
 
@@ -94,7 +96,8 @@ class DocumentAlreadyExistsError(AdminApiError):
     def __init__(self) -> None:
         super().__init__(
             DOCUMENT_ALREADY_EXISTS,
-            "같은 이름의 문서가 이미 있습니다.",
+            "같은 이름의 문서가 이미 있습니다."
+            " 수정본 업로드를 사용하거나 다른 이름을 입력해 주세요.",
             HTTPStatus.CONFLICT,
         )
 
@@ -130,35 +133,51 @@ class AdminJobInProgressError(AdminApiError):
     def __init__(self) -> None:
         super().__init__(
             JOB_IN_PROGRESS,
-            "다른 관리자 문서 작업을 처리 중입니다.",
+            "다른 작업이 진행 중입니다. 완료 후 다시 실행할 수 있습니다.",
             HTTPStatus.CONFLICT,
         )
 
 
-_FAILURE_STATUS = {
-    INVALID_FILE: (INVALID_FILE, HTTPStatus.INTERNAL_SERVER_ERROR),
-    DUPLICATE_CONTENT: (DUPLICATE_CONTENT, HTTPStatus.CONFLICT),
-    NO_CHANGE: (NO_CHANGE, HTTPStatus.CONFLICT),
+# 실행 기록의 원인 코드마다 상태와 화면 문구를 정한다.
+# run.error_message 에는 내부 예외 문자열이 들어 있어 화면에 쓰지 않는다.
+_FAILURE_RESPONSES = {
+    INVALID_FILE: (
+        INVALID_FILE,
+        HTTPStatus.INTERNAL_SERVER_ERROR,
+        "문서 내용을 처리할 수 없습니다. 파일을 확인해 주세요.",
+    ),
+    DUPLICATE_CONTENT: (
+        DUPLICATE_CONTENT,
+        HTTPStatus.CONFLICT,
+        "다른 이름이지만 동일한 콘텐츠가 이미 등록되어 있습니다.",
+    ),
+    NO_CHANGE: (
+        NO_CHANGE,
+        HTTPStatus.CONFLICT,
+        "기존 문서와 내용이 같습니다."
+        " 변경된 내용이 없어 새 버전을 생성하지 않았습니다.",
+    ),
 }
+_DEFAULT_FAILURE = (
+    INTERNAL_ERROR,
+    HTTPStatus.INTERNAL_SERVER_ERROR,
+    "문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+)
 
 
 class IngestionFailedError(AdminApiError):
-    """접수 뒤 처리에서 실패했다. 실행 기록에 남은 원인을 그대로 올린다."""
+    """접수 뒤 처리에서 실패했다.
 
-    def __init__(
-        self,
-        error_code: Optional[str],
-        error_message: Optional[str],
-    ) -> None:
-        code, status_code = _FAILURE_STATUS.get(
+    화면 문구는 원인 코드로 고른다. 실행 기록의 error_message 에는 내부
+    예외 문자열이 들어 있어 그대로 내보내지 않는다.
+    """
+
+    def __init__(self, error_code: Optional[str]) -> None:
+        code, status_code, message = _FAILURE_RESPONSES.get(
             error_code,
-            (INTERNAL_ERROR, HTTPStatus.INTERNAL_SERVER_ERROR),
+            _DEFAULT_FAILURE,
         )
-        super().__init__(
-            code,
-            error_message or "문서를 처리하지 못했습니다.",
-            status_code,
-        )
+        super().__init__(code, message, status_code)
 
 
 class IngestionRunNotFoundError(AdminApiError):
@@ -686,7 +705,9 @@ def _normalize_uploaded_markdown(raw_content: str) -> str:
     try:
         normalized_content, _ = normalize_markdown(raw_content)
     except ValueError as error:
-        raise _UploadedMarkdownInvalidError(str(error)) from error
+        raise _UploadedMarkdownInvalidError(
+            f"본문을 정제하지 못했습니다: {error}"
+        ) from error
 
     if not normalized_content.strip():
         raise _UploadedMarkdownInvalidError("정제 후 유효한 본문이 없습니다.")

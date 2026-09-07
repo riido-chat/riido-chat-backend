@@ -130,7 +130,11 @@ class AdminDocumentApiTest(unittest.TestCase):
         self.assertEqual(500, response.status_code)
         body = response.json()
         self.assertEqual("INVALID_FILE", body["code"])
-        self.assertEqual("문서 구조를 분석하지 못했습니다.", body["message"])
+        # 실행 기록의 내부 문자열이 아니라 코드로 고른 문구가 나간다
+        self.assertEqual(
+            "문서 내용을 처리할 수 없습니다. 파일을 확인해 주세요.",
+            body["message"],
+        )
         # 오류 본문은 code 와 message 둘뿐이다
         self.assertEqual({"code", "message"}, set(body))
 

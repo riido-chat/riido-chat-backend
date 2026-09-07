@@ -174,7 +174,7 @@ async def _run_ingestion(
     )
     detail = await service.read_finished_run(accepted.ingestion_run_id)
     if detail.status == ExecutionStatus.FAILED:
-        raise IngestionFailedError(detail.error_code, detail.error_message)
+        raise IngestionFailedError(detail.error_code)
 
     return AdminUploadResultResponse(
         ingestionRunId=detail.ingestion_run_id,
@@ -262,7 +262,7 @@ async def start_reindex(
     )
     detail = await service.read_finished_run(accepted.index_run_id)
     if detail.status == ExecutionStatus.FAILED:
-        raise IndexRunFailedError(detail.error_message)
+        raise IndexRunFailedError()
 
     return AdminReindexResultResponse(
         indexRunId=detail.index_run_id,
