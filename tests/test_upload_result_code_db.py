@@ -107,7 +107,6 @@ class UploadResultCodeDbTest(unittest.IsolatedAsyncioTestCase):
             accepted = await AdminIngestionService(session).start_new_document(
                 group_id=self.group_id,
                 title=title,
-                category="test",
                 filename="guide.md",
             )
         await run_admin_ingestion(

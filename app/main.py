@@ -159,8 +159,7 @@ def create_app() -> FastAPI:
             content=AdminErrorResponse(
                 code=AdminErrorCode(exc.code),
                 message=exc.message,
-                stage=getattr(exc, "stage", None),
-            ).model_dump(mode="json", by_alias=True, exclude_none=True),
+            ).model_dump(mode="json", by_alias=True),
         )
 
     @app.exception_handler(RequestValidationError)

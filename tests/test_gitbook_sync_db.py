@@ -346,7 +346,6 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
             await AdminIngestionService(session).start_new_document(
                 group_id=self.group_id,
                 title=title,
-                category="test",
                 filename="guide.md",
             )
         async with self.session_factory() as session:

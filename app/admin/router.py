@@ -15,6 +15,7 @@ from app.admin.dependencies import (
 )
 from app.document.ingestion_service import (
     AdminIngestionService,
+    IngestionFailedError,
     InvalidUploadFileError,
     UploadFileTooLargeError,
     run_admin_ingestion,
@@ -33,15 +34,16 @@ from app.admin.schema import (
     AdminGroupInfo,
     AdminGroupSourceItem,
     AdminGroupSummary,
+    AdminChunkStats,
     AdminDocumentRevisionRequest,
     AdminDocumentUploadRequest,
+    AdminDuplicateDocument,
     AdminIndexRunAcceptedResponse,
+    AdminUploadResultResponse,
     AdminErrorResponse,
-    AdminIngestionAcceptedResponse,
     AdminIngestionStatus,
     AdminGitBookSyncRequest,
     AdminRecollectAcceptedResponse,
-    IngestionStageValue,
     RecollectStageValue,
 )
 from app.chat.dependencies import get_corpus_state
@@ -52,6 +54,7 @@ from app.indexing.index_job import run_admin_index_job
 from app.indexing.index_service import IndexReindexService
 from app.retrieval.corpus_state import CorpusState
 from app.retrieval.embedding import OpenAIEmbedder
+from app.database.models import ExecutionStatus
 
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -76,100 +79,116 @@ ADMIN_ERROR_RESPONSES = {
         "model": AdminErrorResponse,
         "description": (
             "`INVALID_FILE`: .md 파일이 아니거나 UTF-8이 아니거나, "
-            "파일 내용이 비어 있는 경우입니다. 본문에 `stage`가 함께 붙습니다."
+            "파일 내용이 비어 있는 경우입니다."
         ),
     },
     status.HTTP_404_NOT_FOUND: {
         "model": AdminErrorResponse,
         "description": "`NOT_FOUND`: 대상 그룹 또는 문서가 없는 경우입니다.",
     },
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {
+        "model": AdminErrorResponse,
+        "description": (
+            "`INVALID_FILE`: 접수 뒤 본문을 처리할 수 없는 경우입니다. "
+            "`INTERNAL_ERROR`: 그 밖의 처리 중 실패입니다."
+        ),
+    },
 }
 
 
 @router.post(
     "/document-groups/{group_id}/documents",
-    response_model=AdminIngestionAcceptedResponse,
-    status_code=status.HTTP_202_ACCEPTED,
+    response_model=AdminUploadResultResponse,
+    status_code=status.HTTP_200_OK,
     responses=ADMIN_ERROR_RESPONSES,
     summary="Markdown 신규 문서 업로드",
 )
 async def create_admin_document(
     group_id: int,
     upload: Annotated[AdminDocumentUploadRequest, File()],
-    http_request: Request,
     service: AdminIngestionService = Depends(get_admin_ingestion_service),
     embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
         get_chunk_embedder_factory
     ),
-) -> AdminIngestionAcceptedResponse:
-    """파일을 검증한 뒤 수집 실행을 확정하고 background task를 시작한다."""
+) -> AdminUploadResultResponse:
+    """파일을 검증하고 임베딩까지 끝낸 뒤 결과를 돌려준다."""
 
     filename, raw_content = await _read_markdown_file(upload.file)
     accepted = await service.start_new_document(
         group_id=group_id,
         title=upload.title,
-        category=upload.category,
         filename=filename,
     )
-    _start_ingestion_job(
-        http_request,
-        accepted.ingestion_run_id,
-        raw_content,
-        embedder_factory,
-    )
-    return _to_accepted_ingestion_response(accepted)
+    return await _run_ingestion(service, accepted, raw_content, embedder_factory)
 
 
 @router.post(
     "/documents/{document_id}/versions",
-    response_model=AdminIngestionAcceptedResponse,
-    status_code=status.HTTP_202_ACCEPTED,
+    response_model=AdminUploadResultResponse,
+    status_code=status.HTTP_200_OK,
     responses=ADMIN_ERROR_RESPONSES,
     summary="Markdown 수정본 업로드",
 )
 async def create_admin_document_version(
     document_id: int,
     upload: Annotated[AdminDocumentRevisionRequest, File()],
-    http_request: Request,
     service: AdminIngestionService = Depends(get_admin_ingestion_service),
     embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
         get_chunk_embedder_factory
     ),
-) -> AdminIngestionAcceptedResponse:
-    """대상 문서를 고정하고 파일만 받아 새 판 후보를 접수한다."""
+) -> AdminUploadResultResponse:
+    """대상 문서를 고정하고 파일만 받아 새 판을 만든다."""
 
     filename, raw_content = await _read_markdown_file(upload.file)
     accepted = await service.start_document_revision(
         document_id=document_id,
         filename=filename,
     )
-    _start_ingestion_job(
-        http_request,
+    return await _run_ingestion(service, accepted, raw_content, embedder_factory)
+
+
+async def _run_ingestion(
+    service: AdminIngestionService,
+    accepted,
+    raw_content: str,
+    embedder_factory: Callable[[], OpenAIEmbedder],
+) -> AdminUploadResultResponse:
+    """파이프라인을 요청 안에서 끝내고 결과를 응답으로 만든다.
+
+    run_admin_ingestion 은 실패를 실행 기록에 남기고 예외를 밖으로 던지지
+    않는다. 기록을 다시 읽어 성공이면 결과를, 실패면 오류를 내보낸다.
+    """
+
+    await run_admin_ingestion(
         accepted.ingestion_run_id,
         raw_content,
         embedder_factory,
     )
-    return _to_accepted_ingestion_response(accepted)
+    detail = await service.read_finished_run(accepted.ingestion_run_id)
+    if detail.status == ExecutionStatus.FAILED:
+        raise IngestionFailedError(detail.error_code, detail.error_message)
 
-
-def _start_ingestion_job(
-    http_request: Request,
-    ingestion_run_id: int,
-    raw_content: str,
-    embedder_factory: Callable[[], OpenAIEmbedder],
-) -> None:
-    task = asyncio.create_task(
-        run_admin_ingestion(ingestion_run_id, raw_content, embedder_factory)
-    )
-    register_pipeline_task(http_request.app, task)
-
-
-def _to_accepted_ingestion_response(accepted) -> AdminIngestionAcceptedResponse:
-    return AdminIngestionAcceptedResponse(
-        ingestionRunId=accepted.ingestion_run_id,
-        documentId=accepted.document_source_id,
-        status=AdminIngestionStatus.PROCESSING,
-        stage=IngestionStageValue.RECEIVING,
+    return AdminUploadResultResponse(
+        ingestionRunId=detail.ingestion_run_id,
+        documentId=detail.document_source_id,
+        resultCode=detail.result_code,
+        documentVersionId=detail.document_version_id,
+        versionNo=detail.version_no,
+        sectionCount=detail.section_count,
+        chunkCount=detail.chunk_count,
+        chunkStats=(
+            None
+            if detail.chunk_stats is None
+            else AdminChunkStats(**detail.chunk_stats)
+        ),
+        duplicateOf=(
+            None
+            if detail.duplicate_of is None
+            else AdminDuplicateDocument(
+                documentId=detail.duplicate_of.document_id,
+                title=detail.duplicate_of.title,
+            )
+        ),
     )
 
 
