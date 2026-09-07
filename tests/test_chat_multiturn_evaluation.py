@@ -41,7 +41,7 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
     def test_loads_balanced_answer_consistency_cases(self) -> None:
         payload = load_cases(DEFAULT_ANSWER_CONSISTENCY_CASES_PATH)
 
-        self.assertEqual("answer-consistency-v1", payload["version"])
+        self.assertEqual("answer-consistency-v2", payload["version"])
         self.assertEqual(
             [f"AC{number:02d}" for number in range(1, 11)],
             [case["id"] for case in payload["cases"]],
@@ -61,6 +61,15 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
                 }
             },
         )
+        ac01 = payload["cases"][0]["turns"][0]
+        self.assertIn(
+            "공간",
+            ac01["expectedDefinitionSentenceConceptGroups"][2],
+        )
+        self.assertNotIn(
+            ["연동", "연결"],
+            ac01["expectedAnswerConceptGroups"],
+        )
 
     def test_loads_versioned_fixed_cases(self) -> None:
         payload = load_cases(DEFAULT_CASES_PATH)
@@ -74,7 +83,7 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
     def test_loads_versioned_cs_cases(self) -> None:
         payload = load_cases(DEFAULT_CS_CASES_PATH)
 
-        self.assertEqual("cs-v3", payload["version"])
+        self.assertEqual("cs-v4", payload["version"])
         self.assertEqual(
             [f"CS{number:02d}" for number in range(1, 26)],
             [case["id"] for case in payload["cases"]],
@@ -90,6 +99,11 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
             for case in payload["cases"]
         )
         self.assertGreaterEqual(definition_case_count, 10)
+        cs23 = next(case for case in payload["cases"] if case["id"] == "CS23")
+        self.assertEqual(
+            [["대기 작업"]],
+            cs23["turns"][0]["expectedAnswerConceptGroups"],
+        )
 
     def test_extracts_selected_turn_numbers_from_v1_snapshot(self) -> None:
         self.assertEqual(
