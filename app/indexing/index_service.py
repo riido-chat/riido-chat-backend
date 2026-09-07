@@ -16,10 +16,7 @@ from app.database.models import (
     ExecutionStatus,
     IndexDocument,
     IndexRun,
-    IndexRunStage,
     IndexVersion,
-    IndexVersionStatus,
-    IngestionRun,
 )
 from app.document.document_group import get_document_group
 from app.document.ingestion_service import (
@@ -30,7 +27,6 @@ from app.document.job_gate import acquire_group_job_gate, find_processing_job
 from app.indexing.index_builder import (
     compute_pending_documents,
     load_latest_ready_versions,
-    start_retry_apply_run,
     start_reindex_run,
 )
 
@@ -38,7 +34,6 @@ from app.indexing.index_builder import (
 NOT_FOUND = "NOT_FOUND"
 REINDEX_NOT_REQUIRED = "REINDEX_NOT_REQUIRED"
 NO_READY_DOCUMENTS = "NO_READY_DOCUMENTS"
-RETRY_NOT_ALLOWED = "RETRY_NOT_ALLOWED"
 
 
 class DocumentGroupNotFoundError(AdminApiError):
@@ -77,18 +72,9 @@ class NoReadyDocumentsError(AdminApiError):
         )
 
 
-class RetryNotAllowedError(AdminApiError):
-    def __init__(self) -> None:
-        super().__init__(
-            RETRY_NOT_ALLOWED,
-            "적용 단계에서 실패한 실행만 다시 시도할 수 있습니다.",
-            HTTPStatus.CONFLICT,
-        )
-
-
 @dataclass(frozen=True)
 class AcceptedIndexRun:
-    """반영 시작과 재시도 접수 결과."""
+    """반영 시작 접수 결과."""
 
     index_run_id: int
     index_version_id: int
@@ -96,7 +82,6 @@ class AcceptedIndexRun:
     operation_type: str
     trigger_type: str
     stage: str
-    retry_of_index_run_id: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -126,7 +111,6 @@ class IndexRunDetail:
     chunk_count: Optional[int] = None
     error_code: Optional[str] = None
     error_message: Optional[str] = None
-    retryable: Optional[bool] = None
 
 
 class IndexReindexService:
@@ -165,51 +149,6 @@ class IndexReindexService:
             operation_type=run.operation_type.value,
             trigger_type=run.trigger_type,
             stage=run.stage.value,
-        )
-        await self._session.commit()
-        return accepted
-
-    async def start_retry_apply(
-        self,
-        index_run_id: int,
-        *,
-        actor_id: Optional[str] = None,
-    ) -> AcceptedIndexRun:
-        """적용 단계에서 실패한 실행의 후보에 적용 전용 실행을 만든다."""
-
-        failed_run = await self._session.get(IndexRun, index_run_id)
-        if failed_run is None:
-            raise IndexRunNotFoundError()
-
-        index_version = await self._session.get(
-            IndexVersion,
-            failed_run.index_version_id,
-        )
-        if index_version is not None:
-            await self._acquire_group_gate(index_version.document_group_id)
-            await self._ensure_no_processing_job(index_version.document_group_id)
-
-        if (
-            failed_run.status != ExecutionStatus.FAILED
-            or failed_run.stage != IndexRunStage.APPLYING
-            or index_version is None
-            or index_version.status != IndexVersionStatus.READY
-        ):
-            raise RetryNotAllowedError()
-
-        run = await start_retry_apply_run(
-            self._session,
-            failed_run,
-            actor_id=actor_id,
-        )
-        accepted = AcceptedIndexRun(
-            index_run_id=run.id,
-            index_version_id=run.index_version_id,
-            group_id=index_version.document_group_id,
-            operation_type=run.operation_type.value,
-            trigger_type=run.trigger_type,
-            stage=run.stage.value,
-            retry_of_index_run_id=index_run_id,
         )
         await self._session.commit()
         return accepted
@@ -254,10 +193,6 @@ class IndexReindexService:
                 index_version=summary,
                 error_code=run.error_code,
                 error_message=run.error_message,
-                retryable=(
-                    run.stage == IndexRunStage.APPLYING
-                    and index_version.status == IndexVersionStatus.READY
-                ),
             )
 
         document_count = await self._session.scalar(

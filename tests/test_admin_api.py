@@ -1,7 +1,6 @@
 import unittest
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
 from unittest.mock import ANY, AsyncMock, patch
 
 from fastapi import FastAPI
@@ -12,9 +11,7 @@ from app.document.ingestion_service import (
     AcceptedIngestion,
     AdminIngestionService,
     DocumentNotRevisableError,
-    IngestionRunDetail,
 )
-from app.database.models import ExecutionStatus
 from app.main import create_app
 
 
@@ -167,81 +164,12 @@ class AdminDocumentApiTest(unittest.TestCase):
         self.assertEqual(409, response.status_code)
         self.assertEqual("DOCUMENT_NOT_REVISABLE", response.json()["code"])
 
-    def test_returns_processing_ingestion_run(self) -> None:
-        started_at = datetime(2026, 8, 31, tzinfo=timezone.utc)
-        self.service.get_ingestion_run.return_value = IngestionRunDetail(
-            ingestion_run_id=101,
-            document_source_id=42,
-            status=ExecutionStatus.PROCESSING,
-            stage="CHUNKING",
-            document_version_id=None,
-            version_no=None,
-            section_count=None,
-            chunk_count=None,
-            error_code=None,
-            error_message=None,
-            started_at=started_at,
-            finished_at=None,
-        )
+    def test_ingestion_run_query_route_is_gone(self) -> None:
+        """동기 전환으로 실행 조회가 사라졌다."""
 
         response = self.client.get("/api/admin/ingestion-runs/101")
 
-        self.assertEqual(200, response.status_code)
-        self.assertEqual("PROCESSING", response.json()["status"])
-        self.assertNotIn("documentVersionId", response.json())
-
-    def test_returns_successful_ingestion_run(self) -> None:
-        started_at = datetime(2026, 8, 31, tzinfo=timezone.utc)
-        finished_at = datetime(2026, 8, 31, 0, 0, 1, tzinfo=timezone.utc)
-        self.service.get_ingestion_run.return_value = IngestionRunDetail(
-            ingestion_run_id=101,
-            document_source_id=42,
-            status=ExecutionStatus.SUCCESS,
-            stage="PERSISTING",
-            result_code="CREATED",
-            chunk_stats={"added": 2, "changed": 0, "deleted": 0, "reused": 0},
-            document_version_id=77,
-            version_no=1,
-            section_count=2,
-            chunk_count=2,
-            error_code=None,
-            error_message=None,
-            started_at=started_at,
-            finished_at=finished_at,
-        )
-
-        body = self.client.get("/api/admin/ingestion-runs/101").json()
-
-        self.assertEqual("SUCCESS", body["status"])
-        self.assertEqual(77, body["documentVersionId"])
-        self.assertEqual(1, body["versionNo"])
-        self.assertEqual("CREATED", body["resultCode"])
-        self.assertEqual(2, body["chunkStats"]["added"])
-        self.assertEqual(2, body["chunkCount"])
-
-    def test_returns_failed_ingestion_run(self) -> None:
-        started_at = datetime(2026, 8, 31, tzinfo=timezone.utc)
-        finished_at = datetime(2026, 8, 31, 0, 0, 1, tzinfo=timezone.utc)
-        self.service.get_ingestion_run.return_value = IngestionRunDetail(
-            ingestion_run_id=101,
-            document_source_id=42,
-            status=ExecutionStatus.FAILED,
-            stage="PARSING",
-            document_version_id=None,
-            version_no=None,
-            section_count=None,
-            chunk_count=None,
-            error_code="INVALID_FILE",
-            error_message="정제·청킹 후 유효한 본문이 없습니다.",
-            started_at=started_at,
-            finished_at=finished_at,
-        )
-
-        body = self.client.get("/api/admin/ingestion-runs/101").json()
-
-        self.assertEqual("FAILED", body["status"])
-        self.assertEqual("INVALID_FILE", body["error"]["code"])
-        self.assertIn("유효한 본문", body["error"]["message"])
+        self.assertEqual(404, response.status_code)
 
     def test_openapi_documents_multipart_request_and_accepted_response(self) -> None:
         operation = self.app.openapi()["paths"][
@@ -258,11 +186,10 @@ class AdminDocumentApiTest(unittest.TestCase):
             operation["responses"]["409"]["description"],
         )
         self.assertIn("INVALID_FILE", operation["responses"]["422"]["description"])
-
-        status_operation = self.app.openapi()["paths"][
-            "/api/admin/ingestion-runs/{ingestion_run_id}"
-        ]["get"]
-        self.assertIn("NOT_FOUND", status_operation["responses"]["404"]["description"])
+        self.assertNotIn(
+            "/api/admin/ingestion-runs/{ingestion_run_id}",
+            self.app.openapi()["paths"],
+        )
 
     def _upload(self, filename: str, content: bytes):
         return self.client.post(

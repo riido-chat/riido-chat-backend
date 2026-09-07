@@ -10,12 +10,8 @@ from fastapi.testclient import TestClient
 
 from app.admin.dependencies import get_recollect_service
 from app.admin.schema import AdminGitBookSyncRequest
-from app.database.models import ExecutionStatus
 from app.document.recollect import AcceptedRecollect
 from app.document.recollect_service import (
-    RecollectBatchDetail,
-    RecollectBatchNotFoundError,
-    RecollectFailure,
     RecollectService,
     SourceListFailedError,
 )
@@ -93,84 +89,14 @@ class AdminGitBookSyncApiTest(unittest.TestCase):
         self.assertEqual(502, response.status_code)
         self.assertEqual("SOURCE_LIST_FAILED", response.json()["code"])
 
-    def test_processing_batch_returns_progress(self) -> None:
-        self.service.get_batch.return_value = RecollectBatchDetail(
-            batch_id=BATCH_ID,
-            group_id=1,
-            group_source_id=1,
-            root_url="https://docs.riido.io",
-            status=ExecutionStatus.PROCESSING,
-            total=41,
-            processed=17,
-            started_at=STARTED_AT,
-        )
+    def test_batch_query_route_is_gone(self) -> None:
+        """동기 전환으로 배치 조회가 사라졌다."""
 
-        body = self.client.get(f"/api/admin/recollect-batches/{BATCH_ID}").json()
-
-        self.assertEqual("PROCESSING", body["status"])
-        self.assertEqual({"total": 41, "processed": 17}, body["progress"])
-        self.assertNotIn("counts", body)
-
-    def test_finished_batch_returns_counts_and_failures(self) -> None:
-        self.service.get_batch.return_value = RecollectBatchDetail(
-            batch_id=BATCH_ID,
-            group_id=1,
-            group_source_id=1,
-            root_url="https://docs.riido.io",
-            status=ExecutionStatus.SUCCESS,
-            total=41,
-            processed=41,
-            started_at=STARTED_AT,
-            finished_at=FINISHED_AT,
-            counts={
-                "total": 41,
-                "created": 1,
-                "updated": 3,
-                "no_change": 35,
-                "removed": 1,
-                "failed": 1,
-            },
-            failures=(
-                RecollectFailure(
-                    document_key="sprints/automations",
-                    title="스프린트 자동화",
-                    ingestion_run_id=950,
-                    stage="EMBEDDING",
-                    error_code="UPSTREAM_ERROR",
-                ),
-            ),
-        )
-
-        body = self.client.get(f"/api/admin/recollect-batches/{BATCH_ID}").json()
-
-        self.assertEqual("SUCCESS", body["status"])
-        self.assertEqual("https://docs.riido.io", body["rootUrl"])
-        self.assertEqual(35, body["counts"]["noChange"])
-        self.assertEqual(1, body["counts"]["removed"])
-        failure = body["failures"][0]
-        # 목록에 사람이 읽을 제목과 원인 단계가 함께 나온다
-        self.assertEqual("스프린트 자동화", failure["title"])
-        self.assertEqual("EMBEDDING", failure["stage"])
-        self.assertEqual("UPSTREAM_ERROR", failure["errorCode"])
-        # 상세는 기존 업로드 실행 조회로 이어진다
-        self.assertEqual(950, failure["ingestionRunId"])
-
-    def test_unknown_batch_returns_404(self) -> None:
-        self.service.get_batch.side_effect = RecollectBatchNotFoundError()
-
-        response = self.client.get(f"/api/admin/recollect-batches/{uuid.uuid4()}")
+        response = self.client.get(f"/api/admin/recollect-batches/{BATCH_ID}")
 
         self.assertEqual(404, response.status_code)
-        self.assertEqual("NOT_FOUND", response.json()["code"])
-
-    def test_malformed_batch_id_returns_422(self) -> None:
-        response = self.client.get("/api/admin/recollect-batches/not-a-uuid")
-
-        self.assertEqual(422, response.status_code)
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class AdminValidationErrorFormatTest(unittest.TestCase):
@@ -216,3 +142,7 @@ class AdminValidationErrorFormatTest(unittest.TestCase):
 
         self.assertEqual(422, response.status_code)
         self.assertIn("detail", response.json())
+
+
+if __name__ == "__main__":
+    unittest.main()

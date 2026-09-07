@@ -27,9 +27,7 @@ from app.indexing.index_builder import (
     CORPUS_RELOAD_FAILED,
     run_index_job,
     start_reindex_run,
-    start_retry_apply_run,
 )
-from app.indexing.index_writer import IndexWriter
 from app.retrieval.corpus import build_document_retrieval_chunks
 from app.retrieval.embedding import (
     OPENAI_EMBEDDING_DIMENSIONS,
@@ -236,9 +234,7 @@ class IndexApplyDbTest(unittest.IsolatedAsyncioTestCase):
             second_run.summary["previous_index_version_id"],
         )
 
-    async def test_apply_failure_keeps_candidate_ready_and_allows_retry(
-        self,
-    ) -> None:
+    async def test_apply_failure_keeps_candidate_ready(self) -> None:
         failing = _StubCorpusState(RuntimeError("corpus 교체 실패"))
         index_run_id = await self._start_and_run(failing)
 
@@ -255,36 +251,10 @@ class IndexApplyDbTest(unittest.IsolatedAsyncioTestCase):
         # corpus 를 바꾸기 전에 실패했으므로 되돌릴 것이 없다.
         # 복구를 시도하면 ACTIVE 가 없는 첫 반영에서 오판이 생긴다
         self.assertEqual(1, failing.attempts)
-        # 후보는 READY 로 남아 다시 시도할 수 있다
+        # 후보는 READY 로 남아 검색 반영을 다시 실행할 수 있다
         self.assertEqual(IndexVersionStatus.READY, candidate.status)
         self.assertIsNotNone(candidate.version_no)
         self.assertEqual(self.active_before, await self._active_index_ids())
-
-        corpus_state = _StubCorpusState()
-        async with self.session_factory() as session:
-            retry = await start_retry_apply_run(
-                session,
-                await session.get(IndexRun, index_run_id),
-            )
-            retry_run_id = retry.id
-            await session.commit()
-        async with self.session_factory() as session:
-            await run_index_job(
-                session,
-                corpus_state,
-                retry_run_id,
-                _StubEmbedder,
-            )
-
-        async with self.session_factory() as session:
-            retry_run = await session.get(IndexRun, retry_run_id)
-            applied = await session.get(IndexVersion, retry_run.index_version_id)
-
-        self.assertEqual(candidate.id, retry_run.index_version_id)
-        self.assertEqual(IndexOperationType.APPLY, retry_run.operation_type)
-        self.assertEqual("RETRY", retry_run.trigger_type)
-        self.assertEqual(ExecutionStatus.SUCCESS, retry_run.status)
-        self.assertEqual(IndexVersionStatus.ACTIVE, applied.status)
 
     async def test_leftover_ready_candidate_becomes_inactive_on_apply(
         self,

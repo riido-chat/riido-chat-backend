@@ -1,8 +1,8 @@
-"""Admin 문서 업로드와 수집 상태 조회 HTTP DTO."""
+"""Admin 문서 업로드와 검색 반영, GitBook 수집 HTTP DTO."""
 
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, List, Literal, Optional, Union
+from typing import List, Literal, Optional
 from uuid import UUID
 
 from fastapi import UploadFile
@@ -130,15 +130,6 @@ class IngestionErrorCode(str, Enum):
     INTERNAL_ERROR = "INTERNAL_ERROR"
 
 
-class AdminIngestionError(BaseModel):
-    """업로드 실행의 실패 원인. HTTP 오류 코드와 별개다."""
-
-    model_config = HTTP_DTO_CONFIG
-
-    code: IngestionErrorCode
-    message: str
-
-
 class AdminChunkStats(BaseModel):
     """이전 판 대비 청크 변화."""
 
@@ -159,56 +150,6 @@ class AdminDuplicateDocument(BaseModel):
     title: str
 
 
-class AdminIngestionProcessingResponse(BaseModel):
-    model_config = HTTP_DTO_CONFIG
-
-    ingestion_run_id: int = Field(alias="ingestionRunId")
-    document_id: int = Field(alias="documentId")
-    status: Literal[AdminIngestionStatus.PROCESSING]
-    stage: IngestionStageValue
-    started_at: datetime = Field(alias="startedAt")
-
-
-class AdminIngestionSuccessResponse(BaseModel):
-    model_config = HTTP_DTO_CONFIG
-
-    ingestion_run_id: int = Field(alias="ingestionRunId")
-    document_id: int = Field(alias="documentId")
-    status: Literal[AdminIngestionStatus.SUCCESS]
-    result_code: IngestionResultCodeValue = Field(alias="resultCode")
-    stage: IngestionStageValue
-    document_version_id: Optional[int] = Field(alias="documentVersionId")
-    version_no: Optional[int] = Field(alias="versionNo", ge=1)
-    section_count: Optional[int] = Field(alias="sectionCount", ge=0)
-    chunk_count: Optional[int] = Field(alias="chunkCount", ge=0)
-    chunk_stats: Optional[AdminChunkStats] = Field(alias="chunkStats")
-    duplicate_of: Optional[AdminDuplicateDocument] = Field(alias="duplicateOf")
-    started_at: datetime = Field(alias="startedAt")
-    finished_at: datetime = Field(alias="finishedAt")
-
-
-class AdminIngestionFailedResponse(BaseModel):
-    model_config = HTTP_DTO_CONFIG
-
-    ingestion_run_id: int = Field(alias="ingestionRunId")
-    document_id: int = Field(alias="documentId")
-    status: Literal[AdminIngestionStatus.FAILED]
-    stage: IngestionStageValue
-    error: AdminIngestionError
-    started_at: datetime = Field(alias="startedAt")
-    finished_at: datetime = Field(alias="finishedAt")
-
-
-AdminIngestionRunResponse = Annotated[
-    Union[
-        AdminIngestionProcessingResponse,
-        AdminIngestionSuccessResponse,
-        AdminIngestionFailedResponse,
-    ],
-    Field(discriminator="status"),
-]
-
-
 class IndexRunStageValue(str, Enum):
     BUILDING = "BUILDING"
     VALIDATING = "VALIDATING"
@@ -222,7 +163,7 @@ class IndexOperationTypeValue(str, Enum):
 
 
 class AdminIndexRunAcceptedResponse(BaseModel):
-    """검색 반영 시작과 적용 재시도 접수 결과."""
+    """검색 반영 시작 접수 결과."""
 
     model_config = HTTP_DTO_CONFIG
 
@@ -233,10 +174,6 @@ class AdminIndexRunAcceptedResponse(BaseModel):
     trigger_type: str = Field(alias="triggerType")
     status: AdminIngestionStatus
     stage: IndexRunStageValue
-    retry_of_index_run_id: Optional[int] = Field(
-        default=None,
-        alias="retryOfIndexRunId",
-    )
 
 
 class IndexRunErrorCode(str, Enum):
@@ -250,15 +187,6 @@ class IndexRunErrorCode(str, Enum):
     INTERNAL_ERROR = "INTERNAL_ERROR"
 
 
-class AdminIndexRunError(BaseModel):
-    """검색 반영 실행의 실패 원인. HTTP 오류 코드와 별개다."""
-
-    model_config = HTTP_DTO_CONFIG
-
-    code: IndexRunErrorCode
-    message: str
-
-
 class AdminIndexVersionSummary(BaseModel):
     """실행이 다룬 검색 버전 요약."""
 
@@ -268,69 +196,6 @@ class AdminIndexVersionSummary(BaseModel):
     version_no: Optional[int] = Field(alias="versionNo")
     status: str
     activated_at: Optional[datetime] = Field(default=None, alias="activatedAt")
-
-
-class AdminIndexRunProcessingResponse(BaseModel):
-    """진행 중인 검색 반영 실행."""
-
-    model_config = HTTP_DTO_CONFIG
-
-    index_run_id: int = Field(alias="indexRunId")
-    group_id: int = Field(alias="groupId")
-    index_version_id: int = Field(alias="indexVersionId")
-    operation_type: IndexOperationTypeValue = Field(alias="operationType")
-    trigger_type: str = Field(alias="triggerType")
-    status: AdminIngestionStatus
-    stage: IndexRunStageValue
-    started_at: datetime = Field(alias="startedAt")
-
-
-class AdminIndexRunSuccessResponse(BaseModel):
-    """반영이 끝난 검색 반영 실행."""
-
-    model_config = HTTP_DTO_CONFIG
-
-    index_run_id: int = Field(alias="indexRunId")
-    group_id: int = Field(alias="groupId")
-    index_version_id: int = Field(alias="indexVersionId")
-    operation_type: IndexOperationTypeValue = Field(alias="operationType")
-    trigger_type: str = Field(alias="triggerType")
-    status: AdminIngestionStatus
-    stage: IndexRunStageValue
-    index_version: AdminIndexVersionSummary = Field(alias="indexVersion")
-    previous_index_version: Optional[AdminIndexVersionSummary] = Field(
-        alias="previousIndexVersion"
-    )
-    document_count: int = Field(alias="documentCount", ge=0)
-    chunk_count: int = Field(alias="chunkCount", ge=0)
-    started_at: datetime = Field(alias="startedAt")
-    finished_at: datetime = Field(alias="finishedAt")
-
-
-class AdminIndexRunFailedResponse(BaseModel):
-    """실패로 마감된 검색 반영 실행."""
-
-    model_config = HTTP_DTO_CONFIG
-
-    index_run_id: int = Field(alias="indexRunId")
-    group_id: int = Field(alias="groupId")
-    index_version_id: int = Field(alias="indexVersionId")
-    operation_type: IndexOperationTypeValue = Field(alias="operationType")
-    trigger_type: str = Field(alias="triggerType")
-    status: AdminIngestionStatus
-    stage: IndexRunStageValue
-    error: AdminIndexRunError
-    index_version: AdminIndexVersionSummary = Field(alias="indexVersion")
-    retryable: bool
-    started_at: datetime = Field(alias="startedAt")
-    finished_at: datetime = Field(alias="finishedAt")
-
-
-AdminIndexRunResponse = Union[
-    AdminIndexRunProcessingResponse,
-    AdminIndexRunSuccessResponse,
-    AdminIndexRunFailedResponse,
-]
 
 
 class AdminGitBookSyncRequest(BaseModel):
@@ -371,15 +236,6 @@ class AdminRecollectAcceptedResponse(BaseModel):
     page_count: int = Field(alias="pageCount", ge=1)
 
 
-class AdminRecollectProgress(BaseModel):
-    """페이지 처리 진행."""
-
-    model_config = HTTP_DTO_CONFIG
-
-    total: int = Field(ge=0)
-    processed: int = Field(ge=0)
-
-
 class AdminRecollectCounts(BaseModel):
     """배치 결과 집계."""
 
@@ -403,44 +259,6 @@ class AdminRecollectFailure(BaseModel):
     ingestion_run_id: int = Field(alias="ingestionRunId")
     stage: IngestionStageValue
     error_code: Optional[IngestionErrorCode] = Field(alias="errorCode")
-
-
-class AdminRecollectProcessingResponse(BaseModel):
-    """진행 중인 재탐색 배치."""
-
-    model_config = HTTP_DTO_CONFIG
-
-    batch_id: UUID = Field(alias="batchId")
-    group_id: int = Field(alias="groupId")
-    group_source_id: Optional[int] = Field(alias="groupSourceId")
-    root_url: Optional[str] = Field(alias="rootUrl")
-    status: Literal[AdminIngestionStatus.PROCESSING]
-    stage: RecollectStageValue
-    progress: AdminRecollectProgress
-    started_at: datetime = Field(alias="startedAt")
-
-
-class AdminRecollectSuccessResponse(BaseModel):
-    """끝난 재탐색 배치. 일부 페이지가 실패해도 배치는 성공이다."""
-
-    model_config = HTTP_DTO_CONFIG
-
-    batch_id: UUID = Field(alias="batchId")
-    group_id: int = Field(alias="groupId")
-    group_source_id: Optional[int] = Field(alias="groupSourceId")
-    root_url: Optional[str] = Field(alias="rootUrl")
-    status: Literal[AdminIngestionStatus.SUCCESS]
-    stage: RecollectStageValue
-    counts: AdminRecollectCounts
-    failures: List[AdminRecollectFailure]
-    started_at: datetime = Field(alias="startedAt")
-    finished_at: datetime = Field(alias="finishedAt")
-
-
-AdminRecollectBatchResponse = Union[
-    AdminRecollectProcessingResponse,
-    AdminRecollectSuccessResponse,
-]
 
 
 class SearchStatusValue(str, Enum):

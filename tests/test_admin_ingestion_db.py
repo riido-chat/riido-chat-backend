@@ -36,6 +36,7 @@ from app.database.models import (
     ExecutionStatus,
     IndexVersion,
     IndexVersionStatus,
+    IngestionResultCode,
     IngestionRun,
     ModelCall,
     ModelCallPurpose,
@@ -213,26 +214,27 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(202, accepted_response.status_code)
             accepted = accepted_response.json()
 
-            result = None
-            for _ in range(100):
-                status_response = await client.get(
-                    f"/api/admin/ingestion-runs/{accepted['ingestionRunId']}"
+        # 실행 조회 라우트가 없어져 결과는 서비스로 확인한다.
+        # 동기 전환이 끝나면 업로드 응답이 이 값을 바로 돌려준다.
+        detail = None
+        for _ in range(100):
+            async with self.session_factory() as session:
+                detail = await AdminIngestionService(session).get_ingestion_run(
+                    accepted["ingestionRunId"]
                 )
-                self.assertEqual(200, status_response.status_code)
-                result = status_response.json()
-                if result["status"] != "PROCESSING":
-                    break
-                await asyncio.sleep(0.05)
+            if detail.status != ExecutionStatus.PROCESSING:
+                break
+            await asyncio.sleep(0.05)
 
-        self.assertIsNotNone(result)
-        self.assertEqual("SUCCESS", result["status"])
-        self.assertEqual("CREATED", result["resultCode"])
-        self.assertEqual(accepted["documentId"], result["documentId"])
+        self.assertIsNotNone(detail)
+        self.assertEqual(ExecutionStatus.SUCCESS, detail.status)
+        self.assertEqual(IngestionResultCode.CREATED.value, detail.result_code)
+        self.assertEqual(accepted["documentId"], detail.document_source_id)
 
         async with self.session_factory() as session:
             version = await session.get(
                 DocumentVersion,
-                result["documentVersionId"],
+                detail.document_version_id,
             )
         self.assertEqual(DocumentVersionStatus.READY, version.status)
         self.assertEqual(raw_content, version.raw_content)
