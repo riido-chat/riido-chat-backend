@@ -57,8 +57,11 @@ def _validation_message(exc: RequestValidationError) -> str:
     if not errors:
         return "요청 형식이 올바르지 않습니다."
     first = errors[0]
-    field = ".".join(str(part) for part in first.get("loc", ()) if part != "body")
     reason = first.get("msg", "값이 올바르지 않습니다.")
+    if first.get("type") == "value_error":
+        # validator가 직접 쓴 문장은 그대로 화면에 띄운다.
+        return reason.removeprefix("Value error, ")
+    field = ".".join(str(part) for part in first.get("loc", ()) if part != "body")
     return f"{field}: {reason}" if field else reason
 
 

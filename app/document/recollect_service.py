@@ -1,5 +1,6 @@
 """재탐색 접수와 배치 조회를 담당한다."""
 
+import logging
 import uuid
 from dataclasses import dataclass
 from http import HTTPStatus
@@ -33,15 +34,25 @@ from app.document.recollect import (
 )
 
 
+logger = logging.getLogger(__name__)
+
 SOURCE_LIST_FAILED = "SOURCE_LIST_FAILED"
 NOT_FOUND = "NOT_FOUND"
 
 
 class SourceListFailedError(AdminApiError):
-    def __init__(self, message: str) -> None:
+    """페이지 목록을 읽지 못했다. 수집을 시작하지 않는다.
+
+    원인이 여럿이라 일시 장애만 가정하는 표현을 쓰지 않는다.
+    루트 URL 은 요청마다 다르므로 문장에 넣지 않는다.
+    """
+
+    def __init__(self, reason: str) -> None:
+        logger.warning("GitBook 페이지 목록 조회에 실패했습니다: %s", reason)
         super().__init__(
             SOURCE_LIST_FAILED,
-            f"docs.riido.io 페이지 목록을 읽지 못했습니다: {message}",
+            "GitBook 페이지 목록을 읽지 못했습니다."
+            " 다시 시도하거나 GitBook 을 확인해 주세요.",
             HTTPStatus.BAD_GATEWAY,
         )
 

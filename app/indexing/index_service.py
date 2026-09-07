@@ -52,10 +52,10 @@ class IndexRunFailedError(AdminApiError):
     화면이 네 원인을 구분하지 않으므로 응답도 구분하지 않는다.
     """
 
-    def __init__(self, error_message: Optional[str] = None) -> None:
+    def __init__(self) -> None:
         super().__init__(
             INTERNAL_ERROR,
-            error_message or "검색 반영에 실패했습니다.",
+            "다시 시도해 주세요.",
             HTTPStatus.INTERNAL_SERVER_ERROR,
         )
 
@@ -73,7 +73,7 @@ class ReindexNotRequiredError(AdminApiError):
     def __init__(self) -> None:
         super().__init__(
             REINDEX_NOT_REQUIRED,
-            "검색에 반영할 변경이 없습니다.",
+            "이미 최신 상태입니다. 새로 업로드된 문서 버전이 없습니다.",
             HTTPStatus.CONFLICT,
         )
 
@@ -82,7 +82,7 @@ class NoReadyDocumentsError(AdminApiError):
     def __init__(self) -> None:
         super().__init__(
             NO_READY_DOCUMENTS,
-            "검색에 반영할 준비된 문서가 없습니다.",
+            "검색에 반영할 준비 완료 문서가 없습니다.",
             HTTPStatus.CONFLICT,
         )
 

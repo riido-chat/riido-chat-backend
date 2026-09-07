@@ -188,7 +188,7 @@ class AdminGitBookSyncRequest(BaseModel):
     def require_https(cls, source_url: str) -> str:
         value = source_url.strip().rstrip("/")
         if not value.startswith("https://"):
-            raise ValueError("GitBook 루트 URL은 https 여야 합니다.")
+            raise ValueError("https 주소만 입력할 수 있습니다.")
         return value
 
 
