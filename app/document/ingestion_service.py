@@ -53,6 +53,8 @@ ADMIN_TRIGGER_TYPE = "ADMIN_UPLOAD"
 
 INVALID_FILE = "INVALID_FILE"
 FILE_TOO_LARGE = "FILE_TOO_LARGE"
+DOCUMENT_ALREADY_EXISTS = "DOCUMENT_ALREADY_EXISTS"
+DUPLICATE_CONTENT = "DUPLICATE_CONTENT"
 DOCUMENT_NOT_REVISABLE = "DOCUMENT_NOT_REVISABLE"
 JOB_IN_PROGRESS = "JOB_IN_PROGRESS"
 NOT_FOUND = "NOT_FOUND"
@@ -84,6 +86,15 @@ class UploadFileTooLargeError(AdminApiError):
             FILE_TOO_LARGE,
             "Markdown 파일은 5MB 이하여야 합니다.",
             HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+        )
+
+
+class DocumentAlreadyExistsError(AdminApiError):
+    def __init__(self) -> None:
+        super().__init__(
+            DOCUMENT_ALREADY_EXISTS,
+            "같은 이름의 문서가 이미 있습니다.",
+            HTTPStatus.CONFLICT,
         )
 
 
@@ -123,6 +134,12 @@ class AdminJobInProgressError(AdminApiError):
         )
 
 
+_FAILURE_STATUS = {
+    INVALID_FILE: (INVALID_FILE, HTTPStatus.INTERNAL_SERVER_ERROR),
+    DUPLICATE_CONTENT: (DUPLICATE_CONTENT, HTTPStatus.CONFLICT),
+}
+
+
 class IngestionFailedError(AdminApiError):
     """접수 뒤 처리에서 실패했다. 실행 기록에 남은 원인을 그대로 올린다."""
 
@@ -131,11 +148,14 @@ class IngestionFailedError(AdminApiError):
         error_code: Optional[str],
         error_message: Optional[str],
     ) -> None:
-        code = INVALID_FILE if error_code == INVALID_FILE else INTERNAL_ERROR
+        code, status_code = _FAILURE_STATUS.get(
+            error_code,
+            (INTERNAL_ERROR, HTTPStatus.INTERNAL_SERVER_ERROR),
+        )
         super().__init__(
             code,
             error_message or "문서를 처리하지 못했습니다.",
-            HTTPStatus.INTERNAL_SERVER_ERROR,
+            status_code,
         )
 
 
@@ -150,6 +170,10 @@ class IngestionRunNotFoundError(AdminApiError):
 
 class _UploadedMarkdownInvalidError(ValueError):
     """접수 뒤 문서 파이프라인에서 발견된 입력 오류."""
+
+
+class _DuplicateContentError(RuntimeError):
+    """그룹 안 다른 콘솔 문서와 본문이 같다. 판을 만들지 않는다."""
 
 
 @dataclass(frozen=True)
@@ -208,7 +232,7 @@ class AdminIngestionService:
             group = await self._get_group(group_id)
             await self._acquire_group_gate(group.id)
             await self._ensure_no_processing_job(group.id)
-            source = await self._find_or_create_upload_source(group, title=title)
+            source = await self._create_upload_source(group, title=title)
             return await self._accept(source, filename)
         except Exception:
             await self._session.rollback()
@@ -378,13 +402,18 @@ class AdminIngestionService:
             raise DocumentGroupNotFoundError()
         return group
 
-    async def _find_or_create_upload_source(
+    async def _create_upload_source(
         self,
         group: DocumentGroup,
         *,
         title: str,
     ) -> DocumentSource:
-        document_key = build_upload_document_key(title)
+        """새 문서 원본을 만든다. 같은 이름이 이미 있으면 거절한다.
+
+        기존 문서의 새 판은 수정본 업로드로만 만든다.
+        """
+
+        document_key = _upload_document_key(title)
         # 콘솔 문서는 밀어 넣는 문서라 수집 원천이 없다. 키는 그룹 안에서 유일하다.
         source = await self._session.scalar(
             select(DocumentSource).where(
@@ -393,41 +422,58 @@ class AdminIngestionService:
                 DocumentSource.document_key == document_key,
             )
         )
-        if source is None:
-            now = datetime.now(timezone.utc)
-            source = DocumentSource(
-                document_group_id=group.id,
-                document_key=document_key,
-                source_type=ADMIN_SOURCE_TYPE,
-                canonical_uri=build_console_canonical_uri(
-                    group.group_key,
-                    document_key,
-                ),
-                title=title,
-                metadata_={"document_id": f"admin-{uuid.uuid4().hex}"},
-                enabled=True,
-                created_at=now,
-                updated_at=now,
-            )
-            self._session.add(source)
+        if source is not None:
+            if await self._has_ready_version(source.id):
+                raise DocumentAlreadyExistsError()
+            # 직전 업로드가 처리 중 실패해 판 없이 남은 껍데기다.
+            # 문서 표에 보이지 않으므로 거절하면 그 이름을 영영 못 쓴다.
+            source.title = title
+            source.enabled = True
+            source.updated_at = datetime.now(timezone.utc)
             await self._session.flush()
             return source
 
-        if source.source_type != ADMIN_SOURCE_TYPE:
-            # 업로드 키는 upload/ 접두가 붙어 GitBook 키와 겹치지 않는다.
-            raise DocumentNotRevisableError()
-
-        # 같은 문서명의 콘솔 문서는 그 문서의 새 판 후보가 된다.
-        metadata = source.metadata_ or {}
-        document_id = metadata.get("document_id")
-        if not isinstance(document_id, str) or not document_id:
-            document_id = f"admin-{uuid.uuid4().hex}"
-        source.title = title
-        source.metadata_ = {"document_id": document_id}
-        source.enabled = True
-        source.updated_at = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc)
+        source = DocumentSource(
+            document_group_id=group.id,
+            document_key=document_key,
+            source_type=ADMIN_SOURCE_TYPE,
+            canonical_uri=build_console_canonical_uri(
+                group.group_key,
+                document_key,
+            ),
+            title=title,
+            metadata_={"document_id": f"admin-{uuid.uuid4().hex}"},
+            enabled=True,
+            created_at=now,
+            updated_at=now,
+        )
+        self._session.add(source)
         await self._session.flush()
         return source
+
+    async def _has_ready_version(self, document_source_id: int) -> bool:
+        found = await self._session.scalar(
+            select(DocumentVersion.id)
+            .where(
+                DocumentVersion.document_source_id == document_source_id,
+                DocumentVersion.status == DocumentVersionStatus.READY,
+            )
+            .limit(1)
+        )
+        return found is not None
+
+
+def _upload_document_key(title: str) -> str:
+    """문서명을 키로 정규화한다. 남는 문자가 없으면 접수 전 거절이다."""
+
+    try:
+        return build_upload_document_key(title)
+    except ValueError as error:
+        raise InvalidUploadFileError(
+            "문서명에 사용할 수 있는 문자가 없습니다."
+        ) from error
+
 
 async def run_admin_ingestion(
     ingestion_run_id: int,
@@ -523,6 +569,16 @@ async def run_admin_ingestion(
                 result_code=result_code,
             )
             await session.commit()
+        except _DuplicateContentError as error:
+            await session.rollback()
+            await _record_ingestion_failure(
+                session,
+                store,
+                ingestion_run_id,
+                error,
+                failed_stage=failed_stage,
+                error_code=DUPLICATE_CONTENT,
+            )
         except _UploadedMarkdownInvalidError as error:
             await session.rollback()
             await _record_ingestion_failure(
@@ -581,13 +637,10 @@ async def _decide_without_new_version(
         normalized_content_hash,
     )
     if duplicate is not None:
-        await store.complete_without_new_version(
-            ingestion_run_id,
-            IngestionResultCode.DUPLICATE_CONTENT,
-            duplicate_of_document_source_id=duplicate.id,
+        # 같은 내용을 다른 이름으로 올린 것이다. 결과가 아니라 거절이다.
+        raise _DuplicateContentError(
+            "다른 이름이지만 동일한 콘텐츠가 이미 등록되어 있습니다."
         )
-        await session.commit()
-        return True
 
     return False
 

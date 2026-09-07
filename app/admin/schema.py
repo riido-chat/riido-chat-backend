@@ -58,6 +58,10 @@ class AdminErrorCode(str, Enum):
     # 요청 본문이나 필드 형식이 잘못된 경우. 422 를 다른 오류와 같은 형식으로 돌려준다.
     INVALID_REQUEST = "INVALID_REQUEST"
     FILE_TOO_LARGE = "FILE_TOO_LARGE"
+    # 같은 이름의 콘솔 문서에 READY 판이 있다. 새 판은 수정본 업로드로 만든다.
+    DOCUMENT_ALREADY_EXISTS = "DOCUMENT_ALREADY_EXISTS"
+    # 그룹 안 다른 콘솔 문서와 본문이 같다. 판을 만들지 않는다.
+    DUPLICATE_CONTENT = "DUPLICATE_CONTENT"
     DOCUMENT_NOT_REVISABLE = "DOCUMENT_NOT_REVISABLE"
     JOB_IN_PROGRESS = "JOB_IN_PROGRESS"
     REINDEX_NOT_REQUIRED = "REINDEX_NOT_REQUIRED"
@@ -127,15 +131,6 @@ class AdminChunkStats(BaseModel):
     reused: int = Field(ge=0)
 
 
-class AdminDuplicateDocument(BaseModel):
-    """같은 본문을 이미 가진 문서."""
-
-    model_config = HTTP_DTO_CONFIG
-
-    document_id: int = Field(alias="documentId")
-    title: str
-
-
 class AdminUploadResultResponse(BaseModel):
     """업로드 처리를 끝내고 돌려주는 결과.
 
@@ -152,7 +147,6 @@ class AdminUploadResultResponse(BaseModel):
     section_count: Optional[int] = Field(alias="sectionCount", ge=0)
     chunk_count: Optional[int] = Field(alias="chunkCount", ge=0)
     chunk_stats: Optional[AdminChunkStats] = Field(alias="chunkStats")
-    duplicate_of: Optional[AdminDuplicateDocument] = Field(alias="duplicateOf")
 
 
 class IndexRunStageValue(str, Enum):
