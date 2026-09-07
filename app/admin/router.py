@@ -37,7 +37,8 @@ from app.admin.schema import (
     AdminChunkStats,
     AdminDocumentRevisionRequest,
     AdminDocumentUploadRequest,
-    AdminIndexRunAcceptedResponse,
+    AdminIndexVersionSummary,
+    AdminReindexResultResponse,
     AdminUploadResultResponse,
     AdminErrorResponse,
     AdminIngestionStatus,
@@ -50,7 +51,10 @@ from app.core.task_registry import register_pipeline_task
 from app.document.recollect import run_recollect_batch
 from app.document.recollect_service import RecollectService
 from app.indexing.index_job import run_admin_index_job
-from app.indexing.index_service import IndexReindexService
+from app.indexing.index_service import (
+    IndexReindexService,
+    IndexRunFailedError,
+)
 from app.retrieval.corpus_state import CorpusState
 from app.retrieval.embedding import OpenAIEmbedder
 from app.database.models import ExecutionStatus
@@ -215,16 +219,21 @@ async def _read_markdown_file(upload_file: UploadFile) -> tuple[str, str]:
 INDEX_RUN_ERROR_RESPONSES = {
     status.HTTP_404_NOT_FOUND: {
         "model": AdminErrorResponse,
-        "description": "`NOT_FOUND`: 대상 그룹 또는 실행이 존재하지 않는 경우입니다.",
+        "description": "`NOT_FOUND`: 대상 그룹이 존재하지 않는 경우입니다.",
     },
     status.HTTP_409_CONFLICT: {
         "model": AdminErrorResponse,
         "description": (
             "`JOB_IN_PROGRESS`: 같은 그룹에 실행 중 작업이 있는 경우입니다. "
             "`REINDEX_NOT_REQUIRED`: 반영할 변경이 없는 경우입니다. "
-            "`NO_READY_DOCUMENTS`: 준비된 문서가 없는 경우입니다. "
-            "`RETRY_NOT_ALLOWED`: 적용 단계 실패가 아니거나 후보가 READY가 "
-            "아닌 경우입니다."
+            "`NO_READY_DOCUMENTS`: 준비된 문서가 없는 경우입니다."
+        ),
+    },
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {
+        "model": AdminErrorResponse,
+        "description": (
+            "`INTERNAL_ERROR`: 처리 중 실패입니다. 원인은 index_runs 의 "
+            "error_code 에 남고 응답에서는 구분하지 않습니다."
         ),
     },
 }
@@ -232,53 +241,46 @@ INDEX_RUN_ERROR_RESPONSES = {
 
 @router.post(
     "/document-groups/{group_id}/reindex",
-    response_model=AdminIndexRunAcceptedResponse,
-    status_code=status.HTTP_202_ACCEPTED,
+    response_model=AdminReindexResultResponse,
+    status_code=status.HTTP_200_OK,
     responses=INDEX_RUN_ERROR_RESPONSES,
     summary="검색에 반영하기",
 )
 async def start_reindex(
     group_id: int,
-    http_request: Request,
     service: IndexReindexService = Depends(get_index_reindex_service),
     corpus_state: CorpusState = Depends(get_corpus_state),
     embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
         get_chunk_embedder_factory
     ),
-) -> AdminIndexRunAcceptedResponse:
-    """최신 READY 문서 조합으로 후보 색인을 만들고 적용까지 진행한다."""
+) -> AdminReindexResultResponse:
+    """최신 READY 문서 조합으로 후보를 만들고 ACTIVE 전환까지 마친다."""
 
     accepted = await service.start_reindex(group_id)
-    _start_index_job(
-        http_request,
+    await run_admin_index_job(
         accepted.index_run_id,
         corpus_state,
         embedder_factory,
     )
-    return _to_accepted_response(accepted)
+    detail = await service.read_finished_run(accepted.index_run_id)
+    if detail.status == ExecutionStatus.FAILED:
+        raise IndexRunFailedError(detail.error_message)
 
-
-def _start_index_job(
-    http_request: Request,
-    index_run_id: int,
-    corpus_state: CorpusState,
-    embedder_factory: Callable[[], OpenAIEmbedder],
-) -> None:
-    task = asyncio.create_task(
-        run_admin_index_job(index_run_id, corpus_state, embedder_factory)
+    return AdminReindexResultResponse(
+        indexRunId=detail.index_run_id,
+        indexVersion=_to_index_version_summary(detail.index_version),
+        previousIndexVersion=(
+            None
+            if detail.previous_index_version is None
+            else _to_index_version_summary(detail.previous_index_version)
+        ),
     )
-    register_pipeline_task(http_request.app, task)
 
 
-def _to_accepted_response(accepted) -> AdminIndexRunAcceptedResponse:
-    return AdminIndexRunAcceptedResponse(
-        indexRunId=accepted.index_run_id,
-        indexVersionId=accepted.index_version_id,
-        groupId=accepted.group_id,
-        operationType=accepted.operation_type,
-        triggerType=accepted.trigger_type,
-        status=AdminIngestionStatus.PROCESSING,
-        stage=accepted.stage,
+def _to_index_version_summary(summary) -> AdminIndexVersionSummary:
+    return AdminIndexVersionSummary(
+        indexVersionId=summary.index_version_id,
+        versionNo=summary.version_no,
     )
 
 

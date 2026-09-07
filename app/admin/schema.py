@@ -1,6 +1,5 @@
 """Admin 문서 업로드와 검색 반영, GitBook 수집 HTTP DTO."""
 
-from datetime import datetime
 from enum import Enum
 from typing import List, Literal, Optional
 from uuid import UUID
@@ -152,52 +151,30 @@ class AdminUploadResultResponse(BaseModel):
     chunk_stats: AdminChunkStats = Field(alias="chunkStats")
 
 
-class IndexRunStageValue(str, Enum):
-    BUILDING = "BUILDING"
-    VALIDATING = "VALIDATING"
-    APPLYING = "APPLYING"
-
-
-class IndexOperationTypeValue(str, Enum):
-    BUILD_AND_APPLY = "BUILD_AND_APPLY"
-    BUILD = "BUILD"
-    APPLY = "APPLY"
-
-
-class AdminIndexRunAcceptedResponse(BaseModel):
-    """검색 반영 시작 접수 결과."""
-
-    model_config = HTTP_DTO_CONFIG
-
-    index_run_id: int = Field(alias="indexRunId")
-    index_version_id: int = Field(alias="indexVersionId")
-    group_id: int = Field(alias="groupId")
-    operation_type: IndexOperationTypeValue = Field(alias="operationType")
-    trigger_type: str = Field(alias="triggerType")
-    status: AdminIngestionStatus
-    stage: IndexRunStageValue
-
-
-class IndexRunErrorCode(str, Enum):
-    """실행 이력에 남는 검색 반영 실패 원인."""
-
-    VALIDATION_FAILED = "VALIDATION_FAILED"
-    CORPUS_RELOAD_FAILED = "CORPUS_RELOAD_FAILED"
-    CORPUS_OUT_OF_SYNC = "CORPUS_OUT_OF_SYNC"
-    UPSTREAM_ERROR = "UPSTREAM_ERROR"
-    TIMEOUT = "TIMEOUT"
-    INTERNAL_ERROR = "INTERNAL_ERROR"
-
-
 class AdminIndexVersionSummary(BaseModel):
-    """실행이 다룬 검색 버전 요약."""
+    """완료 모달이 쓰는 검색 버전 요약."""
 
     model_config = HTTP_DTO_CONFIG
 
     index_version_id: int = Field(alias="indexVersionId")
-    version_no: Optional[int] = Field(alias="versionNo")
-    status: str
-    activated_at: Optional[datetime] = Field(default=None, alias="activatedAt")
+    version_no: int = Field(alias="versionNo", ge=1)
+
+
+class AdminReindexResultResponse(BaseModel):
+    """검색 반영을 끝내고 돌려주는 결과.
+
+    실행이 동기라 접수 응답이 없다. ACTIVE 전환까지 마친 뒤 돌려준다.
+    """
+
+    model_config = HTTP_DTO_CONFIG
+
+    # 화면에 표시하지 않는다. 로그와 지원 문의 추적용이다.
+    index_run_id: int = Field(alias="indexRunId")
+    index_version: AdminIndexVersionSummary = Field(alias="indexVersion")
+    # 첫 반영이면 null 이다.
+    previous_index_version: Optional[AdminIndexVersionSummary] = Field(
+        alias="previousIndexVersion"
+    )
 
 
 class AdminGitBookSyncRequest(BaseModel):
