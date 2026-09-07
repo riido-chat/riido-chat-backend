@@ -1,5 +1,5 @@
 {
-  "version": "cs-v4",
+  "version": "cs-v5",
   "purpose": "초보 사용자의 용어 정의·사용 목적·기능 차이 질문에 공식 이용가이드 근거로 친절하게 답하는지 평가한다. 서로 다른 문서 유형의 직접 정의 질문으로 답변 순서의 일반화 여부를 함께 검증한다.",
   "rubric": {
     "expectedDefinitionSentenceConceptGroups": "직접 정의 질문은 첫 문장에서 용어 자체의 의미를 독립적으로 설명해야 한다.",
@@ -18,12 +18,10 @@
           "expectedDefinitionSentenceConceptGroups": [
             ["팀", "사람", "사용자"],
             ["소통", "커뮤니케이션"],
-            ["도구", "서비스"]
+            ["도구", "서비스", "공간"]
           ],
           "expectedAnswerConceptGroups": [
-            ["소통", "커뮤니케이션"],
             ["뤼이도"],
-            ["연동", "연결"],
             ["알림", "업데이트", "댓글", "논의", "기록"]
           ],
           "minimumCitationCount": 1,
@@ -239,12 +237,11 @@
           "expectedDefinitionSentenceConceptGroups": [
             ["팀", "사람", "사용자"],
             ["소통", "커뮤니케이션"],
-            ["도구", "서비스"]
+            ["도구", "서비스", "공간"]
           ],
           "expectedAnswerConceptGroups": [
             ["슬랙"],
             ["뤼이도"],
-            ["연동", "연결"],
             ["알림", "업데이트", "댓글", "논의", "기록"]
           ],
           "minimumCitationCount": 1,

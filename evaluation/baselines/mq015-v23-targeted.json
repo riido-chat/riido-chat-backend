@@ -1,0 +1,1890 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-07T17:28:06.681742+00:00",
+  "casesVersion": "mvp-quality-v3",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "e678e669e13c1077e00c6b949053dfd560bde2cb",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.4-mini"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v4",
+        "sha256": "ddf49dae6d4ddcf3521d550040bc93a3fd398da026ab1cfbe1cba8075ec4bd8d"
+      },
+      "sourcePlanning": {
+        "version": "v14",
+        "sha256": "72d4866668781c48744a321bcc987ff7b48b8c58be37333fcd260217d427920c"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v14-repair-1",
+        "sha256": "202cf4298435c4f9111e4b63d29f3d8930c079c3fd8e1e82a04f91937b852b6e"
+      },
+      "answer": {
+        "version": "v20",
+        "sha256": "b49c09d6160ff821e8c3b8fd7af03f6b018f6b9e2f5dcd558a8a62cf1caba051"
+      },
+      "answerValidationRegeneration": {
+        "version": "v20-repair-1",
+        "sha256": "a563f1132c08dd7e780834fd9bb9777ca092aba46364b7cced2f97ac11b5acf1"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "e678e669e13c1077e00c6b949053dfd560bde2cb",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v23"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 5,
+    "uniqueCaseCount": 1,
+    "totalCaseExecutionCount": 5,
+    "passedCaseExecutionCount": 3,
+    "failedCaseExecutionCount": 2,
+    "executionErrorCaseExecutionCount": 0,
+    "criteriaMismatchCaseExecutionCount": 2,
+    "perCase": [
+      {
+        "id": "MQ015",
+        "executionCount": 5,
+        "passedCount": 3,
+        "failedCount": 2
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 5,
+        "passedCount": 3,
+        "failedCount": 2
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-07T17:27:40.143905+00:00",
+      "results": [
+        {
+          "id": "MQ015",
+          "description": "비공개 팀 접근 권한",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "b67d7fdf-5945-470f-a131-e5ad4738d86d",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "b67d7fdf-5945-470f-a131-e5ad4738d86d",
+                "ragRunId": "fd9f1158-5961-46db-899d-f9d14ea4251d",
+                "answer": {
+                  "answerMarkdown": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀에 접근할 수 없고, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다. [1]\n\n또한 멤버는 워크스페이스의 모든 데이터에 접근할 수 있지만, 본인이 속하지 않은 비공개 팀은 확인할 수 없다고 안내되어 있습니다. [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "비공개 팀",
+                    "sectionPath": [
+                      "접근 권한"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "멤버",
+                    "sectionPath": [
+                      "권한"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                "resolvedQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 8755,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 31,
+                    "outputTokens": null,
+                    "latencyMs": 2702,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v23",
+                    "inputTokens": 6671,
+                    "outputTokens": 190,
+                    "latencyMs": 5970,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "비공개 팀",
+                  "멤버"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.790425462156414,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5864948295815846,
+                            "latencyMs": 2735
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.66553863848041,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5112831826272616,
+                            "latencyMs": 2735
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3244,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:9f525d515668",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "b2d092eb68fcb946d2d5bd17906c2cda67d1608e10a2d249a5a50edfaf45d2fb",
+                        "content": "비공개 팀은 비즈니스 요금제 이상부터 사용할 수 있습니다. 워크스페이스의 모든 사용자는 새로운 팀을 만들 때 비공개로 설정하거나, 본인이 참여 중인 팀을 비공개 팀으로 전환할 수 있습니다.\n\n비공개 팀은 주로 고객 데이터, HR, 재무 관리처럼 일부 멤버만 접근해야 하는 작업을 안전하게 관리할 때 사용됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 9.596243228790659,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.56502950091933,
+                            "latencyMs": 2735
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3231,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:a71a73e4ac34",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "7904fbb4987e17151ebf07a8ee4bd1543c378ff21eeb76314a0597ba94a1de17",
+                        "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030834914611005692,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 11.384085915824736,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.4213598470907318,
+                            "latencyMs": 2735
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 9.199423567593385,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.44734385558445666,
+                            "latencyMs": 2735
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v23",
+                        "inputTokens": 6671,
+                        "outputTokens": 190,
+                        "latencyMs": 5970,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "비공개 팀에 속하지 않은 멤버의 그 팀 프로젝트 열람 가능 여부",
+                            "source_ids": [
+                              "SOURCE_1",
+                              "SOURCE_4"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3245,
+                          "documentVersionId": 2418,
+                          "documentId": "6c3b150c3146",
+                          "sectionId": "6c3b150c3146:f4771653dfff",
+                          "documentTitle": "비공개 팀",
+                          "sectionPath": [
+                            "비공개 팀",
+                            "접근 권한"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                          "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_4",
+                          "chunkId": 3231,
+                          "documentVersionId": 2415,
+                          "documentId": "567f0ce8042c",
+                          "sectionId": "567f0ce8042c:a71a73e4ac34",
+                          "documentTitle": "멤버",
+                          "sectionPath": [
+                            "멤버",
+                            "권한"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                          "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀에 접근할 수 없고, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다. [SOURCE_1]\n\n또한 멤버는 워크스페이스의 모든 데이터에 접근할 수 있지만, 본인이 속하지 않은 비공개 팀은 확인할 수 없다고 안내되어 있습니다. [SOURCE_4]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀에 접근할 수 없고, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다. [1]\n\n또한 멤버는 워크스페이스의 모든 데이터에 접근할 수 있지만, 본인이 속하지 않은 비공개 팀은 확인할 수 없다고 안내되어 있습니다. [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    },
+    {
+      "repeatNo": 2,
+      "executedAt": "2026-09-07T17:27:48.958827+00:00",
+      "results": [
+        {
+          "id": "MQ015",
+          "description": "비공개 팀 접근 권한",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": false,
+          "conversationId": "a5715fb9-316c-4200-8ac8-dcb11b7d4396",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+              "passed": false,
+              "failures": [
+                "기대 Citation 문서가 없음: expected_any=['비공개 팀'], actual=['멤버']"
+              ],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "a5715fb9-316c-4200-8ac8-dcb11b7d4396",
+                "ragRunId": "8184fc58-5979-4c96-ae9e-3eb20e3b83b1",
+                "answer": {
+                  "answerMarkdown": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀을 확인할 수 없고, 멤버는 프로젝트를 포함한 워크스페이스의 모든 데이터에 접근할 수 있지만 비공개 팀은 예외입니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "멤버",
+                    "sectionPath": [
+                      "권한"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                "resolvedQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 5711,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 31,
+                    "outputTokens": null,
+                    "latencyMs": 1287,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v23",
+                    "inputTokens": 6511,
+                    "outputTokens": 154,
+                    "latencyMs": 4386,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "멤버"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.790425462156414,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5864948295815846,
+                            "latencyMs": 1296
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.66553863848041,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5112831826272616,
+                            "latencyMs": 1296
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3244,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:9f525d515668",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "b2d092eb68fcb946d2d5bd17906c2cda67d1608e10a2d249a5a50edfaf45d2fb",
+                        "content": "비공개 팀은 비즈니스 요금제 이상부터 사용할 수 있습니다. 워크스페이스의 모든 사용자는 새로운 팀을 만들 때 비공개로 설정하거나, 본인이 참여 중인 팀을 비공개 팀으로 전환할 수 있습니다.\n\n비공개 팀은 주로 고객 데이터, HR, 재무 관리처럼 일부 멤버만 접근해야 하는 작업을 안전하게 관리할 때 사용됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 9.596243228790659,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.56502950091933,
+                            "latencyMs": 1296
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3231,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:a71a73e4ac34",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "7904fbb4987e17151ebf07a8ee4bd1543c378ff21eeb76314a0597ba94a1de17",
+                        "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030834914611005692,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 11.384085915824736,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.4213598470907318,
+                            "latencyMs": 1296
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 9.199423567593385,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.44734385558445666,
+                            "latencyMs": 1296
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v23",
+                        "inputTokens": 6511,
+                        "outputTokens": 154,
+                        "latencyMs": 4386,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "비공개 팀에 속하지 않은 멤버의 그 팀 프로젝트 열람 가능 여부",
+                            "source_ids": [
+                              "SOURCE_4"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_4",
+                          "chunkId": 3231,
+                          "documentVersionId": 2415,
+                          "documentId": "567f0ce8042c",
+                          "sectionId": "567f0ce8042c:a71a73e4ac34",
+                          "documentTitle": "멤버",
+                          "sectionPath": [
+                            "멤버",
+                            "권한"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                          "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀을 확인할 수 없고, 멤버는 프로젝트를 포함한 워크스페이스의 모든 데이터에 접근할 수 있지만 비공개 팀은 예외입니다. [SOURCE_4]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀을 확인할 수 없고, 멤버는 프로젝트를 포함한 워크스페이스의 모든 데이터에 접근할 수 있지만 비공개 팀은 예외입니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        }
+      ]
+    },
+    {
+      "repeatNo": 3,
+      "executedAt": "2026-09-07T17:27:54.708976+00:00",
+      "results": [
+        {
+          "id": "MQ015",
+          "description": "비공개 팀 접근 권한",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": false,
+          "conversationId": "d5c2ed1f-6aec-4831-8e9b-d065f67f2023",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+              "passed": false,
+              "failures": [
+                "답변에 기대 개념이 없음: alternatives=['아니요', '볼 수 없습니다', '확인할 수 없습니다', '접근할 수 없습니다']",
+                "기대 Citation 문서가 없음: expected_any=['비공개 팀'], actual=['멤버']"
+              ],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "d5c2ed1f-6aec-4831-8e9b-d065f67f2023",
+                "ragRunId": "36dac78b-5260-422e-a051-3dacb576dfe0",
+                "answer": {
+                  "answerMarkdown": "네, 가능합니다. 멤버는 프로젝트를 포함한 워크스페이스의 모든 데이터에 접근할 수 있습니다. 다만 본인이 속하지 않은 비공개 팀 자체는 확인할 수 없다고 안내되어 있습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "멤버",
+                    "sectionPath": [
+                      "권한"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                "resolvedQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4251,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 31,
+                    "outputTokens": null,
+                    "latencyMs": 188,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v23",
+                    "inputTokens": 6513,
+                    "outputTokens": 155,
+                    "latencyMs": 4013,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "멤버"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.790425462156414,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5864948295815846,
+                            "latencyMs": 201
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.66553863848041,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5112831826272616,
+                            "latencyMs": 201
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3244,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:9f525d515668",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "b2d092eb68fcb946d2d5bd17906c2cda67d1608e10a2d249a5a50edfaf45d2fb",
+                        "content": "비공개 팀은 비즈니스 요금제 이상부터 사용할 수 있습니다. 워크스페이스의 모든 사용자는 새로운 팀을 만들 때 비공개로 설정하거나, 본인이 참여 중인 팀을 비공개 팀으로 전환할 수 있습니다.\n\n비공개 팀은 주로 고객 데이터, HR, 재무 관리처럼 일부 멤버만 접근해야 하는 작업을 안전하게 관리할 때 사용됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 9.596243228790659,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.56502950091933,
+                            "latencyMs": 201
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3231,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:a71a73e4ac34",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "7904fbb4987e17151ebf07a8ee4bd1543c378ff21eeb76314a0597ba94a1de17",
+                        "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030834914611005692,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 11.384085915824736,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.4213598470907318,
+                            "latencyMs": 201
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 9.199423567593385,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.44734385558445666,
+                            "latencyMs": 201
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v23",
+                        "inputTokens": 6513,
+                        "outputTokens": 155,
+                        "latencyMs": 4013,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "비공개 팀에 속하지 않은 멤버가 그 팀의 프로젝트를 볼 수 있는지",
+                            "source_ids": [
+                              "SOURCE_4"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_4",
+                          "chunkId": 3231,
+                          "documentVersionId": 2415,
+                          "documentId": "567f0ce8042c",
+                          "sectionId": "567f0ce8042c:a71a73e4ac34",
+                          "documentTitle": "멤버",
+                          "sectionPath": [
+                            "멤버",
+                            "권한"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                          "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "네, 가능합니다. 멤버는 프로젝트를 포함한 워크스페이스의 모든 데이터에 접근할 수 있습니다. 다만 본인이 속하지 않은 비공개 팀 자체는 확인할 수 없다고 안내되어 있습니다. [SOURCE_4]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "네, 가능합니다. 멤버는 프로젝트를 포함한 워크스페이스의 모든 데이터에 접근할 수 있습니다. 다만 본인이 속하지 않은 비공개 팀 자체는 확인할 수 없다고 안내되어 있습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        }
+      ]
+    },
+    {
+      "repeatNo": 4,
+      "executedAt": "2026-09-07T17:27:58.990953+00:00",
+      "results": [
+        {
+          "id": "MQ015",
+          "description": "비공개 팀 접근 권한",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "9bd00186-5699-4dbe-87d0-84d135a84f0f",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "9bd00186-5699-4dbe-87d0-84d135a84f0f",
+                "ragRunId": "cf34c46b-522a-444a-b38e-86c3cf67ad2f",
+                "answer": {
+                  "answerMarkdown": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀을 확인할 수 없고, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다. [1] [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "비공개 팀",
+                    "sectionPath": [
+                      "접근 권한"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "멤버",
+                    "sectionPath": [
+                      "권한"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                "resolvedQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4310,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 31,
+                    "outputTokens": null,
+                    "latencyMs": 299,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v23",
+                    "inputTokens": 6673,
+                    "outputTokens": 157,
+                    "latencyMs": 3958,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "비공개 팀",
+                  "멤버"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.790425462156414,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5864948295815846,
+                            "latencyMs": 312
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.66553863848041,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5112831826272616,
+                            "latencyMs": 312
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3244,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:9f525d515668",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "b2d092eb68fcb946d2d5bd17906c2cda67d1608e10a2d249a5a50edfaf45d2fb",
+                        "content": "비공개 팀은 비즈니스 요금제 이상부터 사용할 수 있습니다. 워크스페이스의 모든 사용자는 새로운 팀을 만들 때 비공개로 설정하거나, 본인이 참여 중인 팀을 비공개 팀으로 전환할 수 있습니다.\n\n비공개 팀은 주로 고객 데이터, HR, 재무 관리처럼 일부 멤버만 접근해야 하는 작업을 안전하게 관리할 때 사용됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 9.596243228790659,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.56502950091933,
+                            "latencyMs": 312
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3231,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:a71a73e4ac34",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "7904fbb4987e17151ebf07a8ee4bd1543c378ff21eeb76314a0597ba94a1de17",
+                        "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030834914611005692,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 11.384085915824736,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.4213598470907318,
+                            "latencyMs": 312
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 9.199423567593385,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.44734385558445666,
+                            "latencyMs": 312
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v23",
+                        "inputTokens": 6673,
+                        "outputTokens": 157,
+                        "latencyMs": 3958,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "비공개 팀에 속하지 않은 멤버가 그 팀의 프로젝트를 볼 수 있는지",
+                            "source_ids": [
+                              "SOURCE_1",
+                              "SOURCE_4"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3245,
+                          "documentVersionId": 2418,
+                          "documentId": "6c3b150c3146",
+                          "sectionId": "6c3b150c3146:f4771653dfff",
+                          "documentTitle": "비공개 팀",
+                          "sectionPath": [
+                            "비공개 팀",
+                            "접근 권한"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                          "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_4",
+                          "chunkId": 3231,
+                          "documentVersionId": 2415,
+                          "documentId": "567f0ce8042c",
+                          "sectionId": "567f0ce8042c:a71a73e4ac34",
+                          "documentTitle": "멤버",
+                          "sectionPath": [
+                            "멤버",
+                            "권한"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                          "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀을 확인할 수 없고, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다. [SOURCE_1] [SOURCE_4]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀을 확인할 수 없고, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다. [1] [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 4
+        }
+      ]
+    },
+    {
+      "repeatNo": 5,
+      "executedAt": "2026-09-07T17:28:03.337451+00:00",
+      "results": [
+        {
+          "id": "MQ015",
+          "description": "비공개 팀 접근 권한",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "67a3df10-2fe0-4977-92b9-65eef4fcfeb4",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "67a3df10-2fe0-4977-92b9-65eef4fcfeb4",
+                "ragRunId": "7abb2cbe-aadd-4371-8c79-3f6720f60927",
+                "answer": {
+                  "answerMarkdown": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀을 확인할 수 없고, 비공개 팀의 내부 정보도 볼 수 없습니다. [1][2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "비공개 팀",
+                    "sectionPath": [
+                      "접근 권한"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "멤버",
+                    "sectionPath": [
+                      "권한"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                "resolvedQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 3310,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 31,
+                    "outputTokens": null,
+                    "latencyMs": 168,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v23",
+                    "inputTokens": 6673,
+                    "outputTokens": 146,
+                    "latencyMs": 3088,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "비공개 팀",
+                  "멤버"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.790425462156414,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5864948295815846,
+                            "latencyMs": 182
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.66553863848041,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5112831826272616,
+                            "latencyMs": 182
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3244,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:9f525d515668",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "b2d092eb68fcb946d2d5bd17906c2cda67d1608e10a2d249a5a50edfaf45d2fb",
+                        "content": "비공개 팀은 비즈니스 요금제 이상부터 사용할 수 있습니다. 워크스페이스의 모든 사용자는 새로운 팀을 만들 때 비공개로 설정하거나, 본인이 참여 중인 팀을 비공개 팀으로 전환할 수 있습니다.\n\n비공개 팀은 주로 고객 데이터, HR, 재무 관리처럼 일부 멤버만 접근해야 하는 작업을 안전하게 관리할 때 사용됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 9.596243228790659,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.56502950091933,
+                            "latencyMs": 182
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3231,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:a71a73e4ac34",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "7904fbb4987e17151ebf07a8ee4bd1543c378ff21eeb76314a0597ba94a1de17",
+                        "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030834914611005692,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 11.384085915824736,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.4213598470907318,
+                            "latencyMs": 182
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 9.199423567593385,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.44734385558445666,
+                            "latencyMs": 182
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v23",
+                        "inputTokens": 6673,
+                        "outputTokens": 146,
+                        "latencyMs": 3088,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "비공개 팀에 속하지 않은 멤버가 그 팀의 프로젝트를 볼 수 있는지",
+                            "source_ids": [
+                              "SOURCE_1",
+                              "SOURCE_4"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3245,
+                          "documentVersionId": 2418,
+                          "documentId": "6c3b150c3146",
+                          "sectionId": "6c3b150c3146:f4771653dfff",
+                          "documentTitle": "비공개 팀",
+                          "sectionPath": [
+                            "비공개 팀",
+                            "접근 권한"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                          "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_4",
+                          "chunkId": 3231,
+                          "documentVersionId": 2415,
+                          "documentId": "567f0ce8042c",
+                          "sectionId": "567f0ce8042c:a71a73e4ac34",
+                          "documentTitle": "멤버",
+                          "sectionPath": [
+                            "멤버",
+                            "권한"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                          "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀을 확인할 수 없고, 비공개 팀의 내부 정보도 볼 수 없습니다. [SOURCE_1][SOURCE_4]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "아니요. 비공개 팀에 속하지 않은 멤버는 그 팀을 확인할 수 없고, 비공개 팀의 내부 정보도 볼 수 없습니다. [1][2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 5
+        }
+      ]
+    }
+  ]
+}

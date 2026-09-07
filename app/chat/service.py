@@ -658,7 +658,11 @@ class ChatService:
             raise RuntimeError("Query Rewrite ModelCall checkpoint가 실행되지 않았습니다.")
         if call.error is None and call.resolution is None:
             raise RuntimeError("Query Rewrite 성공 결과에 resolution이 없습니다.")
-        if call.error is None and not call.trace.succeeded:
+        if (
+            call.error is None
+            and not call.trace.succeeded
+            and call.fallback_reason is None
+        ):
             raise RuntimeError("Query Rewrite 성공 결과의 trace가 FAILED입니다.")
         if call.error is not None and call.trace.succeeded:
             raise RuntimeError("Query Rewrite 실패 결과의 trace가 SUCCESS입니다.")

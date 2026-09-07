@@ -827,7 +827,7 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         # 인용 검증에 도달하지 못한 보류는 판정 자체가 없다
         self.assertIsNone(runs[0].citation_validated)
 
-    async def test_query_rewrite_candidates_use_latest_valid_turn(self) -> None:
+    async def test_query_rewrite_candidates_use_latest_five_valid_turns(self) -> None:
         conversation = await self.store.create_conversation()
         previous_runs = []
         for turn_no in range(1, 7):
@@ -875,14 +875,20 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
 
         candidates = await self.store.get_query_rewrite_candidates(current.id)
 
-        self.assertEqual([6], [turn.turn_no for turn in candidates])
+        self.assertEqual([2, 3, 4, 5, 6], [turn.turn_no for turn in candidates])
         self.assertEqual(
-            [QueryRewriteTurnStatus.COMPLETED],
+            [
+                QueryRewriteTurnStatus.COMPLETED,
+                QueryRewriteTurnStatus.WITHHELD,
+                QueryRewriteTurnStatus.COMPLETED,
+                QueryRewriteTurnStatus.WITHHELD,
+                QueryRewriteTurnStatus.COMPLETED,
+            ],
             [turn.status for turn in candidates],
         )
-        self.assertEqual("이전 답변 6", candidates[0].answer_content)
-        self.assertIsNone(candidates[0].withheld_reason_code)
-        self.assertIsNone(candidates[0].resolved_query)
+        self.assertEqual("이전 답변 6", candidates[-1].answer_content)
+        self.assertIsNone(candidates[-1].withheld_reason_code)
+        self.assertIsNone(candidates[-1].resolved_query)
         self.assertNotIn(1, [turn.turn_no for turn in candidates])
         self.assertNotIn(failed.id, [turn.rag_run_id for turn in candidates])
         self.assertNotIn(cancelled.id, [turn.rag_run_id for turn in candidates])

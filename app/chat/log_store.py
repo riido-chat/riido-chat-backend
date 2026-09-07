@@ -320,7 +320,7 @@ class RagLogStore:
         self,
         rag_run_id: uuid.UUID,
     ) -> List[QueryRewriteCandidateTurn]:
-        """현재 턴 바로 전의 유효한 대화 턴 하나를 반환한다."""
+        """현재 턴 이전의 유효한 최근 5턴을 시간순으로 반환한다."""
 
         current_run = await self._get_processing_run(rag_run_id)
         recent_runs = list(
@@ -358,7 +358,7 @@ class RagLogStore:
                     else None
                 ),
             )
-            for run in recent_runs
+            for run in reversed(recent_runs)
         ]
 
     async def record_query_resolution(

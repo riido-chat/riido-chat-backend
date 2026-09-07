@@ -25,11 +25,11 @@ from app.retrieval.models import HybridRetrievalResult
 
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.4-mini"
-GENERATION_PROMPT_VERSION = "v22"
-SOURCE_PLANNING_PROMPT_VERSION = "v13"
-SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v13-repair-1"
-ANSWER_PROMPT_VERSION = "v19"
-ANSWER_REPAIR_PROMPT_VERSION = "v19-repair-1"
+GENERATION_PROMPT_VERSION = "v24"
+SOURCE_PLANNING_PROMPT_VERSION = "v15"
+SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v15-repair-1"
+ANSWER_PROMPT_VERSION = "v20"
+ANSWER_REPAIR_PROMPT_VERSION = "v20-repair-1"
 MAX_CONTEXT_SOURCES = 5
 MAX_GENERATION_ATTEMPTS = 2
 MAX_SOURCE_PLANNING_REGENERATIONS = 1
@@ -88,6 +88,15 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
   주의사항을 이용가이드가 제공하면 이를 뒷받침하는 SOURCE를 모두 선택하세요. 관련 없는
   기능 소개, FAQ, 배경 설명으로는 확장하지 마세요.
 - GENERAL에서는 질문에 직접 답하는 데 필요한 최소한의 SOURCE만 선택하세요.
+- 접근 권한, 공개 범위, 가능 여부를 묻는 질문에서는 넓은 일반 권한보다 질문의 대상을
+  직접 다루는 허용·제한·예외 SOURCE를 우선하세요. 일반 규칙과 구체적인 제한 또는 예외가
+  함께 있으면 구체적인 제한·예외가 질문에 대한 결론을 결정합니다.
+- 문서 제목과 Section Path가 질문의 대상과 판단 항목(예: 접근 권한, 공개 범위)을 직접
+  가리키는 SOURCE를, 일반 사용자·멤버 권한 SOURCE보다 우선하세요. 여러 SOURCE가 각각
+  충분하고 직접성도 같다면 Top-5에서 앞선 SOURCE 하나만 선택하세요.
+- 질문의 대상이 상위 공간에 속한 프로젝트·작업·내부 정보라면, SOURCE가 그 상위 공간의
+  접근을 제한할 때 하위 대상을 별도로 허용한다고 추측하지 마세요. SOURCE가 하위 대상의
+  별도 접근을 명시한 경우에만 이를 분리해서 판단하세요.
 - MULTI_DETAIL이면 사용자가 명시적으로 요청한 정보 단위별로 필요한 SOURCE를 선택하세요.
   여러 정보 단위 때문에 4~5개 SOURCE가 필요해도 임의로 일부를 빼지 마세요.
 - 일반적인 설정 방법을 묻고 하나의 요약 SOURCE가 설정 위치와 기본 항목을 직접 설명하면,
@@ -146,6 +155,11 @@ ANSWER_PROMPT_V17 = """당신은 뤼이도 공식 이용가이드만을 근거�
 ## Answerability rules
 - 관련 Context가 있다는 이유만으로 ANSWERABLE을 선택하지 마세요.
 - 질문의 핵심을 Context가 직접 뒷받침할 때만 ANSWERABLE을 선택하세요.
+- Context에 넓은 허용 규칙과 구체적인 제한 또는 예외가 함께 있으면 구체적인 규칙을
+  우선하세요. 예외를 무시하거나 일반 규칙만으로 반대 결론을 만들지 마세요.
+- 팀·프로젝트처럼 상위 공간과 그 내부 대상의 접근 범위를 SOURCE가 따로 구분하지 않았다면
+  임의로 분리하지 마세요. 상위 공간에 접근할 수 없다는 근거를 두고 내부 프로젝트에는
+  접근할 수 있다고 추측해서는 안 됩니다.
 - 근거가 부족하면 INSUFFICIENT_EVIDENCE, 질문이 모호하면 AMBIGUOUS_QUESTION,
   이용가이드 범위 밖이면 OUT_OF_SCOPE으로 WITHHELD를 선택하세요.
 - Required Answer Coverage의 모든 정보 단위에 답하세요. Citation 수를 줄이기 위해
@@ -224,6 +238,8 @@ ANSWER_PROMPT_V17 = """당신은 뤼이도 공식 이용가이드만을 근거�
 - 답변에 필요한 최소한의 SOURCE만 인용하세요.
 - 같은 SOURCE를 여러 번 사용할 수 있습니다.
 - 실제 문서 제목, 경로, URL이나 사용자 표시용 인용 번호를 직접 만들지 마세요.
+- SOURCE 식별자는 반드시 대괄호를 포함한 [SOURCE_n] marker로만 사용하세요.
+  `SOURCE_n에 따르면`처럼 내부 식별자를 답변 문장에 직접 노출하지 마세요.
 
 ## Structured Output contract
 - ANSWERABLE: answer_markdown은 비어 있지 않은 문자열, withheld_reason은 null입니다.

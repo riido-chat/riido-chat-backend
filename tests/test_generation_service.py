@@ -426,6 +426,8 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         cases = (
             "marker가 없는 답변",
             "존재하지 않는 근거 [SOURCE_9]",
+            "SOURCE_1에 따르면 접근할 수 있습니다. [SOURCE_1]",
+            "내부 식별자는 `SOURCE_1`입니다. [SOURCE_1]",
         )
 
         for answer_markdown in cases:

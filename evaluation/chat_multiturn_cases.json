@@ -1,5 +1,5 @@
 {
-  "version": "v3",
+  "version": "v4",
   "cases": [
     {
       "id": "MT01",
@@ -336,6 +336,29 @@
           "expectedContextStrategy": "FOLLOW_UP_WINDOW",
           "expectedSelectedTurnNos": [6],
           "resolvedQueryKeywords": ["구글 캘린더", "작업", "마감일"]
+        }
+      ]
+    },
+    {
+      "id": "MT19",
+      "description": "최근 5턴에서 순서로 명시한 과거 연동 선택",
+      "turns": [
+        {
+          "question": "슬랙 연동은 어떤 기능이야?",
+          "expectedStatus": "COMPLETED"
+        },
+        {
+          "question": "구글 캘린더 연동은 어떤 기능이야?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "NEW_TOPIC",
+          "expectedSelectedTurnNos": []
+        },
+        {
+          "question": "아까 첫 번째 연동에서 비공개 채널은 어떻게 연결해?",
+          "expectedStatus": "COMPLETED",
+          "expectedContextStrategy": "FOLLOW_UP_WINDOW",
+          "expectedSelectedTurnNos": [1],
+          "resolvedQueryKeywords": ["슬랙", "비공개 채널", "연결"]
         }
       ]
     }
