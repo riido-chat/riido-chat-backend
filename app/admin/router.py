@@ -1,10 +1,9 @@
 """Admin Markdown 업로드와 검색 반영, GitBook 수집 endpoint."""
 
-import asyncio
 from pathlib import Path
 from typing import Annotated, Callable
 
-from fastapi import APIRouter, Depends, File, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile, status
 
 from app.admin.dependencies import (
     get_admin_ingestion_service,
@@ -41,13 +40,12 @@ from app.admin.schema import (
     AdminReindexResultResponse,
     AdminUploadResultResponse,
     AdminErrorResponse,
-    AdminIngestionStatus,
     AdminGitBookSyncRequest,
-    AdminRecollectAcceptedResponse,
-    RecollectStageValue,
+    AdminGitBookSyncResultResponse,
+    AdminRecollectCounts,
+    AdminRecollectFailure,
 )
 from app.chat.dependencies import get_corpus_state
-from app.core.task_registry import register_pipeline_task
 from app.document.recollect import run_recollect_batch
 from app.document.recollect_service import RecollectService
 from app.indexing.index_job import run_admin_index_job
@@ -287,17 +285,28 @@ def _to_index_version_summary(summary) -> AdminIndexVersionSummary:
 RECOLLECT_ERROR_RESPONSES = {
     status.HTTP_404_NOT_FOUND: {
         "model": AdminErrorResponse,
-        "description": "`NOT_FOUND`: 대상 그룹 또는 배치가 없는 경우입니다.",
+        "description": "`NOT_FOUND`: 대상 그룹이 없는 경우입니다.",
     },
     status.HTTP_409_CONFLICT: {
         "model": AdminErrorResponse,
         "description": "`JOB_IN_PROGRESS`: 같은 그룹에 진행 중 작업이 있는 경우입니다.",
     },
+    status.HTTP_422_UNPROCESSABLE_ENTITY: {
+        "model": AdminErrorResponse,
+        "description": "`INVALID_REQUEST`: `sourceUrl` 이 https 가 아닌 경우입니다.",
+    },
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {
+        "model": AdminErrorResponse,
+        "description": (
+            "`INTERNAL_ERROR`: 처리 중 실패입니다. 페이지 단위 실패는 여기 "
+            "오지 않고 `200` 응답의 `failures` 로 갑니다."
+        ),
+    },
     status.HTTP_502_BAD_GATEWAY: {
         "model": AdminErrorResponse,
         "description": (
-            "`SOURCE_LIST_FAILED`: docs.riido.io 페이지 목록을 읽지 못한 "
-            "경우입니다. 배치를 시작하지 않습니다."
+            "`SOURCE_LIST_FAILED`: GitBook 페이지 목록을 읽지 못한 "
+            "경우입니다. 수집을 시작하지 않습니다."
         ),
     },
 }
@@ -305,38 +314,50 @@ RECOLLECT_ERROR_RESPONSES = {
 
 @router.post(
     "/document-groups/{group_id}/gitbook-sync",
-    response_model=AdminRecollectAcceptedResponse,
-    status_code=status.HTTP_202_ACCEPTED,
+    response_model=AdminGitBookSyncResultResponse,
+    status_code=status.HTTP_200_OK,
     responses=RECOLLECT_ERROR_RESPONSES,
     summary="GitBook 수집",
 )
 async def start_gitbook_sync(
     group_id: int,
     request: AdminGitBookSyncRequest,
-    http_request: Request,
     service: RecollectService = Depends(get_recollect_service),
     embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
         get_chunk_embedder_factory
     ),
-) -> AdminRecollectAcceptedResponse:
-    """루트 URL의 페이지 목록을 읽어 페이지별 실행을 만들고 배치를 시작한다.
+) -> AdminGitBookSyncResultResponse:
+    """페이지 목록과 원문을 읽어 페이지마다 처리하고 집계를 돌려준다.
 
-    같은 루트로 다시 부르면 재탐색이 된다.
+    같은 루트로 다시 부르면 재수집이 된다. 페이지 하나가 실패해도 계속
+    진행하고 counts.failed 로 센다.
     """
 
     accepted = await service.start_sync(group_id, request.source_url)
-    task = asyncio.create_task(
-        run_recollect_batch(accepted.batch_id, embedder_factory)
-    )
-    register_pipeline_task(http_request.app, task)
-    return AdminRecollectAcceptedResponse(
-        batchId=accepted.batch_id,
-        groupId=accepted.group_id,
-        groupSourceId=accepted.group_source_id,
-        rootUrl=accepted.root_url,
-        status=AdminIngestionStatus.PROCESSING,
-        stage=RecollectStageValue.PROCESSING,
-        pageCount=accepted.page_count,
+    await run_recollect_batch(accepted.batch_id, embedder_factory)
+    detail = await service.read_finished_batch(accepted.batch_id)
+
+    counts = detail.counts or {}
+    return AdminGitBookSyncResultResponse(
+        groupSourceId=detail.group_source_id,
+        rootUrl=detail.root_url,
+        counts=AdminRecollectCounts(
+            total=counts.get("total", 0),
+            created=counts.get("created", 0),
+            updated=counts.get("updated", 0),
+            noChange=counts.get("no_change", 0),
+            removed=counts.get("removed", 0),
+            failed=counts.get("failed", 0),
+        ),
+        failures=[
+            AdminRecollectFailure(
+                documentKey=failure.document_key,
+                title=failure.title,
+                ingestionRunId=failure.ingestion_run_id,
+                message=failure.message,
+            )
+            for failure in detail.failures
+        ],
     )
 
 

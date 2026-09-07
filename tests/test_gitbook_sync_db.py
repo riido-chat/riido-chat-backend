@@ -21,7 +21,6 @@ from app.database.models import (
     ExecutionStatus,
     IngestionResultCode,
     IngestionRun,
-    IngestionStage,
 )
 from app.database.session import dispose_engine
 from app.document.document_group import get_default_document_group
@@ -330,14 +329,15 @@ class GitBookSyncDbTest(unittest.IsolatedAsyncioTestCase):
 
         failure = batch.failures[0]
         self.assertIn("broken", failure.document_key)
-        self.assertEqual(IngestionStage.RECEIVING.value, failure.stage)
-        self.assertEqual("UPSTREAM_ERROR", failure.error_code)
-        # 실패 상세는 기존 업로드 실행 조회로 볼 수 있다
+        # 목록 행에는 축약 문장만 넣는다. 원인 코드는 실행 기록에만 남는다
+        self.assertEqual("페이지를 읽지 못했습니다.", failure.message)
+
         async with self.session_factory() as session:
             detail = await AdminIngestionService(session).get_ingestion_run(
                 failure.ingestion_run_id
             )
         self.assertEqual(ExecutionStatus.FAILED, detail.status)
+        self.assertEqual("UPSTREAM_ERROR", detail.error_code)
 
     async def test_console_documents_are_untouched(self) -> None:
         title = f"sync-console-{self.suffix}"

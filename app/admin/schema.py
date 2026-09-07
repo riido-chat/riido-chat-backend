@@ -1,8 +1,7 @@
 """Admin 문서 업로드와 검색 반영, GitBook 수집 HTTP DTO."""
 
 from enum import Enum
-from typing import List, Literal, Optional
-from uuid import UUID
+from typing import List, Optional
 
 from fastapi import UploadFile
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -193,28 +192,6 @@ class AdminGitBookSyncRequest(BaseModel):
         return value
 
 
-class RecollectStageValue(str, Enum):
-    """재탐색 배치의 단계."""
-
-    LISTING = "LISTING"
-    PROCESSING = "PROCESSING"
-
-
-class AdminRecollectAcceptedResponse(BaseModel):
-    """재탐색 접수 결과."""
-
-    model_config = HTTP_DTO_CONFIG
-
-    batch_id: UUID = Field(alias="batchId")
-    group_id: int = Field(alias="groupId")
-    group_source_id: int = Field(alias="groupSourceId")
-    root_url: str = Field(alias="rootUrl")
-    status: Literal[AdminIngestionStatus.PROCESSING]
-    stage: RecollectStageValue
-    # 빈 목록은 list_pages 가 502 SOURCE_LIST_FAILED 로 먼저 막으므로 0 은 오지 않는다.
-    page_count: int = Field(alias="pageCount", ge=1)
-
-
 class AdminRecollectCounts(BaseModel):
     """배치 결과 집계."""
 
@@ -229,15 +206,30 @@ class AdminRecollectCounts(BaseModel):
 
 
 class AdminRecollectFailure(BaseModel):
-    """실패한 페이지 한 건."""
+    """실패한 페이지 한 건. 수집 결과 모달의 목록 행이다."""
 
     model_config = HTTP_DTO_CONFIG
 
     document_key: str = Field(alias="documentKey")
     title: str
+    # 행을 개별로 지목하는 데 쓴다.
     ingestion_run_id: int = Field(alias="ingestionRunId")
-    stage: IngestionStageValue
-    error_code: Optional[IngestionErrorCode] = Field(alias="errorCode")
+    # 행 폭이 좁아 오류 모달의 전문이 아니라 축약 문장을 쓴다.
+    message: str
+
+
+class AdminGitBookSyncResultResponse(BaseModel):
+    """GitBook 수집을 끝내고 돌려주는 집계.
+
+    실행이 동기라 접수 응답이 없다. 페이지가 실패해도 배치는 200 이다.
+    """
+
+    model_config = HTTP_DTO_CONFIG
+
+    group_source_id: int = Field(alias="groupSourceId")
+    root_url: str = Field(alias="rootUrl")
+    counts: AdminRecollectCounts
+    failures: List[AdminRecollectFailure]
 
 
 class SearchStatusValue(str, Enum):
