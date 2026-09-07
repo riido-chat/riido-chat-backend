@@ -62,19 +62,11 @@ INTERNAL_ERROR = "INTERNAL_ERROR"
 class AdminApiError(RuntimeError):
     """Admin API가 상태 코드와 오류 응답으로 변환할 수 있는 예외."""
 
-    def __init__(
-        self,
-        code: str,
-        message: str,
-        status_code: int,
-        stage: Optional[str] = None,
-    ) -> None:
+    def __init__(self, code: str, message: str, status_code: int) -> None:
         super().__init__(message)
         self.code = code
         self.message = message
         self.status_code = status_code
-        # 접수 전 거절에만 붙는다. FE가 3-4 원인 문구 변형을 고를 때 쓴다.
-        self.stage = stage
 
 
 class InvalidUploadFileError(AdminApiError):
@@ -83,7 +75,6 @@ class InvalidUploadFileError(AdminApiError):
             INVALID_FILE,
             message,
             HTTPStatus.UNPROCESSABLE_ENTITY,
-            stage=IngestionStage.VALIDATING.value,
         )
 
 
@@ -129,6 +120,22 @@ class AdminJobInProgressError(AdminApiError):
             JOB_IN_PROGRESS,
             "다른 관리자 문서 작업을 처리 중입니다.",
             HTTPStatus.CONFLICT,
+        )
+
+
+class IngestionFailedError(AdminApiError):
+    """접수 뒤 처리에서 실패했다. 실행 기록에 남은 원인을 그대로 올린다."""
+
+    def __init__(
+        self,
+        error_code: Optional[str],
+        error_message: Optional[str],
+    ) -> None:
+        code = INVALID_FILE if error_code == INVALID_FILE else INTERNAL_ERROR
+        super().__init__(
+            code,
+            error_message or "문서를 처리하지 못했습니다.",
+            HTTPStatus.INTERNAL_SERVER_ERROR,
         )
 
 
@@ -189,7 +196,6 @@ class AdminIngestionService:
         *,
         group_id: int,
         title: str,
-        category: Optional[str] = None,
         filename: str,
     ) -> AcceptedIngestion:
         """그룹 작업 gate 안에서 문서 원본과 PROCESSING 실행을 확정한다.
@@ -202,11 +208,7 @@ class AdminIngestionService:
             group = await self._get_group(group_id)
             await self._acquire_group_gate(group.id)
             await self._ensure_no_processing_job(group.id)
-            source = await self._find_or_create_upload_source(
-                group,
-                title=title,
-                category=category,
-            )
+            source = await self._find_or_create_upload_source(group, title=title)
             return await self._accept(source, filename)
         except Exception:
             await self._session.rollback()
@@ -274,6 +276,19 @@ class AdminIngestionService:
         )
         await self._session.commit()
         return result
+
+    async def read_finished_run(
+        self,
+        ingestion_run_id: int,
+    ) -> IngestionRunDetail:
+        """파이프라인이 다른 세션에서 마감한 실행을 읽는다.
+
+        run_admin_ingestion 이 자기 세션으로 커밋하므로 요청 세션의
+        identity map 을 비운 뒤 다시 조회한다.
+        """
+
+        self._session.expire_all()
+        return await self.get_ingestion_run(ingestion_run_id)
 
     async def get_ingestion_run(self, ingestion_run_id: int) -> IngestionRunDetail:
         """수집 실행과 성공 시 생성한 문서 버전을 함께 조회한다."""
@@ -368,7 +383,6 @@ class AdminIngestionService:
         group: DocumentGroup,
         *,
         title: str,
-        category: Optional[str],
     ) -> DocumentSource:
         document_key = build_upload_document_key(title)
         # 콘솔 문서는 밀어 넣는 문서라 수집 원천이 없다. 키는 그룹 안에서 유일하다.
@@ -390,10 +404,7 @@ class AdminIngestionService:
                     document_key,
                 ),
                 title=title,
-                metadata_={
-                    "document_id": f"admin-{uuid.uuid4().hex}",
-                    "category": category,
-                },
+                metadata_={"document_id": f"admin-{uuid.uuid4().hex}"},
                 enabled=True,
                 created_at=now,
                 updated_at=now,
@@ -412,7 +423,7 @@ class AdminIngestionService:
         if not isinstance(document_id, str) or not document_id:
             document_id = f"admin-{uuid.uuid4().hex}"
         source.title = title
-        source.metadata_ = {"document_id": document_id, "category": category}
+        source.metadata_ = {"document_id": document_id}
         source.enabled = True
         source.updated_at = datetime.now(timezone.utc)
         await self._session.flush()

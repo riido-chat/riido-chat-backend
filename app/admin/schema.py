@@ -29,7 +29,6 @@ class AdminDocumentUploadRequest(BaseModel):
     model_config = ADMIN_UPLOAD_DTO_CONFIG
 
     title: str = Field(min_length=1, max_length=300)
-    category: Optional[str] = Field(default=None, max_length=100)
     file: UploadFile
 
     @field_validator("title", mode="before")
@@ -38,13 +37,6 @@ class AdminDocumentUploadRequest(BaseModel):
         if isinstance(title, str):
             return title.strip()
         return title
-
-    @field_validator("category", mode="before")
-    @classmethod
-    def normalize_category(cls, category: object) -> object:
-        if isinstance(category, str):
-            return category.strip() or None
-        return category
 
 
 class AdminDocumentRevisionRequest(BaseModel):
@@ -70,7 +62,6 @@ class AdminErrorCode(str, Enum):
     JOB_IN_PROGRESS = "JOB_IN_PROGRESS"
     REINDEX_NOT_REQUIRED = "REINDEX_NOT_REQUIRED"
     NO_READY_DOCUMENTS = "NO_READY_DOCUMENTS"
-    RETRY_NOT_ALLOWED = "RETRY_NOT_ALLOWED"
     SOURCE_LIST_FAILED = "SOURCE_LIST_FAILED"
     NOT_FOUND = "NOT_FOUND"
     INTERNAL_ERROR = "INTERNAL_ERROR"
@@ -84,16 +75,20 @@ class AdminError(BaseModel):
 
 
 class AdminErrorResponse(BaseModel):
+    """오류 본문은 code 와 message 둘이다.
+
+    화면 문구는 message 를 그대로 보인다. code 는 어느 화면에 보일지만 정한다.
+    실행의 단계는 ingestion_runs 에 기록하고 API 로 노출하지 않는다.
+    """
+
     model_config = HTTP_DTO_CONFIG
 
     code: AdminErrorCode
     message: str
-    # 접수 전 거절에만 붙는다. FE가 3-4 원인 문구 변형을 고를 때 쓴다.
-    stage: Optional[str] = None
 
 
 class IngestionStageValue(str, Enum):
-    """업로드 실행의 진행 단계. FE는 이 값으로 3-4 원인 문구를 고른다."""
+    """업로드 실행의 진행 단계. 기록용이고 응답으로 내보내지 않는다."""
 
     RECEIVING = "RECEIVING"
     VALIDATING = "VALIDATING"
@@ -102,15 +97,6 @@ class IngestionStageValue(str, Enum):
     CHUNKING = "CHUNKING"
     EMBEDDING = "EMBEDDING"
     PERSISTING = "PERSISTING"
-
-
-class AdminIngestionAcceptedResponse(BaseModel):
-    model_config = HTTP_DTO_CONFIG
-
-    ingestion_run_id: int = Field(alias="ingestionRunId")
-    document_id: int = Field(alias="documentId")
-    status: Literal[AdminIngestionStatus.PROCESSING]
-    stage: IngestionStageValue
 
 
 class IngestionResultCodeValue(str, Enum):
@@ -148,6 +134,25 @@ class AdminDuplicateDocument(BaseModel):
 
     document_id: int = Field(alias="documentId")
     title: str
+
+
+class AdminUploadResultResponse(BaseModel):
+    """업로드 처리를 끝내고 돌려주는 결과.
+
+    실행이 동기라 접수 응답이 없다. 요청의 응답이 곧 결과다.
+    """
+
+    model_config = HTTP_DTO_CONFIG
+
+    ingestion_run_id: int = Field(alias="ingestionRunId")
+    document_id: int = Field(alias="documentId")
+    result_code: IngestionResultCodeValue = Field(alias="resultCode")
+    document_version_id: Optional[int] = Field(alias="documentVersionId")
+    version_no: Optional[int] = Field(alias="versionNo", ge=1)
+    section_count: Optional[int] = Field(alias="sectionCount", ge=0)
+    chunk_count: Optional[int] = Field(alias="chunkCount", ge=0)
+    chunk_stats: Optional[AdminChunkStats] = Field(alias="chunkStats")
+    duplicate_of: Optional[AdminDuplicateDocument] = Field(alias="duplicateOf")
 
 
 class IndexRunStageValue(str, Enum):

@@ -186,7 +186,7 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(10, model_calls[0].input_tokens)
         self.assertEqual(active_before, await self._active_index_ids())
 
-    async def test_http_upload_and_polling_complete_end_to_end(self) -> None:
+    async def test_http_upload_completes_in_one_request(self) -> None:
         title = self._new_title()
         raw_content = f"# API 업로드\n\n## 이용 방법\n\n실제 multipart 본문 {title}\n"
         active_before = await self._active_index_ids()
@@ -200,9 +200,9 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
             transport=ASGITransport(app=app),
             base_url="http://testserver",
         ) as client:
-            accepted_response = await client.post(
+            response = await client.post(
                 "/api/admin/document-groups/1/documents",
-                data={"title": title, "category": "test"},
+                data={"title": title},
                 files={
                     "file": (
                         "api-smoke.md",
@@ -211,33 +211,23 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
                     )
                 },
             )
-            self.assertEqual(202, accepted_response.status_code)
-            accepted = accepted_response.json()
 
-        # 실행 조회 라우트가 없어져 결과는 서비스로 확인한다.
-        # 동기 전환이 끝나면 업로드 응답이 이 값을 바로 돌려준다.
-        detail = None
-        for _ in range(100):
-            async with self.session_factory() as session:
-                detail = await AdminIngestionService(session).get_ingestion_run(
-                    accepted["ingestionRunId"]
-                )
-            if detail.status != ExecutionStatus.PROCESSING:
-                break
-            await asyncio.sleep(0.05)
-
-        self.assertIsNotNone(detail)
-        self.assertEqual(ExecutionStatus.SUCCESS, detail.status)
-        self.assertEqual(IngestionResultCode.CREATED.value, detail.result_code)
-        self.assertEqual(accepted["documentId"], detail.document_source_id)
+        # 폴링 없이 요청 하나로 끝난다
+        self.assertEqual(200, response.status_code)
+        body = response.json()
+        self.assertEqual(IngestionResultCode.CREATED.value, body["resultCode"])
+        self.assertEqual(1, body["versionNo"])
+        self.assertNotIn("status", body)
+        self.assertNotIn("stage", body)
 
         async with self.session_factory() as session:
             version = await session.get(
                 DocumentVersion,
-                detail.document_version_id,
+                body["documentVersionId"],
             )
         self.assertEqual(DocumentVersionStatus.READY, version.status)
         self.assertEqual(raw_content, version.raw_content)
+        # 업로드는 검색에 반영하지 않는다
         self.assertEqual(active_before, await self._active_index_ids())
 
     async def test_upload_source_uses_document_key_and_console_uri(self) -> None:
@@ -327,7 +317,6 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
             return await AdminIngestionService(session).start_new_document(
                 group_id=group.id,
                 title=title,
-                category="test",
                 filename="guide.md",
             )
 

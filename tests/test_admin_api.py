@@ -1,5 +1,6 @@
 import unittest
 from collections.abc import AsyncIterator
+from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 from unittest.mock import ANY, AsyncMock, patch
 
@@ -7,12 +8,17 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.admin.dependencies import get_admin_ingestion_service
+from app.database.models import ExecutionStatus
 from app.document.ingestion_service import (
     AcceptedIngestion,
     AdminIngestionService,
     DocumentNotRevisableError,
+    IngestionRunDetail,
 )
 from app.main import create_app
+
+
+STARTED_AT = datetime(2026, 9, 6, 10, 0, tzinfo=timezone.utc)
 
 
 @asynccontextmanager
@@ -34,11 +40,38 @@ class AdminDocumentApiTest(unittest.TestCase):
         self.app.dependency_overrides.clear()
         self.client.close()
 
-    def test_accepts_markdown_upload_and_starts_background_ingestion(self) -> None:
+    def _success_detail(self, **changes) -> IngestionRunDetail:
+        base = {
+            "ingestion_run_id": 101,
+            "document_source_id": 42,
+            "status": ExecutionStatus.SUCCESS,
+            "stage": "PERSISTING",
+            "document_version_id": 5001,
+            "version_no": 1,
+            "section_count": 2,
+            "chunk_count": 2,
+            "error_code": None,
+            "error_message": None,
+            "started_at": STARTED_AT,
+            "finished_at": STARTED_AT,
+            "result_code": "CREATED",
+            "chunk_stats": {
+                "added": 2,
+                "changed": 0,
+                "deleted": 0,
+                "reused": 0,
+            },
+            "duplicate_of": None,
+        }
+        base.update(changes)
+        return IngestionRunDetail(**base)
+
+    def test_upload_returns_result_synchronously(self) -> None:
         self.service.start_new_document.return_value = AcceptedIngestion(
             ingestion_run_id=101,
             document_source_id=42,
         )
+        self.service.read_finished_run.return_value = self._success_detail()
 
         with patch(
             "app.admin.router.run_admin_ingestion",
@@ -49,52 +82,71 @@ class AdminDocumentApiTest(unittest.TestCase):
                 "# 문서\n\n## 안내\n\n본문".encode("utf-8"),
             )
 
-        self.assertEqual(202, response.status_code)
+        self.assertEqual(200, response.status_code)
         self.assertEqual(
             {
                 "ingestionRunId": 101,
                 "documentId": 42,
-                "status": "PROCESSING",
-                "stage": "RECEIVING",
+                "resultCode": "CREATED",
+                "documentVersionId": 5001,
+                "versionNo": 1,
+                "sectionCount": 2,
+                "chunkCount": 2,
+                "chunkStats": {
+                    "added": 2,
+                    "changed": 0,
+                    "deleted": 0,
+                    "reused": 0,
+                },
+                "duplicateOf": None,
             },
             response.json(),
         )
+        # 요청 필드는 file 과 title 둘뿐이다
         self.service.start_new_document.assert_awaited_once_with(
             group_id=1,
             title="문서 제목",
-            category="guide",
             filename="guide.md",
         )
+        # background task 가 아니라 요청 안에서 끝난다
         run.assert_awaited_once_with(
             101,
             "# 문서\n\n## 안내\n\n본문",
             ANY,
         )
 
-    def test_accepts_upload_without_category(self) -> None:
+    def test_upload_failure_becomes_500_without_stage(self) -> None:
         self.service.start_new_document.return_value = AcceptedIngestion(
-            ingestion_run_id=102,
-            document_source_id=43,
+            ingestion_run_id=101,
+            document_source_id=42,
+        )
+        self.service.read_finished_run.return_value = self._success_detail(
+            status=ExecutionStatus.FAILED,
+            error_code="INVALID_FILE",
+            error_message="문서 구조를 분석하지 못했습니다.",
         )
 
-        with patch(
-            "app.admin.router.run_admin_ingestion",
-            new=AsyncMock(),
-        ):
-            response = self.client.post(
-                "/api/admin/document-groups/1/documents",
-                data={"title": "문서 제목"},
-                files={"file": ("guide.md", b"# guide", "text/markdown")},
-            )
+        with patch("app.admin.router.run_admin_ingestion", new=AsyncMock()):
+            response = self._upload("guide.md", b"# guide")
 
-        self.assertEqual(202, response.status_code)
-        self.assertEqual("RECEIVING", response.json()["stage"])
-        self.service.start_new_document.assert_awaited_once_with(
-            group_id=1,
-            title="문서 제목",
-            category=None,
-            filename="guide.md",
+        self.assertEqual(500, response.status_code)
+        body = response.json()
+        self.assertEqual("INVALID_FILE", body["code"])
+        self.assertEqual("문서 구조를 분석하지 못했습니다.", body["message"])
+        # 오류 본문은 code 와 message 둘뿐이다
+        self.assertEqual({"code", "message"}, set(body))
+
+    def test_upload_rejects_category_field(self) -> None:
+        """분류는 요청 필드가 아니다."""
+
+        response = self.client.post(
+            "/api/admin/document-groups/1/documents",
+            data={"title": "문서 제목", "category": "guide"},
+            files={"file": ("guide.md", b"# guide", "text/markdown")},
         )
+
+        self.assertEqual(422, response.status_code)
+        self.service.start_new_document.assert_not_awaited()
 
     def test_rejects_source_url_field(self) -> None:
         # 콘솔 문서의 canonical_uri 는 서버가 만든다. 입력으로 받지 않는다
@@ -142,7 +194,6 @@ class AdminDocumentApiTest(unittest.TestCase):
             "/api/admin/document-groups/1/documents",
             data={
                 "title": "문서 제목",
-                "category": "guide",
                 "extra": "not-allowed",
             },
             files={"file": ("guide.md", b"# guide", "text/markdown")},
@@ -171,13 +222,15 @@ class AdminDocumentApiTest(unittest.TestCase):
 
         self.assertEqual(404, response.status_code)
 
-    def test_openapi_documents_multipart_request_and_accepted_response(self) -> None:
+    def test_openapi_documents_multipart_request_and_result_response(self) -> None:
         operation = self.app.openapi()["paths"][
             "/api/admin/document-groups/{group_id}/documents"
         ]["post"]
 
         self.assertIn("multipart/form-data", operation["requestBody"]["content"])
-        self.assertIn("202", operation["responses"])
+        self.assertIn("200", operation["responses"])
+        self.assertNotIn("202", operation["responses"])
+        self.assertIn("500", operation["responses"])
         self.assertIn("409", operation["responses"])
         self.assertIn("413", operation["responses"])
         self.assertIn("FILE_TOO_LARGE", operation["responses"]["413"]["description"])
@@ -194,10 +247,7 @@ class AdminDocumentApiTest(unittest.TestCase):
     def _upload(self, filename: str, content: bytes):
         return self.client.post(
             "/api/admin/document-groups/1/documents",
-            data={
-                "title": " 문서 제목 ",
-                "category": " guide ",
-            },
+            data={"title": " 문서 제목 "},
             files={"file": (filename, content, "application/octet-stream")},
         )
 
