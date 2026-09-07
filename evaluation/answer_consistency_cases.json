@@ -1,5 +1,5 @@
 {
-  "version": "answer-consistency-v1",
+  "version": "answer-consistency-v2",
   "purpose": "동일 질문 반복에서 핵심 사실, 필수 설명, 보류 판단, 문맥 선택, 인용 적합성의 변동 시작 단계를 확인한다.",
   "cases": [
     {
@@ -13,11 +13,10 @@
           "expectedDefinitionSentenceConceptGroups": [
             ["팀", "사람", "사용자"],
             ["소통", "커뮤니케이션"],
-            ["도구", "서비스"]
+            ["도구", "서비스", "공간"]
           ],
           "expectedAnswerConceptGroups": [
             ["뤼이도"],
-            ["연동", "연결"],
             ["알림", "업데이트", "댓글", "논의", "기록"]
           ],
           "minimumCitationCount": 1,
