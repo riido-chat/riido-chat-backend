@@ -372,6 +372,27 @@ def evaluate_turn(
             f"actual={db_snapshot['status']}"
         )
 
+    expected_planning_status = expected.get("expectedPlanningStatus")
+    if expected_planning_status is not None:
+        generation_snapshot = db_snapshot.get("stageTrace", {}).get(
+            "generation",
+            {},
+        )
+        planning_output = generation_snapshot.get("planningOutput")
+        if isinstance(planning_output, dict) and "value" in planning_output:
+            planning_output = planning_output["value"]
+        actual_planning_status = (
+            planning_output.get("status")
+            if isinstance(planning_output, dict)
+            else None
+        )
+        if actual_planning_status != expected_planning_status:
+            failures.append(
+                "Planning status 불일치: "
+                f"expected={expected_planning_status}, "
+                f"actual={actual_planning_status}"
+            )
+
     expected_strategy = expected.get("expectedContextStrategy")
     if (
         expected_strategy is not None

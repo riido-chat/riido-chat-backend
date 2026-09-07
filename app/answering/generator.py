@@ -25,14 +25,34 @@ from app.retrieval.models import HybridRetrievalResult
 
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.4-mini"
-GENERATION_PROMPT_VERSION = "v20"
-SOURCE_PLANNING_PROMPT_VERSION = "v11"
-SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v11-repair-1"
-ANSWER_PROMPT_VERSION = "v17"
-ANSWER_REPAIR_PROMPT_VERSION = "v17-repair-1"
+GENERATION_PROMPT_VERSION = "v22"
+SOURCE_PLANNING_PROMPT_VERSION = "v13"
+SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v13-repair-1"
+ANSWER_PROMPT_VERSION = "v19"
+ANSWER_REPAIR_PROMPT_VERSION = "v19-repair-1"
 MAX_CONTEXT_SOURCES = 5
 MAX_GENERATION_ATTEMPTS = 2
 MAX_SOURCE_PLANNING_REGENERATIONS = 1
+
+PROCEDURE_EVIDENCE_RULES = """## Procedure evidence sufficiency
+- Answer Type이 PROCEDURE이면, 사용자가 SOURCE만 보고 요청한 행동을 수행할 수 있을 때만
+  근거가 충분합니다. 수행 과정에서 질문의 핵심 행동을 추측해야 하면 불충분합니다.
+- 질문과 SOURCE가 설명하는 행동의 대상과 목적이 같아야 합니다. 이름이 비슷한 대상이나
+  참여, 생성, 비활성화처럼 서로 다른 행동의 절차는 대신 사용할 수 없습니다.
+- 요청한 행동을 수행하는 주체와 SOURCE의 행동 주체도 같아야 합니다. 사용자가 관리자의
+  실행 방법을 물었는데 SOURCE가 참여자의 조건만 설명한다면 행동 방향이 다릅니다.
+- 기능을 관리할 수 있다는 설명, 메뉴 이름, 사용 가능 여부, 필요한 권한이나 조건만으로는
+  실제 방법을 뒷받침할 수 없습니다. 요청한 행동을 실행하는 동작이 함께 있어야 합니다.
+- 질문과 같은 명사나 동사가 SOURCE에 등장한다는 이유만으로 절차 근거라고 판정하지 마세요.
+  예를 들어 "참여하려면 관리자의 초대가 필요하다"는 참여 조건이며, 관리자가 사용자를
+  초대하는 실행 방법의 근거가 아닙니다. "멤버를 관리하는 메뉴"도 추가·초대 동작을 직접
+  설명하지 않으면 멤버 초대 방법의 근거가 아닙니다.
+- 위치만 묻는 질문은 정확한 메뉴나 화면 위치로 충분할 수 있습니다. 방법이나 절차를 묻는
+  질문은 위치와 함께 그 위치에서 수행할 핵심 동작이 필요합니다.
+- 모든 절차에 경로, 버튼, 입력값, 저장 단계를 일률적으로 요구하지 마세요. SOURCE가 한 단계
+  동작만으로 요청을 실제 완료한다고 명시하면 그 한 단계로 충분합니다.
+- 직접 절차가 없고 관련 기능이나 조건만 있으면, 관련 안내로 질문 범위를 바꾸거나 일부만
+  답하지 말고 INSUFFICIENT_EVIDENCE로 WITHHELD 처리하세요."""
 
 SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답변에 필요한 근거를 판정합니다.
 
@@ -75,8 +95,6 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
 - 사용자가 여러 하위 항목의 상세 설명을 명시적으로 함께 요청하면, 각 요청을 실제로
   뒷받침하는 SOURCE를 모두 선택하세요. 요약 SOURCE만으로 세부 답변을 대신하지 마세요.
 - 같은 내용을 중복 설명하는 SOURCE는 더 직접적이고 충분한 것만 선택하세요.
-- "방법", "어디서", "어떻게 설정"을 묻는 정보 단위는 실제 경로, 단계, 설정값 등
-  실행 가능한 설명이 있어야 뒷받침됩니다. 기능이 가능하다는 언급만으로는 부족합니다.
 - 이름이 비슷해도 별도 기능은 서로의 근거가 아닙니다. 예를 들어 "자동화" 기능을
   묻는 질문을 "자동으로 스프린트가 활성화됨"이라는 문장으로 뒷받침하지 마세요.
 - 각 정보 단위마다 그것을 완전하게 뒷받침하는 SOURCE를 evidence_requirements에
@@ -88,6 +106,8 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
   INSUFFICIENT_EVIDENCE로 WITHHELD를 선택하세요.
 - 날씨, 일반 지식, 다른 제품 사용법처럼 뤼이도 제품이나 이용가이드의 주제 자체와
   무관한 질문만 OUT_OF_SCOPE으로 WITHHELD를 선택하세요.
+
+""" + PROCEDURE_EVIDENCE_RULES + """
 
 ## Scope examples
 - "스프린트는 어떻게 설정하나요?" → SUMMARY, 정보 단위는 "스프린트 설정 방법"
@@ -130,6 +150,8 @@ ANSWER_PROMPT_V17 = """당신은 뤼이도 공식 이용가이드만을 근거�
   이용가이드 범위 밖이면 OUT_OF_SCOPE으로 WITHHELD를 선택하세요.
 - Required Answer Coverage의 모든 정보 단위에 답하세요. Citation 수를 줄이기 위해
   사용자가 요청한 정보 단위를 생략하거나 질문 범위를 임의로 축소하지 마세요.
+
+""" + PROCEDURE_EVIDENCE_RULES + """
 
 ## Answer style
 - 자연스러운 한국어 존댓말을 사용하세요.

@@ -365,6 +365,59 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual([], failures)
 
+    def test_accepts_matching_planning_status(self) -> None:
+        failures = evaluate_turn(
+            {
+                "expectedStatus": "WITHHELD",
+                "expectedPlanningStatus": "WITHHELD",
+            },
+            200,
+            {"status": "WITHHELD"},
+            {
+                "status": "WITHHELD",
+                "contextStrategy": "NEW_TOPIC",
+                "selectedTurnNos": [],
+                "resolvedQuery": "질문",
+                "stageTrace": {
+                    "generation": {
+                        "planningOutput": {
+                            "availability": "AVAILABLE",
+                            "value": {"status": "WITHHELD"},
+                        }
+                    }
+                },
+            },
+        )
+
+        self.assertEqual([], failures)
+
+    def test_reports_planning_status_mismatch(self) -> None:
+        failures = evaluate_turn(
+            {
+                "expectedStatus": "WITHHELD",
+                "expectedPlanningStatus": "WITHHELD",
+            },
+            200,
+            {"status": "WITHHELD"},
+            {
+                "status": "WITHHELD",
+                "contextStrategy": "NEW_TOPIC",
+                "selectedTurnNos": [],
+                "resolvedQuery": "질문",
+                "stageTrace": {
+                    "generation": {
+                        "planningOutput": {
+                            "availability": "AVAILABLE",
+                            "value": {"status": "ANSWERABLE"},
+                        }
+                    }
+                },
+            },
+        )
+
+        self.assertEqual(1, len(failures))
+        self.assertIn("Planning status 불일치", failures[0])
+
     def test_reports_context_and_resolved_query_mismatches(self) -> None:
         failures = evaluate_turn(
             {
