@@ -1,6 +1,7 @@
 import unittest
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, patch
 
 from fastapi import FastAPI
@@ -8,13 +9,20 @@ from fastapi.testclient import TestClient
 
 from app.admin.dependencies import get_index_reindex_service
 from app.chat.dependencies import get_corpus_state
+from app.database.models import ExecutionStatus
+from app.document.ingestion_service import DocumentGroupNotFoundError
 from app.indexing.index_service import (
     AcceptedIndexRun,
     IndexReindexService,
+    IndexRunDetail,
+    IndexVersionSummary,
     NoReadyDocumentsError,
     ReindexNotRequiredError,
 )
 from app.main import create_app
+
+
+STARTED_AT = datetime(2026, 9, 6, 10, 0, tzinfo=timezone.utc)
 
 
 @asynccontextmanager
@@ -40,8 +48,8 @@ class AdminIndexRunApiTest(unittest.TestCase):
         self.app.dependency_overrides.clear()
         self.client.close()
 
-    def test_reindex_accepts_and_starts_background_job(self) -> None:
-        self.service.start_reindex.return_value = AcceptedIndexRun(
+    def _accepted(self) -> AcceptedIndexRun:
+        return AcceptedIndexRun(
             index_run_id=311,
             index_version_id=59,
             group_id=1,
@@ -50,21 +58,90 @@ class AdminIndexRunApiTest(unittest.TestCase):
             stage="BUILDING",
         )
 
-        response = self.client.post("/api/admin/document-groups/1/reindex")
+    def _detail(self, **changes) -> IndexRunDetail:
+        base = {
+            "index_run_id": 311,
+            "group_id": 1,
+            "index_version_id": 59,
+            "operation_type": "BUILD_AND_APPLY",
+            "trigger_type": "MANUAL",
+            "status": ExecutionStatus.SUCCESS,
+            "stage": "APPLYING",
+            "started_at": STARTED_AT,
+            "finished_at": STARTED_AT,
+            "index_version": IndexVersionSummary(
+                index_version_id=59,
+                version_no=13,
+            ),
+            "previous_index_version": IndexVersionSummary(
+                index_version_id=57,
+                version_no=12,
+            ),
+        }
+        base.update(changes)
+        return IndexRunDetail(**base)
 
-        self.assertEqual(202, response.status_code)
+    def test_reindex_returns_version_transition(self) -> None:
+        self.service.start_reindex.return_value = self._accepted()
+        self.service.read_finished_run.return_value = self._detail()
+
+        with patch(
+            "app.admin.router.run_admin_index_job",
+            new=AsyncMock(),
+        ) as job:
+            response = self.client.post("/api/admin/document-groups/1/reindex")
+
+        self.assertEqual(200, response.status_code)
         self.assertEqual(
             {
                 "indexRunId": 311,
-                "indexVersionId": 59,
-                "groupId": 1,
-                "operationType": "BUILD_AND_APPLY",
-                "triggerType": "MANUAL",
-                "status": "PROCESSING",
-                "stage": "BUILDING",
+                "indexVersion": {"indexVersionId": 59, "versionNo": 13},
+                "previousIndexVersion": {
+                    "indexVersionId": 57,
+                    "versionNo": 12,
+                },
             },
             response.json(),
         )
+        # background task 가 아니라 요청 안에서 끝난다
+        job.assert_awaited_once()
+
+    def test_first_reindex_has_no_previous_version(self) -> None:
+        self.service.start_reindex.return_value = self._accepted()
+        self.service.read_finished_run.return_value = self._detail(
+            previous_index_version=None,
+        )
+
+        with patch("app.admin.router.run_admin_index_job", new=AsyncMock()):
+            response = self.client.post("/api/admin/document-groups/1/reindex")
+
+        self.assertIsNone(response.json()["previousIndexVersion"])
+
+    def test_reindex_failure_returns_500_internal_error(self) -> None:
+        """처리 중 실패는 원인을 가리지 않고 코드 하나로 내린다."""
+
+        self.service.start_reindex.return_value = self._accepted()
+        self.service.read_finished_run.return_value = self._detail(
+            status=ExecutionStatus.FAILED,
+            error_code="CORPUS_RELOAD_FAILED",
+            error_message="corpus 재적재에 실패했습니다.",
+        )
+
+        with patch("app.admin.router.run_admin_index_job", new=AsyncMock()):
+            response = self.client.post("/api/admin/document-groups/1/reindex")
+
+        self.assertEqual(500, response.status_code)
+        body = response.json()
+        self.assertEqual("INTERNAL_ERROR", body["code"])
+        self.assertEqual({"code", "message"}, set(body))
+
+    def test_reindex_returns_404_for_unknown_group(self) -> None:
+        self.service.start_reindex.side_effect = DocumentGroupNotFoundError()
+
+        response = self.client.post("/api/admin/document-groups/999/reindex")
+
+        self.assertEqual(404, response.status_code)
+        self.assertEqual("NOT_FOUND", response.json()["code"])
 
     def test_reindex_returns_409_when_nothing_changed(self) -> None:
         self.service.start_reindex.side_effect = ReindexNotRequiredError()

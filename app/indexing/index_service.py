@@ -34,6 +34,7 @@ from app.indexing.index_builder import (
 NOT_FOUND = "NOT_FOUND"
 REINDEX_NOT_REQUIRED = "REINDEX_NOT_REQUIRED"
 NO_READY_DOCUMENTS = "NO_READY_DOCUMENTS"
+INTERNAL_ERROR = "INTERNAL_ERROR"
 
 
 class DocumentGroupNotFoundError(AdminApiError):
@@ -42,6 +43,20 @@ class DocumentGroupNotFoundError(AdminApiError):
             NOT_FOUND,
             "존재하지 않는 문서 그룹입니다.",
             HTTPStatus.NOT_FOUND,
+        )
+
+
+class IndexRunFailedError(AdminApiError):
+    """처리 중 실패다. 원인은 index_runs 의 error_code 에만 남는다.
+
+    화면이 네 원인을 구분하지 않으므로 응답도 구분하지 않는다.
+    """
+
+    def __init__(self, error_message: Optional[str] = None) -> None:
+        super().__init__(
+            INTERNAL_ERROR,
+            error_message or "검색 반영에 실패했습니다.",
+            HTTPStatus.INTERNAL_SERVER_ERROR,
         )
 
 
@@ -88,8 +103,6 @@ class AcceptedIndexRun:
 class IndexVersionSummary:
     index_version_id: int
     version_no: Optional[int]
-    status: str
-    activated_at: Optional[datetime]
 
 
 @dataclass(frozen=True)
@@ -153,6 +166,16 @@ class IndexReindexService:
         await self._session.commit()
         return accepted
 
+    async def read_finished_run(self, index_run_id: int) -> IndexRunDetail:
+        """파이프라인이 다른 세션에서 마감한 실행을 읽는다.
+
+        run_admin_index_job 이 자기 세션으로 커밋하므로 요청 세션의
+        identity map 을 비운 뒤 다시 조회한다.
+        """
+
+        self._session.expire_all()
+        return await self.get_index_run(index_run_id)
+
     async def get_index_run(self, index_run_id: int) -> IndexRunDetail:
         """실행 한 건의 진행과 결과를 조립한다."""
 
@@ -184,8 +207,6 @@ class IndexReindexService:
         summary = IndexVersionSummary(
             index_version_id=index_version.id,
             version_no=index_version.version_no,
-            status=index_version.status.value,
-            activated_at=index_version.activated_at,
         )
         if run.status == ExecutionStatus.FAILED:
             return replace(
@@ -229,8 +250,6 @@ class IndexReindexService:
         return IndexVersionSummary(
             index_version_id=previous.id,
             version_no=previous.version_no,
-            status=previous.status.value,
-            activated_at=previous.activated_at,
         )
 
     async def _get_group(self, group_id: int):
