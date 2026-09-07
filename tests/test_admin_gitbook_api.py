@@ -11,7 +11,10 @@ from fastapi.testclient import TestClient
 from app.admin.dependencies import get_recollect_service
 from app.admin.schema import AdminGitBookSyncRequest
 from app.document.recollect import AcceptedRecollect
+from app.database.models import ExecutionStatus
 from app.document.recollect_service import (
+    RecollectBatchDetail,
+    RecollectFailure,
     RecollectService,
     SourceListFailedError,
 )
@@ -49,8 +52,8 @@ class AdminGitBookSyncApiTest(unittest.TestCase):
             json={"sourceUrl": source_url},
         )
 
-    def test_accepts_sync_and_returns_batch_id(self) -> None:
-        self.service.start_sync.return_value = AcceptedRecollect(
+    def _accepted(self) -> AcceptedRecollect:
+        return AcceptedRecollect(
             batch_id=BATCH_ID,
             group_id=1,
             page_count=41,
@@ -58,22 +61,83 @@ class AdminGitBookSyncApiTest(unittest.TestCase):
             root_url="https://docs.riido.io",
         )
 
+    def _batch(self, **changes) -> RecollectBatchDetail:
+        base = {
+            "batch_id": BATCH_ID,
+            "group_id": 1,
+            "group_source_id": 1,
+            "root_url": "https://docs.riido.io",
+            "status": ExecutionStatus.SUCCESS,
+            "total": 41,
+            "processed": 41,
+            "started_at": STARTED_AT,
+            "finished_at": FINISHED_AT,
+            "counts": {
+                "total": 41,
+                "created": 1,
+                "updated": 3,
+                "no_change": 36,
+                "removed": 1,
+                "failed": 1,
+            },
+            "failures": (),
+        }
+        base.update(changes)
+        return RecollectBatchDetail(**base)
+
+    def test_sync_returns_counts_and_failures(self) -> None:
+        self.service.start_sync.return_value = self._accepted()
+        self.service.read_finished_batch.return_value = self._batch(
+            failures=(
+                RecollectFailure(
+                    document_key="sprints/automations",
+                    title="스프린트 자동화",
+                    ingestion_run_id=950,
+                    message="페이지를 읽지 못했습니다.",
+                ),
+            ),
+        )
+
         response = self._sync()
 
-        self.assertEqual(202, response.status_code)
+        self.assertEqual(200, response.status_code)
         self.assertEqual(
             {
-                "batchId": str(BATCH_ID),
-                "groupId": 1,
                 "groupSourceId": 1,
                 "rootUrl": "https://docs.riido.io",
-                "status": "PROCESSING",
-                "stage": "PROCESSING",
-                "pageCount": 41,
+                "counts": {
+                    "total": 41,
+                    "created": 1,
+                    "updated": 3,
+                    "noChange": 36,
+                    "removed": 1,
+                    "failed": 1,
+                },
+                "failures": [
+                    {
+                        "documentKey": "sprints/automations",
+                        "title": "스프린트 자동화",
+                        "ingestionRunId": 950,
+                        "message": "페이지를 읽지 못했습니다.",
+                    }
+                ],
             },
             response.json(),
         )
         self.service.start_sync.assert_awaited_once_with(1, "https://docs.riido.io")
+
+    def test_page_failure_keeps_batch_at_200(self) -> None:
+        """페이지가 실패해도 배치는 성공이다."""
+
+        self.service.start_sync.return_value = self._accepted()
+        self.service.read_finished_batch.return_value = self._batch()
+
+        response = self._sync()
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual([], response.json()["failures"])
+        # batchId 는 응답에 없다
+        self.assertNotIn("batchId", response.json())
 
     def test_rejects_non_https_root(self) -> None:
         response = self._sync("http://docs.riido.io")

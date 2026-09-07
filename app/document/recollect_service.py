@@ -19,6 +19,7 @@ from app.document.document_group import get_document_group
 from app.document.document_key import normalize_gitbook_root_url
 from app.document.gitbook.client import GitBookListError, list_pages
 from app.document.ingestion_service import (
+    INVALID_FILE,
     AdminApiError,
     AdminJobInProgressError,
     DocumentGroupNotFoundError,
@@ -26,6 +27,7 @@ from app.document.ingestion_service import (
 from app.document.job_gate import acquire_group_job_gate, find_processing_job
 from app.document.recollect import (
     REMOVED_ACTION,
+    UPSTREAM_ERROR,
     AcceptedRecollect,
     accept_recollect_batch,
 )
@@ -55,11 +57,12 @@ class RecollectBatchNotFoundError(AdminApiError):
 
 @dataclass(frozen=True)
 class RecollectFailure:
+    """실패한 페이지 한 건. 목록 행에 그대로 그린다."""
+
     document_key: str
     title: str
     ingestion_run_id: int
-    stage: str
-    error_code: Optional[str]
+    message: str
 
 
 @dataclass(frozen=True)
@@ -116,6 +119,19 @@ class RecollectService:
             root,
             pages,
         )
+
+    async def read_finished_batch(
+        self,
+        batch_id: uuid.UUID,
+    ) -> RecollectBatchDetail:
+        """수집이 다른 세션에서 마감한 배치를 읽는다.
+
+        run_recollect_batch 가 자기 세션으로 커밋하므로 요청 세션의
+        identity map 을 비운 뒤 다시 조회한다.
+        """
+
+        self._session.expire_all()
+        return await self.get_batch(batch_id)
 
     async def get_batch(self, batch_id: uuid.UUID) -> RecollectBatchDetail:
         """배치에 묶인 수집 실행에서 진행과 집계를 조립한다."""
@@ -222,14 +238,25 @@ def _count_results(runs: List[IngestionRun]) -> Dict[str, int]:
     return counts
 
 
+# 실패 목록은 행 폭이 좁아 오류 모달의 전문이 들어가지 않는다.
+# 원인 코드는 ingestion_runs 의 error_code 에만 남는다.
+_FAILURE_MESSAGES = {
+    UPSTREAM_ERROR: "페이지를 읽지 못했습니다.",
+    INVALID_FILE: "문서 내용을 처리할 수 없습니다.",
+}
+_DEFAULT_FAILURE_MESSAGE = "문제가 발생했습니다."
+
+
 def _failures_of(rows) -> List[RecollectFailure]:
     return [
         RecollectFailure(
             document_key=source.document_key,
             title=source.title or source.document_key,
             ingestion_run_id=run.id,
-            stage=run.stage.value,
-            error_code=run.error_code,
+            message=_FAILURE_MESSAGES.get(
+                run.error_code,
+                _DEFAULT_FAILURE_MESSAGE,
+            ),
         )
         for run, source, _ in rows
         if run.status == ExecutionStatus.FAILED
