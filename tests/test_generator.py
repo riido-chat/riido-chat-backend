@@ -398,6 +398,11 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn("정보 단위 하나라도", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("INSUFFICIENT_EVIDENCE", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("제품의 기능·설정·사용 가능 여부", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("넓은 일반 권한보다", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("구체적인 제한·예외가 질문에 대한 결론", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("문서 제목과 Section Path", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("Top-5에서 앞선 SOURCE 하나만", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("하위 대상을 별도로 허용한다고 추측하지", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("주제 자체와", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("자동화", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("EvidenceRequirement와 source_ids를 각각", SOURCE_PLANNING_PROMPT_V11)
@@ -509,11 +514,14 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn("WITHHELD 여부를 판단하세요", ANSWER_PROMPT_V17)
 
     def test_prompt_forbids_links_urls_and_html(self) -> None:
-        self.assertEqual("v22", GENERATION_PROMPT_VERSION)
-        self.assertEqual("v13", SOURCE_PLANNING_PROMPT_VERSION)
-        self.assertEqual("v13-repair-1", SOURCE_PLANNING_REPAIR_PROMPT_VERSION)
-        self.assertEqual("v19", ANSWER_PROMPT_VERSION)
-        self.assertEqual("v19-repair-1", ANSWER_REPAIR_PROMPT_VERSION)
+        self.assertEqual("v24", GENERATION_PROMPT_VERSION)
+        self.assertEqual("v15", SOURCE_PLANNING_PROMPT_VERSION)
+        self.assertEqual("v15-repair-1", SOURCE_PLANNING_REPAIR_PROMPT_VERSION)
+        self.assertEqual("v20", ANSWER_PROMPT_VERSION)
+        self.assertEqual("v20-repair-1", ANSWER_REPAIR_PROMPT_VERSION)
+        self.assertIn("넓은 허용 규칙과 구체적인 제한", ANSWER_PROMPT_V17)
+        self.assertIn("상위 공간과 그 내부 대상", ANSWER_PROMPT_V17)
+        self.assertIn("내부 식별자를 답변 문장에 직접 노출", ANSWER_PROMPT_V17)
         self.assertIn(
             "Markdown 링크 문법과 HTML을 사용하지 마세요",
             ANSWER_PROMPT_V17,

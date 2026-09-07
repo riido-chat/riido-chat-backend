@@ -467,15 +467,36 @@ def summarize_runs(runs: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
             mode_summary["failedCount"] += 1
 
     passed_count = sum(result["passed"] for result in case_results)
+    failed_results = [result for result in case_results if not result["passed"]]
+    execution_error_count = sum(
+        _has_execution_error(result) for result in failed_results
+    )
     return {
         "repetitionCount": len(runs),
         "uniqueCaseCount": len(per_case),
         "totalCaseExecutionCount": len(case_results),
         "passedCaseExecutionCount": passed_count,
         "failedCaseExecutionCount": len(case_results) - passed_count,
+        "executionErrorCaseExecutionCount": execution_error_count,
+        "criteriaMismatchCaseExecutionCount": (
+            len(failed_results) - execution_error_count
+        ),
         "perCase": list(per_case.values()),
         "perMode": list(per_mode.values()),
     }
+
+
+def _has_execution_error(result: Dict[str, Any]) -> bool:
+    """평가 기준과 비교할 응답 자체를 얻지 못한 실행 실패인지 확인한다."""
+
+    return any(
+        (
+            turn.get("httpStatus") is not None
+            and turn.get("httpStatus") != 200
+        )
+        or (turn.get("response") or {}).get("status") == "ERROR"
+        for turn in result.get("turns", [])
+    )
 
 
 def _recheck_run_results(
@@ -540,10 +561,20 @@ def recheck_saved_results(
             saved_payload["results"],
         )
         passed_count = sum(result["passed"] for result in rechecked_results)
+        failed_results = [
+            result for result in rechecked_results if not result["passed"]
+        ]
+        execution_error_count = sum(
+            _has_execution_error(result) for result in failed_results
+        )
         payload["summary"] = {
             "totalCaseCount": len(rechecked_results),
             "passedCaseCount": passed_count,
             "failedCaseCount": len(rechecked_results) - passed_count,
+            "executionErrorCaseCount": execution_error_count,
+            "criteriaMismatchCaseCount": (
+                len(failed_results) - execution_error_count
+            ),
         }
         payload["results"] = rechecked_results
     return payload

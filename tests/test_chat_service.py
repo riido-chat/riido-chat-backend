@@ -636,6 +636,40 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         finished = self.log_store.finish_model_call.await_args
         self.assertEqual(ExecutionStatus.FAILED, finished.kwargs["status"])
 
+    async def test_query_rewrite_invalid_output_fallback_withholds_without_500(
+        self,
+    ) -> None:
+        error = RuntimeError("invalid structured output")
+        self._prepare_follow_up(
+            QueryRewriteCall(
+                trace=self._query_rewrite_trace(succeeded=False, error=error),
+                resolution=QueryResolution(
+                    decision=QueryRewriteDecision.FOLLOW_UP_UNRESOLVED,
+                    resolved_query=None,
+                    selected_turns=(),
+                ),
+                fallback_reason=str(error),
+            ),
+            [self._candidate_turn(1)],
+        )
+
+        response = await self.service.answer_question(
+            "그건 어떻게 해?",
+            self.conversation_id,
+        )
+
+        self.assertNotIsInstance(response, ChatErrorResponse)
+        self.assertEqual(FinalAnswerStatus.WITHHELD, response.status)
+        self.assertEqual(
+            FinalWithheldReason.AMBIGUOUS_QUESTION,
+            response.withheld.reason_code,
+        )
+        self.retriever.search_with_trace.assert_not_awaited()
+        self.log_store.fail_rag_run.assert_not_awaited()
+        self.log_store.withhold_rag_run.assert_awaited_once()
+        finished = self.log_store.finish_model_call.await_args
+        self.assertEqual(ExecutionStatus.FAILED, finished.kwargs["status"])
+
     async def test_resolution_commit_failure_stops_before_retrieval(self) -> None:
         candidate = self._candidate_turn(1)
         self._prepare_follow_up(

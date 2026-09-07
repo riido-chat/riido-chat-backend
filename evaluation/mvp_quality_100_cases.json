@@ -1,0 +1,466 @@
+{
+  "version": "mvp-quality-v3",
+  "purpose": "공식 이용가이드 전반에서 새로 구성한 단일턴 60개와 2턴 대화 20개로 MVP 답변·보류·문맥·출처 품질을 진단한다.",
+  "cases": [
+    {
+      "id": "MQ001",
+      "description": "워크스페이스의 의미",
+      "turns": [{"question": "워크스페이스는 회사 하나를 뜻하는 거야?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["워크스페이스", "핵심 개념"]}]
+    },
+    {
+      "id": "MQ002",
+      "description": "여러 워크스페이스 참여",
+      "turns": [{"question": "한 계정으로 여러 워크스페이스에 참여할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["워크스페이스", "핵심 개념"]}]
+    },
+    {
+      "id": "MQ003",
+      "description": "워크스페이스 설정 위치",
+      "turns": [{"question": "워크스페이스 이름이나 로고는 어디서 바꿔?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["워크스페이스"]}]
+    },
+    {
+      "id": "MQ004",
+      "description": "관리자와 일반 멤버 권한 차이",
+      "turns": [{"question": "워크스페이스 관리자와 일반 멤버는 권한이 어떻게 달라?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["멤버"]}]
+    },
+    {
+      "id": "MQ005",
+      "description": "멤버 비활성화 절차와 영향",
+      "turns": [{"question": "퇴사한 멤버를 비활성화하려면 어디서 뭘 눌러야 하고 데이터는 어떻게 돼?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["멤버"]}]
+    },
+    {
+      "id": "MQ006",
+      "description": "재초대 시 계정 처리",
+      "turns": [{"question": "비활성화한 멤버를 다시 초대하면 예전 계정이 살아나?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["멤버"]}]
+    },
+    {
+      "id": "MQ007",
+      "description": "요금 산정 기준",
+      "turns": [{"question": "뤼이도 요금은 팀 수로 계산해, 사용자 수로 계산해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["구독 및 결제"]}]
+    },
+    {
+      "id": "MQ008",
+      "description": "구독 취소 후 데이터",
+      "turns": [{"question": "유료 구독을 취소하면 기존 프로젝트와 작업이 삭제돼?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["구독 및 결제"]}]
+    },
+    {
+      "id": "MQ009",
+      "description": "연간 결제 할인",
+      "turns": [{"question": "연간 결제로 바꾸면 월간 결제보다 할인돼?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["구독 및 결제"]}]
+    },
+    {
+      "id": "MQ010",
+      "description": "학생 지원 프로그램",
+      "turns": [{"question": "대학생도 유료 요금제 지원을 받을 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["구독 및 결제"]}]
+    },
+    {
+      "id": "MQ011",
+      "description": "팀의 의미와 구성 기준",
+      "turns": [{"question": "뤼이도에서 팀은 어떤 단위고 보통 어떻게 나누면 돼?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["팀", "핵심 개념"]}]
+    },
+    {
+      "id": "MQ012",
+      "description": "팀 생성 위치와 요금제별 제한",
+      "turns": [{"question": "새 팀은 어디서 만들고 요금제별로 몇 개까지 가능해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["팀"]}]
+    },
+    {
+      "id": "MQ013",
+      "description": "팀 떠나기",
+      "turns": [{"question": "내가 속한 팀에서 직접 나가려면 어떻게 해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["팀"]}]
+    },
+    {
+      "id": "MQ014",
+      "description": "팀 삭제 영향",
+      "turns": [{"question": "팀을 삭제했다가 나중에 복구할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["팀"]}]
+    },
+    {
+      "id": "MQ015",
+      "description": "비공개 팀 접근 권한",
+      "turns": [{"question": "비공개 팀에 속하지 않은 멤버도 그 팀의 프로젝트를 볼 수 있어?", "expectedStatus": "COMPLETED", "expectedAnswerConceptGroups": [["아니요", "볼 수 없습니다", "확인할 수 없습니다", "접근할 수 없습니다"]], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["비공개 팀"]}]
+    },
+    {
+      "id": "MQ016",
+      "description": "비공개 팀 전환 절차",
+      "turns": [{"question": "기존 팀을 비공개로 전환하는 메뉴 경로를 알려줘", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["비공개 팀"]}]
+    },
+    {
+      "id": "MQ017",
+      "description": "작업 상태 설정 위치",
+      "turns": [{"question": "우리 팀에 새 작업 상태를 추가하려면 어디서 설정해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["작업 상태", "팀"]}]
+    },
+    {
+      "id": "MQ018",
+      "description": "진행 중과 완료 상태의 차이",
+      "turns": [{"question": "진행 중 상태와 완료 상태는 각각 어떻게 동작해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["작업 상태"]}]
+    },
+    {
+      "id": "MQ019",
+      "description": "작업 흐름의 전체 단계",
+      "turns": [{"question": "대기 작업부터 보관까지 전체 작업 흐름을 간단히 설명해줘", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["작업 흐름으로 이해하는 프로젝트 관리"]}]
+    },
+    {
+      "id": "MQ020",
+      "description": "대기 작업의 역할",
+      "turns": [{"question": "새 아이디어를 바로 작업으로 만들기 전에 어디에 모아두면 좋아?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["계획: 대기 작업", "작업 흐름으로 이해하는 프로젝트 관리"]}]
+    },
+    {
+      "id": "MQ021",
+      "description": "대기 작업 승인",
+      "turns": [{"question": "검토한 대기 작업을 백로그로 보내려면 어떻게 해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["계획: 대기 작업"]}]
+    },
+    {
+      "id": "MQ022",
+      "description": "대기 작업 거절",
+      "turns": [{"question": "진행하지 않을 대기 작업은 어떻게 처리되고 거절 사유는 어디에 남아?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["계획: 대기 작업"]}]
+    },
+    {
+      "id": "MQ023",
+      "description": "백로그의 역할",
+      "turns": [{"question": "백로그에는 어떤 작업을 두고 무엇을 결정하는 곳이야?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["계획: 백로그"]}]
+    },
+    {
+      "id": "MQ024",
+      "description": "백로그의 작업 전환",
+      "turns": [{"question": "백로그 항목을 실제 실행 작업으로 전환하려면 어떻게 해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["계획: 백로그"]}]
+    },
+    {
+      "id": "MQ025",
+      "description": "프로젝트 목표 작업 계층",
+      "turns": [{"question": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["실행: 작업", "핵심 개념"]}]
+    },
+    {
+      "id": "MQ026",
+      "description": "작업 속성과 보기",
+      "turns": [{"question": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["실행: 작업"]}]
+    },
+    {
+      "id": "MQ027",
+      "description": "작업 외부 공유",
+      "turns": [{"question": "워크스페이스 멤버가 아닌 사람에게 작업을 공유할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["실행: 작업"]}]
+    },
+    {
+      "id": "MQ028",
+      "description": "작업 관계 유형",
+      "turns": [{"question": "작업끼리 연결할 때 연관, 차단, 중복 관계는 어떻게 달라?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["작업간 연결"]}]
+    },
+    {
+      "id": "MQ029",
+      "description": "작업 연결 추가",
+      "turns": [{"question": "작업 상세에서 다른 작업과의 관계를 추가하는 방법을 알려줘", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["작업간 연결"]}]
+    },
+    {
+      "id": "MQ030",
+      "description": "대시보드의 용도",
+      "turns": [{"question": "팀 대시보드에서 어떤 현황들을 한눈에 볼 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["대시보드"]}]
+    },
+    {
+      "id": "MQ031",
+      "description": "작업 관계도 위치",
+      "turns": [{"question": "프로젝트와 목표, 작업의 관계도는 어디에서 볼 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["작업 관계도", "대시보드"]}]
+    },
+    {
+      "id": "MQ032",
+      "description": "저장된 보기 공개 범위",
+      "turns": [{"question": "내가 만든 저장된 보기는 팀원들도 볼 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["저장된 보기"]}]
+    },
+    {
+      "id": "MQ033",
+      "description": "저장된 보기 생성 방식",
+      "turns": [{"question": "현재 적용한 필터 조건을 저장된 보기로 만드는 과정을 알려줘", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["저장된 보기"]}]
+    },
+    {
+      "id": "MQ034",
+      "description": "에디터 입력 방식",
+      "turns": [{"question": "뤼이도 에디터에서 마크다운이나 슬래시 명령을 사용할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["에디터"]}]
+    },
+    {
+      "id": "MQ035",
+      "description": "에디터 사용자 언급",
+      "turns": [{"question": "문서 안에서 팀원을 언급하려면 어떻게 입력해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["에디터"]}]
+    },
+    {
+      "id": "MQ036",
+      "description": "문서 템플릿 생성과 적용",
+      "turns": [{"question": "팀에서 반복해서 쓸 문서 템플릿은 어떻게 만들고 적용해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["문서 템플릿"]}]
+    },
+    {
+      "id": "MQ037",
+      "description": "문서에 실제 조작 단계가 없는 댓글 수정과 답글 절차",
+      "turns": [{"question": "작성한 댓글을 수정하거나 답글을 달려면 어떻게 해?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "MQ038",
+      "description": "댓글 구독",
+      "turns": [{"question": "내가 참여하지 않은 댓글도 알림을 받도록 구독할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["댓글"]}]
+    },
+    {
+      "id": "MQ039",
+      "description": "스프린트 기간 설정",
+      "turns": [{"question": "스프린트 기간은 몇 주로 설정할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["스프린트"]}]
+    },
+    {
+      "id": "MQ040",
+      "description": "문서에 최대값이 없는 다가올 스프린트 미리 생성 개수",
+      "turns": [{"question": "다가올 스프린트를 미리 몇 개까지 만들어 둘 수 있어?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "MQ041",
+      "description": "스프린트 자동화",
+      "turns": [{"question": "새 스프린트가 시작될 때 작업 배정과 완료 작업 정리를 자동화할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["자동화", "스프린트"]}]
+    },
+    {
+      "id": "MQ042",
+      "description": "스프린트 그래프 해석",
+      "turns": [{"question": "스프린트 그래프를 보면 일정 지연이나 병목을 어떻게 파악할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["스프린트 그래프"]}]
+    },
+    {
+      "id": "MQ043",
+      "description": "지난 스프린트 그래프",
+      "turns": [{"question": "이미 끝난 지난 스프린트의 그래프도 다시 볼 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["스프린트 그래프"]}]
+    },
+    {
+      "id": "MQ044",
+      "description": "미팅 생성 방식",
+      "turns": [{"question": "뤼이도에서 미팅을 새로 만드는 방법은 몇 가지야?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["미팅"]}]
+    },
+    {
+      "id": "MQ045",
+      "description": "미팅과 작업 연결",
+      "turns": [{"question": "회의 중 나온 내용을 기존 프로젝트나 작업과 연결할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["미팅"]}]
+    },
+    {
+      "id": "MQ046",
+      "description": "미팅 반복 설정",
+      "turns": [{"question": "팀 미팅을 매주 월요일 같은 시간에 자동 생성되게 할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["자동화", "미팅"]}]
+    },
+    {
+      "id": "MQ047",
+      "description": "AI 에이전트 등록과 작업 위임",
+      "turns": [{"question": "내 AI 에이전트를 뤼이도에 등록하고 작업을 맡기는 과정을 알려줘", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["AI 에이전트 (Beta)"]}]
+    },
+    {
+      "id": "MQ048",
+      "description": "AI 프로젝트 일정 자동 생성",
+      "turns": [{"question": "Riido AI로 참여자 역량을 반영한 프로젝트 일정을 만들려면 어떻게 해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["프로젝트 일정 자동 생성"]}]
+    },
+    {
+      "id": "MQ049",
+      "description": "중복 작업 감지",
+      "turns": [{"question": "새 작업을 만들 때 기존 작업과 중복인지 어떻게 확인해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["중복 작업 감지"]}]
+    },
+    {
+      "id": "MQ050",
+      "description": "릴리즈 노트 자동 생성",
+      "turns": [{"question": "완료된 스프린트 작업으로 릴리즈 노트를 자동 생성하는 순서를 알려줘", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["릴리즈 노트 자동 생성"]}]
+    },
+    {
+      "id": "MQ051",
+      "description": "문서에 없는 팀원 초대 절차",
+      "turns": [{"question": "워크스페이스에 새 멤버를 초대하는 버튼은 어디 있어?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "MQ052",
+      "description": "문서에 없는 슬랙 키워드 알림",
+      "turns": [{"question": "슬랙 연동에서 특정 단어가 들어간 알림만 골라 받을 수 있어?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "MQ053",
+      "description": "문서에 없는 피그마 댓글 동기화",
+      "turns": [{"question": "피그마 댓글도 뤼이도 댓글로 자동 동기화돼?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "MQ054",
+      "description": "문서에 없는 깃허브 이슈 동기화",
+      "turns": [{"question": "깃허브 이슈를 뤼이도 작업으로 자동 가져올 수 있어?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "MQ055",
+      "description": "문서에 없는 급여 계산",
+      "turns": [{"question": "뤼이도에서 직원 급여와 세금을 자동 계산할 수 있어?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "MQ056",
+      "description": "문서에 없는 대시보드 PDF 내보내기",
+      "turns": [{"question": "팀 대시보드를 PDF로 내보내서 공유할 수 있어?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "MQ057",
+      "description": "문서에 없는 미팅 화상 통화",
+      "turns": [{"question": "뤼이도 미팅에서 영상 통화도 바로 할 수 있어?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "MQ058",
+      "description": "문서에 없는 모바일 오프라인 지원",
+      "turns": [{"question": "모바일 앱에서 인터넷 없이 오프라인으로 작업을 수정할 수 있어?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "MQ059",
+      "description": "제품 범위 밖 날씨 질문",
+      "turns": [{"question": "내일 서울 날씨가 어때?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "OUT_OF_SCOPE"}]
+    },
+    {
+      "id": "MQ060",
+      "description": "제품 범위 밖 일반 프로그래밍 질문",
+      "turns": [{"question": "파이썬에서 리스트를 정렬하는 코드를 알려줘", "expectedStatus": "WITHHELD", "expectedWithheldReason": "OUT_OF_SCOPE"}]
+    },
+    {
+      "id": "MQ061",
+      "description": "워크스페이스 정의 후 참여 범위 질문",
+      "turns": [
+        {"question": "워크스페이스가 뭐야?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["워크스페이스", "핵심 개념"]},
+        {"question": "한 사람이 그걸 여러 개 쓸 수도 있어?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["워크스페이스"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["워크스페이스", "핵심 개념"]}
+      ]
+    },
+    {
+      "id": "MQ062",
+      "description": "멤버 비활성화 후 재초대",
+      "turns": [
+        {"question": "워크스페이스 멤버를 비활성화하면 어떤 일이 생겨?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["멤버"]},
+        {"question": "나중에 같은 사람을 다시 초대하면 새 계정이 만들어져?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["멤버", "다시 초대"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["멤버"]}
+      ]
+    },
+    {
+      "id": "MQ063",
+      "description": "구독 요금 후 취소 영향",
+      "turns": [
+        {"question": "뤼이도 결제 금액은 어떤 기준으로 정해져?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["구독 및 결제"]},
+        {"question": "그 구독을 취소해도 데이터는 남아?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["구독", "취소"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["구독 및 결제"]}
+      ]
+    },
+    {
+      "id": "MQ064",
+      "description": "팀 설정 후 스프린트 설정",
+      "turns": [
+        {"question": "팀 설정에서는 어떤 항목들을 바꿀 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["팀"]},
+        {"question": "거기서 스프린트도 켤 수 있어?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["팀", "스프린트"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["팀", "스프린트"]}
+      ]
+    },
+    {
+      "id": "MQ065",
+      "description": "비공개 팀 정의 후 접근 범위",
+      "turns": [
+        {"question": "비공개 팀은 뭐야?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["비공개 팀"]},
+        {"question": "그 팀에 초대받지 않은 사람도 내용을 볼 수 있어?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["비공개 팀"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["비공개 팀", "멤버"]}
+      ]
+    },
+    {
+      "id": "MQ066",
+      "description": "백로그 정의 후 작업 전환",
+      "turns": [
+        {"question": "백로그는 어떤 곳이야?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["계획: 백로그"]},
+        {"question": "거기 있는 항목을 작업으로 옮기려면 어떻게 해?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["백로그", "작업"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["계획: 백로그"]}
+      ]
+    },
+    {
+      "id": "MQ067",
+      "description": "작업 연결 후 차단 관계",
+      "turns": [
+        {"question": "작업간 연결은 왜 사용하는 거야?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["작업간 연결"]},
+        {"question": "그중 차단 중과 차단됨은 어떻게 달라?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["작업", "차단"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["작업간 연결"]}
+      ]
+    },
+    {
+      "id": "MQ068",
+      "description": "대시보드 정의 후 최근 활동",
+      "turns": [
+        {"question": "팀 대시보드는 왜 필요해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["대시보드"]},
+        {"question": "거기서 최근에 누가 뭘 했는지도 볼 수 있어?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["대시보드", "최근"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["대시보드"]}
+      ]
+    },
+    {
+      "id": "MQ069",
+      "description": "저장된 보기 정의 후 공개 범위",
+      "turns": [
+        {"question": "저장된 보기는 어떤 기능이야?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["저장된 보기"]},
+        {"question": "내가 만든 보기는 다른 팀원도 볼 수 있어?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["저장된 보기"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["저장된 보기"]}
+      ]
+    },
+    {
+      "id": "MQ070",
+      "description": "에디터 정의 후 마크다운",
+      "turns": [
+        {"question": "뤼이도 에디터는 어떤 방식으로 문서를 작성해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["에디터"]},
+        {"question": "거기서 마크다운 문법도 바로 쓸 수 있어?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["에디터", "마크다운"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["에디터"]}
+      ]
+    },
+    {
+      "id": "MQ071",
+      "description": "스프린트 정의 후 시작 요일",
+      "turns": [
+        {"question": "스프린트는 어떤 단위야?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["스프린트", "핵심 개념"]},
+        {"question": "그 주기의 시작 요일은 어디서 바꿔?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["스프린트", "시작 요일"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["스프린트"]}
+      ]
+    },
+    {
+      "id": "MQ072",
+      "description": "스프린트 그래프 정의 후 과거 그래프",
+      "turns": [
+        {"question": "스프린트 그래프는 뭘 보여줘?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["스프린트 그래프"]},
+        {"question": "종료된 스프린트 것도 볼 수 있어?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["스프린트", "그래프"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["스프린트 그래프"]}
+      ]
+    },
+    {
+      "id": "MQ073",
+      "description": "미팅 정의 후 작업 연결",
+      "turns": [
+        {"question": "뤼이도 미팅은 일반 회의록과 뭐가 달라?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["미팅"]},
+        {"question": "회의 중에 나온 내용을 기존 작업에 연결할 수도 있어?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["미팅", "작업"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["미팅"]}
+      ]
+    },
+    {
+      "id": "MQ074",
+      "description": "깃허브 연동 후 병합 자동화",
+      "turns": [
+        {"question": "깃허브를 뤼이도와 연결하면 뭐가 자동화돼?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["깃허브"]},
+        {"question": "PR이 머지되면 작업 상태도 자동으로 완료돼?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["깃허브", "PR", "완료"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["깃허브"]}
+      ]
+    },
+    {
+      "id": "MQ075",
+      "description": "피그마 연동 후 플러그인 필요 여부",
+      "turns": [
+        {"question": "피그마 연동으로 어떤 일을 할 수 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["피그마"]},
+        {"question": "그 기능을 쓰려면 플러그인 설치가 꼭 필요해?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["피그마", "플러그인"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["피그마"]}
+      ]
+    },
+    {
+      "id": "MQ076",
+      "description": "여러 메신저 연동 후 슬랙 비공개 채널",
+      "turns": [
+        {"question": "슬랙과 디스코드는 뤼이도와 각각 어떻게 연결해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["슬랙", "디스코드"]},
+        {"question": "슬랙 비공개 채널을 연결하려면 뭘 해야 해?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["슬랙", "비공개 채널"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["슬랙"]}
+      ]
+    },
+    {
+      "id": "MQ077",
+      "description": "구글 캘린더 연동 후 삭제 동기화",
+      "turns": [
+        {"question": "구글 캘린더와 뤼이도 미팅은 어떻게 동기화돼?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["구글 캘린더"]},
+        {"question": "한쪽에서 미팅을 삭제하면 다른 쪽에서도 없어져?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["구글 캘린더", "미팅", "삭제"], "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["구글 캘린더"]}
+      ]
+    },
+    {
+      "id": "MQ078",
+      "description": "복수 대상 뒤 모호한 삭제 질문",
+      "turns": [
+        {"question": "프로젝트와 목표는 어떤 차이가 있어?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["실행: 작업", "핵심 개념"]},
+        {"question": "그걸 삭제하면 어떻게 돼?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "AMBIGUOUS_QUESTION", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": []}
+      ]
+    },
+    {
+      "id": "MQ079",
+      "description": "복수 연동을 하나의 묶음으로 이어 묻는 설정 질문",
+      "turns": [
+        {"question": "슬랙 연동과 디스코드 연동은 각각 어떤 기능을 제공해?", "expectedStatus": "COMPLETED", "minimumCitationCount": 1, "expectedCitationDocumentTitlesAny": ["슬랙", "디스코드"]},
+        {"question": "그 연동은 어디서 설정해?", "expectedStatus": "COMPLETED", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["슬랙", "디스코드", "설정"], "minimumCitationCount": 2, "expectedCitationDocumentTitlesAny": ["슬랙", "디스코드"]}
+      ]
+    },
+    {
+      "id": "MQ080",
+      "description": "근거 부족 기능의 후속 설정 질문",
+      "turns": [
+        {"question": "뤼이도에서 직원 급여를 자동 계산할 수 있어?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"},
+        {"question": "그 기능은 어디에서 켜?", "expectedStatus": "WITHHELD", "expectedWithheldReason": "INSUFFICIENT_EVIDENCE", "expectedContextStrategy": "FOLLOW_UP_WINDOW", "expectedSelectedTurnNos": [1], "resolvedQueryKeywords": ["급여"]}
+      ]
+    }
+  ]
+}

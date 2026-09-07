@@ -38,10 +38,44 @@ from evaluation.run_chat_multiturn_evaluation import (
 
 
 class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
+    def test_loads_mvp_quality_100_question_set(self) -> None:
+        payload = load_cases(
+            Path(__file__).resolve().parents[1]
+            / "evaluation"
+            / "mvp_quality_100_cases.json"
+        )
+
+        self.assertEqual("mvp-quality-v3", payload["version"])
+        self.assertEqual(80, len(payload["cases"]))
+        self.assertEqual(
+            100,
+            sum(len(case["turns"]) for case in payload["cases"]),
+        )
+        self.assertEqual(
+            60,
+            sum(len(case["turns"]) == 1 for case in payload["cases"]),
+        )
+        self.assertEqual(
+            20,
+            sum(len(case["turns"]) == 2 for case in payload["cases"]),
+        )
+        private_team_case = next(
+            case for case in payload["cases"] if case["id"] == "MQ015"
+        )
+        private_team_turn = private_team_case["turns"][0]
+        self.assertEqual(
+            ["비공개 팀"],
+            private_team_turn["expectedCitationDocumentTitlesAny"],
+        )
+        self.assertIn(
+            "볼 수 없습니다",
+            private_team_turn["expectedAnswerConceptGroups"][0],
+        )
+
     def test_loads_balanced_answer_consistency_cases(self) -> None:
         payload = load_cases(DEFAULT_ANSWER_CONSISTENCY_CASES_PATH)
 
-        self.assertEqual("answer-consistency-v2", payload["version"])
+        self.assertEqual("answer-consistency-v3", payload["version"])
         self.assertEqual(
             [f"AC{number:02d}" for number in range(1, 11)],
             [case["id"] for case in payload["cases"]],
@@ -70,20 +104,25 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
             ["연동", "연결"],
             ac01["expectedAnswerConceptGroups"],
         )
+        ac06 = payload["cases"][5]["turns"][0]
+        self.assertEqual(
+            "INSUFFICIENT_EVIDENCE",
+            ac06["expectedWithheldReason"],
+        )
 
     def test_loads_versioned_fixed_cases(self) -> None:
         payload = load_cases(DEFAULT_CASES_PATH)
 
-        self.assertEqual("v3", payload["version"])
+        self.assertEqual("v4", payload["version"])
         self.assertEqual(
-            [f"MT{number:02d}" for number in range(1, 19)],
+            [f"MT{number:02d}" for number in range(1, 20)],
             [case["id"] for case in payload["cases"]],
         )
 
     def test_loads_versioned_cs_cases(self) -> None:
         payload = load_cases(DEFAULT_CS_CASES_PATH)
 
-        self.assertEqual("cs-v4", payload["version"])
+        self.assertEqual("cs-v5", payload["version"])
         self.assertEqual(
             [f"CS{number:02d}" for number in range(1, 26)],
             [case["id"] for case in payload["cases"]],
@@ -104,6 +143,17 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
             [["대기 작업"]],
             cs23["turns"][0]["expectedAnswerConceptGroups"],
         )
+        for case_id in ("CS01", "CS13"):
+            case = next(case for case in payload["cases"] if case["id"] == case_id)
+            turn = case["turns"][0]
+            self.assertIn(
+                "공간",
+                turn["expectedDefinitionSentenceConceptGroups"][2],
+            )
+            self.assertNotIn(
+                ["연동", "연결"],
+                turn["expectedAnswerConceptGroups"],
+            )
 
     def test_extracts_selected_turn_numbers_from_v1_snapshot(self) -> None:
         self.assertEqual(
@@ -641,8 +691,91 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(2, len(rechecked["runs"]))
         self.assertEqual(2, rechecked["summary"]["passedCaseExecutionCount"])
+        self.assertEqual(
+            0,
+            rechecked["summary"]["executionErrorCaseExecutionCount"],
+        )
+        self.assertEqual(
+            0,
+            rechecked["summary"]["criteriaMismatchCaseExecutionCount"],
+        )
         self.assertTrue(rechecked["runs"][0]["results"][0]["passed"])
         self.assertTrue(rechecked["runs"][1]["results"][0]["passed"])
+
+    def test_recheck_summary_separates_execution_errors_from_criteria_mismatches(
+        self,
+    ) -> None:
+        cases = {
+            "version": "test-v2",
+            "cases": [
+                {
+                    "id": "CS01",
+                    "turns": [
+                        {"question": "질문 1", "expectedStatus": "COMPLETED"}
+                    ],
+                },
+                {
+                    "id": "CS02",
+                    "turns": [
+                        {"question": "질문 2", "expectedStatus": "COMPLETED"}
+                    ],
+                },
+            ],
+        }
+        saved = {
+            "schemaVersion": "v2",
+            "casesVersion": "test-v1",
+            "summary": {},
+            "runs": [
+                {
+                    "repeatNo": 1,
+                    "results": [
+                        {
+                            "id": "CS01",
+                            "passed": False,
+                            "turns": [
+                                {
+                                    "turnNo": 1,
+                                    "question": "질문 1",
+                                    "httpStatus": 500,
+                                    "response": {"status": "ERROR"},
+                                    "db": None,
+                                }
+                            ],
+                        },
+                        {
+                            "id": "CS02",
+                            "passed": False,
+                            "turns": [
+                                {
+                                    "turnNo": 1,
+                                    "question": "질문 2",
+                                    "httpStatus": 200,
+                                    "response": {"status": "WITHHELD"},
+                                    "db": {
+                                        "status": "WITHHELD",
+                                        "contextStrategy": "NEW_TOPIC",
+                                        "selectedTurnNos": [],
+                                        "resolvedQuery": "질문 2",
+                                    },
+                                }
+                            ],
+                        },
+                    ],
+                }
+            ],
+        }
+
+        rechecked = recheck_saved_results(cases, saved)
+
+        self.assertEqual(
+            1,
+            rechecked["summary"]["executionErrorCaseExecutionCount"],
+        )
+        self.assertEqual(
+            1,
+            rechecked["summary"]["criteriaMismatchCaseExecutionCount"],
+        )
 
 
 if __name__ == "__main__":

@@ -33,6 +33,9 @@ from app.retrieval.models import HybridRetrievalResult
 logger = logging.getLogger(__name__)
 
 SOURCE_MARKER_PATTERN = re.compile(r"\[SOURCE_([A-Za-z0-9_-]+)\]")
+INTERNAL_SOURCE_REFERENCE_PATTERN = re.compile(
+    r"(?<![A-Za-z0-9_-])SOURCE_[A-Za-z0-9_-]+(?![A-Za-z0-9_-])"
+)
 FORBIDDEN_ANSWER_CONTENT_PATTERNS = (
     re.compile(r"!?\[[^\]\r\n]*\]\([^\)\r\n]*\)"),
     re.compile(r"\[[^\]\r\n]+\]\[[^\]\r\n]*\]"),
@@ -132,6 +135,12 @@ def _strip_code_regions(answer_markdown: str) -> str:
 
 def _validate_answer_content(answer_markdown: str) -> None:
     """코드 영역 밖에서 금지한 링크와 HTML이 답변 본문에 없는지 확인한다."""
+
+    content_without_markers = SOURCE_MARKER_PATTERN.sub("", answer_markdown)
+    if INTERNAL_SOURCE_REFERENCE_PATTERN.search(content_without_markers):
+        raise UnverifiableAnswerError(
+            "답변 본문에 내부 Source 식별자가 노출됐습니다."
+        )
 
     content_to_check = SOURCE_MARKER_PATTERN.sub(
         "",
