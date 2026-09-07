@@ -3,6 +3,7 @@
 import asyncio
 import unittest
 import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -21,6 +22,7 @@ from app.database.session import dispose_engine
 from app.document.document_group import get_default_document_group
 from app.document.ingestion_service import (
     AdminIngestionService,
+    DocumentAlreadyExistsError,
     DocumentNotFoundError,
     DocumentNotRevisableError,
     run_admin_ingestion,
@@ -154,12 +156,47 @@ class UploadResultCodeDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(0, run.summary["deleted"])
         self.assertGreater(run.summary["added"], 0)
 
-    async def test_same_content_upload_is_no_change(self) -> None:
+    async def test_same_title_upload_is_rejected(self) -> None:
+        """기존 문서의 새 판은 수정본 업로드로만 만든다."""
+
         title = self._new_title()
         body = self._body("같은 내용")
         await self._upload(title, body)
 
-        second = await self._upload(title, body)
+        with self.assertRaises(DocumentAlreadyExistsError):
+            await self._upload(title, self._body("다른 내용"))
+
+    async def test_shell_source_without_ready_version_is_reused(self) -> None:
+        """처리 중 실패로 판 없이 남은 원본은 그 이름을 막지 않는다."""
+
+        title = self._new_title()
+        async with self.session_factory() as session:
+            first = await AdminIngestionService(session).start_new_document(
+                group_id=self.group_id,
+                title=title,
+                filename="guide.md",
+            )
+        # 파이프라인이 실패해 READY 판이 없는 껍데기로 남는 상황을 만든다
+        async with self.session_factory() as session:
+            run = await session.get(IngestionRun, first.ingestion_run_id)
+            run.status = ExecutionStatus.FAILED
+            run.error_code = "INTERNAL_ERROR"
+            run.finished_at = datetime.now(timezone.utc)
+            await session.commit()
+
+        second = await self._upload(title, self._body("다시 올린다"))
+        run = await self._run(second.ingestion_run_id)
+
+        self.assertEqual(first.document_source_id, second.document_source_id)
+        self.assertEqual(ExecutionStatus.SUCCESS, run.status)
+        self.assertEqual(IngestionResultCode.CREATED, run.result_code)
+
+    async def test_revision_of_same_content_is_no_change(self) -> None:
+        title = self._new_title()
+        body = self._body("같은 내용")
+        first = await self._upload(title, body)
+
+        second = await self._revise(first.document_source_id, body)
         run = await self._run(second.ingestion_run_id)
 
         self.assertEqual(ExecutionStatus.SUCCESS, run.status)
@@ -167,11 +204,14 @@ class UploadResultCodeDbTest(unittest.IsolatedAsyncioTestCase):
         # 새 판을 만들지 않는다
         self.assertIsNone(run.produced_version_id)
 
-    async def test_changed_content_upload_is_updated(self) -> None:
+    async def test_changed_content_revision_is_updated(self) -> None:
         title = self._new_title()
-        await self._upload(title, self._body("처음"))
+        first = await self._upload(title, self._body("처음"))
 
-        second = await self._upload(title, self._body("고친 뒤"))
+        second = await self._revise(
+            first.document_source_id,
+            self._body("고친 뒤"),
+        )
         run = await self._run(second.ingestion_run_id)
 
         self.assertEqual(IngestionResultCode.UPDATED, run.result_code)
@@ -189,24 +229,20 @@ class UploadResultCodeDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(0, run.summary["added"])
         self.assertEqual(0, run.summary["deleted"])
 
-    async def test_same_content_in_another_document_is_duplicate(self) -> None:
+    async def test_same_content_in_another_document_is_rejected(self) -> None:
+        """다른 이름이어도 본문이 같으면 새 문서를 만들지 않는다."""
+
         body = self._body("공유 본문")
-        first_title = self._new_title()
-        first = await self._upload(first_title, body)
+        await self._upload(self._new_title(), body)
 
         second = await self._upload(self._new_title(), body)
         run = await self._run(second.ingestion_run_id)
 
-        self.assertEqual(ExecutionStatus.SUCCESS, run.status)
-        self.assertEqual(
-            IngestionResultCode.DUPLICATE_CONTENT,
-            run.result_code,
-        )
+        # 판을 만들지 않고 실패로 마감한다. 라우터가 409 로 내보낸다
+        self.assertEqual(ExecutionStatus.FAILED, run.status)
+        self.assertEqual("DUPLICATE_CONTENT", run.error_code)
         self.assertIsNone(run.produced_version_id)
-        self.assertEqual(
-            first.document_source_id,
-            run.duplicate_of_document_source_id,
-        )
+        self.assertIsNone(run.result_code)
 
     async def test_revision_creates_next_version(self) -> None:
         title = self._new_title()

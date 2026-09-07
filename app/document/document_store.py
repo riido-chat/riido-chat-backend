@@ -29,6 +29,7 @@ from app.document.chunking_config import get_or_create_chunking_config
 from app.document.document_key import (
     DEFAULT_GITBOOK_ROOT_URL,
     SOURCE_TYPE_GITBOOK,
+    SOURCE_TYPE_UPLOAD,
     build_gitbook_document_key,
 )
 from app.document.group_source import get_or_create_gitbook_source
@@ -304,7 +305,11 @@ class DocumentStore:
         document_source_id: int,
         normalized_content_hash: str,
     ) -> Optional[DocumentSource]:
-        """그룹 안 다른 문서가 같은 정제 본문을 이미 가지고 있는지 찾는다."""
+        """그룹 안 다른 콘솔 문서가 같은 정제 본문을 가졌는지 찾는다.
+
+        콘솔 문서는 URL 이 없어 본문 해시가 유일한 중복 신호다.
+        GitBook 문서는 원천이 준 URL 이 정체성이라 대상이 아니다.
+        """
 
         source = await self._session.get(DocumentSource, document_source_id)
         if source is None:
@@ -319,6 +324,7 @@ class DocumentStore:
             .where(
                 DocumentSource.document_group_id == source.document_group_id,
                 DocumentSource.id != source.id,
+                DocumentSource.source_type == SOURCE_TYPE_UPLOAD,
                 DocumentVersion.status == DocumentVersionStatus.READY,
                 DocumentVersion.normalized_content_hash
                 == normalized_content_hash,

@@ -37,7 +37,6 @@ from app.admin.schema import (
     AdminChunkStats,
     AdminDocumentRevisionRequest,
     AdminDocumentUploadRequest,
-    AdminDuplicateDocument,
     AdminIndexRunAcceptedResponse,
     AdminUploadResultResponse,
     AdminErrorResponse,
@@ -71,6 +70,10 @@ ADMIN_ERROR_RESPONSES = {
     status.HTTP_409_CONFLICT: {
         "model": AdminErrorResponse,
         "description": (
+            "`DOCUMENT_ALREADY_EXISTS`: 같은 이름의 콘솔 문서에 READY 판이 "
+            "있는 경우입니다. "
+            "`DUPLICATE_CONTENT`: 그룹 안 다른 콘솔 문서와 본문이 같은 "
+            "경우입니다. "
             "`JOB_IN_PROGRESS`: 같은 그룹에 진행 중 작업이 있는 경우입니다. "
             "`DOCUMENT_NOT_REVISABLE`: GitBook 문서에 수정본을 올린 경우입니다."
         ),
@@ -79,7 +82,8 @@ ADMIN_ERROR_RESPONSES = {
         "model": AdminErrorResponse,
         "description": (
             "`INVALID_FILE`: .md 파일이 아니거나 UTF-8이 아니거나, "
-            "파일 내용이 비어 있는 경우입니다."
+            "파일 내용이 비어 있거나, 문서명을 정규화한 결과가 "
+            "빈 문자열인 경우입니다."
         ),
     },
     status.HTTP_404_NOT_FOUND: {
@@ -180,14 +184,6 @@ async def _run_ingestion(
             None
             if detail.chunk_stats is None
             else AdminChunkStats(**detail.chunk_stats)
-        ),
-        duplicateOf=(
-            None
-            if detail.duplicate_of is None
-            else AdminDuplicateDocument(
-                documentId=detail.duplicate_of.document_id,
-                title=detail.duplicate_of.title,
-            )
         ),
     )
 

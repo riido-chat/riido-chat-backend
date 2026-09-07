@@ -11,6 +11,8 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from app.document.ingestion_service import (
     AdminIngestionService,
     AdminJobInProgressError,
+    DocumentAlreadyExistsError,
+    InvalidUploadFileError,
     run_admin_ingestion,
 )
 from app.document.document_key import (
@@ -284,7 +286,24 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
             succeeded = await session.get(IngestionRun, second.ingestion_run_id)
         self.assertEqual(ExecutionStatus.SUCCESS, succeeded.status)
 
-    async def test_same_title_upload_targets_the_existing_document(self) -> None:
+    async def test_unusable_title_is_rejected_before_accepting(self) -> None:
+        """정규화 결과가 비면 실행도 원본도 만들지 않는다."""
+
+        async with self.session_factory() as session:
+            before = await session.scalar(
+                select(func.count()).select_from(IngestionRun)
+            )
+
+        with self.assertRaises(InvalidUploadFileError):
+            await self._start("※※※")
+
+        async with self.session_factory() as session:
+            after = await session.scalar(
+                select(func.count()).select_from(IngestionRun)
+            )
+        self.assertEqual(before, after)
+
+    async def test_same_title_upload_is_rejected(self) -> None:
         title = self._new_title()
         accepted = await self._start(title)
         await run_admin_ingestion(
@@ -293,9 +312,9 @@ class AdminIngestionDbTest(unittest.IsolatedAsyncioTestCase):
             _StubEmbedder,
         )
 
-        # 같은 문서명은 거절이 아니라 그 문서의 새 판 후보가 된다
-        second = await self._start(title)
-        self.assertEqual(accepted.document_source_id, second.document_source_id)
+        # 기존 문서의 새 판은 수정본 업로드로만 만든다
+        with self.assertRaises(DocumentAlreadyExistsError):
+            await self._start(title)
 
     async def test_processing_run_blocks_another_admin_job(self) -> None:
         first_title = self._new_title()

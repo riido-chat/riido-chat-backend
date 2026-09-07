@@ -12,8 +12,10 @@ from app.database.models import ExecutionStatus
 from app.document.ingestion_service import (
     AcceptedIngestion,
     AdminIngestionService,
+    DocumentAlreadyExistsError,
     DocumentNotRevisableError,
     IngestionRunDetail,
+    InvalidUploadFileError,
 )
 from app.main import create_app
 
@@ -98,7 +100,6 @@ class AdminDocumentApiTest(unittest.TestCase):
                     "deleted": 0,
                     "reused": 0,
                 },
-                "duplicateOf": None,
             },
             response.json(),
         )
@@ -135,6 +136,52 @@ class AdminDocumentApiTest(unittest.TestCase):
         self.assertEqual("문서 구조를 분석하지 못했습니다.", body["message"])
         # 오류 본문은 code 와 message 둘뿐이다
         self.assertEqual({"code", "message"}, set(body))
+
+    def test_same_name_upload_returns_409(self) -> None:
+        self.service.start_new_document.side_effect = (
+            DocumentAlreadyExistsError()
+        )
+
+        response = self._upload("guide.md", b"# guide")
+
+        self.assertEqual(409, response.status_code)
+        self.assertEqual("DOCUMENT_ALREADY_EXISTS", response.json()["code"])
+
+    def test_duplicate_content_returns_409(self) -> None:
+        self.service.start_new_document.return_value = AcceptedIngestion(
+            ingestion_run_id=101,
+            document_source_id=42,
+        )
+        self.service.read_finished_run.return_value = self._success_detail(
+            status=ExecutionStatus.FAILED,
+            result_code=None,
+            document_version_id=None,
+            version_no=None,
+            section_count=None,
+            chunk_count=None,
+            chunk_stats=None,
+            error_code="DUPLICATE_CONTENT",
+            error_message="다른 이름이지만 동일한 콘텐츠가 이미 등록되어 있습니다.",
+        )
+
+        with patch("app.admin.router.run_admin_ingestion", new=AsyncMock()):
+            response = self._upload("guide.md", b"# guide")
+
+        # 처리 중에 잡히지만 결과가 아니라 거절이다
+        self.assertEqual(409, response.status_code)
+        self.assertEqual("DUPLICATE_CONTENT", response.json()["code"])
+
+    def test_unusable_title_returns_422(self) -> None:
+        """정규화하면 남는 문자가 없는 문서명은 접수 전 거절이다."""
+
+        self.service.start_new_document.side_effect = InvalidUploadFileError(
+            "문서명에 사용할 수 있는 문자가 없습니다."
+        )
+
+        response = self._upload("guide.md", b"# guide")
+
+        self.assertEqual(422, response.status_code)
+        self.assertEqual("INVALID_FILE", response.json()["code"])
 
     def test_upload_rejects_category_field(self) -> None:
         """분류는 요청 필드가 아니다."""
