@@ -1,5 +1,4 @@
 import unittest
-import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -15,13 +14,9 @@ from app.admin.group_service import (
     GroupDetail,
     GroupDocument,
     GroupSummary,
-    LatestIndexRun,
-    PendingDocumentView,
 )
-from app.database.models import ExecutionStatus
 from app.document.ingestion_service import DocumentGroupNotFoundError
 from app.document.group_source import GroupSourceView
-from app.document.job_gate import RunningJob
 from app.main import create_app
 
 
@@ -66,13 +61,11 @@ class AdminDocumentGroupApiTest(unittest.TestCase):
             "active_index_version": ActiveIndexVersion(
                 index_version_id=57,
                 version_no=12,
-                activated_at=STARTED_AT,
             ),
-            "pending_documents": [],
+            "pending_count": 0,
             "search_status": "UP_TO_DATE",
             "documents": [],
-            "running_job": None,
-            "latest_index_run": None,
+            "job_in_progress": False,
         }
         base.update(changes)
         return GroupDetail(**base)
@@ -109,13 +102,7 @@ class AdminDocumentGroupApiTest(unittest.TestCase):
 
     def test_detail_returns_summary_and_documents(self) -> None:
         self.service.get_group_detail.return_value = self._detail(
-            pending_documents=[
-                PendingDocumentView(
-                    document_id=140,
-                    title="임시 공지 9월",
-                    change_type="NEW",
-                )
-            ],
+            pending_count=1,
             search_status="REINDEX_REQUIRED",
             documents=[
                 GroupDocument(
@@ -126,7 +113,7 @@ class AdminDocumentGroupApiTest(unittest.TestCase):
                     group_source_id=None,
                     document_version_no=4,
                     applied_version_no=3,
-                    processing_status="READY",
+                    applied_status="UNAPPLIED",
                 )
             ],
         )
@@ -135,7 +122,6 @@ class AdminDocumentGroupApiTest(unittest.TestCase):
 
         self.assertEqual(12, body["summary"]["activeIndexVersion"]["versionNo"])
         self.assertEqual(1, body["summary"]["pendingCount"])
-        self.assertEqual("NEW", body["summary"]["pendingDocuments"][0]["changeType"])
         self.assertEqual("REINDEX_REQUIRED", body["summary"]["searchStatus"])
         source = body["sources"][0]
         self.assertEqual("https://docs.riido.io", source["rootUrl"])
@@ -144,55 +130,48 @@ class AdminDocumentGroupApiTest(unittest.TestCase):
         self.assertEqual("UPLOAD", document["sourceType"])
         self.assertEqual(4, document["documentVersionNo"])
         self.assertEqual(3, document["appliedVersionNo"])
+        self.assertEqual("UNAPPLIED", document["appliedStatus"])
         # 콘솔 업로드 문서는 수집 원천이 없다
         self.assertIsNone(document["groupSourceId"])
-        self.assertIsNone(body["runningJob"])
-        self.assertIsNone(body["latestIndexRun"])
+        self.assertFalse(body["jobInProgress"])
 
-    def test_detail_reports_running_recollect_batch(self) -> None:
-        batch_id = uuid.uuid4()
+    def test_detail_drops_polling_fields(self) -> None:
+        """실행 조회가 사라져 복원용 필드를 내려주지 않는다."""
+
+        self.service.get_group_detail.return_value = self._detail()
+
+        body = self.client.get("/api/admin/document-groups/1").json()
+
+        for gone in ("runningJob", "latestIndexRun"):
+            self.assertNotIn(gone, body)
+        self.assertNotIn("pendingDocuments", body["summary"])
+        self.assertNotIn("activatedAt", body["summary"]["activeIndexVersion"])
+
+    def test_detail_reports_job_in_progress(self) -> None:
+        """작업 종류를 구분하지 않고 boolean 하나로 내려준다."""
+
         self.service.get_group_detail.return_value = self._detail(
             search_status="IN_PROGRESS",
-            running_job=RunningJob(
-                job_type="RECOLLECT",
-                stage="PROCESSING",
-                batch_id=batch_id,
-                group_source_id=1,
-                root_url="https://docs.riido.io",
-            ),
+            job_in_progress=True,
         )
 
         body = self.client.get("/api/admin/document-groups/1").json()
 
-        running = body["runningJob"]
-        self.assertEqual("RECOLLECT", running["jobType"])
-        self.assertEqual(str(batch_id), running["batchId"])
-        self.assertIsNone(running["ingestionRunId"])
-        # 새로고침 뒤에도 어느 GitBook 수집인지 알 수 있어야 한다
-        self.assertEqual("https://docs.riido.io", running["rootUrl"])
+        self.assertTrue(body["jobInProgress"])
+        self.assertEqual("IN_PROGRESS", body["summary"]["searchStatus"])
 
-    def test_detail_reports_failed_apply_for_modal_restore(self) -> None:
+    def test_detail_reports_failed_search_status(self) -> None:
+        """직전 반영이 실패해도 검색에 반영하기는 활성이다."""
+
         self.service.get_group_detail.return_value = self._detail(
-            search_status="REINDEX_REQUIRED",
-            latest_index_run=LatestIndexRun(
-                index_run_id=310,
-                index_version_id=58,
-                operation_type="BUILD_AND_APPLY",
-                status=ExecutionStatus.FAILED,
-                stage="APPLYING",
-                error_code="CORPUS_RELOAD_FAILED",
-                started_at=STARTED_AT,
-                finished_at=FINISHED_AT,
-            ),
+            pending_count=2,
+            search_status="FAILED",
         )
 
         body = self.client.get("/api/admin/document-groups/1").json()
 
-        latest = body["latestIndexRun"]
-        # FE 는 이 조합으로 4-4 모달을 복원한다
-        self.assertEqual("FAILED", latest["status"])
-        self.assertEqual("APPLYING", latest["stage"])
-        self.assertEqual("CORPUS_RELOAD_FAILED", latest["errorCode"])
+        self.assertEqual("FAILED", body["summary"]["searchStatus"])
+        self.assertEqual(2, body["summary"]["pendingCount"])
 
     def test_unknown_group_returns_404(self) -> None:
         self.service.get_group_detail.side_effect = DocumentGroupNotFoundError()

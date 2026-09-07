@@ -2,7 +2,7 @@
 
 import asyncio
 from pathlib import Path
-from typing import Annotated, Callable, Optional
+from typing import Annotated, Callable
 
 from fastapi import APIRouter, Depends, File, Request, UploadFile, status
 
@@ -33,13 +33,9 @@ from app.admin.schema import (
     AdminGroupInfo,
     AdminGroupSourceItem,
     AdminGroupSummary,
-    AdminLatestIndexRun,
-    AdminPendingDocument,
-    AdminRunningJob,
     AdminDocumentRevisionRequest,
     AdminDocumentUploadRequest,
     AdminIndexRunAcceptedResponse,
-    IndexRunErrorCode,
     AdminErrorResponse,
     AdminIngestionAcceptedResponse,
     AdminIngestionStatus,
@@ -274,15 +270,6 @@ def _to_accepted_response(accepted) -> AdminIndexRunAcceptedResponse:
     )
 
 
-def _to_index_run_error_code(error_code: Optional[str]) -> IndexRunErrorCode:
-    """기록되지 않았거나 모르는 코드는 내부 오류로 내린다."""
-
-    try:
-        return IndexRunErrorCode(error_code)
-    except ValueError:
-        return IndexRunErrorCode.INTERNAL_ERROR
-
-
 RECOLLECT_ERROR_RESPONSES = {
     status.HTTP_404_NOT_FOUND: {
         "model": AdminErrorResponse,
@@ -387,8 +374,6 @@ def _to_group_summary(summary: GroupSummary) -> AdminDocumentGroupSummary:
 
 def _to_group_detail(detail: GroupDetail) -> AdminDocumentGroupDetailResponse:
     active = detail.active_index_version
-    running = detail.running_job
-    latest = detail.latest_index_run
     return AdminDocumentGroupDetailResponse(
         group=AdminGroupInfo(
             groupId=detail.group_id,
@@ -413,18 +398,9 @@ def _to_group_detail(detail: GroupDetail) -> AdminDocumentGroupDetailResponse:
                 else AdminActiveIndexVersion(
                     indexVersionId=active.index_version_id,
                     versionNo=active.version_no,
-                    activatedAt=active.activated_at,
                 )
             ),
-            pendingCount=len(detail.pending_documents),
-            pendingDocuments=[
-                AdminPendingDocument(
-                    documentId=item.document_id,
-                    title=item.title,
-                    changeType=item.change_type,
-                )
-                for item in detail.pending_documents
-            ],
+            pendingCount=detail.pending_count,
             searchStatus=detail.search_status,
         ),
         documents=[
@@ -436,38 +412,9 @@ def _to_group_detail(detail: GroupDetail) -> AdminDocumentGroupDetailResponse:
                 groupSourceId=document.group_source_id,
                 documentVersionNo=document.document_version_no,
                 appliedVersionNo=document.applied_version_no,
-                processingStatus=document.processing_status,
+                appliedStatus=document.applied_status,
             )
             for document in detail.documents
         ],
-        runningJob=(
-            None
-            if running is None
-            else AdminRunningJob(
-                jobType=running.job_type,
-                stage=running.stage,
-                ingestionRunId=running.ingestion_run_id,
-                documentId=running.document_source_id,
-                indexRunId=running.index_run_id,
-                batchId=running.batch_id,
-                groupSourceId=running.group_source_id,
-                rootUrl=running.root_url,
-            )
-        ),
-        latestIndexRun=(
-            None
-            if latest is None
-            else AdminLatestIndexRun(
-                indexRunId=latest.index_run_id,
-                indexVersionId=latest.index_version_id,
-                operationType=latest.operation_type,
-                status=latest.status.value,
-                stage=latest.stage,
-                errorCode=_to_index_run_error_code(latest.error_code)
-                if latest.error_code
-                else None,
-                startedAt=latest.started_at,
-                finishedAt=latest.finished_at,
-            )
-        ),
+        jobInProgress=detail.job_in_progress,
     )

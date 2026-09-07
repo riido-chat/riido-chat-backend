@@ -5,10 +5,11 @@ import unittest
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.admin.group_service import (
+    SEARCH_STATUS_FAILED,
     SEARCH_STATUS_IN_PROGRESS,
     SEARCH_STATUS_NO_DOCUMENTS,
     SEARCH_STATUS_REINDEX_REQUIRED,
@@ -26,7 +27,6 @@ from app.database.models import (
     IndexVersion,
     IndexVersionStatus,
     IngestionRun,
-    IngestionStage,
 )
 from app.database.session import dispose_engine
 from app.document.chunking_config import get_or_create_chunking_config
@@ -157,16 +157,12 @@ class DocumentGroupDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(group.document_count, len(detail.documents))
         self.assertEqual(group.search_status, detail.search_status)
 
-    async def test_new_document_appears_as_pending_new(self) -> None:
+    async def test_new_document_is_counted_as_unapplied(self) -> None:
         title = f"group-test-{self.suffix}"
         document_id = await self._upload(title)
 
         detail = await self._detail()
 
-        pending = {item.document_id: item for item in detail.pending_documents}
-        self.assertIn(document_id, pending)
-        self.assertEqual("NEW", pending[document_id].change_type)
-        self.assertEqual(title, pending[document_id].title)
         self.assertEqual(
             SEARCH_STATUS_REINDEX_REQUIRED,
             detail.search_status,
@@ -177,13 +173,18 @@ class DocumentGroupDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, row.document_version_no)
         # 아직 색인에 들어가지 않았으므로 반영 버전이 없다
         self.assertIsNone(row.applied_version_no)
-        self.assertEqual("READY", row.processing_status)
+        self.assertEqual("UNAPPLIED", row.applied_status)
+        # 반영 대기 건수는 UNAPPLIED 인 문서 수다
+        self.assertEqual(
+            sum(1 for d in detail.documents if d.applied_status == "UNAPPLIED"),
+            detail.pending_count,
+        )
 
     async def test_running_ingestion_is_reported(self) -> None:
         title = f"group-running-{self.suffix}"
         self.titles.append(title)
         async with self.session_factory() as session:
-            accepted = await AdminIngestionService(session).start_new_document(
+            await AdminIngestionService(session).start_new_document(
                 group_id=self.group_id,
                 title=title,
                 category="test",
@@ -192,16 +193,8 @@ class DocumentGroupDbTest(unittest.IsolatedAsyncioTestCase):
 
         detail = await self._detail()
 
-        self.assertIsNotNone(detail.running_job)
-        self.assertEqual("INGESTION", detail.running_job.job_type)
-        self.assertEqual(
-            accepted.ingestion_run_id,
-            detail.running_job.ingestion_run_id,
-        )
-        self.assertEqual(
-            IngestionStage.RECEIVING.value,
-            detail.running_job.stage,
-        )
+        # 작업 종류를 구분하지 않고 boolean 하나로 알린다
+        self.assertTrue(detail.job_in_progress)
 
     async def test_running_index_makes_status_in_progress(self) -> None:
         now = datetime.now(timezone.utc)
@@ -230,20 +223,52 @@ class DocumentGroupDbTest(unittest.IsolatedAsyncioTestCase):
             )
             session.add(run)
             await session.commit()
-            run_id = run.id
 
         detail = await self._detail()
 
         self.assertEqual(SEARCH_STATUS_IN_PROGRESS, detail.search_status)
-        self.assertEqual("INDEX", detail.running_job.job_type)
-        self.assertEqual(run_id, detail.running_job.index_run_id)
-        self.assertEqual("BUILDING", detail.running_job.stage)
-        # 재진입 복원 근거도 같은 실행을 가리킨다
-        self.assertEqual(run_id, detail.latest_index_run.index_run_id)
-        self.assertEqual(
-            ExecutionStatus.PROCESSING,
-            detail.latest_index_run.status,
-        )
+        self.assertTrue(detail.job_in_progress)
+
+    async def test_failed_index_run_makes_status_failed(self) -> None:
+        """직전 반영이 실패하면 성공한 반영이 있기 전까지 FAILED 로 남는다."""
+
+        # 문서가 없으면 NO_DOCUMENTS 가 먼저 걸린다
+        await self._upload(f"group-failed-doc-{self.suffix}")
+
+        now = datetime.now(timezone.utc)
+        async with self.session_factory() as session:
+            chunking = await get_or_create_chunking_config(session, now)
+            embedding = await get_or_create_embedding_config(session, now)
+            index_version = IndexVersion(
+                document_group_id=self.group_id,
+                version=f"group-failed-{self.suffix}",
+                status=IndexVersionStatus.FAILED,
+                chunking_config_id=chunking.id,
+                embedding_config_id=embedding.id,
+                created_at=now,
+            )
+            session.add(index_version)
+            await session.flush()
+            self.index_version_ids.append(index_version.id)
+            session.add(
+                IndexRun(
+                    index_version_id=index_version.id,
+                    trigger_type="MANUAL",
+                    operation_type=IndexOperationType.BUILD_AND_APPLY,
+                    stage=IndexRunStage.BUILDING,
+                    status=ExecutionStatus.FAILED,
+                    error_code="VALIDATION_FAILED",
+                    started_at=now,
+                    finished_at=now,
+                )
+            )
+            await session.commit()
+
+        detail = await self._detail()
+
+        self.assertEqual(SEARCH_STATUS_FAILED, detail.search_status)
+        # 실패해도 진행 중 작업은 없다. 버튼은 활성이다
+        self.assertFalse(detail.job_in_progress)
 
     async def test_gitbook_documents_show_applied_version(self) -> None:
         detail = await self._detail()
