@@ -5,7 +5,6 @@
 """
 
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Dict, List, Optional, Set
 
 from sqlalchemy import select
@@ -22,7 +21,7 @@ from app.database.models import (
 )
 from app.document.ingestion_service import DocumentGroupNotFoundError
 from app.document.group_source import GroupSourceView, list_group_sources
-from app.document.job_gate import RunningJob, load_running_job
+from app.document.job_gate import load_running_job
 from app.indexing.index_builder import (
     load_active_document_versions,
     load_latest_ready_versions,
@@ -34,6 +33,10 @@ SEARCH_STATUS_UP_TO_DATE = "UP_TO_DATE"
 SEARCH_STATUS_REINDEX_REQUIRED = "REINDEX_REQUIRED"
 SEARCH_STATUS_IN_PROGRESS = "IN_PROGRESS"
 SEARCH_STATUS_NO_DOCUMENTS = "NO_DOCUMENTS"
+SEARCH_STATUS_FAILED = "FAILED"
+
+APPLIED_STATUS_APPLIED = "APPLIED"
+APPLIED_STATUS_UNAPPLIED = "UNAPPLIED"
 
 
 @dataclass(frozen=True)
@@ -53,14 +56,6 @@ class GroupSummary:
 class ActiveIndexVersion:
     index_version_id: int
     version_no: Optional[int]
-    activated_at: Optional[datetime]
-
-
-@dataclass(frozen=True)
-class PendingDocumentView:
-    document_id: int
-    title: str
-    change_type: str
 
 
 @dataclass(frozen=True)
@@ -74,19 +69,7 @@ class GroupDocument:
     group_source_id: Optional[int]
     document_version_no: int
     applied_version_no: Optional[int]
-    processing_status: str
-
-
-@dataclass(frozen=True)
-class LatestIndexRun:
-    index_run_id: int
-    index_version_id: int
-    operation_type: str
-    status: ExecutionStatus
-    stage: str
-    error_code: Optional[str]
-    started_at: datetime
-    finished_at: Optional[datetime]
+    applied_status: str
 
 
 @dataclass(frozen=True)
@@ -99,11 +82,10 @@ class GroupDetail:
     consumer_key: str
     sources: List[GroupSourceView]
     active_index_version: Optional[ActiveIndexVersion]
-    pending_documents: List[PendingDocumentView]
+    pending_count: int
     search_status: str
     documents: List[GroupDocument]
-    running_job: Optional[RunningJob]
-    latest_index_run: Optional[LatestIndexRun]
+    job_in_progress: bool
 
 
 class DocumentGroupService:
@@ -147,7 +129,7 @@ class DocumentGroupService:
         return summaries
 
     async def get_group_detail(self, group_id: int) -> GroupDetail:
-        """요약 카드와 문서 표, 재진입 복원 정보를 한 번에 만든다."""
+        """요약 카드와 문서 표를 한 번에 만든다."""
 
         group = await self._session.get(DocumentGroup, group_id)
         if group is None:
@@ -165,22 +147,20 @@ class DocumentGroupService:
             consumer_key=group.consumer_key,
             sources=await list_group_sources(self._session, group.id),
             active_index_version=await self._active_index_version(group.id),
-            pending_documents=[
-                PendingDocumentView(
-                    document_id=item.document_source_id,
-                    title=item.title,
-                    change_type=item.change_type,
-                )
-                for item in pending
-            ],
+            pending_count=sum(
+                1
+                for document in documents
+                if document.applied_status == APPLIED_STATUS_UNAPPLIED
+            ),
             search_status=await self._search_status(
                 group.id,
                 len(latest),
                 len(pending),
             ),
             documents=documents,
-            running_job=await load_running_job(self._session, group.id),
-            latest_index_run=await self._latest_index_run(group.id),
+            job_in_progress=(
+                await load_running_job(self._session, group.id) is not None
+            ),
         )
 
     async def _search_status(
@@ -189,13 +169,17 @@ class DocumentGroupService:
         document_count: int,
         pending_count: int,
     ) -> str:
-        """부록 A 의 계산 규칙을 그대로 따른다."""
+        """상태는 저장하지 않고 실행 이력과 문서 수로 계산한다."""
 
         latest_run = await self._latest_index_run(group_id)
         if latest_run is not None and latest_run.status == ExecutionStatus.PROCESSING:
             return SEARCH_STATUS_IN_PROGRESS
         if document_count == 0:
             return SEARCH_STATUS_NO_DOCUMENTS
+        if latest_run is not None and latest_run.status == ExecutionStatus.FAILED:
+            # 직전 반영이 실패했다는 뜻이고 반영이 필요한 상태를 포함한다.
+            # 성공한 반영이 있기 전까지 유지된다.
+            return SEARCH_STATUS_FAILED
         if pending_count == 0:
             return SEARCH_STATUS_UP_TO_DATE
         return SEARCH_STATUS_REINDEX_REQUIRED
@@ -217,31 +201,17 @@ class DocumentGroupService:
         return ActiveIndexVersion(
             index_version_id=index_version.id,
             version_no=index_version.version_no,
-            activated_at=index_version.activated_at,
         )
 
-    async def _latest_index_run(
-        self,
-        group_id: int,
-    ) -> Optional[LatestIndexRun]:
-        run = await self._session.scalar(
+    async def _latest_index_run(self, group_id: int) -> Optional[IndexRun]:
+        """검색 반영 상태 계산에만 쓴다. 응답으로 내보내지 않는다."""
+
+        return await self._session.scalar(
             select(IndexRun)
             .join(IndexVersion, IndexVersion.id == IndexRun.index_version_id)
             .where(IndexVersion.document_group_id == group_id)
             .order_by(IndexRun.started_at.desc(), IndexRun.id.desc())
             .limit(1)
-        )
-        if run is None:
-            return None
-        return LatestIndexRun(
-            index_run_id=run.id,
-            index_version_id=run.index_version_id,
-            operation_type=run.operation_type.value,
-            status=run.status,
-            stage=run.stage.value,
-            error_code=run.error_code,
-            started_at=run.started_at,
-            finished_at=run.finished_at,
         )
 
     async def _applied_version_no_by_source(self, group_id: int) -> Dict[int, int]:
@@ -292,7 +262,11 @@ class DocumentGroupService:
                 group_source_id=source.group_source_id,
                 document_version_no=latest[source.id][1],
                 applied_version_no=applied.get(source.id),
-                processing_status="READY",
+                applied_status=(
+                    APPLIED_STATUS_APPLIED
+                    if applied.get(source.id) == latest[source.id][1]
+                    else APPLIED_STATUS_UNAPPLIED
+                ),
             )
             for source in sources
         ]
