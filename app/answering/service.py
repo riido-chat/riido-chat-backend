@@ -11,7 +11,6 @@ from app.core.openai_error import is_transient_openai_error
 from app.chat.progress import OnProgressStageHook, ProgressStage
 from app.answering.generator import (
     GENERATION_PROMPT_VERSION,
-    OPENAI_GENERATION_MODEL,
     OPENAI_GENERATION_PROVIDER,
     OpenAIGenerator,
     build_generation_context,
@@ -311,12 +310,13 @@ def _combine_model_traces(
 def _failed_generation_trace(
     started: float,
     error: Exception,
+    model_name: str,
 ) -> ModelCallTrace:
     """Generator가 trace를 만들기 전에 끝난 예상 밖 실패를 기록한다."""
 
     return ModelCallTrace(
         provider=OPENAI_GENERATION_PROVIDER,
-        model_name=OPENAI_GENERATION_MODEL,
+        model_name=model_name,
         succeeded=False,
         latency_ms=int((time.perf_counter() - started) * 1000),
         prompt_version=GENERATION_PROMPT_VERSION,
@@ -341,10 +341,11 @@ class GenerationService:
         """Hybrid Top-5로 답변을 생성하고 최종 상태를 결정한다."""
 
         sources = build_generation_context(retrieval_results)
+        model_name = self._generator.model_name
         if before_model_call is not None:
             await before_model_call(
                 OPENAI_GENERATION_PROVIDER,
-                OPENAI_GENERATION_MODEL,
+                model_name,
                 GENERATION_PROMPT_VERSION,
             )
 
@@ -354,7 +355,7 @@ class GenerationService:
         except Exception as error:
             return _error_result(
                 _generation_error_code(error),
-                _failed_generation_trace(started, error),
+                _failed_generation_trace(started, error, model_name),
             )
 
         if call.error is not None:

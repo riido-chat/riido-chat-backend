@@ -647,6 +647,24 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
             client.responses.parse.await_args_list,
         )
 
+    async def test_uses_configured_model_for_requests_and_trace(self) -> None:
+        plan = self._answerable_plan("SOURCE_1")
+        client = self._client_with_responses(plan, self._answerable_result())
+        generator = OpenAIGenerator(client=client, model_name="generation-test")
+        sources = build_generation_context([GenerationContextTest._result(1)])
+
+        result = await generator.generate_with_trace("질문", sources)
+
+        self.assertEqual(
+            ["generation-test", "generation-test"],
+            [call.kwargs["model"] for call in client.responses.parse.await_args_list],
+        )
+        self.assertEqual("generation-test", result.trace.model_name)
+
+    def test_rejects_blank_model_name(self) -> None:
+        with self.assertRaisesRegex(ValueError, "model_name"):
+            OpenAIGenerator(client=Mock(), model_name=" ")
+
     async def test_answer_receives_only_sources_required_by_plan(self) -> None:
         sources = build_generation_context(
             [GenerationContextTest._result(index) for index in range(1, 4)]

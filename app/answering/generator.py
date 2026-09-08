@@ -24,7 +24,7 @@ from app.retrieval.models import HybridRetrievalResult
 
 
 OPENAI_GENERATION_PROVIDER = "openai"
-OPENAI_GENERATION_MODEL = "gpt-5.4-mini"
+OPENAI_GENERATION_MODEL = "gpt-5.6-terra"
 GENERATION_PROMPT_VERSION = "v24"
 SOURCE_PLANNING_PROMPT_VERSION = "v15"
 SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v15-repair-1"
@@ -414,6 +414,7 @@ def _sum_tokens(current: Optional[int], added: Optional[int]) -> Optional[int]:
 def _generation_trace(
     started: float,
     *,
+    model_name: str = OPENAI_GENERATION_MODEL,
     retry_count: int,
     input_tokens: Optional[int] = None,
     output_tokens: Optional[int] = None,
@@ -424,7 +425,7 @@ def _generation_trace(
 
     return ModelCallTrace(
         provider=OPENAI_GENERATION_PROVIDER,
-        model_name=OPENAI_GENERATION_MODEL,
+        model_name=model_name,
         succeeded=error is None,
         latency_ms=int((time.perf_counter() - started) * 1000),
         retry_count=retry_count,
@@ -438,7 +439,14 @@ def _generation_trace(
 class OpenAIGenerator:
     """필요 Source를 확정한 뒤 해당 Context만으로 답변을 생성한다."""
 
-    def __init__(self, client: Optional[AsyncOpenAI] = None) -> None:
+    def __init__(
+        self,
+        client: Optional[AsyncOpenAI] = None,
+        *,
+        model_name: str = OPENAI_GENERATION_MODEL,
+    ) -> None:
+        if not model_name.strip():
+            raise ValueError("Generation model_name은 비어 있을 수 없습니다.")
         if client is None:
             api_key = get_settings().openai_api_key
             if not api_key:
@@ -446,6 +454,11 @@ class OpenAIGenerator:
             client = AsyncOpenAI(api_key=api_key, max_retries=0, timeout=30.0)
 
         self._client = client
+        self._model_name = model_name
+
+    @property
+    def model_name(self) -> str:
+        return self._model_name
 
     async def generate(
         self,
@@ -507,6 +520,7 @@ class OpenAIGenerator:
             repair_usage = getattr(repair_call.response, "usage", None)
             planning_regeneration_trace = _generation_trace(
                 repair_started,
+                model_name=self._model_name,
                 retry_count=repair_call.retry_count,
                 input_tokens=getattr(repair_usage, "input_tokens", None),
                 output_tokens=getattr(repair_usage, "output_tokens", None),
@@ -560,6 +574,7 @@ class OpenAIGenerator:
             return GenerationCall(
                 trace=_generation_trace(
                     started,
+                    model_name=self._model_name,
                     retry_count=total_retry_count,
                     input_tokens=total_input_tokens,
                     output_tokens=total_output_tokens,
@@ -621,6 +636,7 @@ class OpenAIGenerator:
         return GenerationCall(
             trace=_generation_trace(
                 started,
+                model_name=self._model_name,
                 retry_count=total_retry_count,
                 input_tokens=total_input_tokens,
                 output_tokens=total_output_tokens,
@@ -650,6 +666,7 @@ class OpenAIGenerator:
             return GenerationCall(
                 trace=_generation_trace(
                     time.perf_counter(),
+                    model_name=self._model_name,
                     retry_count=0,
                     error=error,
                     prompt_version=ANSWER_REPAIR_PROMPT_VERSION,
@@ -673,6 +690,7 @@ class OpenAIGenerator:
         usage = getattr(answer_call.response, "usage", None)
         repair_trace = _generation_trace(
             started,
+            model_name=self._model_name,
             retry_count=answer_call.retry_count,
             input_tokens=getattr(usage, "input_tokens", None),
             output_tokens=getattr(usage, "output_tokens", None),
@@ -714,7 +732,7 @@ class OpenAIGenerator:
         for attempt in range(MAX_GENERATION_ATTEMPTS):
             try:
                 response = await self._client.responses.parse(
-                    model=OPENAI_GENERATION_MODEL,
+                    model=self._model_name,
                     instructions=instructions,
                     input=input_text,
                     text_format=text_format,
@@ -735,8 +753,8 @@ class OpenAIGenerator:
             retry_count=MAX_GENERATION_ATTEMPTS - 1,
         )
 
-    @staticmethod
     def _error_call(
+        self,
         started: float,
         error: Exception,
         retry_count: int,
@@ -747,6 +765,7 @@ class OpenAIGenerator:
         return GenerationCall(
             trace=_generation_trace(
                 started,
+                model_name=self._model_name,
                 retry_count=retry_count,
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
