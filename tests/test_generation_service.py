@@ -72,6 +72,7 @@ def _call(
 class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.generator = AsyncMock(spec=OpenAIGenerator)
+        self.generator.model_name = OPENAI_GENERATION_MODEL
         self.service = GenerationService(self.generator)
 
     async def test_runs_checkpoint_before_generation(self) -> None:
@@ -105,6 +106,30 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
             OPENAI_GENERATION_MODEL,
             GENERATION_PROMPT_VERSION,
         )
+
+    async def test_checkpoints_configured_generation_model(self) -> None:
+        self.generator.model_name = "generation-test"
+        self.generator.generate_with_trace.return_value = _call(
+            GenerationResult(
+                status=GenerationStatus.WITHHELD,
+                answer_markdown=None,
+                withheld_reason=GenerationWithheldReason.OUT_OF_SCOPE,
+            )
+        )
+        before_model_call = AsyncMock()
+
+        result = await self.service.generate_answer(
+            "질문",
+            [],
+            before_model_call=before_model_call,
+        )
+
+        before_model_call.assert_awaited_once_with(
+            OPENAI_GENERATION_PROVIDER,
+            "generation-test",
+            GENERATION_PROMPT_VERSION,
+        )
+        self.assertEqual(FinalAnswerStatus.WITHHELD, result.status)
 
     async def test_does_not_generate_when_checkpoint_fails(self) -> None:
         before_model_call = AsyncMock(side_effect=RuntimeError("checkpoint failed"))
@@ -142,6 +167,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(result.model_call.succeeded)
         self.assertEqual(2500, result.model_call.latency_ms)
         self.assertEqual(0, result.model_call.retry_count)
+        self.assertEqual(OPENAI_GENERATION_MODEL, result.model_call.model_name)
         self.assertEqual(
             "unexpected provider failure",
             result.model_call.error_message,
