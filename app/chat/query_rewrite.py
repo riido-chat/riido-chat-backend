@@ -26,7 +26,7 @@ from app.answering.models import FinalWithheldReason
 
 OPENAI_QUERY_REWRITE_PROVIDER = "openai"
 OPENAI_QUERY_REWRITE_MODEL = "gpt-5.4-mini"
-QUERY_REWRITE_PROMPT_VERSION = "v7"
+QUERY_REWRITE_PROMPT_VERSION = "v8"
 QUERY_REWRITE_TIMEOUT_SECONDS = 30.0
 QUERY_REWRITE_MAX_OUTPUT_TOKENS = 512
 MAX_QUERY_REWRITE_ATTEMPTS = 2
@@ -64,6 +64,9 @@ QUERY_REWRITE_PROMPT_V4 = """당신은 현재 질문이 새 주제인지 후속 
   연관 개념이 등장했다는 이유로 현재 질문의 명시된 대상을 과거 주제에 붙이지 마세요.
 - 현재 질문에 명시된 중심 대상을 후보의 다른 대상으로 교체하거나, 후보 문맥만으로 임의로
   범위를 좁히지 마세요.
+- 현재 질문이 후보보다 더 구체적인 대상·조건·상황을 이미 포함한다면, 후보의 짧고 포괄적인
+  표현으로 현재 질문을 대체하거나 축약하지 마세요. 이 경우 이전 턴 없이 검색할 수 있으므로
+  NEW_TOPIC입니다.
 - 현재 질문이 문법적으로 검색 가능해 보여도, 어떤 서비스·기능에 관한 질문인지 빠져 있고
   직전 턴이 그 범위를 하나로 정한다면 FOLLOW_UP_RESOLVED입니다.
 
@@ -143,6 +146,8 @@ QUERY_REWRITE_PROMPT_V4 = """당신은 현재 질문이 새 주제인지 후속 
   작성하나요?`처럼 후보의 범위를 새로 덧붙이지 마세요.
 - 가장 최근 턴이 슬랙 연동이어도 현재 질문이 `구글 캘린더 연동은 어떤 기능이야?`라면 현재
   질문만으로 대상과 의도가 완결되므로 NEW_TOPIC입니다.
+- 후보가 `비밀번호를 잊어버렸어`이고 현재 질문이 `외부 서비스로 가입한 계정은 비밀번호가
+  없는 건가요?`라면 현재 질문이 더 구체적이고 완결되어 있으므로 NEW_TOPIC입니다.
 - 가장 최근 턴이 `구글 캘린더 연동은 어떤 기능이야?`이고 현재 질문이
   `그 연동에서 작업 마감일도 동기화돼?`라면 구글 캘린더 연동을 사용해
   FOLLOW_UP_RESOLVED로 처리하세요.

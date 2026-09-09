@@ -7,6 +7,7 @@ from app.retrieval.hybrid_retriever import (
     DEFAULT_FINAL_TOP_K,
     RRF_RANK_CONSTANT,
     HybridRetriever,
+    expand_retrieval_query,
     fuse_rrf_results,
 )
 from app.core.model_trace import ModelCallTrace
@@ -63,6 +64,43 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
         self.assertAlmostEqual(
             1.0 / (RRF_RANK_CONSTANT + 1),
             results[1].rrf_score,
+        )
+
+    def test_expands_riido_service_definition_query(self) -> None:
+        for query in ("뤼이도는 어떤 서비스야?", "뤼이도가 뭐야?"):
+            with self.subTest(query=query):
+                self.assertEqual(
+                    "뤼이도 서비스 소개",
+                    expand_retrieval_query(query),
+                )
+
+    def test_does_not_expand_feature_or_external_service_query(self) -> None:
+        for query in ("스프린트는 어떤 기능이야?", "슬랙은 어떤 서비스야?"):
+            with self.subTest(query=query):
+                self.assertEqual(query, expand_retrieval_query(query))
+
+    def test_normalizes_workspace_seat_billing_query(self) -> None:
+        self.assertEqual(
+            "Pro 요금제 워크스페이스 사용자 시트 결제",
+            expand_retrieval_query(
+                "pro 요금제는 팀 단위로 결제하나요? 팀원이 바뀌면 어떻게 되나요?"
+            ),
+        )
+
+    async def test_uses_expanded_query_for_both_retrievers(self) -> None:
+        self.bm25_retriever.search.return_value = []
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall()
+
+        await self.retriever.search_with_trace("뤼이도는 어떤 서비스야?")
+
+        expanded = "뤼이도 서비스 소개"
+        self.bm25_retriever.search.assert_called_once_with(
+            expanded,
+            top_k=CANDIDATE_K,
+        )
+        self.vector_retriever.search_with_trace.assert_awaited_once_with(
+            expanded,
+            top_k=CANDIDATE_K,
         )
 
     async def test_uses_default_final_top_five(self) -> None:

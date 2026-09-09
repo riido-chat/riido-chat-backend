@@ -21,6 +21,8 @@ from app.answering.models import (
     FinalAnswerStatus,
     FinalGenerationResult,
     FinalWithheldReason,
+    GenerationAnswerType,
+    GenerationCall,
     GenerationContextSource,
     GenerationStageTrace,
     GenerationStatus,
@@ -366,6 +368,54 @@ class GenerationService:
             )
 
         generation_result = call.result
+        source_plan = (
+            None if call.stage_trace is None else call.stage_trace.source_plan
+        )
+        if (
+            generation_result.status == GenerationStatus.WITHHELD
+            and source_plan is not None
+            and source_plan.status == GenerationStatus.ANSWERABLE
+            and source_plan.answer_type != GenerationAnswerType.PROCEDURE
+        ):
+            mismatch_error = UnverifiableAnswerError(
+                "ANSWERABLE Source Plan과 Answer의 WITHHELD 상태가 일치하지 않습니다."
+            )
+            failed_stage_trace = _with_validation_error(
+                call.stage_trace,
+                mismatch_error,
+            )
+            regeneration = await self._generator.regenerate_answer_with_trace(
+                question,
+                failed_stage_trace,
+                str(mismatch_error),
+            )
+            combined_model_call = _combine_model_traces(
+                call.trace,
+                regeneration.trace,
+            )
+            regeneration_stage_trace = (
+                regeneration.stage_trace or failed_stage_trace
+            )
+            if regeneration.error is not None:
+                return _error_result(
+                    _generation_error_code(regeneration.error),
+                    combined_model_call,
+                    regeneration_stage_trace,
+                )
+
+            generation_result = regeneration.result
+            if generation_result.status == GenerationStatus.WITHHELD:
+                return _withheld_result(
+                    FinalWithheldReason.UNVERIFIABLE_ANSWER,
+                    combined_model_call,
+                    regeneration_stage_trace,
+                )
+            call = GenerationCall(
+                trace=combined_model_call,
+                result=generation_result,
+                stage_trace=regeneration_stage_trace,
+            )
+
         if generation_result.status == GenerationStatus.WITHHELD:
             reason = FinalWithheldReason(generation_result.withheld_reason.value)
             return _withheld_result(reason, call.trace, call.stage_trace)
@@ -388,6 +438,7 @@ class GenerationService:
             if (
                 failed_stage_trace.source_plan is None
                 or failed_stage_trace.pre_validation_result is None
+                or failed_stage_trace.validation_regeneration_count > 0
             ):
                 logger.warning("답변 검증에 실패해 보류합니다: reason=%s", error)
                 return _withheld_result(

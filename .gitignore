@@ -15,5 +15,6 @@ data/raw/
 
 # 개인정보 포함 (채널톡 상담 데이터)
 data/private/
+app/chat/customer_cases.html
 data/failed.json
 data/clean/
