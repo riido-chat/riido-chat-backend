@@ -20,6 +20,31 @@ DEFAULT_FINAL_TOP_K = 5
 RRF_RANK_CONSTANT = 60
 
 
+def expand_retrieval_query(query: str) -> str:
+    """뤼이도 자체를 묻는 짧은 정의 질문에 소개 검색어를 보충한다."""
+
+    compact_query = " ".join(query.split())
+    service_definition_phrases = (
+        "어떤 서비스",
+        "무슨 서비스",
+        "뭐 하는 서비스",
+        "무엇을 하는 서비스",
+        "뤼이도가 뭐",
+    )
+    if "뤼이도" in compact_query and any(
+        phrase in compact_query for phrase in service_definition_phrases
+    ):
+        return "뤼이도 서비스 소개"
+    lowered_query = compact_query.lower()
+    if (
+        "요금제" in lowered_query
+        and "결제" in lowered_query
+        and any(word in lowered_query for word in ("팀원", "팀 단위", "사용자"))
+    ):
+        return "Pro 요금제 워크스페이스 사용자 시트 결제"
+    return query
+
+
 def _elapsed_ms(started: float) -> int:
     return int((time.perf_counter() - started) * 1000)
 
@@ -135,10 +160,11 @@ class HybridRetriever:
         if top_k <= 0:
             raise ValueError("top_k는 1 이상이어야 합니다.")
 
+        retrieval_query = expand_retrieval_query(query)
         bm25_started = time.perf_counter()
         try:
             bm25_results = self._bm25_retriever.search(
-                query,
+                retrieval_query,
                 top_k=CANDIDATE_K,
             )
         except Exception as error:
@@ -152,7 +178,7 @@ class HybridRetriever:
         if before_model_call is not None:
             vector_search_kwargs["before_model_call"] = before_model_call
         vector_call = await self._vector_retriever.search_with_trace(
-            query,
+            retrieval_query,
             top_k=CANDIDATE_K,
             **vector_search_kwargs,
         )

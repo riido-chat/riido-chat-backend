@@ -302,12 +302,15 @@ def evaluate_turn(
             f"actual={response_body.get('status')}"
         )
 
-    expected_reason = expected.get("expectedWithheldReason")
-    if expected_reason is not None:
+    expected_reasons = expected.get("expectedWithheldReasonsAny")
+    if expected_reasons is None:
+        expected_reason = expected.get("expectedWithheldReason")
+        expected_reasons = [] if expected_reason is None else [expected_reason]
+    if expected_reasons:
         withheld = response_body.get("withheld") or {}
-        if withheld.get("reasonCode") != expected_reason:
+        if withheld.get("reasonCode") not in expected_reasons:
             failures.append(
-                f"withheld reason 불일치: expected={expected_reason}, "
+                f"withheld reason 불일치: expected_any={expected_reasons}, "
                 f"actual={withheld.get('reasonCode')}"
             )
 

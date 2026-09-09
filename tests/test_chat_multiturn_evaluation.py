@@ -1,3 +1,4 @@
+import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -38,6 +39,75 @@ from evaluation.run_chat_multiturn_evaluation import (
 
 
 class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
+    def test_loads_real_customer_triage_catalog(self) -> None:
+        project_root = Path(__file__).resolve().parents[1]
+        payload = json.loads(
+            (project_root / "evaluation" / "customer_case_triage.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+        self.assertEqual("real-customer-triage-v1", payload["version"])
+        self.assertEqual(100, len(payload["records"]))
+        self.assertEqual(
+            [f"faq-{number:03d}" for number in range(1, 101)],
+            [record["sourceSampleId"] for record in payload["records"]],
+        )
+        self.assertEqual(
+            ["MQ027", "MQ040", "MQ066"],
+            payload["policy"]["knownLimitExclusions"],
+        )
+
+    def test_loads_real_customer_evaluation_candidates(self) -> None:
+        project_root = Path(__file__).resolve().parents[1]
+        payload = load_cases(
+            project_root / "evaluation" / "customer_support_cases.json"
+        )
+
+        self.assertEqual("real-customer-cases-v3", payload["version"])
+        self.assertEqual(70, len(payload["cases"]))
+        self.assertEqual(
+            [f"RC{number:03d}" for number in range(1, 71)],
+            [case["id"] for case in payload["cases"]],
+        )
+        self.assertEqual(
+            80,
+            sum(len(case["turns"]) for case in payload["cases"]),
+        )
+        self.assertEqual(
+            10,
+            sum(len(case["turns"]) > 1 for case in payload["cases"]),
+        )
+        self.assertEqual(
+            ["MQ027", "MQ040", "MQ066"],
+            payload["knownLimitExclusions"],
+        )
+        turns = [turn for case in payload["cases"] for turn in case["turns"]]
+        self.assertEqual(
+            {"COMPLETED": 16, "WITHHELD": 64},
+            {
+                status: sum(turn["expectedStatus"] == status for turn in turns)
+                for status in ("COMPLETED", "WITHHELD")
+            },
+        )
+        for turn in turns:
+            if turn["expectedStatus"] == "COMPLETED":
+                self.assertGreaterEqual(turn["minimumCitationCount"], 1)
+                self.assertTrue(turn["expectedCitationDocumentTitlesAny"])
+            else:
+                reasons = turn.get("expectedWithheldReasonsAny") or [
+                    turn["expectedWithheldReason"]
+                ]
+                self.assertTrue(
+                    set(reasons).issubset(
+                        {
+                            "INSUFFICIENT_EVIDENCE",
+                            "AMBIGUOUS_QUESTION",
+                            "OUT_OF_SCOPE",
+                        }
+                    )
+                )
+
     def test_loads_mvp_quality_100_question_set(self) -> None:
         payload = load_cases(
             Path(__file__).resolve().parents[1]
@@ -450,6 +520,30 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
                         }
                     }
                 },
+            },
+        )
+
+        self.assertEqual([], failures)
+
+    def test_accepts_any_expected_withheld_reason(self) -> None:
+        failures = evaluate_turn(
+            {
+                "expectedStatus": "WITHHELD",
+                "expectedWithheldReasonsAny": [
+                    "INSUFFICIENT_EVIDENCE",
+                    "AMBIGUOUS_QUESTION",
+                ],
+            },
+            200,
+            {
+                "status": "WITHHELD",
+                "withheld": {"reasonCode": "AMBIGUOUS_QUESTION"},
+            },
+            {
+                "status": "WITHHELD",
+                "contextStrategy": "NEW_TOPIC",
+                "selectedTurnNos": [],
+                "resolvedQuery": "탈퇴방법",
             },
         )
 

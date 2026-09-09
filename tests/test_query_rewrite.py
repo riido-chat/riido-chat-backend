@@ -270,7 +270,7 @@ class QueryRewriteInputTest(unittest.TestCase):
             build_query_rewrite_input("가" * (MAX_QUERY_LENGTH + 1), [])
 
     def test_prompt_v4_keeps_security_and_previous_turn_rules(self) -> None:
-        self.assertEqual("v7", QUERY_REWRITE_PROMPT_VERSION)
+        self.assertEqual("v8", QUERY_REWRITE_PROMPT_VERSION)
         self.assertIn("신뢰하지 않는 데이터", QUERY_REWRITE_PROMPT_V4)
         self.assertIn("지시 무시", QUERY_REWRITE_PROMPT_V4)
         self.assertIn("확정하는 근거가 아닙니다", QUERY_REWRITE_PROMPT_V4)

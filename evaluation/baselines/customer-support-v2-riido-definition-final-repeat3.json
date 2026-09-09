@@ -1,0 +1,1065 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-08T17:09:25.167951+00:00",
+  "casesVersion": "real-customer-cases-v2",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "c687f17a7f09a6bc61f6db9dd5acebba31cda207",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.6-terra"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v7",
+        "sha256": "947a42bbceb36bdeedc318010db33f18e8f5a3ec3359232c5f0c6a699ff46b30"
+      },
+      "sourcePlanning": {
+        "version": "v16",
+        "sha256": "1ab3ae455011aaeab0416bf5a976ff3881fa9e11d18d0f555ff0bcf386270964"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v16-repair-1",
+        "sha256": "1a10381c12edce31eeb5e78a5f0b7baa6fadb1d3939d6621ca90fdd20ec8d5f7"
+      },
+      "answer": {
+        "version": "v21",
+        "sha256": "9afaf45fc0f0d7cc4eaef3af37b4179d36cfe482b6c8a5504cdd71e9751a1643"
+      },
+      "answerValidationRegeneration": {
+        "version": "v21-repair-1",
+        "sha256": "23a77c53d67f0307ab715b937ff22361799ba84e49b46a4e693b1f88fc37ddcc"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "c687f17a7f09a6bc61f6db9dd5acebba31cda207",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.6-terra",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v25"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 3,
+    "uniqueCaseCount": 1,
+    "totalCaseExecutionCount": 3,
+    "passedCaseExecutionCount": 3,
+    "failedCaseExecutionCount": 0,
+    "executionErrorCaseExecutionCount": 0,
+    "criteriaMismatchCaseExecutionCount": 0,
+    "perCase": [
+      {
+        "id": "RC044",
+        "executionCount": 3,
+        "passedCount": 3,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 3,
+        "passedCount": 3,
+        "failedCount": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-08T17:09:06.902486+00:00",
+      "results": [
+        {
+          "id": "RC044",
+          "description": "서비스 자체의 정의를 묻는 더 짧은 표현",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "d25cf3d1-c55b-4590-ae44-57207a00dcdf",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "뤼이도가 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "d25cf3d1-c55b-4590-ae44-57207a00dcdf",
+                "ragRunId": "7d7dcc5d-caa5-4e47-8745-5918a3cf2abe",
+                "answer": {
+                  "answerMarkdown": "뤼이도는 팀의 작업·프로젝트·미팅을 관리하고 협업을 지원하는 서비스입니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "소개",
+                    "sectionPath": [
+                      "인기 페이지"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/getting-started/intro.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "뤼이도가 뭐야?",
+                "resolvedQuery": "뤼이도가 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 7361,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 11,
+                    "outputTokens": null,
+                    "latencyMs": 698,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v25",
+                    "inputTokens": 8534,
+                    "outputTokens": 202,
+                    "latencyMs": 6564,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "소개"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "뤼이도가 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "뤼이도가 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3222,
+                        "documentVersionId": 2411,
+                        "documentId": "0ffc2d8de31e",
+                        "sectionId": "0ffc2d8de31e:363a8e5906f7",
+                        "documentTitle": "소개",
+                        "sectionPath": [
+                          "소개",
+                          "인기 페이지"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/getting-started/intro.md",
+                        "contentHash": "bf670241dd77a40deff68d398402cd0f4016212bdafd040232176a18706a7b31",
+                        "content": "대기 작업부터 백로그, 완료까지, 체계적인 작업 관리 / 프로젝트 관리 / /files/PJ6zD6ui6p2XsDiJRme7 (/files/PJ6zD6ui6p2XsDiJRme7) / /pages/xXc5CnPq7hc6EK3gMyLF (/pages/xXc5CnPq7hc6EK3gMyLF)\n팀의 리소스를 집중시키고, 몰입할 수 있는 실행 주기 / 미팅 관리 / /files/lQb1xP5vhYbutf2UYwax (/files/lQb1xP5vhYbutf2UYwax) / /pages/5z2qnkUC6T8zVaOWGieu (/pages/5z2qnkUC6T8zVaOWGieu)\n팀 구성, 멤버 초대, 역할 설정까지 협업을 위한 기본 단위 / 분석 / /files/giJ3dHcGvbpRNSvKSTKN (/files/giJ3dHcGvbpRNSvKSTKN) / /pages/llyxaTyrcrpmUrCHz1Ba (/pages/llyxaTyrcrpmUrCHz1Ba)\n진행 중인 작업 중심으로 실행력 있는 미팅 / 연동 / /files/n2k8j6DtfLntHZnTldbD (/files/n2k8j6DtfLntHZnTldbD) / /pages/kS3stzS6teHx65CXHp9t (/pages/kS3stzS6teHx65CXHp9t)\n블록 기반 에디터로 아이디어를 시각화하고 실시간 협업하기 / 시작하기 / /files/rpajh7A2RpkofKMK8tqX (/files/rpajh7A2RpkofKMK8tqX) / /pages/5ThN10EBhDlOhoIma4xS (/pages/5ThN10EBhDlOhoIma4xS)\n개발 작업을 연결하고, 작업 상태 자동화 / AI / /files/KeWezjAYUp9MxWar7fFw (/files/KeWezjAYUp9MxWar7fFw) / /pages/bSrmawZEz7LtWkXHepvt (/pages/bSrmawZEz7LtWkXHepvt)",
+                        "fusedRank": 1,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 1.9856943626697827,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3233,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:d7b0b69863e9",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "f42e779fe5059e2d6aae2bd8c3d152d200539feb61e067ffd3a8982c0edfadb5",
+                        "content": "뤼이도는 무료 요금제와 세 가지 유료 요금제를 운영하고 있습니다. 자세한 내용은 [가격 정보](https://www.riido.io/pricing) 페이지를 확인해 주세요.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5895354935684562,
+                            "latencyMs": 733
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3238,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:e993da30a527",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "특별 지원 프로그램"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "004605154da8d9a53f6387fc6178cd0ea3cf3dc900319dff120b2cc5db252dd2",
+                        "content": "뤼이도는 다양한 조직과 개인이 더 효율적으로 프로젝트를 관리하고 협업할 수 있도록 특별 지원 프로그램을 운영하고 있습니다.\n\n#### 교육 프로그램\n\n재학 중인 학생이라면, 뤼이도의 유료 요금제를 무료로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 학교 이메일이나 학생증 등을 통한 인증 요청 과정이 있을 수 있습니다.\n\n#### 비영리 단체 프로그램\n\n비영리 단체는 뤼이도의 유료 요금제를 최대 70% 할인된 가격으로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 비영리 단체임을 증명하는 서류 제출이 필요할 수 있습니다.\n\n#### 스타트업 프로그램\n\n현재 뤼이도는 별도의 스타트업 전용 프로그램을 운영하고 있지 않습니다. 다만, 뤼이도를 활용해 팀의 실행력을 높이고자 하는 스타트업의 제안은 언제든 환영합니다. 좋은 제안이나 협업 아이디어가 있다면 [고객 문의](https://swyg.channel.io/home)를 통해 제안 바랍니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5265246395606404,
+                            "latencyMs": 733
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3319,
+                        "documentVersionId": 2437,
+                        "documentId": "6e9c13b73663",
+                        "sectionId": "6e9c13b73663:ef1266158078",
+                        "documentTitle": "MCP 서버",
+                        "sectionPath": [
+                          "MCP 서버",
+                          "설치 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/ai/mcp.md",
+                        "contentHash": "63070dbcf624de8a697b612a944f6f216b5c866340f6f3cbfdb872d89d47c985",
+                        "content": "> 현재 [ChatGPT/Codex](https://chatgpt.com/plugins/riido?open_in_app) 와 [Claude](https://claude.ai/directory/riido) 에서는 공식 커넥터 목록을 통해 쉽고 빠르게 설치할 수 있습니다.\n\n#### 1. MCP 서버 주소\n\n#### 2. AI 서비스별 상세 가이드\n\n### Claude Desktop\n\n1. Claude 좌측 사이드바에서 `Customize` 메뉴 클릭\n2. `커스텀 커넥터 추가` 버튼 클릭\n\n3. 원격 MCP 서버 URL에 아래 주소 붙여넣기\n\n```\nhttps://mcp.riido.io/mcp\n```\n\n4. 연결 버튼 클릭 후 뤼이도에서 권한 요청 승인\n5. 뤼이도 커넥터가 정상적으로 추가되었는지 확인\n\n### ChatGPT\n\nChatGPT Pro 요금제 이상부터 사용 가능합니다.\n\n1. 설정 > 연동 및 앱 커넥터 페이지 > 고급 설정으로 이동\n\n2. 개발자 모드 활성화\n\n3. 연동 및 앱 커넥터 페이지에서 \\[앱 만들기] 선택\n\n4. 앱 정보 입력 후 \\[만들기] 클릭\n\n```\n· MCP 서버 URL: https://mcp.riido.io/mcp\n· 인증: OAuth\n```\n\n5. 연동 및 앱 커넥터 페이지에서 Riido MCP 연결 확인\n\n6. \\[+] 버튼을 클릭하여 Riido MCP 사용\n\n### Cursor\n\n1. `CMD 또는 Ctrl` + `Shift` + `p` > MCP Settings 클릭\n\n2. Installed MCP Servers 섹션에서 \\[Add Custom MCP] 버튼 클릭\n\n3. 다음 내용 붙여넣기\n\n```json\n{\n  \"mcpServers\": {\n    \"Riido\": {\n      \"url\": \"https://mcp.riido.io/mcp\"\n    }\n  }\n}\n```\n\n4. Riido MCP 인증 진행\n\n5. Riido가 정상적으로 추가되었는지 확인\n\n### Visual Studio Code\n\n1. `CMD 또는 Ctrl` + `Shift` + `p` > MCP: Add Server… 클릭\n\n2. Command (stdio) 클릭\n\n3. 다음 내용 붙여넣기 후 `Enter`\n\n```bash\nnpx mcp-remote https://mcp.riido.io/mcp\n```\n\n4. 서버 ID 입력 창에 `Riido` 입력 후 `Enter`\n\n5. 서버 등록 완료 후, `CMD 또는 Ctrl` + `Shift` + `p` > MCP: List Servers 클릭\n\n6. Riido MCP Server가 Running(동작 중) 상태로 표시되는 것을 확인\n\n### Claude Code\n\n1. [Claude Code](https://claude.com/product/claude-code) 설치\n2. 터미널에서 Riido MCP 추가\n\n```bash\n$ claude mcp add --transport http riido https://mcp.riido.io/mcp\n```\n\n3. Claude Code 실행 후 MCP 목록 확인\n\n```bash\n$ claude\n$ /mcp\n```\n\n4. \\[Authenticate] 선택\n\n5. 브라우저를 통해 Riido MCP 권한 부여\n\n6. MCP 목록에서 Riido MCP 정상 연결 확인\n\n### Gemini CLI\n\n1. [Gemini CLI](https://geminicli.com/) 설치\n2. `~/.gemini/settings.json` 파일 내에 다음 내용 붙여넣기\n\n```json\n{\n  \"mcpServers\": {\n    \"Riido\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"mcp-remote\",\n        \"https://mcp.riido.io/mcp\"\n      ]\n    }\n  }\n}\n```\n\n3. Gemini 실행 후, 브라우저를 통해 Riido MCP 권한 부여\n\n4. MCP 목록 확인\n\n```bash\n$ /mcp\n```\n\n5. Riido MCP 정상 연결 확인",
+                        "fusedRank": 4,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 1.9020766167044947,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3332,
+                        "documentVersionId": 2442,
+                        "documentId": "a13bfdc38996",
+                        "sectionId": "a13bfdc38996:8f9d2cf72c3e",
+                        "documentTitle": "피그마",
+                        "sectionPath": [
+                          "피그마",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/figma.md",
+                        "contentHash": "ec58e60f934442919dad027fe78ca11d8acc0d205840d9d9bfd287007e78ba06",
+                        "content": "피그마 연동은 ‘피그마 연동’과 ‘뤼이도 피그마 플러그인’이라는 두 가지 방식으로 구성되어 있습니다. 두 가지 방식 모두 최초 1회 연동 후, 뤼이도 워크스페이스 및 피그마 팀 단위에서 유기적으로 동작합니다.\n\n#### 1) 피그마 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Figma] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 계정을 확인하고 승인합니다.\n\n#### 2) 뤼이도 피그마 플러그인\n\n1. 피그마에서 \\[커뮤니티 > 플러그인 > Riido] 혹은 [전용 링크](https://www.figma.com/community/plugin/1511319400311149468/riido)를 통해 뤼이도 플러그인을 설치합니다.\n2. 플러그인을 실행하여 피그마와 연결할 뤼이도 계정을 승인합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.015873015873015872,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 0.9552928068050066,
+                            "latencyMs": 0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v25",
+                        "inputTokens": 8534,
+                        "outputTokens": 202,
+                        "latencyMs": 6564,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "DEFINITION",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "뤼이도의 의미와 서비스 성격",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3222,
+                          "documentVersionId": 2411,
+                          "documentId": "0ffc2d8de31e",
+                          "sectionId": "0ffc2d8de31e:363a8e5906f7",
+                          "documentTitle": "소개",
+                          "sectionPath": [
+                            "소개",
+                            "인기 페이지"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/getting-started/intro.md",
+                          "content": "대기 작업부터 백로그, 완료까지, 체계적인 작업 관리 / 프로젝트 관리 / /files/PJ6zD6ui6p2XsDiJRme7 (/files/PJ6zD6ui6p2XsDiJRme7) / /pages/xXc5CnPq7hc6EK3gMyLF (/pages/xXc5CnPq7hc6EK3gMyLF)\n팀의 리소스를 집중시키고, 몰입할 수 있는 실행 주기 / 미팅 관리 / /files/lQb1xP5vhYbutf2UYwax (/files/lQb1xP5vhYbutf2UYwax) / /pages/5z2qnkUC6T8zVaOWGieu (/pages/5z2qnkUC6T8zVaOWGieu)\n팀 구성, 멤버 초대, 역할 설정까지 협업을 위한 기본 단위 / 분석 / /files/giJ3dHcGvbpRNSvKSTKN (/files/giJ3dHcGvbpRNSvKSTKN) / /pages/llyxaTyrcrpmUrCHz1Ba (/pages/llyxaTyrcrpmUrCHz1Ba)\n진행 중인 작업 중심으로 실행력 있는 미팅 / 연동 / /files/n2k8j6DtfLntHZnTldbD (/files/n2k8j6DtfLntHZnTldbD) / /pages/kS3stzS6teHx65CXHp9t (/pages/kS3stzS6teHx65CXHp9t)\n블록 기반 에디터로 아이디어를 시각화하고 실시간 협업하기 / 시작하기 / /files/rpajh7A2RpkofKMK8tqX (/files/rpajh7A2RpkofKMK8tqX) / /pages/5ThN10EBhDlOhoIma4xS (/pages/5ThN10EBhDlOhoIma4xS)\n개발 작업을 연결하고, 작업 상태 자동화 / AI / /files/KeWezjAYUp9MxWar7fFw (/files/KeWezjAYUp9MxWar7fFw) / /pages/bSrmawZEz7LtWkXHepvt (/pages/bSrmawZEz7LtWkXHepvt)"
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "뤼이도는 팀의 작업·프로젝트·미팅을 관리하고 협업을 지원하는 서비스입니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "뤼이도는 팀의 작업·프로젝트·미팅을 관리하고 협업을 지원하는 서비스입니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    },
+    {
+      "repeatNo": 2,
+      "executedAt": "2026-09-08T17:09:14.322568+00:00",
+      "results": [
+        {
+          "id": "RC044",
+          "description": "서비스 자체의 정의를 묻는 더 짧은 표현",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "f3683148-ed93-4d76-b509-ff477bd1f28e",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "뤼이도가 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "f3683148-ed93-4d76-b509-ff477bd1f28e",
+                "ragRunId": "be8a250d-0ae3-474a-9713-fb6f7bc0d1f4",
+                "answer": {
+                  "answerMarkdown": "뤼이도는 팀의 작업·프로젝트 관리, 실행 주기와 미팅 운영, 협업을 지원하는 서비스입니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "소개",
+                    "sectionPath": [
+                      "인기 페이지"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/getting-started/intro.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "뤼이도가 뭐야?",
+                "resolvedQuery": "뤼이도가 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4454,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 11,
+                    "outputTokens": null,
+                    "latencyMs": 222,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v25",
+                    "inputTokens": 8534,
+                    "outputTokens": 119,
+                    "latencyMs": 4181,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "소개"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "뤼이도가 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "뤼이도가 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3222,
+                        "documentVersionId": 2411,
+                        "documentId": "0ffc2d8de31e",
+                        "sectionId": "0ffc2d8de31e:363a8e5906f7",
+                        "documentTitle": "소개",
+                        "sectionPath": [
+                          "소개",
+                          "인기 페이지"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/getting-started/intro.md",
+                        "contentHash": "bf670241dd77a40deff68d398402cd0f4016212bdafd040232176a18706a7b31",
+                        "content": "대기 작업부터 백로그, 완료까지, 체계적인 작업 관리 / 프로젝트 관리 / /files/PJ6zD6ui6p2XsDiJRme7 (/files/PJ6zD6ui6p2XsDiJRme7) / /pages/xXc5CnPq7hc6EK3gMyLF (/pages/xXc5CnPq7hc6EK3gMyLF)\n팀의 리소스를 집중시키고, 몰입할 수 있는 실행 주기 / 미팅 관리 / /files/lQb1xP5vhYbutf2UYwax (/files/lQb1xP5vhYbutf2UYwax) / /pages/5z2qnkUC6T8zVaOWGieu (/pages/5z2qnkUC6T8zVaOWGieu)\n팀 구성, 멤버 초대, 역할 설정까지 협업을 위한 기본 단위 / 분석 / /files/giJ3dHcGvbpRNSvKSTKN (/files/giJ3dHcGvbpRNSvKSTKN) / /pages/llyxaTyrcrpmUrCHz1Ba (/pages/llyxaTyrcrpmUrCHz1Ba)\n진행 중인 작업 중심으로 실행력 있는 미팅 / 연동 / /files/n2k8j6DtfLntHZnTldbD (/files/n2k8j6DtfLntHZnTldbD) / /pages/kS3stzS6teHx65CXHp9t (/pages/kS3stzS6teHx65CXHp9t)\n블록 기반 에디터로 아이디어를 시각화하고 실시간 협업하기 / 시작하기 / /files/rpajh7A2RpkofKMK8tqX (/files/rpajh7A2RpkofKMK8tqX) / /pages/5ThN10EBhDlOhoIma4xS (/pages/5ThN10EBhDlOhoIma4xS)\n개발 작업을 연결하고, 작업 상태 자동화 / AI / /files/KeWezjAYUp9MxWar7fFw (/files/KeWezjAYUp9MxWar7fFw) / /pages/bSrmawZEz7LtWkXHepvt (/pages/bSrmawZEz7LtWkXHepvt)",
+                        "fusedRank": 1,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 1.9856943626697827,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3233,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:d7b0b69863e9",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "f42e779fe5059e2d6aae2bd8c3d152d200539feb61e067ffd3a8982c0edfadb5",
+                        "content": "뤼이도는 무료 요금제와 세 가지 유료 요금제를 운영하고 있습니다. 자세한 내용은 [가격 정보](https://www.riido.io/pricing) 페이지를 확인해 주세요.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5895354935684562,
+                            "latencyMs": 235
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3238,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:e993da30a527",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "특별 지원 프로그램"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "004605154da8d9a53f6387fc6178cd0ea3cf3dc900319dff120b2cc5db252dd2",
+                        "content": "뤼이도는 다양한 조직과 개인이 더 효율적으로 프로젝트를 관리하고 협업할 수 있도록 특별 지원 프로그램을 운영하고 있습니다.\n\n#### 교육 프로그램\n\n재학 중인 학생이라면, 뤼이도의 유료 요금제를 무료로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 학교 이메일이나 학생증 등을 통한 인증 요청 과정이 있을 수 있습니다.\n\n#### 비영리 단체 프로그램\n\n비영리 단체는 뤼이도의 유료 요금제를 최대 70% 할인된 가격으로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 비영리 단체임을 증명하는 서류 제출이 필요할 수 있습니다.\n\n#### 스타트업 프로그램\n\n현재 뤼이도는 별도의 스타트업 전용 프로그램을 운영하고 있지 않습니다. 다만, 뤼이도를 활용해 팀의 실행력을 높이고자 하는 스타트업의 제안은 언제든 환영합니다. 좋은 제안이나 협업 아이디어가 있다면 [고객 문의](https://swyg.channel.io/home)를 통해 제안 바랍니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5265246395606404,
+                            "latencyMs": 235
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3319,
+                        "documentVersionId": 2437,
+                        "documentId": "6e9c13b73663",
+                        "sectionId": "6e9c13b73663:ef1266158078",
+                        "documentTitle": "MCP 서버",
+                        "sectionPath": [
+                          "MCP 서버",
+                          "설치 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/ai/mcp.md",
+                        "contentHash": "63070dbcf624de8a697b612a944f6f216b5c866340f6f3cbfdb872d89d47c985",
+                        "content": "> 현재 [ChatGPT/Codex](https://chatgpt.com/plugins/riido?open_in_app) 와 [Claude](https://claude.ai/directory/riido) 에서는 공식 커넥터 목록을 통해 쉽고 빠르게 설치할 수 있습니다.\n\n#### 1. MCP 서버 주소\n\n#### 2. AI 서비스별 상세 가이드\n\n### Claude Desktop\n\n1. Claude 좌측 사이드바에서 `Customize` 메뉴 클릭\n2. `커스텀 커넥터 추가` 버튼 클릭\n\n3. 원격 MCP 서버 URL에 아래 주소 붙여넣기\n\n```\nhttps://mcp.riido.io/mcp\n```\n\n4. 연결 버튼 클릭 후 뤼이도에서 권한 요청 승인\n5. 뤼이도 커넥터가 정상적으로 추가되었는지 확인\n\n### ChatGPT\n\nChatGPT Pro 요금제 이상부터 사용 가능합니다.\n\n1. 설정 > 연동 및 앱 커넥터 페이지 > 고급 설정으로 이동\n\n2. 개발자 모드 활성화\n\n3. 연동 및 앱 커넥터 페이지에서 \\[앱 만들기] 선택\n\n4. 앱 정보 입력 후 \\[만들기] 클릭\n\n```\n· MCP 서버 URL: https://mcp.riido.io/mcp\n· 인증: OAuth\n```\n\n5. 연동 및 앱 커넥터 페이지에서 Riido MCP 연결 확인\n\n6. \\[+] 버튼을 클릭하여 Riido MCP 사용\n\n### Cursor\n\n1. `CMD 또는 Ctrl` + `Shift` + `p` > MCP Settings 클릭\n\n2. Installed MCP Servers 섹션에서 \\[Add Custom MCP] 버튼 클릭\n\n3. 다음 내용 붙여넣기\n\n```json\n{\n  \"mcpServers\": {\n    \"Riido\": {\n      \"url\": \"https://mcp.riido.io/mcp\"\n    }\n  }\n}\n```\n\n4. Riido MCP 인증 진행\n\n5. Riido가 정상적으로 추가되었는지 확인\n\n### Visual Studio Code\n\n1. `CMD 또는 Ctrl` + `Shift` + `p` > MCP: Add Server… 클릭\n\n2. Command (stdio) 클릭\n\n3. 다음 내용 붙여넣기 후 `Enter`\n\n```bash\nnpx mcp-remote https://mcp.riido.io/mcp\n```\n\n4. 서버 ID 입력 창에 `Riido` 입력 후 `Enter`\n\n5. 서버 등록 완료 후, `CMD 또는 Ctrl` + `Shift` + `p` > MCP: List Servers 클릭\n\n6. Riido MCP Server가 Running(동작 중) 상태로 표시되는 것을 확인\n\n### Claude Code\n\n1. [Claude Code](https://claude.com/product/claude-code) 설치\n2. 터미널에서 Riido MCP 추가\n\n```bash\n$ claude mcp add --transport http riido https://mcp.riido.io/mcp\n```\n\n3. Claude Code 실행 후 MCP 목록 확인\n\n```bash\n$ claude\n$ /mcp\n```\n\n4. \\[Authenticate] 선택\n\n5. 브라우저를 통해 Riido MCP 권한 부여\n\n6. MCP 목록에서 Riido MCP 정상 연결 확인\n\n### Gemini CLI\n\n1. [Gemini CLI](https://geminicli.com/) 설치\n2. `~/.gemini/settings.json` 파일 내에 다음 내용 붙여넣기\n\n```json\n{\n  \"mcpServers\": {\n    \"Riido\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"mcp-remote\",\n        \"https://mcp.riido.io/mcp\"\n      ]\n    }\n  }\n}\n```\n\n3. Gemini 실행 후, 브라우저를 통해 Riido MCP 권한 부여\n\n4. MCP 목록 확인\n\n```bash\n$ /mcp\n```\n\n5. Riido MCP 정상 연결 확인",
+                        "fusedRank": 4,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 1.9020766167044947,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3332,
+                        "documentVersionId": 2442,
+                        "documentId": "a13bfdc38996",
+                        "sectionId": "a13bfdc38996:8f9d2cf72c3e",
+                        "documentTitle": "피그마",
+                        "sectionPath": [
+                          "피그마",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/figma.md",
+                        "contentHash": "ec58e60f934442919dad027fe78ca11d8acc0d205840d9d9bfd287007e78ba06",
+                        "content": "피그마 연동은 ‘피그마 연동’과 ‘뤼이도 피그마 플러그인’이라는 두 가지 방식으로 구성되어 있습니다. 두 가지 방식 모두 최초 1회 연동 후, 뤼이도 워크스페이스 및 피그마 팀 단위에서 유기적으로 동작합니다.\n\n#### 1) 피그마 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Figma] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 계정을 확인하고 승인합니다.\n\n#### 2) 뤼이도 피그마 플러그인\n\n1. 피그마에서 \\[커뮤니티 > 플러그인 > Riido] 혹은 [전용 링크](https://www.figma.com/community/plugin/1511319400311149468/riido)를 통해 뤼이도 플러그인을 설치합니다.\n2. 플러그인을 실행하여 피그마와 연결할 뤼이도 계정을 승인합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.015873015873015872,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 0.9552928068050066,
+                            "latencyMs": 0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v25",
+                        "inputTokens": 8534,
+                        "outputTokens": 119,
+                        "latencyMs": 4181,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "DEFINITION",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "뤼이도의 의미와 서비스 성격",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3222,
+                          "documentVersionId": 2411,
+                          "documentId": "0ffc2d8de31e",
+                          "sectionId": "0ffc2d8de31e:363a8e5906f7",
+                          "documentTitle": "소개",
+                          "sectionPath": [
+                            "소개",
+                            "인기 페이지"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/getting-started/intro.md",
+                          "content": "대기 작업부터 백로그, 완료까지, 체계적인 작업 관리 / 프로젝트 관리 / /files/PJ6zD6ui6p2XsDiJRme7 (/files/PJ6zD6ui6p2XsDiJRme7) / /pages/xXc5CnPq7hc6EK3gMyLF (/pages/xXc5CnPq7hc6EK3gMyLF)\n팀의 리소스를 집중시키고, 몰입할 수 있는 실행 주기 / 미팅 관리 / /files/lQb1xP5vhYbutf2UYwax (/files/lQb1xP5vhYbutf2UYwax) / /pages/5z2qnkUC6T8zVaOWGieu (/pages/5z2qnkUC6T8zVaOWGieu)\n팀 구성, 멤버 초대, 역할 설정까지 협업을 위한 기본 단위 / 분석 / /files/giJ3dHcGvbpRNSvKSTKN (/files/giJ3dHcGvbpRNSvKSTKN) / /pages/llyxaTyrcrpmUrCHz1Ba (/pages/llyxaTyrcrpmUrCHz1Ba)\n진행 중인 작업 중심으로 실행력 있는 미팅 / 연동 / /files/n2k8j6DtfLntHZnTldbD (/files/n2k8j6DtfLntHZnTldbD) / /pages/kS3stzS6teHx65CXHp9t (/pages/kS3stzS6teHx65CXHp9t)\n블록 기반 에디터로 아이디어를 시각화하고 실시간 협업하기 / 시작하기 / /files/rpajh7A2RpkofKMK8tqX (/files/rpajh7A2RpkofKMK8tqX) / /pages/5ThN10EBhDlOhoIma4xS (/pages/5ThN10EBhDlOhoIma4xS)\n개발 작업을 연결하고, 작업 상태 자동화 / AI / /files/KeWezjAYUp9MxWar7fFw (/files/KeWezjAYUp9MxWar7fFw) / /pages/bSrmawZEz7LtWkXHepvt (/pages/bSrmawZEz7LtWkXHepvt)"
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "뤼이도는 팀의 작업·프로젝트 관리, 실행 주기와 미팅 운영, 협업을 지원하는 서비스입니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "뤼이도는 팀의 작업·프로젝트 관리, 실행 주기와 미팅 운영, 협업을 지원하는 서비스입니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        }
+      ]
+    },
+    {
+      "repeatNo": 3,
+      "executedAt": "2026-09-08T17:09:18.806354+00:00",
+      "results": [
+        {
+          "id": "RC044",
+          "description": "서비스 자체의 정의를 묻는 더 짧은 표현",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "5f53117f-7815-4a0e-968c-63e4052dc982",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "뤼이도가 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "5f53117f-7815-4a0e-968c-63e4052dc982",
+                "ragRunId": "2f81bdff-366d-4363-af6c-8e783233ca0b",
+                "answer": {
+                  "answerMarkdown": "뤼이도는 팀의 작업 관리, 프로젝트 관리, 미팅 관리, 협업을 지원하는 도구입니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "소개",
+                    "sectionPath": [
+                      "인기 페이지"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/getting-started/intro.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "뤼이도가 뭐야?",
+                "resolvedQuery": "뤼이도가 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 6329,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 11,
+                    "outputTokens": null,
+                    "latencyMs": 184,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v25",
+                    "inputTokens": 12127,
+                    "outputTokens": 145,
+                    "latencyMs": 6093,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "소개"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "뤼이도가 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "뤼이도가 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3222,
+                        "documentVersionId": 2411,
+                        "documentId": "0ffc2d8de31e",
+                        "sectionId": "0ffc2d8de31e:363a8e5906f7",
+                        "documentTitle": "소개",
+                        "sectionPath": [
+                          "소개",
+                          "인기 페이지"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/getting-started/intro.md",
+                        "contentHash": "bf670241dd77a40deff68d398402cd0f4016212bdafd040232176a18706a7b31",
+                        "content": "대기 작업부터 백로그, 완료까지, 체계적인 작업 관리 / 프로젝트 관리 / /files/PJ6zD6ui6p2XsDiJRme7 (/files/PJ6zD6ui6p2XsDiJRme7) / /pages/xXc5CnPq7hc6EK3gMyLF (/pages/xXc5CnPq7hc6EK3gMyLF)\n팀의 리소스를 집중시키고, 몰입할 수 있는 실행 주기 / 미팅 관리 / /files/lQb1xP5vhYbutf2UYwax (/files/lQb1xP5vhYbutf2UYwax) / /pages/5z2qnkUC6T8zVaOWGieu (/pages/5z2qnkUC6T8zVaOWGieu)\n팀 구성, 멤버 초대, 역할 설정까지 협업을 위한 기본 단위 / 분석 / /files/giJ3dHcGvbpRNSvKSTKN (/files/giJ3dHcGvbpRNSvKSTKN) / /pages/llyxaTyrcrpmUrCHz1Ba (/pages/llyxaTyrcrpmUrCHz1Ba)\n진행 중인 작업 중심으로 실행력 있는 미팅 / 연동 / /files/n2k8j6DtfLntHZnTldbD (/files/n2k8j6DtfLntHZnTldbD) / /pages/kS3stzS6teHx65CXHp9t (/pages/kS3stzS6teHx65CXHp9t)\n블록 기반 에디터로 아이디어를 시각화하고 실시간 협업하기 / 시작하기 / /files/rpajh7A2RpkofKMK8tqX (/files/rpajh7A2RpkofKMK8tqX) / /pages/5ThN10EBhDlOhoIma4xS (/pages/5ThN10EBhDlOhoIma4xS)\n개발 작업을 연결하고, 작업 상태 자동화 / AI / /files/KeWezjAYUp9MxWar7fFw (/files/KeWezjAYUp9MxWar7fFw) / /pages/bSrmawZEz7LtWkXHepvt (/pages/bSrmawZEz7LtWkXHepvt)",
+                        "fusedRank": 1,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 1.9856943626697827,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3233,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:d7b0b69863e9",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "f42e779fe5059e2d6aae2bd8c3d152d200539feb61e067ffd3a8982c0edfadb5",
+                        "content": "뤼이도는 무료 요금제와 세 가지 유료 요금제를 운영하고 있습니다. 자세한 내용은 [가격 정보](https://www.riido.io/pricing) 페이지를 확인해 주세요.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5895354935684562,
+                            "latencyMs": 199
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3238,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:e993da30a527",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "특별 지원 프로그램"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "004605154da8d9a53f6387fc6178cd0ea3cf3dc900319dff120b2cc5db252dd2",
+                        "content": "뤼이도는 다양한 조직과 개인이 더 효율적으로 프로젝트를 관리하고 협업할 수 있도록 특별 지원 프로그램을 운영하고 있습니다.\n\n#### 교육 프로그램\n\n재학 중인 학생이라면, 뤼이도의 유료 요금제를 무료로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 학교 이메일이나 학생증 등을 통한 인증 요청 과정이 있을 수 있습니다.\n\n#### 비영리 단체 프로그램\n\n비영리 단체는 뤼이도의 유료 요금제를 최대 70% 할인된 가격으로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 비영리 단체임을 증명하는 서류 제출이 필요할 수 있습니다.\n\n#### 스타트업 프로그램\n\n현재 뤼이도는 별도의 스타트업 전용 프로그램을 운영하고 있지 않습니다. 다만, 뤼이도를 활용해 팀의 실행력을 높이고자 하는 스타트업의 제안은 언제든 환영합니다. 좋은 제안이나 협업 아이디어가 있다면 [고객 문의](https://swyg.channel.io/home)를 통해 제안 바랍니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5265246395606404,
+                            "latencyMs": 199
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3319,
+                        "documentVersionId": 2437,
+                        "documentId": "6e9c13b73663",
+                        "sectionId": "6e9c13b73663:ef1266158078",
+                        "documentTitle": "MCP 서버",
+                        "sectionPath": [
+                          "MCP 서버",
+                          "설치 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/ai/mcp.md",
+                        "contentHash": "63070dbcf624de8a697b612a944f6f216b5c866340f6f3cbfdb872d89d47c985",
+                        "content": "> 현재 [ChatGPT/Codex](https://chatgpt.com/plugins/riido?open_in_app) 와 [Claude](https://claude.ai/directory/riido) 에서는 공식 커넥터 목록을 통해 쉽고 빠르게 설치할 수 있습니다.\n\n#### 1. MCP 서버 주소\n\n#### 2. AI 서비스별 상세 가이드\n\n### Claude Desktop\n\n1. Claude 좌측 사이드바에서 `Customize` 메뉴 클릭\n2. `커스텀 커넥터 추가` 버튼 클릭\n\n3. 원격 MCP 서버 URL에 아래 주소 붙여넣기\n\n```\nhttps://mcp.riido.io/mcp\n```\n\n4. 연결 버튼 클릭 후 뤼이도에서 권한 요청 승인\n5. 뤼이도 커넥터가 정상적으로 추가되었는지 확인\n\n### ChatGPT\n\nChatGPT Pro 요금제 이상부터 사용 가능합니다.\n\n1. 설정 > 연동 및 앱 커넥터 페이지 > 고급 설정으로 이동\n\n2. 개발자 모드 활성화\n\n3. 연동 및 앱 커넥터 페이지에서 \\[앱 만들기] 선택\n\n4. 앱 정보 입력 후 \\[만들기] 클릭\n\n```\n· MCP 서버 URL: https://mcp.riido.io/mcp\n· 인증: OAuth\n```\n\n5. 연동 및 앱 커넥터 페이지에서 Riido MCP 연결 확인\n\n6. \\[+] 버튼을 클릭하여 Riido MCP 사용\n\n### Cursor\n\n1. `CMD 또는 Ctrl` + `Shift` + `p` > MCP Settings 클릭\n\n2. Installed MCP Servers 섹션에서 \\[Add Custom MCP] 버튼 클릭\n\n3. 다음 내용 붙여넣기\n\n```json\n{\n  \"mcpServers\": {\n    \"Riido\": {\n      \"url\": \"https://mcp.riido.io/mcp\"\n    }\n  }\n}\n```\n\n4. Riido MCP 인증 진행\n\n5. Riido가 정상적으로 추가되었는지 확인\n\n### Visual Studio Code\n\n1. `CMD 또는 Ctrl` + `Shift` + `p` > MCP: Add Server… 클릭\n\n2. Command (stdio) 클릭\n\n3. 다음 내용 붙여넣기 후 `Enter`\n\n```bash\nnpx mcp-remote https://mcp.riido.io/mcp\n```\n\n4. 서버 ID 입력 창에 `Riido` 입력 후 `Enter`\n\n5. 서버 등록 완료 후, `CMD 또는 Ctrl` + `Shift` + `p` > MCP: List Servers 클릭\n\n6. Riido MCP Server가 Running(동작 중) 상태로 표시되는 것을 확인\n\n### Claude Code\n\n1. [Claude Code](https://claude.com/product/claude-code) 설치\n2. 터미널에서 Riido MCP 추가\n\n```bash\n$ claude mcp add --transport http riido https://mcp.riido.io/mcp\n```\n\n3. Claude Code 실행 후 MCP 목록 확인\n\n```bash\n$ claude\n$ /mcp\n```\n\n4. \\[Authenticate] 선택\n\n5. 브라우저를 통해 Riido MCP 권한 부여\n\n6. MCP 목록에서 Riido MCP 정상 연결 확인\n\n### Gemini CLI\n\n1. [Gemini CLI](https://geminicli.com/) 설치\n2. `~/.gemini/settings.json` 파일 내에 다음 내용 붙여넣기\n\n```json\n{\n  \"mcpServers\": {\n    \"Riido\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"mcp-remote\",\n        \"https://mcp.riido.io/mcp\"\n      ]\n    }\n  }\n}\n```\n\n3. Gemini 실행 후, 브라우저를 통해 Riido MCP 권한 부여\n\n4. MCP 목록 확인\n\n```bash\n$ /mcp\n```\n\n5. Riido MCP 정상 연결 확인",
+                        "fusedRank": 4,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 1.9020766167044947,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3332,
+                        "documentVersionId": 2442,
+                        "documentId": "a13bfdc38996",
+                        "sectionId": "a13bfdc38996:8f9d2cf72c3e",
+                        "documentTitle": "피그마",
+                        "sectionPath": [
+                          "피그마",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/figma.md",
+                        "contentHash": "ec58e60f934442919dad027fe78ca11d8acc0d205840d9d9bfd287007e78ba06",
+                        "content": "피그마 연동은 ‘피그마 연동’과 ‘뤼이도 피그마 플러그인’이라는 두 가지 방식으로 구성되어 있습니다. 두 가지 방식 모두 최초 1회 연동 후, 뤼이도 워크스페이스 및 피그마 팀 단위에서 유기적으로 동작합니다.\n\n#### 1) 피그마 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Figma] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 계정을 확인하고 승인합니다.\n\n#### 2) 뤼이도 피그마 플러그인\n\n1. 피그마에서 \\[커뮤니티 > 플러그인 > Riido] 혹은 [전용 링크](https://www.figma.com/community/plugin/1511319400311149468/riido)를 통해 뤼이도 플러그인을 설치합니다.\n2. 플러그인을 실행하여 피그마와 연결할 뤼이도 계정을 승인합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.015873015873015872,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 0.9552928068050066,
+                            "latencyMs": 0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v25",
+                        "inputTokens": 12127,
+                        "outputTokens": 145,
+                        "latencyMs": 6093,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "DEFINITION",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "뤼이도의 의미",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3222,
+                          "documentVersionId": 2411,
+                          "documentId": "0ffc2d8de31e",
+                          "sectionId": "0ffc2d8de31e:363a8e5906f7",
+                          "documentTitle": "소개",
+                          "sectionPath": [
+                            "소개",
+                            "인기 페이지"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/getting-started/intro.md",
+                          "content": "대기 작업부터 백로그, 완료까지, 체계적인 작업 관리 / 프로젝트 관리 / /files/PJ6zD6ui6p2XsDiJRme7 (/files/PJ6zD6ui6p2XsDiJRme7) / /pages/xXc5CnPq7hc6EK3gMyLF (/pages/xXc5CnPq7hc6EK3gMyLF)\n팀의 리소스를 집중시키고, 몰입할 수 있는 실행 주기 / 미팅 관리 / /files/lQb1xP5vhYbutf2UYwax (/files/lQb1xP5vhYbutf2UYwax) / /pages/5z2qnkUC6T8zVaOWGieu (/pages/5z2qnkUC6T8zVaOWGieu)\n팀 구성, 멤버 초대, 역할 설정까지 협업을 위한 기본 단위 / 분석 / /files/giJ3dHcGvbpRNSvKSTKN (/files/giJ3dHcGvbpRNSvKSTKN) / /pages/llyxaTyrcrpmUrCHz1Ba (/pages/llyxaTyrcrpmUrCHz1Ba)\n진행 중인 작업 중심으로 실행력 있는 미팅 / 연동 / /files/n2k8j6DtfLntHZnTldbD (/files/n2k8j6DtfLntHZnTldbD) / /pages/kS3stzS6teHx65CXHp9t (/pages/kS3stzS6teHx65CXHp9t)\n블록 기반 에디터로 아이디어를 시각화하고 실시간 협업하기 / 시작하기 / /files/rpajh7A2RpkofKMK8tqX (/files/rpajh7A2RpkofKMK8tqX) / /pages/5ThN10EBhDlOhoIma4xS (/pages/5ThN10EBhDlOhoIma4xS)\n개발 작업을 연결하고, 작업 상태 자동화 / AI / /files/KeWezjAYUp9MxWar7fFw (/files/KeWezjAYUp9MxWar7fFw) / /pages/bSrmawZEz7LtWkXHepvt (/pages/bSrmawZEz7LtWkXHepvt)"
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_markdown": null,
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "validationError": "ANSWERABLE Source Plan과 Answer의 WITHHELD 상태가 일치하지 않습니다.",
+                    "validationErrors": [
+                      "ANSWERABLE Source Plan과 Answer의 WITHHELD 상태가 일치하지 않습니다."
+                    ],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 2,
+                    "validationRegenerationCount": 1,
+                    "validationRegenerationModelCall": {
+                      "purpose": "ANSWER_VALIDATION_REGENERATION",
+                      "status": "SUCCESS",
+                      "provider": "openai",
+                      "requestedModel": "gpt-5.6-terra",
+                      "responseModel": null,
+                      "responseModelAvailability": "UNAVAILABLE",
+                      "promptVersion": "v21-repair-1",
+                      "inputTokens": 3597,
+                      "outputTokens": 56,
+                      "latencyMs": 2246,
+                      "retryCount": 0,
+                      "errorMessage": null
+                    },
+                    "validationRegenerationAnswer": {
+                      "status": "ANSWERABLE",
+                      "answer_markdown": "뤼이도는 팀의 작업 관리, 프로젝트 관리, 미팅 관리, 협업을 지원하는 도구입니다. [SOURCE_1]",
+                      "withheld_reason": null
+                    },
+                    "finalAnswer": "뤼이도는 팀의 작업 관리, 프로젝트 관리, 미팅 관리, 협업을 지원하는 도구입니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        }
+      ]
+    }
+  ]
+}

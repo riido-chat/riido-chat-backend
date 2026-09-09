@@ -387,6 +387,114 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         )
         self.generator.regenerate_answer_with_trace.assert_awaited_once()
 
+    async def test_regenerates_when_answer_withholds_after_answerable_plan(
+        self,
+    ) -> None:
+        results = [self._result(1)]
+        generated = GenerationResult(
+            status=GenerationStatus.WITHHELD,
+            answer_markdown=None,
+            withheld_reason=GenerationWithheldReason.INSUFFICIENT_EVIDENCE,
+        )
+        stage_trace = self._stage_trace(results, generated)
+        stage_trace = replace(
+            stage_trace,
+            source_plan=stage_trace.source_plan.model_copy(
+                update={"answer_type": GenerationAnswerType.GENERAL},
+            ),
+        )
+        repaired = self._answerable("계획에 따른 답변 [SOURCE_1]")
+        self.generator.generate_with_trace.return_value = _call(
+            generated,
+            stage_trace,
+        )
+        self.generator.regenerate_answer_with_trace.return_value = GenerationCall(
+            trace=_trace(),
+            result=repaired,
+            stage_trace=replace(
+                stage_trace,
+                validation_error=(
+                    "ANSWERABLE Source Plan과 Answer의 WITHHELD 상태가 일치하지 않습니다."
+                ),
+                validation_errors=(
+                    "ANSWERABLE Source Plan과 Answer의 WITHHELD 상태가 일치하지 않습니다.",
+                ),
+                validation_regeneration_result=repaired,
+                validation_regeneration_count=1,
+            ),
+        )
+
+        result = await self.service.generate_answer("질문", results)
+
+        self.assertEqual(FinalAnswerStatus.COMPLETED, result.status)
+        self.assertEqual("계획에 따른 답변 [1]", result.answer_markdown)
+        self.assertEqual(1, result.stage_trace.validation_regeneration_count)
+        self.assertIn("상태가 일치하지 않습니다", result.stage_trace.validation_error)
+        self.generator.regenerate_answer_with_trace.assert_awaited_once()
+
+    async def test_withholds_when_answerable_plan_repair_still_withholds(
+        self,
+    ) -> None:
+        results = [self._result(1)]
+        generated = GenerationResult(
+            status=GenerationStatus.WITHHELD,
+            answer_markdown=None,
+            withheld_reason=GenerationWithheldReason.INSUFFICIENT_EVIDENCE,
+        )
+        stage_trace = self._stage_trace(results, generated)
+        stage_trace = replace(
+            stage_trace,
+            source_plan=stage_trace.source_plan.model_copy(
+                update={"answer_type": GenerationAnswerType.GENERAL},
+            ),
+        )
+        self.generator.generate_with_trace.return_value = _call(
+            generated,
+            stage_trace,
+        )
+        self.generator.regenerate_answer_with_trace.return_value = GenerationCall(
+            trace=_trace(),
+            result=generated,
+            stage_trace=replace(
+                stage_trace,
+                validation_regeneration_result=generated,
+                validation_regeneration_count=1,
+            ),
+        )
+
+        result = await self.service.generate_answer("질문", results)
+
+        self.assertEqual(FinalAnswerStatus.WITHHELD, result.status)
+        self.assertEqual(
+            FinalWithheldReason.UNVERIFIABLE_ANSWER,
+            result.withheld_reason,
+        )
+        self.generator.regenerate_answer_with_trace.assert_awaited_once()
+
+    async def test_does_not_force_procedure_answer_over_answer_withholding(
+        self,
+    ) -> None:
+        results = [self._result(1)]
+        generated = GenerationResult(
+            status=GenerationStatus.WITHHELD,
+            answer_markdown=None,
+            withheld_reason=GenerationWithheldReason.INSUFFICIENT_EVIDENCE,
+        )
+        stage_trace = self._stage_trace(results, generated)
+        self.generator.generate_with_trace.return_value = _call(
+            generated,
+            stage_trace,
+        )
+
+        result = await self.service.generate_answer("구독 해지 방법", results)
+
+        self.assertEqual(FinalAnswerStatus.WITHHELD, result.status)
+        self.assertEqual(
+            FinalWithheldReason.INSUFFICIENT_EVIDENCE,
+            result.withheld_reason,
+        )
+        self.generator.regenerate_answer_with_trace.assert_not_awaited()
+
     async def test_withholds_when_regenerated_answer_is_still_unverifiable(
         self,
     ) -> None:
