@@ -1,0 +1,1620 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-09T04:11:41.919675+00:00",
+  "casesVersion": "real-customer-cases-v4",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "26a0222c4db369911c6c1a6ac2bf64c32859fbd5",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.6-terra"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v8",
+        "sha256": "6382fe3033a461b851ee88b65c0c8a24aeb74ac940df13fbc3e96ea1f79c3dbb"
+      },
+      "sourcePlanning": {
+        "version": "v25",
+        "sha256": "c5ab2531560503affe79a5c94fac5b24c3895b922e80b5850583bf09ce4308df"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v25-repair-1",
+        "sha256": "d69896097eceb5b04d2f8b5aaa1be0b46fffe4aac559dc580e61c85f113cc083"
+      },
+      "answer": {
+        "version": "v21",
+        "sha256": "9afaf45fc0f0d7cc4eaef3af37b4179d36cfe482b6c8a5504cdd71e9751a1643"
+      },
+      "answerValidationRegeneration": {
+        "version": "v21-repair-1",
+        "sha256": "23a77c53d67f0307ab715b937ff22361799ba84e49b46a4e693b1f88fc37ddcc"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "26a0222c4db369911c6c1a6ac2bf64c32859fbd5",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.6-terra",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v34"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 1,
+    "uniqueCaseCount": 5,
+    "totalCaseExecutionCount": 5,
+    "passedCaseExecutionCount": 4,
+    "failedCaseExecutionCount": 1,
+    "executionErrorCaseExecutionCount": 0,
+    "criteriaMismatchCaseExecutionCount": 1,
+    "perCase": [
+      {
+        "id": "RC081",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "RC082",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "RC083",
+        "executionCount": 1,
+        "passedCount": 0,
+        "failedCount": 1
+      },
+      {
+        "id": "RC084",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "RC085",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 5,
+        "passedCount": 4,
+        "failedCount": 1
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-09T04:11:25.191053+00:00",
+      "results": [
+        {
+          "id": "RC081",
+          "description": "체험판 사용 기간 연장 요청",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "ac7507e2-0184-4502-9ba4-c61fdb03aeb6",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "현재 체험판을 사용 중인데 팀원들이 익숙해질 수 있도록 사용 기간을 일주일 정도 추가 연장할 수 있을까요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "ac7507e2-0184-4502-9ba4-c61fdb03aeb6",
+                "ragRunId": "98e50aff-33ea-4c5b-99b8-e96708d619c9",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "현재 체험판을 사용 중인데 팀원들이 익숙해질 수 있도록 사용 기간을 일주일 정도 추가 연장할 수 있을까요?",
+                "resolvedQuery": "현재 체험판을 사용 중인데 팀원들이 익숙해질 수 있도록 사용 기간을 일주일 정도 추가 연장할 수 있을까요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2642,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 52,
+                    "outputTokens": null,
+                    "latencyMs": 473,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 5138,
+                    "outputTokens": 79,
+                    "latencyMs": 2093,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "현재 체험판을 사용 중인데 팀원들이 익숙해질 수 있도록 사용 기간을 일주일 정도 추가 연장할 수 있을까요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "현재 체험판을 사용 중인데 팀원들이 익숙해질 수 있도록 사용 기간을 일주일 정도 추가 연장할 수 있을까요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3276,
+                        "documentVersionId": 2425,
+                        "documentId": "673858aecdcf",
+                        "sectionId": "673858aecdcf:b1d03b889c87",
+                        "documentTitle": "작업간 연결",
+                        "sectionPath": [
+                          "작업간 연결",
+                          "관계 유형별 동작"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/issue-relations.md",
+                        "contentHash": "03fb7a57b53319ab8fb591b6854efa9a79a0cf30dc61255bae1cecbd67e800bf",
+                        "content": "#### 연관됨\n\n두 작업이 주제나 맥락상 관련되어 있을 때 사용합니다. 연관된 작업은 사이드바에서 직접 추가할 수도 있지만, 에디터나 댓글에서 작업을 멘션 하면 자동으로 ‘연관됨’에도 추가됩니다.\n\n#### 차단 중 / 차단됨\n\n한 작업이 다른 작업의 진행을 막고 있거나 의존하고 있을 때 사용합니다. 예를 들어 “서버 배포” 작업이 끝나야 “테스트 환경 점검”을 진행할 수 있다면, 전자는 차단 중, 후자는 차단됨으로 연결됩니다.\n\n이 관계를 설정하면, 차단된 작업의 상태를 쉽게 확인할 수 있어 일정 지연이나 병목을 빠르게 파악할 수 있습니다.\n\n#### 중복 존재 / 중복됨\n\n유사한 내용의 작업이 여러 개 생겼을 때 사용합니다. 단순히 중복된 작업을 삭제하기보다는 중복 관계로 연결해두면 기록을 보존하면서 정리할 수 있습니다.\n\n하나의 작업에는 여러 개의 중복 존재 작업이 연결될 수 있으며, 반대로 중복됨은 한 개의 원본 작업만을 가질 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 9.146687951445253,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3301,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:1c82492f0b2a",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 기간"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "fea5253ffb2ae1231e90bdcca3ebb35ea55c457a988039db70bca98472a61f24",
+                        "content": "하나의 스프린트가 지속되는 기간입니다. 주 단위로 설정할 수 있으며, 최소 1주부터 최대 8주까지 설정 가능합니다.\n\n* 일반적으로 1\\~2주는 짧은 반복과 빠른 실행에 적합합니다.\n* 3주 이상은 중장기 프로젝트의 진행 추적에 유용합니다.\n\n팀 규모와 업무 성격에 따라 적정 주기를 설정하는 것을 권장합니다.\n\n예: 초기 스타트업 팀 — 1주 / 대규모 프로젝트 팀 — 2\\~3주",
+                        "fusedRank": 2,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.46135832300437196,
+                            "latencyMs": 501
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3234,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:dd62a0b71715",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "257173081d1bcff0fd64c72f08ed19e0de6f533557ceaba7577d66258c913bbe",
+                        "content": "뤼이도의 요금은 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. 하나의 워크스페이스는 하나의 구독과 결제 정보를 가지게 됩니다.\n\n결제 후 멤버를 비활성화하면, 해당 인원만큼 유료 시트가 남게 됩니다. 해당 시트는 새 사용자를 초대할 때 사용할 수 있습니다.\n\n뤼이도의 결제는 월별 결제와 연간 결제 두 가지 주기를 지원합니다.\n\n**월별 결제**\n결제일은 최초 결제 시작일을 기준으로, 매달 동일하게 청구됩니다. (예: 3월 10일에 최초 결제가 시작되었다면, 이후 매달 10일에 결제)\n\n결제 기간 중 새로운 사용자를 추가하더라도 즉시 결제되지 않습니다. 대신 추가된 사용자의 사용 기간만큼, 다음 결제일에 소급 반영되어 청구됩니다.\n\n**연간 결제**\n결제일은 최초 결제일로부터 1년마다 자동 갱신되며, 연간 결제는 월별 요금 대비 20% 할인이 적용됩니다. (예: 2025년 3월 10일에 최초 결제가 시작되었다면, 이후 매년 3월 10일에 결제)\n\n중간에 새로운 사용자를 추가할 경우, 추가된 인원에 대한 금액이 다음 달 요금제 시작일에 계산되어 청구됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 8.921692289250961,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3244,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:9f525d515668",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "b2d092eb68fcb946d2d5bd17906c2cda67d1608e10a2d249a5a50edfaf45d2fb",
+                        "content": "비공개 팀은 비즈니스 요금제 이상부터 사용할 수 있습니다. 워크스페이스의 모든 사용자는 새로운 팀을 만들 때 비공개로 설정하거나, 본인이 참여 중인 팀을 비공개 팀으로 전환할 수 있습니다.\n\n비공개 팀은 주로 고객 데이터, HR, 재무 관리처럼 일부 멤버만 접근해야 하는 작업을 안전하게 관리할 때 사용됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.3721678148171256,
+                            "latencyMs": 501
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3243,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:26bbdd776a1e",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "4d4539e8b14b91e51d63fe24c71eb00ab812043bad06a5e7073815f72a1ebf67",
+                        "content": "#### 팀 생성 및 참여\n\n새로운 팀을 만들거나 기존 팀에 참여하려면, 설정 페이지의 \\[팀]에서 관리할 수 있습니다. 또는 설정 페이지의 좌측 사이드바 하단의 ‘팀 추가’ 버튼을 클릭하여 생성할 수도 있습니다. 단, 비공개 팀은 팀 관리자의 초대를 받아야 참여할 수 있습니다.\n\n팀의 생성 가능 개수는 워크스페이스의 요금제에 따라 제한이 있습니다.\n\n요금제: Free / 팀 개수: 2\n요금제: Pro / 팀 개수: 3\n요금제: Business / 팀 개수: 무제한\n요금제: Enterprise / 팀 개수: 무제한\n\n#### 팀 떠나기\n\n팀 멤버 설정 페이지에서 스스로를 비활성화하면, 팀에서 떠날 수 있습니다.\n\n#### 팀 삭제\n\n팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.015873015873015872,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3452063596375198,
+                            "latencyMs": 501
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 5138,
+                        "outputTokens": 79,
+                        "latencyMs": 2093,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC082",
+          "description": "필터 적용 상태에서 목표 옆 버튼으로 작업을 추가할 때 발생하는 오류",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "b05a1605-db8c-4066-9cb9-36798da336e0",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "리스트 화면에서 상태 필터를 적용한 뒤 목표 옆 + 버튼으로 작업을 추가하면 에러가 뜹니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "b05a1605-db8c-4066-9cb9-36798da336e0",
+                "ragRunId": "a67974e4-291f-4988-8274-e00f18014d5f",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "리스트 화면에서 상태 필터를 적용한 뒤 목표 옆 + 버튼으로 작업을 추가하면 에러가 뜹니다.",
+                "resolvedQuery": "리스트 화면에서 상태 필터를 적용한 뒤 목표 옆 + 버튼으로 작업을 추가하면 에러가 뜹니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2421,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 43,
+                    "outputTokens": null,
+                    "latencyMs": 239,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 4688,
+                    "outputTokens": 92,
+                    "latencyMs": 2142,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "리스트 화면에서 상태 필터를 적용한 뒤 목표 옆 + 버튼으로 작업을 추가하면 에러가 뜹니다.",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "리스트 화면에서 상태 필터를 적용한 뒤 목표 옆 + 버튼으로 작업을 추가하면 에러가 뜹니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3248,
+                        "documentVersionId": 2419,
+                        "documentId": "a26e14ee99d1",
+                        "sectionId": "a26e14ee99d1:8ddbdaa9dc9b",
+                        "documentTitle": "작업 상태",
+                        "sectionPath": [
+                          "작업 상태",
+                          "설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/statuses.md",
+                        "contentHash": "db9b352a0f27ddf0f64055f933c50044ce7b87409e89cbc5c16d6dc6fba487ef",
+                        "content": "현재 팀에서 사용 중인 모든 작업 상태를 한눈에 확인할 수 있습니다. 각 상태는 순서 변경, 정보 편집, 삭제가 모두 가능합니다.\n\n* 상태를 삭제하려면, 해당 상태에 적용된 작업이 없어야 합니다.\n* ‘상태 추가’ 버튼을 클릭해 새로운 상태를 만들 수 있습니다.\n* 단, 첫 단계(계획)와 마지막 단계(운영)는 시스템 기본 영역으로, 추가 및 삭제가 불가능합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 10.509310292263642,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.4617692743576163,
+                            "latencyMs": 253
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3357,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:1ad5bfa76f8e",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "필터 적용하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "245b1996fd28d229ceb4de14fd7ebfa185bc006fc9ab25648dc94ed2e7d20ba3",
+                        "content": "* 각 페이지 좌측 상단의 ‘필터’ 버튼을 클릭해 원하는 조건을 설정합니다.\n* 설정한 필터는 상단에 태그 형태로 표시되어, 어떤 조건이 적용되었는지 한눈에 확인할 수 있습니다.\n* 태그를 클릭하면 해당 필터를 즉시 해제할 수 있습니다.\n* 모든 필터를 해제하고 기본 보기로 돌아가려면 ‘필터 초기화’ 버튼을 클릭합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.455430274813235,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.43866138366919327,
+                            "latencyMs": 253
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3358,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:c36e82021bba",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "필터 카테고리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "ba432bbb4a8ebf6a019033e38d75928a1422251782c5d4f14b4e56439ffcf3a9",
+                        "content": "다음과 같은 카테고리로 필터를 적용할 수 있습니다:\n\n|      | 대시보드 | 대기 작업 | 백로그 | 작업 | 미팅 |\n| ---- | ---- | ----- | --- | -- | -- |\n| 참여자  |      |       | ●   | ●  | ●  |\n| 프로젝트 |      |       |     | ●  |    |\n| 상태   |      |       |     | ●  |    |\n| 라벨   |      | ●     | ●   | ●  |    |\n| 중요도  |      |       | ●   |    |    |\n| 긴급도  |      | ●     | ●   |    |    |\n| 생성자  |      | ●     |     |    |    |\n| 생성일  | ●    |       |     |    |    |\n| 마감일  | ●    |       |     |    |    |",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 11.053825404443511,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.44650797664581865,
+                            "latencyMs": 253
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 10.397849100169099,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.4607606636662418,
+                            "latencyMs": 253
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3356,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:05afebae0312",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "dc728da319ab0ee8eefd04a549c390947f67904ef7374185ee79473dcb615bd8",
+                        "content": "작업이나 미팅이 많아질수록 필요한 정보만 골라보는 것이 중요합니다. 뤼이도에서는 담당자, 상태, 마감일 등 다양한 조건으로 필터를 적용할 수 있어 복잡한 데이터 속에서도 원하는 항목만 빠르게 찾을 수 있습니다.\n\n자주 사용하는 필터 조합은 [저장된 보기](https://docs.riido.io/views/custom-views.md)로 등록해, 한 번의 클릭으로 동일한 조건을 빠르게 불러올 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 9.719553512889558,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.4244814809910642,
+                            "latencyMs": 253
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 4688,
+                        "outputTokens": 92,
+                        "latencyMs": 2142,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC083",
+          "description": "화면 이동 뒤 해제되는 완료 프로젝트 필터 유지 방법 문의",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": false,
+          "conversationId": "0345f265-dbd6-4a19-92a2-c6dce932b76b",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "완료된 프로젝트가 안 보이도록 필터링한 상태를 계속 쓰고 싶은데 다른 화면에 갔다 오면 풀립니다. 유지할 방법이 있나요?",
+              "passed": false,
+              "failures": [
+                "기대 Citation 문서가 없음: expected_any=['필터'], actual=['저장된 보기']"
+              ],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "0345f265-dbd6-4a19-92a2-c6dce932b76b",
+                "ragRunId": "64b0624c-27e7-4e5c-9a7f-761b5ecaf8f0",
+                "answer": {
+                  "answerMarkdown": "완료된 프로젝트가 보이지 않도록 설정한 필터 조건은 **저장된 보기**로 저장해 두면, 다른 화면을 다녀온 뒤에도 다시 불러와 계속 사용할 수 있습니다. 저장된 보기는 프로젝트·우선순위·담당자·라벨 등의 조건으로 필터링한 상태를 저장하고 재사용하는 기능입니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "저장된 보기",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "완료된 프로젝트가 안 보이도록 필터링한 상태를 계속 쓰고 싶은데 다른 화면에 갔다 오면 풀립니다. 유지할 방법이 있나요?",
+                "resolvedQuery": "완료된 프로젝트가 안 보이도록 필터링한 상태를 계속 쓰고 싶은데 다른 화면에 갔다 오면 풀립니다. 유지할 방법이 있나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 6108,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 65,
+                    "outputTokens": null,
+                    "latencyMs": 248,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 8091,
+                    "outputTokens": 286,
+                    "latencyMs": 5810,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "저장된 보기"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "완료된 프로젝트가 안 보이도록 필터링한 상태를 계속 쓰고 싶은데 다른 화면에 갔다 오면 풀립니다. 유지할 방법이 있나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "완료된 프로젝트가 안 보이도록 필터링한 상태를 계속 쓰고 싶은데 다른 화면에 갔다 오면 풀립니다. 유지할 방법이 있나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3284,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:4cf1d0445a55",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "e7afd5b0757aa68f8f710d5dde8970e7252b199c505ad7be7cbb3970e488f00c",
+                        "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 9.799056172243258,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5213451890394833,
+                            "latencyMs": 262
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3287,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:294a258fc7b7",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 편집하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "09661a57156b0135ac0251aaabdfdbc0f85f7cd2e29eab714d699af503bc874e",
+                        "content": "저장된 보기 페이지에서 필터나 정렬을 수정할 경우, 다음 두 가지 방식으로 저장할 수 있습니다.\n\n* 저장: 현재 보고 있는 보기를 그대로 덮어씁니다.\n* 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.129613352921028,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.45552886206787446,
+                            "latencyMs": 262
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3278,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:802f5a7b91ac",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "작업"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "90fae9551bda9339e78eb69cbc4dd1129cefca5018365ecc61b257e216621bd5",
+                        "content": "#### 작업 현황\n\n현재 진행 중인 모든 작업이 상태별 카드 형태로 상단에 표시됩니다. 이를 통해 마감일이 임박한 작업이나 지연된 작업을 빠르게 식별하고, 업무 병목이나 리스크를 사전에 조치할 수 있습니다.\n\n각 상태에 마우스를 올리면 세부 작업 목록이 나타나며, 작업명을 클릭하면 해당 작업 상세 페이지로 바로 이동할 수 있습니다.\n\n#### 멤버별 현황\n\n각 멤버의 담당 작업 수와 진행 상태를 시각적으로 확인할 수 있습니다. 작업 상태는 색상으로 구분되어, 팀 전체의 업무 분배와 균형을 직관적으로 파악할 수 있습니다.\n\n담당자가 지정되지 않은 작업은 ‘할당 안 됨’으로 별도로 표시되어 업무 누락을 방지하고 빠르게 담당자를 할당할 수 있습니다.\n\n#### 대기 및 백로그\n\n매일 새롭게 유입되는 대기 작업과 백로그를 한눈에 확인할 수 있습니다. 이를 통해 새로운 요청이 얼마나 쌓이고 있는지, 팀의 계획 대비 실행 속도가 어떤지 직관적으로 파악할 수 있습니다.\n\n#### 전체 작업 관계도\n\n현재 활성화된 모든 작업의 관계를 다이어그램 형태로 시각화하여 보여줍니다. 화면을 축소하면 전체 구조를, 확대하면 세부 내용을 확인할 수 있습니다. 이를 통해 팀은 프로젝트 간의 의존성, 병목, 중복 상태를 빠르게 파악하고 실행 흐름을 개선할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03036576949620428,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 8.62953635898495,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.422684597172754,
+                            "latencyMs": 262
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3273,
+                        "documentVersionId": 2424,
+                        "documentId": "fcb3c228f5a0",
+                        "sectionId": "fcb3c228f5a0:7ce560cd7b49",
+                        "documentTitle": "운영: 보관 작업",
+                        "sectionPath": [
+                          "운영: 보관 작업",
+                          "보관된 작업을 다시 활성화하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/archived-items.md",
+                        "contentHash": "7a19fe9b4e00e9ba41f7823dc3c0e3a02fc541788ea61cfce244bae47cfdb5b0",
+                        "content": "보관된 작업은 언제든 다시 활성화하여, 실행 가능한 상태로 되돌릴 수 있습니다. 업데이트가 필요한 기능이나 추가 개선이 필요할 때, 보관된 작업을 꺼내어 실행 흐름으로 자연스럽게 이어갈 수 있습니다.\n\n프로젝트나 목표 단위로만 다시 활성화할 수도 있으며, 이 경우 하위 작업은 보관 상태로 유지됩니다. 이 방식을 통해 필요한 작업만 선별적으로 이어갈 수 있으며, 불필요한 복잡도를 줄일 수 있습니다.\n\n이처럼 모든 기록은 그대로 보존되어 과거의 맥락을 잃지 않은 채 이어받을 수 있습니다. 이는 뤼이도의 철학인 “지속적인 개선과 성장”을 실천하는 가장 직접적인 방식입니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.02919863597612958,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 6.089207235387919,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.4456621769413728,
+                            "latencyMs": 262
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.48353039720471536,
+                            "latencyMs": 262
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 8091,
+                        "outputTokens": 286,
+                        "latencyMs": 5810,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "완료된 프로젝트가 보이지 않도록 필터링한 상태를 계속 유지할 수 있는 방법",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3284,
+                          "documentVersionId": 2428,
+                          "documentId": "333984364686",
+                          "sectionId": "333984364686:4cf1d0445a55",
+                          "documentTitle": "저장된 보기",
+                          "sectionPath": [
+                            "저장된 보기",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                          "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "완료된 프로젝트가 보이지 않도록 설정한 필터 조건은 **저장된 보기**로 저장해 두면, 다른 화면을 다녀온 뒤에도 다시 불러와 계속 사용할 수 있습니다. 저장된 보기는 프로젝트·우선순위·담당자·라벨 등의 조건으로 필터링한 상태를 저장하고 재사용하는 기능입니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "완료된 프로젝트가 보이지 않도록 설정한 필터 조건은 **저장된 보기**로 저장해 두면, 다른 화면을 다녀온 뒤에도 다시 불러와 계속 사용할 수 있습니다. 저장된 보기는 프로젝트·우선순위·담당자·라벨 등의 조건으로 필터링한 상태를 저장하고 재사용하는 기능입니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC084",
+          "description": "타임라인 뷰 제공 로드맵 문의",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "36b2dd9a-9c9f-4c0f-bda5-ca0aaff17128",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "타임라인 뷰를 만들 계획이 있으신가요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "36b2dd9a-9c9f-4c0f-bda5-ca0aaff17128",
+                "ragRunId": "df147cce-3f3b-4d18-956c-7aab212d3745",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "타임라인 뷰를 만들 계획이 있으신가요?",
+                "resolvedQuery": "타임라인 뷰를 만들 계획이 있으신가요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2510,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 22,
+                    "outputTokens": null,
+                    "latencyMs": 217,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 4758,
+                    "outputTokens": 91,
+                    "latencyMs": 2240,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "타임라인 뷰를 만들 계획이 있으신가요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "타임라인 뷰를 만들 계획이 있으신가요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3258,
+                        "documentVersionId": 2422,
+                        "documentId": "11957633d8b2",
+                        "sectionId": "11957633d8b2:a6f5feefa6e5",
+                        "documentTitle": "계획: 백로그",
+                        "sectionPath": [
+                          "계획: 백로그",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/backlog.md",
+                        "contentHash": "6b53c9cb6889de16c5e000053f6f122415ec183bcdca2f869e1f853046bd1139",
+                        "content": "백로그는 검토를 마친 작업들을 구조적으로 정리해두는 공간입니다. 이곳에서는 우선순위를 정하고, 어떤 작업부터 실행할지 계획을 세울 수 있습니다.\n\n작업을 당장 시작하지 않더라도, 백로그에 잘 정리해두면 언제든 팀의 상황에 따라 실행으로 옮길 수 있습니다. 계획 단계의 핵심 도구인 백로그를 통해, 팀은 일의 흐름을 놓치지 않고 안정적인 실행 기반을 마련할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.635652276187939,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.39661015923512466,
+                            "latencyMs": 231
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3284,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:4cf1d0445a55",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "e7afd5b0757aa68f8f710d5dde8970e7252b199c505ad7be7cbb3970e488f00c",
+                        "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.030309988518943745,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 4.423306636097284,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.39543418008449893,
+                            "latencyMs": 231
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.030303030303030304,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 4.4635612840046655,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.38995127420081743,
+                            "latencyMs": 231
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3259,
+                        "documentVersionId": 2422,
+                        "documentId": "11957633d8b2",
+                        "sectionId": "11957633d8b2:8e468f02bf3a",
+                        "documentTitle": "계획: 백로그",
+                        "sectionPath": [
+                          "계획: 백로그",
+                          "구조"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/backlog.md",
+                        "contentHash": "a1548be151afaa79c7570517d26d616664bf28affb017633e71fb722b019e6be",
+                        "content": "백로그는 \\[백로그 섹션 → 백로그 아이템]으로 2단계 계층 구조로 이루어져 있습니다. 필요한 만큼 섹션을 만들어 백로그를 주제별로 구분하고, 각 섹션 안에 백로그 항목들을 정리할 수 있습니다. 이를 통해 많은 백로그가 쌓이더라도 직관적으로 필요한 정보를 한눈에 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 5.7977808968970175,
+                            "latencyMs": 1
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3267,
+                        "documentVersionId": 2423,
+                        "documentId": "949ddd65a2a5",
+                        "sectionId": "949ddd65a2a5:28c75fba571f",
+                        "documentTitle": "실행: 작업",
+                        "sectionPath": [
+                          "실행: 작업",
+                          "다양한 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/work-items.md",
+                        "contentHash": "244f515b91b952d8a2d7661e8bc1debcb7793fc99482bbf468f753833e2d12b1",
+                        "content": "작업은 다음과 같이 다양한 보기를 통해 확인하고 관리할 수 있습니다:\n\n| 리스트                                                                                            | 칸반                                 | 그래프                       | 캘린더                                |\n| ---------------------------------------------------------------------------------------------- | ---------------------------------- | ------------------------- | ---------------------------------- |\n|  가장 기본적인 보기 형태로, 작업을 빠르게 스캔하거나 정렬할 때 적합합니다.  뤼이도의 계층 구조를 가장 명확하게 보여주는 방식입니다.  | 상태를 기준으로 작업 흐름을 보드 형태로 시각화한 형태입니다. | 작업의 우선순위를 한눈에 파악할 수 있습니다. | 마감일과 일정을 중심으로 작업을 정리하고 확인할 수 있습니다. |",
+                        "fusedRank": 5,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.40927055176510185,
+                            "latencyMs": 231
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 4758,
+                        "outputTokens": 91,
+                        "latencyMs": 2240,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC085",
+          "description": "캘린더 월간 보기를 기본값으로 설정하는 기능 요청",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "493c9f9c-2be7-4684-9f42-29b6ac7a0410",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "캘린더 뷰에서 월간을 기본 보기로 설정할 수 있으면 좋겠습니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "493c9f9c-2be7-4684-9f42-29b6ac7a0410",
+                "ragRunId": "540fde31-8f86-44b7-9ae7-948e7583ac6c",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "캘린더 뷰에서 월간을 기본 보기로 설정할 수 있으면 좋겠습니다.",
+                "resolvedQuery": "캘린더 뷰에서 월간을 기본 보기로 설정할 수 있으면 좋겠습니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2876,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 32,
+                    "outputTokens": null,
+                    "latencyMs": 198,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 4685,
+                    "outputTokens": 150,
+                    "latencyMs": 2628,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "캘린더 뷰에서 월간을 기본 보기로 설정할 수 있으면 좋겠습니다.",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "캘린더 뷰에서 월간을 기본 보기로 설정할 수 있으면 좋겠습니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3267,
+                        "documentVersionId": 2423,
+                        "documentId": "949ddd65a2a5",
+                        "sectionId": "949ddd65a2a5:28c75fba571f",
+                        "documentTitle": "실행: 작업",
+                        "sectionPath": [
+                          "실행: 작업",
+                          "다양한 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/work-items.md",
+                        "contentHash": "244f515b91b952d8a2d7661e8bc1debcb7793fc99482bbf468f753833e2d12b1",
+                        "content": "작업은 다음과 같이 다양한 보기를 통해 확인하고 관리할 수 있습니다:\n\n| 리스트                                                                                            | 칸반                                 | 그래프                       | 캘린더                                |\n| ---------------------------------------------------------------------------------------------- | ---------------------------------- | ------------------------- | ---------------------------------- |\n|  가장 기본적인 보기 형태로, 작업을 빠르게 스캔하거나 정렬할 때 적합합니다.  뤼이도의 계층 구조를 가장 명확하게 보여주는 방식입니다.  | 상태를 기준으로 작업 흐름을 보드 형태로 시각화한 형태입니다. | 작업의 우선순위를 한눈에 파악할 수 있습니다. | 마감일과 일정을 중심으로 작업을 정리하고 확인할 수 있습니다. |",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 10.735096582169415,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.43372036192078856,
+                            "latencyMs": 213
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3357,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:1ad5bfa76f8e",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "필터 적용하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "245b1996fd28d229ceb4de14fd7ebfa185bc006fc9ab25648dc94ed2e7d20ba3",
+                        "content": "* 각 페이지 좌측 상단의 ‘필터’ 버튼을 클릭해 원하는 조건을 설정합니다.\n* 설정한 필터는 상단에 태그 형태로 표시되어, 어떤 조건이 적용되었는지 한눈에 확인할 수 있습니다.\n* 태그를 클릭하면 해당 필터를 즉시 해제할 수 있습니다.\n* 모든 필터를 해제하고 기본 보기로 돌아가려면 ‘필터 초기화’ 버튼을 클릭합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 8.091162695508707,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.4045807919973865,
+                            "latencyMs": 213
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.178471288172204,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.41494835423180176,
+                            "latencyMs": 213
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03036576949620428,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 7.421578097808492,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.36202226169979257,
+                            "latencyMs": 213
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030117753623188408,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 6.539930850711424,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.40373821028101464,
+                            "latencyMs": 213
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 4685,
+                        "outputTokens": 150,
+                        "latencyMs": 2628,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    }
+  ]
+}
