@@ -1,0 +1,1324 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-09T04:15:48.296319+00:00",
+  "casesVersion": "real-customer-cases-v4",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "26a0222c4db369911c6c1a6ac2bf64c32859fbd5",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.6-terra"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v8",
+        "sha256": "6382fe3033a461b851ee88b65c0c8a24aeb74ac940df13fbc3e96ea1f79c3dbb"
+      },
+      "sourcePlanning": {
+        "version": "v26",
+        "sha256": "51b17bb5c1f9493d7f41a374b66ff97974d615fb1237b5f6cd38a4cf813375fa"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v26-repair-1",
+        "sha256": "a9cb946a47d9fa4277404dcfe2b1f562997f0b62732a779fc4d69283467aa94f"
+      },
+      "answer": {
+        "version": "v21",
+        "sha256": "9afaf45fc0f0d7cc4eaef3af37b4179d36cfe482b6c8a5504cdd71e9751a1643"
+      },
+      "answerValidationRegeneration": {
+        "version": "v21-repair-1",
+        "sha256": "23a77c53d67f0307ab715b937ff22361799ba84e49b46a4e693b1f88fc37ddcc"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "26a0222c4db369911c6c1a6ac2bf64c32859fbd5",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.6-terra",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v35"
+      },
+      {
+        "purpose": "QUERY_REWRITE",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v8"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 1,
+    "uniqueCaseCount": 3,
+    "totalCaseExecutionCount": 3,
+    "passedCaseExecutionCount": 2,
+    "failedCaseExecutionCount": 1,
+    "executionErrorCaseExecutionCount": 0,
+    "criteriaMismatchCaseExecutionCount": 1,
+    "perCase": [
+      {
+        "id": "RC011",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "RC022",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "RC042",
+        "executionCount": 1,
+        "passedCount": 0,
+        "failedCount": 1
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 3,
+        "passedCount": 2,
+        "failedCount": 1
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-09T04:15:35.478493+00:00",
+      "results": [
+        {
+          "id": "RC011",
+          "description": "프로젝트가 스프린트에 표시되지 않는 장애 문의",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "c8d71c8b-c6e9-4755-bb60-04955aa85a68",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "작업관리-작업에 프로젝트를 추가했는데 스프린트에 표시가 되지 않습니다ㅜㅜ",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "c8d71c8b-c6e9-4755-bb60-04955aa85a68",
+                "ragRunId": "33788074-b663-48b1-8921-ff7d7b131348",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "작업관리-작업에 프로젝트를 추가했는데 스프린트에 표시가 되지 않습니다ㅜㅜ",
+                "resolvedQuery": "작업관리-작업에 프로젝트를 추가했는데 스프린트에 표시가 되지 않습니다ㅜㅜ",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 3958,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 43,
+                    "outputTokens": null,
+                    "latencyMs": 447,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v35",
+                    "inputTokens": 4995,
+                    "outputTokens": 146,
+                    "latencyMs": 3435,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "작업관리-작업에 프로젝트를 추가했는데 스프린트에 표시가 되지 않습니다ㅜㅜ",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "작업관리-작업에 프로젝트를 추가했는데 스프린트에 표시가 되지 않습니다ㅜㅜ"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3240,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:62a522a003fd",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "나의 팀"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "b0c1786eb9465ae8a3ad3cbfd54b936971a6b5ff9964577adafe3916ca3d188d",
+                        "content": "내가 속해 있는 팀은 좌측 사이드바에 표시됩니다. 각 팀은 아래와 같은 메뉴를 가지고 있습니다:\n\n* 작업 관리\n  * 대기\n  * 백로그\n  * 작업\n* 스프린트\n* 미팅\n* 저장된 보기",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 9.66819954217386,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.4995417901277768,
+                            "latencyMs": 475
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3305,
+                        "documentVersionId": 2433,
+                        "documentId": "2c428c0d81be",
+                        "sectionId": "2c428c0d81be:012f04cb7b63",
+                        "documentTitle": "스프린트 그래프",
+                        "sectionPath": [
+                          "스프린트 그래프",
+                          "그래프 보는 법"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/sprint-graph.md",
+                        "contentHash": "9b9a9d8d2d28eb5dab4a47072f16659f2345df327a3979b9e2364350b4ae5542",
+                        "content": "스프린트 그래프는 총 4가지 주요 선으로 구성되어 있습니다.\n\n구분: 회색 점선 / 설명: 이번 스프린트의 전체 작업 개수\n구분: 초록색 실선 / 설명: 진행 중인 작업의 개수. 작업이 시작될 때마다 이 선이 증가합니다.\n구분: 보라색 점선 / 설명: 작업이 완료되어야 하는 기준선. 스프린트 전체 기간을 기준으로, 전체 작업이 균등하게 완료된다고 가정했을 때의 이상적인 진행 속도를 보여줍니다. 예를 들어, 2주(14일) 스프린트에 28개의 작업이 있다면, 매일 2개씩 완료되는 흐름이 기준선이 됩니다.\n구분: 보라색 실선 / 설명: 실제로 완료된 작업의 누적 개수. 기준선과 비교하여 현재 속도가 계획 대비 빠른지, 느린지를 즉시 파악할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031054405392392875,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 8.258695252484289,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5114227972155633,
+                            "latencyMs": 475
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3268,
+                        "documentVersionId": 2423,
+                        "documentId": "949ddd65a2a5",
+                        "sectionId": "949ddd65a2a5:b1af22cab7a1",
+                        "documentTitle": "실행: 작업",
+                        "sectionPath": [
+                          "실행: 작업",
+                          "작업 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/work-items.md",
+                        "contentHash": "68e21de4584d9815921a4d95b49bf596d88bc459c1dd69aa545436bd43db8054",
+                        "content": "작업은 효율적이고 유연한 실행을 위해 다양한 추가 기능을 제공합니다.\n\n* **외부 연동:** 깃허브, 피그마 연동을 통해 실무자 중심의 업무 흐름을 구축할 수 있습니다.\n* **스코어:** 작업의 중요도를 수치로 표현해 우선순위 판단을 도와줍니다.\n* **체크리스트:** 세부 항목을 나열하여, 작은 단위로 진행 상황을 관리할 수 있습니다.\n* **상위 작업:** 작업이 속한 상위 구조를 확인하고 연결 관계를 수정할 수 있습니다.\n* **스프린트:** 작업이 어떤 스프린트에 포함되어 있는지 확인하고 연결 관계를 수정할 수 있습니다.\n* **연관된 작업 및 미팅:** 작업과 관련된 회의와 다른 작업을 연결해 실행에 대한 맥락을 놓치지 않을 수 있습니다.\n* **작업 관계도:** 관련된 모든 작업을 트리 형태로 시각화해 흐름을 한눈에 파악할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03057889822595705,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 8.662253210472592,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.4750241811257674,
+                            "latencyMs": 475
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3282,
+                        "documentVersionId": 2427,
+                        "documentId": "9b9516882026",
+                        "sectionId": "9b9516882026:b527f7f75ac6",
+                        "documentTitle": "작업 관계도",
+                        "sectionPath": [
+                          "작업 관계도",
+                          "계층 구조 시각화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/diagram.md",
+                        "contentHash": "22b77fbdb4470504aed2effc51588a73b4202635ee908066fd78dab30c78d100",
+                        "content": "작업 관계도에서는 프로젝트, 목표, 작업, 하위 작업이 트리 형태로 표시됩니다. 각 작업을 클릭하면 해당 작업의 상세 페이지로 이동할 수 있습니다.\n\n* 드래그를 통해 관계도를 자유롭게 이동할 수 있습니다.\n* 확대/축소를 통해 세부 구조와 전체 맥락을 전환할 수 있습니다.\n* 현재 작업과 직접 연결된 작업은 색이 진하게 표시되어, 복잡한 구조 속 관계를 직관적으로 파악할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.028991596638655463,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 8,
+                            "rawScore": 7.918946940361191,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 10,
+                            "rawScore": 0.46333550236248155,
+                            "latencyMs": 475
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3266,
+                        "documentVersionId": 2423,
+                        "documentId": "949ddd65a2a5",
+                        "sectionId": "949ddd65a2a5:4c10db99d1ad",
+                        "documentTitle": "실행: 작업",
+                        "sectionPath": [
+                          "실행: 작업",
+                          "속성"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/work-items.md",
+                        "contentHash": "b3b9bf7b30b741eba843f8f2b401a9f6b57898ef68eb541c1974a563c50be258",
+                        "content": "작업은 형태에 따라 다음과 같은 속성 정보를 가집니다:\n\n|     | 프로젝트      | 목표        | 작업 | 하위작업 |\n| --- | --------- | --------- | -- | ---- |\n| 키 값 | ●         | ●         | ●  | ●    |\n| 시작일 | ●         | —         | ●  | ●    |\n| 마감일 | ●         | ●         | ●  | ●    |\n| 참여자 | ○ (1명)    | —         | ●  | ●    |\n| 라벨  | ●         | ●         | ●  | ●    |\n| 상태  | ○ (완료 여부) | ○ (완료 여부) | ●  | ●    |\n| 스코어 | —         | ○ (총점)    | ●  | —    |\n\n● 사용 가능 / ○ 일부 제한 / — 사용 불가",
+                        "fusedRank": 5,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5348338468378194,
+                            "latencyMs": 475
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v35",
+                        "inputTokens": 4995,
+                        "outputTokens": 146,
+                        "latencyMs": 3435,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC022",
+          "description": "관리자 권한인데도 발생하는 스프린트 생성 권한 오류",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "f3b7e039-1886-427d-a798-c342671a24ef",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "저희 팀 백엔드 팀원 중 한 분이 지금 뤼이도에서 스프린트 생성이 안되는 것 같은데요. 이미 관리자 권한을 줬는데도 권한이 없다는 에러메시지가 뜹니다. 혹시 확인 가능할까요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "f3b7e039-1886-427d-a798-c342671a24ef",
+                "ragRunId": "d2e91121-0ebd-454d-87ca-10c9c473755e",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "저희 팀 백엔드 팀원 중 한 분이 지금 뤼이도에서 스프린트 생성이 안되는 것 같은데요. 이미 관리자 권한을 줬는데도 권한이 없다는 에러메시지가 뜹니다. 혹시 확인 가능할까요?",
+                "resolvedQuery": "저희 팀 백엔드 팀원 중 한 분이 지금 뤼이도에서 스프린트 생성이 안되는 것 같은데요. 이미 관리자 권한을 줬는데도 권한이 없다는 에러메시지가 뜹니다. 혹시 확인 가능할까요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2106,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 91,
+                    "outputTokens": null,
+                    "latencyMs": 170,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v35",
+                    "inputTokens": 4935,
+                    "outputTokens": 89,
+                    "latencyMs": 1892,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "저희 팀 백엔드 팀원 중 한 분이 지금 뤼이도에서 스프린트 생성이 안되는 것 같은데요. 이미 관리자 권한을 줬는데도 권한이 없다는 에러메시지가 뜹니다. 혹시 확인 가능할까요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "저희 팀 백엔드 팀원 중 한 분이 지금 뤼이도에서 스프린트 생성이 안되는 것 같은데요. 이미 관리자 권한을 줬는데도 권한이 없다는 에러메시지가 뜹니다. 혹시 확인 가능할까요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3231,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:a71a73e4ac34",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "7904fbb4987e17151ebf07a8ee4bd1543c378ff21eeb76314a0597ba94a1de17",
+                        "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 24.935157761919946,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.3976516749230663,
+                            "latencyMs": 183
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3243,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:26bbdd776a1e",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "4d4539e8b14b91e51d63fe24c71eb00ab812043bad06a5e7073815f72a1ebf67",
+                        "content": "#### 팀 생성 및 참여\n\n새로운 팀을 만들거나 기존 팀에 참여하려면, 설정 페이지의 \\[팀]에서 관리할 수 있습니다. 또는 설정 페이지의 좌측 사이드바 하단의 ‘팀 추가’ 버튼을 클릭하여 생성할 수도 있습니다. 단, 비공개 팀은 팀 관리자의 초대를 받아야 참여할 수 있습니다.\n\n팀의 생성 가능 개수는 워크스페이스의 요금제에 따라 제한이 있습니다.\n\n요금제: Free / 팀 개수: 2\n요금제: Pro / 팀 개수: 3\n요금제: Business / 팀 개수: 무제한\n요금제: Enterprise / 팀 개수: 무제한\n\n#### 팀 떠나기\n\n팀 멤버 설정 페이지에서 스스로를 비활성화하면, 팀에서 떠날 수 있습니다.\n\n#### 팀 삭제\n\n팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.029631255487269532,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 8,
+                            "rawScore": 7.666156305415189,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.3694683110264304,
+                            "latencyMs": 183
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3240,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:62a522a003fd",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "나의 팀"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "b0c1786eb9465ae8a3ad3cbfd54b936971a6b5ff9964577adafe3916ca3d188d",
+                        "content": "내가 속해 있는 팀은 좌측 사이드바에 표시됩니다. 각 팀은 아래와 같은 메뉴를 가지고 있습니다:\n\n* 작업 관리\n  * 대기\n  * 백로그\n  * 작업\n* 스프린트\n* 미팅\n* 저장된 보기",
+                        "fusedRank": 3,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.3950064870699914,
+                            "latencyMs": 183
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 17.849981972741073,
+                            "latencyMs": 1
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.015873015873015872,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 11.77411522138212,
+                            "latencyMs": 1
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v35",
+                        "inputTokens": 4935,
+                        "outputTokens": 89,
+                        "latencyMs": 1892,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC042",
+          "description": "스프린트 일정 등록 뒤 전체 기간 표시 위치를 이어 질문",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": false,
+          "conversationId": "6d11079a-4e4b-4836-bab1-5700ccc747bb",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "혹시 스프린트 일정과 같은 전체가 확인해야 할 일정을 등록하려면 어떻게 하나요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "6d11079a-4e4b-4836-bab1-5700ccc747bb",
+                "ragRunId": "dcbdc99a-082d-4e5a-9eb6-7881474f971c",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "혹시 스프린트 일정과 같은 전체가 확인해야 할 일정을 등록하려면 어떻게 하나요?",
+                "resolvedQuery": "혹시 스프린트 일정과 같은 전체가 확인해야 할 일정을 등록하려면 어떻게 하나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2968,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 40,
+                    "outputTokens": null,
+                    "latencyMs": 173,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v35",
+                    "inputTokens": 4929,
+                    "outputTokens": 119,
+                    "latencyMs": 2747,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "혹시 스프린트 일정과 같은 전체가 확인해야 할 일정을 등록하려면 어떻게 하나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "혹시 스프린트 일정과 같은 전체가 확인해야 할 일정을 등록하려면 어떻게 하나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3303,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:7a8e11bfc496",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "미리 생성할 다가올 스프린트 개수"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "44a05662ad01974d320173403f923d39732de87c22f5bc027b781e1077d9d52b",
+                        "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.583389548821906,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.4433369852125193,
+                            "latencyMs": 186
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3299,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:203889cf792c",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "35e456517f89ebe937bf0af7f3ee21c6c8db19f1b38912cafc8f675701ac05e6",
+                        "content": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다.\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031544957774465976,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 9.931932868646303,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.44068100687338496,
+                            "latencyMs": 186
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3302,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:48338ffe0288",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 시작 요일"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "d157c06165cd8fb9c70026d16b625c5ed3c02a83db9a7622b3343a82accdbe29",
+                        "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 8.011206910657538,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.4867759208779865,
+                            "latencyMs": 186
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3306,
+                        "documentVersionId": 2433,
+                        "documentId": "2c428c0d81be",
+                        "sectionId": "2c428c0d81be:c496ba980f67",
+                        "documentTitle": "스프린트 그래프",
+                        "sectionPath": [
+                          "스프린트 그래프",
+                          "그래프 해석 팁"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/sprint-graph.md",
+                        "contentHash": "f8fa3f30c21dab656a7eceb34f5b0934c3cf0dac4a32ab537f3122d046c4c1b6",
+                        "content": "**✅ 보라색 실선이 기준선(보라색 점선) 보다 위인 경우:**\n\n계획보다 빠르게 작업이 진행되고 있습니다. 일정에 여유가 있거나, 예상보다 빠른 실행이 이루어지고 있음을 의미합니다.\n\n**⚠️ 보라색 실선이 기준선 아래인 경우:**\n\n일정이 지연되고 있거나, 일부 작업이 계획보다 늦게 완료되고 있을 가능성이 높습니다. 스프린트 중반 이후이면서 특별한 사유가 없다면 병목이 발생한 작업을 확인하고 우선순위를 재조정하는 것이 권장됩니다.\n\n**⛔️ 그래프 변동이 거의 없는 경우:**\n\n진행 중 작업의 전환이 이루어지지 않고 있을 수 있습니다. 스프린트 초반이라면 정상일 수 있지만, 중반 이후라면 진행 상황 점검이 필요합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 8.02053803655501,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.43108079044798053,
+                            "latencyMs": 186
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3346,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:0c33dc302925",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "미팅 일정 동기화 방식"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "3577c3e74d6918a026a69c07d181eb85627c1cef667111f719a65bd7b92ce626",
+                        "content": "연동이 활성화되면, 뤼이도와 구글 캘린더 모두에서 수정한 일정이 실시간으로 서로 반영됩니다. 즉, 팀원들은 평소처럼 구글 캘린더에서 일정을 관리해도 뤼이도에서 자동으로 최신 상태를 유지할 수 있습니다.\n\n#### 1) 뤼이도 → 구글 캘린더\n\n뤼이도에서 다음과 같은 변경이 발생하면 자동으로 구글 캘린더에 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거\n\n#### 2) 구글 캘린더 → 뤼이도\n\n구글 캘린더에서 일정을 수정하면 뤼이도에 자동으로 반영됩니다.\n\n* 미팅 생성\n* 제목/설명 수정\n* 시간 및 장소 변경\n* 참여자 추가/제거",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029857397504456328,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 7.723489163638968,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.4305797558163392,
+                            "latencyMs": 186
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v35",
+                        "inputTokens": 4929,
+                        "outputTokens": 119,
+                        "latencyMs": 2747,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "스프린트 일정을 설정했는데, 작업에서 추가하는 것 외에 전체적인 스프린트 기간이 어디에 표시되는지 궁금합니다.",
+              "passed": false,
+              "failures": [
+                "contextStrategy 불일치: expected=FOLLOW_UP_WINDOW, actual=NEW_TOPIC",
+                "selectedTurnNos 불일치: expected=[1], actual=[]"
+              ],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "6d11079a-4e4b-4836-bab1-5700ccc747bb",
+                "ragRunId": "1210d19c-90b0-4ee1-99e4-ccd85da04c8e",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "스프린트 일정을 설정했는데, 작업에서 추가하는 것 외에 전체적인 스프린트 기간이 어디에 표시되는지 궁금합니다.",
+                "resolvedQuery": "스프린트 일정을 설정했는데, 작업에서 추가하는 것 외에 전체적인 스프린트 기간이 어디에 표시되는지 궁금합니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 3656,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v8",
+                    "inputTokens": 3584,
+                    "outputTokens": 31,
+                    "latencyMs": 1046,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 57,
+                    "outputTokens": null,
+                    "latencyMs": 225,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v35",
+                    "inputTokens": 4799,
+                    "outputTokens": 101,
+                    "latencyMs": 2301,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "스프린트 일정을 설정했는데, 작업에서 추가하는 것 외에 전체적인 스프린트 기간이 어디에 표시되는지 궁금합니다.",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "dcbdc99a-082d-4e5a-9eb6-7881474f971c",
+                        "turnNo": 1,
+                        "status": "WITHHELD",
+                        "userQuery": "혹시 스프린트 일정과 같은 전체가 확인해야 할 일정을 등록하려면 어떻게 하나요?",
+                        "resolvedQuery": "혹시 스프린트 일정과 같은 전체가 확인해야 할 일정을 등록하려면 어떻게 하나요?",
+                        "answerContent": null,
+                        "withheldReasonCode": "INSUFFICIENT_EVIDENCE"
+                      }
+                    ],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "스프린트 일정을 설정했는데, 작업에서 추가하는 것 외에 전체적인 스프린트 기간이 어디에 표시되는지 궁금합니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3300,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:8f39a6741f94",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "30c49ede2036a0dcf966b4c2033000bd7edb3a5d1fd765340871d1e3aefe167c",
+                        "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 12.596521732928645,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6151876585244949,
+                            "latencyMs": 240
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3305,
+                        "documentVersionId": 2433,
+                        "documentId": "2c428c0d81be",
+                        "sectionId": "2c428c0d81be:012f04cb7b63",
+                        "documentTitle": "스프린트 그래프",
+                        "sectionPath": [
+                          "스프린트 그래프",
+                          "그래프 보는 법"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/sprint-graph.md",
+                        "contentHash": "9b9a9d8d2d28eb5dab4a47072f16659f2345df327a3979b9e2364350b4ae5542",
+                        "content": "스프린트 그래프는 총 4가지 주요 선으로 구성되어 있습니다.\n\n구분: 회색 점선 / 설명: 이번 스프린트의 전체 작업 개수\n구분: 초록색 실선 / 설명: 진행 중인 작업의 개수. 작업이 시작될 때마다 이 선이 증가합니다.\n구분: 보라색 점선 / 설명: 작업이 완료되어야 하는 기준선. 스프린트 전체 기간을 기준으로, 전체 작업이 균등하게 완료된다고 가정했을 때의 이상적인 진행 속도를 보여줍니다. 예를 들어, 2주(14일) 스프린트에 28개의 작업이 있다면, 매일 2개씩 완료되는 흐름이 기준선이 됩니다.\n구분: 보라색 실선 / 설명: 실제로 완료된 작업의 누적 개수. 기준선과 비교하여 현재 속도가 계획 대비 빠른지, 느린지를 즉시 파악할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031544957774465976,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 13.733302425252985,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.5197282755241602,
+                            "latencyMs": 240
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3302,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:48338ffe0288",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 시작 요일"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "d157c06165cd8fb9c70026d16b625c5ed3c02a83db9a7622b3343a82accdbe29",
+                        "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 12.077400936942261,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5533019817320958,
+                            "latencyMs": 240
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3301,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:1c82492f0b2a",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 기간"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "fea5253ffb2ae1231e90bdcca3ebb35ea55c457a988039db70bca98472a61f24",
+                        "content": "하나의 스프린트가 지속되는 기간입니다. 주 단위로 설정할 수 있으며, 최소 1주부터 최대 8주까지 설정 가능합니다.\n\n* 일반적으로 1\\~2주는 짧은 반복과 빠른 실행에 적합합니다.\n* 3주 이상은 중장기 프로젝트의 진행 추적에 유용합니다.\n\n팀 규모와 업무 성격에 따라 적정 주기를 설정하는 것을 권장합니다.\n\n예: 초기 스타트업 팀 — 1주 / 대규모 프로젝트 팀 — 2\\~3주",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031054405392392875,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 10.762444208592203,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5637106683162856,
+                            "latencyMs": 240
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3303,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:7a8e11bfc496",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "미리 생성할 다가올 스프린트 개수"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "44a05662ad01974d320173403f923d39732de87c22f5bc027b781e1077d9d52b",
+                        "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.031054405392392875,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 12.662299877521175,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.518316967338968,
+                            "latencyMs": 240
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v35",
+                        "inputTokens": 4799,
+                        "outputTokens": 101,
+                        "latencyMs": 2301,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    }
+  ]
+}

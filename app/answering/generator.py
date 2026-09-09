@@ -25,9 +25,9 @@ from app.retrieval.models import HybridRetrievalResult
 
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.6-terra"
-GENERATION_PROMPT_VERSION = "v33"
-SOURCE_PLANNING_PROMPT_VERSION = "v24"
-SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v24-repair-1"
+GENERATION_PROMPT_VERSION = "v35"
+SOURCE_PLANNING_PROMPT_VERSION = "v26"
+SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v26-repair-1"
 ANSWER_PROMPT_VERSION = "v21"
 ANSWER_REPAIR_PROMPT_VERSION = "v21-repair-1"
 MAX_CONTEXT_SOURCES = 5
@@ -108,6 +108,12 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
 - "작성하는 곳이 있나요?"처럼 기능의 존재와 용도를 묻는 질문은 정확한 메뉴 경로나 클릭
   절차를 요구하는 질문이 아닙니다. SOURCE가 해당 내용을 작성할 수 있는 기능·공간과 용도를
   직접 설명하면 GENERAL로 답할 수 있으며, 경로가 없다는 이유만으로 보류하지 마세요.
+- 관리자·멤버처럼 역할별로 할 수 있는 범위나 제한을 "어디에서 확인"할 수 있는지 묻는 질문은
+  GENERAL입니다. 역할별 권한 범위를 직접 열거한 SOURCE가 있으면, 별도의 화면 이동·설정
+  절차가 없어도 그 SOURCE로 답하세요.
+- 스프린트의 시작 요일, 기간, 주기 변경을 설명한 SOURCE는 각 스프린트의 임의 시작 날짜 설정,
+  과거 날짜 선택, 예외적인 다음 일정 조정 가능 여부의 근거가 아닙니다. 질문이 이런 개별
+  날짜·예외 설정을 요구하면 해당 기능을 직접 설명하는 SOURCE가 있을 때만 답하세요.
 - 사용자가 "왜", "이유", "원인"을 물으면 해당 원인 설명이 독립적인 필수 정보 단위입니다.
   SOURCE가 현재 적용 범위나 제한만 확인하고 그 원인을 설명하지 않으면, 범위 확인만으로 질문을
   축소해 답하지 말고 INSUFFICIENT_EVIDENCE로 처리하세요.

@@ -64,18 +64,18 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
             project_root / "evaluation" / "customer_support_cases.json"
         )
 
-        self.assertEqual("real-customer-cases-v3", payload["version"])
-        self.assertEqual(70, len(payload["cases"]))
+        self.assertEqual("real-customer-cases-v4", payload["version"])
+        self.assertEqual(93, len(payload["cases"]))
         self.assertEqual(
-            [f"RC{number:03d}" for number in range(1, 71)],
+            [f"RC{number:03d}" for number in range(1, 94)],
             [case["id"] for case in payload["cases"]],
         )
         self.assertEqual(
-            80,
+            104,
             sum(len(case["turns"]) for case in payload["cases"]),
         )
         self.assertEqual(
-            10,
+            11,
             sum(len(case["turns"]) > 1 for case in payload["cases"]),
         )
         self.assertEqual(
@@ -84,7 +84,7 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
         )
         turns = [turn for case in payload["cases"] for turn in case["turns"]]
         self.assertEqual(
-            {"COMPLETED": 16, "WITHHELD": 64},
+            {"COMPLETED": 19, "WITHHELD": 85},
             {
                 status: sum(turn["expectedStatus"] == status for turn in turns)
                 for status in ("COMPLETED", "WITHHELD")

@@ -1,5 +1,5 @@
 {
-  "version": "real-customer-cases-v3",
+  "version": "real-customer-cases-v4",
   "purpose": "개인정보 처리된 실제 고객 상담 표현으로 현재 공식 이용가이드 기반 RAG의 답변, 보류, 문맥, 검색 및 Citation 품질을 진단한다.",
   "groundTruthPolicy": "과거 상담원 답변이 아니라 현재 공식 이용가이드만 정답 근거로 사용한다.",
   "reviewStatus": "MANUALLY_REVIEWED_BEFORE_FIRST_RUN",
@@ -461,6 +461,147 @@
       "sourceSampleId": "faq-100",
       "description": "짧은 탈퇴 실행 입력",
       "turns": [{"question":"탈퇴하기","expectedStatus":"WITHHELD","expectedWithheldReasonsAny":["INSUFFICIENT_EVIDENCE","AMBIGUOUS_QUESTION"]}]
+    },
+    {
+      "id": "RC071",
+      "sourceSampleId": "faq-002",
+      "description": "Github 연동 업데이트와 재연동 뒤 Repository가 표시되지 않는 장애",
+      "turns": [{"question":"<외부서비스명> 연동 시 업데이트를 하라고 나오는데 업데이트 버튼도 무반응이고 재연동해도 동일합니다. Repository가 보이지 않는데 어떻게 해야 하나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC072",
+      "sourceSampleId": "faq-002",
+      "description": "Repository 문제 해결 뒤 지속되는 Github PR 연동 장애",
+      "turns": [{"question":"<외부서비스명> Repository가 보이지 않는 문제는 해결된 것 같은데, 여전히 PR 연동은 되지 않는 것 같아요.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC073",
+      "sourceSampleId": "faq-019",
+      "description": "삭제된 워크스페이스의 원인 확인과 복구 요청",
+      "turns": [{"question":"저희 워크스페이스가 삭제된 것 같습니다. 어떻게 삭제됐는지, 삭제됐다면 복구 가능한지 확인 부탁드립니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC074",
+      "sourceSampleId": "faq-019",
+      "description": "워크스페이스 복구 뒤 멤버 페이지 일시 오류 확인 요청",
+      "turns": [{"question":"워크스페이스는 갑자기 복구됐는데 멤버 페이지에 일시적 오류가 뜹니다. 확인 부탁드립니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC075",
+      "sourceSampleId": "faq-019",
+      "description": "새 팀원 추가 처리 요청",
+      "turns": [{"question":"저희 팀에 새로운 팀원분이 오셨는데 팀원 추가 부탁드려도 될까요?","expectedStatus":"WITHHELD","expectedWithheldReasonsAny":["INSUFFICIENT_EVIDENCE","AMBIGUOUS_QUESTION"]}]
+    },
+    {
+      "id": "RC076",
+      "sourceSampleId": "faq-025",
+      "description": "데스크톱 버전 지원 운영체제 문의",
+      "turns": [{"question":"desktop 버전은 어떤 기기 환경에서 사용할 수 있나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC077",
+      "sourceSampleId": "faq-025",
+      "description": "파일 export 기능 제공 여부 문의",
+      "turns": [{"question":"파일 export 같은 기능은 없을까요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC078",
+      "sourceSampleId": "faq-029",
+      "description": "브라우저 번역 오역으로 비밀번호 입력과 회원가입이 실패하는 장애",
+      "turns": [{"question":"회원가입 때 비밀번호 대신 포스틱을 입력하라고 보이고, 형식에 맞게 입력해도 오류가 나면서 가입이 안 됩니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC079",
+      "sourceSampleId": "faq-036",
+      "description": "작업 참여자 선택 목록이 표시되지 않는 장애",
+      "turns": [{"question":"작업에서 참여자를 설정할 때 한 명만 지정되거나 참여자 부분을 클릭해도 아무것도 뜨지 않을 때가 있는데 어떻게 해결하나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC080",
+      "sourceSampleId": "faq-036",
+      "description": "프로젝트와 목표에 참여자를 배정하는 기능 요청",
+      "turns": [{"question":"프로젝트와 목표에도 참여자를 배정할 수 있게 수정 가능한가요?","expectedStatus":"COMPLETED","minimumCitationCount":1,"expectedCitationDocumentTitlesAny":["실행: 작업"]}]
+    },
+    {
+      "id": "RC081",
+      "sourceSampleId": "faq-036",
+      "description": "체험판 사용 기간 연장 요청",
+      "turns": [{"question":"현재 체험판을 사용 중인데 팀원들이 익숙해질 수 있도록 사용 기간을 일주일 정도 추가 연장할 수 있을까요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC082",
+      "sourceSampleId": "faq-074",
+      "description": "필터 적용 상태에서 목표 옆 버튼으로 작업을 추가할 때 발생하는 오류",
+      "turns": [{"question":"리스트 화면에서 상태 필터를 적용한 뒤 목표 옆 + 버튼으로 작업을 추가하면 에러가 뜹니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC083",
+      "sourceSampleId": "faq-074",
+      "description": "화면 이동 뒤 해제되는 완료 프로젝트 필터 유지 방법 문의",
+      "turns": [{"question":"완료된 프로젝트가 안 보이도록 필터링한 상태를 계속 쓰고 싶은데 다른 화면에 갔다 오면 풀립니다. 유지할 방법이 있나요?","expectedStatus":"COMPLETED","minimumCitationCount":1,"expectedCitationDocumentTitlesAny":["필터","저장된 보기"]}]
+    },
+    {
+      "id": "RC084",
+      "sourceSampleId": "faq-080",
+      "description": "타임라인 뷰 제공 로드맵 문의",
+      "turns": [{"question":"타임라인 뷰를 만들 계획이 있으신가요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC085",
+      "sourceSampleId": "faq-080",
+      "description": "캘린더 월간 보기를 기본값으로 설정하는 기능 요청",
+      "turns": [{"question":"캘린더 뷰에서 월간을 기본 보기로 설정할 수 있으면 좋겠습니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC086",
+      "sourceSampleId": "faq-080",
+      "description": "보관함에서 프로젝트 하위 항목을 선택할 수 없는 동작 문의",
+      "turns": [{"question":"리스트 뷰에서는 프로젝트를 선택하면 하위 항목도 선택할 수 있는데, 보관함에서는 프로젝트를 선택해도 하위 항목들이 선택되지 않습니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC087",
+      "sourceSampleId": "faq-081",
+      "description": "미팅 페이지 너비와 라벨 가로 스크롤 UI 개선 요청",
+      "turns": [{"question":"미팅 페이지 너비를 브라우저 창 크기만큼 확장할 수 있으면 좋겠습니다. 라벨을 여러 개 구성하면 가로 스크롤이 나와서 불편합니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC088",
+      "sourceSampleId": "faq-081",
+      "description": "목표로 구성한 작업을 프로젝트로 변경하는 기능 문의",
+      "turns": [{"question":"목표로 구성한 작업이 스케일이 커질 경우 프로젝트로 올려 크게 다루고 싶은데, 목표로 구성한 작업을 프로젝트로 변경할 수 있나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC089",
+      "sourceSampleId": "faq-081",
+      "description": "캘린더에 프로젝트와 목표 기간을 표시하는 기능 요청",
+      "turns": [{"question":"캘린더 뷰에서 작업뿐 아니라 프로젝트와 목표도 기간으로 표시할 수 있으면 좋겠습니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC090",
+      "sourceSampleId": "faq-081",
+      "description": "기존 스프린트 도입 상황의 시작일 유연성 문의와 보충 설명",
+      "turns": [
+        {"question":"기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"},
+        {"question":"이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"resolvedQueryKeywords":["스프린트"]}
+      ]
+    },
+    {
+      "id": "RC091",
+      "sourceSampleId": "faq-081",
+      "description": "초대 후 결제됐지만 멤버 추가와 접근이 되지 않는 장애",
+      "turns": [{"question":"회원가입하지 않은 인원을 초대했는데 결제만 되고 초대 메일도 오지 않았습니다. 멤버 페이지에도 추가되지 않고 가입 후에도 워크스페이스에 접근할 수 없습니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC092",
+      "sourceSampleId": "faq-081",
+      "description": "후불 청구와 사용자 시트 구매 방식 기능 요청",
+      "turns": [{"question":"멤버를 초대할 때 바로 결제하는 방식 대신 후불 청구 방식이나 사용자 시트를 미리 구매하는 기능을 제공할 수 있나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+    },
+    {
+      "id": "RC093",
+      "sourceSampleId": "faq-081",
+      "description": "관리자와 멤버 역할별 권한 범위 설명 요청",
+      "turns": [{"question":"관리자와 멤버가 각각 할 수 있는 활동 범위는 어디에서 확인할 수 있나요?","expectedStatus":"COMPLETED","minimumCitationCount":1,"expectedCitationDocumentTitlesAny":["멤버"]}]
     }
   ]
 }

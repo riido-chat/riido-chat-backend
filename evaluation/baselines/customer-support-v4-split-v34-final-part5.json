@@ -1,0 +1,1064 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-09T04:12:41.826998+00:00",
+  "casesVersion": "real-customer-cases-v4",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "26a0222c4db369911c6c1a6ac2bf64c32859fbd5",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.6-terra"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v8",
+        "sha256": "6382fe3033a461b851ee88b65c0c8a24aeb74ac940df13fbc3e96ea1f79c3dbb"
+      },
+      "sourcePlanning": {
+        "version": "v25",
+        "sha256": "c5ab2531560503affe79a5c94fac5b24c3895b922e80b5850583bf09ce4308df"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v25-repair-1",
+        "sha256": "d69896097eceb5b04d2f8b5aaa1be0b46fffe4aac559dc580e61c85f113cc083"
+      },
+      "answer": {
+        "version": "v21",
+        "sha256": "9afaf45fc0f0d7cc4eaef3af37b4179d36cfe482b6c8a5504cdd71e9751a1643"
+      },
+      "answerValidationRegeneration": {
+        "version": "v21-repair-1",
+        "sha256": "23a77c53d67f0307ab715b937ff22361799ba84e49b46a4e693b1f88fc37ddcc"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "26a0222c4db369911c6c1a6ac2bf64c32859fbd5",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.6-terra",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v34"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 1,
+    "uniqueCaseCount": 3,
+    "totalCaseExecutionCount": 3,
+    "passedCaseExecutionCount": 3,
+    "failedCaseExecutionCount": 0,
+    "executionErrorCaseExecutionCount": 0,
+    "criteriaMismatchCaseExecutionCount": 0,
+    "perCase": [
+      {
+        "id": "RC091",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "RC092",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "RC093",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 3,
+        "passedCount": 3,
+        "failedCount": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-09T04:12:25.836165+00:00",
+      "results": [
+        {
+          "id": "RC091",
+          "description": "초대 후 결제됐지만 멤버 추가와 접근이 되지 않는 장애",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "a2d70509-d80a-46ec-be43-41e842b7a50b",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "회원가입하지 않은 인원을 초대했는데 결제만 되고 초대 메일도 오지 않았습니다. 멤버 페이지에도 추가되지 않고 가입 후에도 워크스페이스에 접근할 수 없습니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "a2d70509-d80a-46ec-be43-41e842b7a50b",
+                "ragRunId": "2a64485e-0c5e-4a12-9797-391a2eda5006",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "회원가입하지 않은 인원을 초대했는데 결제만 되고 초대 메일도 오지 않았습니다. 멤버 페이지에도 추가되지 않고 가입 후에도 워크스페이스에 접근할 수 없습니다.",
+                "resolvedQuery": "회원가입하지 않은 인원을 초대했는데 결제만 되고 초대 메일도 오지 않았습니다. 멤버 페이지에도 추가되지 않고 가입 후에도 워크스페이스에 접근할 수 없습니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 3312,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 68,
+                    "outputTokens": null,
+                    "latencyMs": 381,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 4983,
+                    "outputTokens": 100,
+                    "latencyMs": 2847,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "회원가입하지 않은 인원을 초대했는데 결제만 되고 초대 메일도 오지 않았습니다. 멤버 페이지에도 추가되지 않고 가입 후에도 워크스페이스에 접근할 수 없습니다.",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "회원가입하지 않은 인원을 초대했는데 결제만 되고 초대 메일도 오지 않았습니다. 멤버 페이지에도 추가되지 않고 가입 후에도 워크스페이스에 접근할 수 없습니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3232,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:6a09b6285b28",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "멤버 비활성화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "3c7ba56137fad745d3f659f2eec123126b1ce27eca49c41ffb7c46d977e00ac9",
+                        "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 23.65516272913042,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5485023587269641,
+                            "latencyMs": 412
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 17.57747609324901,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5331126582765954,
+                            "latencyMs": 412
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3237,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:c6dbd3a17dd8",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "워크스페이스에 멤버 추가하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "a93f12fb3de6ebca267444688f4e2eaab08d8880777944f6788e69cdc7c2f0a3",
+                        "content": "#### 월간 요금제\n\n월간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면, 다음 결제일에 새로운 멤버에 대한 비용이 포함되며, 지난 청구 주기에 추가한 멤버에 대한 일할 계산된 요금이 소급 적용됩니다.\n\n#### 연간 요금제\n\n연간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면 다음 달 요금제 시작일과 같은 일자에 청구서를 받게 되며, 아래 두 가지 비용이 포함됩니다.\n\n* 연간 요금제의 잔여기간 동안 신규 멤버 추가로 발생하는 금액\n* 신규 멤버가 워크스페이스에 참여하여 결제일 전까지의 기간만큼 일할 계산하여 소급 적용된 금액",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 15.35357398503006,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.4984636699935219,
+                            "latencyMs": 412
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.029877369007803793,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 11.078803274009472,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.45217817175015274,
+                            "latencyMs": 412
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3352,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:21a1e3032cdd",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "알림 확인하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "5935bd6cac37a70641c9249643eadc79823aca491dcc6b5dbd4da54db73fd962",
+                        "content": "좌측 사이드바 상단의 ‘알림’을 클릭하면, 워크스페이스에서 나에게 발생한 모든 알림을 확인할 수 있습니다.\n\n알림은 다음과 같은 경우에 자동으로 생성됩니다:\n\n* 작업 또는 미팅에 참여자/담당자로 추가되었을 때\n* 에디터나 댓글에서 @멘션 되었을 때\n* 구독 중인 페이지에서 변경이나 댓글이 추가되었을 때\n* 구독 중인 댓글에 답글이나 반응이 달렸을 때\n\n알림은 오입력이나 중복 발생을 방지하기 위해 약간의 시간차를 두고 발생합니다. 새로운 알림이 도착하면, 상단 알림 버튼 우측에 개수가 포함된 뱃지(❹) 형태로 표시됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029437229437229435,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 10.576759896948118,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.439842338275775,
+                            "latencyMs": 412
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 4983,
+                        "outputTokens": 100,
+                        "latencyMs": 2847,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC092",
+          "description": "후불 청구와 사용자 시트 구매 방식 기능 요청",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "2e0087d6-181f-4496-9a92-2723f6e381b8",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "멤버를 초대할 때 바로 결제하는 방식 대신 후불 청구 방식이나 사용자 시트를 미리 구매하는 기능을 제공할 수 있나요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "2e0087d6-181f-4496-9a92-2723f6e381b8",
+                "ragRunId": "fd9a3c6c-de7d-47aa-8ab8-6064f2dcf650",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "멤버를 초대할 때 바로 결제하는 방식 대신 후불 청구 방식이나 사용자 시트를 미리 구매하는 기능을 제공할 수 있나요?",
+                "resolvedQuery": "멤버를 초대할 때 바로 결제하는 방식 대신 후불 청구 방식이나 사용자 시트를 미리 구매하는 기능을 제공할 수 있나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 5006,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 51,
+                    "outputTokens": null,
+                    "latencyMs": 156,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 5180,
+                    "outputTokens": 176,
+                    "latencyMs": 4810,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "멤버를 초대할 때 바로 결제하는 방식 대신 후불 청구 방식이나 사용자 시트를 미리 구매하는 기능을 제공할 수 있나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "멤버를 초대할 때 바로 결제하는 방식 대신 후불 청구 방식이나 사용자 시트를 미리 구매하는 기능을 제공할 수 있나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3234,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:dd62a0b71715",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "257173081d1bcff0fd64c72f08ed19e0de6f533557ceaba7577d66258c913bbe",
+                        "content": "뤼이도의 요금은 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. 하나의 워크스페이스는 하나의 구독과 결제 정보를 가지게 됩니다.\n\n결제 후 멤버를 비활성화하면, 해당 인원만큼 유료 시트가 남게 됩니다. 해당 시트는 새 사용자를 초대할 때 사용할 수 있습니다.\n\n뤼이도의 결제는 월별 결제와 연간 결제 두 가지 주기를 지원합니다.\n\n**월별 결제**\n결제일은 최초 결제 시작일을 기준으로, 매달 동일하게 청구됩니다. (예: 3월 10일에 최초 결제가 시작되었다면, 이후 매달 10일에 결제)\n\n결제 기간 중 새로운 사용자를 추가하더라도 즉시 결제되지 않습니다. 대신 추가된 사용자의 사용 기간만큼, 다음 결제일에 소급 반영되어 청구됩니다.\n\n**연간 결제**\n결제일은 최초 결제일로부터 1년마다 자동 갱신되며, 연간 결제는 월별 요금 대비 20% 할인이 적용됩니다. (예: 2025년 3월 10일에 최초 결제가 시작되었다면, 이후 매년 3월 10일에 결제)\n\n중간에 새로운 사용자를 추가할 경우, 추가된 인원에 대한 금액이 다음 달 요금제 시작일에 계산되어 청구됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 27.470494123877796,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5257382567438457,
+                            "latencyMs": 170
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3232,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:6a09b6285b28",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "멤버 비활성화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "3c7ba56137fad745d3f659f2eec123126b1ce27eca49c41ffb7c46d977e00ac9",
+                        "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 13.18159554567441,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.4309383641978667,
+                            "latencyMs": 170
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3235,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:5e49b96fcb2e",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제 및 청구 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "fc84217e5bab3fc4c62dc9963134cef9c953a9fb1f07f6688ea883fadb5e0d8e",
+                        "content": "결제 관리를 위해서는 설정 페이지의 \\[워크스페이스 > 청구] 페이지에서 확인할 수 있습니다. 현재 워크스페이스의 요금제, 결제 정보, 이전 결제 내역을 확인할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03128054740957967,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 13.941160820222823,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.4157117365531968,
+                            "latencyMs": 170
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3237,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:c6dbd3a17dd8",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "워크스페이스에 멤버 추가하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "a93f12fb3de6ebca267444688f4e2eaab08d8880777944f6788e69cdc7c2f0a3",
+                        "content": "#### 월간 요금제\n\n월간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면, 다음 결제일에 새로운 멤버에 대한 비용이 포함되며, 지난 청구 주기에 추가한 멤버에 대한 일할 계산된 요금이 소급 적용됩니다.\n\n#### 연간 요금제\n\n연간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면 다음 달 요금제 시작일과 같은 일자에 청구서를 받게 되며, 아래 두 가지 비용이 포함됩니다.\n\n* 연간 요금제의 잔여기간 동안 신규 멤버 추가로 발생하는 금액\n* 신규 멤버가 워크스페이스에 참여하여 결제일 전까지의 기간만큼 일할 계산하여 소급 적용된 금액",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030834914611005692,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 8,
+                            "rawScore": 9.36059541976189,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.49395085452833665,
+                            "latencyMs": 170
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3236,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:18af4c7df7aa",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "구독 변경 또는 취소"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "d552e0ca80bf3da68c875b6056e8e2c56247b5a5ff887a97d6dd6243f336a854",
+                        "content": "워크스페이스 관리자는 요금제를 변경하거나 취소할 수 있습니다. 상위 요금제로 업그레이드할 경우에는 즉시 반영되며, 하위 요금제로 다운그레이드 하거나, 구독을 취소하는 경우 다음 구독 주기에 맞춰 적용됩니다. 만약, 월별 결제 주기를 사용하고 있다면 결제 월의 마지막 날에 적용이 되며, 연간 결제 주기를 사용하고 있다면 결제 연도 마지막 날에 적용됩니다.\n\n뤼이도는 구독 기간 중 구독 취소에 대한 환불을 제공하지 않습니다. 따라서 처음에는 월간 결제로 시작해 충분히 효용을 느낀 뒤 연간 결제로 전환하는 것을 권장합니다.\n\n구독을 취소하여 무료 요금제로 전환되더라도 워크스페이스는 삭제되지 않고 다음과 같이 유지됩니다:\n\n* 그 어떤 데이터도 삭제되지 않습니다.\n* 만약 200개가 넘는 작업이 생성되었다면, 더 이상 새로운 작업을 생성할 수 없습니다.\n* 만약 팀이 2개 이상이라면, 더 이상 새로운 팀을 생성할 수 없습니다.\n* 모든 워크스페이스 멤버는 관리자가 됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029418126757516764,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 9.652280238632592,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.4078091293184205,
+                            "latencyMs": 170
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 5180,
+                        "outputTokens": 176,
+                        "latencyMs": 4810,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC093",
+          "description": "관리자와 멤버 역할별 권한 범위 설명 요청",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "cdb2603d-f1c5-4d44-a35b-d294ec55ab8d",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "관리자와 멤버가 각각 할 수 있는 활동 범위는 어디에서 확인할 수 있나요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "cdb2603d-f1c5-4d44-a35b-d294ec55ab8d",
+                "ragRunId": "0bf5b57a-d5af-4da4-be7e-04ef1c111c71",
+                "answer": {
+                  "answerMarkdown": "워크스페이스의 **멤버 권한** 안내에서 관리자와 멤버의 활동 범위를 확인할 수 있습니다. 관리자는 워크스페이스의 모든 동작과 멤버·설정·모든 프로젝트·스프린트·팀을 관리할 수 있으며, 멤버는 워크스페이스 데이터를 확인하고 협업할 수 있지만 비공개 팀 확인과 워크스페이스 수준 설정 편집에는 제한이 있습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "멤버",
+                    "sectionPath": [
+                      "권한"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "관리자와 멤버가 각각 할 수 있는 활동 범위는 어디에서 확인할 수 있나요?",
+                "resolvedQuery": "관리자와 멤버가 각각 할 수 있는 활동 범위는 어디에서 확인할 수 있나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 7571,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 34,
+                    "outputTokens": null,
+                    "latencyMs": 155,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 7968,
+                    "outputTokens": 265,
+                    "latencyMs": 7363,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "멤버"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "관리자와 멤버가 각각 할 수 있는 활동 범위는 어디에서 확인할 수 있나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "관리자와 멤버가 각각 할 수 있는 활동 범위는 어디에서 확인할 수 있나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3231,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:a71a73e4ac34",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "7904fbb4987e17151ebf07a8ee4bd1543c378ff21eeb76314a0597ba94a1de17",
+                        "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 11.352129866328147,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5975363955934501,
+                            "latencyMs": 169
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031024531024531024,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 10.397092684311719,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.38824876117837626,
+                            "latencyMs": 169
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3230,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:dc7240487954",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "846aa225db6b21c0bcb70f94090ed47d8acead69e62aeba00e282185d8d8df9a",
+                        "content": "워크스페이스 멤버는 좌측 사이드바의 \\[워크스페이스 > 멤버] 또는 설정 페이지의 \\[워크스페이스 > 멤버] 페이지에서 확인할 수 있습니다. 해당 페이지에는 현재 활성화된 멤버와, 과거에 있었던 비활성화된 멤버가 모두 존재합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.030834914611005692,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 8,
+                            "rawScore": 8.012544357636417,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5046149448797784,
+                            "latencyMs": 169
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3279,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:fca726772b8f",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "최근 활동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "8b65787522a58183fa8d6a079c09fc7b1bb9d8f99e5f0779b46461fad412f093",
+                        "content": "누가 언제 작업을 생성했는지, 수정했는지, 팀 내 주요 변경 이력을 시간 순으로 확인할 수 있습니다. 이 기록을 통해 작업 진행 흐름을 추적하거나 이슈 발생 시 어떤 변경이 있었는지 쉽게 찾아볼 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030117753623188408,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 8.665688535286654,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.3760621232493302,
+                            "latencyMs": 169
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3243,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:26bbdd776a1e",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "4d4539e8b14b91e51d63fe24c71eb00ab812043bad06a5e7073815f72a1ebf67",
+                        "content": "#### 팀 생성 및 참여\n\n새로운 팀을 만들거나 기존 팀에 참여하려면, 설정 페이지의 \\[팀]에서 관리할 수 있습니다. 또는 설정 페이지의 좌측 사이드바 하단의 ‘팀 추가’ 버튼을 클릭하여 생성할 수도 있습니다. 단, 비공개 팀은 팀 관리자의 초대를 받아야 참여할 수 있습니다.\n\n팀의 생성 가능 개수는 워크스페이스의 요금제에 따라 제한이 있습니다.\n\n요금제: Free / 팀 개수: 2\n요금제: Pro / 팀 개수: 3\n요금제: Business / 팀 개수: 무제한\n요금제: Enterprise / 팀 개수: 무제한\n\n#### 팀 떠나기\n\n팀 멤버 설정 페이지에서 스스로를 비활성화하면, 팀에서 떠날 수 있습니다.\n\n#### 팀 삭제\n\n팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.02967032967032967,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 7.224937201869382,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.38831276988110575,
+                            "latencyMs": 169
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 7968,
+                        "outputTokens": 265,
+                        "latencyMs": 7363,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "관리자와 멤버가 각각 수행할 수 있는 활동 범위",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3231,
+                          "documentVersionId": 2415,
+                          "documentId": "567f0ce8042c",
+                          "sectionId": "567f0ce8042c:a71a73e4ac34",
+                          "documentTitle": "멤버",
+                          "sectionPath": [
+                            "멤버",
+                            "권한"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                          "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "워크스페이스의 **멤버 권한** 안내에서 관리자와 멤버의 활동 범위를 확인할 수 있습니다. 관리자는 워크스페이스의 모든 동작과 멤버·설정·모든 프로젝트·스프린트·팀을 관리할 수 있으며, 멤버는 워크스페이스 데이터를 확인하고 협업할 수 있지만 비공개 팀 확인과 워크스페이스 수준 설정 편집에는 제한이 있습니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "워크스페이스의 **멤버 권한** 안내에서 관리자와 멤버의 활동 범위를 확인할 수 있습니다. 관리자는 워크스페이스의 모든 동작과 멤버·설정·모든 프로젝트·스프린트·팀을 관리할 수 있으며, 멤버는 워크스페이스 데이터를 확인하고 협업할 수 있지만 비공개 팀 확인과 워크스페이스 수준 설정 편집에는 제한이 있습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    }
+  ]
+}
