@@ -12,9 +12,17 @@ from app.retrieval.models import RetrievalChunk
 
 
 class GenerationStatus(str, Enum):
-    """Generator가 판단하는 답변 가능 상태."""
+    """Writer가 판단하는 작성 가능 상태."""
 
     ANSWERABLE = "ANSWERABLE"
+    WITHHELD = "WITHHELD"
+
+
+class GenerationPlanningStatus(str, Enum):
+    """Source Planning이 판단하는 근거 활용 방식."""
+
+    ANSWERABLE = "ANSWERABLE"
+    RELATED_GUIDANCE = "RELATED_GUIDANCE"
     WITHHELD = "WITHHELD"
 
 
@@ -48,7 +56,7 @@ class GenerationEvidenceRequirement(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     information_unit: str = Field(min_length=1)
-    source_ids: List[str] = Field(min_length=1, max_length=5)
+    source_ids: List[str] = Field(min_length=1)
 
     @model_validator(mode="after")
     def validate_source_ids(self) -> "GenerationEvidenceRequirement":
@@ -62,40 +70,82 @@ class GenerationSourcePlan(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    status: GenerationStatus
+    status: GenerationPlanningStatus
     answer_type: GenerationAnswerType
     answer_scope: GenerationAnswerScope
-    evidence_requirements: List[GenerationEvidenceRequirement] = Field(
-        max_length=8
-    )
+    evidence_requirements: List[GenerationEvidenceRequirement]
+    optional_context: List[GenerationEvidenceRequirement]
+    unanswered_information: List[str]
+    related_guidance: List[GenerationEvidenceRequirement]
     withheld_reason: Optional[GenerationWithheldReason]
 
     @model_validator(mode="after")
     def validate_status_fields(self) -> "GenerationSourcePlan":
-        if self.status == GenerationStatus.ANSWERABLE:
+        self._validate_unanswered_information()
+
+        if self.status == GenerationPlanningStatus.ANSWERABLE:
             if not self.evidence_requirements:
                 raise ValueError("ANSWERABLE에는 정보 단위별 근거가 필요합니다.")
+            if self.unanswered_information or self.related_guidance:
+                raise ValueError(
+                    "ANSWERABLE에는 미확인 요구와 관련 안내를 "
+                    "사용할 수 없습니다."
+                )
             if self.withheld_reason is not None:
                 raise ValueError("ANSWERABLE에는 withheld_reason을 사용할 수 없습니다.")
-            if self.answer_type in (
-                GenerationAnswerType.DEFINITION,
-                GenerationAnswerType.FEATURE_SUMMARY,
-            ) and self.answer_scope == GenerationAnswerScope.SUMMARY:
-                if len(self.evidence_requirements) != 1:
-                    raise ValueError(
-                        "정의와 기능 요약 SUMMARY에는 정보 단위가 정확히 하나여야 합니다."
-                    )
-                if len(self.evidence_requirements[0].source_ids) != 1:
-                    raise ValueError(
-                        "정의와 기능 요약 SUMMARY에는 Source가 정확히 하나여야 합니다."
-                    )
             return self
 
-        if self.evidence_requirements:
-            raise ValueError("WITHHELD에는 정보 단위별 근거를 사용할 수 없습니다.")
+        if self.status == GenerationPlanningStatus.RELATED_GUIDANCE:
+            if self.evidence_requirements or self.optional_context:
+                raise ValueError(
+                    "RELATED_GUIDANCE에는 직접 근거와 선택적 배경을 "
+                    "사용할 수 없습니다."
+                )
+            if not self.unanswered_information:
+                raise ValueError(
+                    "RELATED_GUIDANCE에는 미확인 핵심 요구가 필요합니다."
+                )
+            if not self.related_guidance:
+                raise ValueError(
+                    "RELATED_GUIDANCE에는 근거 있는 관련 안내가 필요합니다."
+                )
+            if self.withheld_reason is not None:
+                raise ValueError(
+                    "RELATED_GUIDANCE에는 withheld_reason을 사용할 수 없습니다."
+                )
+            return self
+
+        if (
+            self.evidence_requirements
+            or self.optional_context
+            or self.related_guidance
+        ):
+            raise ValueError("WITHHELD에는 선택 Source를 사용할 수 없습니다.")
         if self.withheld_reason is None:
             raise ValueError("WITHHELD에는 withheld_reason이 필요합니다.")
+        if (
+            self.withheld_reason == GenerationWithheldReason.INSUFFICIENT_EVIDENCE
+            and not self.unanswered_information
+        ):
+            raise ValueError(
+                "INSUFFICIENT_EVIDENCE 보류에는 미확인 핵심 요구가 필요합니다."
+            )
+        if (
+            self.withheld_reason != GenerationWithheldReason.INSUFFICIENT_EVIDENCE
+            and self.unanswered_information
+        ):
+            raise ValueError(
+                "모호함·범위 밖 보류에는 미확인 요구를 기록하지 않습니다."
+            )
         return self
+
+    def _validate_unanswered_information(self) -> None:
+        if any(not item.strip() for item in self.unanswered_information):
+            raise ValueError("미확인 핵심 요구는 비어 있을 수 없습니다.")
+        if len(self.unanswered_information) != len(
+            set(self.unanswered_information)
+        ):
+            raise ValueError("미확인 핵심 요구는 중복될 수 없습니다.")
 
 
 class GenerationResult(BaseModel):
@@ -104,6 +154,7 @@ class GenerationResult(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     status: GenerationStatus
+    limitation_markdown: Optional[str]
     answer_markdown: Optional[str]
     withheld_reason: Optional[GenerationWithheldReason]
 
@@ -114,10 +165,17 @@ class GenerationResult(BaseModel):
         if self.status == GenerationStatus.ANSWERABLE:
             if self.answer_markdown is None or not self.answer_markdown.strip():
                 raise ValueError("ANSWERABLE에는 answer_markdown이 필요합니다.")
+            if (
+                self.limitation_markdown is not None
+                and not self.limitation_markdown.strip()
+            ):
+                raise ValueError("limitation_markdown은 빈 문자열일 수 없습니다.")
             if self.withheld_reason is not None:
                 raise ValueError("ANSWERABLE에는 withheld_reason을 사용할 수 없습니다.")
             return self
 
+        if self.limitation_markdown is not None:
+            raise ValueError("WITHHELD의 limitation_markdown은 null이어야 합니다.")
         if self.answer_markdown is not None:
             raise ValueError("WITHHELD의 answer_markdown은 null이어야 합니다.")
         if self.withheld_reason is None:

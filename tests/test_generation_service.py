@@ -34,6 +34,7 @@ from app.answering.models import (
     GenerationAnswerScope,
     GenerationCall,
     GenerationEvidenceRequirement,
+    GenerationPlanningStatus,
     GenerationResult,
     GenerationSourcePlan,
     GenerationStageTrace,
@@ -86,6 +87,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
             return _call(
                 GenerationResult(
                     status=GenerationStatus.WITHHELD,
+                    limitation_markdown=None,
                     answer_markdown=None,
                     withheld_reason=GenerationWithheldReason.OUT_OF_SCOPE,
                 )
@@ -112,6 +114,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.generator.generate_with_trace.return_value = _call(
             GenerationResult(
                 status=GenerationStatus.WITHHELD,
+                limitation_markdown=None,
                 answer_markdown=None,
                 withheld_reason=GenerationWithheldReason.OUT_OF_SCOPE,
             )
@@ -204,6 +207,141 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(result.withheld_reason)
         self.assertIsNone(result.error_code)
         self.assertIs(stage_trace, result.stage_trace)
+
+    async def test_completes_related_guidance_with_limitation_first(self) -> None:
+        results = [self._result(1), self._result(2)]
+        generated = GenerationResult(
+            status=GenerationStatus.ANSWERABLE,
+            limitation_markdown=(
+                "실제 결제 완료 여부는 이용가이드만으로 "
+                "확인할 수 없습니다."
+            ),
+            answer_markdown=(
+                "요금제와 결제 내역은 청구 설정에서 "
+                "확인할 수 있습니다. [SOURCE_1]"
+            ),
+            withheld_reason=None,
+        )
+        stage_trace = self._related_guidance_stage_trace(
+            results[1:],
+            generated,
+        )
+        self.generator.generate_with_trace.return_value = _call(
+            generated,
+            stage_trace,
+        )
+
+        result = await self.service.generate_answer("결제 완료됐어?", results)
+
+        self.assertEqual(FinalAnswerStatus.COMPLETED, result.status)
+        self.assertEqual(
+            "실제 결제 완료 여부는 이용가이드만으로 "
+            "확인할 수 없습니다.\n\n"
+            "요금제와 결제 내역은 청구 설정에서 "
+            "확인할 수 있습니다. [1]",
+            result.answer_markdown,
+        )
+        self.assertEqual(results[1].chunk.source_url, result.citations[0].source_url)
+
+    async def test_rejects_related_guidance_without_limitation(self) -> None:
+        results = [self._result(1)]
+        generated = self._answerable("관련 안내 [SOURCE_1]")
+        stage_trace = replace(
+            self._related_guidance_stage_trace(results, generated),
+            validation_regeneration_count=1,
+        )
+        self.generator.generate_with_trace.return_value = _call(
+            generated,
+            stage_trace,
+        )
+
+        result = await self.service.generate_answer("질문", results)
+
+        self.assertEqual(FinalAnswerStatus.WITHHELD, result.status)
+        self.assertEqual(
+            FinalWithheldReason.UNVERIFIABLE_ANSWER,
+            result.withheld_reason,
+        )
+        self.assertIn("미확인 범위 고지", result.stage_trace.validation_error)
+
+    async def test_rejects_citation_marker_in_related_guidance_limitation(
+        self,
+    ) -> None:
+        results = [self._result(1)]
+        generated = GenerationResult(
+            status=GenerationStatus.ANSWERABLE,
+            limitation_markdown="실제 상태는 확인할 수 없습니다. [SOURCE_1]",
+            answer_markdown="직접 확인할 위치입니다. [SOURCE_1]",
+            withheld_reason=None,
+        )
+        stage_trace = replace(
+            self._related_guidance_stage_trace(results, generated),
+            validation_regeneration_count=1,
+        )
+        self.generator.generate_with_trace.return_value = _call(
+            generated,
+            stage_trace,
+        )
+
+        result = await self.service.generate_answer("질문", results)
+
+        self.assertEqual(FinalAnswerStatus.WITHHELD, result.status)
+        self.assertEqual(
+            FinalWithheldReason.UNVERIFIABLE_ANSWER,
+            result.withheld_reason,
+        )
+        self.assertIn("citation marker", result.stage_trace.validation_error)
+
+    async def test_rejects_limitation_for_direct_answer(self) -> None:
+        results = [self._result(1)]
+        generated = GenerationResult(
+            status=GenerationStatus.ANSWERABLE,
+            limitation_markdown="일부는 확인할 수 없습니다.",
+            answer_markdown="직접 답변입니다. [SOURCE_1]",
+            withheld_reason=None,
+        )
+        stage_trace = replace(
+            self._stage_trace(results, generated),
+            validation_regeneration_count=1,
+        )
+        self.generator.generate_with_trace.return_value = _call(
+            generated,
+            stage_trace,
+        )
+
+        result = await self.service.generate_answer("질문", results)
+
+        self.assertEqual(FinalAnswerStatus.WITHHELD, result.status)
+        self.assertEqual(
+            FinalWithheldReason.UNVERIFIABLE_ANSWER,
+            result.withheld_reason,
+        )
+        self.assertIn("직접 답변", result.stage_trace.validation_error)
+
+    async def test_related_guidance_writer_may_withhold_without_regeneration(
+        self,
+    ) -> None:
+        results = [self._result(1)]
+        generated = GenerationResult(
+            status=GenerationStatus.WITHHELD,
+            limitation_markdown=None,
+            answer_markdown=None,
+            withheld_reason=GenerationWithheldReason.INSUFFICIENT_EVIDENCE,
+        )
+        stage_trace = self._related_guidance_stage_trace(results, generated)
+        self.generator.generate_with_trace.return_value = _call(
+            generated,
+            stage_trace,
+        )
+
+        result = await self.service.generate_answer("질문", results)
+
+        self.assertEqual(FinalAnswerStatus.WITHHELD, result.status)
+        self.assertEqual(
+            FinalWithheldReason.INSUFFICIENT_EVIDENCE,
+            result.withheld_reason,
+        )
+        self.generator.regenerate_answer_with_trace.assert_not_awaited()
 
     async def test_marks_citation_source_kind_by_canonical_uri_scheme(self) -> None:
         console = self._result(
@@ -393,6 +531,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         results = [self._result(1)]
         generated = GenerationResult(
             status=GenerationStatus.WITHHELD,
+            limitation_markdown=None,
             answer_markdown=None,
             withheld_reason=GenerationWithheldReason.INSUFFICIENT_EVIDENCE,
         )
@@ -438,6 +577,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         results = [self._result(1)]
         generated = GenerationResult(
             status=GenerationStatus.WITHHELD,
+            limitation_markdown=None,
             answer_markdown=None,
             withheld_reason=GenerationWithheldReason.INSUFFICIENT_EVIDENCE,
         )
@@ -477,6 +617,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         results = [self._result(1)]
         generated = GenerationResult(
             status=GenerationStatus.WITHHELD,
+            limitation_markdown=None,
             answer_markdown=None,
             withheld_reason=GenerationWithheldReason.INSUFFICIENT_EVIDENCE,
         )
@@ -738,6 +879,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
                 self.generator.generate_with_trace.return_value = _call(
                     GenerationResult(
                         status=GenerationStatus.WITHHELD,
+                        limitation_markdown=None,
                         answer_markdown=None,
                         withheld_reason=reason,
                     )
@@ -848,6 +990,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.generator.generate_with_trace.return_value = _call(
             GenerationResult(
                 status=GenerationStatus.WITHHELD,
+                limitation_markdown=None,
                 answer_markdown=None,
                 withheld_reason=GenerationWithheldReason.OUT_OF_SCOPE,
             )
@@ -868,6 +1011,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
     def _answerable(answer_markdown: str) -> GenerationResult:
         return GenerationResult(
             status=GenerationStatus.ANSWERABLE,
+            limitation_markdown=None,
             answer_markdown=answer_markdown,
             withheld_reason=None,
         )
@@ -908,7 +1052,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         sources = tuple(build_generation_context(results))
         return GenerationStageTrace(
             source_plan=GenerationSourcePlan(
-                status=GenerationStatus.ANSWERABLE,
+                status=GenerationPlanningStatus.ANSWERABLE,
                 answer_type=GenerationAnswerType.PROCEDURE,
                 answer_scope=(
                     GenerationAnswerScope.SUMMARY
@@ -918,6 +1062,37 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
                 evidence_requirements=[
                     GenerationEvidenceRequirement(
                         information_unit="답변 정보",
+                        source_ids=[source.source_id for source in sources],
+                    )
+                ],
+                optional_context=[],
+                unanswered_information=[],
+                related_guidance=[],
+                withheld_reason=None,
+            ),
+            selected_sources=sources,
+            pre_validation_result=generated,
+            planning_attempt_count=1,
+            answer_attempt_count=1,
+        )
+
+    @staticmethod
+    def _related_guidance_stage_trace(
+        results: list[HybridRetrievalResult],
+        generated: GenerationResult,
+    ) -> GenerationStageTrace:
+        sources = tuple(build_generation_context(results))
+        return GenerationStageTrace(
+            source_plan=GenerationSourcePlan(
+                status=GenerationPlanningStatus.RELATED_GUIDANCE,
+                answer_type=GenerationAnswerType.GENERAL,
+                answer_scope=GenerationAnswerScope.SUMMARY,
+                evidence_requirements=[],
+                optional_context=[],
+                unanswered_information=["실제 처리 상태"],
+                related_guidance=[
+                    GenerationEvidenceRequirement(
+                        information_unit="직접 확인할 위치",
                         source_ids=[source.source_id for source in sources],
                     )
                 ],

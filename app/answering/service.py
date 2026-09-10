@@ -24,6 +24,9 @@ from app.answering.models import (
     GenerationAnswerType,
     GenerationCall,
     GenerationContextSource,
+    GenerationPlanningStatus,
+    GenerationResult,
+    GenerationSourcePlan,
     GenerationStageTrace,
     GenerationStatus,
     ValidatedAnswer,
@@ -228,6 +231,50 @@ def validate_citations(
     )
 
 
+def validate_generation_result(
+    result: GenerationResult,
+    plan: Optional[GenerationSourcePlan],
+    sources: Sequence[GenerationContextSource],
+) -> ValidatedAnswer:
+    """Planner 상태에 맞는 Writer 구조와 Citation을 검증한다."""
+
+    limitation = result.limitation_markdown
+    if plan is None:
+        if limitation is not None:
+            raise UnverifiableAnswerError(
+                "Source Plan 없이 미확인 고지가 생성됐습니다."
+            )
+    elif plan.status == GenerationPlanningStatus.ANSWERABLE:
+        if limitation is not None:
+            raise UnverifiableAnswerError(
+                "직접 답변에는 미확인 고지를 사용할 수 없습니다."
+            )
+    elif plan.status == GenerationPlanningStatus.RELATED_GUIDANCE:
+        if limitation is None or not limitation.strip():
+            raise UnverifiableAnswerError(
+                "관련 안내에는 미확인 범위 고지가 필요합니다."
+            )
+        if SOURCE_MARKER_PATTERN.search(limitation):
+            raise UnverifiableAnswerError(
+                "미확인 고지에는 citation marker를 사용할 수 없습니다."
+            )
+        _validate_answer_content(limitation)
+    else:
+        raise UnverifiableAnswerError(
+            "WITHHELD Source Plan에서 답변이 생성됐습니다."
+        )
+
+    validated = validate_citations(result.answer_markdown, sources)
+    if limitation is None:
+        return validated
+    return ValidatedAnswer(
+        answer_markdown=(
+            f"{limitation.strip()}\n\n{validated.answer_markdown}"
+        ),
+        citations=validated.citations,
+    )
+
+
 def _withheld_result(
     reason: FinalWithheldReason,
     model_call: Optional[ModelCallTrace] = None,
@@ -374,7 +421,7 @@ class GenerationService:
         if (
             generation_result.status == GenerationStatus.WITHHELD
             and source_plan is not None
-            and source_plan.status == GenerationStatus.ANSWERABLE
+            and source_plan.status == GenerationPlanningStatus.ANSWERABLE
             and source_plan.answer_type != GenerationAnswerType.PROCEDURE
         ):
             mismatch_error = UnverifiableAnswerError(
@@ -424,8 +471,9 @@ class GenerationService:
             await on_progress_stage(ProgressStage.VALIDATING)
 
         try:
-            validated_answer = validate_citations(
-                generation_result.answer_markdown,
+            validated_answer = validate_generation_result(
+                generation_result,
+                source_plan,
                 (
                     call.stage_trace.selected_sources
                     if call.stage_trace is not None
@@ -478,8 +526,9 @@ class GenerationService:
                 )
 
             try:
-                validated_answer = validate_citations(
-                    regenerated_result.answer_markdown,
+                validated_answer = validate_generation_result(
+                    regenerated_result,
+                    regeneration_stage_trace.source_plan,
                     regeneration_stage_trace.selected_sources,
                 )
             except UnverifiableAnswerError as retry_error:

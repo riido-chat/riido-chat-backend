@@ -474,6 +474,27 @@ def summarize_runs(runs: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     execution_error_count = sum(
         _has_execution_error(result) for result in failed_results
     )
+    planning_status_turn_counts = {
+        status: 0
+        for status in ("ANSWERABLE", "RELATED_GUIDANCE", "WITHHELD")
+    }
+    for result in case_results:
+        for turn in result.get("turns", []):
+            generation = (
+                (turn.get("db") or {})
+                .get("stageTrace", {})
+                .get("generation", {})
+            )
+            planning_output = generation.get("planningOutput")
+            if isinstance(planning_output, dict) and "value" in planning_output:
+                planning_output = planning_output["value"]
+            status = (
+                planning_output.get("status")
+                if isinstance(planning_output, dict)
+                else None
+            )
+            if status in planning_status_turn_counts:
+                planning_status_turn_counts[status] += 1
     return {
         "repetitionCount": len(runs),
         "uniqueCaseCount": len(per_case),
@@ -484,6 +505,7 @@ def summarize_runs(runs: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
         "criteriaMismatchCaseExecutionCount": (
             len(failed_results) - execution_error_count
         ),
+        "planningStatusTurnCounts": planning_status_turn_counts,
         "perCase": list(per_case.values()),
         "perMode": list(per_mode.values()),
     }
