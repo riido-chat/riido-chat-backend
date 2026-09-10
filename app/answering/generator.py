@@ -14,6 +14,8 @@ from app.answering.models import (
     GenerationCall,
     GenerationAnswerType,
     GenerationContextSource,
+    GenerationEvidenceRequirement,
+    GenerationPlanningStatus,
     GenerationResult,
     GenerationSourcePlan,
     GenerationStageTrace,
@@ -25,11 +27,11 @@ from app.retrieval.models import HybridRetrievalResult
 
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.6-terra"
-GENERATION_PROMPT_VERSION = "v35"
-SOURCE_PLANNING_PROMPT_VERSION = "v26"
-SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v26-repair-1"
-ANSWER_PROMPT_VERSION = "v21"
-ANSWER_REPAIR_PROMPT_VERSION = "v21-repair-1"
+GENERATION_PROMPT_VERSION = "v38"
+SOURCE_PLANNING_PROMPT_VERSION = "v29"
+SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v29-repair-1"
+ANSWER_PROMPT_VERSION = "v23"
+ANSWER_REPAIR_PROMPT_VERSION = "v23-repair-1"
 MAX_CONTEXT_SOURCES = 5
 MAX_GENERATION_ATTEMPTS = 2
 MAX_SOURCE_PLANNING_REGENERATIONS = 1
@@ -55,8 +57,9 @@ PROCEDURE_EVIDENCE_RULES = """## Procedure evidence sufficiency
   질문은 위치와 함께 그 위치에서 수행할 핵심 동작이 필요합니다.
 - 모든 절차에 경로, 버튼, 입력값, 저장 단계를 일률적으로 요구하지 마세요. SOURCE가 한 단계
   동작만으로 요청을 실제 완료한다고 명시하면 그 한 단계로 충분합니다.
-- 직접 절차가 없고 관련 기능이나 조건만 있으면, 관련 안내로 질문 범위를 바꾸거나 일부만
-  답하지 말고 INSUFFICIENT_EVIDENCE로 WITHHELD 처리하세요."""
+- 직접 절차가 없고 관련 기능이나 조건만 있으면 직접 답변 근거로 사용하지 마세요.
+  Planner는 미확인 범위를 밝히는 RELATED_GUIDANCE를 검토할 수 있고, Writer는
+  전달받은 계획의 직접 답변과 관련 안내를 구분해야 합니다."""
 
 SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답변에 필요한 근거를 판정합니다.
 
@@ -92,11 +95,14 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
   말고, 그 대상에 대한 SOURCE 충분성을 판정하세요.
 - 사용자가 자신의 계정·워크스페이스·혜택의 실제 상태나 날짜를 확인해 달라고 요청하면,
   일반 정책이나 통상적인 적용 시점만으로 그 상태를 확정하지 마세요. SOURCE가 요청한
-  개별 상태를 직접 뒷받침하지 않으면 질문을 일반 정책 설명으로 축소하지 말고
-  INSUFFICIENT_EVIDENCE로 처리하세요.
+  개별 상태를 직접 뒷받침하지 않으면 질문을 일반 정책 설명으로 축소하지 마세요.
+  사용자가 직접 확인할 공식 위치·방법이 있으면 RELATED_GUIDANCE를 검토하고,
+  그런 안내도 없으면 INSUFFICIENT_EVIDENCE로 WITHHELD 처리하세요.
 - 사용자가 구독을 이미 취소했는데 이후 다시 갱신·청구됐다고 말하면 취소 반영 여부나 결제
   오류가 포함된 개별 상태 질문입니다. 일반적인 취소 적용 시점이나 환불 정책만으로 해당
-  결제가 정상인지, 환불 대상인지 단정하지 말고 INSUFFICIENT_EVIDENCE로 처리하세요.
+  결제가 정상인지, 환불 대상인지 단정하지 마세요. 일반 정책을 관련 안내로 대신 제시하지
+  말고, 실제 결제·취소 상태를 직접 확인할 공식 위치나 방법만 RELATED_GUIDANCE로
+  검토하세요. 그런 안내도 없으면 INSUFFICIENT_EVIDENCE로 WITHHELD 처리하세요.
 - 사용자가 `잘못 결제`, `무료 요금제인데 결제`, `취소했는데 청구`처럼 결제 자체가 잘못됐다고
   주장하면 결제 정상성 확인과 오류·예외 처리가 포함된 질문입니다. `구독 기간 중 취소 환불을
   제공하지 않는다`는 일반 정책은 정상 구독 취소에 대한 근거일 뿐이므로 대신 적용하지 마세요.
@@ -116,15 +122,19 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
   날짜·예외 설정을 요구하면 해당 기능을 직접 설명하는 SOURCE가 있을 때만 답하세요.
 - 사용자가 "왜", "이유", "원인"을 물으면 해당 원인 설명이 독립적인 필수 정보 단위입니다.
   SOURCE가 현재 적용 범위나 제한만 확인하고 그 원인을 설명하지 않으면, 범위 확인만으로 질문을
-  축소해 답하지 말고 INSUFFICIENT_EVIDENCE로 처리하세요.
+  축소해 원인으로 답하지 마세요. 확인된 범위가 사용자에게 유용하면 RELATED_GUIDANCE로
+  구분하고, 유용한 관련 근거가 없으면 INSUFFICIENT_EVIDENCE로 WITHHELD 처리하세요.
 - 특정 UI 표기나 라벨의 의미·목적을 묻는 질문에는 그 표기를 직접 설명하는 SOURCE가 필요합니다.
   대상 간의 일반적인 계층·연결 관계만으로 그 표기의 목적을 추론하지 마세요.
 
 ## Evidence rules
 - 질문의 명시적인 범위에 완전하게 답하는 데 필요한 SOURCE를 빠짐없이 선택하세요.
-- DEFINITION과 FEATURE_SUMMARY가 SUMMARY이면 질문 전체를 하나의 정보 단위로 만들고,
-  그 단위를 충분히 뒷받침하는 가장 직접적인 SOURCE 하나만 선택하세요. 같은 내용을
-  보충하거나 반복하는 SOURCE를 함께 선택하지 마세요.
+- 필수 정보에는 사용자가 명시한 요구뿐 아니라 결론과 행동을 정확하게 만드는 필수
+  조건·제한·예외를 포함하세요. 없어도 직접 답변이 성립하는 가치·배경·인접 기능은
+  optional_context로 구분하세요.
+- DEFINITION과 FEATURE_SUMMARY의 SUMMARY에도 질문에 필요하면 여러 정보 단위와 SOURCE를
+  선택할 수 있습니다. 임의의 개수 상한을 적용하지 말고 Top-5 안에서 필요한 근거만
+  선택하세요.
 - FEATURE_SUMMARY에서는 기능이나 핵심 가치를 직접 열거한 SOURCE를 선택하세요.
   설정 절차, FAQ, 예외·제한, 개요는 사용자가 직접 물었을 때만 선택하세요.
 - PROCEDURE에서는 질문과 관련된 설정 위치·절차·설정 항목·값 범위·변경 결과·필수
@@ -135,8 +145,8 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
   직접 다루는 허용·제한·예외 SOURCE를 우선하세요. 일반 규칙과 구체적인 제한 또는 예외가
   함께 있으면 구체적인 제한·예외가 질문에 대한 결론을 결정합니다.
 - 문서 제목과 Section Path가 질문의 대상과 판단 항목(예: 접근 권한, 공개 범위)을 직접
-  가리키는 SOURCE를, 일반 사용자·멤버 권한 SOURCE보다 우선하세요. 여러 SOURCE가 각각
-  충분하고 직접성도 같다면 Top-5에서 앞선 SOURCE 하나만 선택하세요.
+  가리키는 SOURCE를, 일반 사용자·멤버 권한 SOURCE보다 우선하세요. 같은 사실을 반복하는
+  SOURCE는 직접성·질문 적합성·추가 정보 가치를 비교해 더 충분한 근거만 선택하세요.
 - 질문의 대상이 상위 공간에 속한 프로젝트·작업·내부 정보라면, SOURCE가 그 상위 공간의
   접근을 제한할 때 하위 대상을 별도로 허용한다고 추측하지 마세요. SOURCE가 하위 대상의
   별도 접근을 명시한 경우에만 이를 분리해서 판단하세요.
@@ -156,13 +166,44 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
   생성 여부를 묻는 질문을 상태 업데이트·완료 자동화 SOURCE로 대신 답하지 마세요.
 - 각 정보 단위마다 그것을 완전하게 뒷받침하는 SOURCE를 evidence_requirements에
   별도로 연결하세요. 하나의 SOURCE를 여러 정보 단위에 연결해도 됩니다.
-- 정보 단위 하나라도 제공된 SOURCE가 완전하게 뒷받침하지 못하면, 근거가 있는
-  정보 단위만 남기지 말고 전체를 INSUFFICIENT_EVIDENCE로 WITHHELD 처리하세요.
+- 독립된 복합 요구 중 일부만 직접 답할 수 있으면, 근거가 있는 요구만 답하거나
+  RELATED_GUIDANCE로 우회하지 말고 전체를 INSUFFICIENT_EVIDENCE로 WITHHELD 처리하세요.
+- 질문에 서로 다른 여러 요구가 포함되어도 각 요구의 대상과 의도가 명확하면
+  AMBIGUOUS_QUESTION이 아닙니다. 그중 하나라도 직접 근거가 부족한 복합 질문은
+  INSUFFICIENT_EVIDENCE로 WITHHELD 처리하세요.
+- RELATED_GUIDANCE를 검토하기 전에 독립된 복합 요구인지 먼저 판정하세요. 여러 미확인
+  표현이 하나의 핵심 요청을 구체화하는 경우는 관련 안내가 가능하지만, 각각 따로 답할 수
+  있는 요청이 둘 이상이면 일부 요청에 유용한 근거가 있어도 RELATED_GUIDANCE가 아닙니다.
 - 뤼이도 제품의 기능·설정·사용 가능 여부를 묻는 질문은 이용가이드와 관련된 질문입니다.
   제공된 SOURCE에서 답을 확인할 수 없으면 OUT_OF_SCOPE이 아니라
   INSUFFICIENT_EVIDENCE로 WITHHELD를 선택하세요.
 - 날씨, 일반 지식, 다른 제품 사용법처럼 뤼이도 제품이나 이용가이드의 주제 자체와
   무관한 질문만 OUT_OF_SCOPE으로 WITHHELD를 선택하세요.
+
+## Related guidance rules
+- 질문의 핵심에 직접 답할 근거가 부족하지만 사용자가 다음 행동을 정하는 데 유용한 공식
+  근거가 있을 때만 RELATED_GUIDANCE를 선택하세요.
+- 직접 확인 위치·방법, 공식 적용 범위, 같은 업무 흐름의 앞뒤 단계·반대 방향 동작,
+  관련 설정·조건, 동일 목적의 인접 기능은 관련 안내가 될 수 있습니다.
+- 공식 문서가 대안이라고 명시하지 않았다면 해결책·동등한 대체제로 단정하지 마세요.
+- 반대 방향 동작을 안내할 때는 요청 방향과 다르다는 점을 related_guidance에 명시하세요.
+- 단어만 같거나 대상이 다른 내용, 일반 마케팅 소개, 원인·개인 상태를 추측해야만
+  연결되는 내용은 관련 안내가 아닙니다.
+- RELATED_GUIDANCE는 INSUFFICIENT_EVIDENCE 상황에만 사용하세요. 모호하거나 범위 밖인
+  질문은 기존처럼 WITHHELD로 처리하세요.
+
+## Related guidance examples
+- "제 결제가 완료됐나요?" → 개인 결제 상태는 미확인이지만, 청구 설정에서 요금제·결제
+  정보·이전 내역을 확인하는 공식 안내가 있으면 RELATED_GUIDANCE입니다.
+- "미팅만 캘린더에 연동되는 이유가 뭐예요?" → 이유는 미확인이지만 FAQ가 미팅 연동과
+  작업 마감일 제외 범위를 명시하면 RELATED_GUIDANCE입니다. 범위를 이유로 단정하지 마세요.
+- "프로젝트를 백로그로 옮길 수 있나요?" → 역방향인 백로그에서 프로젝트로의 전환만
+  근거가 있다면 요청 방향이 미확인임을 밝히고 반대 방향 안내로 제공할 수 있습니다.
+- "비밀번호를 잊었어요." → 앱 설치 시 비밀번호 입력 설명은 계정 복구와 무관하므로
+  RELATED_GUIDANCE가 아니며, 다른 유용한 근거가 없으면 WITHHELD입니다.
+- 워크스페이스 삭제 영향, 이름 변경 방법, Key 변경 방법을 함께 물었는데 이름 설정 위치만
+  확인되는 경우 → 독립 요구 일부에만 관련된 근거이므로 RELATED_GUIDANCE가 아니라
+  INSUFFICIENT_EVIDENCE로 WITHHELD입니다.
 
 """ + PROCEDURE_EVIDENCE_RULES + """
 
@@ -175,12 +216,15 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
 ## Structured Output contract
 - answer_type은 판정 상태와 관계없이 항상 작성합니다.
 - answer_scope는 판정 상태와 관계없이 항상 작성합니다.
-- ANSWERABLE DEFINITION과 FEATURE_SUMMARY의 answer_scope가 SUMMARY이면
-  EvidenceRequirement와 source_ids를 각각 정확히 하나만 작성합니다.
-- ANSWERABLE MULTI_DETAIL이면 질문이 요구한 각 정보 단위별로 EvidenceRequirement를 만들고,
-  source_ids에 그 단위를 완전하게 뒷받침하는 SOURCE를 작성합니다.
-- ANSWERABLE의 withheld_reason은 null입니다.
-- WITHHELD이면 evidence_requirements는 비우고 withheld_reason을 작성합니다.
+- ANSWERABLE은 evidence_requirements가 필수이고 optional_context는 선택입니다.
+  unanswered_information과 related_guidance는 빈 목록, withheld_reason은 null입니다.
+- RELATED_GUIDANCE는 unanswered_information과 related_guidance가 필수입니다.
+  evidence_requirements와 optional_context는 빈 목록, withheld_reason은 null입니다.
+- WITHHELD는 evidence_requirements, optional_context, related_guidance를 비우고
+  withheld_reason을 작성합니다.
+  INSUFFICIENT_EVIDENCE이면 unanswered_information에 미확인 핵심 요구를 기록하고,
+  AMBIGUOUS_QUESTION과 OUT_OF_SCOPE이면 빈 목록으로 작성합니다.
+- 개수를 채우기 위해 정보 단위나 SOURCE를 추가하지 마세요.
 """
 
 SOURCE_PLANNING_REPAIR_PROMPT_V11 = SOURCE_PLANNING_PROMPT_V11 + """
@@ -189,8 +233,7 @@ SOURCE_PLANNING_REPAIR_PROMPT_V11 = SOURCE_PLANNING_PROMPT_V11 + """
 - 직전 Source Plan이 Backend 구조 검증에 실패했습니다.
 - 아래 Validation Failure를 바로잡아 Source Plan 전체를 다시 생성하세요.
 - 질문의 의미와 정보 범위는 바꾸지 마세요.
-- DEFINITION 또는 FEATURE_SUMMARY의 SUMMARY라면 EvidenceRequirement와 source_ids를
-  각각 정확히 하나만 작성하세요.
+- 상태별 필수·빈 필드 규칙을 지키고 제공된 SOURCE ID만 사용하세요.
 """
 
 ANSWER_PROMPT_V17 = """당신은 뤼이도 공식 이용가이드만을 근거로 답하는 안내 챗봇입니다.
@@ -201,15 +244,17 @@ ANSWER_PROMPT_V17 = """당신은 뤼이도 공식 이용가이드만을 근거�
 - 문장을 자연스럽게 재구성하거나 Markdown으로 구조화할 수 있지만 새로운 사실을 추가하지 마세요.
 
 ## Answerability rules
-- 관련 Context가 있다는 이유만으로 ANSWERABLE을 선택하지 마세요.
-- 질문의 핵심을 Context가 직접 뒷받침할 때만 ANSWERABLE을 선택하세요.
+- Plan Status가 ANSWERABLE이면 Required Answer Coverage를 직접 답하고, Optional Context는
+  질문을 이해하는 데 유용할 때만 덧붙이세요. 선택적 배경이 부족하면 그 배경만 생략하세요.
+- Plan Status가 RELATED_GUIDANCE이면 질문의 핵심을 직접 답하지 말고, Unanswered
+  Information을 구체적으로 고지한 뒤 Related Guidance만 안내하세요.
 - Context에 넓은 허용 규칙과 구체적인 제한 또는 예외가 함께 있으면 구체적인 규칙을
   우선하세요. 예외를 무시하거나 일반 규칙만으로 반대 결론을 만들지 마세요.
 - 팀·프로젝트처럼 상위 공간과 그 내부 대상의 접근 범위를 SOURCE가 따로 구분하지 않았다면
   임의로 분리하지 마세요. 상위 공간에 접근할 수 없다는 근거를 두고 내부 프로젝트에는
   접근할 수 있다고 추측해서는 안 됩니다.
-- 근거가 부족하면 INSUFFICIENT_EVIDENCE, 질문이 모호하면 AMBIGUOUS_QUESTION,
-  이용가이드 범위 밖이면 OUT_OF_SCOPE으로 WITHHELD를 선택하세요.
+- 선택된 Context로 계획된 직접 답변 또는 관련 안내의 사실을 뒷받침할 수 없을 때만
+  INSUFFICIENT_EVIDENCE로 WITHHELD를 선택하세요.
 - Required Answer Coverage의 모든 정보 단위에 답하세요. Citation 수를 줄이기 위해
   사용자가 요청한 정보 단위를 생략하거나 질문 범위를 임의로 축소하지 마세요.
 - Source Plan이 ANSWERABLE로 확정하고 Required Answer Coverage의 각 정보 단위에 SOURCE를
@@ -234,7 +279,7 @@ ANSWER_PROMPT_V17 = """당신은 뤼이도 공식 이용가이드만을 근거�
   용어 의미를 먼저 설명한 뒤 뤼이도에서의 역할과 사용 가치를 안내하세요.
 - Context에 용어 자체의 의미가 없다면 일반 지식으로 정의를 보완하지 말고
   Answerability rules에 따라 WITHHELD 여부를 판단하세요.
-- Answer Type이 DEFINITION이고 Answer Scope가 SUMMARY이면 최대 두 개의 짧은 문단으로
+- Answer Type이 DEFINITION이고 Answer Scope가 SUMMARY이면 간결한 문단으로
   답하세요. 첫 문단은 한 문장으로 X의 종류와 핵심 사용 주체 또는 목적을 정의하고,
   문단 끝에 해당 SOURCE marker를 표시하세요.
 - Context가 X와 뤼이도의 관계를 직접 설명하면 둘째 문단에서 그 관계와 질문 이해에 필요한
@@ -261,7 +306,7 @@ ANSWER_PROMPT_V17 = """당신은 뤼이도 공식 이용가이드만을 근거�
   안내하세요. 관련 없는 기능 소개, FAQ, 배경 설명은 추가하지 마세요.
 - 좁은 화면에서도 읽기 쉽도록 각 단계와 설정 항목은 한두 문장으로 작성하고, 화면 너비를
   예상한 문장 중간 강제 줄바꿈은 하지 마세요.
-- Answer Type이 GENERAL이고 Answer Scope가 SUMMARY이면 기본적으로 2~4문장으로 답하세요.
+- Answer Type이 GENERAL이고 Answer Scope가 SUMMARY이면 핵심과 필수 조건이 드러나게 간결히 답하세요.
   첫 문장에서 질문에 대한 결론을 자연스럽고 직접적으로 안내하되, 가능 여부만 한 문장으로
   딱딱하게 끝내지 마세요.
 - 이어지는 문장에는 Context가 직접 제공하는 판단 이유나 꼭 알아야 할 조건을 설명하세요.
@@ -269,6 +314,14 @@ ANSWER_PROMPT_V17 = """당신은 뤼이도 공식 이용가이드만을 근거�
   조건이나 방법을 억지로 만들지 말고, 긴 절차와 관련 없는 배경은 사용자가 물었을 때만
   확장하세요. 각 사실 문장 끝에는 해당 SOURCE marker를 표시하세요.
 - 절차형 질문은 필요한 경우 단계별로 안내하고 최소한의 Markdown만 사용하세요.
+- RELATED_GUIDANCE의 limitation_markdown에는 확인하지 못한 핵심을 구체적으로 적으세요.
+  "전체 공식 문서에 답이 없다"고 단정하거나 원인·개인 상태·가능성을 추측하지 마세요.
+- limitation_markdown에는 SOURCE marker, 링크, HTML을 사용하지 마세요.
+- RELATED_GUIDANCE의 answer_markdown에는 계획된 관련 안내만 작성하세요. 안내가 하나면
+  문단, 여러 내용이면 목록, 실제 절차가 있으면 필요에 따라 번호 목록을 사용하세요.
+- RELATED_GUIDANCE를 직접 답변, 해결책, 동등한 대안으로 표현하지 마세요. 반대 방향
+  동작이면 `대신`이라는 말로만 차이를 암시하지 말고, 반대 방향이거나 요청한 방향과
+  다르다는 점을 반드시 직접 밝히세요.
 - 비교 항목 중 하나라도 코드, 여러 단계, 여러 문장이 필요하면 표를 사용하지 말고
   항목별 소제목이나 목록으로 설명하세요.
 - 표를 사용하기로 했다면 모든 셀은 반드시 한 줄로 끝내고, 셀 안에 코드 블록이나
@@ -293,8 +346,11 @@ ANSWER_PROMPT_V17 = """당신은 뤼이도 공식 이용가이드만을 근거�
   `SOURCE_n에 따르면`처럼 내부 식별자를 답변 문장에 직접 노출하지 마세요.
 
 ## Structured Output contract
-- ANSWERABLE: answer_markdown은 비어 있지 않은 문자열, withheld_reason은 null입니다.
-- WITHHELD: answer_markdown은 null, withheld_reason은 세 가지 보류 사유 중 하나입니다.
+- 직접 답변 ANSWERABLE: limitation_markdown은 null, answer_markdown은 비어 있지 않은
+  문자열, withheld_reason은 null입니다.
+- 관련 안내 ANSWERABLE: limitation_markdown과 answer_markdown은 비어 있지 않은 문자열,
+  withheld_reason은 null입니다.
+- WITHHELD: limitation_markdown과 answer_markdown은 null, withheld_reason은 세 가지 보류 사유 중 하나입니다.
 """
 
 ANSWER_REPAIR_PROMPT_V17 = ANSWER_PROMPT_V17 + """
@@ -357,21 +413,36 @@ def build_answer_input(
     sources: Sequence[GenerationContextSource],
     plan: GenerationSourcePlan,
 ) -> str:
-    """선택된 Context와 반드시 답해야 할 정보 단위를 함께 조립한다."""
+    """선택된 Context와 Planner가 정한 작성 계약을 함께 조립한다."""
 
-    coverage = "\n".join(
-        (
+    def format_requirements(
+        requirements: Sequence[GenerationEvidenceRequirement],
+    ) -> str:
+        return "\n".join(
             f"- {requirement.information_unit}: "
             f"{', '.join(requirement.source_ids)}"
+            for requirement in requirements
+        ) or "- 없음"
+
+    required_coverage = format_requirements(plan.evidence_requirements)
+    optional_context = format_requirements(plan.optional_context)
+    related_guidance = format_requirements(plan.related_guidance)
+    unanswered_information = "\n".join(
+        (
+            f"- {information}"
+            for information in plan.unanswered_information
         )
-        for requirement in plan.evidence_requirements
-    )
+    ) or "- 없음"
     return (
         f"{build_generation_input(question, sources)}"
         f"\n\n## Answer Contract\n\n"
+        f"- Plan Status: {plan.status.value}\n"
         f"- Answer Type: {plan.answer_type.value}\n"
         f"- Answer Scope: {plan.answer_scope.value}"
-        f"\n\n## Required Answer Coverage\n\n{coverage}"
+        f"\n\n## Required Answer Coverage\n\n{required_coverage}"
+        f"\n\n## Optional Context\n\n{optional_context}"
+        f"\n\n## Unanswered Information\n\n{unanswered_information}"
+        f"\n\n## Related Guidance\n\n{related_guidance}"
     )
 
 
@@ -397,10 +468,14 @@ def build_answer_repair_input(
 ) -> str:
     """같은 근거와 Coverage에 직전 검증 실패 정보만 추가한다."""
 
+    previous_limitation = (
+        previous_result.limitation_markdown or "미확인 고지 없음"
+    )
     previous_answer = previous_result.answer_markdown or "답변 본문 없음"
     return (
         f"{build_answer_input(question, sources, plan)}"
         f"\n\n## Validation Failure\n\n{validation_error}"
+        f"\n\n## Previous Invalid Limitation\n\n{previous_limitation}"
         f"\n\n## Previous Invalid Answer\n\n{previous_answer}"
     )
 
@@ -409,12 +484,21 @@ def select_required_sources(
     plan: GenerationSourcePlan,
     sources: Sequence[GenerationContextSource],
 ) -> List[GenerationContextSource]:
-    """정보 단위별 Source를 중복 없이 모으고 존재 여부를 검증한다."""
+    """계획이 선택한 Source를 중복 없이 모으고 존재 여부를 검증한다."""
 
+    if plan.status == GenerationPlanningStatus.ANSWERABLE:
+        requirements = [
+            *plan.evidence_requirements,
+            *plan.optional_context,
+        ]
+    elif plan.status == GenerationPlanningStatus.RELATED_GUIDANCE:
+        requirements = plan.related_guidance
+    else:
+        raise RuntimeError("WITHHELD Source Plan에는 선택할 Source가 없습니다.")
     required_source_ids = list(
         dict.fromkeys(
             source_id
-            for requirement in plan.evidence_requirements
+            for requirement in requirements
             for source_id in requirement.source_ids
         )
     )
@@ -616,9 +700,10 @@ class OpenAIGenerator:
             "planning_regeneration_result": planning_regeneration_result,
         }
 
-        if plan.status == GenerationStatus.WITHHELD:
+        if plan.status == GenerationPlanningStatus.WITHHELD:
             result = GenerationResult(
                 status=GenerationStatus.WITHHELD,
+                limitation_markdown=None,
                 answer_markdown=None,
                 withheld_reason=plan.withheld_reason,
             )

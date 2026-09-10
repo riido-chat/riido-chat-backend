@@ -10,6 +10,7 @@ from app.answering.models import (
     GenerationAnswerScope,
     GenerationContextSource,
     GenerationEvidenceRequirement,
+    GenerationPlanningStatus,
     GenerationResult,
     GenerationSourcePlan,
     GenerationStageTrace,
@@ -291,7 +292,7 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
 
     def test_serializes_generation_stage_trace_for_evaluation(self) -> None:
         plan = GenerationSourcePlan(
-            status=GenerationStatus.ANSWERABLE,
+            status=GenerationPlanningStatus.ANSWERABLE,
             answer_type=GenerationAnswerType.PROCEDURE,
             answer_scope=GenerationAnswerScope.SUMMARY,
             evidence_requirements=[
@@ -300,10 +301,14 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
                     source_ids=["SOURCE_1"],
                 )
             ],
+            optional_context=[],
+            unanswered_information=[],
+            related_guidance=[],
             withheld_reason=None,
         )
         generated = GenerationResult(
             status=GenerationStatus.ANSWERABLE,
+            limitation_markdown=None,
             answer_markdown="답변 [SOURCE_1]",
             withheld_reason=None,
         )
@@ -477,6 +482,49 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
                 },
             ],
             summary["perCase"],
+        )
+
+    def test_summarizes_internal_planning_statuses(self) -> None:
+        def result(case_id: str, status: str) -> dict:
+            return {
+                "id": case_id,
+                "passed": True,
+                "turns": [
+                    {
+                        "db": {
+                            "stageTrace": {
+                                "generation": {
+                                    "planningOutput": {
+                                        "availability": "AVAILABLE",
+                                        "value": {"status": status},
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+            }
+
+        summary = summarize_runs(
+            [
+                {
+                    "repeatNo": 1,
+                    "results": [
+                        result("A", "ANSWERABLE"),
+                        result("B", "RELATED_GUIDANCE"),
+                        result("C", "WITHHELD"),
+                    ],
+                }
+            ]
+        )
+
+        self.assertEqual(
+            {
+                "ANSWERABLE": 1,
+                "RELATED_GUIDANCE": 1,
+                "WITHHELD": 1,
+            },
+            summary["planningStatusTurnCounts"],
         )
 
     def test_accepts_matching_api_and_db_follow_up(self) -> None:

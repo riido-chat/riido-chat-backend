@@ -79,6 +79,10 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _project_relative(path: Path) -> str:
+    return str(path.resolve().relative_to(PROJECT_ROOT))
+
+
 def _git_revision() -> Optional[str]:
     try:
         return subprocess.run(
@@ -166,11 +170,17 @@ def load_frozen_turns(
         }
 
         for turn_no, expected in enumerate(case["turns"], start=1):
-            actual = actual_turns.get(turn_no)
+            fixture_turn_no = int(expected.get("fixtureTurnNo", turn_no))
+            actual = actual_turns.get(fixture_turn_no)
             if actual is None:
-                raise ValueError(f"고정 평가 결과에 turn이 없습니다: {case_id}/{turn_no}")
+                raise ValueError(
+                    "고정 평가 결과에 turn이 없습니다: "
+                    f"{case_id}/{fixture_turn_no}"
+                )
             if actual.get("question") != expected.get("question"):
-                raise ValueError(f"질문이 일치하지 않습니다: {case_id}/{turn_no}")
+                raise ValueError(
+                    f"질문이 일치하지 않습니다: {case_id}/{fixture_turn_no}"
+                )
 
             db = actual.get("db") or {}
             top_five = (
@@ -180,7 +190,7 @@ def load_frozen_turns(
                 skipped.append(
                     {
                         "caseId": case_id,
-                        "turnNo": turn_no,
+                        "turnNo": fixture_turn_no,
                         "reason": "GENERATION_NOT_REACHED",
                     }
                 )
@@ -189,7 +199,7 @@ def load_frozen_turns(
             frozen_turns.append(
                 FrozenGenerationTurn(
                     case_id=case_id,
-                    turn_no=turn_no,
+                    turn_no=fixture_turn_no,
                     description=case["description"],
                     original_question=expected["question"],
                     generation_query=db.get("resolvedQuery") or expected["question"],
@@ -238,6 +248,25 @@ def evaluate_result(
             f"expected={expected_reason}, actual={actual_reason}"
         )
 
+    expected_planning_status = expected.get("expectedPlanningStatus")
+    source_plan = (
+        result.stage_trace.source_plan
+        if result.stage_trace is not None
+        else None
+    )
+    actual_planning_status = (
+        source_plan.status.value if source_plan is not None else None
+    )
+    if (
+        expected_planning_status is not None
+        and actual_planning_status != expected_planning_status
+    ):
+        failures.append(
+            "planning status 불일치: "
+            f"expected={expected_planning_status}, "
+            f"actual={actual_planning_status}"
+        )
+
     answer = result.answer_markdown or ""
     for field, target, label in (
         ("expectedDefinitionSentenceConceptGroups", _lead_sentence(answer), "첫 문장"),
@@ -263,6 +292,9 @@ def evaluate_result(
             "기대 Citation 문서가 없음: "
             f"expected_any={expected_titles!r}, actual={citation_titles!r}"
         )
+    for phrase in expected.get("forbiddenAnswerPhrases", []):
+        if phrase in answer:
+            failures.append(f"답변에 금지 문구가 포함됨: {phrase!r}")
     return failures
 
 
@@ -301,6 +333,7 @@ def _serialize_result(
         "description": fixture.description,
         "originalQuestion": fixture.original_question,
         "generationQuery": fixture.generation_query,
+        "expected": fixture.expected,
         "passed": not failures,
         "failures": failures,
         "status": result.status.value,
@@ -456,6 +489,9 @@ async def run_comparison(
     output_path: Path,
     cases_path: Path = DEFAULT_CASES_PATH,
     fixture_source_path: Path = DEFAULT_FIXTURE_SOURCE_PATH,
+    supplemental_fixture_paths: Sequence[
+        Path
+    ] = DEFAULT_SUPPLEMENTAL_FIXTURE_PATHS,
 ) -> Dict[str, Any]:
     if repeat <= 0:
         raise ValueError("repeat은 1 이상이어야 합니다.")
@@ -473,10 +509,17 @@ async def run_comparison(
             "answer": ANSWER_PROMPT_VERSION,
         },
         "fixedInputs": {
-            "casesPath": str(cases_path.relative_to(PROJECT_ROOT)),
+            "casesPath": _project_relative(cases_path),
             "casesSha256": _sha256(cases_path),
-            "fixtureSourcePath": str(fixture_source_path.relative_to(PROJECT_ROOT)),
+            "fixtureSourcePath": _project_relative(fixture_source_path),
             "fixtureSourceSha256": _sha256(fixture_source_path),
+            "supplementalFixtureSources": [
+                {
+                    "path": _project_relative(path),
+                    "sha256": _sha256(path),
+                }
+                for path in supplemental_fixture_paths
+            ],
             "turnCount": len(turns),
             "retrievalFrozen": True,
             "queryRewriteFrozen": True,
@@ -564,6 +607,18 @@ async def run_comparison(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
+    parser.add_argument("--cases", type=Path, default=DEFAULT_CASES_PATH)
+    parser.add_argument(
+        "--fixture-source",
+        type=Path,
+        default=DEFAULT_FIXTURE_SOURCE_PATH,
+    )
+    parser.add_argument(
+        "--supplemental-fixtures",
+        nargs="*",
+        type=Path,
+        default=list(DEFAULT_SUPPLEMENTAL_FIXTURE_PATHS),
+    )
     parser.add_argument("--repeat", type=int, default=1)
     parser.add_argument(
         "--models",
@@ -576,7 +631,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
-    turns, skipped = load_frozen_turns()
+    turns, skipped = load_frozen_turns(
+        cases_path=args.cases,
+        fixture_source_path=args.fixture_source,
+        supplemental_fixture_paths=args.supplemental_fixtures,
+    )
     selected_turns = select_turns(turns, args.case_ids)
     candidates = select_candidates(args.models)
     payload = asyncio.run(
@@ -585,6 +644,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             turns=selected_turns,
             repeat=args.repeat,
             output_path=args.output,
+            cases_path=args.cases,
+            fixture_source_path=args.fixture_source,
+            supplemental_fixture_paths=args.supplemental_fixtures,
         )
     )
     print(f"제외/미도달: {len(skipped)}건", flush=True)

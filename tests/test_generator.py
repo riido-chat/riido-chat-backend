@@ -34,6 +34,7 @@ from app.answering.models import (
     GenerationAnswerType,
     GenerationAnswerScope,
     GenerationEvidenceRequirement,
+    GenerationPlanningStatus,
     GenerationResult,
     GenerationSourcePlan,
     GenerationStageTrace,
@@ -47,6 +48,7 @@ class GenerationResultTest(unittest.TestCase):
     def test_answerable_requires_answer_and_null_reason(self) -> None:
         result = GenerationResult(
             status=GenerationStatus.ANSWERABLE,
+            limitation_markdown=None,
             answer_markdown="핵심 답변입니다. [SOURCE_1]",
             withheld_reason=None,
         )
@@ -56,16 +58,19 @@ class GenerationResultTest(unittest.TestCase):
         invalid_cases = (
             {
                 "status": GenerationStatus.ANSWERABLE,
+                "limitation_markdown": None,
                 "answer_markdown": None,
                 "withheld_reason": None,
             },
             {
                 "status": GenerationStatus.ANSWERABLE,
+                "limitation_markdown": None,
                 "answer_markdown": "  ",
                 "withheld_reason": None,
             },
             {
                 "status": GenerationStatus.ANSWERABLE,
+                "limitation_markdown": None,
                 "answer_markdown": "답변",
                 "withheld_reason": GenerationWithheldReason.OUT_OF_SCOPE,
             },
@@ -80,6 +85,7 @@ class GenerationResultTest(unittest.TestCase):
             with self.subTest(reason=reason):
                 result = GenerationResult(
                     status=GenerationStatus.WITHHELD,
+                    limitation_markdown=None,
                     answer_markdown=None,
                     withheld_reason=reason,
                 )
@@ -88,11 +94,13 @@ class GenerationResultTest(unittest.TestCase):
         invalid_cases = (
             {
                 "status": GenerationStatus.WITHHELD,
+                "limitation_markdown": None,
                 "answer_markdown": "답변",
                 "withheld_reason": GenerationWithheldReason.OUT_OF_SCOPE,
             },
             {
                 "status": GenerationStatus.WITHHELD,
+                "limitation_markdown": None,
                 "answer_markdown": None,
                 "withheld_reason": None,
             },
@@ -106,7 +114,12 @@ class GenerationResultTest(unittest.TestCase):
         schema = GenerationResult.model_json_schema()
 
         self.assertEqual(
-            {"status", "answer_markdown", "withheld_reason"},
+            {
+                "status",
+                "limitation_markdown",
+                "answer_markdown",
+                "withheld_reason",
+            },
             set(schema["required"]),
         )
         self.assertFalse(schema["additionalProperties"])
@@ -114,11 +127,13 @@ class GenerationResultTest(unittest.TestCase):
         with self.assertRaises(ValidationError):
             GenerationResult(
                 status=GenerationStatus.WITHHELD,
+                limitation_markdown=None,
                 answer_markdown=None,
             )
         with self.assertRaises(ValidationError):
             GenerationResult(
                 status=GenerationStatus.WITHHELD,
+                limitation_markdown=None,
                 answer_markdown=None,
                 withheld_reason=GenerationWithheldReason.OUT_OF_SCOPE,
                 unexpected="field",
@@ -129,7 +144,7 @@ class GenerationSourcePlanTest(unittest.TestCase):
     def test_answerable_requires_information_unit_evidence(self) -> None:
         plan = self._answerable_plan("SOURCE_1")
 
-        self.assertEqual(GenerationStatus.ANSWERABLE, plan.status)
+        self.assertEqual(GenerationPlanningStatus.ANSWERABLE, plan.status)
         self.assertEqual(
             ["SOURCE_1"],
             plan.evidence_requirements[0].source_ids,
@@ -137,14 +152,17 @@ class GenerationSourcePlanTest(unittest.TestCase):
 
         invalid_cases = (
             {
-                "status": GenerationStatus.ANSWERABLE,
+                "status": GenerationPlanningStatus.ANSWERABLE,
                 "answer_type": GenerationAnswerType.GENERAL,
                 "answer_scope": GenerationAnswerScope.SUMMARY,
                 "evidence_requirements": [],
+                "optional_context": [],
+                "unanswered_information": [],
+                "related_guidance": [],
                 "withheld_reason": None,
             },
             {
-                "status": GenerationStatus.ANSWERABLE,
+                "status": GenerationPlanningStatus.ANSWERABLE,
                 "answer_type": GenerationAnswerType.GENERAL,
                 "answer_scope": GenerationAnswerScope.SUMMARY,
                 "evidence_requirements": [
@@ -153,6 +171,9 @@ class GenerationSourcePlanTest(unittest.TestCase):
                         source_ids=["SOURCE_1"],
                     )
                 ],
+                "optional_context": [],
+                "unanswered_information": [],
+                "related_guidance": [],
                 "withheld_reason": GenerationWithheldReason.OUT_OF_SCOPE,
             },
         )
@@ -161,47 +182,38 @@ class GenerationSourcePlanTest(unittest.TestCase):
                 with self.assertRaises(ValidationError):
                     GenerationSourcePlan(**values)
 
-    def test_definition_and_feature_summary_require_one_unit_and_source(self) -> None:
-        invalid_evidence = (
-            [
-                GenerationEvidenceRequirement(
-                    information_unit="기능",
-                    source_ids=["SOURCE_1", "SOURCE_2"],
-                )
-            ],
-            [
-                GenerationEvidenceRequirement(
-                    information_unit="기능",
-                    source_ids=["SOURCE_1"],
-                ),
-                GenerationEvidenceRequirement(
-                    information_unit="설정",
-                    source_ids=["SOURCE_2"],
-                ),
-            ],
-        )
-
+    def test_definition_and_feature_summary_allow_multiple_units_and_sources(
+        self,
+    ) -> None:
         for answer_type in (
             GenerationAnswerType.DEFINITION,
             GenerationAnswerType.FEATURE_SUMMARY,
         ):
-            for evidence_requirements in invalid_evidence:
-                with self.subTest(
-                    answer_type=answer_type,
-                    evidence_requirements=evidence_requirements,
-                ):
-                    with self.assertRaises(ValidationError):
-                        GenerationSourcePlan(
-                            status=GenerationStatus.ANSWERABLE,
-                            answer_type=answer_type,
-                            answer_scope=GenerationAnswerScope.SUMMARY,
-                            evidence_requirements=evidence_requirements,
-                            withheld_reason=None,
-                        )
+            plan = GenerationSourcePlan(
+                status=GenerationPlanningStatus.ANSWERABLE,
+                answer_type=answer_type,
+                answer_scope=GenerationAnswerScope.SUMMARY,
+                evidence_requirements=[
+                    GenerationEvidenceRequirement(
+                        information_unit="핵심 의미",
+                        source_ids=["SOURCE_1", "SOURCE_2"],
+                    ),
+                    GenerationEvidenceRequirement(
+                        information_unit="필수 조건",
+                        source_ids=["SOURCE_3"],
+                    ),
+                ],
+                optional_context=[],
+                unanswered_information=[],
+                related_guidance=[],
+                withheld_reason=None,
+            )
+
+            self.assertEqual(2, len(plan.evidence_requirements))
 
     def test_procedure_summary_allows_multiple_sources(self) -> None:
         plan = GenerationSourcePlan(
-            status=GenerationStatus.ANSWERABLE,
+            status=GenerationPlanningStatus.ANSWERABLE,
             answer_type=GenerationAnswerType.PROCEDURE,
             answer_scope=GenerationAnswerScope.SUMMARY,
             evidence_requirements=[
@@ -210,6 +222,9 @@ class GenerationSourcePlanTest(unittest.TestCase):
                     source_ids=["SOURCE_1", "SOURCE_2"],
                 )
             ],
+            optional_context=[],
+            unanswered_information=[],
+            related_guidance=[],
             withheld_reason=None,
         )
 
@@ -220,7 +235,7 @@ class GenerationSourcePlanTest(unittest.TestCase):
 
     def test_detailed_definition_allows_multiple_units_and_sources(self) -> None:
         plan = GenerationSourcePlan(
-            status=GenerationStatus.ANSWERABLE,
+            status=GenerationPlanningStatus.ANSWERABLE,
             answer_type=GenerationAnswerType.DEFINITION,
             answer_scope=GenerationAnswerScope.MULTI_DETAIL,
             evidence_requirements=[
@@ -233,6 +248,9 @@ class GenerationSourcePlanTest(unittest.TestCase):
                     source_ids=["SOURCE_2", "SOURCE_3"],
                 ),
             ],
+            optional_context=[],
+            unanswered_information=[],
+            related_guidance=[],
             withheld_reason=None,
         )
 
@@ -240,7 +258,7 @@ class GenerationSourcePlanTest(unittest.TestCase):
 
     def test_multi_detail_allows_multiple_information_units_and_sources(self) -> None:
         plan = GenerationSourcePlan(
-            status=GenerationStatus.ANSWERABLE,
+            status=GenerationPlanningStatus.ANSWERABLE,
             answer_type=GenerationAnswerType.PROCEDURE,
             answer_scope=GenerationAnswerScope.MULTI_DETAIL,
             evidence_requirements=[
@@ -253,6 +271,9 @@ class GenerationSourcePlanTest(unittest.TestCase):
                     source_ids=["SOURCE_3"],
                 ),
             ],
+            optional_context=[],
+            unanswered_information=[],
+            related_guidance=[],
             withheld_reason=None,
         )
 
@@ -264,10 +285,13 @@ class GenerationSourcePlanTest(unittest.TestCase):
 
     def test_withheld_requires_empty_evidence_and_reason(self) -> None:
         plan = GenerationSourcePlan(
-            status=GenerationStatus.WITHHELD,
+            status=GenerationPlanningStatus.WITHHELD,
             answer_type=GenerationAnswerType.GENERAL,
             answer_scope=GenerationAnswerScope.MULTI_DETAIL,
             evidence_requirements=[],
+            optional_context=[],
+            unanswered_information=["확인할 수 없는 요구"],
+            related_guidance=[],
             withheld_reason=GenerationWithheldReason.INSUFFICIENT_EVIDENCE,
         )
 
@@ -278,12 +302,71 @@ class GenerationSourcePlanTest(unittest.TestCase):
 
         with self.assertRaises(ValidationError):
             GenerationSourcePlan(
-                status=GenerationStatus.WITHHELD,
+                status=GenerationPlanningStatus.WITHHELD,
                 answer_type=GenerationAnswerType.GENERAL,
                 answer_scope=GenerationAnswerScope.SUMMARY,
                 evidence_requirements=[],
+                optional_context=[],
+                unanswered_information=["확인할 수 없는 요구"],
+                related_guidance=[],
                 withheld_reason=None,
             )
+
+    def test_related_guidance_requires_unanswered_information_and_evidence(
+        self,
+    ) -> None:
+        plan = GenerationSourcePlan(
+            status=GenerationPlanningStatus.RELATED_GUIDANCE,
+            answer_type=GenerationAnswerType.GENERAL,
+            answer_scope=GenerationAnswerScope.SUMMARY,
+            evidence_requirements=[],
+            optional_context=[],
+            unanswered_information=["실제 결제 완료 여부"],
+            related_guidance=[
+                GenerationEvidenceRequirement(
+                    information_unit="결제 정보 확인 위치",
+                    source_ids=["SOURCE_2"],
+                )
+            ],
+            withheld_reason=None,
+        )
+
+        self.assertEqual(GenerationPlanningStatus.RELATED_GUIDANCE, plan.status)
+
+    def test_answerable_allows_optional_context(self) -> None:
+        plan = self._answerable_plan("SOURCE_1")
+        plan = plan.model_copy(
+            update={
+                "optional_context": [
+                    GenerationEvidenceRequirement(
+                        information_unit="이해를 돕는 배경",
+                        source_ids=["SOURCE_2"],
+                    )
+                ]
+            }
+        )
+
+        self.assertEqual(["SOURCE_2"], plan.optional_context[0].source_ids)
+
+    def test_evidence_requirements_have_no_arbitrary_item_limit(self) -> None:
+        plan = GenerationSourcePlan(
+            status=GenerationPlanningStatus.ANSWERABLE,
+            answer_type=GenerationAnswerType.GENERAL,
+            answer_scope=GenerationAnswerScope.MULTI_DETAIL,
+            evidence_requirements=[
+                GenerationEvidenceRequirement(
+                    information_unit=f"정보 {index}",
+                    source_ids=["SOURCE_1"],
+                )
+                for index in range(1, 10)
+            ],
+            optional_context=[],
+            unanswered_information=[],
+            related_guidance=[],
+            withheld_reason=None,
+        )
+
+        self.assertEqual(9, len(plan.evidence_requirements))
 
     def test_evidence_rejects_duplicate_source_ids(self) -> None:
         with self.assertRaises(ValidationError):
@@ -301,6 +384,9 @@ class GenerationSourcePlanTest(unittest.TestCase):
                 "answer_type",
                 "answer_scope",
                 "evidence_requirements",
+                "optional_context",
+                "unanswered_information",
+                "related_guidance",
                 "withheld_reason",
             },
             set(schema["required"]),
@@ -310,7 +396,7 @@ class GenerationSourcePlanTest(unittest.TestCase):
     @staticmethod
     def _answerable_plan(*source_ids: str) -> GenerationSourcePlan:
         return GenerationSourcePlan(
-            status=GenerationStatus.ANSWERABLE,
+            status=GenerationPlanningStatus.ANSWERABLE,
             answer_type=GenerationAnswerType.PROCEDURE,
             answer_scope=(
                 GenerationAnswerScope.SUMMARY
@@ -320,6 +406,27 @@ class GenerationSourcePlanTest(unittest.TestCase):
             evidence_requirements=[
                 GenerationEvidenceRequirement(
                     information_unit="설정 방법",
+                    source_ids=list(source_ids),
+                )
+            ],
+            optional_context=[],
+            unanswered_information=[],
+            related_guidance=[],
+            withheld_reason=None,
+        )
+
+    @staticmethod
+    def _related_guidance_plan(*source_ids: str) -> GenerationSourcePlan:
+        return GenerationSourcePlan(
+            status=GenerationPlanningStatus.RELATED_GUIDANCE,
+            answer_type=GenerationAnswerType.GENERAL,
+            answer_scope=GenerationAnswerScope.SUMMARY,
+            evidence_requirements=[],
+            optional_context=[],
+            unanswered_information=["실제 처리 상태"],
+            related_guidance=[
+                GenerationEvidenceRequirement(
+                    information_unit="사용자가 직접 확인할 위치",
                     source_ids=list(source_ids),
                 )
             ],
@@ -399,29 +506,32 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn("설정·관리 위치", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("역할별로 할 수 있는 범위", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("과거 날짜 선택", SOURCE_PLANNING_PROMPT_V11)
-        self.assertIn("질문 전체를 하나의 정보 단위", SOURCE_PLANNING_PROMPT_V11)
-        self.assertIn("가장 직접적인 SOURCE 하나만", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("조건·제한·예외", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("optional_context", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("여러 정보 단위와 SOURCE", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("임의의 개수 상한을 적용하지", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("설정 위치·절차·설정 항목·값 범위", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("관련 없는", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("4~5개 SOURCE가 필요해도", SOURCE_PLANNING_PROMPT_V11)
-        self.assertIn("정보 단위 하나라도", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("독립된 복합 요구 중 일부만", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("INSUFFICIENT_EVIDENCE", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("제품의 기능·설정·사용 가능 여부", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("넓은 일반 권한보다", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("구체적인 제한·예외가 질문에 대한 결론", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("문서 제목과 Section Path", SOURCE_PLANNING_PROMPT_V11)
-        self.assertIn("Top-5에서 앞선 SOURCE 하나만", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("추가 정보 가치를 비교", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("하위 대상을 별도로 허용한다고 추측하지", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("주제 자체와", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("자동화", SOURCE_PLANNING_PROMPT_V11)
-        self.assertIn("EvidenceRequirement와 source_ids를 각각", SOURCE_PLANNING_PROMPT_V11)
-        self.assertIn("정확히 하나만 작성", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("RELATED_GUIDANCE", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("unanswered_information", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("related_guidance", SOURCE_PLANNING_PROMPT_V11)
 
     def test_source_planning_repair_prompt_only_corrects_structure(self) -> None:
         self.assertIn(SOURCE_PLANNING_PROMPT_V11, SOURCE_PLANNING_REPAIR_PROMPT_V11)
         self.assertIn("Backend 구조 검증에 실패", SOURCE_PLANNING_REPAIR_PROMPT_V11)
         self.assertIn("질문의 의미와 정보 범위는 바꾸지 마세요", SOURCE_PLANNING_REPAIR_PROMPT_V11)
-        self.assertIn("각각 정확히 하나만", SOURCE_PLANNING_REPAIR_PROMPT_V11)
+        self.assertIn("상태별 필수·빈 필드", SOURCE_PLANNING_REPAIR_PROMPT_V11)
 
     def test_procedure_evidence_rules_are_shared_by_planning_and_answer(self) -> None:
         for prompt in (SOURCE_PLANNING_PROMPT_V11, ANSWER_PROMPT_V17):
@@ -432,7 +542,7 @@ class GenerationContextTest(unittest.TestCase):
                 self.assertIn("메뉴 이름, 사용 가능 여부", prompt)
                 self.assertIn("수행할 핵심 동작이 필요", prompt)
                 self.assertIn("한 단계로 충분", prompt)
-                self.assertIn("관련 안내로 질문 범위를 바꾸거나", prompt)
+                self.assertIn("직접 답변 근거로 사용하지", prompt)
                 self.assertIn("일상적인 바꿔 말하기", prompt)
                 self.assertIn("다른 시점으로 이동", prompt)
 
@@ -480,7 +590,7 @@ class GenerationContextTest(unittest.TestCase):
     ) -> None:
         self.assertIn("Answer Type이 GENERAL", ANSWER_PROMPT_V17)
         self.assertIn("Answer Scope가 SUMMARY", ANSWER_PROMPT_V17)
-        self.assertIn("기본적으로 2~4문장", ANSWER_PROMPT_V17)
+        self.assertIn("핵심과 필수 조건이 드러나게", ANSWER_PROMPT_V17)
         self.assertIn("결론을 자연스럽고 직접적으로", ANSWER_PROMPT_V17)
         self.assertIn("가능 여부만 한 문장으로", ANSWER_PROMPT_V17)
         self.assertIn("판단 이유나 꼭 알아야 할 조건", ANSWER_PROMPT_V17)
@@ -511,7 +621,7 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn("둘째 문장으로 미루지 마세요", ANSWER_PROMPT_V17)
         self.assertIn("용어 의미를 먼저 설명한 뒤", ANSWER_PROMPT_V17)
         self.assertIn("뤼이도에서의 역할과 사용 가치", ANSWER_PROMPT_V17)
-        self.assertIn("최대 두 개의 짧은 문단", ANSWER_PROMPT_V17)
+        self.assertIn("간결한 문단", ANSWER_PROMPT_V17)
         self.assertIn("X의 종류와 핵심 사용 주체 또는 목적", ANSWER_PROMPT_V17)
         self.assertIn("X와 뤼이도의 관계를 직접 설명하면", ANSWER_PROMPT_V17)
         self.assertIn("질문 이해에 필요한", ANSWER_PROMPT_V17)
@@ -527,14 +637,18 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn("WITHHELD 여부를 판단하세요", ANSWER_PROMPT_V17)
 
     def test_prompt_forbids_links_urls_and_html(self) -> None:
-        self.assertEqual("v35", GENERATION_PROMPT_VERSION)
-        self.assertEqual("v26", SOURCE_PLANNING_PROMPT_VERSION)
-        self.assertEqual("v26-repair-1", SOURCE_PLANNING_REPAIR_PROMPT_VERSION)
-        self.assertEqual("v21", ANSWER_PROMPT_VERSION)
-        self.assertEqual("v21-repair-1", ANSWER_REPAIR_PROMPT_VERSION)
+        self.assertEqual("v38", GENERATION_PROMPT_VERSION)
+        self.assertEqual("v29", SOURCE_PLANNING_PROMPT_VERSION)
+        self.assertEqual("v29-repair-1", SOURCE_PLANNING_REPAIR_PROMPT_VERSION)
+        self.assertEqual("v23", ANSWER_PROMPT_VERSION)
+        self.assertEqual("v23-repair-1", ANSWER_REPAIR_PROMPT_VERSION)
         self.assertIn("넓은 허용 규칙과 구체적인 제한", ANSWER_PROMPT_V17)
         self.assertIn("상위 공간과 그 내부 대상", ANSWER_PROMPT_V17)
         self.assertIn("내부 식별자를 답변 문장에 직접 노출", ANSWER_PROMPT_V17)
+        self.assertIn("`대신`이라는 말로만", ANSWER_PROMPT_V17)
+        self.assertIn("각 요구의 대상과 의도가 명확", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("독립된 복합 요구인지 먼저 판정", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("워크스페이스 삭제 영향", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn(
             "Markdown 링크 문법과 HTML을 사용하지 마세요",
             ANSWER_PROMPT_V17,
@@ -551,7 +665,7 @@ class GenerationContextTest(unittest.TestCase):
             [self._result(index) for index in range(1, 4)]
         )
         plan = GenerationSourcePlan(
-            status=GenerationStatus.ANSWERABLE,
+            status=GenerationPlanningStatus.ANSWERABLE,
             answer_type=GenerationAnswerType.PROCEDURE,
             answer_scope=GenerationAnswerScope.MULTI_DETAIL,
             evidence_requirements=[
@@ -564,6 +678,9 @@ class GenerationContextTest(unittest.TestCase):
                     source_ids=["SOURCE_1", "SOURCE_3"],
                 ),
             ],
+            optional_context=[],
+            unanswered_information=[],
+            related_guidance=[],
             withheld_reason=None,
         )
 
@@ -573,6 +690,62 @@ class GenerationContextTest(unittest.TestCase):
             ["SOURCE_2", "SOURCE_1", "SOURCE_3"],
             [source.source_id for source in selected],
         )
+
+    def test_selects_optional_context_after_required_sources(self) -> None:
+        sources = build_generation_context(
+            [self._result(index) for index in range(1, 4)]
+        )
+        plan = GenerationSourcePlanTest._answerable_plan("SOURCE_2")
+        plan = GenerationSourcePlan(
+            **{
+                **plan.model_dump(),
+                "optional_context": [
+                    GenerationEvidenceRequirement(
+                        information_unit="선택적 배경",
+                        source_ids=["SOURCE_3", "SOURCE_2"],
+                    )
+                ],
+            }
+        )
+
+        selected = select_required_sources(plan, sources)
+
+        self.assertEqual(
+            ["SOURCE_2", "SOURCE_3"],
+            [source.source_id for source in selected],
+        )
+
+    def test_selects_only_related_guidance_sources(self) -> None:
+        sources = build_generation_context(
+            [self._result(index) for index in range(1, 4)]
+        )
+        plan = GenerationSourcePlanTest._related_guidance_plan(
+            "SOURCE_3",
+            "SOURCE_1",
+        )
+
+        selected = select_required_sources(plan, sources)
+
+        self.assertEqual(
+            ["SOURCE_3", "SOURCE_1"],
+            [source.source_id for source in selected],
+        )
+
+    def test_rejects_source_selection_for_withheld_plan(self) -> None:
+        sources = build_generation_context([self._result(1)])
+        plan = GenerationSourcePlan(
+            status=GenerationPlanningStatus.WITHHELD,
+            answer_type=GenerationAnswerType.GENERAL,
+            answer_scope=GenerationAnswerScope.SUMMARY,
+            evidence_requirements=[],
+            optional_context=[],
+            unanswered_information=["확인할 수 없는 요구"],
+            related_guidance=[],
+            withheld_reason=GenerationWithheldReason.INSUFFICIENT_EVIDENCE,
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "선택할 Source가 없습니다"):
+            select_required_sources(plan, sources)
 
     def test_rejects_source_plan_id_missing_from_context(self) -> None:
         plan = GenerationSourcePlanTest._answerable_plan("SOURCE_9")
@@ -601,10 +774,23 @@ class GenerationContextTest(unittest.TestCase):
         answer_input = build_answer_input("질문", sources, plan)
 
         self.assertIn("## Answer Contract", answer_input)
+        self.assertIn("Plan Status: ANSWERABLE", answer_input)
         self.assertIn("Answer Type: PROCEDURE", answer_input)
         self.assertIn("Answer Scope: SUMMARY", answer_input)
         self.assertIn("## Required Answer Coverage", answer_input)
         self.assertIn("설정 방법: SOURCE_1", answer_input)
+
+    def test_answer_input_contains_related_guidance_contract(self) -> None:
+        sources = build_generation_context([self._result(1)])
+        plan = GenerationSourcePlanTest._related_guidance_plan("SOURCE_1")
+
+        answer_input = build_answer_input("질문", sources, plan)
+
+        self.assertIn("Plan Status: RELATED_GUIDANCE", answer_input)
+        self.assertIn("## Unanswered Information", answer_input)
+        self.assertIn("실제 처리 상태", answer_input)
+        self.assertIn("## Related Guidance", answer_input)
+        self.assertIn("사용자가 직접 확인할 위치: SOURCE_1", answer_input)
 
     @staticmethod
     def _result(index: int) -> HybridRetrievalResult:
@@ -693,12 +879,40 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("### SOURCE_1", answer_input)
         self.assertNotIn("### SOURCE_3", answer_input)
 
+    async def test_related_guidance_receives_only_planned_sources(self) -> None:
+        sources = build_generation_context(
+            [GenerationContextTest._result(index) for index in range(1, 4)]
+        )
+        plan = GenerationSourcePlanTest._related_guidance_plan("SOURCE_2")
+        expected = GenerationResult(
+            status=GenerationStatus.ANSWERABLE,
+            limitation_markdown="실제 처리 상태는 확인할 수 없습니다.",
+            answer_markdown="직접 확인할 위치는 이곳입니다. [SOURCE_2]",
+            withheld_reason=None,
+        )
+        client = self._client_with_responses(plan, expected)
+
+        result = await OpenAIGenerator(client=client).generate_with_trace(
+            "실제 상태를 확인해줘",
+            sources,
+        )
+
+        answer_input = client.responses.parse.await_args_list[1].kwargs["input"]
+        self.assertEqual(expected, result.result)
+        self.assertEqual((sources[1],), result.stage_trace.selected_sources)
+        self.assertIn("### SOURCE_2", answer_input)
+        self.assertNotIn("### SOURCE_1", answer_input)
+        self.assertNotIn("### SOURCE_3", answer_input)
+
     async def test_source_plan_withheld_skips_answer_generation(self) -> None:
         plan = GenerationSourcePlan(
-            status=GenerationStatus.WITHHELD,
+            status=GenerationPlanningStatus.WITHHELD,
             answer_type=GenerationAnswerType.GENERAL,
             answer_scope=GenerationAnswerScope.MULTI_DETAIL,
             evidence_requirements=[],
+            optional_context=[],
+            unanswered_information=["확인할 수 없는 요구"],
+            related_guidance=[],
             withheld_reason=GenerationWithheldReason.INSUFFICIENT_EVIDENCE,
         )
         client = self._client_with_responses(plan)
@@ -724,6 +938,7 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
                 )
                 answer = GenerationResult(
                     status=GenerationStatus.ANSWERABLE,
+                    limitation_markdown=None,
                     answer_markdown=" ".join(
                         f"근거 [{source.source_id}]" for source in sources
                     ),
@@ -781,7 +996,7 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
     async def test_repairs_one_source_plan_structure_validation_error(self) -> None:
         validation_error = self._single_source_validation_error()
         repaired_plan = GenerationSourcePlan(
-            status=GenerationStatus.ANSWERABLE,
+            status=GenerationPlanningStatus.ANSWERABLE,
             answer_type=GenerationAnswerType.FEATURE_SUMMARY,
             answer_scope=GenerationAnswerScope.SUMMARY,
             evidence_requirements=[
@@ -790,6 +1005,9 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
                     source_ids=["SOURCE_1"],
                 )
             ],
+            optional_context=[],
+            unanswered_information=[],
+            related_guidance=[],
             withheld_reason=None,
         )
         answer = self._answerable_result()
@@ -1002,6 +1220,7 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
         plan = self._answerable_plan("SOURCE_1")
         invalid_answer = GenerationResult(
             status=GenerationStatus.ANSWERABLE,
+            limitation_markdown=None,
             answer_markdown="잘못된 인용 [SOURCE_9]",
             withheld_reason=None,
         )
@@ -1111,6 +1330,7 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
     def _answerable_result() -> GenerationResult:
         return GenerationResult(
             status=GenerationStatus.ANSWERABLE,
+            limitation_markdown=None,
             answer_markdown="답변입니다. [SOURCE_1]",
             withheld_reason=None,
         )
@@ -1119,15 +1339,13 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
     def _single_source_validation_error() -> ValidationError:
         with unittest.TestCase().assertRaises(ValidationError) as caught:
             GenerationSourcePlan(
-                status=GenerationStatus.ANSWERABLE,
+                status=GenerationPlanningStatus.ANSWERABLE,
                 answer_type=GenerationAnswerType.FEATURE_SUMMARY,
                 answer_scope=GenerationAnswerScope.SUMMARY,
-                evidence_requirements=[
-                    GenerationEvidenceRequirement(
-                        information_unit="핵심 기능",
-                        source_ids=["SOURCE_1", "SOURCE_2"],
-                    )
-                ],
+                evidence_requirements=[],
+                optional_context=[],
+                unanswered_information=[],
+                related_guidance=[],
                 withheld_reason=None,
             )
         return caught.exception

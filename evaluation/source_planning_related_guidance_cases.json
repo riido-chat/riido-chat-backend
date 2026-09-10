@@ -1,0 +1,172 @@
+{
+  "version": "source-planning-related-guidance-v1",
+  "description": "Issue #165의 직접 답변, 관련 안내, 완전 보류 경계를 저장된 Top-5로 비교한다.",
+  "recommendedRepeat": 3,
+  "cases": [
+    {
+      "id": "RC006",
+      "description": "프로젝트를 백로그로 역이동할 수 있는지 문의",
+      "turns": [
+        {
+          "question": "혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "RELATED_GUIDANCE",
+          "expectedLeadConceptGroups": [
+            ["프로젝트"],
+            ["백로그"],
+            ["확인할 수 없", "확인되지 않", "근거가 없"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["백로그"],
+            ["프로젝트", "목표", "작업"],
+            ["반대", "역방향", "방향과는 다", "요청하신 방향과 다"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["계획: 백로그"],
+          "forbiddenAnswerPhrases": ["프로젝트를 백로그로 이동할 수 있습니다"],
+          "manualReviewCriteria": [
+            "프로젝트에서 백로그로 이동할 수 있다고 추론하지 않는다.",
+            "백로그에서 프로젝트·목표·작업으로 전환하는 반대 방향임을 명시한다."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RC007",
+      "description": "특정 워크스페이스의 결제 완료 상태 조회",
+      "turns": [
+        {
+          "question": "현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "RELATED_GUIDANCE",
+          "expectedLeadConceptGroups": [
+            ["결제"],
+            ["완료", "상태"],
+            ["확인할 수 없", "확인해 드릴 수 없", "확인되지 않", "알 수 없"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["설정"],
+            ["워크스페이스"],
+            ["청구"],
+            ["요금제", "결제 정보"],
+            ["이전 결제 내역", "결제 내역"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구독 및 결제"],
+          "forbiddenAnswerPhrases": ["결제가 완료되었습니다"],
+          "manualReviewCriteria": [
+            "사용자의 실제 결제 완료 여부를 단정하지 않는다.",
+            "일반 결제·환불 정책이 아니라 청구 확인 위치만 관련 안내로 제공한다."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RC018",
+      "description": "캘린더 동기화 이유 대신 공식 적용 범위를 안내",
+      "turns": [
+        {
+          "fixtureTurnNo": 2,
+          "question": "해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "RELATED_GUIDANCE",
+          "expectedLeadConceptGroups": [
+            ["이유", "원인"],
+            ["확인할 수 없", "확인되지 않", "설명하지 않", "나와 있지 않"]
+          ],
+          "expectedAnswerConceptGroups": [
+            ["미팅"],
+            ["작업"],
+            ["마감일"],
+            ["연동 대상이 아", "연동 대상에 포함되지 않", "동기화되지 않", "연동되지 않"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구글 캘린더"],
+          "manualReviewCriteria": [
+            "공식 적용 범위를 연동 이유로 바꿔서 설명하지 않는다.",
+            "미팅만 양방향 연동되고 작업 마감일은 대상이 아니라는 범위만 안내한다."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RC040",
+      "description": "워크스페이스 삭제·이름·Key 변경 복합 질문의 부분 답변 금지",
+      "turns": [
+        {
+          "question": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+          "manualReviewCriteria": [
+            "삭제 영향·이름 변경·Key 변경 중 일부만 관련 안내로 제공하지 않는다.",
+            "PARTIAL 상태나 부분 답변을 암묵적으로 만들지 않는다."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RC012",
+      "description": "소셜 로그인 비밀번호 질문에 무관한 근거 사용 금지",
+      "turns": [
+        {
+          "fixtureTurnNo": 2,
+          "question": "비번찾기 누르면 외부 서비스 로그인으로 회원가입된 계정은 비밀번호를 찾을 수 없습니다라고 뜨네요. 아예 외부 서비스로 가입하면 비번 자체가 없는 건가요?",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+          "manualReviewCriteria": [
+            "비밀번호와 단어만 겹치는 다른 기능 문서를 관련 안내로 사용하지 않는다.",
+            "외부 서비스 계정의 비밀번호 존재 여부를 추론하지 않는다."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RC010",
+      "description": "백로그 정의 직접 답변 회귀",
+      "turns": [
+        {
+          "question": "백로그가 뭐여",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [["백로그"], ["계획", "정리"]],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["계획: 백로그"]
+        }
+      ]
+    },
+    {
+      "id": "RC023",
+      "description": "백로그 기능 요약 직접 답변 회귀",
+      "turns": [
+        {
+          "question": "백로그 기능 설명",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [["백로그"], ["우선순위", "계획"]],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["계획: 백로그"]
+        }
+      ]
+    },
+    {
+      "id": "RC008",
+      "description": "워크스페이스 결제 단위 직접 답변 회귀",
+      "turns": [
+        {
+          "question": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [
+            ["워크스페이스"],
+            ["Business"],
+            ["사용자", "시트", "멤버"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구독 및 결제"]
+        }
+      ]
+    }
+  ]
+}
