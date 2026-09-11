@@ -330,6 +330,18 @@ class GenerationService:
     def __init__(self, generator: OpenAIGenerator) -> None:
         self._generator = generator
 
+    @property
+    def model_name(self) -> str:
+        """실제로 주입된 generation client의 모델 이름."""
+
+        return self._generator.model_name
+
+    @property
+    def prompt_version(self) -> str:
+        """model_calls에 기록하는 generation 프롬프트 버전."""
+
+        return GENERATION_PROMPT_VERSION
+
     async def generate_answer(
         self,
         question: str,

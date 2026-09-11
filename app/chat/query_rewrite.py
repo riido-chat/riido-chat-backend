@@ -615,6 +615,18 @@ class QueryRewriteService:
 
         self._client = client
 
+    @property
+    def model_name(self) -> str:
+        """실제 query rewrite 호출에 사용하는 모델 이름."""
+
+        return OPENAI_QUERY_REWRITE_MODEL
+
+    @property
+    def prompt_version(self) -> str:
+        """model_calls에 기록하는 query rewrite 프롬프트 버전."""
+
+        return QUERY_REWRITE_PROMPT_VERSION
+
     async def rewrite(
         self,
         user_query: str,

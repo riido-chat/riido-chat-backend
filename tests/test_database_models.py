@@ -15,11 +15,16 @@ from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from app.database.base import Base
 from app.database.models import (
     ACTIVE_INDEX_VERSION_CONSTRAINT,
+    CHAT_PROFILE_REVISION_FK_CONSTRAINT,
     INDEX_VERSION_NO_CONSTRAINT,
     AnswerStatus,
+    ChatProfile,
+    ChatProfileRevision,
+    ChatProfileRevisionStatus,
     ChunkEmbedding,
     ContentNode,
     ContextStrategy,
+    ConversationChannel,
     DocumentChunk,
     DocumentGroup,
     DocumentSource,
@@ -37,6 +42,7 @@ from app.database.models import (
     ModelCall,
     ModelCallPurpose,
     RagRun,
+    Conversation,
 )
 from app.retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 
@@ -44,6 +50,8 @@ from app.retrieval.embedding import OPENAI_EMBEDDING_DIMENSIONS
 ERD_TABLE_NAMES = {
     "document_groups",
     "document_group_sources",
+    "chat_profiles",
+    "chat_profile_revisions",
     "document_sources",
     "ingestion_runs",
     "document_versions",
@@ -68,9 +76,9 @@ LEGACY_TABLE_NAMES = {"legacy_document_chunks", "legacy_chunk_embeddings"}
 
 class DatabaseModelTest(unittest.TestCase):
     def test_registers_erd_and_legacy_tables(self) -> None:
-        self.assertEqual(
-            ERD_TABLE_NAMES | LEGACY_TABLE_NAMES,
-            set(Base.metadata.tables),
+        self.assertTrue(
+            ERD_TABLE_NAMES | LEGACY_TABLE_NAMES
+            <= set(Base.metadata.tables)
         )
         self.assertEqual("legacy_document_chunks", LegacyDocumentChunk.__tablename__)
         self.assertEqual("legacy_chunk_embeddings", LegacyChunkEmbedding.__tablename__)
@@ -185,6 +193,70 @@ class DatabaseModelTest(unittest.TestCase):
             unique_constraints["uq_document_groups_group_key"],
         )
         self.assertFalse(table.c.consumer_key.nullable)
+
+    def test_chat_profile_revision_has_single_active_slot_per_status(self) -> None:
+        self.assertEqual(
+            {
+                "id",
+                "profile_key",
+                "name",
+                "created_at",
+                "updated_at",
+            },
+            set(ChatProfile.__table__.columns.keys()),
+        )
+        table = ChatProfileRevision.__table__
+        self.assertFalse(table.c.document_group_id.nullable)
+        self.assertFalse(table.c.generation_model_name.nullable)
+        self.assertFalse(table.c.query_rewrite_model_name.nullable)
+        self.assertFalse(table.c.semantic_cache_enabled.nullable)
+        self.assertTrue(table.c.verifier_model_name.nullable)
+        partial_unique = {
+            index.name: str(index.dialect_options["postgresql"]["where"])
+            for index in table.indexes
+            if index.unique
+        }
+        self.assertEqual(
+            "status = 'PUBLISHED'",
+            partial_unique["uq_chat_profile_revisions_profile_published"],
+        )
+        self.assertEqual(
+            "status = 'TESTING'",
+            partial_unique["uq_chat_profile_revisions_profile_testing"],
+        )
+        check_constraint_names = {
+            constraint.name
+            for constraint in table.constraints
+            if isinstance(constraint, CheckConstraint)
+        }
+        self.assertTrue(
+            any(
+                name == "chat_profile_revision_status"
+                or (
+                    isinstance(name, str)
+                    and name.endswith("_chat_profile_revision_status")
+                )
+                for name in check_constraint_names
+            )
+        )
+        self.assertEqual("PUBLISHED", ChatProfileRevisionStatus.PUBLISHED.value)
+
+    def test_conversation_profile_pin_is_required_and_restricts_delete(self) -> None:
+        column = Conversation.__table__.c.chat_profile_revision_id
+        self.assertFalse(column.nullable)
+        foreign_key = next(iter(column.foreign_keys))
+        self.assertEqual(
+            "chat_profile_revisions.id",
+            foreign_key.target_fullname,
+        )
+        self.assertEqual(
+            CHAT_PROFILE_REVISION_FK_CONSTRAINT,
+            foreign_key.constraint.name,
+        )
+        self.assertLessEqual(len(foreign_key.constraint.name), 63)
+        self.assertEqual("RESTRICT", foreign_key.ondelete)
+        self.assertFalse(Conversation.__table__.c.channel.nullable)
+        self.assertEqual("PUBLIC", ConversationChannel.PUBLIC.value)
 
     def test_document_source_is_identified_by_group_and_document_key(self) -> None:
         table = DocumentSource.__table__

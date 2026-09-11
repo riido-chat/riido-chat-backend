@@ -23,6 +23,9 @@ from app.chat.schema import (
     ChatWithheldResponse,
 )
 from app.database.models import (
+    ChatProfileRevision,
+    ChatProfileRevisionStatus,
+    ConversationChannel,
     ContextStrategy,
     ExecutionStatus,
     ModelCallPurpose,
@@ -65,6 +68,14 @@ from app.answering.models import (
 )
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import HybridSearchCall, RetrievalResult
+from app.retrieval.corpus_state import CorpusNotLoadedError
+from app.chat.profile import (
+    ChatProfileConfigurationError,
+    ChatProfileUnavailableError,
+    ConversationProfileMismatchError,
+    resolve_chat_profile_revision,
+    validate_runtime_model_configuration,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -263,6 +274,10 @@ class _TurnStart:
     conversation_id: uuid.UUID
     rag_run_id: uuid.UUID
     turn_no: int
+    profile_revision_id: Optional[int] = None
+    document_group_id: Optional[int] = None
+    index_version_id: Optional[int] = None
+    retriever: Optional[HybridRetriever] = None
 
 
 @dataclass(frozen=True)
@@ -295,12 +310,16 @@ class ChatService:
 
     def __init__(
         self,
-        retriever: HybridRetriever,
+        retriever: Optional[HybridRetriever],
         generation_service: GenerationService,
         query_rewrite_service: QueryRewriteService,
         log_store: RagLogStore,
         session: AsyncSession,
-        index_version_id: int,
+        index_version_id: Optional[int],
+        profile_status: Optional[ChatProfileRevisionStatus] = None,
+        retriever_factory: Optional[
+            Callable[[int], tuple[HybridRetriever, int]]
+        ] = None,
     ) -> None:
         self._retriever = retriever
         self._generation_service = generation_service
@@ -308,6 +327,8 @@ class ChatService:
         self._log_store = log_store
         self._session = session
         self._index_version_id = index_version_id
+        self._profile_status = profile_status
+        self._retriever_factory = retriever_factory
 
     async def answer_question(
         self,
@@ -332,7 +353,14 @@ class ChatService:
         except asyncio.CancelledError:
             await self._rollback_quietly()
             raise
-        except (ConversationNotFoundError, ConversationBusyError):
+        except (
+            ConversationNotFoundError,
+            ConversationBusyError,
+            ConversationProfileMismatchError,
+            ChatProfileUnavailableError,
+            ChatProfileConfigurationError,
+            CorpusNotLoadedError,
+        ):
             # FOR UPDATE를 포함한 시작 transaction을 닫고 HTTP 계층으로 전달한다.
             await self._rollback_quietly()
             raise
@@ -381,6 +409,7 @@ class ChatService:
     ) -> ChatResponse:
         conversation_id = turn.conversation_id
         rag_run_id = turn.rag_run_id
+        retriever = turn.retriever or self._retriever
 
         # Query Rewrite도 검색 질의 확정 단계이므로 기존 RETRIEVING에 포함한다.
         if on_progress_stage is not None:
@@ -419,7 +448,9 @@ class ChatService:
                 prompt_version,
             )
 
-        search = await self._retriever.search_with_trace(
+        if retriever is None:
+            raise RuntimeError("검색기가 구성되지 않았습니다.")
+        search = await retriever.search_with_trace(
             resolved_query,
             before_model_call=checkpoint_embedding,
         )
@@ -596,15 +627,52 @@ class ChatService:
         question: str,
         conversation_id: Optional[uuid.UUID],
     ) -> _TurnStart:
+        profile_revision: Optional[ChatProfileRevision] = None
+        if self._profile_status is not None:
+            profile_revision = await resolve_chat_profile_revision(
+                self._session,
+                status=self._profile_status,
+                channel=(
+                    ConversationChannel.INTERNAL_TEST
+                    if self._profile_status == ChatProfileRevisionStatus.TESTING
+                    else ConversationChannel.PUBLIC
+                ),
+                conversation_id=conversation_id,
+            )
+            validate_runtime_model_configuration(
+                profile_revision,
+                generation_service=self._generation_service,
+                query_rewrite_service=self._query_rewrite_service,
+            )
+
         if conversation_id is None:
-            conversation = await self._log_store.create_conversation()
+            if profile_revision is None:
+                conversation = await self._log_store.create_conversation()
+            else:
+                conversation = await self._log_store.create_conversation(
+                    chat_profile_revision_id=profile_revision.id,
+                    channel=(
+                        ConversationChannel.INTERNAL_TEST
+                        if self._profile_status == ChatProfileRevisionStatus.TESTING
+                        else ConversationChannel.PUBLIC
+                    ),
+                )
             conversation_id = conversation.id
+
+        effective_index_version_id = self._index_version_id
+        selected_retriever: Optional[HybridRetriever] = None
+        if profile_revision is not None and self._retriever_factory is not None:
+            selected_retriever, effective_index_version_id = self._retriever_factory(
+                profile_revision.document_group_id
+            )
+        if effective_index_version_id is None and self._retriever_factory is None:
+            raise RuntimeError("검색에 사용할 index version이 없습니다.")
 
         try:
             run = await self._log_store.start_rag_run(
                 conversation_id,
                 user_query=question,
-                index_version_id=self._index_version_id,
+                index_version_id=effective_index_version_id,
             )
         except ConversationUnavailableError as error:
             raise ConversationNotFoundError(
@@ -615,6 +683,14 @@ class ChatService:
             conversation_id=conversation_id,
             rag_run_id=run.id,
             turn_no=run.turn_no,
+            profile_revision_id=(
+                None if profile_revision is None else profile_revision.id
+            ),
+            document_group_id=(
+                None if profile_revision is None else profile_revision.document_group_id
+            ),
+            index_version_id=effective_index_version_id,
+            retriever=selected_retriever,
         )
         await self._session.commit()
         return turn

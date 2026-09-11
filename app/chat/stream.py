@@ -30,7 +30,7 @@ from app.chat.schema import ChatResponse
 from app.core.task_registry import register_pipeline_task
 from app.database.session import get_session_factory
 from app.chat.service import ChatService, _internal_error_response
-from app.retrieval.corpus_state import CorpusState
+from app.retrieval.corpus_state import CorpusRegistry, CorpusState
 from app.chat.dependencies import build_chat_service
 from app.answering.service import GenerationService
 from app.chat.progress import ProgressStage
@@ -149,6 +149,7 @@ async def _chat_service_scope(
     embedder: OpenAIEmbedder,
     generation_service: GenerationService,
     query_rewrite_service: QueryRewriteService,
+    corpus_registry: CorpusRegistry | None = None,
 ) -> AsyncIterator[ChatService]:
     """producer가 소유하는 session으로 ChatService를 만든다.
 
@@ -162,6 +163,7 @@ async def _chat_service_scope(
             embedder=embedder,
             generation_service=generation_service,
             query_rewrite_service=query_rewrite_service,
+            corpus_registry=corpus_registry,
         )
 
 
@@ -174,6 +176,7 @@ async def produce_turn(
     embedder: OpenAIEmbedder,
     generation_service: GenerationService,
     query_rewrite_service: QueryRewriteService,
+    corpus_registry: CorpusRegistry | None = None,
 ) -> None:
     """파이프라인을 끝까지 실행하며 이벤트를 Queue에 넣는다.
 
@@ -188,6 +191,7 @@ async def produce_turn(
             embedder,
             generation_service,
             query_rewrite_service,
+            corpus_registry,
         ) as service:
 
             async def on_turn_started(
@@ -284,6 +288,7 @@ async def start_chat_stream(
             question=question,
             conversation_id=conversation_id,
             corpus_state=request.app.state.corpus_state,
+            corpus_registry=getattr(request.app.state, "corpus_registry", None),
             embedder=request.app.state.embedder,
             generation_service=request.app.state.generation_service,
             query_rewrite_service=request.app.state.query_rewrite_service,

@@ -25,6 +25,10 @@ from app.database.models import (
     AnswerStatus,
     Conversation,
     ConversationStatus,
+    ChatProfile,
+    ChatProfileRevision,
+    ChatProfileRevisionStatus,
+    ConversationChannel,
     ContextStrategy,
     ExecutionStatus,
     Feedback,
@@ -145,12 +149,33 @@ class RagLogStore:
     # ------------------------------------------------------------------
 
     async def create_conversation(
-        self, client_key: Optional[uuid.UUID] = None
+        self,
+        client_key: Optional[uuid.UUID] = None,
+        chat_profile_revision_id: Optional[int] = None,
+        channel: Optional[ConversationChannel] = None,
     ) -> Conversation:
         """새 대화를 ACTIVE 상태로 생성한다."""
 
+        if chat_profile_revision_id is None:
+            # Legacy callers (including maintenance jobs) do not know the
+            # endpoint profile.  Keep them safe by resolving the published
+            # HELP_CHATBOT revision rather than leaving an unpinned row.
+            chat_profile_revision_id = await self._session.scalar(
+                select(ChatProfileRevision.id)
+                .join(ChatProfile, ChatProfile.id == ChatProfileRevision.profile_id)
+                .where(
+                    ChatProfile.profile_key == "HELP_CHATBOT",
+                    ChatProfileRevision.status
+                    == ChatProfileRevisionStatus.PUBLISHED,
+                )
+            )
+            if chat_profile_revision_id is None:
+                raise ValueError("HELP_CHATBOT PUBLISHED 프로필 판이 없습니다.")
+
         conversation = Conversation(
             client_key=client_key,
+            chat_profile_revision_id=chat_profile_revision_id,
+            channel=channel or ConversationChannel.PUBLIC,
             status=ConversationStatus.ACTIVE,
             created_at=_utcnow(),
             last_active_at=_utcnow(),
