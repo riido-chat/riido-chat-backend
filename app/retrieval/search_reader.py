@@ -26,8 +26,16 @@ class ActiveIndexNotFoundError(RuntimeError):
 class SearchReader:
     """AsyncSession으로 ACTIVE index를 조회한다."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self,
+        session: AsyncSession,
+        *,
+        document_group_id: Optional[int] = None,
+        index_version_id: Optional[int] = None,
+    ) -> None:
         self._session = session
+        self._document_group_id = document_group_id
+        self._index_version_id = index_version_id
 
     async def get_active_index_version_id(self) -> int:
         """유일한 ACTIVE index version의 DB 식별자를 반환한다."""
@@ -159,17 +167,47 @@ class SearchReader:
         ]
 
     async def _get_active_index_version(self) -> IndexVersion:
+        # An exact index id is a request snapshot.  It may become INACTIVE
+        # after apply while the request is still running, so status must not be
+        # part of this lookup.  A group-only reader resolves ACTIVE instead.
+        if self._index_version_id is not None:
+            statement = select(IndexVersion).where(
+                IndexVersion.id == self._index_version_id
+            )
+        else:
+            statement = select(IndexVersion).where(
+                IndexVersion.status == IndexVersionStatus.ACTIVE
+            )
+        if self._document_group_id is not None:
+            statement = statement.where(
+                IndexVersion.document_group_id == self._document_group_id
+            )
         result = await self._session.execute(
-            select(IndexVersion)
-            .where(IndexVersion.status == IndexVersionStatus.ACTIVE)
-            .order_by(IndexVersion.activated_at.desc(), IndexVersion.id.desc())
-            .limit(2)
+            statement.order_by(
+                IndexVersion.activated_at.desc(), IndexVersion.id.desc()
+            ).limit(2)
         )
         active_versions = list(result.scalars().all())
         if not active_versions:
-            raise ActiveIndexNotFoundError("ACTIVE index version이 없습니다.")
+            scope = (
+                f"document_group_id={self._document_group_id}"
+                if self._document_group_id is not None
+                else "전역"
+            )
+            if self._index_version_id is not None:
+                scope = f"index_version_id={self._index_version_id} ({scope})"
+            raise ActiveIndexNotFoundError(
+                f"{scope} 범위에 index version이 없습니다."
+            )
         if len(active_versions) > 1:
-            raise RuntimeError("ACTIVE index version이 둘 이상 존재합니다.")
+            scope = (
+                f"document_group_id={self._document_group_id}"
+                if self._document_group_id is not None
+                else "전역"
+            )
+            raise RuntimeError(
+                f"{scope} 범위에 ACTIVE index version이 둘 이상 존재합니다."
+            )
         return active_versions[0]
 
     @staticmethod

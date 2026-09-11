@@ -7,9 +7,11 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import select
 
 from app.document.ingestion_service import AdminApiError
 from app.admin.router import router as admin_documents_router
+from app.admin.question_router import register_question_logs
 from app.admin.schema import AdminErrorCode, AdminErrorResponse
 from app.chat.router import corpus_unavailable_response
 from app.chat.router import router as chat_router
@@ -20,6 +22,7 @@ from app.chat.feedback import (
 from app.chat.feedback import router as feedback_router
 from app.api.health import router as health_router
 from app.api.internal import router as internal_router
+from app.api.internal import test_chat_router as internal_test_chat_router
 from app.chat.rag_run import rag_run_result_not_found_response
 from app.chat.rag_run import router as rag_run_router
 from app.core.config import get_settings
@@ -31,6 +34,8 @@ from app.chat.service import (
     conversation_not_found_response,
 )
 from app.retrieval.corpus_state import CorpusNotLoadedError, CorpusState
+from app.retrieval.corpus_state import CorpusRegistry
+from app.database.models import IndexVersion, IndexVersionStatus
 from app.answering.service import GenerationService
 from app.chat.log_store import (
     ConversationBusyError,
@@ -38,6 +43,11 @@ from app.chat.log_store import (
     RagRunNotFoundError,
 )
 from app.chat.query_rewrite import QueryRewriteService
+from app.chat.profile import (
+    ChatProfileConfigurationError,
+    ChatProfileUnavailableError,
+    ConversationProfileMismatchError,
+)
 from app.chat.rag_run_view import RagRunResultNotFoundError
 from app.answering.generator import OpenAIGenerator
 from app.retrieval.embedding import OpenAIEmbedder
@@ -72,8 +82,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     try:
         await _close_interrupted_runs()
         corpus_state = CorpusState(get_settings().corpus_dir)
+        corpus_registry = CorpusRegistry(get_settings().corpus_dir)
         app.state.corpus_state = corpus_state
-        await _load_corpus_if_available(corpus_state)
+        app.state.corpus_registry = corpus_registry
+        await _load_corpus_if_available(corpus_state, corpus_registry)
         app.state.embedder = OpenAIEmbedder()
         app.state.generation_service = GenerationService(OpenAIGenerator())
         app.state.query_rewrite_service = QueryRewriteService()
@@ -110,13 +122,64 @@ async def _drain_pipeline_tasks(app: FastAPI) -> None:
     await asyncio.gather(*pending, return_exceptions=True)
 
 
-async def _load_corpus_if_available(corpus_state: CorpusState) -> None:
+async def _load_corpus_if_available(
+    corpus_state: CorpusState,
+    corpus_registry: CorpusRegistry | None = None,
+) -> None:
     """ACTIVE index가 준비되어 있으면 BM25 corpus를 적재한다."""
 
     try:
         async with get_session_factory()() as session:
-            chunks = await SearchReader(session).load_active_chunks()
-        snapshot = corpus_state.replace(chunks)
+            # Unit tests replace SearchReader with a Mock and exercise the
+            # original single-corpus lifecycle.  Keep that contract while the
+            # real application uses the registry path below.
+            if corpus_registry is None or not isinstance(SearchReader, type):
+                chunks = await SearchReader(session).load_active_chunks()
+                if corpus_registry is None:
+                    snapshot = corpus_state.replace(chunks)
+                else:
+                    prepared = corpus_state.prepare(chunks)
+                    corpus_state.publish(prepared)
+                    # Compatibility for mocked single-corpus startup tests;
+                    # real startup always loads registry entries by DB group.
+                    corpus_registry.replace_legacy(chunks, prepared=prepared)
+                    snapshot = corpus_state.snapshot()
+            else:
+                group_ids = list(
+                    (
+                        await session.scalars(
+                            select(IndexVersion.document_group_id)
+                            .where(
+                                IndexVersion.status == IndexVersionStatus.ACTIVE
+                            )
+                            .order_by(IndexVersion.document_group_id)
+                        )
+                    ).all()
+                )
+                if not group_ids:
+                    raise ActiveIndexNotFoundError(
+                        "ACTIVE index version이 없습니다."
+                    )
+                # Keep the legacy default state for existing internal/admin
+                # endpoints.  It is only valid when one group is active.
+                if len(group_ids) == 1:
+                    group_id = group_ids[0]
+                    chunks = await SearchReader(
+                        session,
+                        document_group_id=group_id,
+                    ).load_active_chunks()
+                    prepared = corpus_registry.prepare(group_id, chunks)
+                    corpus_registry.publish(group_id, prepared)
+                    corpus_state.publish(prepared)
+                    snapshot = corpus_state.snapshot()
+                else:
+                    for group_id in group_ids:
+                        chunks = await SearchReader(
+                            session,
+                            document_group_id=group_id,
+                        ).load_active_chunks()
+                        corpus_registry.replace(group_id, chunks)
+                    snapshot = corpus_registry.snapshot(group_ids[0])
     except (ActiveIndexNotFoundError, ValueError) as exc:
         logger.warning("corpus 미적재 상태로 기동합니다: %s", exc)
         return
@@ -149,7 +212,9 @@ def create_app() -> FastAPI:
     app.include_router(feedback_router)
     app.include_router(rag_run_router)
     app.include_router(internal_router)
+    app.include_router(internal_test_chat_router)
     app.include_router(admin_documents_router)
+    register_question_logs(app)
 
     @app.exception_handler(AdminApiError)
     async def handle_admin_api_error(
@@ -216,6 +281,45 @@ def create_app() -> FastAPI:
             content=conversation_not_found_response().model_dump(
                 mode="json",
                 by_alias=True,
+            ),
+        )
+
+    @app.exception_handler(ConversationProfileMismatchError)
+    async def handle_conversation_profile_mismatch(
+        _: Request,
+        exc: ConversationProfileMismatchError,
+    ) -> JSONResponse:
+        logger.info("endpoint와 다른 프로필의 대화로 요청을 받았습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=conversation_not_found_response().model_dump(
+                mode="json", by_alias=True
+            ),
+        )
+
+    @app.exception_handler(ChatProfileUnavailableError)
+    async def handle_chat_profile_unavailable(
+        _: Request,
+        exc: ChatProfileUnavailableError,
+    ) -> JSONResponse:
+        logger.warning("사용 가능한 chat profile이 없습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content=corpus_unavailable_response().model_dump(
+                mode="json", by_alias=True
+            ),
+        )
+
+    @app.exception_handler(ChatProfileConfigurationError)
+    async def handle_chat_profile_configuration_error(
+        _: Request,
+        exc: ChatProfileConfigurationError,
+    ) -> JSONResponse:
+        logger.error("chat profile 모델 설정이 런타임과 일치하지 않습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content=corpus_unavailable_response().model_dump(
+                mode="json", by_alias=True
             ),
         )
 

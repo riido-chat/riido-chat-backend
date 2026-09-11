@@ -226,7 +226,7 @@ class DrainTest(unittest.IsolatedAsyncioTestCase):
         async def fake_dispose() -> None:
             order.append("dispose")
 
-        async def fake_load(_corpus_state) -> None:
+        async def fake_load(_corpus_state, _corpus_registry=None) -> None:
             return None
 
         with patch.object(main, "_drain_pipeline_tasks", fake_drain), \
