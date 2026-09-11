@@ -82,7 +82,7 @@ def _published_revision_id(connection, profile_id: int) -> int:
             "query_rewrite_model_name, query_rewrite_prompt_version, "
             "semantic_cache_enabled) "
             "VALUES (:profile_id, 1, :group_id, 'PUBLISHED', "
-            "'gpt-5.6-terra', 'v24', 'gpt-5.4-mini', 'v7', false) "
+            "'gpt-5.6-terra', 'v38', 'gpt-5.4-mini', 'v8', false) "
             "RETURNING id"
         ),
         {"profile_id": profile_id, "group_id": group_id},
