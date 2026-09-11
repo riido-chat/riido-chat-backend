@@ -19,6 +19,7 @@ from app.core.config import get_settings
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PARENT_REVISION = "20260908_10"
 CHAT_PROFILE_REVISION = "20260911_11"
+RUNTIME_SYNC_REVISION = "20260912_12"
 CONVERSATION_PROFILE_FK = (
     "fk_conversations_profile_revision_id_chat_profile_revisions"
 )
@@ -145,6 +146,13 @@ class ChatProfileMigrationDbTest(unittest.IsolatedAsyncioTestCase):
         group_id = await self._scalar(
             "SELECT id FROM document_groups WHERE group_key = 'HELP_CHATBOT'"
         )
+        published_config = await self._row(
+            "SELECT generation_prompt_version, query_rewrite_prompt_version "
+            "FROM chat_profile_revisions "
+            "WHERE profile_id = :profile_id AND status = 'PUBLISHED'",
+            {"profile_id": profile_id},
+        )
+        self.assertEqual(("v38", "v8"), published_config)
         revision_values = {
             "profile_id": profile_id,
             "group_id": group_id,
@@ -199,6 +207,90 @@ class ChatProfileMigrationDbTest(unittest.IsolatedAsyncioTestCase):
                     ),
                     revision_values,
                 )
+
+    async def test_runtime_sync_updates_only_legacy_help_chatbot_revisions(self) -> None:
+        _alembic(self.scratch_url, "upgrade", CHAT_PROFILE_REVISION)
+        profile_id = await self._scalar(
+            "SELECT id FROM chat_profiles WHERE profile_key = 'HELP_CHATBOT'"
+        )
+        group_id = await self._scalar(
+            "SELECT id FROM document_groups WHERE group_key = 'HELP_CHATBOT'"
+        )
+        async with self.engine.begin() as connection:
+            await connection.execute(
+                text(
+                    "UPDATE chat_profile_revisions "
+                    "SET generation_prompt_version = 'v24', "
+                    "    query_rewrite_prompt_version = 'v7' "
+                    "WHERE profile_id = :profile_id AND status = 'PUBLISHED'"
+                ),
+                {"profile_id": profile_id},
+            )
+            await connection.execute(
+                text(
+                    "INSERT INTO chat_profile_revisions "
+                    "(profile_id, version, document_group_id, status, "
+                    "generation_model_name, generation_prompt_version, "
+                    "query_rewrite_model_name, query_rewrite_prompt_version) "
+                    "VALUES (:profile_id, 2, :group_id, 'TESTING', "
+                    "'gpt-5.6-terra', 'v24', 'gpt-5.4-mini', 'v7')"
+                ),
+                {"profile_id": profile_id, "group_id": group_id},
+            )
+            await connection.execute(
+                text(
+                    "INSERT INTO chat_profile_revisions "
+                    "(profile_id, version, document_group_id, status, "
+                    "generation_model_name, generation_prompt_version, "
+                    "query_rewrite_model_name, query_rewrite_prompt_version) "
+                    "VALUES (:profile_id, 3, :group_id, 'DRAFT', "
+                    "'gpt-5.6-terra', 'v24', 'gpt-5.4-mini', 'v7')"
+                ),
+                {"profile_id": profile_id, "group_id": group_id},
+            )
+            await connection.execute(
+                text(
+                    "INSERT INTO chat_profiles (profile_key, name) "
+                    "VALUES ('OTHER_PROFILE', 'Other')"
+                )
+            )
+            other_profile_id = (
+                await connection.execute(
+                    text(
+                        "SELECT id FROM chat_profiles "
+                        "WHERE profile_key = 'OTHER_PROFILE'"
+                    )
+                )
+            ).scalar_one()
+            await connection.execute(
+                text(
+                    "INSERT INTO chat_profile_revisions "
+                    "(profile_id, version, document_group_id, status, "
+                    "generation_model_name, generation_prompt_version, "
+                    "query_rewrite_model_name, query_rewrite_prompt_version) "
+                    "VALUES (:profile_id, 1, :group_id, 'PUBLISHED', "
+                    "'gpt-5.6-terra', 'v24', 'gpt-5.4-mini', 'v7')"
+                ),
+                {"profile_id": other_profile_id, "group_id": group_id},
+            )
+
+        _alembic(self.scratch_url, "upgrade", RUNTIME_SYNC_REVISION)
+        rows = await self._rows(
+            "SELECT p.profile_key, r.status, r.generation_prompt_version, "
+            "r.query_rewrite_prompt_version "
+            "FROM chat_profile_revisions r "
+            "JOIN chat_profiles p ON p.id = r.profile_id "
+            "ORDER BY p.profile_key, r.status"
+        )
+        self.assertIn(("HELP_CHATBOT", "PUBLISHED", "v38", "v8"), rows)
+        self.assertIn(("HELP_CHATBOT", "TESTING", "v38", "v8"), rows)
+        self.assertIn(("HELP_CHATBOT", "DRAFT", "v24", "v7"), rows)
+        self.assertIn(("OTHER_PROFILE", "PUBLISHED", "v24", "v7"), rows)
+
+    async def _rows(self, statement: str, parameters=None):
+        async with self.engine.connect() as connection:
+            result = await connection.execute(text(statement), parameters or {})
+            return result.fetchall()
 
     async def _maintenance(self, statement: str) -> None:
         url = make_url(self.database_url).set(database="postgres")

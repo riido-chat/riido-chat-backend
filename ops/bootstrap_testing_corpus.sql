@@ -1,4 +1,4 @@
--- One-time remote-dev setup after Alembic 20260911_11.
+-- One-time remote-dev setup after Alembic 20260912_12.
 -- Run this transaction against the intended database, then run:
 --   python -m app.ops.bootstrap_testing_corpus
 -- The application command copies generated-identity corpus rows in one
@@ -43,9 +43,9 @@ BEGIN
         UPDATE chat_profile_revisions
         SET document_group_id = v_target_group_id,
             generation_model_name = 'gpt-5.6-terra',
-            generation_prompt_version = 'v24',
+            generation_prompt_version = 'v38',
             query_rewrite_model_name = 'gpt-5.4-mini',
-            query_rewrite_prompt_version = 'v7',
+            query_rewrite_prompt_version = 'v8',
             semantic_cache_enabled = false
         WHERE id = v_testing_revision_id;
     ELSE
@@ -59,7 +59,7 @@ BEGIN
              semantic_cache_enabled)
         VALUES
             (v_profile_id, v_next_version, v_target_group_id, 'TESTING',
-             'gpt-5.6-terra', 'v24', 'gpt-5.4-mini', 'v7', false);
+             'gpt-5.6-terra', 'v38', 'gpt-5.4-mini', 'v8', false);
     END IF;
 END $$;
 
