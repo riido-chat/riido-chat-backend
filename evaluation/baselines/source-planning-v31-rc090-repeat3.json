@@ -1,0 +1,2466 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-11T10:34:29.902330+00:00",
+  "casesVersion": "real-customer-cases-v4",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "d77c5a8e6af04ef61ef325594130e6d564e3d441",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.6-terra"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v8",
+        "sha256": "6382fe3033a461b851ee88b65c0c8a24aeb74ac940df13fbc3e96ea1f79c3dbb"
+      },
+      "sourcePlanning": {
+        "version": "v31",
+        "sha256": "36167ae7401ff371fef846011491591350f1176435ccb3a57322add660a14917"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v31-repair-1",
+        "sha256": "2dc7311f4e2ed1cb84b055823a2948395828a4f8d6a0160188e200902ff4e1db"
+      },
+      "answer": {
+        "version": "v23",
+        "sha256": "7cefd4931821158f05581d5a4259a55d6a2b51ae559af69a16fa59b139707591"
+      },
+      "answerValidationRegeneration": {
+        "version": "v23-repair-1",
+        "sha256": "179ee279b1466e88bd411e3f7839c9751d78e30700a6e4ff14b771c3f3f477ad"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "d77c5a8e6af04ef61ef325594130e6d564e3d441",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.6-terra",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v38"
+      },
+      {
+        "purpose": "QUERY_REWRITE",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v8"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 3,
+    "uniqueCaseCount": 1,
+    "totalCaseExecutionCount": 3,
+    "passedCaseExecutionCount": 3,
+    "failedCaseExecutionCount": 0,
+    "executionErrorCaseExecutionCount": 0,
+    "criteriaMismatchCaseExecutionCount": 0,
+    "planningStatusTurnCounts": {
+      "ANSWERABLE": 0,
+      "RELATED_GUIDANCE": 6,
+      "WITHHELD": 0
+    },
+    "perCase": [
+      {
+        "id": "RC090",
+        "executionCount": 3,
+        "passedCount": 3,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 3,
+        "passedCount": 3,
+        "failedCount": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-11T10:33:29.579855+00:00",
+      "results": [
+        {
+          "id": "RC090",
+          "description": "기존 스프린트 도입 상황의 시작일 유연성 문의와 보충 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "27d3b773-f35a-44de-b466-401e52a1d5db",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "27d3b773-f35a-44de-b466-401e52a1d5db",
+                "ragRunId": "3f17e4e8-d9ca-4165-8d35-f7962037b94c",
+                "answer": {
+                  "answerMarkdown": "기존 프로젝트에서 첫 스프린트와 이후 스프린트의 시작 날짜를 임의의 날짜로 유연하게 지정할 수 있는지는 제공된 안내에서 확인되지 않습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정하면 자동으로 활성화됩니다. [1]\n\n시작 요일은 스프린트 시작의 기준이 됩니다. 처음 활성화할 때는 설정한 요일부터 새 스프린트가 시작되고, 기존 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤 다음 스프린트가 시작됩니다. 예정된 작업 일정에 영향을 줄 수 있어 주기 변경은 현재 스프린트 종료 후 적용하는 것이 권장됩니다. [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 설정"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 시작 요일"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 8706,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 78,
+                    "outputTokens": null,
+                    "latencyMs": 476,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v38",
+                    "inputTokens": 9467,
+                    "outputTokens": 335,
+                    "latencyMs": 8146,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "스프린트",
+                  "스프린트"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3302,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:48338ffe0288",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 시작 요일"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "d157c06165cd8fb9c70026d16b625c5ed3c02a83db9a7622b3343a82accdbe29",
+                        "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 23.701200132894655,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6411632830158984,
+                            "latencyMs": 505
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3300,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:8f39a6741f94",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "30c49ede2036a0dcf966b4c2033000bd7edb3a5d1fd765340871d1e3aefe167c",
+                        "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 17.631192361765887,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5669626375312758,
+                            "latencyMs": 505
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3299,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:203889cf792c",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "35e456517f89ebe937bf0af7f3ee21c6c8db19f1b38912cafc8f675701ac05e6",
+                        "content": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다.\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 15.751645869875151,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5530109603365749,
+                            "latencyMs": 505
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3303,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:7a8e11bfc496",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "미리 생성할 다가올 스프린트 개수"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "44a05662ad01974d320173403f923d39732de87c22f5bc027b781e1077d9d52b",
+                        "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03036576949620428,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 14.20665236789397,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5684458278881557,
+                            "latencyMs": 505
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3309,
+                        "documentVersionId": 2434,
+                        "documentId": "40ac0f0ac641",
+                        "sectionId": "40ac0f0ac641:6bbc22c7fbca",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/automations.md",
+                        "contentHash": "e4a0d98606608d268f52c4c09b9062ae703b2b9cc6ea84b143eb868a6f608a0a",
+                        "content": "스프린트를 시작하거나 종료할 때마다 반복되는 작업이 있다면, 자동화 기능을 통해 한 번의 설정으로 처리할 수 있습니다. 작업을 일일이 수동으로 정리하지 않아도 되기 때문에 팀은 실행에 더 집중할 수 있고, 스프린트 리듬도 자연스럽게 유지됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030303030303030304,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 15.157236648128025,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.5134806816413381,
+                            "latencyMs": 505
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v38",
+                        "inputTokens": 9467,
+                        "outputTokens": 335,
+                        "latencyMs": 8146,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "RELATED_GUIDANCE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "optional_context": [],
+                        "unanswered_information": [
+                          "기존 프로젝트 진행 중 첫 스프린트의 임의 시작 날짜와 이후 스프린트의 시작 날짜를 유연하게 지정할 수 있는지 여부"
+                        ],
+                        "related_guidance": [
+                          {
+                            "information_unit": "스프린트에서 공식적으로 설정 가능한 시작 요일과 설정 위치",
+                            "source_ids": [
+                              "SOURCE_1",
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3302,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:48338ffe0288",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 시작 요일"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3300,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:8f39a6741f94",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 설정"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "limitation_markdown": "기존 프로젝트에서 첫 스프린트와 이후 스프린트의 시작 날짜를 임의의 날짜로 유연하게 지정할 수 있는지는 제공된 안내에서 확인되지 않습니다.",
+                        "answer_markdown": "스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정하면 자동으로 활성화됩니다. [SOURCE_2]\n\n시작 요일은 스프린트 시작의 기준이 됩니다. 처음 활성화할 때는 설정한 요일부터 새 스프린트가 시작되고, 기존 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤 다음 스프린트가 시작됩니다. 예정된 작업 일정에 영향을 줄 수 있어 주기 변경은 현재 스프린트 종료 후 적용하는 것이 권장됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "기존 프로젝트에서 첫 스프린트와 이후 스프린트의 시작 날짜를 임의의 날짜로 유연하게 지정할 수 있는지는 제공된 안내에서 확인되지 않습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정하면 자동으로 활성화됩니다. [1]\n\n시작 요일은 스프린트 시작의 기준이 됩니다. 처음 활성화할 때는 설정한 요일부터 새 스프린트가 시작되고, 기존 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤 다음 스프린트가 시작됩니다. 예정된 작업 일정에 영향을 줄 수 있어 주기 변경은 현재 스프린트 종료 후 적용하는 것이 권장됩니다. [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "27d3b773-f35a-44de-b466-401e52a1d5db",
+                "ragRunId": "190841ab-7621-4e0a-84f4-feac05ee1736",
+                "answer": {
+                  "answerMarkdown": "이미 진행 중인 스프린트에서 오늘 이전 날짜를 선택할 수 있는지, 다음 스프린트의 임의 시작 날짜를 직접 지정할 수 있는지, 회고·계획 수립을 위해 예외적으로 시작일과 기간을 조정하는 방법은 제공된 안내에서 확인할 수 없습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정하면 스프린트가 자동으로 활성화됩니다. [1]\n\n- **시작 요일**: 스프린트가 시작되는 기준 요일입니다. 처음 활성화할 때는 설정한 요일부터 새 스프린트가 시작되며, 기존 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤 다음 스프린트부터 새로 시작됩니다. [2]\n- **스프린트 기간**: 주 단위로 설정하며, 최소 1주부터 최대 8주까지 지정할 수 있습니다. [3]\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것이 권장됩니다. [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 설정"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 시작 요일"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 3,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 기간"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+                "resolvedQuery": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다. 스프린트는 어떻게 설정하나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 10757,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v8",
+                    "inputTokens": 3819,
+                    "outputTokens": 104,
+                    "latencyMs": 1479,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 114,
+                    "outputTokens": null,
+                    "latencyMs": 514,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v38",
+                    "inputTokens": 9804,
+                    "outputTokens": 637,
+                    "latencyMs": 8668,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 3,
+                "citationDocumentTitles": [
+                  "스프린트",
+                  "스프린트",
+                  "스프린트"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "3f17e4e8-d9ca-4165-8d35-f7962037b94c",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "answerContent": "기존 프로젝트에서 첫 스프린트와 이후 스프린트의 시작 날짜를 임의의 날짜로 유연하게 지정할 수 있는지는 제공된 안내에서 확인되지 않습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정하면 자동으로 활성화됩니다. [1]\n\n시작 요일은 스프린트 시작의 기준이 됩니다. 처음 활성화할 때는 설정한 요일부터 새 스프린트가 시작되고, 기존 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤 다음 스프린트가 시작됩니다. 예정된 작업 일정에 영향을 줄 수 있어 주기 변경은 현재 스프린트 종료 후 적용하는 것이 권장됩니다. [2]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "3f17e4e8-d9ca-4165-8d35-f7962037b94c",
+                        "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "answerContent": "기존 프로젝트에서 첫 스프린트와 이후 스프린트의 시작 날짜를 임의의 날짜로 유연하게 지정할 수 있는지는 제공된 안내에서 확인되지 않습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정하면 자동으로 활성화됩니다. [1]\n\n시작 요일은 스프린트 시작의 기준이 됩니다. 처음 활성화할 때는 설정한 요일부터 새 스프린트가 시작되고, 기존 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤 다음 스프린트가 시작됩니다. 예정된 작업 일정에 영향을 줄 수 있어 주기 변경은 현재 스프린트 종료 후 적용하는 것이 권장됩니다. [2]",
+                        "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다. 스프린트는 어떻게 설정하나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3302,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:48338ffe0288",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 시작 요일"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "d157c06165cd8fb9c70026d16b625c5ed3c02a83db9a7622b3343a82accdbe29",
+                        "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 19.656968037113444,
+                            "latencyMs": 4
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6220350577390581,
+                            "latencyMs": 529
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3300,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:8f39a6741f94",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "30c49ede2036a0dcf966b4c2033000bd7edb3a5d1fd765340871d1e3aefe167c",
+                        "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03225806451612903,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 20.01300434036947,
+                            "latencyMs": 4
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6024160252993215,
+                            "latencyMs": 529
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3299,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:203889cf792c",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "35e456517f89ebe937bf0af7f3ee21c6c8db19f1b38912cafc8f675701ac05e6",
+                        "content": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다.\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 23.22388718486191,
+                            "latencyMs": 4
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5709156025165594,
+                            "latencyMs": 529
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3303,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:7a8e11bfc496",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "미리 생성할 다가올 스프린트 개수"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "44a05662ad01974d320173403f923d39732de87c22f5bc027b781e1077d9d52b",
+                        "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 18.998102165198734,
+                            "latencyMs": 4
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5836035981542236,
+                            "latencyMs": 529
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3301,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:1c82492f0b2a",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 기간"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "fea5253ffb2ae1231e90bdcca3ebb35ea55c457a988039db70bca98472a61f24",
+                        "content": "하나의 스프린트가 지속되는 기간입니다. 주 단위로 설정할 수 있으며, 최소 1주부터 최대 8주까지 설정 가능합니다.\n\n* 일반적으로 1\\~2주는 짧은 반복과 빠른 실행에 적합합니다.\n* 3주 이상은 중장기 프로젝트의 진행 추적에 유용합니다.\n\n팀 규모와 업무 성격에 따라 적정 주기를 설정하는 것을 권장합니다.\n\n예: 초기 스타트업 팀 — 1주 / 대규모 프로젝트 팀 — 2\\~3주",
+                        "fusedRank": 5,
+                        "fusedScore": 0.02967032967032967,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 15.097517210254624,
+                            "latencyMs": 4
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5643315733400766,
+                            "latencyMs": 529
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v38",
+                        "inputTokens": 9804,
+                        "outputTokens": 637,
+                        "latencyMs": 8668,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "RELATED_GUIDANCE",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "optional_context": [],
+                        "unanswered_information": [
+                          "이미 진행 중인 스프린트에 오늘 이전 날짜를 선택할 수 있는지 여부와 설정 방법",
+                          "다음 스프린트의 임의 시작 날짜를 직접 지정할 수 있는지 여부와 설정 방법",
+                          "회고 및 계획 수립을 위해 종료 후 다음 일정의 시작일·기간을 예외적으로 조정하는 방법"
+                        ],
+                        "related_guidance": [
+                          {
+                            "information_unit": "스프린트의 공식 설정 위치와 기본 설정 항목(기간·시작 요일·다가올 스프린트 개수)",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          },
+                          {
+                            "information_unit": "시작 요일 또는 주기 변경 시 현재 스프린트가 유지되는 방식과 변경 권장 시점",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          },
+                          {
+                            "information_unit": "스프린트 기간의 설정 단위 및 허용 범위",
+                            "source_ids": [
+                              "SOURCE_5"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3300,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:8f39a6741f94",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 설정"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3302,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:48338ffe0288",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 시작 요일"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_5",
+                          "chunkId": 3301,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:1c82492f0b2a",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 기간"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "하나의 스프린트가 지속되는 기간입니다. 주 단위로 설정할 수 있으며, 최소 1주부터 최대 8주까지 설정 가능합니다.\n\n* 일반적으로 1\\~2주는 짧은 반복과 빠른 실행에 적합합니다.\n* 3주 이상은 중장기 프로젝트의 진행 추적에 유용합니다.\n\n팀 규모와 업무 성격에 따라 적정 주기를 설정하는 것을 권장합니다.\n\n예: 초기 스타트업 팀 — 1주 / 대규모 프로젝트 팀 — 2\\~3주"
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "limitation_markdown": "이미 진행 중인 스프린트에서 오늘 이전 날짜를 선택할 수 있는지, 다음 스프린트의 임의 시작 날짜를 직접 지정할 수 있는지, 회고·계획 수립을 위해 예외적으로 시작일과 기간을 조정하는 방법은 제공된 안내에서 확인할 수 없습니다.",
+                        "answer_markdown": "스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정하면 스프린트가 자동으로 활성화됩니다. [SOURCE_2]\n\n- **시작 요일**: 스프린트가 시작되는 기준 요일입니다. 처음 활성화할 때는 설정한 요일부터 새 스프린트가 시작되며, 기존 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤 다음 스프린트부터 새로 시작됩니다. [SOURCE_1]\n- **스프린트 기간**: 주 단위로 설정하며, 최소 1주부터 최대 8주까지 지정할 수 있습니다. [SOURCE_5]\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것이 권장됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "이미 진행 중인 스프린트에서 오늘 이전 날짜를 선택할 수 있는지, 다음 스프린트의 임의 시작 날짜를 직접 지정할 수 있는지, 회고·계획 수립을 위해 예외적으로 시작일과 기간을 조정하는 방법은 제공된 안내에서 확인할 수 없습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정하면 스프린트가 자동으로 활성화됩니다. [1]\n\n- **시작 요일**: 스프린트가 시작되는 기준 요일입니다. 처음 활성화할 때는 설정한 요일부터 새 스프린트가 시작되며, 기존 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤 다음 스프린트부터 새로 시작됩니다. [2]\n- **스프린트 기간**: 주 단위로 설정하며, 최소 1주부터 최대 8주까지 지정할 수 있습니다. [3]\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것이 권장됩니다. [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    },
+    {
+      "repeatNo": 2,
+      "executedAt": "2026-09-11T10:33:49.143853+00:00",
+      "results": [
+        {
+          "id": "RC090",
+          "description": "기존 스프린트 도입 상황의 시작일 유연성 문의와 보충 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "ecc4812c-0108-4804-a095-7c293d7a3f55",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "ecc4812c-0108-4804-a095-7c293d7a3f55",
+                "ragRunId": "81fbfd09-f09a-4916-aaf6-a4040ff49a60",
+                "answer": {
+                  "answerMarkdown": "기존 프로젝트 진행 중 첫 스프린트와 다음 스프린트의 시작 날짜를 각각 임의로 지정할 수 있는지는 확인되지 않았습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. [1]\n\n처음 활성화할 때는 설정한 시작 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤, 다음 스프린트가 새로 시작됩니다. [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 설정"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 시작 요일"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 9284,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 78,
+                    "outputTokens": null,
+                    "latencyMs": 282,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v38",
+                    "inputTokens": 9528,
+                    "outputTokens": 452,
+                    "latencyMs": 8950,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "스프린트",
+                  "스프린트"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3302,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:48338ffe0288",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 시작 요일"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "d157c06165cd8fb9c70026d16b625c5ed3c02a83db9a7622b3343a82accdbe29",
+                        "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 23.701200132894655,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6411632830158984,
+                            "latencyMs": 297
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3300,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:8f39a6741f94",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "30c49ede2036a0dcf966b4c2033000bd7edb3a5d1fd765340871d1e3aefe167c",
+                        "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 17.631192361765887,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5669626375312758,
+                            "latencyMs": 297
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3299,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:203889cf792c",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "35e456517f89ebe937bf0af7f3ee21c6c8db19f1b38912cafc8f675701ac05e6",
+                        "content": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다.\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 15.751645869875151,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5530109603365749,
+                            "latencyMs": 297
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3303,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:7a8e11bfc496",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "미리 생성할 다가올 스프린트 개수"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "44a05662ad01974d320173403f923d39732de87c22f5bc027b781e1077d9d52b",
+                        "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03036576949620428,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 14.20665236789397,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5684458278881557,
+                            "latencyMs": 297
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3309,
+                        "documentVersionId": 2434,
+                        "documentId": "40ac0f0ac641",
+                        "sectionId": "40ac0f0ac641:6bbc22c7fbca",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/automations.md",
+                        "contentHash": "e4a0d98606608d268f52c4c09b9062ae703b2b9cc6ea84b143eb868a6f608a0a",
+                        "content": "스프린트를 시작하거나 종료할 때마다 반복되는 작업이 있다면, 자동화 기능을 통해 한 번의 설정으로 처리할 수 있습니다. 작업을 일일이 수동으로 정리하지 않아도 되기 때문에 팀은 실행에 더 집중할 수 있고, 스프린트 리듬도 자연스럽게 유지됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030303030303030304,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 15.157236648128025,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.5134806816413381,
+                            "latencyMs": 297
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v38",
+                        "inputTokens": 9528,
+                        "outputTokens": 452,
+                        "latencyMs": 8950,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "RELATED_GUIDANCE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "optional_context": [],
+                        "unanswered_information": [
+                          "기존 프로젝트 진행 중 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 각각 임의로 유연하게 지정할 수 있는지 여부"
+                        ],
+                        "related_guidance": [
+                          {
+                            "information_unit": "스프린트의 공식 설정 위치와 기본적으로 설정 가능한 일정 항목(기간, 시작 요일, 다가올 스프린트 개수)",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          },
+                          {
+                            "information_unit": "첫 스프린트는 설정한 시작 요일부터 시작되며, 주기 변경 시 현재 스프린트가 해당 요일까지 유지된 뒤 다음 스프린트가 시작되는 기본 동작",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3300,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:8f39a6741f94",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 설정"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3302,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:48338ffe0288",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 시작 요일"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "limitation_markdown": "기존 프로젝트 진행 중 첫 스프린트와 다음 스프린트의 시작 날짜를 각각 임의로 지정할 수 있는지는 확인되지 않았습니다.",
+                        "answer_markdown": "스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. [SOURCE_2]\n\n처음 활성화할 때는 설정한 시작 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤, 다음 스프린트가 새로 시작됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "기존 프로젝트 진행 중 첫 스프린트와 다음 스프린트의 시작 날짜를 각각 임의로 지정할 수 있는지는 확인되지 않았습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. [1]\n\n처음 활성화할 때는 설정한 시작 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤, 다음 스프린트가 새로 시작됩니다. [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "ecc4812c-0108-4804-a095-7c293d7a3f55",
+                "ragRunId": "7bb0dbaf-d479-4335-a80b-df7aa3ad7fd4",
+                "answer": {
+                  "answerMarkdown": "이미 진행 중인 스프린트에서 오늘 이전의 특정 날짜를 선택할 수 있는지, 다음 스프린트의 시작일을 임의의 날짜로 지정할 수 있는지, 회고·계획 일정에 맞춰 다음 스프린트의 시작일과 기간을 설정하는 구체적인 방법 및 조건은 제공된 안내에서 확인되지 않습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. 이 설정에 따라 스프린트가 자동으로 활성화됩니다. [1]\n\n기존 스프린트의 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지되고, 그다음 스프린트부터 새로 시작됩니다. 예정된 작업 일정에 영향을 줄 수 있으므로 주기 변경은 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 설정"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 시작 요일"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+                "resolvedQuery": "이미 진행하던 스프린트를 관리하려는 상황이라 스프린트의 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 12826,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v8",
+                    "inputTokens": 3777,
+                    "outputTokens": 93,
+                    "latencyMs": 1350,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 103,
+                    "outputTokens": null,
+                    "latencyMs": 192,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v38",
+                    "inputTokens": 9600,
+                    "outputTokens": 714,
+                    "latencyMs": 11196,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "스프린트",
+                  "스프린트"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "81fbfd09-f09a-4916-aaf6-a4040ff49a60",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "answerContent": "기존 프로젝트 진행 중 첫 스프린트와 다음 스프린트의 시작 날짜를 각각 임의로 지정할 수 있는지는 확인되지 않았습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. [1]\n\n처음 활성화할 때는 설정한 시작 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤, 다음 스프린트가 새로 시작됩니다. [2]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "81fbfd09-f09a-4916-aaf6-a4040ff49a60",
+                        "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "answerContent": "기존 프로젝트 진행 중 첫 스프린트와 다음 스프린트의 시작 날짜를 각각 임의로 지정할 수 있는지는 확인되지 않았습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. [1]\n\n처음 활성화할 때는 설정한 시작 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 뒤, 다음 스프린트가 새로 시작됩니다. [2]",
+                        "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "이미 진행하던 스프린트를 관리하려는 상황이라 스프린트의 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3302,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:48338ffe0288",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 시작 요일"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "d157c06165cd8fb9c70026d16b625c5ed3c02a83db9a7622b3343a82accdbe29",
+                        "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 18.444782073989064,
+                            "latencyMs": 3
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5886692628310938,
+                            "latencyMs": 206
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3299,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:203889cf792c",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "35e456517f89ebe937bf0af7f3ee21c6c8db19f1b38912cafc8f675701ac05e6",
+                        "content": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다.\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03177805800756621,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 23.223887184861912,
+                            "latencyMs": 3
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5256418644154005,
+                            "latencyMs": 206
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3303,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:7a8e11bfc496",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "미리 생성할 다가올 스프린트 개수"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "44a05662ad01974d320173403f923d39732de87c22f5bc027b781e1077d9d52b",
+                        "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 17.725186025681676,
+                            "latencyMs": 3
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5672811981202628,
+                            "latencyMs": 206
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3300,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:8f39a6741f94",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "30c49ede2036a0dcf966b4c2033000bd7edb3a5d1fd765340871d1e3aefe167c",
+                        "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031746031746031744,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 18.414792152093828,
+                            "latencyMs": 3
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5366607846721556,
+                            "latencyMs": 206
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3308,
+                        "documentVersionId": 2433,
+                        "documentId": "2c428c0d81be",
+                        "sectionId": "2c428c0d81be:91e1e3f290e3",
+                        "documentTitle": "스프린트 그래프",
+                        "sectionPath": [
+                          "스프린트 그래프",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/sprint-graph.md",
+                        "contentHash": "fd79b9576cc657ccbfebfa1ee98f16719f094dbaa76cca052295e3ee83a96d42",
+                        "content": "* 스프린트 그래프는 모든 작업의 상태 변경(진행 중/완료)에 따라 실시간으로 자동 업데이트됩니다.\n* 그래프 상의 데이터는 스프린트가 종료되면 자동으로 저장되어, 이후 작업의 변동 사항이 생기더라도 그래프에는 반영되지 않습니다. 이는 스프린트 회고 시점의 데이터를 기준으로 분석할 수 있도록 하기 위함입니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029418126757516764,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 14.953400440270462,
+                            "latencyMs": 3
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.49163887584801824,
+                            "latencyMs": 206
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v38",
+                        "inputTokens": 9600,
+                        "outputTokens": 714,
+                        "latencyMs": 11196,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "RELATED_GUIDANCE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "MULTI_DETAIL",
+                        "evidence_requirements": [],
+                        "optional_context": [],
+                        "unanswered_information": [
+                          "이미 진행 중인 스프린트에서 오늘 이전의 특정 날짜를 선택할 수 있는지",
+                          "다음 스프린트의 시작일을 임의의 특정 날짜로 지정할 수 있는지",
+                          "현재 스프린트 종료 후 다음 일정의 시작일 및 기간을 회고·계획 목적에 맞춰 설정하는 방법과 조건"
+                        ],
+                        "related_guidance": [
+                          {
+                            "information_unit": "스프린트 설정 위치와 설정 가능한 기본 항목(스프린트 기간, 시작 요일, 다가올 스프린트 개수)",
+                            "source_ids": [
+                              "SOURCE_4"
+                            ]
+                          },
+                          {
+                            "information_unit": "기존 스프린트 주기 변경 시 현재 스프린트 유지 방식 및 종료 후 변경 권장 사항",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_4",
+                          "chunkId": 3300,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:8f39a6741f94",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 설정"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3302,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:48338ffe0288",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 시작 요일"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "limitation_markdown": "이미 진행 중인 스프린트에서 오늘 이전의 특정 날짜를 선택할 수 있는지, 다음 스프린트의 시작일을 임의의 날짜로 지정할 수 있는지, 회고·계획 일정에 맞춰 다음 스프린트의 시작일과 기간을 설정하는 구체적인 방법 및 조건은 제공된 안내에서 확인되지 않습니다.",
+                        "answer_markdown": "스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. 이 설정에 따라 스프린트가 자동으로 활성화됩니다. [SOURCE_4]\n\n기존 스프린트의 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지되고, 그다음 스프린트부터 새로 시작됩니다. 예정된 작업 일정에 영향을 줄 수 있으므로 주기 변경은 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "이미 진행 중인 스프린트에서 오늘 이전의 특정 날짜를 선택할 수 있는지, 다음 스프린트의 시작일을 임의의 날짜로 지정할 수 있는지, 회고·계획 일정에 맞춰 다음 스프린트의 시작일과 기간을 설정하는 구체적인 방법 및 조건은 제공된 안내에서 확인되지 않습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. 이 설정에 따라 스프린트가 자동으로 활성화됩니다. [1]\n\n기존 스프린트의 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지되고, 그다음 스프린트부터 새로 시작됩니다. 예정된 작업 일정에 영향을 줄 수 있으므로 주기 변경은 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        }
+      ]
+    },
+    {
+      "repeatNo": 3,
+      "executedAt": "2026-09-11T10:34:11.331485+00:00",
+      "results": [
+        {
+          "id": "RC090",
+          "description": "기존 스프린트 도입 상황의 시작일 유연성 문의와 보충 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "77a9ecd7-e5ff-4395-81fe-6867e0ce6fd6",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "77a9ecd7-e5ff-4395-81fe-6867e0ce6fd6",
+                "ragRunId": "3670346c-09b2-4f38-81a3-67dd98f58fba",
+                "answer": {
+                  "answerMarkdown": "기존 프로젝트 진행 중 첫 스프린트와 이후 스프린트의 시작 날짜를 임의로 유연하게 지정할 수 있는지와 그 설정 방법은 확인되지 않았습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. 이 항목을 설정하면 스프린트가 자동으로 활성화됩니다. [1]\n\n처음 스프린트를 활성화할 때는 설정한 시작 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지되고, 이후 다음 스프린트가 새로 시작됩니다. 주기 변경은 예정된 작업 일정에 영향을 줄 수 있어 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 설정"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 시작 요일"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 8447,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 78,
+                    "outputTokens": null,
+                    "latencyMs": 189,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v38",
+                    "inputTokens": 9533,
+                    "outputTokens": 520,
+                    "latencyMs": 8210,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "스프린트",
+                  "스프린트"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3302,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:48338ffe0288",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 시작 요일"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "d157c06165cd8fb9c70026d16b625c5ed3c02a83db9a7622b3343a82accdbe29",
+                        "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 23.701200132894655,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6411632830158984,
+                            "latencyMs": 200
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3300,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:8f39a6741f94",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "30c49ede2036a0dcf966b4c2033000bd7edb3a5d1fd765340871d1e3aefe167c",
+                        "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 17.631192361765887,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5669626375312758,
+                            "latencyMs": 200
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3299,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:203889cf792c",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "35e456517f89ebe937bf0af7f3ee21c6c8db19f1b38912cafc8f675701ac05e6",
+                        "content": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다.\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 15.751645869875151,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5530109603365749,
+                            "latencyMs": 200
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3303,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:7a8e11bfc496",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "미리 생성할 다가올 스프린트 개수"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "44a05662ad01974d320173403f923d39732de87c22f5bc027b781e1077d9d52b",
+                        "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03036576949620428,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 14.20665236789397,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5684458278881557,
+                            "latencyMs": 200
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3309,
+                        "documentVersionId": 2434,
+                        "documentId": "40ac0f0ac641",
+                        "sectionId": "40ac0f0ac641:6bbc22c7fbca",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/automations.md",
+                        "contentHash": "e4a0d98606608d268f52c4c09b9062ae703b2b9cc6ea84b143eb868a6f608a0a",
+                        "content": "스프린트를 시작하거나 종료할 때마다 반복되는 작업이 있다면, 자동화 기능을 통해 한 번의 설정으로 처리할 수 있습니다. 작업을 일일이 수동으로 정리하지 않아도 되기 때문에 팀은 실행에 더 집중할 수 있고, 스프린트 리듬도 자연스럽게 유지됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030303030303030304,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 15.157236648128025,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.5134806816413381,
+                            "latencyMs": 200
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v38",
+                        "inputTokens": 9533,
+                        "outputTokens": 520,
+                        "latencyMs": 8210,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "RELATED_GUIDANCE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "optional_context": [],
+                        "unanswered_information": [
+                          "기존 프로젝트 진행 중 첫 스프린트 시작 날짜와 이후 스프린트 시작 날짜를 임의로 유연하게 지정할 수 있는지 여부 및 그 설정 방법"
+                        ],
+                        "related_guidance": [
+                          {
+                            "information_unit": "스프린트의 공식 설정 위치와 설정 가능한 기본 일정 항목(스프린트 기간, 시작 요일, 다가올 스프린트 개수)",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          },
+                          {
+                            "information_unit": "첫 스프린트 활성화 시 설정한 시작 요일부터 시작되며, 기존 주기 변경 시 현재 스프린트 종료 후 다음 스프린트가 새로 시작되는 동작",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3300,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:8f39a6741f94",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 설정"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3302,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:48338ffe0288",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 시작 요일"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "limitation_markdown": "기존 프로젝트 진행 중 첫 스프린트와 이후 스프린트의 시작 날짜를 임의로 유연하게 지정할 수 있는지와 그 설정 방법은 확인되지 않았습니다.",
+                        "answer_markdown": "스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. 이 항목을 설정하면 스프린트가 자동으로 활성화됩니다. [SOURCE_2]\n\n처음 스프린트를 활성화할 때는 설정한 시작 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지되고, 이후 다음 스프린트가 새로 시작됩니다. 주기 변경은 예정된 작업 일정에 영향을 줄 수 있어 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "기존 프로젝트 진행 중 첫 스프린트와 이후 스프린트의 시작 날짜를 임의로 유연하게 지정할 수 있는지와 그 설정 방법은 확인되지 않았습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. 이 항목을 설정하면 스프린트가 자동으로 활성화됩니다. [1]\n\n처음 스프린트를 활성화할 때는 설정한 시작 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지되고, 이후 다음 스프린트가 새로 시작됩니다. 주기 변경은 예정된 작업 일정에 영향을 줄 수 있어 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "77a9ecd7-e5ff-4395-81fe-6867e0ce6fd6",
+                "ragRunId": "266664c5-a3d0-4b3c-b77d-662a2049515d",
+                "answer": {
+                  "answerMarkdown": "오늘 이전의 임의 날짜를 시작일로 선택할 수 있는지, 또는 스프린트 종료 후 다음 스프린트의 임의 시작 날짜와 기간을 정할 수 있는지는 제공된 안내에서 확인되지 않습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. 이 항목을 설정하면 스프린트가 자동으로 활성화됩니다. [1]\n\n시작 요일을 처음 설정하면 해당 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지되고, 그다음 스프린트부터 새로 시작됩니다. 예정된 작업 일정에 영향을 줄 수 있으므로 주기 변경은 현재 스프린트가 끝난 뒤 적용하는 것이 권장됩니다. [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 설정"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 시작 요일"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+                "resolvedQuery": "이미 진행하던 스프린트를 관리하려는 상황이라 스프린트에서 오늘 이전 날짜도 선택할 수 있는지, 그리고 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간을 정할 수 있는지 알고 싶습니다.",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 10044,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v8",
+                    "inputTokens": 3834,
+                    "outputTokens": 99,
+                    "latencyMs": 1410,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 110,
+                    "outputTokens": null,
+                    "latencyMs": 207,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v38",
+                    "inputTokens": 9580,
+                    "outputTokens": 554,
+                    "latencyMs": 8349,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "스프린트",
+                  "스프린트"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "3670346c-09b2-4f38-81a3-67dd98f58fba",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "answerContent": "기존 프로젝트 진행 중 첫 스프린트와 이후 스프린트의 시작 날짜를 임의로 유연하게 지정할 수 있는지와 그 설정 방법은 확인되지 않았습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. 이 항목을 설정하면 스프린트가 자동으로 활성화됩니다. [1]\n\n처음 스프린트를 활성화할 때는 설정한 시작 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지되고, 이후 다음 스프린트가 새로 시작됩니다. 주기 변경은 예정된 작업 일정에 영향을 줄 수 있어 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [2]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "3670346c-09b2-4f38-81a3-67dd98f58fba",
+                        "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "answerContent": "기존 프로젝트 진행 중 첫 스프린트와 이후 스프린트의 시작 날짜를 임의로 유연하게 지정할 수 있는지와 그 설정 방법은 확인되지 않았습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. 이 항목을 설정하면 스프린트가 자동으로 활성화됩니다. [1]\n\n처음 스프린트를 활성화할 때는 설정한 시작 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지되고, 이후 다음 스프린트가 새로 시작됩니다. 주기 변경은 예정된 작업 일정에 영향을 줄 수 있어 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [2]",
+                        "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "이미 진행하던 스프린트를 관리하려는 상황이라 스프린트에서 오늘 이전 날짜도 선택할 수 있는지, 그리고 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간을 정할 수 있는지 알고 싶습니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3302,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:48338ffe0288",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 시작 요일"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "d157c06165cd8fb9c70026d16b625c5ed3c02a83db9a7622b3343a82accdbe29",
+                        "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 19.542141992375807,
+                            "latencyMs": 3
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5918795313400421,
+                            "latencyMs": 220
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3300,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:8f39a6741f94",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "30c49ede2036a0dcf966b4c2033000bd7edb3a5d1fd765340871d1e3aefe167c",
+                        "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 19.74478665743049,
+                            "latencyMs": 3
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.549235165144011,
+                            "latencyMs": 220
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3299,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:203889cf792c",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "35e456517f89ebe937bf0af7f3ee21c6c8db19f1b38912cafc8f675701ac05e6",
+                        "content": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다.\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03177805800756621,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 24.86750318184782,
+                            "latencyMs": 3
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5319003324938812,
+                            "latencyMs": 220
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3303,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:7a8e11bfc496",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "미리 생성할 다가올 스프린트 개수"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "44a05662ad01974d320173403f923d39732de87c22f5bc027b781e1077d9d52b",
+                        "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 19.29674235615103,
+                            "latencyMs": 3
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5502732826539263,
+                            "latencyMs": 220
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3308,
+                        "documentVersionId": 2433,
+                        "documentId": "2c428c0d81be",
+                        "sectionId": "2c428c0d81be:91e1e3f290e3",
+                        "documentTitle": "스프린트 그래프",
+                        "sectionPath": [
+                          "스프린트 그래프",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/sprint-graph.md",
+                        "contentHash": "fd79b9576cc657ccbfebfa1ee98f16719f094dbaa76cca052295e3ee83a96d42",
+                        "content": "* 스프린트 그래프는 모든 작업의 상태 변경(진행 중/완료)에 따라 실시간으로 자동 업데이트됩니다.\n* 그래프 상의 데이터는 스프린트가 종료되면 자동으로 저장되어, 이후 작업의 변동 사항이 생기더라도 그래프에는 반영되지 않습니다. 이는 스프린트 회고 시점의 데이터를 기준으로 분석할 수 있도록 하기 위함입니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029437229437229435,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 16.11153238727313,
+                            "latencyMs": 3
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.5258458262924219,
+                            "latencyMs": 220
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v38",
+                        "inputTokens": 9580,
+                        "outputTokens": 554,
+                        "latencyMs": 8349,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "RELATED_GUIDANCE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "MULTI_DETAIL",
+                        "evidence_requirements": [],
+                        "optional_context": [],
+                        "unanswered_information": [
+                          "스프린트에서 오늘 이전의 임의 날짜를 시작 날짜로 선택할 수 있는지",
+                          "스프린트 종료 후 다음 스프린트의 임의 시작 날짜와 기간을 정할 수 있는지"
+                        ],
+                        "related_guidance": [
+                          {
+                            "information_unit": "스프린트의 공식 설정 위치 및 기본 설정 가능 항목(기간, 시작 요일, 다가올 스프린트 개수)",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          },
+                          {
+                            "information_unit": "시작 요일 또는 기존 스프린트 주기 변경 시 적용 방식과 권장 시점",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3300,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:8f39a6741f94",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 설정"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3302,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:48338ffe0288",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 시작 요일"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "limitation_markdown": "오늘 이전의 임의 날짜를 시작일로 선택할 수 있는지, 또는 스프린트 종료 후 다음 스프린트의 임의 시작 날짜와 기간을 정할 수 있는지는 제공된 안내에서 확인되지 않습니다.",
+                        "answer_markdown": "스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. 이 항목을 설정하면 스프린트가 자동으로 활성화됩니다. [SOURCE_2]\n\n시작 요일을 처음 설정하면 해당 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지되고, 그다음 스프린트부터 새로 시작됩니다. 예정된 작업 일정에 영향을 줄 수 있으므로 주기 변경은 현재 스프린트가 끝난 뒤 적용하는 것이 권장됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "오늘 이전의 임의 날짜를 시작일로 선택할 수 있는지, 또는 스프린트 종료 후 다음 스프린트의 임의 시작 날짜와 기간을 정할 수 있는지는 제공된 안내에서 확인되지 않습니다.\n\n스프린트 설정은 **팀 설정 > 스프린트**에서 관리하며, 스프린트 기간·시작 요일·다가올 스프린트 개수를 설정할 수 있습니다. 이 항목을 설정하면 스프린트가 자동으로 활성화됩니다. [1]\n\n시작 요일을 처음 설정하면 해당 요일부터 새 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지되고, 그다음 스프린트부터 새로 시작됩니다. 예정된 작업 일정에 영향을 줄 수 있으므로 주기 변경은 현재 스프린트가 끝난 뒤 적용하는 것이 권장됩니다. [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        }
+      ]
+    }
+  ]
+}

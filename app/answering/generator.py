@@ -28,8 +28,8 @@ from app.retrieval.models import HybridRetrievalResult
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.6-terra"
 GENERATION_PROMPT_VERSION = "v38"
-SOURCE_PLANNING_PROMPT_VERSION = "v29"
-SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v29-repair-1"
+SOURCE_PLANNING_PROMPT_VERSION = "v31"
+SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v31-repair-1"
 ANSWER_PROMPT_VERSION = "v23"
 ANSWER_REPAIR_PROMPT_VERSION = "v23-repair-1"
 MAX_CONTEXT_SOURCES = 5
@@ -187,6 +187,15 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
   관련 설정·조건, 동일 목적의 인접 기능은 관련 안내가 될 수 있습니다.
 - 공식 문서가 대안이라고 명시하지 않았다면 해결책·동등한 대체제로 단정하지 마세요.
 - 반대 방향 동작을 안내할 때는 요청 방향과 다르다는 점을 related_guidance에 명시하세요.
+- 관련 안내도 질문과 SOURCE가 다루는 기능·대상 범위가 같아야 합니다. 일반 제품의 데스크탑
+  지원 환경을 묻는 질문에 특정 하위 기능의 데스크탑앱 지원 조건을 사용하거나, 스프린트 일정을
+  묻는 질문에 미팅 일정 연동을 사용하는 것처럼 범위가 다른 내용은 관련 안내가 아닙니다.
+- 전환 안내는 SOURCE가 설명하는 전환 전 대상과 사용자가 변경하려는 현재 대상이 같을 때만
+  사용하세요. 백로그 항목의 프로젝트·목표·작업 전환은 이미 목표에 속한 작업이나 목표 자체를
+  프로젝트로 변경하는 질문의 직접 근거나 관련 안내가 아닙니다.
+- 사용자가 특정 기능의 예외적인 날짜·값·조건을 설정할 수 있는지 물었으나 그 예외는 확인되지
+  않고, 같은 기능에서 공식적으로 설정 가능한 기본 날짜·값·조건과 설정 위치가 확인된다면
+  미확인 예외와 구분하여 RELATED_GUIDANCE로 제공할 수 있습니다.
 - 단어만 같거나 대상이 다른 내용, 일반 마케팅 소개, 원인·개인 상태를 추측해야만
   연결되는 내용은 관련 안내가 아닙니다.
 - RELATED_GUIDANCE는 INSUFFICIENT_EVIDENCE 상황에만 사용하세요. 모호하거나 범위 밖인

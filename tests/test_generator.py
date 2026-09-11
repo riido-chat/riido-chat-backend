@@ -638,8 +638,8 @@ class GenerationContextTest(unittest.TestCase):
 
     def test_prompt_forbids_links_urls_and_html(self) -> None:
         self.assertEqual("v38", GENERATION_PROMPT_VERSION)
-        self.assertEqual("v29", SOURCE_PLANNING_PROMPT_VERSION)
-        self.assertEqual("v29-repair-1", SOURCE_PLANNING_REPAIR_PROMPT_VERSION)
+        self.assertEqual("v31", SOURCE_PLANNING_PROMPT_VERSION)
+        self.assertEqual("v31-repair-1", SOURCE_PLANNING_REPAIR_PROMPT_VERSION)
         self.assertEqual("v23", ANSWER_PROMPT_VERSION)
         self.assertEqual("v23-repair-1", ANSWER_REPAIR_PROMPT_VERSION)
         self.assertIn("넓은 허용 규칙과 구체적인 제한", ANSWER_PROMPT_V17)
@@ -649,6 +649,9 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn("각 요구의 대상과 의도가 명확", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("독립된 복합 요구인지 먼저 판정", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("워크스페이스 삭제 영향", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("기능·대상 범위가 같아야", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("전환 전 대상", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("예외적인 날짜·값·조건", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn(
             "Markdown 링크 문법과 HTML을 사용하지 마세요",
             ANSWER_PROMPT_V17,
