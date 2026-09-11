@@ -7,10 +7,12 @@ from unittest.mock import AsyncMock, Mock, patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.chat.schema import ChatErrorCode, ChatResponseStatus
+from app.chat.dependencies import get_testing_chat_service
+from app.chat.schema import ChatErrorCode, ChatErrorResponse, ChatResponseStatus
 from app.main import create_app
 from app.retrieval.corpus_state import (
     CorpusNotLoadedError,
+    CorpusRegistry,
     CorpusSnapshot,
     CorpusState,
 )
@@ -87,6 +89,27 @@ class InternalCorpusApiTest(unittest.TestCase):
         self.assertEqual(39, body["documentCount"])
         self.assertIsNotNone(body["loadedAt"])
 
+    def test_reports_group_snapshot_when_registry_is_active(self) -> None:
+        registry = Mock(spec=CorpusRegistry)
+        registry.is_legacy_compat = False
+        registry.snapshot.return_value = LOADED_SNAPSHOT
+        self.app.state.corpus_registry = registry
+
+        response = self.client.get("/internal/corpus?documentGroupId=7")
+
+        self.assertEqual(200, response.status_code)
+        registry.snapshot.assert_called_once_with(7)
+
+    def test_requires_group_for_multi_group_registry_status(self) -> None:
+        registry = Mock(spec=CorpusRegistry)
+        registry.is_legacy_compat = False
+        self.app.state.corpus_registry = registry
+
+        response = self.client.get("/internal/corpus")
+
+        self.assertEqual(400, response.status_code)
+        registry.snapshot.assert_not_called()
+
     def test_reload_returns_new_state(self) -> None:
         self.corpus_state.replace.return_value = LOADED_SNAPSHOT
 
@@ -123,6 +146,35 @@ class InternalCorpusApiTest(unittest.TestCase):
         )
         self.assertIsNone(body["answer"])
         self.assertEqual([], body["citations"])
+
+    def test_internal_test_chat_reuses_chat_response_contract(self) -> None:
+        response_model = ChatErrorResponse(
+            status=ChatResponseStatus.ERROR,
+            conversationId=None,
+            ragRunId=None,
+            answer=None,
+            error={
+                "code": ChatErrorCode.SERVICE_UNAVAILABLE,
+                "message": "검색 데이터가 아직 준비되지 않았습니다.",
+                "retryable": False,
+            },
+            citations=[],
+        )
+        service = Mock()
+        service.answer_question = AsyncMock(return_value=response_model)
+        self.app.dependency_overrides[get_testing_chat_service] = lambda: service
+
+        response = self.client.post(
+            "/api/internal/test-chat",
+            json={"question": "질문"},
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            ChatResponseStatus.ERROR.value,
+            response.json()["status"],
+        )
+        service.answer_question.assert_awaited_once_with("질문", None)
 
 
 if __name__ == "__main__":

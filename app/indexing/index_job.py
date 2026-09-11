@@ -5,7 +5,7 @@ from typing import Callable
 
 from app.database.session import get_session_factory
 from app.indexing.index_builder import run_index_job
-from app.retrieval.corpus_state import CorpusState
+from app.retrieval.corpus_state import CorpusRegistry, CorpusState
 from app.retrieval.embedding import OpenAIEmbedder
 
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 async def run_admin_index_job(
     index_run_id: int,
-    corpus_state: CorpusState,
+    corpus_state: CorpusState | CorpusRegistry,
     embedder_factory: Callable[[], OpenAIEmbedder] = OpenAIEmbedder,
 ) -> None:
     """요청 세션과 분리된 세션에서 색인 생성과 적용을 끝까지 진행한다."""

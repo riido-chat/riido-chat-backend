@@ -45,7 +45,7 @@ from app.admin.schema import (
     AdminRecollectCounts,
     AdminRecollectFailure,
 )
-from app.chat.dependencies import get_corpus_state
+from app.chat.dependencies import get_corpus_registry, get_corpus_state
 from app.document.recollect import run_recollect_batch
 from app.document.recollect_service import RecollectService
 from app.indexing.index_job import run_admin_index_job
@@ -53,7 +53,7 @@ from app.indexing.index_service import (
     IndexReindexService,
     IndexRunFailedError,
 )
-from app.retrieval.corpus_state import CorpusState
+from app.retrieval.corpus_state import CorpusRegistry, CorpusState
 from app.retrieval.embedding import OpenAIEmbedder
 from app.database.models import ExecutionStatus
 
@@ -248,6 +248,7 @@ async def start_reindex(
     group_id: int,
     service: IndexReindexService = Depends(get_index_reindex_service),
     corpus_state: CorpusState = Depends(get_corpus_state),
+    corpus_registry: CorpusRegistry | None = Depends(get_corpus_registry),
     embedder_factory: Callable[[], OpenAIEmbedder] = Depends(
         get_chunk_embedder_factory
     ),
@@ -257,7 +258,7 @@ async def start_reindex(
     accepted = await service.start_reindex(group_id)
     await run_admin_index_job(
         accepted.index_run_id,
-        corpus_state,
+        corpus_registry if corpus_registry is not None else corpus_state,
         embedder_factory,
     )
     detail = await service.read_finished_run(accepted.index_run_id)

@@ -2,6 +2,7 @@ from functools import lru_cache
 from typing import List, Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import SecretStr
 
 
 class Settings(BaseSettings):
@@ -10,6 +11,8 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = None
     corpus_dir: str = "data"
     cors_origins: str = "http://localhost:3000"
+    question_log_view_token: Optional[SecretStr] = None
+    question_log_owner_token: Optional[SecretStr] = None
 
     @property
     def cors_origin_list(self) -> List[str]:

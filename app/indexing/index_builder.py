@@ -35,7 +35,11 @@ from app.core.error_message import sanitize_error_message
 from app.core.hashing import sha256_hex
 from app.document.chunking_config import get_or_create_chunking_config
 from app.indexing.index_writer import IndexWriter
-from app.retrieval.corpus_state import CorpusState
+from app.retrieval.corpus_state import (
+    CorpusRegistry,
+    CorpusState,
+    PreparedCorpusSnapshot,
+)
 from app.retrieval.embedding import OpenAIEmbedder, build_embedding_text
 from app.retrieval.models import RetrievalChunk
 from app.retrieval.search_reader import SearchReader
@@ -286,7 +290,7 @@ async def start_reindex_run(
 
 async def run_index_job(
     session: AsyncSession,
-    corpus_state: CorpusState,
+    corpus_state: CorpusState | CorpusRegistry,
     index_run_id: int,
     embedder_factory: Callable[[], OpenAIEmbedder] = OpenAIEmbedder,
 ) -> None:
@@ -324,7 +328,13 @@ async def run_index_job(
         )
         if not built:
             return
-    await _apply(session, writer, corpus_state, index_run_id)
+    await _apply(
+        session,
+        writer,
+        corpus_state,
+        index_run_id,
+        document_group_id=index_version.document_group_id,
+    )
 
 
 async def _build(
@@ -388,32 +398,43 @@ async def _build(
 async def _apply(
     session: AsyncSession,
     writer: IndexWriter,
-    corpus_state: CorpusState,
+    corpus_state: CorpusState | CorpusRegistry,
     index_run_id: int,
+    *,
+    document_group_id: int,
 ) -> None:
     """READY 후보를 ACTIVE로 바꾸고 chat corpus까지 같은 세대로 교체한다.
 
-    corpus 교체는 커밋 전에 끝낸다. 실패하면 전환을 롤백해 DB 와 메모리
-    모두 이전 세대로 남기고 후보는 READY 로 유지한다.
+    DB의 ACTIVE 전환을 먼저 커밋한 뒤 메모리 registry를 publish한다. 이 순서를
+    지켜야 다른 요청이 아직 커밋되지 않은 index id를 registry에서 먼저 보고
+    vector 조회에 실패하는 snapshot race가 생기지 않는다. publish가 일시적으로
+    실패하면 기존 snapshot을 유지해도 요청은 BM25와 exact index id를 함께 사용하며,
+    다음 reload에서 새 ACTIVE를 다시 적재할 수 있다.
     """
 
-    corpus_replaced = False
     error_code = CORPUS_RELOAD_FAILED
     try:
         await writer.apply_index(index_run_id)
-        chunks = await SearchReader(session).load_active_chunks()
-        corpus_state.replace(chunks)
-        corpus_replaced = True
+        chunks = await SearchReader(
+            session,
+            document_group_id=document_group_id,
+        ).load_active_chunks()
+        if hasattr(corpus_state, "prepare"):
+            prepared_corpus = _prepare_corpus(
+                corpus_state,
+                document_group_id,
+                chunks,
+            )
+        else:
+            # Structural test doubles from the legacy single-corpus API only
+            # expose replace(). Keep their failure/rollback contract intact.
+            _replace_corpus(corpus_state, document_group_id, chunks)
+            prepared_corpus = None
         await writer.finish_apply_run(index_run_id)
         await session.commit()
-        return
     except Exception as error:
         logger.exception("색인 적용에 실패했습니다: index_run_id=%s", index_run_id)
         await session.rollback()
-        # corpus 를 바꾸기 전에 실패했으면 DB 와 메모리가 모두 이전 세대다.
-        # 되돌릴 것이 없으므로 복구를 시도하지 않는다.
-        if corpus_replaced and not await _restore_corpus(session, corpus_state):
-            error_code = CORPUS_OUT_OF_SYNC
         await _record_failure(
             session,
             writer,
@@ -421,6 +442,21 @@ async def _apply(
             error,
             "APPLYING",
             error_code,
+        )
+        return
+
+    if prepared_corpus is None:
+        return
+
+    try:
+        _publish_corpus(corpus_state, document_group_id, prepared_corpus)
+    except Exception:
+        # DB와 이전 메모리 snapshot의 조합은 여전히 일관된 exact snapshot이다.
+        # 재적재 endpoint 또는 다음 적용에서 target group만 다시 교체한다.
+        logger.exception(
+            "ACTIVE 전환 후 corpus registry publish에 실패했습니다: "
+            "document_group_id=%s",
+            document_group_id,
         )
 
 
@@ -450,18 +486,55 @@ async def _record_failure(
 
 async def _restore_corpus(
     session: AsyncSession,
-    corpus_state: CorpusState,
+    corpus_state: CorpusState | CorpusRegistry,
+    *,
+    document_group_id: int,
 ) -> bool:
     """롤백으로 되돌아간 ACTIVE 색인에 맞춰 corpus를 복구한다."""
 
     try:
-        chunks = await SearchReader(session).load_active_chunks()
-        corpus_state.replace(chunks)
+        chunks = await SearchReader(
+            session,
+            document_group_id=document_group_id,
+        ).load_active_chunks()
+        _replace_corpus(corpus_state, document_group_id, chunks)
         return True
     except Exception:
         # 복구는 최선 노력이다. 여기서 난 오류가 원래 실패를 가리면 안 된다.
         logger.warning("적용 실패 후 corpus를 복구하지 못했습니다.", exc_info=True)
         return False
+
+
+def _replace_corpus(
+    corpus_state: CorpusState | CorpusRegistry,
+    document_group_id: int,
+    chunks: List[RetrievalChunk],
+) -> None:
+    if isinstance(corpus_state, CorpusRegistry):
+        corpus_state.replace(document_group_id, chunks)
+    else:
+        corpus_state.replace(chunks)
+
+
+def _prepare_corpus(
+    corpus_state: CorpusState | CorpusRegistry,
+    document_group_id: int,
+    chunks: List[RetrievalChunk],
+) -> PreparedCorpusSnapshot:
+    if isinstance(corpus_state, CorpusRegistry):
+        return corpus_state.prepare(document_group_id, chunks)
+    return corpus_state.prepare(chunks)
+
+
+def _publish_corpus(
+    corpus_state: CorpusState | CorpusRegistry,
+    document_group_id: int,
+    prepared: PreparedCorpusSnapshot,
+) -> None:
+    if isinstance(corpus_state, CorpusRegistry):
+        corpus_state.publish(document_group_id, prepared)
+    else:
+        corpus_state.publish(prepared)
 
 
 async def _fill_missing_embeddings(

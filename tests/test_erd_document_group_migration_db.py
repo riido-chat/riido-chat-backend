@@ -87,7 +87,7 @@ class ErdDocumentGroupMigrationDbTest(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_empty_database_upgrades_and_downgrades(self) -> None:
-        _run_alembic(self.scratch_url, "upgrade", "head")
+        _run_alembic(self.scratch_url, "upgrade", HEAD_REVISION)
 
         self.assertEqual(HEAD_REVISION, await self._current_revision())
         groups = await self._fetch_all(
@@ -104,14 +104,14 @@ class ErdDocumentGroupMigrationDbTest(unittest.IsolatedAsyncioTestCase):
             await self._column_exists("document_sources", "document_group_id")
         )
 
-        _run_alembic(self.scratch_url, "upgrade", "head")
+        _run_alembic(self.scratch_url, "upgrade", HEAD_REVISION)
         self.assertEqual(HEAD_REVISION, await self._current_revision())
 
     async def test_existing_rows_are_backfilled_and_restored(self) -> None:
         _run_alembic(self.scratch_url, "upgrade", REVISION_BEFORE_GROUPS)
         await self._insert_legacy_rows()
 
-        _run_alembic(self.scratch_url, "upgrade", "head")
+        _run_alembic(self.scratch_url, "upgrade", HEAD_REVISION)
 
         group_id = await self._fetch_one(
             "SELECT id FROM document_groups WHERE group_key = :group_key",

@@ -45,6 +45,12 @@ INDEX_VERSION_NO_CONSTRAINT = "uq_index_versions_document_group_id_version_no"
 DUPLICATE_DOCUMENT_SOURCE_CONSTRAINT = (
     "fk_ingestion_runs_duplicate_of_document_source_id"
 )
+# The normal naming convention would exceed PostgreSQL's 63-character
+# identifier limit for this relationship, so keep the historical name
+# explicit in both the ORM and its migration.
+CHAT_PROFILE_REVISION_FK_CONSTRAINT = (
+    "fk_conversations_profile_revision_id_chat_profile_revisions"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -128,6 +134,22 @@ class ConversationStatus(str, enum.Enum):
     ACTIVE = "ACTIVE"
     CLOSED = "CLOSED"
     EXPIRED = "EXPIRED"
+
+
+class ConversationChannel(str, enum.Enum):
+    """Endpoint channel that owns a conversation's pinned revision."""
+
+    PUBLIC = "PUBLIC"
+    INTERNAL_TEST = "INTERNAL_TEST"
+
+
+class ChatProfileRevisionStatus(str, enum.Enum):
+    """프로필 설정 판의 lifecycle 상태."""
+
+    DRAFT = "DRAFT"
+    TESTING = "TESTING"
+    PUBLISHED = "PUBLISHED"
+    RETIRED = "RETIRED"
 
 
 class AnswerStatus(str, enum.Enum):
@@ -214,6 +236,76 @@ class DocumentGroup(Base):
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class ChatProfile(Base):
+    """어떤 소비자에게 제공할 챗봇 프로필의 안정적인 식별자."""
+
+    __tablename__ = "chat_profiles"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    profile_key: Mapped[str] = mapped_column(String(80), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class ChatProfileRevision(Base):
+    """불변으로 취급하는 챗봇 프로필 설정 판."""
+
+    __tablename__ = "chat_profile_revisions"
+    __table_args__ = (
+        UniqueConstraint(
+            "profile_id",
+            "version",
+            name="uq_chat_profile_revisions_profile_id_version",
+        ),
+        Index(
+            "uq_chat_profile_revisions_profile_published",
+            "profile_id",
+            unique=True,
+            postgresql_where=text("status = 'PUBLISHED'"),
+        ),
+        Index(
+            "uq_chat_profile_revisions_profile_testing",
+            "profile_id",
+            unique=True,
+            postgresql_where=text("status = 'TESTING'"),
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    profile_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("chat_profiles.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    document_group_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("document_groups.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    status: Mapped[ChatProfileRevisionStatus] = mapped_column(
+        _status_enum(ChatProfileRevisionStatus, "chat_profile_revision_status"),
+        nullable=False,
+    )
+    generation_model_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    generation_prompt_version: Mapped[str] = mapped_column(String(50), nullable=False)
+    query_rewrite_model_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    query_rewrite_prompt_version: Mapped[str] = mapped_column(String(50), nullable=False)
+    semantic_cache_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false"
+    )
+    verifier_model_name: Mapped[Optional[str]] = mapped_column(String(150))
+    verifier_prompt_version: Mapped[Optional[str]] = mapped_column(String(50))
+    created_at: Mapped[Any] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
 
@@ -630,6 +722,21 @@ class Conversation(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    chat_profile_revision_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(
+            "chat_profile_revisions.id",
+            name=CHAT_PROFILE_REVISION_FK_CONSTRAINT,
+            ondelete="RESTRICT",
+        ),
+        nullable=False,
+    )
+    channel: Mapped[ConversationChannel] = mapped_column(
+        _status_enum(ConversationChannel, "conversation_channel"),
+        nullable=False,
+        default=ConversationChannel.PUBLIC,
+        server_default=ConversationChannel.PUBLIC.value,
     )
     client_key: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True),
