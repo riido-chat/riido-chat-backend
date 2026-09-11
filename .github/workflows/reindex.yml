@@ -32,7 +32,7 @@ jobs:
           role-to-assume: ${{ env.DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: 재색인 스크립트 업로드
+      - name: 그룹별 전체 재색인 스크립트 업로드
         run: aws s3 cp scripts/reindex.sh "s3://${DEPLOY_BUCKET}/deploy/reindex.sh"
 
       - name: 앱 EC2에서 재색인 실행
@@ -49,14 +49,14 @@ jobs:
                 "set -euo pipefail",
                 "mkdir -p /opt/riido",
                 "aws s3 cp s3://riido-chat-deploy/deploy/reindex.sh /opt/riido/reindex.sh",
-                "bash /opt/riido/reindex.sh"
+                "bash /opt/riido/reindex.sh ALL"
               ],
               "executionTimeout": ["3600"]
             }' \
             --query Command.CommandId --output text)
           echo "CommandId: ${COMMAND_ID}"
 
-          # 수집 40초, 임베딩 142건까지 포함해 최대 30분 대기한다
+          # 그룹별 READY 문서 색인과 corpus reload를 포함해 최대 30분 대기한다.
           STATUS=Pending
           for _ in $(seq 1 180); do
             STATUS=$(aws ssm get-command-invocation \
