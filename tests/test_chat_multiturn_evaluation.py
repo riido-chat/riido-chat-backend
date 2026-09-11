@@ -85,7 +85,7 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
         )
         turns = [turn for case in payload["cases"] for turn in case["turns"]]
         self.assertEqual(
-            {"COMPLETED": 19, "WITHHELD": 85},
+            {"COMPLETED": 48, "WITHHELD": 56},
             {
                 status: sum(turn["expectedStatus"] == status for turn in turns)
                 for status in ("COMPLETED", "WITHHELD")
@@ -94,6 +94,8 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
         for turn in turns:
             if turn["expectedStatus"] == "COMPLETED":
                 self.assertGreaterEqual(turn["minimumCitationCount"], 1)
+                if turn.get("expectedPlanningStatus") == "RELATED_GUIDANCE":
+                    continue
                 self.assertTrue(turn["expectedCitationDocumentTitlesAny"])
             else:
                 reasons = turn.get("expectedWithheldReasonsAny") or [

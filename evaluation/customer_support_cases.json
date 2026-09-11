@@ -41,7 +41,7 @@
       "sourceSampleId": "faq-016",
       "description": "하위작업 표시 의미를 묻고 생략 표현으로 활용법을 이어 묻는 대화",
       "turns": [
-        {"question":"작업 단위에서 하위 작업 항목을 추가하게 되면 태그처럼 작업 브런치명이 옆에 나오게 됩니다. 이렇게 되었을 때 태그의 활용도는 어떤 작업의 하위 항목인지 구분하기 위한 값인가요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"},
+        {"question":"작업 단위에서 하위 작업 항목을 추가하게 되면 태그처럼 작업 브런치명이 옆에 나오게 됩니다. 이렇게 되었을 때 태그의 활용도는 어떤 작업의 하위 항목인지 구분하기 위한 값인가요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1},
         {"question":"활용도가 작업 계층에서 무한적으로 발생할 수 있는 계층구조를 막기 위해 링크방식으로 연결시켜 주신거 같은데 이렇게 활용하면 될까요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE","resolvedQueryKeywords":["작업 계층"]}
       ]
     },
@@ -49,13 +49,13 @@
       "id": "RC006",
       "sourceSampleId": "faq-017",
       "description": "프로젝트를 백로그로 역이동할 수 있는지 문의",
-      "turns": [{"question":"혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC007",
       "sourceSampleId": "faq-021",
       "description": "특정 워크스페이스의 결제 완료 상태 조회",
-      "turns": [{"question":"현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC008",
@@ -79,7 +79,7 @@
       "id": "RC011",
       "sourceSampleId": "faq-028",
       "description": "프로젝트가 스프린트에 표시되지 않는 장애 문의",
-      "turns": [{"question":"작업관리-작업에 프로젝트를 추가했는데 스프린트에 표시가 되지 않습니다ㅜㅜ","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"작업관리-작업에 프로젝트를 추가했는데 스프린트에 표시가 되지 않습니다ㅜㅜ","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC012",
@@ -113,23 +113,23 @@
       "sourceSampleId": "faq-043",
       "description": "구독 취소 문의 뒤 작업 복제로 주제를 전환",
       "turns": [
-        {"question":"프로 체험판 요금제 신청했는데 기간이 지나면 자동결제 된다고 해서 자동결제는 안되게 하고싶은데 어디서 가능한가요","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"},
-        {"question":"지금 프로젝트-목표-작업 이렇게 입력했는데 동일한 작업을 목표별로 입력하고 싶거든요. 브랜치명 복사기능은 봤는데 아예 작업 자체를 복사할 수 있나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE","expectedContextStrategy":"NEW_TOPIC","expectedSelectedTurnNos":[]}
+        {"question":"프로 체험판 요금제 신청했는데 기간이 지나면 자동결제 된다고 해서 자동결제는 안되게 하고싶은데 어디서 가능한가요","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1},
+        {"question":"지금 프로젝트-목표-작업 이렇게 입력했는데 동일한 작업을 목표별로 입력하고 싶거든요. 브랜치명 복사기능은 봤는데 아예 작업 자체를 복사할 수 있나요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","expectedContextStrategy":"NEW_TOPIC","expectedSelectedTurnNos":[],"minimumCitationCount":1}
       ]
     },
     {
       "id": "RC017",
       "sourceSampleId": "faq-044",
       "description": "Github PR 생성 후 티켓이 자동 생성되지 않는다는 문의",
-      "turns": [{"question":"깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC018",
       "sourceSampleId": "faq-047",
       "description": "연동 장애가 해결된 뒤 캘린더 동기화 범위를 질문",
       "turns": [
-        {"question":"캘린더 연동이 왜 안될까요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"},
-        {"question":"해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE","expectedContextStrategy":"NEW_TOPIC","expectedSelectedTurnNos":[]}
+        {"question":"캘린더 연동이 왜 안될까요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1},
+        {"question":"해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"minimumCitationCount":1}
       ]
     },
     {
@@ -142,7 +142,7 @@
       "id": "RC020",
       "sourceSampleId": "faq-051",
       "description": "워크스페이스 제거 후 결제가 시도된 원인 문의",
-      "turns": [{"question":"워크스페이스를 제거하였음에도 불구하고, 요금제 결제 시도가 왜 됐는지 궁금합니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"워크스페이스를 제거하였음에도 불구하고, 요금제 결제 시도가 왜 됐는지 궁금합니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC021",
@@ -154,7 +154,7 @@
       "id": "RC022",
       "sourceSampleId": "faq-057",
       "description": "관리자 권한인데도 발생하는 스프린트 생성 권한 오류",
-      "turns": [{"question":"저희 팀 백엔드 팀원 중 한 분이 지금 뤼이도에서 스프린트 생성이 안되는 것 같은데요. 이미 관리자 권한을 줬는데도 권한이 없다는 에러메시지가 뜹니다. 혹시 확인 가능할까요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"저희 팀 백엔드 팀원 중 한 분이 지금 뤼이도에서 스프린트 생성이 안되는 것 같은데요. 이미 관리자 권한을 줬는데도 권한이 없다는 에러메시지가 뜹니다. 혹시 확인 가능할까요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC023",
@@ -188,7 +188,7 @@
       "sourceSampleId": "faq-064",
       "description": "중복 감지 UX 문의 뒤 작업 관계도 조작법으로 주제 전환",
       "turns": [
-        {"question":"태스크 추가할 때마다 중복된 것이 있는지 검사하라는 팝업이 뜨는데 계속 나오는 게 조금 불편합니다. 혹시 온오프를 해주시거나 중 중복된 것이 있을 때만 팝업 뜨게 할 수 있나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"},
+        {"question":"태스크 추가할 때마다 중복된 것이 있는지 검사하라는 팝업이 뜨는데 계속 나오는 게 조금 불편합니다. 혹시 온오프를 해주시거나 중 중복된 것이 있을 때만 팝업 뜨게 할 수 있나요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1},
         {"question":"작업관계도에서 조작할 때 다른 시점으로 이동은 안되는 걸까요?","expectedStatus":"COMPLETED","expectedContextStrategy":"NEW_TOPIC","expectedSelectedTurnNos":[],"minimumCitationCount":1,"expectedCitationDocumentTitlesAny":["작업 관계도"]}
       ]
     },
@@ -202,13 +202,13 @@
       "id": "RC029",
       "sourceSampleId": "faq-069",
       "description": "미팅 작성 권한 오류와 설정 위치 문의",
-      "turns": [{"question":"뤼이도 미팅에 게시글(일정)을 만드려는데 권한이 없다고 뜹니다. 혹시 어디서 설정해야 할지 알 수 있을까요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"뤼이도 미팅에 게시글(일정)을 만드려는데 권한이 없다고 뜹니다. 혹시 어디서 설정해야 할지 알 수 있을까요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC030",
       "sourceSampleId": "faq-072",
       "description": "작업 복제 가능 여부",
-      "turns": [{"question":"혹시 태스크 복제 기능이 있을까요? 태스크는 작업을 뜻하고, 제목까지 복제해서 일부만 수정하고 싶습니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"혹시 태스크 복제 기능이 있을까요? 태스크는 작업을 뜻하고, 제목까지 복제해서 일부만 수정하고 싶습니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC031",
@@ -232,13 +232,13 @@
       "id": "RC034",
       "sourceSampleId": "faq-083",
       "description": "붙여 쓴 짧은 구독 취소 방법 질문",
-      "turns": [{"question":"구독취소하는방법","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"구독취소하는방법","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC035",
       "sourceSampleId": "faq-084",
       "description": "존댓말 구독 해지 방법 질문",
-      "turns": [{"question":"뤼이도 구독 해지 어떻게 하면 될까요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"뤼이도 구독 해지 어떻게 하면 될까요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC036",
@@ -282,7 +282,7 @@
       "description": "스프린트 일정 등록 뒤 전체 기간 표시 위치를 이어 질문",
       "turns": [
         {"question":"혹시 스프린트 일정과 같은 전체가 확인해야 할 일정을 등록하려면 어떻게 하나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"},
-        {"question":"스프린트 일정을 설정했는데, 작업에서 추가하는 것 외에 전체적인 스프린트 기간이 어디에 표시되는지 궁금합니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"resolvedQueryKeywords":["스프린트"]}
+        {"question":"스프린트 일정을 설정했는데, 작업에서 추가하는 것 외에 전체적인 스프린트 기간이 어디에 표시되는지 궁금합니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"resolvedQueryKeywords":["스프린트"],"minimumCitationCount":1}
       ]
     },
     {
@@ -290,7 +290,7 @@
       "sourceSampleId": "faq-096",
       "description": "기술문서 관리 방법과 검색 편의성을 이어 질문",
       "turns": [
-        {"question":"뤼이도를 본격적으로 사용해보려고 합니다. 기술문서나 위키 관리는 어떻게 하는 게 좋을까요? 외부 서비스와 연동해서 같이 쓰는 것이 좋을까요? 좋은 방법이 있으면 추천 부탁드립니다.","expectedStatus":"COMPLETED","minimumCitationCount":1,"expectedCitationDocumentTitlesAny":["에디터"]},
+        {"question":"뤼이도를 본격적으로 사용해보려고 합니다. 기술문서나 위키 관리는 어떻게 하는 게 좋을까요? 외부 서비스와 연동해서 같이 쓰는 것이 좋을까요? 좋은 방법이 있으면 추천 부탁드립니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"ANSWERABLE","minimumCitationCount":1,"expectedCitationDocumentTitlesAny":["에디터"]},
         {"question":"업무 공유 문서로는 유용할 것 같은데, 나중에 기술문서를 찾아볼 때 더 편하게 모아볼 수 있을까요?","expectedStatus":"COMPLETED","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"resolvedQueryKeywords":["기술문서"],"minimumCitationCount":1,"expectedCitationDocumentTitlesAny":["검색","에디터","대시보드"]}
       ]
     },
@@ -328,7 +328,7 @@
       "id": "RC049",
       "sourceSampleId": "faq-020",
       "description": "개인카드 결제 가능 여부와 결제 실패 문의",
-      "turns": [{"question":"법인카드 사용이 일시적으로 힘들어서 개인카드로 결제하려고 하는데 결제가 안되나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"법인카드 사용이 일시적으로 힘들어서 개인카드로 결제하려고 하는데 결제가 안되나요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC050",
@@ -409,7 +409,7 @@
       "id": "RC062",
       "sourceSampleId": "faq-068",
       "description": "잘못 결제된 금액의 환불 정책 문의",
-      "turns": [{"question":"금액이 잘못 결제된 것 같습니다. 환불이 가능할까요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"금액이 잘못 결제된 것 같습니다. 환불이 가능할까요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC063",
@@ -428,7 +428,7 @@
       "sourceSampleId": "faq-086",
       "description": "외부 레포 Action 설정 중 에러 화면이 발생하는 대화",
       "turns": [
-        {"question":"외부 서비스 레포를 연동한 뒤 Action을 설정하려고 하는데 뤼이도에서 에러 페이지를 보여주네요. 이유가 뭔가요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"},
+        {"question":"외부 서비스 레포를 연동한 뒤 Action을 설정하려고 하는데 뤼이도에서 에러 페이지를 보여주네요. 이유가 뭔가요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1},
         {"question":"해당 버튼을 눌렀을 때 에러 화면이 뜹니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"resolvedQueryKeywords":["Action"]}
       ]
     },
@@ -448,7 +448,7 @@
       "id": "RC068",
       "sourceSampleId": "faq-098",
       "description": "과거 비영리 무료 지원 약속에 따른 업그레이드 요청",
-      "turns": [{"question":"비영리로 운영 중인데 이전에 유료 버전을 무료로 사용할 수 있게 해주시겠다는 안내를 받았습니다. 유료 버전으로 업그레이드 부탁드립니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"비영리로 운영 중인데 이전에 유료 버전을 무료로 사용할 수 있게 해주시겠다는 안내를 받았습니다. 유료 버전으로 업그레이드 부탁드립니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC069",
@@ -466,13 +466,13 @@
       "id": "RC071",
       "sourceSampleId": "faq-002",
       "description": "Github 연동 업데이트와 재연동 뒤 Repository가 표시되지 않는 장애",
-      "turns": [{"question":"<외부서비스명> 연동 시 업데이트를 하라고 나오는데 업데이트 버튼도 무반응이고 재연동해도 동일합니다. Repository가 보이지 않는데 어떻게 해야 하나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"<외부서비스명> 연동 시 업데이트를 하라고 나오는데 업데이트 버튼도 무반응이고 재연동해도 동일합니다. Repository가 보이지 않는데 어떻게 해야 하나요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC072",
       "sourceSampleId": "faq-002",
       "description": "Repository 문제 해결 뒤 지속되는 Github PR 연동 장애",
-      "turns": [{"question":"<외부서비스명> Repository가 보이지 않는 문제는 해결된 것 같은데, 여전히 PR 연동은 되지 않는 것 같아요.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"<외부서비스명> Repository가 보이지 않는 문제는 해결된 것 같은데, 여전히 PR 연동은 되지 않는 것 같아요.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC073",
@@ -532,7 +532,7 @@
       "id": "RC082",
       "sourceSampleId": "faq-074",
       "description": "필터 적용 상태에서 목표 옆 버튼으로 작업을 추가할 때 발생하는 오류",
-      "turns": [{"question":"리스트 화면에서 상태 필터를 적용한 뒤 목표 옆 + 버튼으로 작업을 추가하면 에러가 뜹니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"리스트 화면에서 상태 필터를 적용한 뒤 목표 옆 + 버튼으로 작업을 추가하면 에러가 뜹니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC083",
@@ -556,7 +556,7 @@
       "id": "RC086",
       "sourceSampleId": "faq-080",
       "description": "보관함에서 프로젝트 하위 항목을 선택할 수 없는 동작 문의",
-      "turns": [{"question":"리스트 뷰에서는 프로젝트를 선택하면 하위 항목도 선택할 수 있는데, 보관함에서는 프로젝트를 선택해도 하위 항목들이 선택되지 않습니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"리스트 뷰에서는 프로젝트를 선택하면 하위 항목도 선택할 수 있는데, 보관함에서는 프로젝트를 선택해도 하위 항목들이 선택되지 않습니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"ANSWERABLE","minimumCitationCount":1,"expectedCitationDocumentTitlesAny":["운영: 보관 작업"]}]
     },
     {
       "id": "RC087",
@@ -574,15 +574,15 @@
       "id": "RC089",
       "sourceSampleId": "faq-081",
       "description": "캘린더에 프로젝트와 목표 기간을 표시하는 기능 요청",
-      "turns": [{"question":"캘린더 뷰에서 작업뿐 아니라 프로젝트와 목표도 기간으로 표시할 수 있으면 좋겠습니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"캘린더 뷰에서 작업뿐 아니라 프로젝트와 목표도 기간으로 표시할 수 있으면 좋겠습니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1}]
     },
     {
       "id": "RC090",
       "sourceSampleId": "faq-081",
       "description": "기존 스프린트 도입 상황의 시작일 유연성 문의와 보충 설명",
       "turns": [
-        {"question":"기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"},
-        {"question":"이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"resolvedQueryKeywords":["스프린트"]}
+        {"question":"기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1},
+        {"question":"이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"resolvedQueryKeywords":["스프린트"],"minimumCitationCount":1}
       ]
     },
     {
@@ -595,7 +595,7 @@
       "id": "RC092",
       "sourceSampleId": "faq-081",
       "description": "후불 청구와 사용자 시트 구매 방식 기능 요청",
-      "turns": [{"question":"멤버를 초대할 때 바로 결제하는 방식 대신 후불 청구 방식이나 사용자 시트를 미리 구매하는 기능을 제공할 수 있나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"}]
+      "turns": [{"question":"멤버를 초대할 때 바로 결제하는 방식 대신 후불 청구 방식이나 사용자 시트를 미리 구매하는 기능을 제공할 수 있나요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"ANSWERABLE","minimumCitationCount":1,"expectedCitationDocumentTitlesAny":["구독 및 결제"]}]
     },
     {
       "id": "RC093",
