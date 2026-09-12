@@ -130,6 +130,7 @@ class ChatApiTest(unittest.TestCase):
                     ),
                 },
                 "citations": [],
+                "relatedSections": [],
             },
             response.json(),
         )

@@ -35,7 +35,7 @@ from app.chat.service import (
     _to_response_source_url,
 )
 from app.answering.service import WITHHELD_RESPONSES
-from app.chat.log_store import RagLogStore, RagRunDetail
+from app.chat.log_store import RagLogStore, RagRunDetail, RelatedSectionLog
 from app.answering.models import (
     Citation,
     CitationSourceKind,
@@ -84,7 +84,7 @@ def to_rag_run_response(detail: RagRunDetail) -> RagRunResponse:
         return _completed_response(run, detail.citations)
 
     if run.status == AnswerStatus.WITHHELD:
-        return _withheld_response(run)
+        return _withheld_response(run, detail.related_sections)
 
     if run.status == AnswerStatus.ERROR:
         return _internal_error_response(run.conversation_id, run.id)
@@ -128,7 +128,10 @@ def _completed_response(
         return _internal_error_response(run.conversation_id, run.id)
 
 
-def _withheld_response(run: RagRun) -> RagRunResponse:
+def _withheld_response(
+    run: RagRun,
+    related_rows: Sequence[RelatedSectionLog],
+) -> RagRunResponse:
     try:
         reason = FinalWithheldReason(run.withheld_reason_code)
         message = WITHHELD_RESPONSES[reason]
@@ -148,6 +151,34 @@ def _withheld_response(run: RagRun) -> RagRunResponse:
         answer=None,
         withheld=ChatWithheld(reason_code=reason_code, message=message),
         citations=[],
+        related_sections=(
+            [
+                _to_related_section(row, index)
+                for index, row in enumerate(related_rows, start=1)
+            ]
+            if reason
+            in {
+                FinalWithheldReason.AMBIGUOUS_QUESTION,
+                FinalWithheldReason.INSUFFICIENT_EVIDENCE,
+            }
+            else []
+        ),
+    )
+
+
+def _to_related_section(
+    row: RelatedSectionLog,
+    citation_number: int,
+) -> ChatCitation:
+    section_path = row.section_path
+    if section_path and section_path[0] == row.document_title:
+        section_path = section_path[1:]
+    return ChatCitation(
+        citation_number=citation_number,
+        document_title=row.document_title,
+        section_path=list(section_path),
+        source_url=row.source_url,
+        source_kind=CitationSourceKind.GITBOOK,
     )
 
 

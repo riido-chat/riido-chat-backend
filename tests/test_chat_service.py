@@ -338,6 +338,67 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
                 )
                 self.assertEqual(self.conversation_id, response.conversation_id)
                 self.assertEqual(self.rag_run_id, response.rag_run_id)
+                expected_count = (
+                    2
+                    if reason
+                    in {
+                        FinalWithheldReason.AMBIGUOUS_QUESTION,
+                        FinalWithheldReason.INSUFFICIENT_EVIDENCE,
+                    }
+                    else 0
+                )
+                self.assertEqual(expected_count, len(response.related_sections))
+
+    async def test_withheld_related_sections_keep_rank_and_remove_duplicates(
+        self,
+    ) -> None:
+        duplicate = replace(
+            _chunk(3),
+            document_title="문서 1",
+            section_path=("문서 1", "섹션 1"),
+            source_url="https://docs.riido.io/1",
+        )
+        self._search_result = replace(
+            self._search_result,
+            fused_results=(
+                self._search_result.fused_results[0],
+                HybridRetrievalResult(
+                    chunk=duplicate,
+                    rrf_score=0.4,
+                    final_rank=2,
+                    bm25_rank=2,
+                    vector_rank=None,
+                ),
+                self._search_result.fused_results[1],
+            ),
+        )
+        self._generation_result = FinalGenerationResult(
+            status=FinalAnswerStatus.WITHHELD,
+            answer_markdown=WITHHELD_RESPONSES[
+                FinalWithheldReason.INSUFFICIENT_EVIDENCE
+            ],
+            citations=(),
+            withheld_reason=FinalWithheldReason.INSUFFICIENT_EVIDENCE,
+            model_call=_generation_trace(),
+        )
+
+        response = await self.service.answer_question("질문")
+
+        self.assertEqual(
+            [
+                (1, "문서 1", ["섹션 1"], "https://docs.riido.io/1"),
+                (2, "문서 2", ["섹션 2"], "https://docs.riido.io/2"),
+            ],
+            [
+                (
+                    section.citation_number,
+                    section.document_title,
+                    section.section_path,
+                    section.source_url,
+                )
+                for section in response.related_sections
+            ],
+        )
 
     async def test_error_response_keeps_identifiers_and_exposes_safe_error_policy(
         self,

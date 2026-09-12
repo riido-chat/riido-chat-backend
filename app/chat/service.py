@@ -5,7 +5,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, replace
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -67,7 +67,11 @@ from app.answering.models import (
     GenerationStageTrace,
 )
 from app.retrieval.hybrid_retriever import HybridRetriever
-from app.retrieval.models import HybridSearchCall, RetrievalResult
+from app.retrieval.models import (
+    HybridRetrievalResult,
+    HybridSearchCall,
+    RetrievalResult,
+)
 from app.retrieval.corpus_state import CorpusNotLoadedError
 from app.chat.profile import (
     ChatProfileConfigurationError,
@@ -208,6 +212,7 @@ def _to_chat_response(
     result: FinalGenerationResult,
     conversation_id: uuid.UUID,
     rag_run_id: uuid.UUID,
+    retrieved_results: Sequence[HybridRetrievalResult] = (),
 ) -> ChatResponse:
     if result.status == FinalAnswerStatus.COMPLETED:
         if result.answer_markdown is None:
@@ -244,6 +249,10 @@ def _to_chat_response(
                 message=result.answer_markdown,
             ),
             citations=[],
+            related_sections=_related_sections(
+                result.withheld_reason,
+                retrieved_results,
+            ),
         )
 
     if result.status == FinalAnswerStatus.ERROR:
@@ -254,6 +263,46 @@ def _to_chat_response(
         )
 
     raise ValueError(f"지원하지 않는 최종 답변 상태입니다: {result.status}")
+
+
+def _related_sections(
+    reason: FinalWithheldReason,
+    results: Sequence[HybridRetrievalResult],
+) -> List[ChatCitation]:
+    """관련 문서를 안내할 수 있는 보류 사유에만 고유 섹션을 순위대로 반환한다."""
+
+    if reason not in {
+        FinalWithheldReason.AMBIGUOUS_QUESTION,
+        FinalWithheldReason.INSUFFICIENT_EVIDENCE,
+    }:
+        return []
+
+    sections: List[ChatCitation] = []
+    seen = set()
+    for result in results:
+        chunk = result.chunk
+        source_kind = CitationSourceKind.from_canonical_uri(chunk.source_url)
+        if source_kind != CitationSourceKind.GITBOOK:
+            continue
+        section_path = tuple(chunk.section_path)
+        if section_path and section_path[0] == chunk.document_title:
+            section_path = section_path[1:]
+        identity = (chunk.source_url, section_path)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        sections.append(
+            ChatCitation(
+                citation_number=len(sections) + 1,
+                document_title=chunk.document_title,
+                section_path=list(section_path),
+                source_url=chunk.source_url,
+                source_kind=source_kind,
+            )
+        )
+        if len(sections) == 5:
+            break
+    return sections
 
 
 def _elapsed_ms(started: float) -> int:
@@ -562,6 +611,7 @@ class ChatService:
                 generation_result,
                 conversation_id,
                 rag_run_id,
+                search.fused_results,
             )
         except Exception as error:
             logger.exception(

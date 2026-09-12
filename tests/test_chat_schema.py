@@ -158,11 +158,39 @@ class ChatResponseTest(unittest.TestCase):
                             "message": "답변을 제공하지 않습니다.",
                         },
                         "citations": [],
+                        "relatedSections": [],
                     }
                 )
 
                 self.assertIsInstance(response, ChatWithheldResponse)
                 self.assertEqual(reason, response.withheld.reason_code)
+                self.assertEqual([], response.related_sections)
+
+    def test_related_sections_reuse_citation_shape(self) -> None:
+        response = self.response_adapter.validate_python(
+            {
+                "status": "WITHHELD",
+                "conversationId": CONVERSATION_ID,
+                "ragRunId": RAG_RUN_ID,
+                "answer": None,
+                "withheld": {
+                    "reasonCode": "INSUFFICIENT_EVIDENCE",
+                    "message": "관련 문서를 확인해주세요.",
+                },
+                "citations": [],
+                "relatedSections": [
+                    {
+                        "citationNumber": 1,
+                        "documentTitle": "팀",
+                        "sectionPath": ["팀 관리"],
+                        "sourceUrl": "https://docs.riido.io/team.md",
+                        "sourceKind": "GITBOOK",
+                    }
+                ],
+            }
+        )
+
+        self.assertIsInstance(response.related_sections[0], ChatCitation)
 
     def test_validates_error_response(self) -> None:
         response = self.response_adapter.validate_python(
