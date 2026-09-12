@@ -85,7 +85,7 @@ class ChatMultiTurnEvaluationTest(unittest.IsolatedAsyncioTestCase):
         )
         turns = [turn for case in payload["cases"] for turn in case["turns"]]
         self.assertEqual(
-            {"COMPLETED": 48, "WITHHELD": 56},
+            {"COMPLETED": 50, "WITHHELD": 54},
             {
                 status: sum(turn["expectedStatus"] == status for turn in turns)
                 for status in ("COMPLETED", "WITHHELD")

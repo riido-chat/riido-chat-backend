@@ -270,7 +270,7 @@ class QueryRewriteInputTest(unittest.TestCase):
             build_query_rewrite_input("가" * (MAX_QUERY_LENGTH + 1), [])
 
     def test_prompt_v4_keeps_security_and_previous_turn_rules(self) -> None:
-        self.assertEqual("v8", QUERY_REWRITE_PROMPT_VERSION)
+        self.assertEqual("v10", QUERY_REWRITE_PROMPT_VERSION)
         self.assertIn("신뢰하지 않는 데이터", QUERY_REWRITE_PROMPT_V4)
         self.assertIn("지시 무시", QUERY_REWRITE_PROMPT_V4)
         self.assertIn("확정하는 근거가 아닙니다", QUERY_REWRITE_PROMPT_V4)
@@ -320,6 +320,21 @@ class QueryRewriteInputTest(unittest.TestCase):
         self.assertIn("구글 캘린더 연동은 어떤 기능이야?", QUERY_REWRITE_PROMPT_V4)
         self.assertIn("스프린트는 어떻게 연동하나요?", QUERY_REWRITE_PROMPT_V4)
         self.assertIn("슬랙 연동에서 댓글은 어떻게", QUERY_REWRITE_PROMPT_V4)
+        self.assertIn("현재 질문 내부에서 해석", QUERY_REWRITE_PROMPT_V4)
+        self.assertIn("무엇의 활용도인지는", QUERY_REWRITE_PROMPT_V4)
+        self.assertIn("전체적인 스프린트 기간", QUERY_REWRITE_PROMPT_V4)
+        self.assertIn("Final decision checklist", QUERY_REWRITE_PROMPT_V4)
+        self.assertIn("현재 질문에 이미 있는 단어만 반복", QUERY_REWRITE_PROMPT_V4)
+
+    def test_prompt_v4_preserves_specific_action_and_parent_scope(self) -> None:
+        self.assertIn("가장 가까운 구체적인", QUERY_REWRITE_PROMPT_V4)
+        self.assertIn("상위 서비스 범위와 구체적인 기능", QUERY_REWRITE_PROMPT_V4)
+        self.assertIn("외부 서비스 레포 연동 후 Action 설정 버튼", QUERY_REWRITE_PROMPT_V4)
+        self.assertIn(
+            "구체적인 기능을 상위 서비스나 구성 요소로 바꾸지 마세요",
+            QUERY_REWRITE_PROMPT_V4,
+        )
+        self.assertIn("resolvedQuery에 `해당 버튼`을 남기지 마세요", QUERY_REWRITE_PROMPT_V4)
 
     def test_prompt_v4_resolves_an_explicit_choice_from_multiple_topics(self) -> None:
         self.assertIn("그중 슬랙에서", QUERY_REWRITE_PROMPT_V4)
@@ -448,6 +463,112 @@ class QueryRewriteResolutionTest(unittest.TestCase):
                     resolved_query="이전 질문은 어떻게 하나요?",
                 ),
             )
+
+    def test_normalizes_resolved_query_with_redundant_action_reference(self) -> None:
+        candidate = QueryRewriteCandidateTurn(
+            rag_run_id=uuid.uuid4(),
+            turn_no=1,
+            status=QueryRewriteTurnStatus.COMPLETED,
+            user_query="외부 서비스 레포를 연동한 뒤 Action을 설정합니다.",
+            answer_content="연동 설정을 확인하세요.",
+            withheld_reason_code=None,
+        )
+
+        resolution = resolve_query_rewrite_output(
+            "해당 버튼을 누르면 오류가 납니다.",
+            [candidate],
+            QueryRewriteOutput(
+                decision=QueryRewriteDecision.FOLLOW_UP_RESOLVED,
+                selected_turn_no=1,
+                context_phrase="Action",
+                resolved_query="Action에서 해당 버튼을 누르면 오류가 납니다.",
+            ),
+        )
+
+        self.assertEqual(
+            (
+                "외부 서비스 레포를 연동한 뒤 Action을 설정합니다. "
+                "버튼을 누르면 오류가 납니다."
+            ),
+            resolution.resolved_query,
+        )
+
+    def test_keeps_model_query_when_ui_scope_merge_would_exceed_limit(self) -> None:
+        previous_query = "이전 범위 " + ("가" * (MAX_QUERY_LENGTH - 6))
+        candidate = QueryRewriteCandidateTurn(
+            rag_run_id=uuid.uuid4(),
+            turn_no=1,
+            status=QueryRewriteTurnStatus.COMPLETED,
+            user_query=previous_query,
+            answer_content="답변",
+            withheld_reason_code=None,
+        )
+
+        resolution = resolve_query_rewrite_output(
+            "해당 버튼을 누르면 오류가 납니다.",
+            [candidate],
+            QueryRewriteOutput(
+                decision=QueryRewriteDecision.FOLLOW_UP_RESOLVED,
+                selected_turn_no=1,
+                context_phrase="이전 범위",
+                resolved_query="이전 범위 버튼을 누르면 오류가 납니다.",
+            ),
+        )
+
+        self.assertEqual(
+            "이전 범위 버튼을 누르면 오류가 납니다.",
+            resolution.resolved_query,
+        )
+
+    def test_normalizes_redundant_follow_up_to_new_topic(self) -> None:
+        candidate = QueryRewriteCandidateTurn(
+            rag_run_id=uuid.uuid4(),
+            turn_no=1,
+            status=QueryRewriteTurnStatus.WITHHELD,
+            user_query="스프린트 일정 등록은 어떻게 하나요?",
+            answer_content=None,
+            withheld_reason_code=FinalWithheldReason.INSUFFICIENT_EVIDENCE,
+        )
+
+        current_query = "스프린트 일정의 전체 기간은 어디에 표시되나요?"
+        resolution = resolve_query_rewrite_output(
+            current_query,
+            [candidate],
+            QueryRewriteOutput(
+                decision=QueryRewriteDecision.FOLLOW_UP_RESOLVED,
+                selected_turn_no=1,
+                context_phrase="스프린트 일정",
+                resolved_query="스프린트 일정의 전체 기간은 어디에 표시되나요?",
+            ),
+        )
+
+        self.assertEqual(QueryRewriteDecision.NEW_TOPIC, resolution.decision)
+        self.assertEqual((), resolution.selected_turns)
+        self.assertEqual(current_query, resolution.resolved_query)
+
+    def test_keeps_explicit_reference_when_context_phrase_is_in_current_query(self) -> None:
+        candidate = QueryRewriteCandidateTurn(
+            rag_run_id=uuid.uuid4(),
+            turn_no=1,
+            status=QueryRewriteTurnStatus.COMPLETED,
+            user_query="스프린트와 프로젝트 중 어떤 것을 사용하나요?",
+            answer_content="두 기능을 비교합니다.",
+            withheld_reason_code=None,
+        )
+
+        resolution = resolve_query_rewrite_output(
+            "그중 스프린트는 어떻게 설정하나요?",
+            [candidate],
+            QueryRewriteOutput(
+                decision=QueryRewriteDecision.FOLLOW_UP_RESOLVED,
+                selected_turn_no=1,
+                context_phrase="스프린트",
+                resolved_query="스프린트는 어떻게 설정하나요?",
+            ),
+        )
+
+        self.assertEqual(QueryRewriteDecision.FOLLOW_UP_RESOLVED, resolution.decision)
+        self.assertEqual((candidate,), resolution.selected_turns)
 
     def test_resolved_follow_up_can_select_an_older_candidate(self) -> None:
         candidates = [

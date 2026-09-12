@@ -27,9 +27,9 @@ from app.retrieval.models import HybridRetrievalResult
 
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.6-terra"
-GENERATION_PROMPT_VERSION = "v38"
-SOURCE_PLANNING_PROMPT_VERSION = "v31"
-SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v31-repair-1"
+GENERATION_PROMPT_VERSION = "v40"
+SOURCE_PLANNING_PROMPT_VERSION = "v33"
+SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v33-repair-1"
 ANSWER_PROMPT_VERSION = "v23"
 ANSWER_REPAIR_PROMPT_VERSION = "v23-repair-1"
 MAX_CONTEXT_SOURCES = 5
@@ -187,6 +187,9 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
   관련 설정·조건, 동일 목적의 인접 기능은 관련 안내가 될 수 있습니다.
 - 공식 문서가 대안이라고 명시하지 않았다면 해결책·동등한 대체제로 단정하지 마세요.
 - 반대 방향 동작을 안내할 때는 요청 방향과 다르다는 점을 related_guidance에 명시하세요.
+- 질문과 SOURCE의 전환 대상이 같고 SOURCE가 요청과 정확히 반대 방향의 공식 전환 절차를
+  설명한다면 반드시 RELATED_GUIDANCE를 선택하세요. 요청 방향이 가능하다고 추론하지 말고,
+  확인되지 않은 요청 방향과 공식적으로 확인된 반대 방향을 분리하세요.
 - 관련 안내도 질문과 SOURCE가 다루는 기능·대상 범위가 같아야 합니다. 일반 제품의 데스크탑
   지원 환경을 묻는 질문에 특정 하위 기능의 데스크탑앱 지원 조건을 사용하거나, 스프린트 일정을
   묻는 질문에 미팅 일정 연동을 사용하는 것처럼 범위가 다른 내용은 관련 안내가 아닙니다.
@@ -196,6 +199,14 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
 - 사용자가 특정 기능의 예외적인 날짜·값·조건을 설정할 수 있는지 물었으나 그 예외는 확인되지
   않고, 같은 기능에서 공식적으로 설정 가능한 기본 날짜·값·조건과 설정 위치가 확인된다면
   미확인 예외와 구분하여 RELATED_GUIDANCE로 제공할 수 있습니다.
+- 사용자가 명시한 바로 그 기능의 설계 의도·권장 활용법·표시 위치·오류 원인은 확인되지 않지만,
+  SOURCE가 같은 기능의 공식 구조·연결 관계·설정 위치·적용 범위를 설명한다면 반드시
+  RELATED_GUIDANCE를 선택하세요. 미확인 핵심을 먼저 밝히고, 공식 사실을 의도·표시 위치·오류
+  원인이나 해결책으로 단정하지 마세요.
+- 알려진 기능을 단지 비교 예시로 든 질문은 같은 기능에 대한 질문이 아닙니다. 예를 들어
+  `스프린트 일정과 같은 전체가 확인해야 할 일정`은 스프린트 자체가 아니라 별도의 공용 일정
+  등록 방법을 묻습니다. 공용 일정 기능의 직접 근거가 없으면 스프린트 설정을 관련 안내로
+  붙이지 말고 INSUFFICIENT_EVIDENCE로 WITHHELD 처리하세요.
 - 단어만 같거나 대상이 다른 내용, 일반 마케팅 소개, 원인·개인 상태를 추측해야만
   연결되는 내용은 관련 안내가 아닙니다.
 - RELATED_GUIDANCE는 INSUFFICIENT_EVIDENCE 상황에만 사용하세요. 모호하거나 범위 밖인
@@ -207,7 +218,19 @@ SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답�
 - "미팅만 캘린더에 연동되는 이유가 뭐예요?" → 이유는 미확인이지만 FAQ가 미팅 연동과
   작업 마감일 제외 범위를 명시하면 RELATED_GUIDANCE입니다. 범위를 이유로 단정하지 마세요.
 - "프로젝트를 백로그로 옮길 수 있나요?" → 역방향인 백로그에서 프로젝트로의 전환만
-  근거가 있다면 요청 방향이 미확인임을 밝히고 반대 방향 안내로 제공할 수 있습니다.
+  근거가 있다면 요청 방향이 미확인임을 밝히고 반드시 반대 방향의 RELATED_GUIDANCE로
+  제공하세요.
+- "작업 브런치명이 무한한 작업 계층을 막기 위한 링크 방식인가요?" → 설계 의도와 권장
+  활용법은 미확인이지만, 같은 작업·하위작업의 공식 계층과 연결 관계를 설명하는 SOURCE가
+  있으면 RELATED_GUIDANCE입니다.
+- "작업에서 추가하는 것 외에 전체적인 스프린트 기간이 어디에 표시되나요?" → 정확한 표시
+  위치는 미확인이지만, 같은 스프린트의 설정 위치·기간 설정·그래프 범위를 설명하는 SOURCE가
+  있으면 표시 위치로 단정하지 않는 RELATED_GUIDANCE입니다.
+- "외부 레포의 Action 설정 버튼에서 오류가 납니다." → 오류 원인은 미확인이지만, 같은 외부
+  레포 연동의 Action 설정 위치·범위나 Repository 접근 권한을 설명하는 SOURCE가 있으면
+  원인·해결책으로 단정하지 않는 RELATED_GUIDANCE입니다.
+- "스프린트 일정과 같은 전체가 확인해야 할 일정은 어떻게 등록하나요?" → 스프린트는 비교
+  예시일 뿐이며 별도 공용 일정 등록 근거가 없으므로 WITHHELD입니다.
 - "비밀번호를 잊었어요." → 앱 설치 시 비밀번호 입력 설명은 계정 복구와 무관하므로
   RELATED_GUIDANCE가 아니며, 다른 유용한 근거가 없으면 WITHHELD입니다.
 - 워크스페이스 삭제 영향, 이름 변경 방법, Key 변경 방법을 함께 물었는데 이름 설정 위치만

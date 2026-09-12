@@ -363,3 +363,36 @@ v35에서 시작 요일·기간·주기 변경 Source가 개별 임의 날짜, �
 아님을 명시했다. RC090은 3/3 통과했고, 정상 스프린트 기간 설정(MQ039)과 시작 요일 변경(MT14)은
 각각 1/1 통과했다. 기존 스프린트 보류 RC011·RC022도 유지됐다. RC042의 단발 불일치는 최종
 보류 상태가 아니라 기대한 FOLLOW_UP_WINDOW 대신 NEW_TOPIC을 선택한 Query Rewrite 변동이다.
+
+## 15. #171 Query Rewrite 잔여 사례 진단과 v10 검증
+
+RC005/2·RC042/2·RC065/2를 한 이슈에서 진단했다. RC005/2는 `이렇게` 자체보다 현재 질문에서
+활용 대상인 `작업 브런치명`이 생략된 것이 핵심이므로 이전 턴을 선택해야 한다. RC042/2는
+`스프린트 일정`과 표시 위치 의도가 현재 질문에 모두 있어 이전 턴이 필요하지 않다. RC065/2는
+`해당 버튼`이 이전 턴의 Action 설정을 가리키므로 상위 외부 레포 연동 범위와 Action을 모두
+보존해야 한다.
+
+Query Rewrite v10은 세 경계를 예시와 최종 판정 규칙으로 명시했다. Backend에는 모델이 선택한
+context phrase가 이미 현재 질문에 존재하고 명시적인 과거 참조도 없는 경우 `NEW_TOPIC`으로
+정규화하는 규칙을 추가했다. 또한 검증을 통과한 재작성에 `해당 버튼`, `그 메뉴`, `그 설정` 같은
+잔여 지시 표현이 있으면 구체 문맥은 유지하면서 일반 명사로 정규화한다.
+
+첫 5회 반복에서는 세 사례의 Query Rewrite 기준은 15/15였지만 Source Planner가
+`WITHHELD`·`RELATED_GUIDANCE` 사이에서 변동해 전체 기준은 11/15였다. 같은 기능의 공식
+구조·설정 범위를 미확인 설계 의도·표시 위치·오류 원인과 분리해 관련 안내로 제공하고, 비교
+예시로 언급된 다른 기능은 근거로 확장하지 않도록 Source Planning v32를 추가했다. 표적 세
+사례는 15/15가 됐지만 기존 역방향 전환 RC006이 3회 중 2회 보류되어, 같은 대상의 공식 반대
+방향 절차는 요청 방향과 다름을 명시한 RELATED_GUIDANCE로 고정하는 v33 규칙을 추가했다.
+
+Mini·Luna·Terra를 동일한 v10 Rewrite 프롬프트와 v32 Planner로 비교했다. Mini는 15/15,
+Luna와 Terra는 각각 12/15였다. Luna와 Terra는 RC065를 `Action을 설정하는 버튼`처럼 재작성해
+GitHub 문서가 검색 Top-5에서 누락되는 경우가 3회씩 있었다. 평균 Rewrite 지연도 Mini 1.23초,
+Luna 3.28초, Terra 2.14초였으므로 Query Rewrite는 `gpt-5.4-mini`를 유지한다.
+
+모델 표현 변동에만 의존하지 않도록 `해당 버튼·메뉴·설정` 같은 UI 참조는 이전 질문 범위를
+현재 질문과 합치는 Backend 안전장치를 추가했다. 최종 조합은 `gpt-5.4-mini` Rewrite v10,
+`gpt-5.6-terra` Generation v40·Source Planning v33이다. 최종 세 사례 5회 반복은
+`evaluation/baselines/query-rewrite-v10-source-planning-v33-mini-scope-guard-repeat5.json`에서
+**15/15**, 기존 관련 안내·완전 보류·직접 답변 경계 8개 고정 입력의 3회 반복은
+`evaluation/baselines/source-planning-related-guidance-v1-v33-regression-repeat3.json`에서
+**24/24** 통과했다.
