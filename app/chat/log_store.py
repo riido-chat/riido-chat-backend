@@ -30,6 +30,9 @@ from app.database.models import (
     ChatProfileRevisionStatus,
     ConversationChannel,
     ContextStrategy,
+    ContentNode,
+    DocumentSource,
+    DocumentVersion,
     ExecutionStatus,
     Feedback,
     FeedbackRating,
@@ -44,6 +47,7 @@ from app.chat.query_rewrite import (
     QueryRewriteCandidateTurn,
     QueryRewriteTurnStatus,
 )
+from app.document.document_key import SOURCE_TYPE_GITBOOK
 
 # WITHHELD 보류 사유 4종
 UNVERIFIABLE_ANSWER_REASON_CODE = "UNVERIFIABLE_ANSWER"
@@ -128,6 +132,15 @@ class CitationLog:
 
 
 @dataclass(frozen=True)
+class RelatedSectionLog:
+    """저장된 검색 결과에서 복원한 관련 섹션."""
+
+    document_title: str
+    section_path: tuple[str, ...]
+    source_url: str
+
+
+@dataclass(frozen=True)
 class RagRunDetail:
     """ragRunId 하나로 조회한 턴 실행 전체."""
 
@@ -136,6 +149,7 @@ class RagRunDetail:
     model_calls: List[ModelCall] = field(default_factory=list)
     citations: List[AnswerCitation] = field(default_factory=list)
     feedback: Optional[Feedback] = None
+    related_sections: List[RelatedSectionLog] = field(default_factory=list)
 
 
 class RagLogStore:
@@ -829,6 +843,56 @@ class RagLogStore:
             .scalars()
             .all()
         )
+        related_section_rows = (
+            await self._session.execute(
+                select(ContentNode, DocumentSource)
+                .join(
+                    RetrievalResultRow,
+                    RetrievalResultRow.chunk_id == ContentNode.id,
+                )
+                .join(
+                    DocumentVersion,
+                    DocumentVersion.id == ContentNode.document_version_id,
+                )
+                .join(
+                    DocumentSource,
+                    DocumentSource.id == DocumentVersion.document_source_id,
+                )
+                .where(
+                    RetrievalResultRow.rag_run_id == rag_run_id,
+                    RetrievalResultRow.selected_as_evidence.is_(True),
+                )
+                .order_by(
+                    RetrievalResultRow.fused_rank,
+                    RetrievalResultRow.id,
+                )
+            )
+        ).all()
+        related_sections = []
+        seen_related_sections = set()
+        for node, source in related_section_rows:
+            metadata = node.metadata_ or {}
+            section_path = metadata.get("section_path")
+            if (
+                source.source_type != SOURCE_TYPE_GITBOOK
+                or not source.title
+                or not isinstance(section_path, list)
+                or not all(isinstance(part, str) for part in section_path)
+            ):
+                continue
+            identity = (source.canonical_uri, tuple(section_path))
+            if identity in seen_related_sections:
+                continue
+            seen_related_sections.add(identity)
+            related_sections.append(
+                RelatedSectionLog(
+                    document_title=source.title,
+                    section_path=tuple(section_path),
+                    source_url=source.canonical_uri,
+                )
+            )
+            if len(related_sections) == 5:
+                break
         model_calls = (
             (
                 await self._session.execute(
@@ -861,6 +925,7 @@ class RagLogStore:
             model_calls=list(model_calls),
             citations=list(citations),
             feedback=feedback,
+            related_sections=related_sections,
         )
 
     async def list_conversation_runs(

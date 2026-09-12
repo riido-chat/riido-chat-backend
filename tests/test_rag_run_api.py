@@ -28,7 +28,11 @@ from app.database.models import (
 from app.main import create_app
 from app.chat.dependencies import get_rag_log_store
 from app.answering.service import WITHHELD_RESPONSES
-from app.chat.log_store import RagLogStore, RagRunDetail
+from app.chat.log_store import (
+    RagLogStore,
+    RagRunDetail,
+    RelatedSectionLog,
+)
 from app.answering.models import CitationSourceKind, FinalWithheldReason
 from app.document.document_key import (
     CONSOLE_URI_SCHEME,
@@ -179,7 +183,38 @@ class RagRunApiTest(unittest.TestCase):
                     body["withheld"]["message"],
                 )
                 self.assertEqual([], body["citations"])
+                self.assertEqual([], body["relatedSections"])
                 self.assertIsNone(body["answer"])
+
+    def test_withheld_restores_related_sections_for_allowed_reason(self) -> None:
+        self._detail_returns(
+            self._run(
+                AnswerStatus.WITHHELD,
+                withheld_reason_code=FinalWithheldReason.INSUFFICIENT_EVIDENCE.value,
+            ),
+            related_sections=[
+                RelatedSectionLog(
+                    document_title="멤버 관리",
+                    section_path=("멤버 관리", "워크스페이스", "멤버 초대"),
+                    source_url="https://docs.riido.io/member/invite.md",
+                )
+            ],
+        )
+
+        body = self._get().json()
+
+        self.assertEqual(
+            [
+                {
+                    "citationNumber": 1,
+                    "documentTitle": "멤버 관리",
+                    "sectionPath": ["워크스페이스", "멤버 초대"],
+                    "sourceUrl": "https://docs.riido.io/member/invite.md",
+                    "sourceKind": "GITBOOK",
+                }
+            ],
+            body["relatedSections"],
+        )
 
     def test_stored_error_returns_200_with_error_body(self) -> None:
         self._detail_returns(
@@ -407,6 +442,7 @@ class RagRunApiTest(unittest.TestCase):
             model_calls=list(parts.get("model_calls", [])),
             citations=list(parts.get("citations", [])),
             feedback=parts.get("feedback"),
+            related_sections=list(parts.get("related_sections", [])),
         )
 
     def _get(self):

@@ -132,6 +132,11 @@ class ChatWithheldResponse(BaseModel):
     answer: None
     withheld: ChatWithheld
     citations: List[ChatCitation] = Field(max_length=0)
+    related_sections: List[ChatCitation] = Field(
+        default_factory=list,
+        alias="relatedSections",
+        max_length=5,
+    )
 
 
 class ChatErrorResponse(BaseModel):
