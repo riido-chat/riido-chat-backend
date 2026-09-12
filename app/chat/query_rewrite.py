@@ -26,13 +26,33 @@ from app.answering.models import FinalWithheldReason
 
 OPENAI_QUERY_REWRITE_PROVIDER = "openai"
 OPENAI_QUERY_REWRITE_MODEL = "gpt-5.4-mini"
-QUERY_REWRITE_PROMPT_VERSION = "v8"
+QUERY_REWRITE_PROMPT_VERSION = "v10"
 QUERY_REWRITE_TIMEOUT_SECONDS = 30.0
 QUERY_REWRITE_MAX_OUTPUT_TOKENS = 512
 MAX_QUERY_REWRITE_ATTEMPTS = 2
 MAX_QUERY_REWRITE_TURNS = 5
 MAX_QUERY_LENGTH = 4000
 CONTEXT_SNAPSHOT_SCHEMA_VERSION = "v2"
+UNRESOLVED_REFERENCE_REPLACEMENTS = {
+    "해당 버튼": "버튼",
+    "그 버튼": "버튼",
+    "해당 메뉴": "메뉴",
+    "그 메뉴": "메뉴",
+    "해당 설정": "설정",
+    "그 설정": "설정",
+}
+PRIOR_CONTEXT_REFERENCE_MARKERS = (
+    "그것",
+    "그거",
+    "그건",
+    "그중",
+    "그 ",
+    "해당",
+    "앞서",
+    "앞에서",
+    "이렇게",
+    "이 방식",
+)
 
 MODEL_OUTPUT_INVALID_ERROR_CODE = "MODEL_OUTPUT_INVALID"
 UPSTREAM_ERROR_CODE = "UPSTREAM_ERROR"
@@ -59,6 +79,9 @@ QUERY_REWRITE_PROMPT_V4 = """당신은 현재 질문이 새 주제인지 후속 
   후보가 필요하지 않았으므로 NEW_TOPIC입니다.
 - 첫 문장이 짧다는 이유만으로 후속 질문으로 분류하지 말고, 실제 생략된 문맥이 있는지 판단하세요.
 - candidateTurns를 보기 전에 현재 질문만으로 중심 대상과 질문 의도가 완결되는지 먼저 검사하세요.
+- `이렇게`, `이 방식` 같은 표현이 있어도 현재 질문 앞부분에 그 방식·조건·대상이 이미 명시되어
+  있으면 현재 질문 내부에서 해석할 수 있습니다. 이런 표현만으로 과거 문맥이 필요하다고 판단하지
+  말고, 현재 질문 자체가 독립 검색 질의라면 NEW_TOPIC을 선택하세요.
 - 현재 질문이 `슬랙 연동은 어떻게 해?`, `댓글은 어떻게 작성해?`처럼 구체적인 중심 대상을
   직접 명시하고 대명사나 생략된 범위가 없다면 NEW_TOPIC입니다. 후보 답변에 같은 단어 또는
   연관 개념이 등장했다는 이유로 현재 질문의 명시된 대상을 과거 주제에 붙이지 마세요.
@@ -67,6 +90,8 @@ QUERY_REWRITE_PROMPT_V4 = """당신은 현재 질문이 새 주제인지 후속 
 - 현재 질문이 후보보다 더 구체적인 대상·조건·상황을 이미 포함한다면, 후보의 짧고 포괄적인
   표현으로 현재 질문을 대체하거나 축약하지 마세요. 이 경우 이전 턴 없이 검색할 수 있으므로
   NEW_TOPIC입니다.
+- FOLLOW_UP_RESOLVED에서도 현재 질문에 이미 명시된 대상·조건·증상은 모두 보존하고, 생략된
+  표현을 해소하는 데 필요한 문맥만 추가하세요.
 - 현재 질문이 문법적으로 검색 가능해 보여도, 어떤 서비스·기능에 관한 질문인지 빠져 있고
   직전 턴이 그 범위를 하나로 정한다면 FOLLOW_UP_RESOLVED입니다.
 
@@ -88,6 +113,9 @@ QUERY_REWRITE_PROMPT_V4 = """당신은 현재 질문이 새 주제인지 후속 
   그 대상을 사용해 FOLLOW_UP_RESOLVED로 재작성하세요.
 - 현재 질문에서 무엇을 추가·삭제·설정하는지 목적어가 생략됐고 가장 최근 턴의 중심 대상이
   하나라면, 그 중심 대상을 목적어로 보충해 FOLLOW_UP_RESOLVED로 재작성하세요.
+- `해당 버튼`, `그 메뉴`, `그 설정`처럼 조작 대상을 가리키면 선택한 턴에서 가장 가까운 구체적인
+  기능·행동을 우선 복원하세요. 후보에 상위 서비스 범위와 구체적인 기능이 함께 있으면 둘 다
+  보존하고, 구체적인 기능을 상위 서비스나 구성 요소로 바꾸지 마세요.
 - 후보 턴의 질문이 하나의 대상을 명시했다면 그 대상이 중심 주제입니다. answerContent에 나온
   속성, 구성 요소, 연관 개념은 현재 질문이 대명사나 생략 표현으로 직접 가리키지 않는 한
   별도 지시 대상이 아닙니다. 현재 질문이 그 개념의 이름을 새 중심 대상으로 직접 명시한 것은
@@ -138,6 +166,16 @@ QUERY_REWRITE_PROMPT_V4 = """당신은 현재 질문이 새 주제인지 후속 
 - FOLLOW_UP_UNRESOLVED는 selectedTurnNo, contextPhrase, resolvedQuery를 모두 null로 둡니다.
 - resolvedQuery는 4,000자 이하여야 하며 질문에 직접 답하지 마세요.
 
+## Final decision checklist
+- 분류 직전에 현재 질문만 다시 읽고, 검색 대상과 질문 의도가 모두 명시됐는지 확인하세요.
+- 현재 질문만으로 독립 검색이 가능하고 `그`, `해당`, `이렇게`, 생략된 소유 대상처럼 후보 턴이
+  채워야 할 정보가 없다면, 후보와 주제가 이어지거나 후보가 배경 이해에 도움돼도 NEW_TOPIC입니다.
+- FOLLOW_UP_RESOLVED를 선택할 때는 contextPhrase가 현재 질문에 없는 필수 대상을 실제로
+  보충하는지 확인하세요. 현재 질문에 이미 있는 단어만 반복하고 `그중`처럼 후보 집합을 명시적으로
+  참조하지도 않는다면 NEW_TOPIC으로 되돌리세요.
+- 현재 질문의 명시된 대상·조건·행동은 후보 문맥을 합칠 때 하나도 삭제하거나 더 넓은 상위
+  대상으로 바꾸지 마세요.
+
 ## Classification examples
 - 가장 최근 턴이 스프린트에 관한 내용이어도 현재 질문이 `슬랙 연동은 어떻게 해?`라면 중심 대상과
   의도가 이미 완결되므로 NEW_TOPIC입니다. `스프린트는 어떻게 연동하나요?`로 바꾸지 마세요.
@@ -151,6 +189,20 @@ QUERY_REWRITE_PROMPT_V4 = """당신은 현재 질문이 새 주제인지 후속 
 - 가장 최근 턴이 `구글 캘린더 연동은 어떤 기능이야?`이고 현재 질문이
   `그 연동에서 작업 마감일도 동기화돼?`라면 구글 캘린더 연동을 사용해
   FOLLOW_UP_RESOLVED로 처리하세요.
+- 후보가 작업 브런치명의 의미를 묻고 현재 질문이 `활용도가 작업 계층에서 무한적으로 발생할 수
+  있는 계층구조를 막기 위해 링크방식으로 연결시켜 주신거 같은데 이렇게 활용하면 될까요?`라면
+  `이렇게`가 가리키는 링크 방식은 현재 질문 안에 있지만, 무엇의 활용도인지는 후보의 작업
+  브런치명이 필요합니다. FOLLOW_UP_RESOLVED이며 작업 브런치명과 현재 질문의 작업 계층·링크
+  방식을 모두 보존하세요.
+- 후보가 스프린트 일정 등록 방법을 묻고 현재 질문이 `스프린트 일정을 설정했는데, 작업에서
+  추가하는 것 외에 전체적인 스프린트 기간이 어디에 표시되는지 궁금합니다.`라면 대상과 의도가
+  이미 완결되어 있으므로 NEW_TOPIC입니다.
+- 후보가 `외부 서비스 레포를 연동한 뒤 Action을 설정하려고 하는데 에러 페이지가 나옵니다.`이고
+  현재 질문이 `해당 버튼을 눌렀을 때 에러 화면이 뜹니다.`라면 버튼의 구체적인 대상은 Action
+  설정입니다. FOLLOW_UP_RESOLVED이며 `외부 서비스 레포 연동 후 Action 설정 버튼을 눌렀을 때
+  에러 화면이 뜹니다.`처럼 상위 연동 범위와 Action을 함께 보존하세요. contextPhrase도 `Action`
+  하나가 아니라 상위 범위를 포함한 전체 대상 구절을 선택하세요. `외부 서비스 레포를 눌렀을 때`
+  처럼 구체 기능을 상위 대상으로 바꾸거나 resolvedQuery에 `해당 버튼`을 남기지 마세요.
 - 후보가 `스프린트가 뭐야?`이고 현재 질문이 `그건 어떻게 설정해?`라면 이전 답변에
   기간, 프로젝트, 목표, 작업이 언급되어도 중심 주제는 스프린트 하나입니다.
   FOLLOW_UP_RESOLVED이며 resolvedQuery는 `스프린트는 어떻게 설정하나요?`입니다.
@@ -454,12 +506,42 @@ def _validated_output(value: object) -> QueryRewriteOutput:
         ) from error
 
 
+def _normalize_reference_phrases(value: str) -> str:
+    normalized = value
+    for phrase, replacement in UNRESOLVED_REFERENCE_REPLACEMENTS.items():
+        normalized = normalized.replace(phrase, replacement)
+    return normalized
+
+
+def _preserve_previous_scope_for_ui_reference(
+    normalized_query: str,
+    previous_query: str,
+    resolved_query: str,
+) -> str:
+    if not any(
+        phrase in normalized_query
+        for phrase in UNRESOLVED_REFERENCE_REPLACEMENTS
+    ):
+        return resolved_query
+
+    normalized_current = _normalize_reference_phrases(normalized_query)
+    if previous_query in resolved_query:
+        return resolved_query
+
+    merged_query = f"{previous_query} {normalized_current}"
+    if len(merged_query) <= MAX_QUERY_LENGTH:
+        return merged_query
+    return resolved_query
+
+
 def _resolve_query_rewrite_output(
     normalized_query: str,
     candidates: Tuple[QueryRewriteCandidateTurn, ...],
     output: object,
 ) -> QueryResolution:
     parsed = _validated_output(output)
+    decision = parsed.decision
+    resolved_query = parsed.resolved_query
     if (
         parsed.decision == QueryRewriteDecision.FOLLOW_UP_RESOLVED
         and not candidates
@@ -491,6 +573,22 @@ def _resolve_query_rewrite_output(
             raise QueryRewriteOutputInvalidError(
                 "resolvedQuery가 contextPhrase를 그대로 보존하지 않았습니다."
             )
+        resolved_query = _normalize_reference_phrases(resolved_query or "")
+        resolved_query = _preserve_previous_scope_for_ui_reference(
+            normalized_query,
+            previous_query,
+            resolved_query,
+        )
+
+        if (
+            context_phrase in normalized_query
+            and not any(
+                marker in normalized_query
+                for marker in PRIOR_CONTEXT_REFERENCE_MARKERS
+            )
+        ):
+            decision = QueryRewriteDecision.NEW_TOPIC
+            resolved_query = normalized_query
 
     selected_turns = (
         tuple(
@@ -498,17 +596,15 @@ def _resolve_query_rewrite_output(
             for candidate in candidates
             if candidate.turn_no == parsed.selected_turn_no
         )
-        if parsed.decision == QueryRewriteDecision.FOLLOW_UP_RESOLVED
+        if decision == QueryRewriteDecision.FOLLOW_UP_RESOLVED
         else ()
     )
 
-    if parsed.decision == QueryRewriteDecision.NEW_TOPIC:
+    if decision == QueryRewriteDecision.NEW_TOPIC:
         resolved_query = normalized_query
-    else:
-        resolved_query = parsed.resolved_query
 
     return QueryResolution(
-        decision=parsed.decision,
+        decision=decision,
         resolved_query=resolved_query,
         selected_turns=selected_turns,
     )

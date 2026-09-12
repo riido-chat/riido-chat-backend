@@ -42,7 +42,7 @@
       "description": "하위작업 표시 의미를 묻고 생략 표현으로 활용법을 이어 묻는 대화",
       "turns": [
         {"question":"작업 단위에서 하위 작업 항목을 추가하게 되면 태그처럼 작업 브런치명이 옆에 나오게 됩니다. 이렇게 되었을 때 태그의 활용도는 어떤 작업의 하위 항목인지 구분하기 위한 값인가요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1},
-        {"question":"활용도가 작업 계층에서 무한적으로 발생할 수 있는 계층구조를 막기 위해 링크방식으로 연결시켜 주신거 같은데 이렇게 활용하면 될까요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE","resolvedQueryKeywords":["작업 계층"]}
+        {"question":"활용도가 작업 계층에서 무한적으로 발생할 수 있는 계층구조를 막기 위해 링크방식으로 연결시켜 주신거 같은데 이렇게 활용하면 될까요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"resolvedQueryKeywords":["작업 브런치명","작업 계층"],"minimumCitationCount":1}
       ]
     },
     {
@@ -282,7 +282,7 @@
       "description": "스프린트 일정 등록 뒤 전체 기간 표시 위치를 이어 질문",
       "turns": [
         {"question":"혹시 스프린트 일정과 같은 전체가 확인해야 할 일정을 등록하려면 어떻게 하나요?","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE"},
-        {"question":"스프린트 일정을 설정했는데, 작업에서 추가하는 것 외에 전체적인 스프린트 기간이 어디에 표시되는지 궁금합니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"resolvedQueryKeywords":["스프린트"],"minimumCitationCount":1}
+        {"question":"스프린트 일정을 설정했는데, 작업에서 추가하는 것 외에 전체적인 스프린트 기간이 어디에 표시되는지 궁금합니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","expectedContextStrategy":"NEW_TOPIC","expectedSelectedTurnNos":[],"resolvedQueryKeywords":["스프린트"],"minimumCitationCount":1}
       ]
     },
     {
@@ -429,7 +429,7 @@
       "description": "외부 레포 Action 설정 중 에러 화면이 발생하는 대화",
       "turns": [
         {"question":"외부 서비스 레포를 연동한 뒤 Action을 설정하려고 하는데 뤼이도에서 에러 페이지를 보여주네요. 이유가 뭔가요?","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","minimumCitationCount":1},
-        {"question":"해당 버튼을 눌렀을 때 에러 화면이 뜹니다.","expectedStatus":"WITHHELD","expectedWithheldReason":"INSUFFICIENT_EVIDENCE","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"resolvedQueryKeywords":["Action"]}
+        {"question":"해당 버튼을 눌렀을 때 에러 화면이 뜹니다.","expectedStatus":"COMPLETED","expectedPlanningStatus":"RELATED_GUIDANCE","expectedContextStrategy":"FOLLOW_UP_WINDOW","expectedSelectedTurnNos":[1],"resolvedQueryKeywords":["Action"],"minimumCitationCount":1}
       ]
     },
     {

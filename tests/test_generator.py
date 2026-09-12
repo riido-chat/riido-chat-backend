@@ -637,11 +637,15 @@ class GenerationContextTest(unittest.TestCase):
         self.assertIn("WITHHELD 여부를 판단하세요", ANSWER_PROMPT_V17)
 
     def test_prompt_forbids_links_urls_and_html(self) -> None:
-        self.assertEqual("v38", GENERATION_PROMPT_VERSION)
-        self.assertEqual("v31", SOURCE_PLANNING_PROMPT_VERSION)
-        self.assertEqual("v31-repair-1", SOURCE_PLANNING_REPAIR_PROMPT_VERSION)
+        self.assertEqual("v40", GENERATION_PROMPT_VERSION)
+        self.assertEqual("v33", SOURCE_PLANNING_PROMPT_VERSION)
+        self.assertEqual("v33-repair-1", SOURCE_PLANNING_REPAIR_PROMPT_VERSION)
         self.assertEqual("v23", ANSWER_PROMPT_VERSION)
         self.assertEqual("v23-repair-1", ANSWER_REPAIR_PROMPT_VERSION)
+        self.assertIn("바로 그 기능의 설계 의도", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("스프린트 자체가 아니라 별도의 공용 일정", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("Action 설정 버튼에서 오류", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("정확히 반대 방향의 공식 전환 절차", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("넓은 허용 규칙과 구체적인 제한", ANSWER_PROMPT_V17)
         self.assertIn("상위 공간과 그 내부 대상", ANSWER_PROMPT_V17)
         self.assertIn("내부 식별자를 답변 문장에 직접 노출", ANSWER_PROMPT_V17)
