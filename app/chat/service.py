@@ -21,6 +21,7 @@ from app.chat.schema import (
     ChatWithheld,
     ChatWithheldReasonCode,
     ChatWithheldResponse,
+    MAX_RELATED_SECTIONS,
 )
 from app.database.models import (
     ChatProfileRevision,
@@ -300,7 +301,7 @@ def _related_sections(
                 source_kind=source_kind,
             )
         )
-        if len(sections) == 5:
+        if len(sections) == MAX_RELATED_SECTIONS:
             break
     return sections
 

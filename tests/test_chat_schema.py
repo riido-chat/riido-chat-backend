@@ -17,6 +17,7 @@ from app.chat.schema import (
     ChatWithheldReasonCode,
     ChatWithheldResponse,
     MAX_QUESTION_LENGTH,
+    MAX_RELATED_SECTIONS,
 )
 from app.answering.models import CitationSourceKind, FinalGenerationResult
 
@@ -191,6 +192,32 @@ class ChatResponseTest(unittest.TestCase):
         )
 
         self.assertIsInstance(response.related_sections[0], ChatCitation)
+
+    def test_related_sections_reject_more_than_three_items(self) -> None:
+        payload = {
+            "status": "WITHHELD",
+            "conversationId": CONVERSATION_ID,
+            "ragRunId": RAG_RUN_ID,
+            "answer": None,
+            "withheld": {
+                "reasonCode": "INSUFFICIENT_EVIDENCE",
+                "message": "관련 문서를 확인해주세요.",
+            },
+            "citations": [],
+            "relatedSections": [
+                {
+                    "citationNumber": index,
+                    "documentTitle": f"문서 {index}",
+                    "sectionPath": [f"섹션 {index}"],
+                    "sourceUrl": f"https://docs.riido.io/{index}",
+                    "sourceKind": "GITBOOK",
+                }
+                for index in range(1, MAX_RELATED_SECTIONS + 2)
+            ],
+        }
+
+        with self.assertRaises(ValidationError):
+            self.response_adapter.validate_python(payload)
 
     def test_validates_error_response(self) -> None:
         response = self.response_adapter.validate_python(

@@ -20,6 +20,7 @@ from typing import Any, List, Optional, Sequence
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.chat.schema import MAX_RELATED_SECTIONS
 from app.database.models import (
     AnswerCitation,
     AnswerStatus,
@@ -891,7 +892,7 @@ class RagLogStore:
                     source_url=source.canonical_uri,
                 )
             )
-            if len(related_sections) == 5:
+            if len(related_sections) == MAX_RELATED_SECTIONS:
                 break
         model_calls = (
             (

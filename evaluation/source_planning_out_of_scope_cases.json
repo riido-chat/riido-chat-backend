@@ -1,0 +1,274 @@
+{
+  "version": "source-planning-out-of-scope-v1",
+  "description": "Issue #177의 OUT_OF_SCOPE, AMBIGUOUS_QUESTION, INSUFFICIENT_EVIDENCE 판정 경계를 검증한다.",
+  "recommendedRepeat": 3,
+  "cases": [
+    {
+      "id": "OS001",
+      "description": "순수 인사",
+      "turns": [
+        {
+          "question": "안녕",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS002",
+      "description": "초성 인사",
+      "turns": [
+        {
+          "question": "ㅎㅇ",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS003",
+      "description": "영문식 인사",
+      "turns": [
+        {
+          "question": "hello",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS004",
+      "description": "변형된 인사",
+      "turns": [
+        {
+          "question": "안뇽",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS005",
+      "description": "순수 감사",
+      "turns": [
+        {
+          "question": "도와줘서 고마워",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS006",
+      "description": "초성 감사",
+      "turns": [
+        {
+          "question": "ㄱㅅ",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS007",
+      "description": "순수 작별",
+      "turns": [
+        {
+          "question": "바이 다음에 봐",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS008",
+      "description": "일상적인 잡담",
+      "turns": [
+        {
+          "question": "오늘 기분 어때?",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS009",
+      "description": "짧은 잡담",
+      "turns": [
+        {
+          "question": "뭐해",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS010",
+      "description": "일반 지식 질문",
+      "turns": [
+        {
+          "question": "대한민국의 수도는 어디야?",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS011",
+      "description": "짧은 일반 지식 질문",
+      "turns": [
+        {
+          "question": "광합성이 뭐임?",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS012",
+      "description": "일반 프로그래밍 질문",
+      "turns": [
+        {
+          "question": "파이썬에서 리스트를 정렬하는 방법을 알려줘",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS013",
+      "description": "명사형 일반 프로그래밍 질문",
+      "turns": [
+        {
+          "question": "자바 배열 정렬",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS014",
+      "description": "다른 제품 사용법 질문",
+      "turns": [
+        {
+          "question": "노션에서 페이지를 삭제하려면 어떻게 해야 해?",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS015",
+      "description": "오타가 포함된 다른 제품 질문",
+      "turns": [
+        {
+          "question": "슬렉 채널 만드는법 알랴줘",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "OUT_OF_SCOPE"
+        }
+      ]
+    },
+    {
+      "id": "OS016",
+      "description": "인사와 뤼이도 제품 질문이 함께 있는 입력",
+      "turns": [
+        {
+          "question": "안녕하세요, 뤼이도에서 팀을 비공개로 설정하는 방법을 알려주세요.",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["비공개 팀"]
+        }
+      ]
+    },
+    {
+      "id": "OS017",
+      "description": "초성 인사와 짧은 제품 질문이 함께 있는 입력",
+      "turns": [
+        {
+          "question": "ㅎㅇ 백로그가 뭐야?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["계획: 백로그"]
+        }
+      ]
+    },
+    {
+      "id": "OS018",
+      "description": "감사와 후속 제품 질문이 함께 있는 입력",
+      "turns": [
+        {
+          "question": "고마워, 그런데 댓글을 수정하면 시간이 표시돼?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["댓글"]
+        }
+      ]
+    },
+    {
+      "id": "OS019",
+      "description": "제품 주제만 밝힌 불명확한 문의",
+      "turns": [
+        {
+          "question": "안녕하세요, 뤼이도 요금제 문의드립니다.",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "AMBIGUOUS_QUESTION"
+        }
+      ]
+    },
+    {
+      "id": "OS020",
+      "description": "짧은 제품 주제 문의",
+      "turns": [
+        {
+          "question": "결제 질문",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "AMBIGUOUS_QUESTION"
+        }
+      ]
+    },
+    {
+      "id": "OS021",
+      "description": "공식 근거가 부족한 구체적인 제품 질문",
+      "turns": [
+        {
+          "question": "뤼이도 모바일 앱이 지원하는 최소 iOS 버전을 알려주세요.",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "id": "OS022",
+      "description": "오타가 포함된 구체적인 제품 질문의 근거 부족",
+      "turns": [
+        {
+          "question": "뤼이도 윈도우 최소 지원 버전이 몬가요?",
+          "expectedStatus": "WITHHELD",
+          "expectedPlanningStatus": "WITHHELD",
+          "expectedWithheldReason": "INSUFFICIENT_EVIDENCE"
+        }
+      ]
+    }
+  ]
+}

@@ -486,6 +486,13 @@ class GenerationContextTest(unittest.TestCase):
         self.assertNotIn(r"\[설정", generation_input)
 
     def test_source_planning_prompt_preserves_scope_and_all_evidence(self) -> None:
+        self.assertIn("검색된 SOURCE보다 먼저 판정", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("인사·감사·작별", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("AMBIGUOUS_QUESTION이 아니라 OUT_OF_SCOPE", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("표준어·반말·초성·오타", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("인사·감사 표현과 뤼이도 제품 질문", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("다른 제품의 기능이나 사용법", SOURCE_PLANNING_PROMPT_V11)
+        self.assertIn("구체적인 질문·요청이 없으면", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("질문을 answer_type으로 분류", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("DEFINITION", SOURCE_PLANNING_PROMPT_V11)
         self.assertIn("FEATURE_SUMMARY", SOURCE_PLANNING_PROMPT_V11)
@@ -638,8 +645,8 @@ class GenerationContextTest(unittest.TestCase):
 
     def test_prompt_forbids_links_urls_and_html(self) -> None:
         self.assertEqual("v40", GENERATION_PROMPT_VERSION)
-        self.assertEqual("v33", SOURCE_PLANNING_PROMPT_VERSION)
-        self.assertEqual("v33-repair-1", SOURCE_PLANNING_REPAIR_PROMPT_VERSION)
+        self.assertEqual("v34", SOURCE_PLANNING_PROMPT_VERSION)
+        self.assertEqual("v34-repair-1", SOURCE_PLANNING_REPAIR_PROMPT_VERSION)
         self.assertEqual("v23", ANSWER_PROMPT_VERSION)
         self.assertEqual("v23-repair-1", ANSWER_REPAIR_PROMPT_VERSION)
         self.assertIn("바로 그 기능의 설계 의도", SOURCE_PLANNING_PROMPT_V11)

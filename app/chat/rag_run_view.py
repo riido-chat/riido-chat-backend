@@ -19,6 +19,7 @@ from app.chat.schema import (
     ChatWithheld,
     ChatWithheldReasonCode,
     ChatWithheldResponse,
+    MAX_RELATED_SECTIONS,
 )
 from app.chat.rag_run_schema import (
     RagRunProcessingResponse,
@@ -154,7 +155,10 @@ def _withheld_response(
         related_sections=(
             [
                 _to_related_section(row, index)
-                for index, row in enumerate(related_rows, start=1)
+                for index, row in enumerate(
+                    related_rows[:MAX_RELATED_SECTIONS],
+                    start=1,
+                )
             ]
             if reason
             in {
