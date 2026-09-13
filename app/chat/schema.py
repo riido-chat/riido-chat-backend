@@ -16,6 +16,7 @@ HTTP_DTO_CONFIG = ConfigDict(
 )
 
 MAX_QUESTION_LENGTH = 4_000
+MAX_RELATED_SECTIONS = 3
 
 
 class ChatRequest(BaseModel):
@@ -135,7 +136,7 @@ class ChatWithheldResponse(BaseModel):
     related_sections: List[ChatCitation] = Field(
         default_factory=list,
         alias="relatedSections",
-        max_length=5,
+        max_length=MAX_RELATED_SECTIONS,
     )
 
 

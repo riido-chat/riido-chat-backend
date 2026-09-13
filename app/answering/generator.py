@@ -28,8 +28,8 @@ from app.retrieval.models import HybridRetrievalResult
 OPENAI_GENERATION_PROVIDER = "openai"
 OPENAI_GENERATION_MODEL = "gpt-5.6-terra"
 GENERATION_PROMPT_VERSION = "v40"
-SOURCE_PLANNING_PROMPT_VERSION = "v33"
-SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v33-repair-1"
+SOURCE_PLANNING_PROMPT_VERSION = "v34"
+SOURCE_PLANNING_REPAIR_PROMPT_VERSION = "v34-repair-1"
 ANSWER_PROMPT_VERSION = "v23"
 ANSWER_REPAIR_PROMPT_VERSION = "v23-repair-1"
 MAX_CONTEXT_SOURCES = 5
@@ -64,6 +64,19 @@ PROCEDURE_EVIDENCE_RULES = """## Procedure evidence sufficiency
 SOURCE_PLANNING_PROMPT_V11 = """당신은 뤼이도 공식 이용가이드 답변에 필요한 근거를 판정합니다.
 
 ## Scope rules
+- 질문의 범위는 검색된 SOURCE보다 먼저 판정하세요. 검색 결과에 뤼이도 문서가 있다는 이유로
+  질문 자체를 뤼이도 이용가이드 질문으로 바꾸거나 관련 안내를 만들지 마세요.
+- `안녕`, `ㅎㅇ`, `하이`, `반가워`, `고마워`, `ㄱㅅ`, `잘 가`, `바이`처럼 제품에 관한
+  질문이나 요청 없이 인사·감사·작별만 표현한 입력과 일상적인 잡담은
+  AMBIGUOUS_QUESTION이 아니라 OUT_OF_SCOPE으로 WITHHELD 처리하세요. 표준어·반말·초성·오타·
+  영문처럼 표현 방식이 달라도 의미가 같으면 동일하게 판정하세요.
+- 인사·감사 표현과 뤼이도 제품 질문이 함께 있으면 인사 표현을 제외한 실제 질문을 기준으로
+  판정하세요. 예를 들어 `안녕하세요, 팀 삭제 방법을 알려주세요`는 OUT_OF_SCOPE이 아닙니다.
+- 날씨·일반 지식·일반 프로그래밍처럼 제품과 무관한 질문, 다른 제품의 기능이나 사용법을 묻는
+  질문은 OUT_OF_SCOPE으로 WITHHELD 처리하세요.
+- 뤼이도 제품이나 이용가이드의 주제를 밝혔지만 구체적인 질문·요청이 없으면
+  AMBIGUOUS_QUESTION이고, 구체적인 질문은 있으나 SOURCE에 근거가 없으면
+  INSUFFICIENT_EVIDENCE입니다. 이 둘을 OUT_OF_SCOPE으로 바꾸지 마세요.
 - SOURCE를 선택하기 전에 질문을 answer_type으로 분류하세요.
   용어의 의미를 묻는 질문은 DEFINITION, 기능을 넓게 묻는 질문은 FEATURE_SUMMARY,
   설정 위치·방법·절차를 묻는 질문은 PROCEDURE입니다. 가능 여부, 조건·제한, 공개 범위,

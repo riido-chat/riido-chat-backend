@@ -18,6 +18,7 @@ from app.chat.schema import (
     ChatResponseStatus,
     ChatWithheldReasonCode,
     ChatWithheldResponse,
+    MAX_RELATED_SECTIONS,
 )
 from app.database.models import ContextStrategy, ExecutionStatus
 from app.chat.service import (
@@ -398,6 +399,38 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
                 )
                 for section in response.related_sections
             ],
+        )
+
+    async def test_withheld_related_sections_are_limited_to_three(self) -> None:
+        self._search_result = replace(
+            self._search_result,
+            fused_results=tuple(
+                HybridRetrievalResult(
+                    chunk=_chunk(index),
+                    rrf_score=1 / index,
+                    final_rank=index,
+                    bm25_rank=index,
+                    vector_rank=None,
+                )
+                for index in range(1, 6)
+            ),
+        )
+        self._generation_result = FinalGenerationResult(
+            status=FinalAnswerStatus.WITHHELD,
+            answer_markdown=WITHHELD_RESPONSES[
+                FinalWithheldReason.INSUFFICIENT_EVIDENCE
+            ],
+            citations=(),
+            withheld_reason=FinalWithheldReason.INSUFFICIENT_EVIDENCE,
+            model_call=_generation_trace(),
+        )
+
+        response = await self.service.answer_question("질문")
+
+        self.assertEqual(MAX_RELATED_SECTIONS, len(response.related_sections))
+        self.assertEqual(
+            ["문서 1", "문서 2", "문서 3"],
+            [section.document_title for section in response.related_sections],
         )
 
     async def test_error_response_keeps_identifiers_and_exposes_safe_error_policy(

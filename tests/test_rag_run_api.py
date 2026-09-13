@@ -12,6 +12,7 @@ from app.chat.schema import (
     ChatCitation,
     ChatCompletedResponse,
     ChatResponseStatus,
+    MAX_RELATED_SECTIONS,
 )
 from app.database.models import (
     AnswerCitation,
@@ -214,6 +215,30 @@ class RagRunApiTest(unittest.TestCase):
                 }
             ],
             body["relatedSections"],
+        )
+
+    def test_withheld_limits_restored_related_sections_to_three(self) -> None:
+        self._detail_returns(
+            self._run(
+                AnswerStatus.WITHHELD,
+                withheld_reason_code=FinalWithheldReason.INSUFFICIENT_EVIDENCE.value,
+            ),
+            related_sections=[
+                RelatedSectionLog(
+                    document_title=f"문서 {index}",
+                    section_path=(f"문서 {index}", f"섹션 {index}"),
+                    source_url=f"https://docs.riido.io/{index}.md",
+                )
+                for index in range(1, 6)
+            ],
+        )
+
+        body = self._get().json()
+
+        self.assertEqual(MAX_RELATED_SECTIONS, len(body["relatedSections"]))
+        self.assertEqual(
+            ["문서 1", "문서 2", "문서 3"],
+            [section["documentTitle"] for section in body["relatedSections"]],
         )
 
     def test_stored_error_returns_200_with_error_body(self) -> None:
