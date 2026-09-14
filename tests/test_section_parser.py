@@ -3,11 +3,28 @@ import unittest
 from app.document.models import NormalizedDocument
 from app.document.section_parser import (
     create_section_identity_hash,
+    find_headings,
     parse_sections,
 )
 
 
 class SectionParserTest(unittest.TestCase):
+    def test_find_headings_skips_fenced_code_and_h4(self) -> None:
+        lines = [
+            "# 제목",
+            "## 설정 ##",
+            "```",
+            "## 코드 안",
+            "```",
+            "### 세부",
+            "#### 본문 취급",
+        ]
+
+        self.assertEqual(
+            [(0, 1, "제목"), (1, 2, "설정"), (5, 3, "세부")],
+            find_headings(lines),
+        )
+
     def test_creates_a_section_for_each_h2(self) -> None:
         document = self._document(
             """# 문서 제목

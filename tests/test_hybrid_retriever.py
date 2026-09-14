@@ -185,6 +185,27 @@ class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(42, call.vector_latency_ms)
         self.assertIs(embedding_call, call.embedding_call)
 
+    async def test_trace_exposes_retrieval_query_and_query_embedding(self) -> None:
+        embedding = (0.1, 0.2, 0.3)
+        self.bm25_retriever.search.return_value = []
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall(
+            query_embedding=embedding
+        )
+
+        call = await self.retriever.search_with_trace("뤼이도는 어떤 서비스야?")
+
+        self.assertEqual("뤼이도 서비스 소개", call.retrieval_query)
+        self.assertEqual(embedding, call.query_embedding)
+
+    async def test_trace_keeps_retrieval_query_when_bm25_fails(self) -> None:
+        self.bm25_retriever.search.side_effect = RuntimeError("bm25 unavailable")
+
+        call = await self.retriever.search_with_trace("질문")
+
+        self.assertIsNotNone(call.error)
+        self.assertEqual("질문", call.retrieval_query)
+        self.assertIsNone(call.query_embedding)
+
     async def test_trace_keeps_candidates_when_vector_search_fails(self) -> None:
         failure = RuntimeError("embedding unavailable")
         self.bm25_retriever.search.return_value = [

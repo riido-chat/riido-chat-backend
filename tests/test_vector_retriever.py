@@ -115,6 +115,29 @@ class VectorRetrieverTest(unittest.IsolatedAsyncioTestCase):
             timeout=QUERY_EMBEDDING_TIMEOUT_SECONDS,
         )
 
+    async def test_trace_exposes_query_embedding_for_reuse(self) -> None:
+        self.store.similarity_search.return_value = [(self.chunks[0], 0.9)]
+
+        call = await self.retriever.search_with_trace("질문")
+
+        self.assertEqual(tuple(self.embedding), call.query_embedding)
+
+    async def test_trace_keeps_query_embedding_when_store_fails(self) -> None:
+        self.store.similarity_search.side_effect = RuntimeError("database unavailable")
+
+        call = await self.retriever.search_with_trace("질문")
+
+        self.assertIsNotNone(call.error)
+        self.assertEqual(tuple(self.embedding), call.query_embedding)
+
+    async def test_trace_has_no_query_embedding_when_embedding_fails(self) -> None:
+        self.embedder.embed_many_with_usage.side_effect = RuntimeError("embedding unavailable")
+
+        call = await self.retriever.search_with_trace("질문")
+
+        self.assertIsNotNone(call.error)
+        self.assertIsNone(call.query_embedding)
+
     async def test_trace_records_successful_embedding_call(self) -> None:
         self.store.similarity_search.return_value = [(self.chunks[0], 0.9)]
 

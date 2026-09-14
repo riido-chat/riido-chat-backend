@@ -18,7 +18,7 @@ def parse_sections(document: NormalizedDocument) -> List[Section]:
     """H2와 그 이전의 의미 콘텐츠를 Section으로 파싱한다."""
 
     lines = document.content.splitlines(keepends=True)
-    headings = _find_headings(lines)
+    headings = find_headings(lines)
     h2_headings = [heading for heading in headings if heading[1] == 2]
     sections = []
 
@@ -160,7 +160,12 @@ def _validate_unique_semantic_paths(sections: List[Section]) -> None:
         seen_paths.add(local_section_path)
 
 
-def _find_headings(lines: List[str]) -> List[Tuple[int, int, str]]:
+def find_headings(lines: List[str]) -> List[Tuple[int, int, str]]:
+    """펜스 코드 밖의 H1~H3 제목을 ``(줄 번호, 수준, 제목)`` 으로 찾는다.
+
+    Section 을 자르는 규칙과 같다. 질문 판별의 문서 outline 도 이 규칙으로 제목을 읽는다.
+    """
+
     headings = []
     fence: Optional[Tuple[str, int]] = None
 

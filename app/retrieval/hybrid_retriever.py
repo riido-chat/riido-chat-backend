@@ -171,6 +171,7 @@ class HybridRetriever:
             return HybridSearchCall(
                 bm25_latency_ms=_elapsed_ms(bm25_started),
                 error=error,
+                retrieval_query=retrieval_query,
             )
         bm25_latency_ms = _elapsed_ms(bm25_started)
 
@@ -188,6 +189,8 @@ class HybridRetriever:
             bm25_latency_ms=bm25_latency_ms,
             vector_latency_ms=vector_call.latency_ms,
             embedding_call=vector_call.embedding_call,
+            retrieval_query=retrieval_query,
+            query_embedding=vector_call.query_embedding,
         )
         if vector_call.error is not None:
             return replace(partial, error=vector_call.error)

@@ -106,6 +106,7 @@ class VectorRetriever:
             input_tokens=response.input_tokens,
             retry_count=attempt + response.retry_count,
         )
+        query_embedding = tuple(response.embeddings[0])
 
         try:
             matches = await self._store.similarity_search(
@@ -117,6 +118,7 @@ class VectorRetriever:
                 latency_ms=_elapsed_ms(started),
                 embedding_call=embedding_call,
                 error=error,
+                query_embedding=query_embedding,
             )
 
         return VectorSearchCall(
@@ -130,6 +132,7 @@ class VectorRetriever:
             ),
             latency_ms=_elapsed_ms(started),
             embedding_call=embedding_call,
+            query_embedding=query_embedding,
         )
 
     @staticmethod
