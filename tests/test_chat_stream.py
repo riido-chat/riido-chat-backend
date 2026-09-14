@@ -30,6 +30,7 @@ from app.chat.stream import (
     _Sentinel,
     produce_turn,
     register_pipeline_task,
+    start_chat_stream,
 )
 from app.database.models import ConversationStatus
 from app.main import _drain_pipeline_tasks
@@ -46,6 +47,11 @@ from app.answering.models import (
     CitationSourceKind,
     FinalAnswerStatus,
     FinalGenerationResult,
+)
+from tests.test_chat_service_grouping import (
+    GroupingChatFixture,
+    expected_served_response,
+    recorded_judgment,
 )
 
 
@@ -399,6 +405,86 @@ class CoreHookNeutralityTest(unittest.IsolatedAsyncioTestCase):
             ],
             seen[1:],
         )
+
+
+class QuestionGroupingStreamTest(unittest.IsolatedAsyncioTestCase):
+    """정본 서빙 턴의 SSE 순서와 판별 부품 전달을 검증한다."""
+
+    async def test_served_turn_emits_run_retrieving_then_result(self) -> None:
+        fixture = GroupingChatFixture()
+        fixture.recorded = recorded_judgment("SERVED", served=True)
+        fixture.start()
+        self.addCleanup(fixture.stop)
+
+        @asynccontextmanager
+        async def scope(*_args, **_kwargs):
+            yield fixture.service
+
+        queue: "asyncio.Queue" = asyncio.Queue()
+        with patch("app.chat.stream._chat_service_scope", scope):
+            await produce_turn(
+                queue,
+                question="질문",
+                conversation_id=None,
+                corpus_state=object(),
+                embedder=object(),
+                generation_service=object(),
+                query_rewrite_service=object(),
+                question_grouping=object(),
+            )
+
+        items = await _drain(queue)
+        self.assertEqual(4, len(items))
+        self.assertEqual(
+            RunEvent(fixture.conversation_id, fixture.rag_run_id), items[0]
+        )
+        self.assertEqual(StageEvent(ProgressStage.RETRIEVING), items[1])
+        self.assertIsInstance(items[2], ResultEvent)
+        self.assertEqual(
+            expected_served_response(fixture.conversation_id, fixture.rag_run_id),
+            items[2].response,
+        )
+        self.assertIsInstance(items[3], _Sentinel)
+        fixture.generation_service.generate_answer.assert_not_awaited()
+
+    async def test_stream_forwards_question_grouping_components_to_scope(self) -> None:
+        components = object()
+        observed = []
+
+        @asynccontextmanager
+        async def scope(*args, **kwargs):
+            observed.append((args, kwargs))
+            service = AsyncMock(spec=ChatService)
+
+            async def answer(_question, _conversation_id=None, *, on_turn_started=None,
+                             on_progress_stage=None):
+                await on_turn_started(CONVERSATION_ID, RAG_RUN_ID)
+                return completed_response()
+
+            service.answer_question.side_effect = answer
+            yield service
+
+        app = SimpleNamespace(
+            state=SimpleNamespace(
+                pipeline_tasks=set(),
+                corpus_state=object(),
+                corpus_registry=None,
+                embedder=object(),
+                generation_service=object(),
+                query_rewrite_service=object(),
+                question_grouping=components,
+            )
+        )
+        with patch("app.chat.stream._chat_service_scope", scope):
+            stream = await start_chat_stream(
+                SimpleNamespace(app=app), question="질문", conversation_id=None
+            )
+            await _drain_pipeline_tasks(app)
+
+        self.assertEqual("text/event-stream", stream.media_type)
+        args, kwargs = observed[0]
+        self.assertIs(components, args[-1])
+        self.assertEqual({}, kwargs)
 
 
 if __name__ == "__main__":

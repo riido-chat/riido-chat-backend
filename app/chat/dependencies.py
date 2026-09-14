@@ -15,6 +15,8 @@ from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.search_reader import SearchReader
 from app.retrieval.vector_retriever import VectorRetriever
 from app.database.models import ChatProfileRevisionStatus
+from app.core.config import get_settings
+from app.question_grouping.runtime import QuestionGroupingComponents
 
 
 def _build_group_retriever(
@@ -40,6 +42,38 @@ def _build_group_retriever(
         ),
         snapshot_id,
     )
+
+
+def _question_grouping_kwargs(
+    components: QuestionGroupingComponents | None,
+    *,
+    session: AsyncSession,
+    log_store: RagLogStore,
+    embedder: OpenAIEmbedder,
+) -> dict:
+    """판별 부품이 있으면 ChatService 와 같은 session·log_store 로 판별 서비스를 붙인다.
+
+    부품이 없으면(스위치 꺼짐, lifespan 을 바꾼 테스트 앱) 빈 인자를 돌려 기존 조립과 같게 둔다.
+    """
+
+    if components is None:
+        return {}
+    return {
+        "question_grouping": components.build_service(
+            session=session,
+            log_store=log_store,
+            embedder=embedder,
+        ),
+        "question_grouping_enabled": get_settings().question_grouping_enabled,
+    }
+
+
+def get_question_grouping_components(
+    request: Request,
+) -> QuestionGroupingComponents | None:
+    """스위치가 켜진 채 기동했을 때만 lifespan 이 만든 판별 공유 부품을 반환한다."""
+
+    return getattr(request.app.state, "question_grouping", None)
 
 
 def get_corpus_state(request: Request) -> CorpusState:
@@ -151,6 +185,9 @@ def get_chat_service(
     embedder: OpenAIEmbedder = Depends(get_embedder),
     index_version_id: int | None = Depends(get_index_version_id),
     corpus_registry: CorpusRegistry | None = Depends(get_corpus_registry),
+    question_grouping: QuestionGroupingComponents | None = Depends(
+        get_question_grouping_components
+    ),
 ) -> ChatService:
     """요청별 검색·로그와 공유 Generation·Query Rewrite 서비스를 연결한다.
 
@@ -166,6 +203,14 @@ def get_chat_service(
             )
 
         kwargs["retriever_factory"] = build_for_group
+    kwargs.update(
+        _question_grouping_kwargs(
+            question_grouping,
+            session=session,
+            log_store=log_store,
+            embedder=embedder,
+        )
+    )
     return ChatService(
         retriever=retriever,
         generation_service=generation_service,
@@ -186,6 +231,9 @@ def get_testing_chat_service(
     session: AsyncSession = Depends(get_db_session),
     embedder: OpenAIEmbedder = Depends(get_embedder),
     corpus_registry: CorpusRegistry = Depends(get_corpus_registry),
+    question_grouping: QuestionGroupingComponents | None = Depends(
+        get_question_grouping_components
+    ),
 ) -> ChatService:
     """Internal test endpoint's ChatService.
 
@@ -194,16 +242,23 @@ def get_testing_chat_service(
     revision id from the request.
     """
 
+    log_store = RagLogStore(session)
     return ChatService(
         retriever=None,
         generation_service=generation_service,
         query_rewrite_service=query_rewrite_service,
-        log_store=RagLogStore(session),
+        log_store=log_store,
         session=session,
         index_version_id=None,
         profile_status=ChatProfileRevisionStatus.TESTING,
         retriever_factory=lambda group_id: _build_group_retriever(
             corpus_registry, session, embedder, group_id
+        ),
+        **_question_grouping_kwargs(
+            question_grouping,
+            session=session,
+            log_store=log_store,
+            embedder=embedder,
         ),
     )
 
@@ -217,6 +272,7 @@ def build_chat_service(
     query_rewrite_service: QueryRewriteService,
     profile_status: ChatProfileRevisionStatus = ChatProfileRevisionStatus.PUBLISHED,
     corpus_registry: CorpusRegistry | None = None,
+    question_grouping: QuestionGroupingComponents | None = None,
 ) -> ChatService:
     """요청 의존성 밖에서 ChatService를 조립한다.
 
@@ -244,11 +300,20 @@ def build_chat_service(
             ),
         )
     )
+    log_store = RagLogStore(session)
+    kwargs.update(
+        _question_grouping_kwargs(
+            question_grouping,
+            session=session,
+            log_store=log_store,
+            embedder=embedder,
+        )
+    )
     return ChatService(
         retriever=legacy_retriever,
         generation_service=generation_service,
         query_rewrite_service=query_rewrite_service,
-        log_store=RagLogStore(session),
+        log_store=log_store,
         session=session,
         index_version_id=legacy_index_version_id,
         profile_status=profile_status,

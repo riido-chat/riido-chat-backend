@@ -36,6 +36,7 @@ from app.answering.service import GenerationService
 from app.chat.progress import ProgressStage
 from app.chat.query_rewrite import QueryRewriteService
 from app.retrieval.embedding import OpenAIEmbedder
+from app.question_grouping.runtime import QuestionGroupingComponents
 
 
 logger = logging.getLogger(__name__)
@@ -150,6 +151,7 @@ async def _chat_service_scope(
     generation_service: GenerationService,
     query_rewrite_service: QueryRewriteService,
     corpus_registry: CorpusRegistry | None = None,
+    question_grouping: QuestionGroupingComponents | None = None,
 ) -> AsyncIterator[ChatService]:
     """producer가 소유하는 session으로 ChatService를 만든다.
 
@@ -164,6 +166,7 @@ async def _chat_service_scope(
             generation_service=generation_service,
             query_rewrite_service=query_rewrite_service,
             corpus_registry=corpus_registry,
+            question_grouping=question_grouping,
         )
 
 
@@ -177,6 +180,7 @@ async def produce_turn(
     generation_service: GenerationService,
     query_rewrite_service: QueryRewriteService,
     corpus_registry: CorpusRegistry | None = None,
+    question_grouping: QuestionGroupingComponents | None = None,
 ) -> None:
     """파이프라인을 끝까지 실행하며 이벤트를 Queue에 넣는다.
 
@@ -192,6 +196,7 @@ async def produce_turn(
             generation_service,
             query_rewrite_service,
             corpus_registry,
+            question_grouping,
         ) as service:
 
             async def on_turn_started(
@@ -292,6 +297,7 @@ async def start_chat_stream(
             embedder=request.app.state.embedder,
             generation_service=request.app.state.generation_service,
             query_rewrite_service=request.app.state.query_rewrite_service,
+            question_grouping=getattr(request.app.state, "question_grouping", None),
         )
     )
     register_pipeline_task(request.app, task)

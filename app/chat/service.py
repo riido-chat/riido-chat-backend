@@ -81,6 +81,11 @@ from app.chat.profile import (
     resolve_chat_profile_revision,
     validate_runtime_model_configuration,
 )
+from app.question_grouping.service import (
+    GroupingTurn,
+    QuestionGroupingService,
+    RecordedJudgment,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -306,6 +311,55 @@ def _related_sections(
     return sections
 
 
+# answer_citations.node_path_snapshot 을 되돌리는 구분자. rag_run_view 와 같은 규칙이다.
+SECTION_PATH_SEPARATOR = " > "
+
+
+def _citation_log_to_chat_citation(citation: CitationLog) -> ChatCitation:
+    """기록한 인용 스냅샷을 결과 조회(rag_run_view._to_chat_citation)와 같은 규칙으로 옮긴다."""
+
+    document_title = citation.document_title_snapshot or ""
+    source_url = citation.source_uri_snapshot or ""
+    node_path = citation.node_path_snapshot
+    restored = Citation(
+        citation_number=citation.citation_order,
+        document_title=document_title,
+        section_path=(
+            tuple(node_path.split(SECTION_PATH_SEPARATOR)) if node_path else ()
+        ),
+        source_url=source_url,
+        source_kind=CitationSourceKind.from_canonical_uri(source_url),
+    )
+    return ChatCitation(
+        citation_number=restored.citation_number,
+        document_title=restored.document_title,
+        section_path=_to_response_section_path(restored),
+        source_url=_to_response_source_url(restored),
+        source_kind=restored.source_kind,
+    )
+
+
+def _served_response(
+    recorded: RecordedJudgment,
+    conversation_id: uuid.UUID,
+    rag_run_id: uuid.UUID,
+) -> ChatCompletedResponse:
+    """정본 서빙 턴의 COMPLETED 응답. 결과 조회가 같은 기록에서 같은 응답을 만든다."""
+
+    if recorded.served_answer_markdown is None:
+        raise ValueError("SERVED 기록에 정본 본문이 없습니다.")
+    return ChatCompletedResponse(
+        status=ChatResponseStatus.COMPLETED,
+        conversation_id=conversation_id,
+        rag_run_id=rag_run_id,
+        answer=ChatAnswer(answer_markdown=recorded.served_answer_markdown),
+        citations=[
+            _citation_log_to_chat_citation(citation)
+            for citation in recorded.served_citations
+        ],
+    )
+
+
 def _elapsed_ms(started: float) -> int:
     return int((time.perf_counter() - started) * 1000)
 
@@ -328,6 +382,17 @@ class _TurnStart:
     document_group_id: Optional[int] = None
     index_version_id: Optional[int] = None
     retriever: Optional[HybridRetriever] = None
+    # 앱 스위치 켜짐 AND 판별 서비스 주입 AND 프로필 판·문서 그룹·색인 판이 모두 있을 때만 True.
+    grouping_enabled: bool = False
+    semantic_cache_enabled: bool = False
+
+
+@dataclass(frozen=True)
+class _GroupingOutcome:
+    """판별·게이트 기록 결과. response 가 있으면 정본 서빙으로 턴을 이미 마감했다."""
+
+    recorded: RecordedJudgment
+    response: Optional[ChatResponse] = None
 
 
 @dataclass(frozen=True)
@@ -370,6 +435,8 @@ class ChatService:
         retriever_factory: Optional[
             Callable[[int], tuple[HybridRetriever, int]]
         ] = None,
+        question_grouping: Optional[QuestionGroupingService] = None,
+        question_grouping_enabled: bool = False,
     ) -> None:
         self._retriever = retriever
         self._generation_service = generation_service
@@ -379,6 +446,8 @@ class ChatService:
         self._index_version_id = index_version_id
         self._profile_status = profile_status
         self._retriever_factory = retriever_factory
+        self._question_grouping = question_grouping
+        self._question_grouping_enabled = question_grouping_enabled
 
     async def answer_question(
         self,
@@ -480,6 +549,10 @@ class ChatService:
                 raise RuntimeError("검색할 resolved_query가 확정되지 않았습니다.")
             resolved_query = resolution_outcome.resolved_query
 
+        grouping_turn: Optional[GroupingTurn] = None
+        if turn.grouping_enabled:
+            grouping_turn = await self._open_grouping_run(turn)
+
         embedding_model_call_id: Optional[int] = None
 
         async def checkpoint_embedding(
@@ -496,6 +569,11 @@ class ChatService:
                 provider,
                 model_name,
                 prompt_version,
+                classification_run_id=(
+                    None
+                    if grouping_turn is None
+                    else grouping_turn.classification_run_id
+                ),
             )
 
         if retriever is None:
@@ -531,6 +609,23 @@ class ChatService:
                 rag_run_id,
             )
 
+        # 판별 경로는 검색 임베딩 호출 마감과 검색 후보 기록을 판별 트랜잭션에서 이미 끝냈다.
+        retrieval_recorded = False
+        grouping_recorded: Optional[RecordedJudgment] = None
+        if grouping_turn is not None:
+            grouping_outcome = await self._judge_and_gate(
+                turn,
+                grouping_turn,
+                resolved_query,
+                search,
+                embedding_model_call_id,
+                started,
+            )
+            retrieval_recorded = True
+            if grouping_outcome.response is not None:
+                return grouping_outcome.response
+            grouping_recorded = grouping_outcome.recorded
+
         generation_checkpoint: Optional[_ModelCallCheckpoint] = None
 
         async def checkpoint_generation(
@@ -543,11 +638,12 @@ class ChatService:
                 raise RuntimeError("Generation 호출이 이미 시작됐습니다.")
 
             # Generation 시작 commit에 앞서 확보한 Retrieval 로그도 함께 확정한다.
-            await self._finish_model_call(
-                embedding_model_call_id,
-                search.embedding_call,
-            )
-            await self._record_retrieval_results(rag_run_id, search)
+            if not retrieval_recorded:
+                await self._finish_model_call(
+                    embedding_model_call_id,
+                    search.embedding_call,
+                )
+                await self._record_retrieval_results(rag_run_id, search)
             model_call_id = await self._checkpoint_model_call(
                 rag_run_id,
                 ModelCallPurpose.ANSWER_GENERATION,
@@ -640,7 +736,9 @@ class ChatService:
             generation_model_call_id = (
                 None if generation_checkpoint is None else generation_checkpoint.id
             )
-            retrieval_needs_recovery = generation_checkpoint is None
+            retrieval_needs_recovery = (
+                generation_checkpoint is None and not retrieval_recorded
+            )
             await self._record_turn(
                 rag_run_id,
                 search,
@@ -653,6 +751,7 @@ class ChatService:
                     else None
                 ),
                 record_retrieval=retrieval_needs_recovery,
+                grouping_recorded=grouping_recorded,
             )
             return _internal_error_response(conversation_id, rag_run_id)
 
@@ -664,6 +763,7 @@ class ChatService:
             _elapsed_ms(started),
             embedding_model_call_id=None,
             record_retrieval=False,
+            grouping_recorded=grouping_recorded,
         )
         if not recorded:
             return _internal_error_response(conversation_id, rag_run_id)
@@ -729,6 +829,16 @@ class ChatService:
             raise ConversationNotFoundError(
                 f"이어갈 수 없는 대화입니다: {conversation_id}"
             ) from error
+        document_group_id = (
+            None if profile_revision is None else profile_revision.document_group_id
+        )
+        grouping_enabled = (
+            self._question_grouping_enabled
+            and self._question_grouping is not None
+            and profile_revision is not None
+            and document_group_id is not None
+            and effective_index_version_id is not None
+        )
         # commit 이후 객체 접근을 피하려고 식별자를 먼저 확정한다.
         turn = _TurnStart(
             conversation_id=conversation_id,
@@ -737,11 +847,13 @@ class ChatService:
             profile_revision_id=(
                 None if profile_revision is None else profile_revision.id
             ),
-            document_group_id=(
-                None if profile_revision is None else profile_revision.document_group_id
-            ),
+            document_group_id=document_group_id,
             index_version_id=effective_index_version_id,
             retriever=selected_retriever,
+            grouping_enabled=grouping_enabled,
+            semantic_cache_enabled=bool(
+                getattr(profile_revision, "semantic_cache_enabled", False)
+            ),
         )
         await self._session.commit()
         return turn
@@ -915,6 +1027,94 @@ class ChatService:
         return _to_chat_response(result, conversation_id, rag_run_id)
 
     # ------------------------------------------------------------------
+    # 질문 판별과 정본 캐시 게이트
+    # ------------------------------------------------------------------
+
+    def _require_grouping(self) -> QuestionGroupingService:
+        if self._question_grouping is None:
+            raise RuntimeError("질문 판별 서비스가 구성되지 않았습니다.")
+        return self._question_grouping
+
+    async def _open_grouping_run(self, turn: _TurnStart) -> GroupingTurn:
+        """검색 임베딩 checkpoint 보다 먼저 열린 ONLINE 분류 실행을 확보한다(commit 포함)."""
+
+        if turn.document_group_id is None or turn.index_version_id is None:
+            raise RuntimeError("판별할 턴의 문서 그룹 또는 색인 판이 없습니다.")
+        return await self._require_grouping().open_online_run(
+            rag_run_id=turn.rag_run_id,
+            document_group_id=turn.document_group_id,
+            index_version_id=turn.index_version_id,
+        )
+
+    async def _judge_and_gate(
+        self,
+        turn: _TurnStart,
+        grouping_turn: GroupingTurn,
+        resolved_query: str,
+        search: HybridSearchCall,
+        embedding_model_call_id: Optional[int],
+        started: float,
+    ) -> _GroupingOutcome:
+        """검색이 성공한 턴을 판별하고 게이트 결과를 기록한다.
+
+        검색 임베딩 호출 마감과 검색 후보 기록은 여기서 한 번만 한다. 판별 준비가 끝났으면
+        판별 checkpoint 트랜잭션에, 준비에 실패했으면 실패 행과 같은 트랜잭션에 넣는다.
+        SERVED 면 같은 트랜잭션에서 턴을 완료하고 commit 한 뒤 응답을 돌려준다. 그 쓰기가
+        실패하면 REJECTED[CANONICAL_SERVE_FAILED] 로 다시 기록하고 생성으로 진행한다.
+        판별 외 쓰기·commit 실패는 그대로 올린다(fail-closed).
+        """
+
+        grouping = self._require_grouping()
+        rag_run_id = turn.rag_run_id
+
+        async def record_retrieval_logs() -> None:
+            await self._finish_model_call(
+                embedding_model_call_id,
+                search.embedding_call,
+            )
+            await self._record_retrieval_results(rag_run_id, search)
+
+        prepared = await grouping.prepare(grouping_turn, resolved_query, search)
+        if not prepared.ready:
+            await record_retrieval_logs()
+            recorded = await grouping.record_preparation_failure(prepared)
+            await self._session.commit()
+            return _GroupingOutcome(recorded=recorded)
+
+        judged = await grouping.judge(
+            prepared,
+            before_checkpoint=record_retrieval_logs,
+        )
+        recorded = await grouping.record_judgment_and_gate(
+            prepared,
+            judged,
+            semantic_cache_enabled=turn.semantic_cache_enabled,
+        )
+        if not recorded.served:
+            await self._session.commit()
+            return _GroupingOutcome(recorded=recorded)
+
+        try:
+            response = _served_response(recorded, turn.conversation_id, rag_run_id)
+            await self._log_store.complete_rag_run(
+                rag_run_id,
+                answer_content=recorded.served_answer_markdown,
+                citations=list(recorded.served_citations),
+                total_latency_ms=_elapsed_ms(started),
+            )
+            await self._session.commit()
+        except Exception:
+            logger.exception(
+                "정본 답변 서빙을 기록하지 못해 생성으로 진행합니다: rag_run_id=%s",
+                rag_run_id,
+            )
+            # rollback 뒤 새 트랜잭션에서 다시 쓴다. 이 쓰기마저 실패하면 올린다.
+            recorded = await grouping.record_serve_failure(prepared, judged, recorded)
+            await self._session.commit()
+            return _GroupingOutcome(recorded=recorded)
+        return _GroupingOutcome(recorded=recorded, response=response)
+
+    # ------------------------------------------------------------------
     # 외부 모델 호출 checkpoint
     # ------------------------------------------------------------------
 
@@ -925,13 +1125,22 @@ class ChatService:
         provider: str,
         model_name: str,
         prompt_version: Optional[str],
+        *,
+        classification_run_id: Optional[int] = None,
     ) -> int:
+        # 판별이 꺼진 턴은 기존 호출 인자를 그대로 둔다.
+        owner_kwargs = (
+            {}
+            if classification_run_id is None
+            else {"classification_run_id": classification_run_id}
+        )
         call = await self._log_store.start_model_call(
             rag_run_id=rag_run_id,
             purpose=purpose.value,
             provider=provider,
             model_name=model_name,
             prompt_version=prompt_version,
+            **owner_kwargs,
         )
         model_call_id = call.id
         await self._session.commit()
@@ -973,6 +1182,7 @@ class ChatService:
         *,
         embedding_model_call_id: Optional[int],
         record_retrieval: bool,
+        grouping_recorded: Optional[RecordedJudgment] = None,
     ) -> bool:
         try:
             await self._finish_model_call(
@@ -990,6 +1200,7 @@ class ChatService:
                 search,
                 generation_result,
                 total_latency_ms,
+                grouping_recorded=grouping_recorded,
             )
             await self._session.commit()
             return True
@@ -1074,6 +1285,8 @@ class ChatService:
         search: HybridSearchCall,
         generation_result: Optional[FinalGenerationResult],
         total_latency_ms: int,
+        *,
+        grouping_recorded: Optional[RecordedJudgment] = None,
     ) -> None:
         if generation_result is None:
             await self._log_store.fail_rag_run(
@@ -1084,10 +1297,19 @@ class ChatService:
             return
 
         if generation_result.status == FinalAnswerStatus.COMPLETED:
+            citation_logs = self._to_citation_logs(generation_result)
+            if grouping_recorded is not None:
+                if self._question_grouping is None:
+                    raise RuntimeError("판별 기록이 있는데 판별 서비스가 없습니다.")
+                # 턴 끝 인용 귀속은 턴이 아직 PROCESSING 일 때, 완료와 같은 트랜잭션에서 한다.
+                await self._question_grouping.finalize_attribution(
+                    grouping_recorded,
+                    citation_logs,
+                )
             await self._log_store.complete_rag_run(
                 rag_run_id,
                 answer_content=generation_result.answer_markdown,
-                citations=self._to_citation_logs(generation_result),
+                citations=citation_logs,
                 total_latency_ms=total_latency_ms,
             )
             return

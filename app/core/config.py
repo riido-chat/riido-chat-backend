@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = None
     corpus_dir: str = "data"
     cors_origins: str = "http://localhost:3000"
+    # 질문 판별·정본 캐시 서빙 전체 스위치(R19). 꺼져 있으면 판별 행·캐시 시도·질문 임베딩
+    # 저장 없이 기존 턴 흐름과 같다.
+    question_grouping_enabled: bool = False
 
     @property
     def cors_origin_list(self) -> List[str]:
