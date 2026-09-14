@@ -1,3 +1,4 @@
+import os
 import unittest
 from collections.abc import AsyncIterator
 from contextlib import ExitStack, contextmanager
@@ -11,7 +12,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.session import get_db_session
 from app.main import create_app
 from app.chat.service import ChatService
-from app.chat.dependencies import get_chat_service
+from app.chat.dependencies import get_chat_service, get_testing_chat_service
+from app.core.config import get_settings
+from app.question_grouping.runtime import QuestionGroupingComponents
+from app.question_grouping.service import QuestionGroupingService
 from app.answering.service import GenerationService
 from app.chat.query_rewrite import QueryRewriteService
 from app.answering.generator import OpenAIGenerator
@@ -165,6 +169,80 @@ class ChatDependencyLifecycleTest(unittest.TestCase):
         self.assertIsNot(first._log_store, second._log_store)
         self.assertEqual(3, first._index_version_id)
         self.assertEqual(3, second._index_version_id)
+
+    def test_grouping_switch_off_injects_nothing(self) -> None:
+        observed: List[ChatService] = []
+        with self._grouping_switch(False), self._patched_lifespan_dependencies():
+            app = create_app()
+            app.dependency_overrides[get_db_session] = self._single_session()
+
+            @app.get("/_test/chat-dependencies")
+            async def inspect(service: ChatService = Depends(get_chat_service)) -> dict:
+                observed.append(service)
+                return {}
+
+            with TestClient(app) as client:
+                self.assertIsNone(app.state.question_grouping)
+                client.get("/_test/chat-dependencies")
+
+        self.assertIsNone(observed[0]._question_grouping)
+        self.assertFalse(observed[0]._question_grouping_enabled)
+
+    def test_grouping_switch_on_shares_components_and_request_session(self) -> None:
+        judge_client = Mock()
+        observed: List[ChatService] = []
+        with self._grouping_switch(True), self._patched_lifespan_dependencies(), patch(
+            "app.question_grouping.runtime.QuestionJudgeClient",
+            return_value=judge_client,
+        ) as judge_client_class:
+            app = create_app()
+            app.dependency_overrides[get_db_session] = self._single_session()
+
+            @app.get("/_test/chat-dependencies")
+            async def inspect(
+                public: ChatService = Depends(get_chat_service),
+                testing: ChatService = Depends(get_testing_chat_service),
+            ) -> dict:
+                observed.extend([public, testing])
+                return {}
+
+            with TestClient(app) as client:
+                components = app.state.question_grouping
+                client.get("/_test/chat-dependencies")
+                client.get("/_test/chat-dependencies")
+
+        judge_client_class.assert_called_once_with()
+        self.assertIsInstance(components, QuestionGroupingComponents)
+        self.assertIs(judge_client, components.judge_client)
+        self.assertEqual(4, len(observed))
+        for service in observed:
+            grouping = service._question_grouping
+            self.assertIsInstance(grouping, QuestionGroupingService)
+            self.assertTrue(service._question_grouping_enabled)
+            self.assertIs(service._session, grouping._session)
+            self.assertIs(service._log_store, grouping._log_store)
+            self.assertIs(judge_client, grouping._judge_client)
+            self.assertIs(self.embedder, grouping._embedder)
+            self.assertIs(components.outline_cache, grouping._outline_reader._cache)
+        self.assertIsNot(observed[0]._question_grouping, observed[2]._question_grouping)
+
+    @staticmethod
+    def _single_session():
+        async def override_db_session() -> AsyncIterator[AsyncSession]:
+            yield AsyncMock(spec=AsyncSession)
+
+        return override_db_session
+
+    @contextmanager
+    def _grouping_switch(self, enabled: bool):
+        with patch.dict(
+            os.environ, {"QUESTION_GROUPING_ENABLED": "true" if enabled else "false"}
+        ):
+            get_settings.cache_clear()
+            try:
+                yield
+            finally:
+                get_settings.cache_clear()
 
     @contextmanager
     def _patched_lifespan_dependencies(self):

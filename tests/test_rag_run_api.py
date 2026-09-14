@@ -1,3 +1,4 @@
+import asyncio
 import unittest
 import uuid
 from collections.abc import AsyncIterator
@@ -41,6 +42,10 @@ from app.document.document_key import (
     build_console_canonical_uri,
     build_upload_document_key,
 )
+from tests.test_chat_service_grouping import (
+    GroupingChatFixture,
+    recorded_judgment,
+)
 
 
 VIEW_LOGGER = "app.chat.rag_run_view"
@@ -75,6 +80,48 @@ class RagRunApiTest(unittest.TestCase):
     # ------------------------------------------------------------------
     # 상태별 응답
     # ------------------------------------------------------------------
+
+    def test_served_turn_polls_identically_to_sync_response(self) -> None:
+        """정본 서빙 턴이 남긴 기록을 조회하면 동기 응답과 같은 본문이 나온다."""
+
+        fixture = GroupingChatFixture()
+        fixture.recorded = recorded_judgment("SERVED", served=True)
+        fixture.conversation_id = self.conversation_id
+        fixture.rag_run_id = self.rag_run_id
+        fixture._wire_log_store(1)
+        fixture.start()
+        try:
+            sync_response = asyncio.run(fixture.service.answer_question("질문"))
+        finally:
+            fixture.stop()
+
+        completed = fixture.log_store.complete_rag_run.await_args
+        run = self._run(
+            AnswerStatus.COMPLETED,
+            answer_content=completed.kwargs["answer_content"],
+            citation_validated=True,
+        )
+        citations = [
+            AnswerCitation(
+                rag_run_id=self.rag_run_id,
+                chunk_id=log.chunk_id,
+                document_version_id=log.document_version_id,
+                citation_order=log.citation_order,
+                document_title_snapshot=log.document_title_snapshot,
+                node_path_snapshot=log.node_path_snapshot,
+                source_uri_snapshot=log.source_uri_snapshot,
+            )
+            for log in completed.kwargs["citations"]
+        ]
+        self._detail_returns(run, citations=citations)
+
+        response = self._get()
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            sync_response.model_dump(mode="json", by_alias=True),
+            response.json(),
+        )
 
     def test_processing_returns_status_and_ids_only(self) -> None:
         self._detail_returns(self._run(AnswerStatus.PROCESSING))

@@ -84,11 +84,17 @@ class VectorSearchCall:
     latency_ms: int = 0
     embedding_call: Optional[ModelCallTrace] = None
     error: Optional[Exception] = None
+    # 질문 판별이 같은 벡터를 재사용한다. embedding 호출이 성공했을 때만 채운다.
+    query_embedding: Optional[Tuple[float, ...]] = None
 
 
 @dataclass(frozen=True)
 class HybridSearchCall:
-    """Hybrid 검색 한 번의 검색기별 후보 전체와 융합 결과, 모델 호출 관측값."""
+    """Hybrid 검색 한 번의 검색기별 후보 전체와 융합 결과, 모델 호출 관측값.
+
+    retrieval_query 는 검색기에 실제로 넣은 질의(expand_retrieval_query 결과)이고,
+    query_embedding 은 그 질의의 embedding 이다. 질문 판별이 두 값을 재사용한다.
+    """
 
     bm25_results: Tuple[RetrievalResult, ...] = ()
     vector_results: Tuple[RetrievalResult, ...] = ()
@@ -97,3 +103,5 @@ class HybridSearchCall:
     vector_latency_ms: int = 0
     embedding_call: Optional[ModelCallTrace] = None
     error: Optional[Exception] = None
+    retrieval_query: Optional[str] = None
+    query_embedding: Optional[Tuple[float, ...]] = None

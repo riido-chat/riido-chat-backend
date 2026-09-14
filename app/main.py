@@ -51,6 +51,7 @@ from app.chat.rag_run_view import RagRunResultNotFoundError
 from app.answering.generator import OpenAIGenerator
 from app.retrieval.embedding import OpenAIEmbedder
 from app.retrieval.search_reader import ActiveIndexNotFoundError, SearchReader
+from app.question_grouping.runtime import create_question_grouping_components
 
 
 logger = logging.getLogger(__name__)
@@ -88,6 +89,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.embedder = OpenAIEmbedder()
         app.state.generation_service = GenerationService(OpenAIGenerator())
         app.state.query_rewrite_service = QueryRewriteService()
+        # 판별 스위치가 꺼져 있으면 None 이라 ChatService 에 판별을 주입하지 않는다.
+        app.state.question_grouping = create_question_grouping_components(
+            get_settings()
+        )
         yield
     finally:
         # 살아 있는 파이프라인이 끝난 뒤에 engine을 정리해야 세션이 깨지지 않는다.

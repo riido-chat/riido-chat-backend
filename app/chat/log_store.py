@@ -572,6 +572,14 @@ class RagLogStore:
         await self._session.flush()
         return run
 
+    async def lock_processing_run(self, rag_run_id: uuid.UUID) -> RagRun:
+        """대화 → 턴 순서로 잠그고 PROCESSING 턴을 돌려준다. 아니면 ValueError.
+
+        턴에 딸린 다른 테이블(질문 판별 등)을 쓰는 저장 계층이 같은 잠금 순서를 따르게 한다.
+        """
+
+        return await self._get_processing_run(rag_run_id)
+
     async def _get_processing_run(self, rag_run_id: uuid.UUID) -> RagRun:
         known_run = await self._session.get(RagRun, rag_run_id)
         if known_run is None:
@@ -646,11 +654,19 @@ class RagLogStore:
         rag_run_id: Optional[uuid.UUID] = None,
         index_run_id: Optional[int] = None,
         prompt_version: Optional[str] = None,
+        classification_run_id: Optional[int] = None,
     ) -> ModelCall:
-        """외부 호출 전에 논리적 모델 호출 한 건을 PROCESSING으로 생성한다."""
+        """외부 호출 전에 논리적 모델 호출 한 건을 PROCESSING으로 생성한다.
 
-        if rag_run_id is None and index_run_id is None:
-            raise ValueError("rag_run_id 또는 index_run_id 중 하나는 필요합니다.")
+        classification_run_id 는 질문 판별 실행에 속한 호출에 채운다. 턴의 검색 임베딩
+        (QUERY_EMBEDDING, rag_run_id 와 함께)과 판별 호출(QUESTION_CLASSIFICATION)만
+        허용되며, 허용 조합은 model_calls.owner_combination CHECK 가 최종 판정한다.
+        """
+
+        if rag_run_id is None and index_run_id is None and classification_run_id is None:
+            raise ValueError(
+                "rag_run_id, index_run_id, classification_run_id 중 하나는 필요합니다."
+            )
 
         if rag_run_id is not None:
             await self._get_processing_run(rag_run_id)
@@ -658,6 +674,7 @@ class RagLogStore:
         call = ModelCall(
             rag_run_id=rag_run_id,
             index_run_id=index_run_id,
+            classification_run_id=classification_run_id,
             purpose=purpose,
             provider=provider,
             model_name=model_name,

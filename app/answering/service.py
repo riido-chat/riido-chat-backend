@@ -128,8 +128,11 @@ def _strip_fenced_code_blocks(text: str) -> str:
     return "\n".join(stripped_lines)
 
 
-def _strip_code_regions(answer_markdown: str) -> str:
-    """코드 블록과 인라인 코드를 금지 패턴 검사 대상에서 제외한다."""
+def strip_code_regions(answer_markdown: str) -> str:
+    """코드 블록과 인라인 코드를 줄 구조만 남기고 지운다.
+
+    금지 패턴 검사와 정본 본문의 인용 번호 추출이 코드 영역을 건너뛸 때 쓴다.
+    """
 
     return INLINE_CODE_PATTERN.sub(
         _blank_code_region,
@@ -148,13 +151,22 @@ def _validate_answer_content(answer_markdown: str) -> None:
 
     content_to_check = SOURCE_MARKER_PATTERN.sub(
         "",
-        _strip_code_regions(answer_markdown),
+        strip_code_regions(answer_markdown),
     )
     if any(
         pattern.search(content_to_check)
         for pattern in FORBIDDEN_ANSWER_CONTENT_PATTERNS
     ):
         raise UnverifiableAnswerError("답변 본문에 링크 또는 HTML이 포함됐습니다.")
+
+
+def validate_answer_content(answer_markdown: str) -> None:
+    """생성 답변과 같은 본문 규칙(링크·HTML·내부 Source 식별자 금지)을 검사한다.
+
+    정본 시드처럼 생성 경로 밖에서 본문을 검증할 때 쓴다. 위반이면 UnverifiableAnswerError.
+    """
+
+    _validate_answer_content(answer_markdown)
 
 
 def validate_citations(
