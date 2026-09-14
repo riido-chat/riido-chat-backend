@@ -121,12 +121,16 @@ class RagLogStoreModelCallTest(unittest.IsolatedAsyncioTestCase):
             status=ExecutionStatus.FAILED,
             input_tokens=100,
             output_tokens=20,
+            cached_input_tokens=64,
+            reasoning_tokens=8,
             latency_ms=4500,
             retry_count=1,
             error_message="upstream timeout",
         )
 
         self.assertIs(call, finished)
+        self.assertEqual(64, finished.cached_input_tokens)
+        self.assertEqual(8, finished.reasoning_tokens)
         self.assertEqual(ExecutionStatus.FAILED, finished.status)
         self.assertEqual(1, finished.retry_count)
         self.assertEqual(4500, finished.latency_ms)

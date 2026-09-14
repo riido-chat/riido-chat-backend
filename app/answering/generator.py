@@ -10,6 +10,8 @@ from pydantic import ValidationError
 from app.core.config import get_settings
 from app.core.model_trace import ModelCallTrace
 from app.core.openai_error import is_transient_openai_error
+from app.core.openai_usage import cached_input_tokens as usage_cached_input_tokens
+from app.core.openai_usage import reasoning_tokens as usage_reasoning_tokens
 from app.answering.models import (
     GenerationCall,
     GenerationAnswerType,
@@ -598,6 +600,8 @@ def _generation_trace(
     retry_count: int,
     input_tokens: Optional[int] = None,
     output_tokens: Optional[int] = None,
+    cached_input_tokens: Optional[int] = None,
+    reasoning_tokens: Optional[int] = None,
     error: Optional[Exception] = None,
     prompt_version: str = GENERATION_PROMPT_VERSION,
 ) -> ModelCallTrace:
@@ -611,6 +615,8 @@ def _generation_trace(
         retry_count=retry_count,
         input_tokens=input_tokens,
         output_tokens=output_tokens,
+        cached_input_tokens=cached_input_tokens,
+        reasoning_tokens=reasoning_tokens,
         prompt_version=prompt_version,
         error_message=None if error is None else str(error),
     )
@@ -667,6 +673,8 @@ class OpenAIGenerator:
         total_retry_count = 0
         total_input_tokens: Optional[int] = None
         total_output_tokens: Optional[int] = None
+        total_cached_input_tokens: Optional[int] = None
+        total_reasoning_tokens: Optional[int] = None
 
         generation_input = build_generation_input(question, sources)
         plan_call = await self._parse_with_retry(
@@ -704,6 +712,8 @@ class OpenAIGenerator:
                 retry_count=repair_call.retry_count,
                 input_tokens=getattr(repair_usage, "input_tokens", None),
                 output_tokens=getattr(repair_usage, "output_tokens", None),
+                cached_input_tokens=usage_cached_input_tokens(repair_usage),
+                reasoning_tokens=usage_reasoning_tokens(repair_usage),
                 error=repair_call.error,
                 prompt_version=SOURCE_PLANNING_REPAIR_PROMPT_VERSION,
             )
@@ -716,6 +726,8 @@ class OpenAIGenerator:
                 total_retry_count,
                 total_input_tokens,
                 total_output_tokens,
+                cached_input_tokens=total_cached_input_tokens,
+                reasoning_tokens=total_reasoning_tokens,
                 stage_trace=GenerationStageTrace(
                     planning_attempt_count=planning_attempt_count,
                     planning_regeneration_count=planning_regeneration_count,
@@ -734,6 +746,14 @@ class OpenAIGenerator:
         total_output_tokens = _sum_tokens(
             total_output_tokens,
             getattr(plan_usage, "output_tokens", None),
+        )
+        total_cached_input_tokens = _sum_tokens(
+            total_cached_input_tokens,
+            usage_cached_input_tokens(plan_usage),
+        )
+        total_reasoning_tokens = _sum_tokens(
+            total_reasoning_tokens,
+            usage_reasoning_tokens(plan_usage),
         )
         plan = plan_response.output_parsed
         if planning_regeneration_count:
@@ -759,6 +779,8 @@ class OpenAIGenerator:
                     retry_count=total_retry_count,
                     input_tokens=total_input_tokens,
                     output_tokens=total_output_tokens,
+                    cached_input_tokens=total_cached_input_tokens,
+                    reasoning_tokens=total_reasoning_tokens,
                 ),
                 result=result,
                 stage_trace=GenerationStageTrace(
@@ -776,6 +798,8 @@ class OpenAIGenerator:
                 total_retry_count,
                 total_input_tokens,
                 total_output_tokens,
+                cached_input_tokens=total_cached_input_tokens,
+                reasoning_tokens=total_reasoning_tokens,
                 stage_trace=GenerationStageTrace(
                     source_plan=plan,
                     **planning_trace_fields,
@@ -795,6 +819,8 @@ class OpenAIGenerator:
                 total_retry_count,
                 total_input_tokens,
                 total_output_tokens,
+                cached_input_tokens=total_cached_input_tokens,
+                reasoning_tokens=total_reasoning_tokens,
                 stage_trace=GenerationStageTrace(
                     source_plan=plan,
                     selected_sources=tuple(selected_sources),
@@ -813,6 +839,14 @@ class OpenAIGenerator:
             total_output_tokens,
             getattr(answer_usage, "output_tokens", None),
         )
+        total_cached_input_tokens = _sum_tokens(
+            total_cached_input_tokens,
+            usage_cached_input_tokens(answer_usage),
+        )
+        total_reasoning_tokens = _sum_tokens(
+            total_reasoning_tokens,
+            usage_reasoning_tokens(answer_usage),
+        )
         result = answer_response.output_parsed
         return GenerationCall(
             trace=_generation_trace(
@@ -821,6 +855,8 @@ class OpenAIGenerator:
                 retry_count=total_retry_count,
                 input_tokens=total_input_tokens,
                 output_tokens=total_output_tokens,
+                cached_input_tokens=total_cached_input_tokens,
+                reasoning_tokens=total_reasoning_tokens,
             ),
             result=result,
             stage_trace=GenerationStageTrace(
@@ -875,6 +911,8 @@ class OpenAIGenerator:
             retry_count=answer_call.retry_count,
             input_tokens=getattr(usage, "input_tokens", None),
             output_tokens=getattr(usage, "output_tokens", None),
+            cached_input_tokens=usage_cached_input_tokens(usage),
+            reasoning_tokens=usage_reasoning_tokens(usage),
             error=answer_call.error,
             prompt_version=ANSWER_REPAIR_PROMPT_VERSION,
         )
@@ -942,6 +980,9 @@ class OpenAIGenerator:
         input_tokens: Optional[int],
         output_tokens: Optional[int],
         stage_trace: Optional[GenerationStageTrace] = None,
+        *,
+        cached_input_tokens: Optional[int] = None,
+        reasoning_tokens: Optional[int] = None,
     ) -> GenerationCall:
         return GenerationCall(
             trace=_generation_trace(
@@ -950,6 +991,8 @@ class OpenAIGenerator:
                 retry_count=retry_count,
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
+                cached_input_tokens=cached_input_tokens,
+                reasoning_tokens=reasoning_tokens,
                 error=error,
             ),
             error=error,

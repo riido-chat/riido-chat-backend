@@ -347,6 +347,14 @@ def _combine_model_traces(
             initial.output_tokens,
             regeneration.output_tokens,
         ),
+        cached_input_tokens=_sum_optional(
+            initial.cached_input_tokens,
+            regeneration.cached_input_tokens,
+        ),
+        reasoning_tokens=_sum_optional(
+            initial.reasoning_tokens,
+            regeneration.reasoning_tokens,
+        ),
         prompt_version=initial.prompt_version,
         error_message=(
             regeneration.error_message

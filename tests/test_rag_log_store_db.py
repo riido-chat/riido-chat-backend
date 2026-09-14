@@ -428,9 +428,13 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
             status=ExecutionStatus.SUCCESS,
             input_tokens=1000,
             output_tokens=300,
+            cached_input_tokens=768,
+            reasoning_tokens=40,
             latency_ms=1200,
         )
         self.assertEqual(model_call_id, finished_model_call.id)
+        self.assertEqual(768, finished_model_call.cached_input_tokens)
+        self.assertEqual(40, finished_model_call.reasoning_tokens)
         self.assertEqual(ExecutionStatus.SUCCESS, finished_model_call.status)
         with self.assertRaisesRegex(ValueError, "PROCESSING"):
             await self.store.finish_model_call(
