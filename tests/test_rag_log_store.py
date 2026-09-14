@@ -103,6 +103,48 @@ class RagLogStoreModelCallTest(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(call.error_message)
         self.session.add.assert_called_once_with(call)
         self.session.flush.assert_awaited_once_with()
+        self.assertIsNone(call.classification_run_id)
+
+    async def test_starts_turn_model_call_with_classification_run(self) -> None:
+        self._prepare_rag_run_lock()
+
+        call = await self.store.start_model_call(
+            rag_run_id=self.rag_run_id,
+            classification_run_id=11,
+            purpose=ModelCallPurpose.QUESTION_CLASSIFICATION.value,
+            provider="openai",
+            model_name="gpt-test",
+            prompt_version="question-grouping-v7-2",
+        )
+
+        self.assertEqual(self.rag_run_id, call.rag_run_id)
+        self.assertEqual(11, call.classification_run_id)
+        self.assertIsNone(call.index_run_id)
+        self.assertEqual(ExecutionStatus.PROCESSING, call.status)
+        # 턴에 속한 호출은 기존처럼 대화 → 턴 잠금을 먼저 잡는다.
+        self.assertEqual(2, self.session.scalar.await_count)
+
+    async def test_starts_classification_run_call_without_turn(self) -> None:
+        call = await self.store.start_model_call(
+            classification_run_id=11,
+            purpose=ModelCallPurpose.QUESTION_CLASSIFICATION.value,
+            provider="openai",
+            model_name="gpt-test",
+        )
+
+        self.assertIsNone(call.rag_run_id)
+        self.assertEqual(11, call.classification_run_id)
+        self.session.scalar.assert_not_awaited()
+        self.session.add.assert_called_once_with(call)
+
+    async def test_rejects_model_call_without_owner(self) -> None:
+        with self.assertRaisesRegex(ValueError, "classification_run_id"):
+            await self.store.start_model_call(
+                purpose=ModelCallPurpose.QUESTION_CLASSIFICATION.value,
+                provider="openai",
+                model_name="gpt-test",
+            )
+        self.session.add.assert_not_called()
 
     async def test_finishes_same_processing_model_call(self) -> None:
         call = ModelCall(
