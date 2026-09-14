@@ -1145,6 +1145,74 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
             timeout=30.0,
         )
 
+    async def test_trace_sums_cached_and_reasoning_tokens_across_stages(self) -> None:
+        plan = self._answerable_plan("SOURCE_1")
+        answer = self._answerable_result()
+        client = Mock()
+        client.responses.parse = AsyncMock(
+            side_effect=[
+                self._response(
+                    plan,
+                    input_tokens=400,
+                    output_tokens=50,
+                    input_tokens_details=SimpleNamespace(cached_tokens=300),
+                    output_tokens_details=SimpleNamespace(reasoning_tokens=20),
+                ),
+                self._response(
+                    answer,
+                    input_tokens=1200,
+                    output_tokens=300,
+                    input_tokens_details=SimpleNamespace(cached_tokens=None),
+                    output_tokens_details=SimpleNamespace(reasoning_tokens=100),
+                ),
+            ]
+        )
+        generator = OpenAIGenerator(client=client)
+        sources = build_generation_context([GenerationContextTest._result(1)])
+
+        generation_call = await generator.generate_with_trace("질문", sources)
+
+        self.assertIsNone(generation_call.error)
+        self.assertEqual(1600, generation_call.trace.input_tokens)
+        self.assertEqual(300, generation_call.trace.cached_input_tokens)
+        self.assertEqual(120, generation_call.trace.reasoning_tokens)
+
+    async def test_answer_repair_trace_reports_usage_breakdown(self) -> None:
+        sources = tuple(
+            build_generation_context([GenerationContextTest._result(1)])
+        )
+        stage_trace = GenerationStageTrace(
+            source_plan=self._answerable_plan("SOURCE_1"),
+            selected_sources=sources,
+            pre_validation_result=self._answerable_result(),
+            planning_attempt_count=1,
+            answer_attempt_count=1,
+        )
+        client = Mock()
+        client.responses.parse = AsyncMock(
+            return_value=self._response(
+                self._answerable_result(),
+                input_tokens=900,
+                output_tokens=200,
+                input_tokens_details=SimpleNamespace(cached_tokens=512),
+                output_tokens_details=SimpleNamespace(reasoning_tokens=64),
+            )
+        )
+        generator = OpenAIGenerator(client=client)
+
+        call_result = await generator.regenerate_answer_with_trace(
+            "질문",
+            stage_trace,
+            "검증 실패",
+        )
+
+        self.assertEqual(512, call_result.trace.cached_input_tokens)
+        self.assertEqual(64, call_result.trace.reasoning_tokens)
+        self.assertIs(
+            call_result.trace,
+            call_result.stage_trace.validation_regeneration_model_call,
+        )
+
     async def test_trace_reports_tokens_without_retry_on_first_success(self) -> None:
         plan = self._answerable_plan("SOURCE_1")
         answer = self._answerable_result()
@@ -1173,6 +1241,8 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(0, generation_call.trace.retry_count)
         self.assertEqual(1600, generation_call.trace.input_tokens)
         self.assertEqual(350, generation_call.trace.output_tokens)
+        self.assertIsNone(generation_call.trace.cached_input_tokens)
+        self.assertIsNone(generation_call.trace.reasoning_tokens)
         self.assertEqual(
             GENERATION_PROMPT_VERSION,
             generation_call.trace.prompt_version,
@@ -1329,10 +1399,14 @@ class OpenAIGeneratorTest(unittest.IsolatedAsyncioTestCase):
         *,
         input_tokens: Optional[int] = None,
         output_tokens: Optional[int] = None,
+        input_tokens_details: Optional[object] = None,
+        output_tokens_details: Optional[object] = None,
     ) -> SimpleNamespace:
         usage = SimpleNamespace(
             input_tokens=input_tokens,
             output_tokens=output_tokens,
+            input_tokens_details=input_tokens_details,
+            output_tokens_details=output_tokens_details,
         )
         return SimpleNamespace(output_parsed=result, usage=usage)
 

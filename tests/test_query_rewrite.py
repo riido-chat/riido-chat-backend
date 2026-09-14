@@ -763,7 +763,74 @@ class QueryRewriteServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, call.trace.retry_count)
         self.assertEqual(170, call.trace.input_tokens)
         self.assertEqual(30, call.trace.output_tokens)
+        # 내역을 주지 않은 응답은 캐시와 추론 몫을 비워 둔다.
+        self.assertIsNone(call.trace.cached_input_tokens)
+        self.assertIsNone(call.trace.reasoning_tokens)
         self.assertEqual(2, client.responses.parse.await_count)
+
+    async def test_sums_cached_and_reasoning_tokens_across_attempts(self) -> None:
+        client = Mock()
+        client.responses.parse = AsyncMock(
+            side_effect=[
+                self._response(
+                    None,
+                    usage=SimpleNamespace(
+                        input_tokens=70,
+                        output_tokens=10,
+                        input_tokens_details=SimpleNamespace(cached_tokens=40),
+                        output_tokens_details=SimpleNamespace(reasoning_tokens=4),
+                    ),
+                ),
+                self._response(
+                    self._new_topic_output(),
+                    usage=SimpleNamespace(
+                        input_tokens=100,
+                        output_tokens=20,
+                        input_tokens_details=SimpleNamespace(cached_tokens=60),
+                        output_tokens_details=SimpleNamespace(reasoning_tokens=8),
+                    ),
+                ),
+            ]
+        )
+        service = QueryRewriteService(client=client)
+
+        call = await service.rewrite("새 질문", [])
+
+        self.assertIsNone(call.error)
+        self.assertEqual(170, call.trace.input_tokens)
+        self.assertEqual(100, call.trace.cached_input_tokens)
+        self.assertEqual(12, call.trace.reasoning_tokens)
+
+    async def test_skips_missing_usage_details_when_summing_breakdown(self) -> None:
+        client = Mock()
+        client.responses.parse = AsyncMock(
+            side_effect=[
+                self._response(
+                    None,
+                    usage=SimpleNamespace(
+                        input_tokens=70,
+                        output_tokens=10,
+                        input_tokens_details=SimpleNamespace(cached_tokens=40),
+                        output_tokens_details=None,
+                    ),
+                ),
+                self._response(
+                    None,
+                    usage=SimpleNamespace(
+                        input_tokens=100,
+                        output_tokens=20,
+                        input_tokens_details=SimpleNamespace(cached_tokens=None),
+                    ),
+                ),
+            ]
+        )
+        service = QueryRewriteService(client=client)
+
+        call = await service.rewrite("새 질문", [])
+
+        self.assertIsNotNone(call.fallback_reason)
+        self.assertEqual(40, call.trace.cached_input_tokens)
+        self.assertIsNone(call.trace.reasoning_tokens)
 
     async def test_retries_incomplete_max_output_then_succeeds(self) -> None:
         client = Mock()

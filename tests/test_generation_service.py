@@ -478,6 +478,7 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
             _trace(),
             input_tokens=100,
             output_tokens=20,
+            cached_input_tokens=80,
         )
         self.generator.generate_with_trace.return_value = GenerationCall(
             trace=initial_trace,
@@ -490,6 +491,8 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
                 _trace(),
                 input_tokens=30,
                 output_tokens=10,
+                cached_input_tokens=20,
+                reasoning_tokens=4,
             )
             return GenerationCall(
                 trace=repair_trace,
@@ -519,6 +522,9 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(240, result.model_call.latency_ms)
         self.assertEqual(130, result.model_call.input_tokens)
         self.assertEqual(30, result.model_call.output_tokens)
+        # 한쪽만 내역이 있으면 있는 쪽만 더한다.
+        self.assertEqual(100, result.model_call.cached_input_tokens)
+        self.assertEqual(4, result.model_call.reasoning_tokens)
         self.assertEqual(
             30,
             result.stage_trace.validation_regeneration_model_call.input_tokens,

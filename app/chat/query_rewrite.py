@@ -21,6 +21,8 @@ from pydantic import (
 from app.core.config import get_settings
 from app.core.model_trace import BeforeModelCallHook, ModelCallTrace
 from app.core.openai_error import is_transient_openai_error
+from app.core.openai_usage import cached_input_tokens as usage_cached_input_tokens
+from app.core.openai_usage import reasoning_tokens as usage_reasoning_tokens
 from app.answering.models import FinalWithheldReason
 
 
@@ -649,6 +651,8 @@ def _query_rewrite_trace(
     retry_count: int,
     input_tokens: Optional[int] = None,
     output_tokens: Optional[int] = None,
+    cached_input_tokens: Optional[int] = None,
+    reasoning_tokens: Optional[int] = None,
     error: Optional[Exception] = None,
 ) -> ModelCallTrace:
     return ModelCallTrace(
@@ -659,6 +663,8 @@ def _query_rewrite_trace(
         retry_count=retry_count,
         input_tokens=input_tokens,
         output_tokens=output_tokens,
+        cached_input_tokens=cached_input_tokens,
+        reasoning_tokens=reasoning_tokens,
         prompt_version=QUERY_REWRITE_PROMPT_VERSION,
         error_message=None if error is None else str(error),
     )
@@ -750,6 +756,8 @@ class QueryRewriteService:
         started = time.perf_counter()
         input_tokens: Optional[int] = None
         output_tokens: Optional[int] = None
+        cached_input_tokens: Optional[int] = None
+        reasoning_tokens: Optional[int] = None
         for attempt in range(MAX_QUERY_REWRITE_ATTEMPTS):
             try:
                 response = await self._client.responses.parse(
@@ -768,6 +776,14 @@ class QueryRewriteService:
                     output_tokens,
                     getattr(usage, "output_tokens", None),
                 )
+                cached_input_tokens = _add_token_count(
+                    cached_input_tokens,
+                    usage_cached_input_tokens(usage),
+                )
+                reasoning_tokens = _add_token_count(
+                    reasoning_tokens,
+                    usage_reasoning_tokens(usage),
+                )
                 _validate_response_status(response)
                 resolution = _resolve_query_rewrite_output(
                     normalized_query,
@@ -780,6 +796,8 @@ class QueryRewriteService:
                         retry_count=attempt,
                         input_tokens=input_tokens,
                         output_tokens=output_tokens,
+                        cached_input_tokens=cached_input_tokens,
+                        reasoning_tokens=reasoning_tokens,
                     ),
                     resolution=resolution,
                 )
@@ -794,6 +812,8 @@ class QueryRewriteService:
                             retry_count=attempt,
                             input_tokens=input_tokens,
                             output_tokens=output_tokens,
+                            cached_input_tokens=cached_input_tokens,
+                            reasoning_tokens=reasoning_tokens,
                             error=output_error,
                         ),
                         resolution=QueryResolution(
@@ -814,6 +834,8 @@ class QueryRewriteService:
                                 retry_count=attempt,
                                 input_tokens=input_tokens,
                                 output_tokens=output_tokens,
+                                cached_input_tokens=cached_input_tokens,
+                                reasoning_tokens=reasoning_tokens,
                                 error=error,
                             ),
                             error_code=UPSTREAM_ERROR_CODE,
@@ -825,6 +847,8 @@ class QueryRewriteService:
                             retry_count=attempt,
                             input_tokens=input_tokens,
                             output_tokens=output_tokens,
+                            cached_input_tokens=cached_input_tokens,
+                            reasoning_tokens=reasoning_tokens,
                             error=error,
                         ),
                         error_code=INTERNAL_ERROR_CODE,
@@ -838,6 +862,8 @@ class QueryRewriteService:
                             retry_count=attempt,
                             input_tokens=input_tokens,
                             output_tokens=output_tokens,
+                            cached_input_tokens=cached_input_tokens,
+                            reasoning_tokens=reasoning_tokens,
                             error=error,
                         ),
                         error_code=UPSTREAM_ERROR_CODE,
@@ -849,6 +875,8 @@ class QueryRewriteService:
                         retry_count=attempt,
                         input_tokens=input_tokens,
                         output_tokens=output_tokens,
+                        cached_input_tokens=cached_input_tokens,
+                        reasoning_tokens=reasoning_tokens,
                         error=error,
                     ),
                     error_code=INTERNAL_ERROR_CODE,
