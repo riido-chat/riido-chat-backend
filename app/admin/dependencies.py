@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.document.ingestion_service import AdminIngestionService
 from app.admin.group_service import DocumentGroupService
+from app.admin.question_insights.service import QuestionInsightService
 from app.document.recollect_service import RecollectService
 from app.indexing.index_service import IndexReindexService
 from app.database.session import get_db_session
@@ -29,6 +30,12 @@ def get_document_group_service(
     session: AsyncSession = Depends(get_db_session),
 ) -> DocumentGroupService:
     return DocumentGroupService(session)
+
+
+def get_question_insight_service(
+    session: AsyncSession = Depends(get_db_session),
+) -> QuestionInsightService:
+    return QuestionInsightService(session)
 
 
 def get_recollect_service(

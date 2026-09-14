@@ -11,6 +11,7 @@ from sqlalchemy import select
 
 from app.document.ingestion_service import AdminApiError
 from app.admin.router import router as admin_documents_router
+from app.admin.question_insights.router import router as admin_question_log_router
 from app.admin.schema import AdminErrorCode, AdminErrorResponse
 from app.chat.router import corpus_unavailable_response
 from app.chat.router import router as chat_router
@@ -218,6 +219,7 @@ def create_app() -> FastAPI:
     app.include_router(internal_router)
     app.include_router(internal_test_chat_router)
     app.include_router(admin_documents_router)
+    app.include_router(admin_question_log_router)
 
     @app.exception_handler(AdminApiError)
     async def handle_admin_api_error(
