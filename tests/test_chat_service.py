@@ -103,6 +103,8 @@ def _generation_trace(succeeded: bool = True) -> ModelCallTrace:
         retry_count=1 if not succeeded else 0,
         input_tokens=1200,
         output_tokens=300,
+        cached_input_tokens=1024,
+        reasoning_tokens=120,
         prompt_version="v2",
     )
 
@@ -1116,6 +1118,8 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             embedding_finish.kwargs["status"],
         )
         self.assertEqual(11, embedding_finish.kwargs["input_tokens"])
+        self.assertIsNone(embedding_finish.kwargs["cached_input_tokens"])
+        self.assertIsNone(embedding_finish.kwargs["reasoning_tokens"])
 
         generation_finish = self.log_store.finish_model_call.await_args_list[1]
         self.assertEqual(2, generation_finish.args[0])
@@ -1125,6 +1129,8 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(1200, generation_finish.kwargs["input_tokens"])
         self.assertEqual(300, generation_finish.kwargs["output_tokens"])
+        self.assertEqual(1024, generation_finish.kwargs["cached_input_tokens"])
+        self.assertEqual(120, generation_finish.kwargs["reasoning_tokens"])
 
     async def test_records_failed_generation_call_with_retry_count(self) -> None:
         trace = ModelCallTrace(

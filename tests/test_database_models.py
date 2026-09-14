@@ -10,14 +10,29 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 
 from app.database.base import Base
 from app.database.models import (
     ACTIVE_INDEX_VERSION_CONSTRAINT,
+    APPROVED_CANONICAL_ANSWER_CONSTRAINT,
     CHAT_PROFILE_REVISION_FK_CONSTRAINT,
+    CURRENT_CLASSIFICATION_CONSTRAINT,
+    DOCUMENT_SOURCE_GROUP_SOURCE_FK_CONSTRAINT,
+    GROUP_SOURCE_DOCUMENT_GROUP_UNIQUE_CONSTRAINT,
     INDEX_VERSION_NO_CONSTRAINT,
+    OPEN_ONLINE_CLASSIFICATION_RUN_CONSTRAINT,
+    AnswerCitation,
     AnswerStatus,
+    AttributionSource,
+    CacheAttemptOutcome,
+    CanonicalAnswer,
+    CanonicalAnswerApproval,
+    CanonicalAnswerCitation,
+    CanonicalAnswerOrigin,
+    ClassificationDecision,
+    ClassificationRun,
+    ClassificationRunKind,
     ChatProfile,
     ChatProfileRevision,
     ChatProfileRevisionStatus,
@@ -27,6 +42,7 @@ from app.database.models import (
     ConversationChannel,
     DocumentChunk,
     DocumentGroup,
+    DocumentGroupSource,
     DocumentSource,
     DocumentVersion,
     IndexOperationType,
@@ -37,10 +53,17 @@ from app.database.models import (
     IngestionResultCode,
     IngestionRun,
     IngestionStage,
-    LegacyChunkEmbedding,
-    LegacyDocumentChunk,
     ModelCall,
     ModelCallPurpose,
+    QuestionCacheAttempt,
+    QuestionClassification,
+    QuestionEmbedding,
+    QuestionProblemGroup,
+    QuestionProblemGroupKind,
+    QuestionSubproblem,
+    QuestionSubproblemRevision,
+    QuestionSubproblemServingState,
+    QuestionSubproblemStatus,
     RagRun,
     Conversation,
 )
@@ -69,68 +92,52 @@ ERD_TABLE_NAMES = {
     "model_calls",
     "answer_citations",
     "feedbacks",
+    "question_problem_groups",
+    "question_subproblems",
+    "question_subproblem_revisions",
+    "classification_runs",
+    "question_classifications",
+    "question_embeddings",
+    "canonical_answers",
+    "canonical_answer_citations",
+    "question_cache_attempts",
 }
 
-LEGACY_TABLE_NAMES = {"legacy_document_chunks", "legacy_chunk_embeddings"}
+# 중심벡터는 2차라 아직 만들지 않는다.
+REMOVED_TABLE_NAMES = {
+    "legacy_document_chunks",
+    "legacy_chunk_embeddings",
+    "question_group_revisions",
+    "question_reviews",
+    "question_review_intents",
+    "subproblem_centroids",
+}
+
+
+def _application_tables():
+    """app.database.models 가 정의한 테이블만 돌려준다.
+
+    같은 Base 를 쓰는 다른 모듈이 먼저 import 되어도 결과가 흔들리지 않게 한다.
+    """
+
+    return {
+        mapper.local_table
+        for mapper in Base.registry.mappers
+        if mapper.class_.__module__ == "app.database.models"
+    }
 
 
 class DatabaseModelTest(unittest.TestCase):
-    def test_registers_erd_and_legacy_tables(self) -> None:
-        self.assertTrue(
-            ERD_TABLE_NAMES | LEGACY_TABLE_NAMES
-            <= set(Base.metadata.tables)
-        )
-        self.assertEqual("legacy_document_chunks", LegacyDocumentChunk.__tablename__)
-        self.assertEqual("legacy_chunk_embeddings", LegacyChunkEmbedding.__tablename__)
+    def test_registers_erd_tables_without_legacy_tables(self) -> None:
+        table_names = {table.name for table in _application_tables()}
+
+        self.assertTrue(ERD_TABLE_NAMES <= table_names)
+        self.assertFalse(REMOVED_TABLE_NAMES & table_names)
         self.assertEqual("document_chunks", DocumentChunk.__tablename__)
         self.assertEqual("chunk_embeddings", ChunkEmbedding.__tablename__)
 
-    def test_legacy_document_chunk_matches_retrieval_chunk_fields(self) -> None:
-        table = LegacyDocumentChunk.__table__
-
-        self.assertEqual(
-            {
-                "chunk_id",
-                "document_id",
-                "section_id",
-                "document_title",
-                "section_path",
-                "source_url",
-                "category",
-                "content",
-            },
-            set(table.columns.keys()),
-        )
-        self.assertTrue(table.c.chunk_id.primary_key)
-        self.assertIsInstance(table.c.chunk_id.type, Text)
-        self.assertIsInstance(table.c.section_path.type, ARRAY)
-        self.assertIsInstance(table.c.section_path.type.item_type, Text)
-
-    def test_legacy_chunk_embedding_keeps_one_to_one_cascade_constraint(self) -> None:
-        table = LegacyChunkEmbedding.__table__
-        foreign_key = next(iter(table.c.chunk_id.foreign_keys))
-        unique_constraints = {
-            constraint.name: tuple(constraint.columns.keys())
-            for constraint in table.constraints
-            if isinstance(constraint, UniqueConstraint)
-        }
-
-        self.assertTrue(table.c.id.primary_key)
-        self.assertIsInstance(table.c.id.type, BigInteger)
-        self.assertIsNotNone(table.c.id.identity)
-        self.assertFalse(table.c.chunk_id.nullable)
-        self.assertEqual(
-            "legacy_document_chunks.chunk_id",
-            foreign_key.target_fullname,
-        )
-        self.assertEqual("CASCADE", foreign_key.ondelete)
-        self.assertEqual(
-            ("chunk_id",),
-            unique_constraints["uq_chunk_embeddings_chunk_id"],
-        )
-
     def test_embeddings_use_confirmed_vector_dimension(self) -> None:
-        for table in (LegacyChunkEmbedding.__table__, ChunkEmbedding.__table__):
+        for table in (ChunkEmbedding.__table__, QuestionEmbedding.__table__):
             self.assertIsInstance(table.c.embedding.type, VECTOR)
             self.assertEqual(
                 OPENAI_EMBEDDING_DIMENSIONS,
@@ -265,7 +272,12 @@ class DatabaseModelTest(unittest.TestCase):
             for constraint in table.constraints
             if isinstance(constraint, UniqueConstraint)
         }
-        foreign_key = next(iter(table.c.document_group_id.foreign_keys))
+        # document_group_id 는 원천과의 복합 외래키에도 들어가므로 단일 외래키를 고른다.
+        foreign_key = next(
+            foreign_key
+            for foreign_key in table.c.document_group_id.foreign_keys
+            if foreign_key.column.table.name == "document_groups"
+        )
 
         self.assertFalse(table.c.document_group_id.nullable)
         self.assertFalse(table.c.document_key.nullable)
@@ -445,6 +457,7 @@ class DatabaseModelTest(unittest.TestCase):
             "ANSWER_GENERATION",
             "QUERY_REWRITE",
             "CONVERSATION_SUMMARY",
+            "QUESTION_CLASSIFICATION",
         }
 
         self.assertEqual(expected, {member.value for member in ModelCallPurpose})
@@ -479,6 +492,325 @@ class DatabaseModelTest(unittest.TestCase):
         self.assertIs(ContextStrategy, strategy_type.enum_class)
         self.assertEqual(expected, set(strategy_type.enums))
         self.assertIn("ck_rag_runs_context_strategy", rag_run_constraint_names)
+
+
+    def test_rag_run_drops_sanitized_query_and_keeps_query_hash(self) -> None:
+        columns = set(RagRun.__table__.columns.keys())
+
+        self.assertNotIn("sanitized_query", columns)
+        self.assertIn("query_hash", columns)
+
+    def test_model_call_links_classification_run_with_owner_combination(self) -> None:
+        table = ModelCall.__table__
+        foreign_key = next(iter(table.c.classification_run_id.foreign_keys))
+        owner_check = next(
+            constraint
+            for constraint in table.constraints
+            if isinstance(constraint, CheckConstraint)
+            and constraint.name == "ck_model_calls_owner_combination"
+        )
+
+        self.assertTrue(table.c.classification_run_id.nullable)
+        self.assertEqual("classification_runs.id", foreign_key.target_fullname)
+        self.assertEqual("CASCADE", foreign_key.ondelete)
+        self.assertIn("QUESTION_CLASSIFICATION", str(owner_check.sqltext))
+        self.assertIn("num_nonnulls", str(owner_check.sqltext))
+
+    def test_model_call_records_cached_and_reasoning_token_subsets(self) -> None:
+        table = ModelCall.__table__
+        check_names = {
+            constraint.name
+            for constraint in table.constraints
+            if isinstance(constraint, CheckConstraint)
+        }
+
+        for column in ("cached_input_tokens", "reasoning_tokens"):
+            self.assertTrue(table.c[column].nullable, column)
+            self.assertIsInstance(table.c[column].type, Integer)
+        self.assertTrue(
+            {
+                "ck_model_calls_cached_input_tokens",
+                "ck_model_calls_reasoning_tokens",
+            }
+            <= check_names
+        )
+
+    def test_document_source_group_must_match_group_source(self) -> None:
+        source_table = DocumentGroupSource.__table__
+        unique_constraints = {
+            constraint.name: tuple(constraint.columns.keys())
+            for constraint in source_table.constraints
+            if isinstance(constraint, UniqueConstraint)
+        }
+        self.assertEqual(
+            ("id", "document_group_id"),
+            unique_constraints[GROUP_SOURCE_DOCUMENT_GROUP_UNIQUE_CONSTRAINT],
+        )
+
+        table = DocumentSource.__table__
+        foreign_keys = {
+            constraint.name: constraint
+            for constraint in table.foreign_key_constraints
+        }
+        composite = foreign_keys[DOCUMENT_SOURCE_GROUP_SOURCE_FK_CONSTRAINT]
+        self.assertEqual(
+            ["group_source_id", "document_group_id"],
+            list(composite.column_keys),
+        )
+        self.assertEqual(
+            ["document_group_sources.id", "document_group_sources.document_group_id"],
+            [element.target_fullname for element in composite.elements],
+        )
+        self.assertEqual("RESTRICT", composite.ondelete)
+        self.assertLessEqual(len(composite.name), 63)
+        self.assertEqual(1, len(table.c.group_source_id.foreign_keys))
+        self.assertTrue(table.c.group_source_id.nullable)
+
+    def test_problem_group_fills_exactly_one_target_matching_kind(self) -> None:
+        table = QuestionProblemGroup.__table__
+        check_names = {
+            constraint.name
+            for constraint in table.constraints
+            if isinstance(constraint, CheckConstraint)
+        }
+        unique_constraints = {
+            tuple(constraint.columns.keys())
+            for constraint in table.constraints
+            if isinstance(constraint, UniqueConstraint)
+        }
+
+        self.assertEqual(
+            {"DOCUMENT", "NO_DOCUMENT"},
+            {member.value for member in QuestionProblemGroupKind},
+        )
+        self.assertIsInstance(table.c.id.type, UUID)
+        self.assertTrue(table.c.document_source_id.nullable)
+        self.assertTrue(table.c.document_group_id.nullable)
+        self.assertNotIn("title", table.columns.keys())
+        self.assertIn("ck_question_problem_groups_kind_target", check_names)
+        self.assertIn("ck_question_problem_groups_problem_group_kind", check_names)
+        self.assertIn(("document_source_id",), unique_constraints)
+        self.assertIn(("document_group_id",), unique_constraints)
+
+    def test_subproblem_has_status_serving_state_and_revisions(self) -> None:
+        table = QuestionSubproblem.__table__
+        self.assertEqual(
+            {"DRAFT", "APPROVED", "ARCHIVED"},
+            {member.value for member in QuestionSubproblemStatus},
+        )
+        self.assertEqual(
+            {"UNUSED", "SHADOW", "SERVING", "STOPPED"},
+            {member.value for member in QuestionSubproblemServingState},
+        )
+        self.assertFalse(table.c.problem_group_id.nullable)
+        self.assertFalse(table.c.key.nullable)
+        self.assertEqual(200, table.c.key.type.length)
+        subproblem_unique = {
+            tuple(constraint.columns.keys())
+            for constraint in table.constraints
+            if isinstance(constraint, UniqueConstraint)
+        }
+        # 같은 분류 체계를 다른 문서 그룹에 넣을 수 있어 전역 유일이 아니다.
+        self.assertEqual({("problem_group_id", "key")}, subproblem_unique)
+        self.assertFalse(table.c.serving_state.nullable)
+        self.assertEqual("UNUSED", table.c.serving_state.server_default.arg)
+
+        revisions = QuestionSubproblemRevision.__table__
+        unique_constraints = {
+            tuple(constraint.columns.keys())
+            for constraint in revisions.constraints
+            if isinstance(constraint, UniqueConstraint)
+        }
+        self.assertIn(("subproblem_id", "version"), unique_constraints)
+        self.assertNotIn("key_snapshot", revisions.columns.keys())
+        # 포함 기준 벡터와 그 설정, 입력 문장 구성 판은 함께 채운다.
+        self.assertIsInstance(revisions.c.inclusion_embedding.type, VECTOR)
+        self.assertEqual(1536, revisions.c.inclusion_embedding.type.dim)
+        for column in (
+            "inclusion_embedding",
+            "embedding_config_id",
+            "embedding_text_version",
+        ):
+            self.assertTrue(revisions.c[column].nullable, column)
+        self.assertEqual(50, revisions.c.embedding_text_version.type.length)
+        embedding_fk = next(iter(revisions.c.embedding_config_id.foreign_keys))
+        self.assertEqual("embedding_configs.id", embedding_fk.target_fullname)
+        self.assertEqual("RESTRICT", embedding_fk.ondelete)
+        self.assertIn(
+            "ck_question_subproblem_revisions_inclusion_embedding",
+            {
+                constraint.name
+                for constraint in revisions.constraints
+                if isinstance(constraint, CheckConstraint)
+            },
+        )
+        self.assertFalse(
+            [index for index in revisions.indexes if "embedding" in str(index.name)]
+        )
+
+    def test_classification_run_records_group_index_and_kind(self) -> None:
+        table = ClassificationRun.__table__
+
+        self.assertEqual(
+            {"ONLINE", "BACKFILL", "OPERATOR", "REJUDGE"},
+            {member.value for member in ClassificationRunKind},
+        )
+        self.assertFalse(table.c.document_group_id.nullable)
+        self.assertFalse(table.c.index_version_id.nullable)
+        self.assertFalse(table.c.model.nullable)
+        self.assertFalse(table.c.prompt_version.nullable)
+        open_online = {index.name: index for index in table.indexes}[
+            OPEN_ONLINE_CLASSIFICATION_RUN_CONSTRAINT
+        ]
+        self.assertTrue(open_online.unique)
+        self.assertEqual(
+            ["document_group_id", "index_version_id", "model", "prompt_version"],
+            list(open_online.columns.keys()),
+        )
+        self.assertEqual(
+            "kind = 'ONLINE' AND finished_at IS NULL",
+            str(open_online.dialect_options["postgresql"]["where"]),
+        )
+
+    def test_question_classification_is_append_only_with_one_current_row(self) -> None:
+        table = QuestionClassification.__table__
+        check_names = {
+            constraint.name
+            for constraint in table.constraints
+            if isinstance(constraint, CheckConstraint)
+        }
+        partial_unique = {
+            index.name: (
+                tuple(index.columns.keys()),
+                str(index.dialect_options["postgresql"]["where"]),
+            )
+            for index in table.indexes
+            if index.unique
+        }
+
+        self.assertEqual(
+            {"CONNECT", "SEPARATE", "UNCLASSIFIED"},
+            {member.value for member in ClassificationDecision},
+        )
+        self.assertEqual(
+            {"SUBPROBLEM", "CITATION", "DOCUMENT", "NONE"},
+            {member.value for member in AttributionSource},
+        )
+        self.assertTrue(table.c.subproblem_id.nullable)
+        self.assertFalse(table.c.problem_group_id.nullable)
+        self.assertFalse(table.c.run_id.nullable)
+        self.assertIsInstance(table.c.judgment_input.type, JSONB)
+        self.assertNotIn("verified", table.columns.keys())
+        self.assertEqual(
+            (("rag_run_id",), "effective_to IS NULL"),
+            partial_unique[CURRENT_CLASSIFICATION_CONSTRAINT],
+        )
+        self.assertTrue(
+            {
+                "ck_question_classifications_connect_subproblem",
+                "ck_question_classifications_connect_attribution",
+                "ck_question_classifications_subproblem_version",
+                "ck_question_classifications_effective_period",
+            }
+            <= check_names
+        )
+
+    def test_question_embedding_is_keyed_by_rag_run(self) -> None:
+        table = QuestionEmbedding.__table__
+        foreign_key = next(iter(table.c.rag_run_id.foreign_keys))
+
+        self.assertEqual(["rag_run_id"], [column.name for column in table.primary_key])
+        self.assertEqual("rag_runs.id", foreign_key.target_fullname)
+        self.assertEqual("CASCADE", foreign_key.ondelete)
+        self.assertFalse(table.c.embedding_config_id.nullable)
+
+    def test_canonical_answer_allows_one_approved_row_per_subproblem(self) -> None:
+        table = CanonicalAnswer.__table__
+        source_fk = next(iter(table.c.source_rag_run_id.foreign_keys))
+        partial_unique = {
+            index.name: (
+                tuple(index.columns.keys()),
+                str(index.dialect_options["postgresql"]["where"]),
+            )
+            for index in table.indexes
+            if index.unique
+        }
+
+        self.assertEqual(
+            {"SELECTED", "AUTHORED"},
+            {member.value for member in CanonicalAnswerOrigin},
+        )
+        self.assertEqual(
+            {"DRAFT", "APPROVED", "REVOKED"},
+            {member.value for member in CanonicalAnswerApproval},
+        )
+        self.assertTrue(table.c.source_rag_run_id.nullable)
+        self.assertEqual("SET NULL", source_fk.ondelete)
+        self.assertEqual(
+            (("subproblem_id",), "approval = 'APPROVED'"),
+            partial_unique[APPROVED_CANONICAL_ANSWER_CONSTRAINT],
+        )
+
+    def test_canonical_answer_citation_restricts_chunk_and_version_delete(self) -> None:
+        table = CanonicalAnswerCitation.__table__
+        unique_constraints = {
+            tuple(constraint.columns.keys())
+            for constraint in table.constraints
+            if isinstance(constraint, UniqueConstraint)
+        }
+
+        self.assertIn(("canonical_answer_id", "citation_order"), unique_constraints)
+        for column, target in (
+            ("chunk_id", "document_chunks.id"),
+            ("document_version_id", "document_versions.id"),
+        ):
+            foreign_key = next(iter(table.c[column].foreign_keys))
+            self.assertFalse(table.c[column].nullable)
+            self.assertEqual(target, foreign_key.target_fullname)
+            self.assertEqual("RESTRICT", foreign_key.ondelete)
+        self.assertEqual(
+            set(AnswerCitation.__table__.columns.keys()) - {"rag_run_id"},
+            set(table.columns.keys()) - {"canonical_answer_id"},
+        )
+
+    def test_cache_attempt_outcome_constraints(self) -> None:
+        table = QuestionCacheAttempt.__table__
+        check_names = {
+            constraint.name
+            for constraint in table.constraints
+            if isinstance(constraint, CheckConstraint)
+        }
+        unique_constraints = {
+            tuple(constraint.columns.keys())
+            for constraint in table.constraints
+            if isinstance(constraint, UniqueConstraint)
+        }
+
+        self.assertEqual(
+            {"SERVED", "SHADOW", "GROUP_DISABLED", "REJECTED", "SKIPPED", "FAILED"},
+            {member.value for member in CacheAttemptOutcome},
+        )
+        self.assertIn(("rag_run_id",), unique_constraints)
+        self.assertIn(("classification_id",), unique_constraints)
+        self.assertTrue(table.c.classification_id.nullable)
+        self.assertTrue(table.c.canonical_answer_id.nullable)
+        self.assertIsInstance(table.c.rejection_reasons.type, ARRAY)
+        self.assertTrue(
+            {
+                "ck_question_cache_attempts_outcome_canonical_answer",
+                "ck_question_cache_attempts_outcome_rejection_reasons",
+                "ck_question_cache_attempts_cache_attempt_outcome",
+            }
+            <= check_names
+        )
+
+    def test_constraint_names_fit_postgres_identifier_limit(self) -> None:
+        names = [
+            str(item.name)
+            for table in _application_tables()
+            for item in (*table.constraints, *table.indexes)
+        ]
+        self.assertEqual([], [name for name in names if len(name) > 63])
 
 
 if __name__ == "__main__":

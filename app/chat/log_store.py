@@ -239,7 +239,6 @@ class RagLogStore:
         *,
         user_query: str,
         index_version_id: int,
-        sanitized_query: Optional[str] = None,
         query_hash: Optional[str] = None,
     ) -> RagRun:
         """ACTIVE 대화에 다음 턴을 PROCESSING 상태로 생성한다.
@@ -305,7 +304,6 @@ class RagLogStore:
             turn_no=next_turn_no,
             index_version_id=index_version_id,
             user_query=user_query,
-            sanitized_query=sanitized_query,
             resolved_query=user_query if is_first_turn else None,
             query_hash=query_hash,
             context_strategy=(
@@ -679,6 +677,8 @@ class RagLogStore:
         status: ExecutionStatus,
         input_tokens: Optional[int] = None,
         output_tokens: Optional[int] = None,
+        cached_input_tokens: Optional[int] = None,
+        reasoning_tokens: Optional[int] = None,
         estimated_cost: Optional[float] = None,
         latency_ms: Optional[int] = None,
         retry_count: int = 0,
@@ -714,6 +714,8 @@ class RagLogStore:
         call.status = status
         call.input_tokens = input_tokens
         call.output_tokens = output_tokens
+        call.cached_input_tokens = cached_input_tokens
+        call.reasoning_tokens = reasoning_tokens
         call.estimated_cost = estimated_cost
         call.latency_ms = latency_ms
         call.retry_count = retry_count

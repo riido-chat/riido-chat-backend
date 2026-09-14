@@ -3,8 +3,8 @@
 - 문서 영역: document_sources → document_versions → content_nodes ↔ document_chunks(공유 PK 1:1)
 - 검색·색인 영역: embedding_configs, chunk_embeddings, index_versions, index_documents, index_runs
 - 대화·RAG 영역: conversations → rag_runs → retrieval_results / model_calls / answer_citations / feedbacks
-- Legacy: ERD 도입 전 Vector Retrieval 최소 테이블(legacy_*).
-  파이프라인 → DB 적재 매핑 확정 후 ERD 테이블로 흡수하고 제거한다.
+- 질문 그룹핑 영역: question_problem_groups → question_subproblems → canonical_answers,
+  classification_runs → question_classifications → question_cache_attempts
 """
 
 import enum
@@ -18,6 +18,7 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     ForeignKey,
+    ForeignKeyConstraint,
     Identity,
     Index,
     Integer,
@@ -50,6 +51,28 @@ DUPLICATE_DOCUMENT_SOURCE_CONSTRAINT = (
 # explicit in both the ORM and its migration.
 CHAT_PROFILE_REVISION_FK_CONSTRAINT = (
     "fk_conversations_profile_revision_id_chat_profile_revisions"
+)
+# 복합 외래키는 명명 규칙대로 붙이면 63자를 넘어 이름을 직접 지정한다.
+DOCUMENT_SOURCE_GROUP_SOURCE_FK_CONSTRAINT = (
+    "fk_document_sources_group_source_id_document_group_id"
+)
+GROUP_SOURCE_DOCUMENT_GROUP_UNIQUE_CONSTRAINT = (
+    "uq_document_group_sources_id_document_group_id"
+)
+CURRENT_CLASSIFICATION_CONSTRAINT = "uq_question_classifications_rag_run_id_current"
+OPEN_ONLINE_CLASSIFICATION_RUN_CONSTRAINT = "uq_classification_runs_open_online"
+APPROVED_CANONICAL_ANSWER_CONSTRAINT = "uq_canonical_answers_subproblem_id_approved"
+
+# 턴, 분류 실행, 색인, 수집 중 어느 실행 칸을 함께 채울 수 있는지 정한다.
+# 즉시 판별은 턴과 분류 실행을 모두 채우고, 백필 판정은 분류 실행만 채운다.
+MODEL_CALL_OWNER_COMBINATION = (
+    "(classification_run_id IS NULL"
+    " AND purpose <> 'QUESTION_CLASSIFICATION'"
+    " AND num_nonnulls(rag_run_id, index_run_id, ingestion_run_id) = 1)"
+    " OR (classification_run_id IS NOT NULL"
+    " AND index_run_id IS NULL AND ingestion_run_id IS NULL"
+    " AND (purpose = 'QUESTION_CLASSIFICATION'"
+    " OR (purpose = 'QUERY_EMBEDDING' AND rag_run_id IS NOT NULL)))"
 )
 
 
@@ -192,6 +215,7 @@ class ModelCallPurpose(str, enum.Enum):
     ANSWER_GENERATION = "ANSWER_GENERATION"
     QUERY_REWRITE = "QUERY_REWRITE"
     CONVERSATION_SUMMARY = "CONVERSATION_SUMMARY"
+    QUESTION_CLASSIFICATION = "QUESTION_CLASSIFICATION"
 
 
 class FeedbackRating(str, enum.Enum):
@@ -199,6 +223,82 @@ class FeedbackRating(str, enum.Enum):
 
     GOOD = "GOOD"
     BAD = "BAD"
+
+
+class QuestionProblemGroupKind(str, enum.Enum):
+    """문제 그룹이 문서 한 건을 가리키는지, 가이드 밖 질문을 받는지 나타낸다."""
+
+    DOCUMENT = "DOCUMENT"
+    NO_DOCUMENT = "NO_DOCUMENT"
+
+
+class QuestionSubproblemStatus(str, enum.Enum):
+    """세부 문제 정의의 lifecycle 상태."""
+
+    DRAFT = "DRAFT"
+    APPROVED = "APPROVED"
+    ARCHIVED = "ARCHIVED"
+
+
+class QuestionSubproblemServingState(str, enum.Enum):
+    """캐시 게이트가 매 턴 읽는 세부 문제의 서빙 상태. 긴급 정지는 STOPPED 다."""
+
+    UNUSED = "UNUSED"
+    SHADOW = "SHADOW"
+    SERVING = "SERVING"
+    STOPPED = "STOPPED"
+
+
+class ClassificationRunKind(str, enum.Enum):
+    """질문 연결 행을 만든 분류 실행의 종류. MVP 는 ONLINE 만 쓴다."""
+
+    ONLINE = "ONLINE"
+    BACKFILL = "BACKFILL"
+    OPERATOR = "OPERATOR"
+    REJUDGE = "REJUDGE"
+
+
+class ClassificationDecision(str, enum.Enum):
+    """질문을 세부 문제에 붙였는지 나타낸다. 판별 호출이 실패하면 UNCLASSIFIED 다."""
+
+    CONNECT = "CONNECT"
+    SEPARATE = "SEPARATE"
+    UNCLASSIFIED = "UNCLASSIFIED"
+
+
+class AttributionSource(str, enum.Enum):
+    """질문 연결 행의 문제 그룹을 어디서 얻었는지 나타낸다."""
+
+    SUBPROBLEM = "SUBPROBLEM"
+    CITATION = "CITATION"
+    DOCUMENT = "DOCUMENT"
+    NONE = "NONE"
+
+
+class CanonicalAnswerOrigin(str, enum.Enum):
+    """정본을 최근 답변에서 선정했는지 운영자가 직접 썼는지 나타낸다."""
+
+    SELECTED = "SELECTED"
+    AUTHORED = "AUTHORED"
+
+
+class CanonicalAnswerApproval(str, enum.Enum):
+    """정본 승인 상태. 세부 문제마다 APPROVED 는 하나뿐이다."""
+
+    DRAFT = "DRAFT"
+    APPROVED = "APPROVED"
+    REVOKED = "REVOKED"
+
+
+class CacheAttemptOutcome(str, enum.Enum):
+    """턴 하나의 캐시 시도가 무엇을 반환했거나 왜 반환하지 않았는지 나타낸다."""
+
+    SERVED = "SERVED"
+    SHADOW = "SHADOW"
+    GROUP_DISABLED = "GROUP_DISABLED"
+    REJECTED = "REJECTED"
+    SKIPPED = "SKIPPED"
+    FAILED = "FAILED"
 
 
 def _status_enum(
@@ -323,7 +423,15 @@ class DocumentGroupSource(Base):
     """
 
     __tablename__ = "document_group_sources"
-    __table_args__ = (UniqueConstraint("document_group_id", "root_url"),)
+    __table_args__ = (
+        UniqueConstraint("document_group_id", "root_url"),
+        # 문서가 원천과 문서 그룹을 함께 가리키는 복합 외래키의 대상이다.
+        UniqueConstraint(
+            "id",
+            "document_group_id",
+            name=GROUP_SOURCE_DOCUMENT_GROUP_UNIQUE_CONSTRAINT,
+        ),
+    )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     document_group_id: Mapped[int] = mapped_column(
@@ -371,6 +479,17 @@ class DocumentSource(Base):
         UniqueConstraint("document_group_id", "canonical_uri"),
         Index(None, "document_group_id"),
         Index(None, "group_source_id"),
+        # 원천을 거친 문서 그룹과 직접 적은 문서 그룹이 같아야 한다.
+        # 원천이 없는 업로드 문서는 복합 외래키 검사를 받지 않는다.
+        ForeignKeyConstraint(
+            ["group_source_id", "document_group_id"],
+            [
+                "document_group_sources.id",
+                "document_group_sources.document_group_id",
+            ],
+            name=DOCUMENT_SOURCE_GROUP_SOURCE_FK_CONSTRAINT,
+            ondelete="RESTRICT",
+        ),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
@@ -379,10 +498,7 @@ class DocumentSource(Base):
         ForeignKey("document_groups.id", ondelete="RESTRICT"),
         nullable=False,
     )
-    group_source_id: Mapped[Optional[int]] = mapped_column(
-        BigInteger,
-        ForeignKey("document_group_sources.id", ondelete="RESTRICT"),
-    )
+    group_source_id: Mapped[Optional[int]] = mapped_column(BigInteger)
     document_key: Mapped[str] = mapped_column(String(300), nullable=False)
     source_type: Mapped[str] = mapped_column(String(30), nullable=False)
     canonical_uri: Mapped[str] = mapped_column(String(1000), nullable=False)
@@ -788,7 +904,6 @@ class RagRun(Base):
         nullable=False,
     )
     user_query: Mapped[str] = mapped_column(Text, nullable=False)
-    sanitized_query: Mapped[Optional[str]] = mapped_column(Text)
     resolved_query: Mapped[Optional[str]] = mapped_column(Text)
     query_hash: Mapped[Optional[str]] = mapped_column(String(128))
     context_strategy: Mapped[ContextStrategy] = mapped_column(
@@ -865,9 +980,24 @@ class RetrievalResultRow(Base):
 
 
 class ModelCall(Base):
-    """질문 재작성, 임베딩, 답변 생성, 대화 요약 등 모델 호출 이력."""
+    """질문 재작성, 임베딩, 답변 생성, 대화 요약, 질문 판별 등 모델 호출 이력."""
 
     __tablename__ = "model_calls"
+    __table_args__ = (
+        CheckConstraint(MODEL_CALL_OWNER_COMBINATION, name="owner_combination"),
+        # 캐시 입력과 추론 출력은 각 총량에 포함된 부분값이다.
+        CheckConstraint(
+            "cached_input_tokens IS NULL OR (cached_input_tokens >= 0"
+            " AND (input_tokens IS NULL OR cached_input_tokens <= input_tokens))",
+            name="cached_input_tokens",
+        ),
+        CheckConstraint(
+            "reasoning_tokens IS NULL OR (reasoning_tokens >= 0"
+            " AND (output_tokens IS NULL OR reasoning_tokens <= output_tokens))",
+            name="reasoning_tokens",
+        ),
+        Index(None, "classification_run_id"),
+    )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     rag_run_id: Mapped[Optional[uuid.UUID]] = mapped_column(
@@ -879,6 +1009,9 @@ class ModelCall(Base):
     ingestion_run_id: Mapped[Optional[int]] = mapped_column(
         BigInteger, ForeignKey("ingestion_runs.id", ondelete="CASCADE")
     )
+    classification_run_id: Mapped[Optional[int]] = mapped_column(
+        BigInteger, ForeignKey("classification_runs.id", ondelete="CASCADE")
+    )
     purpose: Mapped[ModelCallPurpose] = mapped_column(
         _status_enum(ModelCallPurpose, "model_call_purpose", length=40),
         nullable=False,
@@ -888,6 +1021,8 @@ class ModelCall(Base):
     prompt_version: Mapped[Optional[str]] = mapped_column(String(50))
     input_tokens: Mapped[Optional[int]] = mapped_column(Integer)
     output_tokens: Mapped[Optional[int]] = mapped_column(Integer)
+    cached_input_tokens: Mapped[Optional[int]] = mapped_column(Integer)
+    reasoning_tokens: Mapped[Optional[int]] = mapped_column(Integer)
     estimated_cost: Mapped[Optional[float]] = mapped_column(Numeric)
     latency_ms: Mapped[Optional[int]] = mapped_column(Integer)
     status: Mapped[ExecutionStatus] = mapped_column(
@@ -962,49 +1097,439 @@ class Feedback(Base):
 
 
 # ---------------------------------------------------------------------------
-# Legacy — ERD 도입 전 Vector Retrieval 최소 테이블
-# 파이프라인 → ERD 적재 매핑 확정 시 ERD 테이블로 흡수하고 제거한다.
+# 질문 그룹핑 영역
+# 명명 규칙대로면 식별자 63자를 넘는 외래키와 유니크는 참조 테이블을 빼고 이름을 직접 지정한다.
 # ---------------------------------------------------------------------------
 
 
-class LegacyDocumentChunk(Base):
-    """(legacy) 검색 결과를 RetrievalChunk로 복원하기 위한 Chunk와 metadata."""
+class QuestionProblemGroup(Base):
+    """세부 문제의 상위. 문서 한 건이나 문서 그룹의 가이드 밖 질문을 가리킨다.
 
-    __tablename__ = "legacy_document_chunks"
+    DOCUMENT 는 문서만, NO_DOCUMENT 는 문서 그룹만 채운다. 문서 그룹을 두 번
+    적지 않아 어긋날 수 없고, 제목은 복사하지 않는다.
+    """
 
-    chunk_id: Mapped[str] = mapped_column(Text, primary_key=True)
-    document_id: Mapped[str] = mapped_column(Text, nullable=False)
-    section_id: Mapped[str] = mapped_column(Text, nullable=False)
-    document_title: Mapped[str] = mapped_column(Text, nullable=False)
-    section_path: Mapped[List[str]] = mapped_column(ARRAY(Text), nullable=False)
-    source_url: Mapped[str] = mapped_column(Text, nullable=False)
-    category: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    content: Mapped[str] = mapped_column(Text, nullable=False)
-
-
-class LegacyChunkEmbedding(Base):
-    """(legacy) Chunk에 1:1로 종속되는 OpenAI embedding."""
-
-    __tablename__ = "legacy_chunk_embeddings"
+    __tablename__ = "question_problem_groups"
     __table_args__ = (
-        UniqueConstraint("chunk_id", name="uq_chunk_embeddings_chunk_id"),
+        CheckConstraint(
+            "(kind = 'DOCUMENT'"
+            " AND document_source_id IS NOT NULL AND document_group_id IS NULL)"
+            " OR (kind = 'NO_DOCUMENT'"
+            " AND document_source_id IS NULL AND document_group_id IS NOT NULL)",
+            name="kind_target",
+        ),
+        # 널은 서로 다르므로 채운 행끼리만 유일하다.
+        UniqueConstraint("document_source_id"),
+        # NO_DOCUMENT 행만 문서 그룹을 채우므로 문서 그룹당 가이드 밖 그룹은 하나다.
+        UniqueConstraint("document_group_id"),
     )
 
-    id: Mapped[int] = mapped_column(
-        BigInteger,
-        Identity(),
-        primary_key=True,
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    chunk_id: Mapped[str] = mapped_column(
-        Text,
+    kind: Mapped[QuestionProblemGroupKind] = mapped_column(
+        _status_enum(QuestionProblemGroupKind, "problem_group_kind"),
+        nullable=False,
+    )
+    document_source_id: Mapped[Optional[int]] = mapped_column(
+        BigInteger, ForeignKey("document_sources.id", ondelete="RESTRICT")
+    )
+    document_group_id: Mapped[Optional[int]] = mapped_column(
+        BigInteger, ForeignKey("document_groups.id", ondelete="RESTRICT")
+    )
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class QuestionSubproblem(Base):
+    """분류의 단위이자 캐시의 단위인 세부 문제."""
+
+    __tablename__ = "question_subproblems"
+    __table_args__ = (
+        # 같은 분류 체계를 다른 문서 그룹에 넣을 수 있어 문제 그룹 안에서만 유일하다.
+        UniqueConstraint("problem_group_id", "key"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    problem_group_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey(
-            "legacy_document_chunks.chunk_id",
-            name="fk_chunk_embeddings_chunk_id_document_chunks",
-            ondelete="CASCADE",
+            "question_problem_groups.id",
+            ondelete="RESTRICT",
+            name="fk_question_subproblems_problem_group_id",
         ),
         nullable=False,
     )
-    embedding: Mapped[List[float]] = mapped_column(
-        VECTOR(EMBEDDING_DIMENSIONS),
+    # 시드가 재실행과 환경을 넘어 같은 세부 문제를 알아보는 외부 식별자. 바꾸지 않는다.
+    key: Mapped[str] = mapped_column(String(200), nullable=False)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    # 임베딩과 판정에 쓴다. 제외 기준은 판정에만 쓴다.
+    inclusion_criteria: Mapped[str] = mapped_column(Text, nullable=False)
+    exclusion_criteria: Mapped[Optional[str]] = mapped_column(Text)
+    current_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[QuestionSubproblemStatus] = mapped_column(
+        _status_enum(QuestionSubproblemStatus, "subproblem_status"),
         nullable=False,
+    )
+    serving_state: Mapped[QuestionSubproblemServingState] = mapped_column(
+        _status_enum(QuestionSubproblemServingState, "subproblem_serving_state"),
+        nullable=False,
+        default=QuestionSubproblemServingState.UNUSED,
+        server_default=QuestionSubproblemServingState.UNUSED.value,
+    )
+    created_by: Mapped[str] = mapped_column(String(100), nullable=False)
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class QuestionSubproblemRevision(Base):
+    """판정이 기록한 세부 문제 개정 번호가 가리키는 정의 스냅샷."""
+
+    __tablename__ = "question_subproblem_revisions"
+    __table_args__ = (
+        UniqueConstraint("subproblem_id", "version"),
+        # 벡터, 임베딩 설정, 입력 문장 구성 판은 함께 채우거나 함께 비운다.
+        CheckConstraint(
+            "num_nulls(inclusion_embedding, embedding_config_id,"
+            " embedding_text_version) IN (0, 3)",
+            name="inclusion_embedding",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    subproblem_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "question_subproblems.id",
+            ondelete="RESTRICT",
+            name="fk_question_subproblem_revisions_subproblem_id",
+        ),
+        nullable=False,
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    name_snapshot: Mapped[str] = mapped_column(String(200), nullable=False)
+    inclusion_snapshot: Mapped[str] = mapped_column(Text, nullable=False)
+    exclusion_snapshot: Mapped[Optional[str]] = mapped_column(Text)
+    change_reason: Mapped[Optional[str]] = mapped_column(Text)
+    # 온라인 세부 문제 후보 검색에 쓰는 포함 기준 벡터. 시드 스크립트가 계산한다.
+    inclusion_embedding: Mapped[Optional[List[float]]] = mapped_column(
+        VECTOR(EMBEDDING_DIMENSIONS)
+    )
+    embedding_config_id: Mapped[Optional[int]] = mapped_column(
+        BigInteger,
+        ForeignKey(
+            "embedding_configs.id",
+            ondelete="RESTRICT",
+            name="fk_question_subproblem_revisions_embedding_config_id",
+        ),
+    )
+    embedding_text_version: Mapped[Optional[str]] = mapped_column(String(50))
+    approved_by: Mapped[str] = mapped_column(String(100), nullable=False)
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class ClassificationRun(Base):
+    """질문 연결 행을 어떤 문서 그룹, 색인 판, 모델, 프롬프트로 만들었는지 묶는 실행."""
+
+    __tablename__ = "classification_runs"
+    __table_args__ = (
+        Index(None, "document_group_id", "started_at"),
+        # 동시 턴이 같은 설정의 ONLINE 실행을 둘 열지 못하게 한다.
+        Index(
+            OPEN_ONLINE_CLASSIFICATION_RUN_CONSTRAINT,
+            "document_group_id",
+            "index_version_id",
+            "model",
+            "prompt_version",
+            unique=True,
+            postgresql_where=text("kind = 'ONLINE' AND finished_at IS NULL"),
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    document_group_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("document_groups.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    index_version_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("index_versions.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    kind: Mapped[ClassificationRunKind] = mapped_column(
+        _status_enum(ClassificationRunKind, "classification_run_kind"),
+        nullable=False,
+    )
+    model: Mapped[str] = mapped_column(String(150), nullable=False)
+    prompt_version: Mapped[str] = mapped_column(String(50), nullable=False)
+    row_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default="0"
+    )
+    started_at: Mapped[Any] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
+    finished_at: Mapped[Optional[Any]] = mapped_column(TIMESTAMP(timezone=True))
+    actor: Mapped[Optional[str]] = mapped_column(String(100))
+
+
+class QuestionClassification(Base):
+    """질문이 어느 세부 문제와 문제 그룹에 붙었는지 기록하는 연결 행.
+
+    재분류는 이전 행에 effective_to 를 찍고 새 행을 추가한다. effective_to 가
+    널인 행이 현재 값이다. 턴 끝 인용 귀속만 같은 행의 problem_group_id 와
+    attribution_source 를 덮어쓴다.
+    """
+
+    __tablename__ = "question_classifications"
+    __table_args__ = (
+        CheckConstraint(
+            "(decision = 'CONNECT') = (subproblem_id IS NOT NULL)",
+            name="connect_subproblem",
+        ),
+        CheckConstraint(
+            "(decision = 'CONNECT') = (attribution_source = 'SUBPROBLEM')",
+            name="connect_attribution",
+        ),
+        CheckConstraint(
+            "(subproblem_id IS NULL) = (subproblem_version IS NULL)",
+            name="subproblem_version",
+        ),
+        CheckConstraint(
+            "effective_to IS NULL OR effective_to >= effective_from",
+            name="effective_period",
+        ),
+        Index(
+            CURRENT_CLASSIFICATION_CONSTRAINT,
+            "rag_run_id",
+            unique=True,
+            postgresql_where=text("effective_to IS NULL"),
+        ),
+        Index(None, "problem_group_id"),
+        Index(None, "subproblem_id"),
+        Index(None, "run_id"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    rag_run_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("rag_runs.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    subproblem_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("question_subproblems.id", ondelete="RESTRICT"),
+    )
+    # 세부 문제가 이미 그룹을 갖지만 판정 시점의 그룹을 기록으로 남긴다.
+    problem_group_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "question_problem_groups.id",
+            ondelete="RESTRICT",
+            name="fk_question_classifications_problem_group_id",
+        ),
+        nullable=False,
+    )
+    run_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("classification_runs.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    decision: Mapped[ClassificationDecision] = mapped_column(
+        _status_enum(ClassificationDecision, "classification_decision"),
+        nullable=False,
+    )
+    subproblem_version: Mapped[Optional[int]] = mapped_column(Integer)
+    attribution_source: Mapped[AttributionSource] = mapped_column(
+        _status_enum(AttributionSource, "attribution_source"),
+        nullable=False,
+    )
+    is_composite: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false"
+    )
+    confidence: Mapped[Optional[float]] = mapped_column(Numeric)
+    judgment_input: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB)
+    effective_from: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    effective_to: Mapped[Optional[Any]] = mapped_column(TIMESTAMP(timezone=True))
+
+
+class QuestionEmbedding(Base):
+    """판별과 같은 resolved_query 를 임베딩한 질문 벡터."""
+
+    __tablename__ = "question_embeddings"
+
+    rag_run_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("rag_runs.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    embedding: Mapped[List[float]] = mapped_column(
+        VECTOR(EMBEDDING_DIMENSIONS), nullable=False
+    )
+    embedding_config_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("embedding_configs.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class CanonicalAnswer(Base):
+    """캐시가 반환할 정본. 행을 고치지 않고 REVOKED 로 내린 뒤 새 행을 넣는다."""
+
+    __tablename__ = "canonical_answers"
+    __table_args__ = (
+        Index(
+            APPROVED_CANONICAL_ANSWER_CONSTRAINT,
+            "subproblem_id",
+            unique=True,
+            postgresql_where=text("approval = 'APPROVED'"),
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    subproblem_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("question_subproblems.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    origin: Mapped[CanonicalAnswerOrigin] = mapped_column(
+        _status_enum(CanonicalAnswerOrigin, "canonical_answer_origin"),
+        nullable=False,
+    )
+    # 출처로만 남긴다. 질문 행이 지워져도 정본은 본문과 인용을 직접 소유한다.
+    source_rag_run_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("rag_runs.id", ondelete="SET NULL")
+    )
+    content_markdown: Mapped[str] = mapped_column(Text, nullable=False)
+    applicability_rules: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB)
+    subproblem_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    filter_results: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB)
+    approval: Mapped[CanonicalAnswerApproval] = mapped_column(
+        _status_enum(CanonicalAnswerApproval, "canonical_answer_approval"),
+        nullable=False,
+    )
+    approved_by: Mapped[Optional[str]] = mapped_column(String(100))
+    valid_from: Mapped[Optional[Any]] = mapped_column(TIMESTAMP(timezone=True))
+    valid_to: Mapped[Optional[Any]] = mapped_column(TIMESTAMP(timezone=True))
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class CanonicalAnswerCitation(Base):
+    """정본 인용. 캐시 적중 턴의 answer_citations 로 그대로 복사한다."""
+
+    __tablename__ = "canonical_answer_citations"
+    __table_args__ = (
+        UniqueConstraint(
+            "canonical_answer_id",
+            "citation_order",
+            name="uq_canonical_answer_citations_answer_id_citation_order",
+        ),
+        Index(None, "chunk_id"),
+        Index(None, "document_version_id"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    canonical_answer_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "canonical_answers.id",
+            ondelete="CASCADE",
+            name="fk_canonical_answer_citations_canonical_answer_id",
+        ),
+        nullable=False,
+    )
+    citation_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    # 정본이 쓰는 청크와 문서 판이 지워지지 않게 막는다.
+    chunk_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("document_chunks.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    document_version_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(
+            "document_versions.id",
+            ondelete="RESTRICT",
+            name="fk_canonical_answer_citations_document_version_id",
+        ),
+        nullable=False,
+    )
+    document_title_snapshot: Mapped[Optional[str]] = mapped_column(String(500))
+    node_path_snapshot: Mapped[Optional[str]] = mapped_column(String(1000))
+    source_uri_snapshot: Mapped[Optional[str]] = mapped_column(String(1000))
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class QuestionCacheAttempt(Base):
+    """재작성을 통과한 턴의 캐시 시도와 게이트 결과. 턴마다 많아야 하나다."""
+
+    __tablename__ = "question_cache_attempts"
+    __table_args__ = (
+        CheckConstraint(
+            "(outcome IN ('SERVED', 'SHADOW', 'GROUP_DISABLED'))"
+            " = (canonical_answer_id IS NOT NULL)",
+            name="outcome_canonical_answer",
+        ),
+        CheckConstraint(
+            "(outcome = 'REJECTED')"
+            " = (COALESCE(cardinality(rejection_reasons), 0) > 0)",
+            name="outcome_rejection_reasons",
+        ),
+        Index(None, "canonical_answer_id"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    rag_run_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("rag_runs.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+    )
+    # 판정 없이 건너뛰면 비운다. 널은 서로 다르므로 채운 행끼리만 유일하다.
+    # 턴 삭제가 연결 행과 시도를 함께 지우므로 문장 끝에 검사하는 NO ACTION 을 쓴다.
+    classification_id: Mapped[Optional[int]] = mapped_column(
+        BigInteger,
+        ForeignKey(
+            "question_classifications.id",
+            ondelete="NO ACTION",
+            name="fk_question_cache_attempts_classification_id",
+        ),
+        unique=True,
+    )
+    outcome: Mapped[CacheAttemptOutcome] = mapped_column(
+        _status_enum(CacheAttemptOutcome, "cache_attempt_outcome"),
+        nullable=False,
+    )
+    canonical_answer_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "canonical_answers.id",
+            ondelete="RESTRICT",
+            name="fk_question_cache_attempts_canonical_answer_id",
+        ),
+    )
+    rejection_reasons: Mapped[Optional[List[str]]] = mapped_column(
+        ARRAY(String(50))
+    )
+    latency_ms: Mapped[Optional[int]] = mapped_column(Integer)
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )

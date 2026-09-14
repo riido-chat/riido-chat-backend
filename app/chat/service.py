@@ -952,6 +952,8 @@ class ChatService:
             ),
             input_tokens=trace.input_tokens,
             output_tokens=trace.output_tokens,
+            cached_input_tokens=trace.cached_input_tokens,
+            reasoning_tokens=trace.reasoning_tokens,
             latency_ms=trace.latency_ms,
             retry_count=trace.retry_count,
             error_message=trace.error_message,
