@@ -183,6 +183,37 @@ class QuestionLogSubproblemDetailResponse(BaseModel):
     )
 
 
+class QuestionLogSubproblemFullItem(BaseModel):
+    """문서 상세 통합 조회의 세부 문제 한 행.
+
+    문서 상세 표의 집계 필드와 세부 문제 펼침 조회의 정본 계약을 한 행에
+    함께 싣는다. 포함·제외 기준도 판정 카탈로그의 원래 순서로 보낸다.
+    """
+
+    model_config = HTTP_DTO_CONFIG
+
+    subproblem_id: uuid.UUID = Field(alias="subproblemId")
+    name: str
+    question_count: int = Field(alias="questionCount", ge=0)
+    source_section: Optional[str] = Field(alias="sourceSection")
+    apply_status: ApplyStatus = Field(alias="applyStatus")
+    inclusion_criteria: List[str] = Field(alias="inclusionCriteria")
+    exclusion_criteria: List[str] = Field(alias="exclusionCriteria")
+    canonical_answer: Optional[QuestionLogCanonicalAnswer] = Field(
+        alias="canonicalAnswer"
+    )
+
+
+class QuestionLogDocumentFullDetailResponse(BaseModel):
+    """문서 정보·요약·세부 문제 행·정본 상세를 한 번에 주는 응답."""
+
+    model_config = HTTP_DTO_CONFIG
+
+    document: QuestionLogDocumentRef
+    summary: QuestionLogDocumentSummary
+    subproblems: List[QuestionLogSubproblemFullItem]
+
+
 class QuestionLogQuestionItem(BaseModel):
     """질문 목록 한 행."""
 

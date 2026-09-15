@@ -56,6 +56,7 @@ from app.question_grouping.catalog_reader import (
     CatalogDataError,
     applicability_rules_from_json,
 )
+from app.question_grouping.payload import split_criteria
 
 
 logger = logging.getLogger(__name__)
@@ -402,6 +403,9 @@ class SubproblemRow:
     question_count: int
     source_section: Optional[str]
     apply_status: ApplyStatus
+    inclusion_criteria: Tuple[str, ...] = ()
+    exclusion_criteria: Tuple[str, ...] = ()
+    canonical_answer: Optional["CanonicalAnswerView"] = None
 
 
 @dataclass(frozen=True)
@@ -818,6 +822,13 @@ class QuestionInsightService:
         )
 
     async def get_document_detail(self, group_id: int, document_id: int) -> DocumentDetail:
+        return await self._get_document_detail(
+            group_id, document_id, include_full=False
+        )
+
+    async def _get_document_detail(
+        self, group_id: int, document_id: int, *, include_full: bool
+    ) -> DocumentDetail:
         await self._require_group(group_id)
         document = await self._require_document(group_id, document_id)
 
@@ -853,7 +864,9 @@ class QuestionInsightService:
         problem_group_id = await self._document_problem_group_id(document_id)
         subproblems: List[SubproblemRow] = []
         if problem_group_id is not None:
-            subproblems = await self._document_subproblems(group_id, problem_group_id)
+            subproblems = await self._document_subproblems(
+                group_id, problem_group_id, include_full=include_full
+            )
 
         return DocumentDetail(
             document=document,
@@ -864,6 +877,21 @@ class QuestionInsightService:
                 subproblem_count=len(subproblems),
             ),
             subproblems=subproblems,
+        )
+
+    async def get_document_full_detail(
+        self, group_id: int, document_id: int
+    ) -> DocumentDetail:
+        """문서 상세와 각 활성 세부 문제의 정본 상세를 함께 읽는다.
+
+        기존 문서 상세 조회가 이미 문서 소속·그룹 검증, 집계 대상 턴 범위,
+        보관 세부 문제 제외, 승인 정본 선택을 적용한다. 세부 문제 정본은
+        ``_document_subproblems``의 한 번의 집합 조회에서 모두 붙이므로
+        세부 문제 수에 따른 추가 DB 호출이 생기지 않는다.
+        """
+
+        return await self._get_document_detail(
+            group_id, document_id, include_full=True
         )
 
     async def get_subproblem_detail(
@@ -990,7 +1018,11 @@ class QuestionInsightService:
         )
 
     async def _document_subproblems(
-        self, group_id: int, problem_group_id: uuid.UUID
+        self,
+        group_id: int,
+        problem_group_id: uuid.UUID,
+        *,
+        include_full: bool = False,
     ) -> List[SubproblemRow]:
         turns = scoped_turns_query(group_id).cte("scoped_turns")
         counts = (
@@ -1005,8 +1037,12 @@ class QuestionInsightService:
                 select(
                     QuestionSubproblem.id,
                     QuestionSubproblem.name,
+                    QuestionSubproblem.inclusion_criteria,
+                    QuestionSubproblem.exclusion_criteria,
                     question_count.label("question_count"),
                     CanonicalAnswer.id.label("canonical_answer_id"),
+                    CanonicalAnswer.content_markdown,
+                    CanonicalAnswer.applicability_rules,
                     CanonicalAnswerCitation.document_title_snapshot,
                     CanonicalAnswerCitation.node_path_snapshot,
                 )
@@ -1037,26 +1073,48 @@ class QuestionInsightService:
                 )
             )
         ).all()
-        return [
-            SubproblemRow(
-                subproblem_id=row.id,
-                name=row.name,
-                question_count=row.question_count,
-                source_section=(
-                    None
-                    if row.canonical_answer_id is None
-                    else compose_source_section(
-                        row.document_title_snapshot, row.node_path_snapshot
-                    )
-                ),
-                apply_status=(
-                    ApplyStatus.NEEDS_CANONICAL
-                    if row.canonical_answer_id is None
-                    else ApplyStatus.APPLIED
-                ),
+        result: List[SubproblemRow] = []
+        for row in rows:
+            canonical_exists = row.canonical_answer_id is not None
+            canonical = None
+            if include_full and canonical_exists:
+                canonical = CanonicalAnswerView(
+                    content_markdown=row.content_markdown,
+                    applicability_rules=_canonical_rules(
+                        row.applicability_rules, row.canonical_answer_id
+                    ),
+                )
+            result.append(
+                SubproblemRow(
+                    subproblem_id=row.id,
+                    name=row.name,
+                    question_count=row.question_count,
+                    source_section=(
+                        None
+                        if not canonical_exists
+                        else compose_source_section(
+                            row.document_title_snapshot, row.node_path_snapshot
+                        )
+                    ),
+                    apply_status=(
+                        ApplyStatus.NEEDS_CANONICAL
+                        if not canonical_exists
+                        else ApplyStatus.APPLIED
+                    ),
+                    inclusion_criteria=(
+                        split_criteria(row.inclusion_criteria)
+                        if include_full
+                        else ()
+                    ),
+                    exclusion_criteria=(
+                        split_criteria(row.exclusion_criteria)
+                        if include_full
+                        else ()
+                    ),
+                    canonical_answer=canonical if include_full else None,
+                )
             )
-            for row in rows
-        ]
+        return result
 
 
 def _active_subproblem_counts() -> Any:
