@@ -670,6 +670,40 @@ class QuestionInsightServiceDbTest(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(expected, await self.service.get_document_detail(self.group.id, self._doc("B")))
 
+    async def test_document_full_detail_includes_canonical_and_excludes_archived(self) -> None:
+        detail = await self.service.get_document_full_detail(self.group.id, self._doc("A"))
+
+        self.assertEqual(
+            [self._sp("SA1"), self._sp("SA2")],
+            [item.subproblem_id for item in detail.subproblems],
+        )
+        applied, needs_canonical = detail.subproblems
+        self.assertEqual(
+            ("결제 실패 처리 기준",), applied.inclusion_criteria
+        )
+        self.assertEqual((), applied.exclusion_criteria)
+        self.assertEqual(ApplyStatus.APPLIED, applied.apply_status)
+        self.assertEqual(
+            CanonicalAnswerView(
+                "결제 실패 정본",
+                ["환불 절차는 다루지 않습니다", "연간 계약의 중도 좌석 변경은 다루지 않습니다"],
+            ),
+            applied.canonical_answer,
+        )
+        self.assertEqual(("구독 취소 기준",), needs_canonical.inclusion_criteria)
+        self.assertEqual((), needs_canonical.exclusion_criteria)
+        self.assertEqual(ApplyStatus.NEEDS_CANONICAL, needs_canonical.apply_status)
+        self.assertIsNone(needs_canonical.canonical_answer)
+
+        # SA3 는 같은 문서의 ARCHIVED 세부 문제라 통합 응답에 포함하지 않는다.
+        self.assertNotIn(self._sp("SA3"), [item.subproblem_id for item in detail.subproblems])
+
+    async def test_document_full_detail_checks_group_and_document_ownership(self) -> None:
+        with self.assertRaises(DocumentNotFoundError):
+            await self.service.get_document_full_detail(self.group.id, self._doc("H"))
+        with self.assertRaises(DocumentGroupNotFoundError):
+            await self.service.get_document_full_detail(UNKNOWN_ID, self._doc("A"))
+
     async def test_document_detail_edge_documents(self) -> None:
         cases = {
             "C": DocumentDetail(DocumentRef(self._doc("C"), "가이드"), DocumentSummary(3, 1, 0, 0), []),

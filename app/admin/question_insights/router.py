@@ -19,6 +19,7 @@ from app.admin.question_insights.schema import (
     QuestionLogCanonicalAnswer,
     QuestionLogDashboardResponse,
     QuestionLogDocumentDetailResponse,
+    QuestionLogDocumentFullDetailResponse,
     QuestionLogDocumentItem,
     QuestionLogDocumentListResponse,
     QuestionLogDocumentRef,
@@ -27,6 +28,7 @@ from app.admin.question_insights.schema import (
     QuestionLogQuestionItem,
     QuestionLogQuestionListResponse,
     QuestionLogSubproblemDetailResponse,
+    QuestionLogSubproblemFullItem,
     QuestionLogSubproblemItem,
     QuestionLogWithheldDocument,
     QuestionLogWithheldReasonCounts,
@@ -129,6 +131,33 @@ async def get_question_log_document(
     _require_group_id(group_id)
     _require_document_id(document_id)
     return _to_document_detail(await service.get_document_detail(group_id, document_id))
+
+
+@router.get(
+    "/documents/{document_id}/full",
+    response_model=QuestionLogDocumentFullDetailResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": AdminErrorResponse,
+            "description": (
+                "`NOT_FOUND`: 문서 그룹이 없거나, 문서가 없거나 그 그룹 소속이 아닌 경우입니다."
+            ),
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: _INVALID_PATH,
+    },
+    summary="질문 로그 문서 통합 상세 조회",
+)
+async def get_question_log_document_full(
+    group_id: int,
+    document_id: int,
+    service: QuestionInsightService = Depends(get_question_insight_service),
+) -> QuestionLogDocumentFullDetailResponse:
+    _require_group_id(group_id)
+    _require_document_id(document_id)
+    return _to_document_full_detail(
+        await service.get_document_full_detail(group_id, document_id)
+    )
 
 
 @router.get(
@@ -352,6 +381,46 @@ def _to_subproblem_detail(detail: SubproblemDetail) -> QuestionLogSubproblemDeta
                 applicabilityRules=list(canonical.applicability_rules),
             )
         ),
+    )
+
+
+def _to_document_full_detail(
+    detail: DocumentDetail,
+) -> QuestionLogDocumentFullDetailResponse:
+    summary = detail.summary
+    return QuestionLogDocumentFullDetailResponse(
+        document=QuestionLogDocumentRef(
+            documentId=detail.document.document_id,
+            documentTitle=detail.document.document_title,
+        ),
+        summary=QuestionLogDocumentSummary(
+            questionCount=summary.question_count,
+            insufficientEvidenceCount=summary.insufficient_evidence_count,
+            cachedAnswerCount=summary.cached_answer_count,
+            subproblemCount=summary.subproblem_count,
+        ),
+        subproblems=[
+            QuestionLogSubproblemFullItem(
+                subproblemId=item.subproblem_id,
+                name=item.name,
+                questionCount=item.question_count,
+                sourceSection=item.source_section,
+                applyStatus=item.apply_status,
+                inclusionCriteria=list(item.inclusion_criteria),
+                exclusionCriteria=list(item.exclusion_criteria),
+                canonicalAnswer=(
+                    None
+                    if item.canonical_answer is None
+                    else QuestionLogCanonicalAnswer(
+                        contentMarkdown=item.canonical_answer.content_markdown,
+                        applicabilityRules=list(
+                            item.canonical_answer.applicability_rules
+                        ),
+                    )
+                ),
+            )
+            for item in detail.subproblems
+        ],
     )
 
 

@@ -51,11 +51,15 @@ from app.database.models import (
 )
 from app.database.models import (
     AttributionSource,
+    CanonicalAnswer,
+    CanonicalAnswerApproval,
+    CanonicalAnswerOrigin,
     ClassificationDecision,
     ClassificationRun,
     ClassificationRunKind,
     ContextStrategy,
     QuestionClassification,
+    QuestionSubproblemStatus,
     RagRun,
 )
 from app.database.session import get_db_session
@@ -230,6 +234,78 @@ class QuestionLogApiTest(unittest.TestCase):
             response.json(),
         )
         self.service.get_document_detail.assert_awaited_once_with(GROUP_ID, DOCUMENT_ID)
+
+    def test_document_full_detail_shape(self) -> None:
+        self.service.get_document_full_detail.return_value = DocumentDetail(
+            document=DocumentRef(DOCUMENT_ID, "문서 가"),
+            summary=DocumentSummary(16, 2, 5, 2),
+            subproblems=[
+                SubproblemRow(
+                    SUBPROBLEM_ID,
+                    "세부 문제 가",
+                    8,
+                    "문서 가 > 절 하나",
+                    ApplyStatus.APPLIED,
+                    ("질문 범위 하나", "질문 범위 둘"),
+                    ("다른 의도",),
+                    CanonicalAnswerView("정본 본문 [1]", ["규칙 하나"]),
+                ),
+                SubproblemRow(
+                    SUBPROBLEM_ID,
+                    "세부 문제 나",
+                    0,
+                    None,
+                    ApplyStatus.NEEDS_CANONICAL,
+                    ("질문 범위 셋",),
+                    (),
+                    None,
+                ),
+            ],
+        )
+
+        response = self.client.get(f"{BASE_PATH}/documents/{DOCUMENT_ID}/full")
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            {
+                "document": {"documentId": DOCUMENT_ID, "documentTitle": "문서 가"},
+                "summary": {
+                    "questionCount": 16,
+                    "insufficientEvidenceCount": 2,
+                    "cachedAnswerCount": 5,
+                    "subproblemCount": 2,
+                },
+                "subproblems": [
+                    {
+                        "subproblemId": str(SUBPROBLEM_ID),
+                        "name": "세부 문제 가",
+                        "questionCount": 8,
+                        "sourceSection": "문서 가 > 절 하나",
+                        "applyStatus": "APPLIED",
+                        "inclusionCriteria": ["질문 범위 하나", "질문 범위 둘"],
+                        "exclusionCriteria": ["다른 의도"],
+                        "canonicalAnswer": {
+                            "contentMarkdown": "정본 본문 [1]",
+                            "applicabilityRules": ["규칙 하나"],
+                        },
+                    },
+                    {
+                        "subproblemId": str(SUBPROBLEM_ID),
+                        "name": "세부 문제 나",
+                        "questionCount": 0,
+                        "sourceSection": None,
+                        "applyStatus": "NEEDS_CANONICAL",
+                        "inclusionCriteria": ["질문 범위 셋"],
+                        "exclusionCriteria": [],
+                        "canonicalAnswer": None,
+                    },
+                ],
+            },
+            response.json(),
+        )
+        self.service.get_document_full_detail.assert_awaited_once_with(
+            GROUP_ID, DOCUMENT_ID
+        )
 
     def test_subproblem_detail_shape(self) -> None:
         path = f"{BASE_PATH}/documents/{DOCUMENT_ID}/subproblems/{SUBPROBLEM_ID}"
@@ -447,6 +523,7 @@ class QuestionLogApiTest(unittest.TestCase):
             "/api/admin/document-groups/abc/question-log/documents",
             "/api/admin/document-groups/1.5/question-log/questions",
             f"{BASE_PATH}/documents/abc",
+            f"{BASE_PATH}/documents/abc/full",
             f"{BASE_PATH}/documents/abc/subproblems/{SUBPROBLEM_ID}",
             f"{BASE_PATH}/documents/{DOCUMENT_ID}/subproblems/not-a-uuid",
         ]
@@ -460,6 +537,7 @@ class QuestionLogApiTest(unittest.TestCase):
             f"/api/admin/document-groups/{OUT_OF_BIGINT}/question-log/documents",
             f"/api/admin/document-groups/{OUT_OF_BIGINT}/question-log/questions",
             f"{BASE_PATH}/documents/{OUT_OF_BIGINT}",
+            f"{BASE_PATH}/documents/{OUT_OF_BIGINT}/full",
             f"{BASE_PATH}/documents/{OUT_OF_BIGINT}/subproblems/{SUBPROBLEM_ID}",
         ]
         for path in paths:
@@ -472,6 +550,7 @@ class QuestionLogApiTest(unittest.TestCase):
         self.service.list_documents.side_effect = DocumentGroupNotFoundError()
         self.service.list_questions.side_effect = DocumentGroupNotFoundError()
         self.service.get_document_detail.side_effect = DocumentNotFoundError()
+        self.service.get_document_full_detail.side_effect = DocumentNotFoundError()
         self.service.get_subproblem_detail.side_effect = SubproblemNotFoundError()
 
         cases = [
@@ -479,6 +558,7 @@ class QuestionLogApiTest(unittest.TestCase):
             (f"{BASE_PATH}/documents", "존재하지 않는 문서 그룹입니다."),
             (f"{BASE_PATH}/questions", "존재하지 않는 문서 그룹입니다."),
             (f"{BASE_PATH}/documents/{DOCUMENT_ID}", "존재하지 않는 문서입니다."),
+            (f"{BASE_PATH}/documents/{DOCUMENT_ID}/full", "존재하지 않는 문서입니다."),
             (
                 f"{BASE_PATH}/documents/{DOCUMENT_ID}/subproblems/{SUBPROBLEM_ID}",
                 "존재하지 않는 세부 문제입니다.",
@@ -501,6 +581,12 @@ class QuestionLogApiTest(unittest.TestCase):
         )
         self.assertIn("404", operation["responses"])
         self.assertIn("422", operation["responses"])
+
+        full_operation = self.client.get("/openapi.json").json()["paths"][
+            "/api/admin/document-groups/{group_id}/question-log/documents/{document_id}/full"
+        ]["get"]
+        self.assertIn("404", full_operation["responses"])
+        self.assertIn("422", full_operation["responses"])
 
 
 class QuestionLogApiDbTest(unittest.IsolatedAsyncioTestCase):
@@ -550,6 +636,22 @@ class QuestionLogApiDbTest(unittest.IsolatedAsyncioTestCase):
         index = await seed.index(self.group, chunking, embedding, [])
         problem_group = await seed.document_group(self.group, self.document)
         self.subproblem = await seed.subproblem(problem_group, f"api-{seed.suffix}")
+        self.archived_subproblem = await seed.subproblem(
+            problem_group,
+            f"archived-{seed.suffix}",
+            status=QuestionSubproblemStatus.ARCHIVED,
+        )
+        await seed.add(
+            CanonicalAnswer(
+                subproblem_id=self.subproblem.id,
+                origin=CanonicalAnswerOrigin.AUTHORED,
+                content_markdown="승인 정본 본문 [1]",
+                applicability_rules={"rules": ["이 정본이 적용되는 범위"]},
+                subproblem_version=1,
+                approval=CanonicalAnswerApproval.APPROVED,
+                approved_by="test",
+            )
+        )
         run = ClassificationRun(
             document_group_id=self.group.id,
             index_version_id=index.index_version_id,
@@ -622,15 +724,59 @@ class QuestionLogApiDbTest(unittest.IsolatedAsyncioTestCase):
 
         detail = (await self.client.get(self._path(f"/documents/{self.document.id}"))).json()
         self.assertEqual(
-            [{"subproblemId": str(self.subproblem.id), "name": self.subproblem.name, "questionCount": 1, "sourceSection": None, "applyStatus": "NEEDS_CANONICAL"}],
+            [{"subproblemId": str(self.subproblem.id), "name": self.subproblem.name, "questionCount": 1, "sourceSection": None, "applyStatus": "APPLIED"}],
             detail["subproblems"],
+        )
+
+        full = await self.client.get(
+            self._path(f"/documents/{self.document.id}/full")
+        )
+        self.assertEqual(200, full.status_code, full.text)
+        self.assertEqual(
+            [{
+                "subproblemId": str(self.subproblem.id),
+                "name": self.subproblem.name,
+                "questionCount": 1,
+                "sourceSection": None,
+                "applyStatus": "APPLIED",
+                "inclusionCriteria": [
+                    f"{self.subproblem.key} 기준 하나",
+                    f"{self.subproblem.key} 기준 둘",
+                ],
+                "exclusionCriteria": [f"{self.subproblem.key} 제외"],
+                "canonicalAnswer": {
+                    "contentMarkdown": "승인 정본 본문 [1]",
+                    "applicabilityRules": ["이 정본이 적용되는 범위"],
+                },
+            }],
+            full.json()["subproblems"],
         )
 
         expanded = await self.client.get(
             self._path(f"/documents/{self.document.id}/subproblems/{self.subproblem.id}")
         )
         self.assertEqual(200, expanded.status_code)
-        self.assertIsNone(expanded.json()["canonicalAnswer"])
+        self.assertEqual(
+            "승인 정본 본문 [1]", expanded.json()["canonicalAnswer"]["contentMarkdown"]
+        )
+
+    async def test_full_endpoint_checks_group_document_ownership(self) -> None:
+        other_group = await _Seed(self.session).group()
+        other_document = await _Seed(self.session).source(
+            other_group, "other-api", "다른 그룹 문서"
+        )
+
+        wrong_document = await self.client.get(
+            self._path(f"/documents/{other_document.id}/full")
+        )
+        self.assertEqual(404, wrong_document.status_code, wrong_document.text)
+        self.assertEqual("NOT_FOUND", wrong_document.json()["code"])
+
+        wrong_group = await self.client.get(
+            self._path(f"/documents/{self.document.id}/full", group_id=other_group.id)
+        )
+        self.assertEqual(404, wrong_group.status_code, wrong_group.text)
+        self.assertEqual("NOT_FOUND", wrong_group.json()["code"])
 
     async def test_boundary_ids_do_not_reach_driver_errors(self) -> None:
         bigint_max = "9223372036854775807"
