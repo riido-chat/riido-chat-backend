@@ -9,7 +9,7 @@ import asyncio
 import unittest
 import uuid
 from types import SimpleNamespace
-from typing import Any, List, Optional
+from typing import Any, Callable, List, Optional, Tuple
 from unittest.mock import ANY, AsyncMock, Mock, patch
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -49,6 +49,7 @@ from app.core.model_trace import ModelCallTrace
 from app.database.models import (
     CacheAttemptOutcome,
     ChatProfileRevisionStatus,
+    ContextStrategy,
     ModelCallPurpose,
 )
 from app.document.document_key import (
@@ -666,14 +667,96 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
 
         return rewrite
 
-    async def test_second_turn_same_text_bypasses_exact_question(self) -> None:
+    def _counting_rewrite(self, resolved_query: str) -> Tuple[Callable[..., Any], List[str]]:
+        rewrite = self._new_topic_rewrite(resolved_query)
+        questions: List[str] = []
+
+        async def counted(question, candidates, *, before_model_call):
+            questions.append(question)
+            return await rewrite(question, candidates, before_model_call=before_model_call)
+
+        return counted, questions
+
+    async def test_follow_up_exact_question_served_skips_rewrite_search_and_judge(self) -> None:
         fixture = self._fixture(turn_no=2)
-        fixture.query_rewrite_service.rewrite.side_effect = self._new_topic_rewrite("추천 질문")
+        fixture.query_rewrite_service.rewrite.side_effect, rewrite_questions = self._counting_rewrite("추천 질문")
+        fixture.grouping.record_exact_question.return_value = self._exact_result(
+            CacheAttemptOutcome.SERVED
+        )
 
-        await self._answer(fixture, "추천 질문")
+        response, stages = await self._answer(fixture, "  추천 질문 ")
 
-        fixture.grouping.record_exact_question.assert_not_awaited()
+        self.assertEqual(CACHED_SERVED_ANSWER, response.answer.answer_markdown)
+        self.assertEqual([ProgressStage.RETRIEVING], stages)
+        call = fixture.grouping.record_exact_question.await_args
+        self.assertEqual("  추천 질문 ", call.args[1])
+        self.assertEqual([], rewrite_questions)
+        fixture.query_rewrite_service.rewrite.assert_not_awaited()
+        fixture.log_store.get_query_rewrite_candidates.assert_not_awaited()
+        fixture.retriever.search_with_trace.assert_not_awaited()
+        fixture.grouping.prepare.assert_not_awaited()
+        fixture.grouping.judge.assert_not_awaited()
+        fixture.generation_service.generate_answer.assert_not_awaited()
+        fixture.log_store.start_model_call.assert_not_awaited()
+        # Query Rewrite 를 건너뛴 턴은 원문을 NEW_TOPIC·빈 문맥으로 확정한 뒤 같은 트랜잭션에서 완료한다.
+        fixture.log_store.record_query_resolution.assert_awaited_once_with(
+            fixture.rag_run_id,
+            resolved_query="  추천 질문 ",
+            context_strategy=ContextStrategy.NEW_TOPIC,
+            context_turn_count=0,
+            context_snapshot=None,
+        )
+        self.assertEqual(
+            TURN_START + ["open_online_run", "record_query_resolution", "complete_rag_run", "commit"],
+            fixture.events,
+        )
+
+    async def test_follow_up_without_exact_match_runs_rewrite_and_judge_as_before(self) -> None:
+        fixture = self._fixture(turn_no=2)
+        fixture.query_rewrite_service.rewrite.side_effect, rewrite_questions = self._counting_rewrite("보충된 질문")
+        fixture.recorded = recorded_judgment("REJECTED")
+
+        response, _ = await self._answer(fixture, "그건 어떻게 해?")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        self.assertEqual(["그건 어떻게 해?"], rewrite_questions)
+        self.assertEqual(
+            ["open_online_run", "record_exact_question"],
+            [name for name, _args, _kwargs in fixture.grouping.mock_calls][:2],
+        )
+        fixture.grouping.prepare.assert_awaited_once()
+        self.assertEqual("보충된 질문", fixture.grouping.prepare.await_args.args[1])
+        fixture.grouping.judge.assert_awaited_once()
+        fixture.grouping.record_judgment_and_gate.assert_awaited_once()
+        self.assertEqual("보충된 질문", fixture.retriever.search_with_trace.await_args.args[0])
+        fixture.generation_service.generate_answer.assert_awaited_once()
+
+    async def test_follow_up_exact_rejection_rewrites_and_generates_without_second_judgment(self) -> None:
+        fixture = self._fixture(turn_no=2)
+        fixture.query_rewrite_service.rewrite.side_effect, rewrite_questions = self._counting_rewrite("추천 질문")
+        fixture.grouping.record_exact_question.return_value = self._exact_result(
+            CacheAttemptOutcome.REJECTED
+        )
+
+        response, _ = await self._answer(fixture, "추천 질문")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        # 게이트 기록을 Query Rewrite·검색 전에 확정한다.
+        self.assertEqual(
+            TURN_START + ["open_online_run", "commit"],
+            fixture.events[: len(TURN_START) + 2],
+        )
+        self.assertEqual(["추천 질문"], rewrite_questions)
+        fixture.log_store.record_query_resolution.assert_awaited_once()
+        self.assertEqual(
+            ContextStrategy.NEW_TOPIC,
+            fixture.log_store.record_query_resolution.await_args.kwargs["context_strategy"],
+        )
         fixture.retriever.search_with_trace.assert_awaited_once()
+        fixture.grouping.prepare.assert_not_awaited()
+        fixture.grouping.judge.assert_not_awaited()
+        fixture.grouping.record_judgment_and_gate.assert_not_awaited()
+        fixture.generation_service.generate_answer.assert_awaited_once()
 
     async def test_profile_semantic_cache_flag_reaches_gate(self) -> None:
         fixture = self._fixture(semantic_cache_enabled=False)
@@ -858,7 +941,7 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
     # 판별을 부르지 않는 경로
     # ------------------------------------------------------------------
 
-    async def test_follow_up_withheld_or_rewrite_error_does_not_call_grouping(
+    async def test_follow_up_withheld_or_rewrite_error_does_not_judge(
         self,
     ) -> None:
         trace = ModelCallTrace(
@@ -911,7 +994,11 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
                     self.assertIsInstance(response, ChatWithheldResponse)
                 else:
                     self.assertIsInstance(response, ChatErrorResponse)
-                self.assertEqual([], fixture.grouping.mock_calls)
+                # 정확 일치 조회는 Query Rewrite 전에 하지만 일치가 없으면 판별 행을 쓰지 않는다.
+                self.assertEqual(
+                    ["open_online_run", "record_exact_question"],
+                    [name for name, _args, _kwargs in fixture.grouping.mock_calls],
+                )
                 fixture.retriever.search_with_trace.assert_not_awaited()
 
     async def test_search_error_does_not_prepare_or_record_judgment(self) -> None:

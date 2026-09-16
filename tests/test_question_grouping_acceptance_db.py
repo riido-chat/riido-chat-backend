@@ -52,6 +52,7 @@ from app.database.models import (
     ChunkEmbedding,
     ClassificationDecision,
     ClassificationRun,
+    ContextStrategy,
     DocumentSource,
     EmbeddingConfig,
     ExecutionStatus,
@@ -543,6 +544,7 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
         query_rewrite = AsyncMock(spec=QueryRewriteService)
         query_rewrite.model_name = GENERATION_MODEL
         query_rewrite.prompt_version = QUERY_REWRITE_PROMPT_VERSION
+        self.query_rewrite = query_rewrite
 
         async def search(query, *, before_model_call):
             await before_model_call(OPENAI_EMBEDDING_PROVIDER, OPENAI_EMBEDDING_MODEL, None)
@@ -586,8 +588,11 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
     # 조회 도우미
     # ------------------------------------------------------------------
 
-    async def _ask(self, question: str = QUESTION) -> Dict[str, Any]:
-        response = await self.client.post("/api/chat", json={"question": question})
+    async def _ask(self, question: str = QUESTION, conversation_id: Optional[str] = None) -> Dict[str, Any]:
+        payload: Dict[str, Any] = {"question": question}
+        if conversation_id is not None:
+            payload["conversationId"] = conversation_id
+        response = await self.client.post("/api/chat", json=payload)
         self.assertEqual(200, response.status_code, response.text)
         body = response.json()
         polled = await self.client.get(f"/api/chat/{body['ragRunId']}")
@@ -769,6 +774,47 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual([], embeddings)
         self.assertEqual([], await self._model_calls(second_id))
+
+    async def test_follow_up_exact_question_serves_without_any_model_call(self) -> None:
+        judge = FakeJudge(connect_to(SUBPROBLEM_KEY))
+        retriever, generation = self._build_service(judge, enabled=True)
+
+        source = await self._ask()
+        other = await self._ask("구독 결제일을 바꾸고 싶어요")
+        follow_up = await self._ask(QUESTION, other["conversationId"])
+        source_id, follow_up_id = uuid.UUID(source["ragRunId"]), uuid.UUID(follow_up["ragRunId"])
+
+        self.assertEqual(other["conversationId"], follow_up["conversationId"])
+        self.assertEqual("COMPLETED", follow_up["status"])
+        self.assertEqual(CACHED_CANONICAL, follow_up["answer"]["answerMarkdown"])
+        self.assertEqual(source["citations"], follow_up["citations"])
+        self.assertEqual(2, retriever.search_with_trace.await_count)
+        self.assertEqual(2, len(judge.payloads))
+        generation.generate_answer.assert_not_awaited()
+        self.query_rewrite.rewrite.assert_not_awaited()
+        self.assertEqual([], await self._model_calls(follow_up_id))
+
+        run = await self._run(follow_up_id)
+        self.assertEqual(
+            (2, AnswerStatus.COMPLETED, CACHED_CANONICAL, QUESTION, ContextStrategy.NEW_TOPIC, 0, None),
+            (run.turn_no, run.status, run.answer_content, run.resolved_query,
+             run.context_strategy, run.context_turn_count, run.context_snapshot),
+        )
+        classifications, attempts, embeddings = await self._grouping_rows(follow_up_id)
+        (classification,) = classifications
+        self.assertEqual(
+            (ClassificationDecision.CONNECT, self.subproblem_id, "QUESTION_LOG_EXACT"),
+            (classification.decision, classification.subproblem_id, classification.judgment_input["matchSource"]),
+        )
+        self.assertEqual(str(source_id), classification.judgment_input["exactQuestionMatch"]["sourceRagRunId"])
+        self.assertEqual([CacheAttemptOutcome.SERVED], [row.outcome for row in attempts])
+        self.assertEqual([], embeddings)
+
+        # 후속 턴이 쓴 CONNECT 행은 매핑 원천이 아니다. 새 대화 첫 턴은 여전히 원본 첫 턴 로그 하나만 찾는다.
+        fresh = await self._ask()
+        (fresh_classification,), _, _ = await self._grouping_rows(uuid.UUID(fresh["ragRunId"]))
+        exact = fresh_classification.judgment_input["exactQuestionMatch"]
+        self.assertEqual((str(source_id), 1), (exact["sourceRagRunId"], exact["matchedCount"]))
 
     async def test_separate_with_matched_document_generates_and_attributes_by_citation(self) -> None:
         judge = FakeJudge(separate_matching_document(BILLING_TITLE))

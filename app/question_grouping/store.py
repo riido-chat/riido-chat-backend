@@ -209,6 +209,8 @@ class QuestionGroupingStore:
     ) -> Optional[ExactQuestionLogMatch]:
         """같은 문서 그룹의 과거 첫 턴 질문 중 정규화 결과가 같은 로그의 최신 CONNECT 분류.
 
+        조회는 첫 턴과 후속 턴 모두에서 사용자 원문으로 부르지만, 매핑 원천은 첫 턴 로그
+        (turn_no = 1)뿐이다. 후속 턴 로그는 이전 문맥에 기대어 판별됐을 수 있어 원천으로 쓰지 않는다.
         ``rag_runs.query_hash`` 로 좁히고 현재(effective_to IS NULL) CONNECT 분류 중
         effective_from 이 가장 최근인 행(같으면 분류 id 가 큰 행)의 세부 문제를 쓴다.
         세부 문제가 서로 달라도 충돌로 보지 않는다. 운영자가 로그 하나를 다시 연결하면
