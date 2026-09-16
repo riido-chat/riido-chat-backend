@@ -62,6 +62,9 @@ GROUP_SOURCE_DOCUMENT_GROUP_UNIQUE_CONSTRAINT = (
 CURRENT_CLASSIFICATION_CONSTRAINT = "uq_question_classifications_rag_run_id_current"
 OPEN_ONLINE_CLASSIFICATION_RUN_CONSTRAINT = "uq_classification_runs_open_online"
 APPROVED_CANONICAL_ANSWER_CONSTRAINT = "uq_canonical_answers_subproblem_id_approved"
+EXACT_QUESTION_MATCH_UNIQUE_CONSTRAINT = "uq_exact_question_matches_document_group_normalized"
+# Compatibility alias for callers that still use the old seed terminology.
+RECOMMENDED_QUESTION_UNIQUE_CONSTRAINT = EXACT_QUESTION_MATCH_UNIQUE_CONSTRAINT
 
 # 턴, 분류 실행, 색인, 수집 중 어느 실행 칸을 함께 채울 수 있는지 정한다.
 # 즉시 판별은 턴과 분류 실행을 모두 채우고, 백필 판정은 분류 실행만 채운다.
@@ -247,6 +250,20 @@ class QuestionSubproblemServingState(str, enum.Enum):
     SHADOW = "SHADOW"
     SERVING = "SERVING"
     STOPPED = "STOPPED"
+
+
+class ExactQuestionMatchSource(str, enum.Enum):
+    """정확 질문 매핑의 등록 근거."""
+
+    RECOMMENDED = "RECOMMENDED"
+    HISTORICAL_SERVED = "HISTORICAL_SERVED"
+
+
+class ExactQuestionMatchState(str, enum.Enum):
+    """정확 질문 매핑의 사용 가능 상태."""
+
+    ACTIVE = "ACTIVE"
+    CONFLICT = "CONFLICT"
 
 
 class ClassificationRunKind(str, enum.Enum):
@@ -1187,6 +1204,72 @@ class QuestionSubproblem(Base):
     updated_at: Mapped[Any] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
+
+
+class ExactQuestionMatch(Base):
+    """추천 질문과 과거 SERVED 질문을 세부 문제에 연결하는 정확 일치 매핑."""
+
+    __tablename__ = "exact_question_matches"
+    __table_args__ = (
+        UniqueConstraint(
+            "document_group_id",
+            "normalized_question",
+            name=EXACT_QUESTION_MATCH_UNIQUE_CONSTRAINT,
+        ),
+        Index(None, "subproblem_id"),
+        Index(None, "source_rag_run_id"),
+        CheckConstraint("length(btrim(question)) > 0", name="question_nonempty"),
+        CheckConstraint(
+            "length(btrim(normalized_question)) > 0", name="normalized_question_nonempty"
+        ),
+        CheckConstraint(
+            "subproblem_version > 0",
+            name="subproblem_version_positive",
+        ),
+        CheckConstraint(
+            "(source = 'RECOMMENDED' AND source_rag_run_id IS NULL) OR "
+            "(source = 'HISTORICAL_SERVED' AND source_rag_run_id IS NOT NULL)",
+            name="source_provenance",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    document_group_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("document_groups.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    subproblem_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("question_subproblems.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    question: Mapped[str] = mapped_column(Text, nullable=False)
+    normalized_question: Mapped[str] = mapped_column(Text, nullable=False)
+    source: Mapped[ExactQuestionMatchSource] = mapped_column(
+        _status_enum(ExactQuestionMatchSource, "exact_question_match_source", length=30),
+        nullable=False,
+        server_default=ExactQuestionMatchSource.RECOMMENDED.value,
+    )
+    state: Mapped[ExactQuestionMatchState] = mapped_column(
+        _status_enum(ExactQuestionMatchState, "exact_question_match_state", length=20),
+        nullable=False,
+        server_default=ExactQuestionMatchState.ACTIVE.value,
+    )
+    subproblem_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    canonical_answer_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("canonical_answers.id", ondelete="RESTRICT")
+    )
+    source_rag_run_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("rag_runs.id", ondelete="RESTRICT")
+    )
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+# Keep the seed and older application code readable while the physical table is generic.
+RecommendedQuestion = ExactQuestionMatch
 
 
 class QuestionSubproblemRevision(Base):

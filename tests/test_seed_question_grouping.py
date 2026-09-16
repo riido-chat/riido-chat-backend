@@ -51,6 +51,7 @@ from app.ops.seed_question_grouping import (
     render_report,
 )
 from app.question_grouping.constants import SUBPROBLEM_EMBEDDING_TEXT_VERSION
+from app.question_grouping.recommended import normalize_recommended_question
 
 DOC_PATH = "workspaces/plans-and-billing.md"
 OTHER_PATH = "workspaces/members.md"
@@ -109,6 +110,42 @@ class ParseInputTest(unittest.TestCase):
         self.assertEqual(("유료 구독을 취소하려는 질문",), item.inclusion_criteria)
         self.assertEqual(("환불은 다루지 않는다",), item.applicability_rules)
         self.assertEqual(("구독 변경 또는 취소",), item.citations[0].section_path)
+
+    def test_parses_optional_recommended_questions_and_preserves_original(self) -> None:
+        parsed = _parse(
+            _document(
+                subproblems=[
+                    _subproblem(
+                        recommendedQuestions=["  구독   취소 방법?  ", "환불도 가능한가요?"]
+                    )
+                ]
+            )
+        )
+        (item,) = parsed.documents[0].subproblems
+        self.assertEqual(
+            ("  구독   취소 방법?  ", "환불도 가능한가요?"),
+            item.recommended_questions,
+        )
+        self.assertIsNone(_parse(_document()).documents[0].subproblems[0].recommended_questions)
+
+    def test_recommended_question_normalization_and_collisions(self) -> None:
+        self.assertEqual("ABC 결제 방법?", normalize_recommended_question("ＡＢＣ\t결제   방법?"))
+        self.assertEqual("구독 취소 방법?", normalize_recommended_question(" 구독\n취소 방법? "))
+        parsed = _parse(
+            _document(
+                subproblems=[
+                    _subproblem("a.one", recommendedQuestions=["같은 질문"]),
+                    _subproblem("a.two", recommendedQuestions=["  같은   질문"]),
+                ]
+            )
+        )
+        self.assertIn("RECOMMENDED_QUESTION_DUPLICATE", _codes(parsed))
+
+    def test_empty_recommended_questions_is_explicit_and_whitespace_is_invalid(self) -> None:
+        empty = _parse(_document(subproblems=[_subproblem(recommendedQuestions=[])]))
+        self.assertEqual((), empty.documents[0].subproblems[0].recommended_questions)
+        invalid = _parse(_document(subproblems=[_subproblem(recommendedQuestions=[" \t"])]))
+        self.assertIn("RECOMMENDED_QUESTION_INVALID", _codes(invalid))
 
     def test_filters_by_review_status(self) -> None:
         document = _document(

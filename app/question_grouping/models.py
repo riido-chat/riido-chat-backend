@@ -18,6 +18,8 @@ from app.database.models import (
     QuestionProblemGroupKind,
     QuestionSubproblemServingState,
     QuestionSubproblemStatus,
+    ExactQuestionMatchSource,
+    ExactQuestionMatchState,
 )
 
 
@@ -167,6 +169,32 @@ class PresentedSubproblem:
             "retrievalRank": self.retrieval_rank,
             "presentedOrder": self.presented_order,
         }
+
+
+@dataclass(frozen=True)
+class RecommendedQuestionMatch:
+    """문서 그룹 소속 검증까지 끝난 정확 일치 매핑.
+
+    ``source``와 historical provenance는 추천 질문과 과거 SERVED 질문을 같은
+    조회 경로에서 구분하기 위해 보존한다.
+    """
+
+    mapping_id: int
+    document_group_id: int
+    subproblem_id: uuid.UUID
+    key: str
+    name: str
+    problem_group_id: uuid.UUID
+    current_version: int
+    document_source_id: int
+    document_key: str
+    question: str
+    normalized_question: str
+    source: ExactQuestionMatchSource = ExactQuestionMatchSource.RECOMMENDED
+    state: ExactQuestionMatchState = ExactQuestionMatchState.ACTIVE
+    subproblem_version: int = 1
+    canonical_answer_id: Optional[uuid.UUID] = None
+    source_rag_run_id: Optional[uuid.UUID] = None
 
 
 @dataclass(frozen=True)

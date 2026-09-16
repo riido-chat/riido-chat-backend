@@ -97,6 +97,7 @@ SUBPROBLEM_KEY = "billing.cancel"
 SUBPROBLEM_NAME = "구독 취소"
 INCLUSION = "유료 구독을 취소하려는 질문"
 CANONICAL = "설정에서 구독을 취소합니다 [1]. 멤버 초대는 따로 봅니다 [2]."
+CACHED_CANONICAL = f"{CANONICAL} (캐시된 답변)"
 QUESTION = "구독을 취소하고 싶어요"
 GENERATION_MODEL = "gpt-test"
 GENERATION_PROMPT = "v3"
@@ -672,7 +673,7 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
         rag_run_id = uuid.UUID(body["ragRunId"])
 
         self.assertEqual("COMPLETED", body["status"])
-        self.assertEqual(CANONICAL, body["answer"]["answerMarkdown"])
+        self.assertEqual(CACHED_CANONICAL, body["answer"]["answerMarkdown"])
         self.assertEqual(
             [
                 (1, BILLING_TITLE, ["구독 변경 또는 취소"], self.billing.canonical_uri, "GITBOOK"),
@@ -689,7 +690,7 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([SUBPROBLEM_KEY], [item["subproblem"]["id"] for item in judge.payloads[0]["candidates"]])
 
         run = await self._run(rag_run_id)
-        self.assertEqual((AnswerStatus.COMPLETED, CANONICAL), (run.status, run.answer_content))
+        self.assertEqual((AnswerStatus.COMPLETED, CACHED_CANONICAL), (run.status, run.answer_content))
         self.assertEqual(self.index_version_id, run.index_version_id)
 
         run_id = await self._open_run_id()

@@ -84,6 +84,7 @@ from app.chat.profile import (
 from app.question_grouping.service import (
     GroupingTurn,
     QuestionGroupingService,
+    RecommendedExactResult,
     RecordedJudgment,
 )
 
@@ -114,6 +115,7 @@ CONVERSATION_BUSY_MESSAGE = (
 )
 
 INTERNAL_ERROR_CODE = "INTERNAL_ERROR"
+CACHED_ANSWER_SUFFIX = " (캐시된 답변)"
 
 CHAT_ERROR_POLICIES: Dict[ChatErrorCode, Tuple[str, bool]] = {
     ChatErrorCode.UPSTREAM_ERROR: (UPSTREAM_ERROR_MESSAGE, True),
@@ -352,12 +354,22 @@ def _served_response(
         status=ChatResponseStatus.COMPLETED,
         conversation_id=conversation_id,
         rag_run_id=rag_run_id,
-        answer=ChatAnswer(answer_markdown=recorded.served_answer_markdown),
+        answer=ChatAnswer(
+            answer_markdown=_cached_answer_markdown(recorded.served_answer_markdown)
+        ),
         citations=[
             _citation_log_to_chat_citation(citation)
             for citation in recorded.served_citations
         ],
     )
+
+
+def _cached_answer_markdown(answer_markdown: str) -> str:
+    """캐시 응답임을 표시하되 재시도·재포맷에도 접미사를 한 번만 붙인다."""
+
+    if answer_markdown.endswith(CACHED_ANSWER_SUFFIX):
+        return answer_markdown
+    return f"{answer_markdown}{CACHED_ANSWER_SUFFIX}"
 
 
 def _elapsed_ms(started: float) -> int:
@@ -553,6 +565,53 @@ class ChatService:
         if turn.grouping_enabled:
             grouping_turn = await self._open_grouping_run(turn)
 
+        # 추천·과거 SERVED 질문의 정확 일치는 첫 턴의 그룹 범위 안에서만 검색·판별보다 먼저 확인한다.
+        # 게이트가 거절하면 같은 분류 행을 유지한 채 일반 검색·생성으로 이어간다.
+        grouping_recorded: Optional[RecordedJudgment] = None
+        exact_grouping_recorded = False
+        if grouping_turn is not None and turn.turn_no == 1:
+            exact_result = await self._require_grouping().record_recommended_exact(
+                grouping_turn,
+                resolved_query,
+                semantic_cache_enabled=turn.semantic_cache_enabled,
+            )
+            grouping_recorded = (
+                None
+                if not isinstance(exact_result, RecommendedExactResult)
+                else exact_result.recorded
+            )
+            exact_grouping_recorded = grouping_recorded is not None
+            if grouping_recorded is not None and grouping_recorded.served:
+                try:
+                    response = _served_response(
+                        grouping_recorded, turn.conversation_id, turn.rag_run_id
+                    )
+                    await self._log_store.complete_rag_run(
+                        turn.rag_run_id,
+                        answer_content=_cached_answer_markdown(
+                            grouping_recorded.served_answer_markdown
+                        ),
+                        citations=list(grouping_recorded.served_citations),
+                        total_latency_ms=_elapsed_ms(started),
+                    )
+                    await self._session.commit()
+                    return response
+                except Exception:
+                    logger.exception(
+                        "추천 질문 정본 답변 서빙 기록 실패로 생성으로 진행합니다: rag_run_id=%s",
+                        turn.rag_run_id,
+                    )
+                    grouping_recorded = await self._require_grouping().record_serve_failure(
+                        exact_result.prepared,
+                        exact_result.judged,
+                        grouping_recorded,
+                    )
+                    await self._session.commit()
+            elif grouping_recorded is not None:
+                # 정확 일치 게이트 결과는 검색 전에 확정해야 검색 후 rollback으로
+                # 분류·캐시 시도 행이 사라지지 않는다.
+                await self._session.commit()
+
         embedding_model_call_id: Optional[int] = None
 
         async def checkpoint_embedding(
@@ -611,8 +670,7 @@ class ChatService:
 
         # 판별 경로는 검색 임베딩 호출 마감과 검색 후보 기록을 판별 트랜잭션에서 이미 끝냈다.
         retrieval_recorded = False
-        grouping_recorded: Optional[RecordedJudgment] = None
-        if grouping_turn is not None:
+        if grouping_turn is not None and not exact_grouping_recorded:
             grouping_outcome = await self._judge_and_gate(
                 turn,
                 grouping_turn,
@@ -1098,7 +1156,9 @@ class ChatService:
             response = _served_response(recorded, turn.conversation_id, rag_run_id)
             await self._log_store.complete_rag_run(
                 rag_run_id,
-                answer_content=recorded.served_answer_markdown,
+                answer_content=_cached_answer_markdown(
+                    recorded.served_answer_markdown
+                ),
                 citations=list(recorded.served_citations),
                 total_latency_ms=_elapsed_ms(started),
             )
@@ -1112,6 +1172,25 @@ class ChatService:
             recorded = await grouping.record_serve_failure(prepared, judged, recorded)
             await self._session.commit()
             return _GroupingOutcome(recorded=recorded)
+        # A successful LLM classified first-turn canonical serve becomes an exact
+        # historical match in a separate best-effort transaction. The response has
+        # already been committed, so a cache materialization failure must not affect it.
+        if turn.turn_no == 1 and getattr(judged, "model_call_id", None) is not None:
+            try:
+                materialized = await grouping.materialize_historical_exact(
+                    prepared, judged, recorded, first_turn=True
+                )
+                if materialized:
+                    await self._session.commit()
+                else:
+                    await self._session.rollback()
+            except Exception:
+                logger.warning(
+                    "과거 정본 서빙 질문 매핑 기록을 건너뜁니다: rag_run_id=%s",
+                    rag_run_id,
+                    exc_info=True,
+                )
+                await self._session.rollback()
         return _GroupingOutcome(recorded=recorded, response=response)
 
     # ------------------------------------------------------------------

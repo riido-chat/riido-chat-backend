@@ -42,6 +42,10 @@ from app.database.models import (
     QuestionEmbedding,
     QuestionProblemGroup,
     QuestionProblemGroupKind,
+    RecommendedQuestion,
+    ExactQuestionMatch,
+    ExactQuestionMatchSource,
+    ExactQuestionMatchState,
     RagRun,
 )
 from app.question_grouping.attribution import document_attribution, initial_attribution, no_document_attribution
@@ -420,6 +424,145 @@ class ProblemGroupDbTest(_StoreDbTestCase):
             )
         )
         self.assertEqual(3, counts)
+
+
+class RecommendedQuestionLookupDbTest(_StoreDbTestCase):
+    async def test_lookup_is_scoped_to_group_and_rejects_mismatched_owner(self) -> None:
+        current_problem_group = await self.seed.document_group(self.group, self.billing)
+        current_subproblem = await self.seed.subproblem(
+            current_problem_group, "current.exact"
+        )
+
+        other_group = await self.seed.group()
+        other_source = await self.seed.source(other_group, "other-doc", "다른 문서")
+        other_problem_group = await self.seed.document_group(other_group, other_source)
+        other_subproblem = await self.seed.subproblem(other_problem_group, "other.exact")
+
+        self.session.add_all(
+            [
+                RecommendedQuestion(
+                    document_group_id=self.group.id,
+                    subproblem_id=current_subproblem.id,
+                    question="추천 질문",
+                    normalized_question="추천 질문",
+                ),
+                RecommendedQuestion(
+                    document_group_id=other_group.id,
+                    subproblem_id=other_subproblem.id,
+                    question="추천 질문",
+                    normalized_question="추천 질문",
+                ),
+                # The foreign keys alone permit this malformed cross-group row.
+                RecommendedQuestion(
+                    document_group_id=self.group.id,
+                    subproblem_id=other_subproblem.id,
+                    question="잘못된 매핑",
+                    normalized_question="잘못된 매핑",
+                ),
+            ]
+        )
+        await self.session.flush()
+
+        current = await self.store.find_recommended_question(self.group.id, "추천 질문")
+        repeated_whitespace = await self.store.find_recommended_question(
+            self.group.id, "  추천   질문  "
+        )
+        other = await self.store.find_recommended_question(other_group.id, "추천 질문")
+        malformed = await self.store.find_recommended_question(self.group.id, "잘못된 매핑")
+        inserted_space = await self.store.find_recommended_question(self.group.id, "추 천 질문")
+        removed_space = await self.store.find_recommended_question(self.group.id, "추천질문")
+        changed_ending = await self.store.find_recommended_question(self.group.id, "추천 질문입니다")
+
+        self.assertIsNotNone(current)
+        self.assertEqual(current_subproblem.id, current.subproblem_id)
+        self.assertIsNotNone(repeated_whitespace)
+        self.assertEqual(current_subproblem.id, repeated_whitespace.subproblem_id)
+        self.assertIsNotNone(other)
+        self.assertEqual(other_subproblem.id, other.subproblem_id)
+        self.assertIsNone(malformed)
+        self.assertIsNone(inserted_space)
+        self.assertIsNone(removed_space)
+        self.assertIsNone(changed_ending)
+
+    async def test_historical_match_materializes_and_conflicts_are_disabled(self) -> None:
+        subproblem = await self._billing_subproblem(current_version=1)
+        canonical = await self.seed.canonical(
+            subproblem, [(self.billing_chunks[1], self.billing_v1.id)]
+        )
+        turn = await self._turn()
+        inserted = await self.store.materialize_historical_exact(
+            document_group_id=self.group.id,
+            question="과거 질문",
+            subproblem_id=subproblem.id,
+            subproblem_version=1,
+            canonical_answer_id=canonical.id,
+            source_rag_run_id=turn.id,
+        )
+        self.assertTrue(inserted)
+        match = await self.store.find_exact_question_match(self.group.id, "과거 질문")
+        self.assertIsNotNone(match)
+        self.assertEqual(ExactQuestionMatchSource.HISTORICAL_SERVED, match.source)
+        self.assertEqual(ExactQuestionMatchState.ACTIVE, match.state)
+        self.assertEqual(canonical.id, match.canonical_answer_id)
+
+        other = await self._billing_subproblem(key="billing.refund", current_version=1)
+        other_canonical = await self.seed.canonical(
+            other, [(self.billing_chunks[2], self.billing_v1.id)]
+        )
+        other_turn = await self._turn()
+        inserted = await self.store.materialize_historical_exact(
+            document_group_id=self.group.id,
+            question="과거 질문",
+            subproblem_id=other.id,
+            subproblem_version=1,
+            canonical_answer_id=other_canonical.id,
+            source_rag_run_id=other_turn.id,
+        )
+        self.assertTrue(inserted)
+        conflict = await self.store.find_exact_question_match(self.group.id, "과거 질문")
+        # The conflict transition is flushed as a real row mutation so the caller
+        # can commit it; a later retry is a no-op and must not clear the conflict.
+        self.assertEqual(ExactQuestionMatchState.CONFLICT, conflict.state)
+        self.assertFalse(
+            await self.store.materialize_historical_exact(
+                document_group_id=self.group.id,
+                question="과거 질문",
+                subproblem_id=other.id,
+                subproblem_version=1,
+                canonical_answer_id=other_canonical.id,
+                source_rag_run_id=other_turn.id,
+            )
+        )
+
+    async def test_recommended_match_is_never_overwritten_by_history(self) -> None:
+        subproblem = await self._billing_subproblem(current_version=1)
+        other = await self._billing_subproblem(key="billing.refund", current_version=1)
+        turn = await self._turn()
+        self.session.add(
+            RecommendedQuestion(
+                document_group_id=self.group.id,
+                subproblem_id=subproblem.id,
+                question="고정 질문",
+                normalized_question="고정 질문",
+            )
+        )
+        await self.session.flush()
+        canonical = await self.seed.canonical(
+            other, [(self.billing_chunks[2], self.billing_v1.id)]
+        )
+        self.assertFalse(
+            await self.store.materialize_historical_exact(
+                document_group_id=self.group.id,
+                question="고정 질문",
+                subproblem_id=other.id,
+                subproblem_version=1,
+                canonical_answer_id=canonical.id,
+                source_rag_run_id=turn.id,
+            )
+        )
+        match = await self.store.find_exact_question_match(self.group.id, "고정 질문")
+        self.assertEqual(subproblem.id, match.subproblem_id)
+        self.assertEqual(ExactQuestionMatchSource.RECOMMENDED, match.source)
 
 
 class ClassificationDbTest(_StoreDbTestCase):

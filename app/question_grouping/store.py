@@ -1,6 +1,7 @@
 """질문 판별과 캐시 시도의 DB 쓰기.
 
 - 열린 ONLINE 분류 실행 조회/생성
+- 문서 그룹별 추천·과거 SERVED 질문 정확 일치 조회/기록
 - 질문 임베딩, 판별 행(question_classifications), 캐시 시도(question_cache_attempts)
 - 문제 그룹 ensure(INSERT … ON CONFLICT DO NOTHING 후 SELECT)
 - 턴 끝 인용 귀속 갱신(problem_group_id, attribution_source 두 칸만)
@@ -33,20 +34,27 @@ from app.database.models import (
     ClassificationDecision,
     ClassificationRun,
     ClassificationRunKind,
+    DocumentSource,
     DocumentVersion,
+    ExactQuestionMatch,
+    ExactQuestionMatchSource,
+    ExactQuestionMatchState,
     QuestionCacheAttempt,
     QuestionClassification,
     QuestionEmbedding,
     QuestionProblemGroup,
     QuestionProblemGroupKind,
+    QuestionSubproblem,
 )
 from app.question_grouping.attribution import citation_attribution
 from app.question_grouping.models import (
     AttributionTarget,
     CitedDocument,
     GateResult,
+    RecommendedQuestionMatch,
     TurnJudgment,
 )
+from app.question_grouping.recommended import normalize_recommended_question
 
 # question_cache_attempts.rejection_reasons 원소 길이(VARCHAR(50)).
 MAX_REJECTION_REASON_LENGTH = 50
@@ -189,6 +197,148 @@ class QuestionGroupingStore:
     ) -> None:
         self._session = session
         self._log_store = log_store or RagLogStore(session)
+
+    async def find_exact_question_match(
+        self, document_group_id: int, question: str
+    ) -> Optional[RecommendedQuestionMatch]:
+        """첫 턴 정확 일치 매핑을 그룹과 세부 문제 소속까지 검증해 읽는다."""
+
+        normalized = normalize_recommended_question(question)
+        if not normalized:
+            return None
+        mapping = ExactQuestionMatch
+        subproblem = QuestionSubproblem
+        problem_group = QuestionProblemGroup
+        source = DocumentSource
+        row = (
+            await self._session.execute(
+                select(
+                    mapping.id,
+                    mapping.document_group_id,
+                    mapping.subproblem_id,
+                    mapping.question,
+                    mapping.normalized_question,
+                    mapping.source,
+                    mapping.state,
+                    mapping.subproblem_version,
+                    mapping.canonical_answer_id,
+                    mapping.source_rag_run_id,
+                    subproblem.key,
+                    subproblem.name,
+                    problem_group.id.label("problem_group_id"),
+                    subproblem.current_version,
+                    source.id.label("document_source_id"),
+                    source.document_key,
+                    source.document_group_id.label("owner_document_group_id"),
+                )
+                .join(subproblem, subproblem.id == mapping.subproblem_id)
+                .join(problem_group, problem_group.id == subproblem.problem_group_id)
+                .join(source, source.id == problem_group.document_source_id)
+                .where(
+                    mapping.document_group_id == document_group_id,
+                    mapping.normalized_question == normalized,
+                    problem_group.kind == QuestionProblemGroupKind.DOCUMENT,
+                    source.document_group_id == document_group_id,
+                )
+                .order_by(mapping.id)
+            )
+        ).first()
+        if row is None:
+            return None
+        # The query above intentionally excludes malformed cross-group rows. Keep this
+        # assertion to make the invariant explicit if the query is changed later.
+        if row.owner_document_group_id != document_group_id:
+            return None
+        return RecommendedQuestionMatch(
+            mapping_id=row.id,
+            document_group_id=row.document_group_id,
+            subproblem_id=row.subproblem_id,
+            key=row.key,
+            name=row.name,
+            problem_group_id=row.problem_group_id,
+            current_version=row.current_version,
+            document_source_id=row.document_source_id,
+            document_key=row.document_key,
+            question=row.question,
+            normalized_question=row.normalized_question,
+            source=row.source,
+            state=row.state,
+            subproblem_version=row.subproblem_version,
+            canonical_answer_id=row.canonical_answer_id,
+            source_rag_run_id=row.source_rag_run_id,
+        )
+
+    async def find_recommended_question(
+        self, document_group_id: int, question: str
+    ) -> Optional[RecommendedQuestionMatch]:
+        """이전 API 이름을 유지하는 정확 일치 조회 별칭."""
+
+        return await self.find_exact_question_match(document_group_id, question)
+
+    async def materialize_historical_exact(
+        self,
+        *,
+        document_group_id: int,
+        question: str,
+        subproblem_id: uuid.UUID,
+        subproblem_version: int,
+        canonical_answer_id: uuid.UUID,
+        source_rag_run_id: uuid.UUID,
+    ) -> bool:
+        """성공한 첫 턴 SERVED 질문을 정확 일치 매핑으로 best-effort 기록한다.
+
+        추천 매핑은 과거 기록이 절대 덮지 않는다. 같은 질문이 다른 세부 문제로
+        연결되면 기존 추천은 유지하고, 과거 매핑은 CONFLICT 상태로 비활성화한다.
+        반환값은 행이 생성·갱신되어 commit이 필요한지 나타낸다. 호출자는 이 쓰기를
+        응답 성공과 분리해 예외를 삼켜야 한다.
+        """
+
+        normalized = normalize_recommended_question(question)
+        if not normalized or subproblem_version < 1:
+            return False
+        mapping = ExactQuestionMatch
+        row = await self._session.scalar(
+            select(mapping)
+            .where(
+                mapping.document_group_id == document_group_id,
+                mapping.normalized_question == normalized,
+            )
+            .with_for_update()
+        )
+        if row is not None:
+            if row.source == ExactQuestionMatchSource.RECOMMENDED:
+                return False
+            if row.state == ExactQuestionMatchState.CONFLICT:
+                return False
+            if (
+                row.subproblem_id != subproblem_id
+                or row.subproblem_version != subproblem_version
+                or row.canonical_answer_id != canonical_answer_id
+            ):
+                row.state = ExactQuestionMatchState.CONFLICT
+                await self._session.flush()
+                return True
+            if row.source_rag_run_id == source_rag_run_id:
+                return False
+            row.source_rag_run_id = source_rag_run_id
+            await self._session.flush()
+            return True
+        self._session.add(
+            mapping(
+                document_group_id=document_group_id,
+                subproblem_id=subproblem_id,
+                question=question,
+                normalized_question=normalized,
+                source=ExactQuestionMatchSource.HISTORICAL_SERVED,
+                state=ExactQuestionMatchState.ACTIVE,
+                subproblem_version=subproblem_version,
+                canonical_answer_id=canonical_answer_id,
+                source_rag_run_id=source_rag_run_id,
+                created_at=_utcnow(),
+            )
+        )
+        await self._session.flush()
+        return True
 
     # ------------------------------------------------------------------
     # 분류 실행

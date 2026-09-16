@@ -50,6 +50,8 @@ from app.database.models import (
     ClassificationDecision,
     ExecutionStatus,
     ModelCallPurpose,
+    ExactQuestionMatchSource,
+    ExactQuestionMatchState,
 )
 from app.question_grouping.catalog_reader import (
     CatalogDataError,
@@ -82,6 +84,7 @@ from app.question_grouping.models import (
     JudgeFailure,
     JudgeFailureKind,
     JudgePresentation,
+    PresentedSubproblem,
     SubproblemCatalog,
     TurnJudgment,
 )
@@ -92,6 +95,7 @@ from app.question_grouping.payload import (
     presentation_seed,
 )
 from app.question_grouping.store import QuestionGroupingStore, served_citation_logs
+from app.question_grouping.attribution import subproblem_attribution
 from app.question_grouping.subproblem_search import rank_subproblems
 from app.retrieval.embedding import OPENAI_EMBEDDING_MODEL, OPENAI_EMBEDDING_PROVIDER
 from app.retrieval.models import HybridSearchCall
@@ -166,6 +170,7 @@ class PreparedJudgment:
     presentation: Optional[JudgePresentation] = None
     failure: Optional[JudgeFailure] = None
     failure_stage: Optional[str] = None
+    exact_match_metadata: Optional[Dict[str, Any]] = None
 
     @property
     def ready(self) -> bool:
@@ -181,6 +186,15 @@ class JudgedTurn:
     model_call_id: Optional[int]
     # 판별 checkpoint 에서 재임베딩 model_call 을 이미 마감(commit)했는가.
     embedding_call_finished: bool = False
+
+
+@dataclass(frozen=True)
+class RecommendedExactResult:
+    """정확 일치 기록과 SERVED 실패 복구에 필요한 내부 입력."""
+
+    recorded: "RecordedJudgment"
+    prepared: PreparedJudgment
+    judged: JudgedTurn
 
 
 @dataclass(frozen=True)
@@ -413,6 +427,174 @@ class QuestionGroupingService:
             document_group_id=document_group_id,
             index_version_id=index_version_id,
             classification_run_id=run_id,
+        )
+
+    async def record_recommended_exact(
+        self,
+        turn: GroupingTurn,
+        question: str,
+        *,
+        semantic_cache_enabled: bool,
+    ) -> Optional[RecommendedExactResult]:
+        """등록된 추천 질문이면 LLM·검색 없이 CONNECT 판별과 게이트를 기록한다.
+
+        매핑은 요청 문서 그룹과 세부 문제의 실제 DOCUMENT 그룹을 함께 검증한다.
+        게이트가 거절하면 기록만 반환하고 호출자가 일반 검색·생성으로 이어간다.
+        """
+
+        match = await self._store.find_exact_question_match(
+            turn.document_group_id, question
+        )
+        if match is None:
+            return None
+        scope = await self._catalog_reader.load_index_scope(turn.index_version_id)
+        if scope.document_group_id != turn.document_group_id:
+            return None
+        # Historical mappings are deliberately stricter than FE recommendations:
+        # the mapping is a hint only while the current canonical/version remains
+        # identical. A stale mapping falls through to normal retrieval/judgment.
+        if match.source == ExactQuestionMatchSource.HISTORICAL_SERVED:
+            if match.state != ExactQuestionMatchState.ACTIVE:
+                return None
+            current = await self._catalog_reader.load_gate_inputs(
+                match.subproblem_id, scope
+            )
+            if (
+                current.subproblem is None
+                or current.subproblem.current_version != match.subproblem_version
+                or current.canonical_answer is None
+                or current.canonical_answer.canonical_answer_id != match.canonical_answer_id
+                or current.canonical_answer.subproblem_version != match.subproblem_version
+            ):
+                return None
+        presented = PresentedSubproblem(
+            key=match.key,
+            subproblem_id=match.subproblem_id,
+            subproblem_version=match.current_version,
+            problem_group_id=match.problem_group_id,
+            document_source_id=match.document_source_id,
+            document_key=match.document_key,
+            canonical_answer_id=None,
+            similarity=1.0,
+            retrieval_rank=1,
+            presented_order=1,
+            inclusion_count=0,
+            exclusion_count=0,
+        )
+        prepared = PreparedJudgment(
+            turn=turn,
+            resolved_query=question,
+            seed=presentation_seed(turn.rag_run_id),
+            model=self._judge_client.model_name,
+            prompt_version=self._judge_client.prompt_version,
+            vector=QuestionVector(
+                embedding=None,
+                reused_retrieval_embedding=False,
+                retrieval_query=None,
+            ),
+            started=self._clock(),
+            scope=scope,
+            exact_match_metadata={
+                "matchSource": (
+                    "RECOMMENDED_EXACT"
+                    if match.source == ExactQuestionMatchSource.RECOMMENDED
+                    else "HISTORICAL_SERVED_EXACT"
+                ),
+                "exactQuestionMatch": {
+                    "mappingId": match.mapping_id,
+                    "normalizedQuestion": match.normalized_question,
+                    "source": match.source.value,
+                },
+            },
+        )
+        judgment = TurnJudgment(
+            decision=ClassificationDecision.CONNECT,
+            attribution=subproblem_attribution(match.problem_group_id),
+            subproblem=presented,
+        )
+        outcome = await self._evaluate_gate(
+            prepared, judgment, semantic_cache_enabled
+        )
+        canonical = (
+            None if outcome.inputs is None else outcome.inputs.canonical_answer
+        )
+        canonical_answer_id = None if canonical is None else canonical.canonical_answer_id
+        gate_block = gate_judgment_input(
+            outcome.gate,
+            citation_resolutions=outcome.resolutions,
+            canonical_answer_id=canonical_answer_id,
+        )
+        if outcome.data_error is not None:
+            gate_block["dataError"] = outcome.data_error
+        synthetic_judged = JudgedTurn(
+            call=JudgeCall(
+                trace=ModelCallTrace(
+                    provider=self._judge_client.provider,
+                    model_name=self._judge_client.model_name,
+                    succeeded=True,
+                    latency_ms=0,
+                    prompt_version=self._judge_client.prompt_version,
+                )
+            ),
+            judgment=judgment,
+            model_call_id=None,
+        )
+        recorded = await self._insert_rows(
+            prepared,
+            None,
+            outcome.gate,
+            gate_block,
+            latency_ms=_elapsed_ms(prepared.started, self._clock()),
+            resolutions=outcome.resolutions,
+            canonical_answer_id=canonical_answer_id,
+            judgment=judgment,
+            extra=prepared.exact_match_metadata,
+        )
+        if not recorded.served:
+            return RecommendedExactResult(
+                recorded=recorded, prepared=prepared, judged=synthetic_judged
+            )
+        assert canonical is not None
+        return RecommendedExactResult(
+            recorded=replace(
+                recorded,
+                served_citations=served_citation_logs(outcome.gate),
+                served_answer_markdown=canonical.content_markdown,
+            ),
+            prepared=prepared,
+            judged=synthetic_judged,
+        )
+
+    async def materialize_historical_exact(
+        self,
+        prepared: PreparedJudgment,
+        judged: JudgedTurn,
+        recorded: RecordedJudgment,
+        *,
+        first_turn: bool = True,
+    ) -> bool:
+        """커밋된 첫 턴 LLM SERVED 결과를 과거 질문 매핑으로 저장한다.
+
+        이 메서드는 호출자가 별도 트랜잭션에서 호출하고, 실패가 사용자 응답에
+        영향을 주지 않도록 예외를 호출자에서 처리한다.
+        """
+
+        if (
+            not first_turn
+            or judged.model_call_id is None
+            or not recorded.served
+            or recorded.judgment.subproblem is None
+            or recorded.canonical_answer_id is None
+        ):
+            return False
+        subproblem = recorded.judgment.subproblem
+        return await self._store.materialize_historical_exact(
+            document_group_id=prepared.turn.document_group_id,
+            question=prepared.resolved_query,
+            subproblem_id=subproblem.subproblem_id,
+            subproblem_version=subproblem.subproblem_version,
+            canonical_answer_id=recorded.canonical_answer_id,
+            source_rag_run_id=prepared.turn.rag_run_id,
         )
 
     # ------------------------------------------------------------------
@@ -752,7 +934,9 @@ class QuestionGroupingService:
         await self._write_common(prepared, judged)
         outcome = await self._evaluate_gate(prepared, judged.judgment, semantic_cache_enabled)
         latency_ms = _elapsed_ms(prepared.started, self._clock())
-        canonical = outcome.inputs.canonical_answer
+        canonical = (
+            None if outcome.inputs is None else outcome.inputs.canonical_answer
+        )
         canonical_answer_id = (
             None if canonical is None else canonical.canonical_answer_id
         )
@@ -836,6 +1020,11 @@ class QuestionGroupingService:
             citation_resolutions=recorded.citation_resolutions,
             canonical_answer_id=recorded.canonical_answer_id,
         )
+        extra = dict(prepared.exact_match_metadata or {})
+        extra["serveFailure"] = {
+            "gateOutcome": CacheAttemptOutcome.SERVED.value,
+            "cacheAttemptOutcome": CacheAttemptOutcome.REJECTED.value,
+        }
         return await self._insert_rows(
             prepared,
             judged,
@@ -844,12 +1033,7 @@ class QuestionGroupingService:
             latency_ms=recorded.latency_ms,
             resolutions=recorded.citation_resolutions,
             canonical_answer_id=recorded.canonical_answer_id,
-            extra={
-                "serveFailure": {
-                    "gateOutcome": CacheAttemptOutcome.SERVED.value,
-                    "cacheAttemptOutcome": CacheAttemptOutcome.REJECTED.value,
-                }
-            },
+            extra=extra,
         )
 
     async def finalize_attribution(
