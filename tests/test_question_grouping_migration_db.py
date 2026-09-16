@@ -1,4 +1,4 @@
-"""질문 그룹핑 migration의 upgrade, 제약, downgrade 통합 테스트."""
+"""질문 그룹핑 migration(20260915_13, 20260915_14)의 upgrade, 제약, downgrade 통합 테스트."""
 
 import asyncio
 import os
@@ -21,7 +21,6 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PARENT_REVISION = "20260912_12"
 GROUPING_REVISION = "20260915_13"
 CLEANUP_REVISION = "20260915_14"
-HEAD_REVISION = "20260916_15"
 
 NEW_TABLES = (
     "question_problem_groups",
@@ -33,7 +32,6 @@ NEW_TABLES = (
     "canonical_answers",
     "canonical_answer_citations",
     "question_cache_attempts",
-    "exact_question_matches",
 )
 REMOVED_TABLES = (
     "question_group_revisions",
@@ -100,13 +98,11 @@ class QuestionGroupingMigrationDbTest(unittest.IsolatedAsyncioTestCase):
 
         _alembic(self.scratch_url, "upgrade", "head")
         self.assertEqual(
-            HEAD_REVISION,
+            CLEANUP_REVISION,
             await self._scalar("SELECT version_num FROM alembic_version"),
         )
         for table in NEW_TABLES:
             self.assertTrue(await self._table(table), table)
-        self.assertTrue(await self._column("exact_question_matches", "source"))
-        self.assertTrue(await self._column("exact_question_matches", "canonical_answer_id"))
         for table in REMOVED_TABLES:
             self.assertFalse(await self._table(table), table)
         self.assertFalse(await self._table("subproblem_centroids"))

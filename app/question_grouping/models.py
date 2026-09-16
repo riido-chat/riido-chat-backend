@@ -18,8 +18,6 @@ from app.database.models import (
     QuestionProblemGroupKind,
     QuestionSubproblemServingState,
     QuestionSubproblemStatus,
-    ExactQuestionMatchSource,
-    ExactQuestionMatchState,
 )
 
 
@@ -172,29 +170,23 @@ class PresentedSubproblem:
 
 
 @dataclass(frozen=True)
-class RecommendedQuestionMatch:
-    """문서 그룹 소속 검증까지 끝난 정확 일치 매핑.
+class ExactQuestionLogMatch:
+    """과거 첫 턴 질문 로그 중 가장 최근에 확정된 CONNECT 분류가 가리키는 세부 문제.
 
-    ``source``와 historical provenance는 추천 질문과 과거 SERVED 질문을 같은
-    조회 경로에서 구분하기 위해 보존한다.
+    세부 문제 소속은 요청 문서 그룹으로 이미 검증했다. NO_DOCUMENT 문제 그룹이면
+    문서 칸이 비어 있다. ``matched_count`` 는 선택 전에 조건을 만족한 로그 수다.
     """
 
-    mapping_id: int
-    document_group_id: int
     subproblem_id: uuid.UUID
     key: str
-    name: str
     problem_group_id: uuid.UUID
     current_version: int
-    document_source_id: int
-    document_key: str
-    question: str
+    document_source_id: Optional[int]
+    document_key: Optional[str]
     normalized_question: str
-    source: ExactQuestionMatchSource = ExactQuestionMatchSource.RECOMMENDED
-    state: ExactQuestionMatchState = ExactQuestionMatchState.ACTIVE
-    subproblem_version: int = 1
-    canonical_answer_id: Optional[uuid.UUID] = None
-    source_rag_run_id: Optional[uuid.UUID] = None
+    source_rag_run_id: uuid.UUID
+    classification_id: int
+    matched_count: int
 
 
 @dataclass(frozen=True)

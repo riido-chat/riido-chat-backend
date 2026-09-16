@@ -76,6 +76,7 @@ from app.question_grouping.constants import (
     JUDGE_PROVIDER,
     REJECT_CLASSIFICATION_NOT_CONNECTED,
 )
+from app.question_grouping.exact_question import exact_question_hash
 from app.question_grouping.models import JudgeCall
 from app.question_grouping.outline_reader import DocumentOutlineCache, DocumentOutlineReader
 from app.question_grouping.service import QuestionGroupingService
@@ -728,6 +729,46 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
             ],
             [tuple(row) for row in await self._model_calls(rag_run_id)],
         )
+
+    async def test_same_first_turn_question_reuses_log_classification_without_search_or_judge(self) -> None:
+        judge = FakeJudge(connect_to(SUBPROBLEM_KEY))
+        retriever, generation = self._build_service(judge, enabled=True)
+
+        first = await self._ask()
+        second = await self._ask(f"  {QUESTION}  ")
+        first_id, second_id = uuid.UUID(first["ragRunId"]), uuid.UUID(second["ragRunId"])
+
+        self.assertNotEqual(first["conversationId"], second["conversationId"])
+        self.assertEqual(CACHED_CANONICAL, second["answer"]["answerMarkdown"])
+        self.assertEqual(first["citations"], second["citations"])
+        retriever.search_with_trace.assert_awaited_once()
+        generation.generate_answer.assert_not_awaited()
+        self.assertEqual(1, len(judge.payloads))
+
+        first_run, second_run = await self._run(first_id), await self._run(second_id)
+        self.assertEqual(exact_question_hash(QUESTION), first_run.query_hash)
+        self.assertEqual(first_run.query_hash, second_run.query_hash)
+        self.assertEqual((AnswerStatus.COMPLETED, CACHED_CANONICAL), (second_run.status, second_run.answer_content))
+
+        classifications, attempts, embeddings = await self._grouping_rows(second_id)
+        (classification,) = classifications
+        self.assertEqual(
+            (ClassificationDecision.CONNECT, AttributionSource.SUBPROBLEM, self.subproblem_id, await self._open_run_id()),
+            (classification.decision, classification.attribution_source, classification.subproblem_id, classification.run_id),
+        )
+        self.assertEqual("QUESTION_LOG_EXACT", classification.judgment_input["matchSource"])
+        exact = classification.judgment_input["exactQuestionMatch"]
+        (first_classification,), _, _ = await self._grouping_rows(first_id)
+        self.assertEqual(
+            (str(first_id), first_classification.id, 1),
+            (exact["sourceRagRunId"], exact["sourceClassificationId"], exact["matchedCount"]),
+        )
+        self.assertEqual(
+            [(classification.id, CacheAttemptOutcome.SERVED, self.canonical_id, None)],
+            [tuple(row) for row in attempts],
+        )
+        self.assertEqual([], embeddings)
+        self.assertEqual([], await self._model_calls(second_id))
 
     async def test_separate_with_matched_document_generates_and_attributes_by_citation(self) -> None:
         judge = FakeJudge(separate_matching_document(BILLING_TITLE))

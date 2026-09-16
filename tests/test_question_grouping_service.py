@@ -39,6 +39,7 @@ from app.question_grouping.models import (
     CatalogCanonicalAnswer,
     CitationIndexContext,
     DocumentOutline,
+    ExactQuestionLogMatch,
     GateCanonicalAnswer,
     GateInputs,
     GateSubproblemState,
@@ -286,6 +287,13 @@ class FakeStore:
         self.classifications: List[Dict[str, Any]] = []
         self.attempts: List[Dict[str, Any]] = []
         self.finalized: List[Any] = []
+        self.exact_match: Optional[ExactQuestionLogMatch] = None
+        self.exact_lookups: List[Tuple[Any, ...]] = []
+
+    async def find_exact_question_log_match(self, document_group_id, question, *, exclude_rag_run_id):
+        self.exact_lookups.append((document_group_id, question, exclude_rag_run_id))
+        self.events.append("exact_lookup")
+        return self.exact_match
 
     async def get_or_open_online_run(self, **kwargs: Any) -> int:
         self.events.append(("open_run", kwargs["model"], kwargs["prompt_version"]))
@@ -883,6 +891,89 @@ class FinalizeAttributionTest(_ServiceTestCase):
         self.assertEqual([(recorded.classification_id, self.CITATIONS)], self.store.finalized)
         self.assertNotIn("commit", self.events[-2:])
 
+
+def _exact_match(subproblem_id: uuid.UUID = CANCEL_ID, key: str = "billing.cancel") -> ExactQuestionLogMatch:
+    return ExactQuestionLogMatch(
+        subproblem_id=subproblem_id,
+        key=key,
+        problem_group_id=CANCEL_GROUP,
+        current_version=1,
+        document_source_id=BILLING_SOURCE,
+        document_key=BILLING_KEY,
+        normalized_question=QUESTION,
+        source_rag_run_id=uuid.UUID("77777777-7777-4777-8777-777777777777"),
+        classification_id=9,
+        matched_count=3,
+    )
+
+
+class ExactQuestionTest(_ServiceTestCase):
+    async def test_single_log_match_records_connect_and_serves_without_llm(self) -> None:
+        self.store.exact_match = _exact_match()
+
+        result = await self.service().record_exact_question(
+            self.turn, QUESTION, semantic_cache_enabled=True
+        )
+
+        self.assertIsNotNone(result)
+        self.assertEqual([(GROUP_ID, QUESTION, RAG_RUN_ID)], self.store.exact_lookups)
+        self.assertEqual(["exact_lookup", "gate_inputs", "classification", "attempt"], self.events)
+        self.assertEqual([], self.judge_client.payloads)
+        self.assertEqual([], self.embedder.calls)
+        self.assertEqual([], self.store.embeddings)
+        recorded = result.recorded
+        self.assertTrue(recorded.served)
+        self.assertEqual(ClassificationDecision.CONNECT, recorded.judgment.decision)
+        self.assertEqual(CANCEL_ID, recorded.judgment.subproblem.subproblem_id)
+        self.assertEqual(1, recorded.judgment.subproblem.subproblem_version)
+        self.assertEqual("현재 정본 [1]", recorded.served_answer_markdown)
+        self.assertEqual(RUN_ID, self.store.classifications[0]["run_id"])
+        data = self.judgment_input()
+        self.assertEqual("QUESTION_LOG_EXACT", data["matchSource"])
+        self.assertEqual(
+            {
+                "normalizedQuestion": QUESTION,
+                "sourceRagRunId": "77777777-7777-4777-8777-777777777777",
+                "sourceClassificationId": 9,
+                "matchedCount": 3,
+            },
+            data["exactQuestionMatch"],
+        )
+
+    async def test_gate_rejection_is_recorded_and_returned(self) -> None:
+        self.store.exact_match = _exact_match()
+        self.catalog.gate_inputs = _gate_inputs(canonical=False)
+
+        result = await self.service().record_exact_question(
+            self.turn, QUESTION, semantic_cache_enabled=True
+        )
+
+        self.assertFalse(result.recorded.served)
+        self.assertEqual(CacheAttemptOutcome.REJECTED, result.recorded.gate.outcome)
+        self.assertEqual(1, len(self.store.classifications))
+        self.assertEqual(1, len(self.store.attempts))
+
+    async def test_no_match_writes_nothing(self) -> None:
+        result = await self.service().record_exact_question(
+            self.turn, QUESTION, semantic_cache_enabled=True
+        )
+
+        self.assertIsNone(result)
+        self.assertEqual(["exact_lookup"], self.events)
+        self.assertEqual([], self.store.classifications)
+        self.assertEqual([], self.store.attempts)
+
+    async def test_store_selected_latest_subproblem_is_connected_as_is(self) -> None:
+        # 최신 분류 선택은 저장소가 한다. 서비스는 고른 세부 문제를 충돌 검사 없이 그대로 연결한다.
+        self.store.exact_match = _exact_match(INVITE_ID, "members.invite")
+        self.catalog.gate_inputs = _gate_inputs(canonical=False)
+
+        result = await self.service().record_exact_question(
+            self.turn, QUESTION, semantic_cache_enabled=True
+        )
+
+        self.assertEqual(INVITE_ID, result.recorded.judgment.subproblem.subproblem_id)
+        self.assertEqual(INVITE_ID, self.store.classifications[0]["judgment"].subproblem.subproblem_id)
 
 if __name__ == "__main__":
     unittest.main()

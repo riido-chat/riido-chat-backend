@@ -81,10 +81,11 @@ from app.chat.profile import (
     resolve_chat_profile_revision,
     validate_runtime_model_configuration,
 )
+from app.question_grouping.exact_question import exact_question_hash
 from app.question_grouping.service import (
+    ExactQuestionResult,
     GroupingTurn,
     QuestionGroupingService,
-    RecommendedExactResult,
     RecordedJudgment,
 )
 
@@ -565,19 +566,20 @@ class ChatService:
         if turn.grouping_enabled:
             grouping_turn = await self._open_grouping_run(turn)
 
-        # 추천·과거 SERVED 질문의 정확 일치는 첫 턴의 그룹 범위 안에서만 검색·판별보다 먼저 확인한다.
-        # 게이트가 거절하면 같은 분류 행을 유지한 채 일반 검색·생성으로 이어간다.
+        # 같은 문서 그룹의 과거 첫 턴 질문과 정확히 같으면 그 로그의 현재 분류를
+        # 검색·판별보다 먼저 정본 캐시 게이트에 넣는다. 게이트가 거절하면 같은 분류 행을
+        # 유지한 채 일반 검색·생성으로 이어가고, 일치가 없으면 아무 행도 쓰지 않는다.
         grouping_recorded: Optional[RecordedJudgment] = None
         exact_grouping_recorded = False
         if grouping_turn is not None and turn.turn_no == 1:
-            exact_result = await self._require_grouping().record_recommended_exact(
+            exact_result = await self._require_grouping().record_exact_question(
                 grouping_turn,
-                resolved_query,
+                question,
                 semantic_cache_enabled=turn.semantic_cache_enabled,
             )
             grouping_recorded = (
                 None
-                if not isinstance(exact_result, RecommendedExactResult)
+                if not isinstance(exact_result, ExactQuestionResult)
                 else exact_result.recorded
             )
             exact_grouping_recorded = grouping_recorded is not None
@@ -598,7 +600,7 @@ class ChatService:
                     return response
                 except Exception:
                     logger.exception(
-                        "추천 질문 정본 답변 서빙 기록 실패로 생성으로 진행합니다: rag_run_id=%s",
+                        "정확 일치 질문 정본 답변 서빙 기록 실패로 생성으로 진행합니다: rag_run_id=%s",
                         turn.rag_run_id,
                     )
                     grouping_recorded = await self._require_grouping().record_serve_failure(
@@ -882,6 +884,8 @@ class ChatService:
                 conversation_id,
                 user_query=question,
                 index_version_id=effective_index_version_id,
+                # 모든 턴에 채워 두어야 이후 첫 턴 정확 일치 조회가 과거 로그를 찾는다.
+                query_hash=exact_question_hash(question),
             )
         except ConversationUnavailableError as error:
             raise ConversationNotFoundError(
@@ -1172,25 +1176,6 @@ class ChatService:
             recorded = await grouping.record_serve_failure(prepared, judged, recorded)
             await self._session.commit()
             return _GroupingOutcome(recorded=recorded)
-        # A successful LLM classified first-turn canonical serve becomes an exact
-        # historical match in a separate best-effort transaction. The response has
-        # already been committed, so a cache materialization failure must not affect it.
-        if turn.turn_no == 1 and getattr(judged, "model_call_id", None) is not None:
-            try:
-                materialized = await grouping.materialize_historical_exact(
-                    prepared, judged, recorded, first_turn=True
-                )
-                if materialized:
-                    await self._session.commit()
-                else:
-                    await self._session.rollback()
-            except Exception:
-                logger.warning(
-                    "과거 정본 서빙 질문 매핑 기록을 건너뜁니다: rag_run_id=%s",
-                    rag_run_id,
-                    exc_info=True,
-                )
-                await self._session.rollback()
         return _GroupingOutcome(recorded=recorded, response=response)
 
     # ------------------------------------------------------------------

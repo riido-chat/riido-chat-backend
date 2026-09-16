@@ -56,9 +56,6 @@ from app.database.models import (
     ModelCall,
     ModelCallPurpose,
     QuestionCacheAttempt,
-    ExactQuestionMatch,
-    ExactQuestionMatchSource,
-    ExactQuestionMatchState,
     QuestionClassification,
     QuestionEmbedding,
     QuestionProblemGroup,
@@ -104,7 +101,6 @@ ERD_TABLE_NAMES = {
     "canonical_answers",
     "canonical_answer_citations",
     "question_cache_attempts",
-    "exact_question_matches",
 }
 
 # 중심벡터는 2차라 아직 만들지 않는다.
@@ -806,26 +802,6 @@ class DatabaseModelTest(unittest.TestCase):
                 "ck_question_cache_attempts_cache_attempt_outcome",
             }
             <= check_names
-        )
-
-    def test_exact_question_match_tracks_source_and_historical_provenance(self) -> None:
-        table = ExactQuestionMatch.__table__
-        self.assertEqual("exact_question_matches", ExactQuestionMatch.__tablename__)
-        self.assertEqual({"RECOMMENDED", "HISTORICAL_SERVED"}, {item.value for item in ExactQuestionMatchSource})
-        self.assertEqual({"ACTIVE", "CONFLICT"}, {item.value for item in ExactQuestionMatchState})
-        self.assertTrue(table.c.canonical_answer_id.nullable)
-        self.assertTrue(table.c.source_rag_run_id.nullable)
-        self.assertIn(
-            "ck_exact_question_matches_source_provenance",
-            {constraint.name for constraint in table.constraints if isinstance(constraint, CheckConstraint)},
-        )
-        self.assertIn(
-            ("document_group_id", "normalized_question"),
-            {
-                tuple(constraint.columns.keys())
-                for constraint in table.constraints
-                if isinstance(constraint, UniqueConstraint)
-            },
         )
 
     def test_constraint_names_fit_postgres_identifier_limit(self) -> None:

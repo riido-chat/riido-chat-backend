@@ -33,6 +33,7 @@ from app.chat.log_store import (
     RagLogStore,
 )
 from app.core.model_trace import ModelCallTrace
+from app.question_grouping.exact_question import exact_question_hash
 from app.document.document_key import (
     CONSOLE_URI_SCHEME,
     DEFAULT_DOCUMENT_GROUP_KEY,
@@ -515,6 +516,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             self.conversation_id,
             user_query="질문",
             index_version_id=INDEX_VERSION_ID,
+            query_hash=exact_question_hash("질문"),
         )
 
     async def test_reuses_conversation_id_from_request(self) -> None:
@@ -528,6 +530,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             existing_id,
             user_query="질문",
             index_version_id=INDEX_VERSION_ID,
+            query_hash=exact_question_hash("질문"),
         )
         self.assertEqual(existing_id, response.conversation_id)
 

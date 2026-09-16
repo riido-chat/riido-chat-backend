@@ -12,6 +12,7 @@ from app.database.models import (
     ConversationChannel,
     ChatProfileRevisionStatus,
 )
+from app.question_grouping.exact_question import exact_question_hash
 
 
 class ChatProfileRoutingTest(unittest.IsolatedAsyncioTestCase):
@@ -269,6 +270,7 @@ class ChatProfileRoutingTest(unittest.IsolatedAsyncioTestCase):
             conversation_id,
             user_query="질문",
             index_version_id=91,
+            query_hash=exact_question_hash("질문"),
         )
         self.assertIs(retriever, turn.retriever)
         self.assertEqual(11, turn.profile_revision_id)

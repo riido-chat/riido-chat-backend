@@ -9,6 +9,7 @@ ChatService 가 턴 흐름 사이사이에서 부른다(계획 1절 5~11단계).
 | 메서드 | commit | 설명 |
 | --- | --- | --- |
 | open_online_run | 직접 commit | 열린 ONLINE 분류 실행 조회/생성. 턴 잠금 없음 |
+| record_exact_question | 하지 않음 | 첫 턴이 같은 문서 그룹 과거 첫 턴 질문과 정확히 같으면 최신 CONNECT 분류로 판별 행과 캐시 시도. 일치 없으면 쓰지 않음 |
 | prepare | 재임베딩 checkpoint 만 직접 commit | 질문 벡터, 카탈로그, 후보, payload. 읽기는 열린 채 둔다 |
 | judge | 판별 checkpoint 를 직접 commit | 대기 중인 재임베딩 호출 마감 + 호출자 쓰기 + 판별 model_call 시작 |
 | record_judgment_and_gate | 하지 않음 | 호출 마감, 질문 임베딩, 게이트, 판별 행, 캐시 시도 |
@@ -50,8 +51,6 @@ from app.database.models import (
     ClassificationDecision,
     ExecutionStatus,
     ModelCallPurpose,
-    ExactQuestionMatchSource,
-    ExactQuestionMatchState,
 )
 from app.question_grouping.catalog_reader import (
     CatalogDataError,
@@ -189,7 +188,7 @@ class JudgedTurn:
 
 
 @dataclass(frozen=True)
-class RecommendedExactResult:
+class ExactQuestionResult:
     """정확 일치 기록과 SERVED 실패 복구에 필요한 내부 입력."""
 
     recorded: "RecordedJudgment"
@@ -429,51 +428,38 @@ class QuestionGroupingService:
             classification_run_id=run_id,
         )
 
-    async def record_recommended_exact(
+    async def record_exact_question(
         self,
         turn: GroupingTurn,
         question: str,
         *,
         semantic_cache_enabled: bool,
-    ) -> Optional[RecommendedExactResult]:
-        """등록된 추천 질문이면 LLM·검색 없이 CONNECT 판별과 게이트를 기록한다.
+    ) -> Optional[ExactQuestionResult]:
+        """같은 문서 그룹의 과거 첫 턴 질문과 정확히 같으면 LLM·검색 없이 판별과 게이트를 기록한다.
 
-        매핑은 요청 문서 그룹과 세부 문제의 실제 DOCUMENT 그룹을 함께 검증한다.
-        게이트가 거절하면 기록만 반환하고 호출자가 일반 검색·생성으로 이어간다.
+        일치한 로그 중 가장 최근에 확정된 현재 CONNECT 분류가 가리키는 세부 문제를 현재
+        개정으로 연결한다(로그끼리 세부 문제가 달라도 최신 분류가 이긴다). 일치가 없으면
+        아무 행도 쓰지 않고 None 을 돌려 호출자가 일반 판별로 진행한다. 게이트가 거절하면 기록만 반환하고
+        호출자가 일반 검색·생성으로 이어간다.
         """
 
-        match = await self._store.find_exact_question_match(
-            turn.document_group_id, question
+        match = await self._store.find_exact_question_log_match(
+            turn.document_group_id,
+            question,
+            exclude_rag_run_id=turn.rag_run_id,
         )
         if match is None:
             return None
         scope = await self._catalog_reader.load_index_scope(turn.index_version_id)
         if scope.document_group_id != turn.document_group_id:
             return None
-        # Historical mappings are deliberately stricter than FE recommendations:
-        # the mapping is a hint only while the current canonical/version remains
-        # identical. A stale mapping falls through to normal retrieval/judgment.
-        if match.source == ExactQuestionMatchSource.HISTORICAL_SERVED:
-            if match.state != ExactQuestionMatchState.ACTIVE:
-                return None
-            current = await self._catalog_reader.load_gate_inputs(
-                match.subproblem_id, scope
-            )
-            if (
-                current.subproblem is None
-                or current.subproblem.current_version != match.subproblem_version
-                or current.canonical_answer is None
-                or current.canonical_answer.canonical_answer_id != match.canonical_answer_id
-                or current.canonical_answer.subproblem_version != match.subproblem_version
-            ):
-                return None
         presented = PresentedSubproblem(
             key=match.key,
             subproblem_id=match.subproblem_id,
             subproblem_version=match.current_version,
             problem_group_id=match.problem_group_id,
             document_source_id=match.document_source_id,
-            document_key=match.document_key,
+            document_key=match.document_key or "",
             canonical_answer_id=None,
             similarity=1.0,
             retrieval_rank=1,
@@ -495,15 +481,12 @@ class QuestionGroupingService:
             started=self._clock(),
             scope=scope,
             exact_match_metadata={
-                "matchSource": (
-                    "RECOMMENDED_EXACT"
-                    if match.source == ExactQuestionMatchSource.RECOMMENDED
-                    else "HISTORICAL_SERVED_EXACT"
-                ),
+                "matchSource": "QUESTION_LOG_EXACT",
                 "exactQuestionMatch": {
-                    "mappingId": match.mapping_id,
                     "normalizedQuestion": match.normalized_question,
-                    "source": match.source.value,
+                    "sourceRagRunId": str(match.source_rag_run_id),
+                    "sourceClassificationId": match.classification_id,
+                    "matchedCount": match.matched_count,
                 },
             },
         )
@@ -551,11 +534,11 @@ class QuestionGroupingService:
             extra=prepared.exact_match_metadata,
         )
         if not recorded.served:
-            return RecommendedExactResult(
+            return ExactQuestionResult(
                 recorded=recorded, prepared=prepared, judged=synthetic_judged
             )
         assert canonical is not None
-        return RecommendedExactResult(
+        return ExactQuestionResult(
             recorded=replace(
                 recorded,
                 served_citations=served_citation_logs(outcome.gate),
@@ -563,38 +546,6 @@ class QuestionGroupingService:
             ),
             prepared=prepared,
             judged=synthetic_judged,
-        )
-
-    async def materialize_historical_exact(
-        self,
-        prepared: PreparedJudgment,
-        judged: JudgedTurn,
-        recorded: RecordedJudgment,
-        *,
-        first_turn: bool = True,
-    ) -> bool:
-        """커밋된 첫 턴 LLM SERVED 결과를 과거 질문 매핑으로 저장한다.
-
-        이 메서드는 호출자가 별도 트랜잭션에서 호출하고, 실패가 사용자 응답에
-        영향을 주지 않도록 예외를 호출자에서 처리한다.
-        """
-
-        if (
-            not first_turn
-            or judged.model_call_id is None
-            or not recorded.served
-            or recorded.judgment.subproblem is None
-            or recorded.canonical_answer_id is None
-        ):
-            return False
-        subproblem = recorded.judgment.subproblem
-        return await self._store.materialize_historical_exact(
-            document_group_id=prepared.turn.document_group_id,
-            question=prepared.resolved_query,
-            subproblem_id=subproblem.subproblem_id,
-            subproblem_version=subproblem.subproblem_version,
-            canonical_answer_id=recorded.canonical_answer_id,
-            source_rag_run_id=prepared.turn.rag_run_id,
         )
 
     # ------------------------------------------------------------------

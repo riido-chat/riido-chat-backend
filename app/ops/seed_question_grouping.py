@@ -47,7 +47,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
 
-from sqlalchemy import and_, delete, func, or_, select, text, update
+from sqlalchemy import and_, func, or_, select, text, update
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -74,9 +74,6 @@ from app.database.models import (
     QuestionSubproblemRevision,
     QuestionSubproblemServingState,
     QuestionSubproblemStatus,
-    ExactQuestionMatchSource,
-    ExactQuestionMatchState,
-    RecommendedQuestion,
 )
 from app.question_grouping.canonical_validation import (
     check_canonical_citations,
@@ -85,7 +82,6 @@ from app.question_grouping.canonical_validation import (
 from app.question_grouping.catalog_reader import CatalogDataError, applicability_rules_from_json
 from app.question_grouping.constants import HEADING_SEPARATOR, SUBPROBLEM_EMBEDDING_TEXT_VERSION
 from app.question_grouping.payload import split_criteria
-from app.question_grouping.recommended import normalize_recommended_question
 from app.question_grouping.store import QuestionGroupingStore
 from app.question_grouping.subproblem_search import build_subproblem_embedding_text
 from app.retrieval.embedding import (
@@ -146,9 +142,6 @@ ERROR_SECTION_AMBIGUOUS = "SECTION_AMBIGUOUS"
 ERROR_KEY_IN_OTHER_PROBLEM_GROUP = "KEY_IN_OTHER_PROBLEM_GROUP"
 ERROR_SUBPROBLEM_STATUS = "SUBPROBLEM_NOT_APPROVED_IN_DB"
 ERROR_CURRENT_REVISION_MISSING = "CURRENT_REVISION_MISSING"
-ERROR_RECOMMENDED_QUESTION = "RECOMMENDED_QUESTION_INVALID"
-ERROR_RECOMMENDED_QUESTION_DUPLICATE = "RECOMMENDED_QUESTION_DUPLICATE"
-ERROR_RECOMMENDED_QUESTION_OWNERSHIP = "RECOMMENDED_QUESTION_OWNERSHIP_INVALID"
 
 # 경고 코드(쓰기를 막지 않는다)
 WARNING_CONTENT_HASH = "DOCUMENT_CONTENT_HASH_MISMATCH"
@@ -203,8 +196,6 @@ class SeedSubproblem:
     citations: Tuple[SeedCitation, ...]
     review_status: str
     legacy_id: Optional[str] = None
-    # None means this input does not manage existing mappings; () explicitly removes them.
-    recommended_questions: Optional[Tuple[str, ...]] = None
 
 
 @dataclass(frozen=True)
@@ -402,11 +393,6 @@ def _parse_subproblem(item: Mapping[str, Any], where: str) -> SeedSubproblem:
         citations=tuple(sorted(citations, key=lambda citation: citation.order)),
         review_status=item["reviewStatus"],
         legacy_id=_require(item, "legacyId", str, where, optional=True),
-        recommended_questions=(
-            None
-            if "recommendedQuestions" not in item
-            else _string_list(item, "recommendedQuestions", where)
-        ),
     )
 
 
@@ -496,10 +482,6 @@ def validate_subproblem(document_path: str, subproblem: SeedSubproblem, source_f
             issue(ERROR_DOCUMENT_PATH, f"인용 [{citation.order}] {path_problem}")
         if any(not part.strip() for part in citation.section_path):
             issue(ERROR_SCHEMA, f"인용 [{citation.order}] 절 경로에 빈 제목이 있습니다.")
-    if subproblem.recommended_questions is not None:
-        for index, question in enumerate(subproblem.recommended_questions):
-            if not question.strip():
-                issue(ERROR_RECOMMENDED_QUESTION, f"추천 질문 {index + 1}번이 비어 있습니다.")
     first = next((citation for citation in subproblem.citations if citation.order == 1), None)
     if first is not None and first.document_path != document_path:
         issue(
@@ -513,7 +495,6 @@ def validate_documents(documents: Sequence[SeedDocument]) -> List[SeedIssue]:
     issues: List[SeedIssue] = []
     files_by_path: Dict[str, List[str]] = {}
     documents_by_key: Dict[str, List[str]] = {}
-    recommended_by_normalized: Dict[str, List[Tuple[str, str, str]]] = {}
     for document in documents:
         files_by_path.setdefault(document.path, []).append(document.source_file)
         path_problem = document_path_error(document.path)
@@ -522,14 +503,6 @@ def validate_documents(documents: Sequence[SeedDocument]) -> List[SeedIssue]:
         for subproblem in document.subproblems:
             documents_by_key.setdefault(subproblem.key, []).append(document.path)
             issues.extend(validate_subproblem(document.path, subproblem, document.source_file))
-            if subproblem.recommended_questions is not None:
-                for question in subproblem.recommended_questions:
-                    if not question.strip():
-                        continue
-                    normalized = normalize_recommended_question(question)
-                    recommended_by_normalized.setdefault(normalized, []).append(
-                        (document.path, subproblem.key, question)
-                    )
     for path, files in sorted(files_by_path.items()):
         if len(files) > 1:
             issues.append(SeedIssue(ERROR_DUPLICATE_DOCUMENT, f"같은 문서가 여러 파일에 있습니다: {files}", document_path=path))
@@ -537,17 +510,6 @@ def validate_documents(documents: Sequence[SeedDocument]) -> List[SeedIssue]:
         if len(paths) > 1:
             issues.append(
                 SeedIssue(ERROR_DUPLICATE_KEY, f"입력 안에서 key 가 겹칩니다: {paths}", key=key)
-            )
-    for normalized, entries in sorted(recommended_by_normalized.items()):
-        if len(entries) > 1:
-            labels = [f"{path}:{key}" for path, key, _ in entries]
-            issues.append(
-                SeedIssue(
-                    ERROR_RECOMMENDED_QUESTION_DUPLICATE,
-                    f"정규화한 추천 질문이 입력에서 겹칩니다: {normalized!r} ({labels})",
-                    document_path=entries[0][0],
-                    key=entries[0][1],
-                )
             )
     return issues
 
@@ -614,42 +576,6 @@ class ExistingSubproblem:
     serving_state: QuestionSubproblemServingState
     current_revision: Optional[ExistingRevision] = None
     approved_canonical: Optional[ExistingCanonical] = None
-
-
-@dataclass(frozen=True)
-class ExistingRecommendedQuestion:
-    mapping_id: int
-    subproblem_id: uuid.UUID
-    question: str
-    normalized_question: str
-    source: ExactQuestionMatchSource = ExactQuestionMatchSource.RECOMMENDED
-    state: ExactQuestionMatchState = ExactQuestionMatchState.ACTIVE
-
-
-class RecommendedQuestionAction(str, enum.Enum):
-    NONE = "NONE"
-    UPSERT = "UPSERT"
-    DELETE = "DELETE"
-
-
-@dataclass(frozen=True)
-class RecommendedQuestionPlan:
-    document_group_id: int
-    subproblem_key: str
-    subproblem_id: Optional[uuid.UUID]
-    questions: Optional[Tuple[str, ...]]
-    existing: Tuple[ExistingRecommendedQuestion, ...]
-    action: RecommendedQuestionAction
-
-    @property
-    def normalized_questions(self) -> Tuple[str, ...]:
-        if self.questions is None:
-            return ()
-        return tuple(normalize_recommended_question(q) for q in self.questions)
-
-    @property
-    def writes(self) -> bool:
-        return self.action != RecommendedQuestionAction.NONE
 
 
 @dataclass(frozen=True)
@@ -909,7 +835,6 @@ class SeedPlan:
     no_document_group_id: Optional[uuid.UUID] = None
     document_problem_groups: Dict[int, uuid.UUID] = field(default_factory=dict)
     missing_document_problem_groups: List[int] = field(default_factory=list)
-    recommended_question_plans: List[RecommendedQuestionPlan] = field(default_factory=list)
 
     @property
     def subproblem_plans(self) -> List[SubproblemPlan]:
@@ -922,10 +847,6 @@ class SeedPlan:
     @property
     def embedding_plans(self) -> List[SubproblemPlan]:
         return [plan for plan in self.subproblem_plans if plan.embedding_action != EmbeddingAction.NONE]
-
-    @property
-    def recommended_writes(self) -> List[RecommendedQuestionPlan]:
-        return [item for item in self.recommended_question_plans if item.writes]
 
 
 class SeedReader:
@@ -1154,54 +1075,6 @@ class SeedReader:
             for row in rows
         ]
 
-    async def recommended_questions(
-        self, context: GroupContext
-    ) -> List[ExistingRecommendedQuestion]:
-        """그룹에 기록된 추천 질문을 읽고 세부 문제 소속을 함께 검증한다."""
-
-        mapping = RecommendedQuestion
-        group = QuestionProblemGroup
-        source = DocumentSource
-        rows = (
-            await self._session.execute(
-                select(
-                    mapping.id,
-                    mapping.subproblem_id,
-                    mapping.question,
-                    mapping.normalized_question,
-                    mapping.source,
-                    mapping.state,
-                    source.document_group_id,
-                )
-                .join(QuestionSubproblem, QuestionSubproblem.id == mapping.subproblem_id)
-                .join(group, group.id == QuestionSubproblem.problem_group_id)
-                .outerjoin(source, source.id == group.document_source_id)
-                .where(mapping.document_group_id == context.document_group_id)
-                .order_by(mapping.normalized_question, mapping.id)
-            )
-        ).all()
-        invalid = [
-            row.id
-            for row in rows
-            if row.document_group_id != context.document_group_id
-        ]
-        if invalid:
-            raise CatalogDataError(
-                "추천 질문이 문서 그룹 밖의 세부 문제를 가리킵니다: "
-                f"document_group_id={context.document_group_id}, mapping_ids={invalid}"
-            )
-        return [
-            ExistingRecommendedQuestion(
-                mapping_id=row.id,
-                subproblem_id=row.subproblem_id,
-                question=row.question,
-                normalized_question=row.normalized_question,
-                source=row.source,
-                state=row.state,
-            )
-            for row in rows
-        ]
-
     async def _current_revisions(self, subproblem_ids: Sequence[uuid.UUID]) -> Dict[uuid.UUID, ExistingRevision]:
         revision = QuestionSubproblemRevision
         rows = (
@@ -1338,18 +1211,6 @@ async def build_seed_plan(
     existing_by_key: Dict[str, List[ExistingSubproblem]] = {}
     for item in existing:
         existing_by_key.setdefault(item.key, []).append(item)
-
-    try:
-        existing_recommended = await reader.recommended_questions(context)
-    except CatalogDataError as error:
-        plan.errors.append(SeedIssue(ERROR_RECOMMENDED_QUESTION_OWNERSHIP, str(error)))
-        existing_recommended = []
-    recommended_by_subproblem: Dict[uuid.UUID, List[ExistingRecommendedQuestion]] = {}
-    for item in existing_recommended:
-        recommended_by_subproblem.setdefault(item.subproblem_id, []).append(item)
-    existing_recommended_by_normalized = {
-        item.normalized_question: item for item in existing_recommended
-    }
 
     def resolve_source(document_path: str, where: SeedIssue) -> Optional[SourceRow]:
         matches = sources_by_key.get(document_key_from_path(document_path), [])
@@ -1519,66 +1380,6 @@ async def build_seed_plan(
             (document, None if document_source is None else document_source.document_source_id, subproblem_plans)
         )
 
-        # 추천 질문은 정본/개정과 독립적으로 관리한다. 필드가 빠진 세부 문제는
-        # 기존 매핑을 그대로 두고, 빈 배열만 명시적 삭제로 해석한다.
-        plans_by_key = {item.seed.key: item for item in subproblem_plans}
-        for subproblem in document.subproblems:
-            if subproblem.recommended_questions is None:
-                continue
-            target = plans_by_key.get(subproblem.key)
-            if target is None:
-                continue
-            target_id = None if target.existing is None else target.existing.subproblem_id
-            current_rows = () if target_id is None else tuple(recommended_by_subproblem.get(target_id, ()))
-            desired = tuple(normalize_recommended_question(q) for q in subproblem.recommended_questions)
-            for normalized in desired:
-                owner = existing_recommended_by_normalized.get(normalized)
-                if (
-                    owner is not None
-                    and owner.source == ExactQuestionMatchSource.RECOMMENDED
-                    and owner.subproblem_id != target_id
-                ):
-                    plan.errors.append(
-                        SeedIssue(
-                            ERROR_RECOMMENDED_QUESTION_DUPLICATE,
-                            f"추천 질문이 이미 다른 세부 문제에 매핑되어 있습니다: {normalized!r}",
-                            source_file=document.source_file,
-                            document_path=document.path,
-                            key=subproblem.key,
-                        )
-                    )
-            existing_by_normalized = {
-                item.normalized_question: (item.question, item.source)
-                for item in current_rows
-            }
-            desired_by_normalized = {
-                normalize_recommended_question(question): question
-                for question in subproblem.recommended_questions
-            }
-            if not desired_by_normalized and current_rows:
-                action = RecommendedQuestionAction.DELETE
-            elif desired_by_normalized != {
-                normalized: question
-                for normalized, (question, _source) in existing_by_normalized.items()
-            } or any(
-                source != ExactQuestionMatchSource.RECOMMENDED
-                for _normalized, (_question, source) in existing_by_normalized.items()
-                if _normalized in desired_by_normalized
-            ):
-                action = RecommendedQuestionAction.UPSERT
-            else:
-                action = RecommendedQuestionAction.NONE
-            plan.recommended_question_plans.append(
-                RecommendedQuestionPlan(
-                    document_group_id=context.document_group_id,
-                    subproblem_key=subproblem.key,
-                    subproblem_id=target_id,
-                    questions=subproblem.recommended_questions,
-                    existing=current_rows,
-                    action=action,
-                )
-            )
-
     for item in existing:
         if item.key in input_keys:
             continue
@@ -1604,9 +1405,6 @@ class ApplyResult:
     canonicals_replaced: int = 0
     embedding_texts: int = 0
     embedding_input_tokens: Optional[int] = None
-    recommended_questions_created: int = 0
-    recommended_questions_updated: int = 0
-    recommended_questions_deleted: int = 0
 
 
 async def compute_embeddings(embedder: Any, texts: Sequence[str]) -> Tuple[List[List[float]], Optional[int], int]:
@@ -1673,7 +1471,6 @@ async def apply_seed_plan(
         result.problem_groups_created += 1
 
     now = _utcnow()
-    created_subproblem_ids: Dict[str, uuid.UUID] = {}
     for item in plan.subproblem_plans:
         seed = item.seed
         vector = vectors_by_key.get(seed.key)
@@ -1726,7 +1523,6 @@ async def apply_seed_plan(
                 )
                 if updated.rowcount != 1:
                     raise RuntimeError(f"세부 문제가 계획 이후 바뀌었습니다: key={seed.key}")
-        created_subproblem_ids[seed.key] = subproblem_id
 
         if item.embedding_action == EmbeddingAction.NEW_REVISION:
             assert vector is not None
@@ -1814,70 +1610,6 @@ async def apply_seed_plan(
             ]
         )
         await session.flush()
-
-    for item in plan.recommended_question_plans:
-        if item.action == RecommendedQuestionAction.NONE:
-            continue
-        subproblem_id = item.subproblem_id or created_subproblem_ids.get(item.subproblem_key)
-        if subproblem_id is None:
-            raise RuntimeError(
-                f"추천 질문 대상 세부 문제를 찾지 못했습니다: key={item.subproblem_key}"
-            )
-        desired_by_normalized = {
-            normalize_recommended_question(question): question
-            for question in (item.questions or ())
-        }
-        existing_by_normalized = {
-            row.normalized_question: row for row in item.existing
-        }
-        for normalized, row in existing_by_normalized.items():
-            if normalized not in desired_by_normalized:
-                if row.source != ExactQuestionMatchSource.RECOMMENDED:
-                    continue
-                await session.execute(
-                    delete(RecommendedQuestion).where(
-                        RecommendedQuestion.id == row.mapping_id,
-                        RecommendedQuestion.document_group_id == item.document_group_id,
-                    )
-                )
-                result.recommended_questions_deleted += 1
-        for normalized, question in desired_by_normalized.items():
-            current = existing_by_normalized.get(normalized)
-            if current is not None:
-                if (
-                    current.question != question
-                    or current.source != ExactQuestionMatchSource.RECOMMENDED
-                    or current.state != ExactQuestionMatchState.ACTIVE
-                ):
-                    await session.execute(
-                        update(RecommendedQuestion)
-                        .where(
-                            RecommendedQuestion.id == current.mapping_id,
-                            RecommendedQuestion.document_group_id == item.document_group_id,
-                        )
-                        .values(
-                            question=question,
-                            normalized_question=normalized,
-                            source=ExactQuestionMatchSource.RECOMMENDED,
-                            state=ExactQuestionMatchState.ACTIVE,
-                            canonical_answer_id=None,
-                            source_rag_run_id=None,
-                        )
-                        .execution_options(synchronize_session=False)
-                    )
-                    result.recommended_questions_updated += 1
-                continue
-            session.add(
-                RecommendedQuestion(
-                    document_group_id=item.document_group_id,
-                    subproblem_id=subproblem_id,
-                    question=question,
-                    normalized_question=normalized,
-                    created_at=now,
-                )
-            )
-            await session.flush()
-            result.recommended_questions_created += 1
     return result
 
 
@@ -1973,10 +1705,6 @@ def render_report(report: SeedReport, *, database: Optional[str] = None) -> str:
     new_revisions = sum(1 for item in plans if item.embedding_action == EmbeddingAction.NEW_REVISION)
     refresh = sum(1 for item in plans if item.embedding_action == EmbeddingAction.REFRESH_CURRENT_REVISION)
     lines.append(f"임베딩: {new_revisions + refresh}건 (새 개정 {new_revisions}, 기존 개정 갱신 {refresh})")
-    lines.append(
-        f"추천 질문 매핑: {len(plan.recommended_question_plans)}건 관리, "
-        f"변경 {len(plan.recommended_writes)}건"
-    )
 
     for document, source_id, subproblem_plans in plan.documents:
         lines.append("")
@@ -2049,9 +1777,7 @@ def render_report(report: SeedReport, *, database: Optional[str] = None) -> str:
             f"갱신 {applied.subproblems_updated}, 개정 생성 {applied.revisions_created}, "
             f"임베딩 갱신 {applied.revisions_embedding_refreshed}, 서빙 상태 변경 {applied.serving_state_changed}, "
             f"정본 생성 {applied.canonicals_created}, 정본 교체 {applied.canonicals_replaced}, "
-            f"임베딩 입력 {applied.embedding_texts}건 (input_tokens={applied.embedding_input_tokens}), "
-            f"추천 질문 생성 {applied.recommended_questions_created}, "
-            f"갱신 {applied.recommended_questions_updated}, 삭제 {applied.recommended_questions_deleted}"
+            f"임베딩 입력 {applied.embedding_texts}건 (input_tokens={applied.embedding_input_tokens})"
         )
     else:
         writes = sum(1 for item in plans if item.writes)

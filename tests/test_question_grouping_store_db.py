@@ -9,12 +9,14 @@
 """
 
 import asyncio
+from dataclasses import replace
+from datetime import datetime, timedelta, timezone
 import unittest
 import uuid
 from typing import Any, Dict, List, Optional, Sequence
 from unittest.mock import patch
 
-from sqlalchemy import delete, func, select, text
+from sqlalchemy import delete, func, select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
@@ -42,10 +44,6 @@ from app.database.models import (
     QuestionEmbedding,
     QuestionProblemGroup,
     QuestionProblemGroupKind,
-    RecommendedQuestion,
-    ExactQuestionMatch,
-    ExactQuestionMatchSource,
-    ExactQuestionMatchState,
     RagRun,
 )
 from app.question_grouping.attribution import document_attribution, initial_attribution, no_document_attribution
@@ -67,6 +65,7 @@ from app.question_grouping.models import (
     PresentedSubproblem,
     TurnJudgment,
 )
+from app.question_grouping.exact_question import exact_question_hash
 from app.question_grouping.store import QuestionGroupingStore, served_citation_logs
 from tests.test_question_grouping_readers_db import Section, _available, _Seed, _vector
 
@@ -426,143 +425,227 @@ class ProblemGroupDbTest(_StoreDbTestCase):
         self.assertEqual(3, counts)
 
 
-class RecommendedQuestionLookupDbTest(_StoreDbTestCase):
-    async def test_lookup_is_scoped_to_group_and_rejects_mismatched_owner(self) -> None:
-        current_problem_group = await self.seed.document_group(self.group, self.billing)
-        current_subproblem = await self.seed.subproblem(
-            current_problem_group, "current.exact"
+class ExactQuestionLogLookupDbTest(_StoreDbTestCase):
+    QUESTION = "추천 질문"
+    BASE_TIME = datetime(2026, 9, 1, tzinfo=timezone.utc)
+
+    async def asyncSetUp(self) -> None:
+        await super().asyncSetUp()
+        self.run_id = await self._run_id()
+
+    async def _logged_turn(
+        self,
+        question: str,
+        *,
+        scope: Optional[IndexScope] = None,
+        turn_no: int = 1,
+        query_hash: Optional[str] = None,
+    ) -> RagRun:
+        conversation = await self.log_store.create_conversation()
+        turn = await self.log_store.start_rag_run(
+            conversation.id,
+            user_query=question,
+            index_version_id=(scope or self.scope).index_version_id,
+            query_hash=query_hash or exact_question_hash(question),
+        )
+        if turn_no != 1:
+            await self.session.execute(update(RagRun).where(RagRun.id == turn.id).values(turn_no=turn_no))
+        return turn
+
+    async def _classify_connect(
+        self,
+        turn: RagRun,
+        subproblem: Any,
+        *,
+        source: Optional[DocumentSource] = None,
+        run_id: Optional[int] = None,
+        minutes: Optional[int] = None,
+    ) -> int:
+        classification_id = await self.store.insert_classification(
+            turn.id,
+            run_id=run_id or self.run_id,
+            judgment=self._connect(self._presented(subproblem, source or self.billing)),
+            judgment_input=_gate_input("SERVED"),
+        )
+        if minutes is not None:
+            await self._set_effective_from(classification_id, minutes)
+        return classification_id
+
+    async def _set_effective_from(self, classification_id: int, minutes: int) -> None:
+        await self.session.execute(
+            update(QuestionClassification)
+            .where(QuestionClassification.id == classification_id)
+            .values(effective_from=self.BASE_TIME + timedelta(minutes=minutes))
         )
 
+    async def _connect_log(
+        self,
+        subproblem: Any,
+        question: str = QUESTION,
+        *,
+        source: Optional[DocumentSource] = None,
+        scope: Optional[IndexScope] = None,
+        run_id: Optional[int] = None,
+        turn_no: int = 1,
+        minutes: Optional[int] = None,
+    ) -> RagRun:
+        turn = await self._logged_turn(question, scope=scope, turn_no=turn_no)
+        await self._classify_connect(turn, subproblem, source=source, run_id=run_id, minutes=minutes)
+        return turn
+
+    async def _lookup(self, question: str = QUESTION, *, group_id: Optional[int] = None, exclude: Optional[uuid.UUID] = None):
+        return await self.store.find_exact_question_log_match(
+            group_id or self.group.id,
+            question,
+            exclude_rag_run_id=exclude or uuid.uuid4(),
+        )
+
+    async def test_same_group_first_turn_current_connect_matches_after_normalization(self) -> None:
+        subproblem = await self._billing_subproblem(current_version=3)
+        first = await self._connect_log(subproblem, minutes=1)
+        second = await self._connect_log(subproblem, "  추천   질문 ", minutes=2)
+
+        match = await self._lookup("추천 질문")
+        spaced = await self._lookup("\t추천  질문\n")
+        excluded = await self._lookup(exclude=second.id)
+
+        self.assertIsNotNone(match)
+        self.assertEqual(subproblem.id, match.subproblem_id)
+        self.assertEqual(subproblem.problem_group_id, match.problem_group_id)
+        self.assertEqual(3, match.current_version)
+        self.assertEqual((self.billing.id, self.billing.document_key), (match.document_source_id, match.document_key))
+        self.assertEqual((second.id, 2), (match.source_rag_run_id, match.matched_count))
+        self.assertEqual("추천 질문", match.normalized_question)
+        self.assertEqual(match, spaced)
+        self.assertEqual((first.id, 1), (excluded.source_rag_run_id, excluded.matched_count))
+        for changed in ("추 천 질문", "추천질문", "추천 질문입니다", "추천 질문?"):
+            with self.subTest(changed=changed):
+                self.assertIsNone(await self._lookup(changed))
+
+    async def test_other_document_group_is_not_matched(self) -> None:
         other_group = await self.seed.group()
         other_source = await self.seed.source(other_group, "other-doc", "다른 문서")
+        other_version = await self.seed.version(other_source, 1)
+        other_scope = await self.seed.index(other_group, self.chunking, self.embed, [other_version])
         other_problem_group = await self.seed.document_group(other_group, other_source)
         other_subproblem = await self.seed.subproblem(other_problem_group, "other.exact")
+        other_run = await self._run_id(other_scope)
+        await self._connect_log(other_subproblem, source=other_source, scope=other_scope, run_id=other_run)
 
-        self.session.add_all(
-            [
-                RecommendedQuestion(
-                    document_group_id=self.group.id,
-                    subproblem_id=current_subproblem.id,
-                    question="추천 질문",
-                    normalized_question="추천 질문",
-                ),
-                RecommendedQuestion(
-                    document_group_id=other_group.id,
-                    subproblem_id=other_subproblem.id,
-                    question="추천 질문",
-                    normalized_question="추천 질문",
-                ),
-                # The foreign keys alone permit this malformed cross-group row.
-                RecommendedQuestion(
-                    document_group_id=self.group.id,
-                    subproblem_id=other_subproblem.id,
-                    question="잘못된 매핑",
-                    normalized_question="잘못된 매핑",
-                ),
-            ]
-        )
-        await self.session.flush()
+        self.assertIsNone(await self._lookup())
+        found = await self._lookup(group_id=other_group.id)
+        self.assertEqual(other_subproblem.id, found.subproblem_id)
 
-        current = await self.store.find_recommended_question(self.group.id, "추천 질문")
-        repeated_whitespace = await self.store.find_recommended_question(
-            self.group.id, "  추천   질문  "
-        )
-        other = await self.store.find_recommended_question(other_group.id, "추천 질문")
-        malformed = await self.store.find_recommended_question(self.group.id, "잘못된 매핑")
-        inserted_space = await self.store.find_recommended_question(self.group.id, "추 천 질문")
-        removed_space = await self.store.find_recommended_question(self.group.id, "추천질문")
-        changed_ending = await self.store.find_recommended_question(self.group.id, "추천 질문입니다")
+        # 외래 키만으로는 막히지 않는, 현재 그룹 로그가 다른 그룹 세부 문제를 가리키는 행도
+        # 가장 최근이어도 고르지 않고 그 아래 유효한 옛 행으로 내려간다.
+        subproblem = await self._billing_subproblem()
+        valid = await self._connect_log(subproblem, minutes=1)
+        await self._connect_log(other_subproblem, source=other_source, minutes=5)
+        match = await self._lookup()
+        self.assertEqual((subproblem.id, valid.id, 1), (match.subproblem_id, match.source_rag_run_id, match.matched_count))
 
-        self.assertIsNotNone(current)
-        self.assertEqual(current_subproblem.id, current.subproblem_id)
-        self.assertIsNotNone(repeated_whitespace)
-        self.assertEqual(current_subproblem.id, repeated_whitespace.subproblem_id)
-        self.assertIsNotNone(other)
-        self.assertEqual(other_subproblem.id, other.subproblem_id)
-        self.assertIsNone(malformed)
-        self.assertIsNone(inserted_space)
-        self.assertIsNone(removed_space)
-        self.assertIsNone(changed_ending)
+    async def test_follow_up_turn_non_current_and_non_connect_rows_are_not_matched(self) -> None:
+        subproblem = await self._billing_subproblem()
+        await self._connect_log(subproblem, turn_no=2)
 
-    async def test_historical_match_materializes_and_conflicts_are_disabled(self) -> None:
-        subproblem = await self._billing_subproblem(current_version=1)
-        canonical = await self.seed.canonical(
-            subproblem, [(self.billing_chunks[1], self.billing_v1.id)]
+        replaced = await self._connect_log(subproblem)
+        await self.session.execute(
+            update(QuestionClassification)
+            .where(QuestionClassification.rag_run_id == replaced.id)
+            .values(effective_to=QuestionClassification.effective_from + timedelta(microseconds=1))
         )
-        turn = await self._turn()
-        inserted = await self.store.materialize_historical_exact(
-            document_group_id=self.group.id,
-            question="과거 질문",
-            subproblem_id=subproblem.id,
-            subproblem_version=1,
-            canonical_answer_id=canonical.id,
-            source_rag_run_id=turn.id,
-        )
-        self.assertTrue(inserted)
-        match = await self.store.find_exact_question_match(self.group.id, "과거 질문")
-        self.assertIsNotNone(match)
-        self.assertEqual(ExactQuestionMatchSource.HISTORICAL_SERVED, match.source)
-        self.assertEqual(ExactQuestionMatchState.ACTIVE, match.state)
-        self.assertEqual(canonical.id, match.canonical_answer_id)
-
-        other = await self._billing_subproblem(key="billing.refund", current_version=1)
-        other_canonical = await self.seed.canonical(
-            other, [(self.billing_chunks[2], self.billing_v1.id)]
-        )
-        other_turn = await self._turn()
-        inserted = await self.store.materialize_historical_exact(
-            document_group_id=self.group.id,
-            question="과거 질문",
-            subproblem_id=other.id,
-            subproblem_version=1,
-            canonical_answer_id=other_canonical.id,
-            source_rag_run_id=other_turn.id,
-        )
-        self.assertTrue(inserted)
-        conflict = await self.store.find_exact_question_match(self.group.id, "과거 질문")
-        # The conflict transition is flushed as a real row mutation so the caller
-        # can commit it; a later retry is a no-op and must not clear the conflict.
-        self.assertEqual(ExactQuestionMatchState.CONFLICT, conflict.state)
-        self.assertFalse(
-            await self.store.materialize_historical_exact(
-                document_group_id=self.group.id,
-                question="과거 질문",
-                subproblem_id=other.id,
-                subproblem_version=1,
-                canonical_answer_id=other_canonical.id,
-                source_rag_run_id=other_turn.id,
-            )
+        await self.store.insert_classification(
+            replaced.id, run_id=self.run_id, judgment=self._separate(), judgment_input=_gate_input()
         )
 
-    async def test_recommended_match_is_never_overwritten_by_history(self) -> None:
-        subproblem = await self._billing_subproblem(current_version=1)
-        other = await self._billing_subproblem(key="billing.refund", current_version=1)
-        turn = await self._turn()
-        self.session.add(
-            RecommendedQuestion(
-                document_group_id=self.group.id,
-                subproblem_id=subproblem.id,
-                question="고정 질문",
-                normalized_question="고정 질문",
-            )
+        separate = await self._logged_turn(self.QUESTION)
+        await self.store.insert_classification(
+            separate.id, run_id=self.run_id, judgment=self._separate(self.billing.id), judgment_input=_gate_input()
         )
-        await self.session.flush()
-        canonical = await self.seed.canonical(
-            other, [(self.billing_chunks[2], self.billing_v1.id)]
+        unclassified = await self._logged_turn(self.QUESTION)
+        await self.store.insert_classification(
+            unclassified.id, run_id=self.run_id, judgment=self._failed(), judgment_input=_gate_input()
         )
-        self.assertFalse(
-            await self.store.materialize_historical_exact(
-                document_group_id=self.group.id,
-                question="고정 질문",
-                subproblem_id=other.id,
-                subproblem_version=1,
-                canonical_answer_id=canonical.id,
-                source_rag_run_id=turn.id,
-            )
+        await self._logged_turn(self.QUESTION)  # 판별 행이 없는 로그
+
+        self.assertIsNone(await self._lookup())
+
+    async def test_hash_collision_row_never_blocks_older_valid_row(self) -> None:
+        subproblem = await self._billing_subproblem()
+        refund = await self._billing_subproblem(key="billing.refund")
+        collided = await self._logged_turn("다른 질문", query_hash=exact_question_hash(self.QUESTION))
+        await self._classify_connect(collided, refund, minutes=10)
+
+        self.assertIsNone(await self._lookup())
+
+        valid = await self._connect_log(subproblem, minutes=1)
+        match = await self._lookup()
+        self.assertEqual((subproblem.id, valid.id, 1), (match.subproblem_id, match.source_rag_run_id, match.matched_count))
+
+    async def test_no_document_subproblem_of_same_group_matches(self) -> None:
+        problem_group = await self.seed.no_document_group(self.group)
+        subproblem = await self.seed.subproblem(problem_group, "outside.guide")
+        turn = await self._logged_turn(self.QUESTION)
+        presented = replace(
+            self._presented(subproblem, self.billing), document_source_id=None, document_key=""
         )
-        match = await self.store.find_exact_question_match(self.group.id, "고정 질문")
+        await self.store.insert_classification(
+            turn.id, run_id=self.run_id, judgment=self._connect(presented), judgment_input=_gate_input("SERVED")
+        )
+
+        match = await self._lookup()
+
         self.assertEqual(subproblem.id, match.subproblem_id)
-        self.assertEqual(ExactQuestionMatchSource.RECOMMENDED, match.source)
+        self.assertIsNone(match.document_source_id)
+        self.assertIsNone(match.document_key)
+
+    async def test_newest_classification_wins_over_older_rows_of_other_subproblem(self) -> None:
+        cancel = await self._billing_subproblem()
+        refund = await self._billing_subproblem(key="billing.refund")
+        await self._connect_log(cancel, minutes=1)
+        await self._connect_log(cancel, minutes=2)
+        newest = await self._connect_log(refund, minutes=3)
+
+        match = await self._lookup()
+
+        self.assertEqual((refund.id, newest.id, 3), (match.subproblem_id, match.source_rag_run_id, match.matched_count))
+
+    async def test_operator_relink_of_original_log_wins_over_fast_path_rows(self) -> None:
+        old = await self._billing_subproblem()
+        relinked = await self._billing_subproblem(key="billing.refund")
+        original = await self._connect_log(old, minutes=1)
+        # 빠른 경로가 원본을 보고 쓴 행들(X)
+        await self._connect_log(old, minutes=2)
+        await self._connect_log(old, minutes=3)
+
+        # 운영자가 원본 로그(Y)만 다른 세부 문제로 다시 연결한다.
+        await self.session.execute(
+            update(QuestionClassification)
+            .where(QuestionClassification.rag_run_id == original.id, QuestionClassification.effective_to.is_(None))
+            .values(effective_to=self.BASE_TIME + timedelta(minutes=4))
+        )
+        classification_id = await self._classify_connect(original, relinked, minutes=4)
+
+        match = await self._lookup()
+
+        self.assertEqual(
+            (relinked.id, original.id, classification_id, 3),
+            (match.subproblem_id, match.source_rag_run_id, match.classification_id, match.matched_count),
+        )
+
+    async def test_same_effective_from_tie_breaks_by_highest_classification_id(self) -> None:
+        cancel = await self._billing_subproblem()
+        refund = await self._billing_subproblem(key="billing.refund")
+        first_turn = await self._logged_turn(self.QUESTION)
+        second_turn = await self._logged_turn(self.QUESTION)
+        # 먼저 쓴 행이 더 큰 id 를 갖지 않도록 id 순서와 세부 문제를 엇갈려 둔다.
+        low_id = await self._classify_connect(first_turn, refund, minutes=7)
+        high_id = await self._classify_connect(second_turn, cancel, minutes=7)
+        self.assertLess(low_id, high_id)
+
+        for _ in range(3):
+            match = await self._lookup()
+            self.assertEqual((cancel.id, high_id), (match.subproblem_id, match.classification_id))
 
 
 class ClassificationDbTest(_StoreDbTestCase):
