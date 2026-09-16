@@ -56,6 +56,9 @@ CODE_FENCE_LINE_PATTERN = re.compile(r"^(`{3,}|~{3,})(.*)$")
 INLINE_CODE_PATTERN = re.compile(
     r"(?P<ticks>`+)(?:(?!\n[ \t]*\n)[\s\S])*?(?<!`)(?P=ticks)(?!`)"
 )
+BRACKETED_STRONG_BEFORE_WORD_PATTERN = re.compile(
+    r"\*\*\[(?P<label>[^\]\r\n]+)\]\*\*(?=[^\W_])"
+)
 UPSTREAM_ERROR_CODE = "UPSTREAM_ERROR"
 CITATION_VALIDATION_ERROR_CODE = "CITATION_VALIDATION_ERROR"
 INTERNAL_ERROR_CODE = "INTERNAL_ERROR"
@@ -138,6 +141,69 @@ def strip_code_regions(answer_markdown: str) -> str:
         _blank_code_region,
         _strip_fenced_code_blocks(answer_markdown),
     )
+
+
+def _normalize_bracketed_strong_outside_inline_code(line: str) -> str:
+    """인라인 코드 밖의 파싱되지 않는 굵게 표기만 정규화한다."""
+
+    def normalize_segment(segment: str) -> str:
+        def replace(match: re.Match[str]) -> str:
+            label = match.group("label")
+            if label.isdigit() or label.startswith("SOURCE_"):
+                return match.group(0)
+            return f"**{label}**"
+
+        return BRACKETED_STRONG_BEFORE_WORD_PATTERN.sub(replace, segment)
+
+    normalized_parts = []
+    previous_end = 0
+    for match in INLINE_CODE_PATTERN.finditer(line):
+        normalized_parts.append(normalize_segment(line[previous_end : match.start()]))
+        normalized_parts.append(match.group(0))
+        previous_end = match.end()
+    normalized_parts.append(normalize_segment(line[previous_end:]))
+    return "".join(normalized_parts)
+
+
+def normalize_answer_markdown(answer_markdown: str) -> str:
+    """React Markdown에서 풀리지 않는 굵게 표기를 안전한 동등 표현으로 바꾼다.
+
+    ``**[팀]**에서``처럼 대괄호를 포함한 굵게 표기 뒤에 단어 문자가 바로
+    오면 CommonMark 경계 규칙상 강조로 파싱되지 않는다. 코드 예시는 원문을
+    보존하고, 사용자에게 보여줄 일반 본문에서만 대괄호를 제거한다.
+    """
+
+    normalized_lines = []
+    open_fence: Optional[Tuple[str, int]] = None
+
+    for line in answer_markdown.split("\n"):
+        body = line.lstrip(" \t")
+        indented = len(line) - len(body) > 3
+        match = None if indented else CODE_FENCE_LINE_PATTERN.match(body)
+        marker = match.group(1) if match else ""
+        info = match.group(2) if match else ""
+
+        if open_fence is None:
+            if match and not (marker[0] == "`" and "`" in info):
+                open_fence = (marker[0], len(marker))
+                normalized_lines.append(line)
+                continue
+            normalized_lines.append(
+                _normalize_bracketed_strong_outside_inline_code(line)
+            )
+            continue
+
+        fence_char, fence_length = open_fence
+        if (
+            match
+            and marker[0] == fence_char
+            and len(marker) >= fence_length
+            and not info.strip()
+        ):
+            open_fence = None
+        normalized_lines.append(line)
+
+    return "\n".join(normalized_lines)
 
 
 def _validate_answer_content(answer_markdown: str) -> None:
@@ -233,9 +299,11 @@ def validate_citations(
         source_id = f"SOURCE_{marker.group(1)}"
         return f"[{citation_number_by_source_id[source_id]}]"
 
-    validated_markdown = SOURCE_MARKER_PATTERN.sub(
-        replace_marker,
-        answer_markdown,
+    validated_markdown = normalize_answer_markdown(
+        SOURCE_MARKER_PATTERN.sub(
+            replace_marker,
+            answer_markdown,
+        )
     ).strip()
     return ValidatedAnswer(
         answer_markdown=validated_markdown,
@@ -281,7 +349,8 @@ def validate_generation_result(
         return validated
     return ValidatedAnswer(
         answer_markdown=(
-            f"{limitation.strip()}\n\n{validated.answer_markdown}"
+            f"{normalize_answer_markdown(limitation).strip()}\n\n"
+            f"{validated.answer_markdown}"
         ),
         citations=validated.citations,
     )
