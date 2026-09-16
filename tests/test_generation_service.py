@@ -12,6 +12,7 @@ from app.answering.service import (
     UPSTREAM_ERROR_CODE,
     WITHHELD_RESPONSES,
     GenerationService,
+    normalize_answer_markdown,
 )
 from app.core.model_trace import ModelCallTrace
 from app.document.document_key import (
@@ -68,6 +69,47 @@ def _call(
         result=result,
         stage_trace=stage_trace,
     )
+
+
+class MarkdownNormalizationTest(unittest.TestCase):
+    def test_normalizes_bracketed_strong_before_word(self) -> None:
+        cases = (
+            ("**[팀]**에서", "**팀**에서"),
+            ("**[워크스페이스]**를", "**워크스페이스**를"),
+            ("**[설정 > 멤버]**으로", "**설정 > 멤버**으로"),
+            ("**[Billing]**page", "**Billing**page"),
+        )
+
+        for markdown, expected in cases:
+            with self.subTest(markdown=markdown):
+                self.assertEqual(expected, normalize_answer_markdown(markdown))
+
+    def test_keeps_already_renderable_or_citation_markdown(self) -> None:
+        cases = (
+            "**팀**에서",
+            "**[팀]** 에서",
+            "**[팀]**.",
+            "**[1]**에서",
+            "**[SOURCE_1]**에서",
+        )
+
+        for markdown in cases:
+            with self.subTest(markdown=markdown):
+                self.assertEqual(markdown, normalize_answer_markdown(markdown))
+
+    def test_keeps_code_regions_and_normalizes_regular_content(self) -> None:
+        markdown = (
+            "`**[팀]**에서`\n\n"
+            "```markdown\n**[팀]**에서\n```\n\n"
+            "본문의 **[팀]**에서 확인합니다."
+        )
+
+        self.assertEqual(
+            "`**[팀]**에서`\n\n"
+            "```markdown\n**[팀]**에서\n```\n\n"
+            "본문의 **팀**에서 확인합니다.",
+            normalize_answer_markdown(markdown),
+        )
 
 
 class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
@@ -207,6 +249,21 @@ class GenerationServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(result.withheld_reason)
         self.assertIsNone(result.error_code)
         self.assertIs(stage_trace, result.stage_trace)
+
+    async def test_normalizes_bracketed_strong_without_regeneration(self) -> None:
+        generated = self._answerable(
+            "팀 관련 관리는 **[팀]**에서 할 수 있습니다. [SOURCE_1]"
+        )
+        self.generator.generate_with_trace.return_value = _call(generated)
+
+        result = await self.service.generate_answer("질문", [self._result(1)])
+
+        self.assertEqual(FinalAnswerStatus.COMPLETED, result.status)
+        self.assertEqual(
+            "팀 관련 관리는 **팀**에서 할 수 있습니다. [1]",
+            result.answer_markdown,
+        )
+        self.generator.regenerate_answer_with_trace.assert_not_awaited()
 
     async def test_completes_related_guidance_with_limitation_first(self) -> None:
         results = [self._result(1), self._result(2)]
