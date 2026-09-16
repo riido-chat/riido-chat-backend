@@ -1,6 +1,7 @@
 """질문 판별과 캐시 시도의 DB 쓰기.
 
 - 열린 ONLINE 분류 실행 조회/생성
+- 문서 그룹별 과거 첫 턴 질문 로그 정확 일치 조회(가장 최근의 현재 CONNECT 분류)
 - 질문 임베딩, 판별 행(question_classifications), 캐시 시도(question_cache_attempts)
 - 문제 그룹 ensure(INSERT … ON CONFLICT DO NOTHING 후 SELECT)
 - 턴 끝 인용 귀속 갱신(problem_group_id, attribution_source 두 칸만)
@@ -19,7 +20,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, Mapping, Optional, Sequence, Tuple
 
-from sqlalchemy import select, update
+from sqlalchemy import and_, or_, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,19 +34,28 @@ from app.database.models import (
     ClassificationDecision,
     ClassificationRun,
     ClassificationRunKind,
+    DocumentSource,
     DocumentVersion,
+    IndexVersion,
     QuestionCacheAttempt,
     QuestionClassification,
     QuestionEmbedding,
     QuestionProblemGroup,
     QuestionProblemGroupKind,
+    QuestionSubproblem,
+    RagRun,
 )
 from app.question_grouping.attribution import citation_attribution
 from app.question_grouping.models import (
     AttributionTarget,
     CitedDocument,
+    ExactQuestionLogMatch,
     GateResult,
     TurnJudgment,
+)
+from app.question_grouping.exact_question import (
+    exact_question_hash,
+    normalize_exact_question,
 )
 
 # question_cache_attempts.rejection_reasons 원소 길이(VARCHAR(50)).
@@ -189,6 +199,115 @@ class QuestionGroupingStore:
     ) -> None:
         self._session = session
         self._log_store = log_store or RagLogStore(session)
+
+    async def find_exact_question_log_match(
+        self,
+        document_group_id: int,
+        question: str,
+        *,
+        exclude_rag_run_id: uuid.UUID,
+    ) -> Optional[ExactQuestionLogMatch]:
+        """같은 문서 그룹의 과거 첫 턴 질문 중 정규화 결과가 같은 로그의 최신 CONNECT 분류.
+
+        ``rag_runs.query_hash`` 로 좁히고 현재(effective_to IS NULL) CONNECT 분류 중
+        effective_from 이 가장 최근인 행(같으면 분류 id 가 큰 행)의 세부 문제를 쓴다.
+        세부 문제가 서로 달라도 충돌로 보지 않는다. 운영자가 로그 하나를 다시 연결하면
+        그 행이 가장 최근의 현재 분류가 되므로, 빠른 경로가 스스로 쓴 행을 포함한 옛 로그를
+        모두 다시 연결하지 않아도 바로 반영된다.
+
+        정렬은 SQL 에서 하지만 LIMIT 은 걸지 않는다. 해시만 같고 원문 정규화가 다른 행
+        (해시 충돌이나 다른 규칙으로 잘못 채워진 query_hash 방어)이나 소속 재확인에 실패한 행이 맨 위에 있어도 그 아래의 유효한
+        옛 행을 고를 수 있어야 하기 때문이다. 같은 해시의 첫 턴 로그만 읽으므로 행 수는 작다.
+        """
+
+        normalized = normalize_exact_question(question)
+        if not normalized:
+            return None
+        classification = QuestionClassification
+        subproblem = QuestionSubproblem
+        problem_group = QuestionProblemGroup
+        source = DocumentSource
+        rows = (
+            await self._session.execute(
+                select(
+                    classification.id.label("classification_id"),
+                    classification.effective_from,
+                    RagRun.id.label("rag_run_id"),
+                    RagRun.user_query,
+                    subproblem.id.label("subproblem_id"),
+                    subproblem.key,
+                    subproblem.problem_group_id,
+                    subproblem.current_version,
+                    problem_group.kind,
+                    problem_group.document_group_id.label("no_document_owner_id"),
+                    source.id.label("document_source_id"),
+                    source.document_key,
+                    source.document_group_id.label("document_owner_id"),
+                )
+                .select_from(RagRun)
+                .join(IndexVersion, IndexVersion.id == RagRun.index_version_id)
+                .join(
+                    classification,
+                    and_(
+                        classification.rag_run_id == RagRun.id,
+                        classification.effective_to.is_(None),
+                        classification.decision == ClassificationDecision.CONNECT,
+                    ),
+                )
+                .join(subproblem, subproblem.id == classification.subproblem_id)
+                .join(problem_group, problem_group.id == subproblem.problem_group_id)
+                .outerjoin(source, source.id == problem_group.document_source_id)
+                .where(
+                    IndexVersion.document_group_id == document_group_id,
+                    RagRun.turn_no == 1,
+                    RagRun.query_hash == exact_question_hash(question),
+                    RagRun.id != exclude_rag_run_id,
+                    or_(
+                        and_(
+                            problem_group.kind == QuestionProblemGroupKind.DOCUMENT,
+                            source.document_group_id == document_group_id,
+                        ),
+                        and_(
+                            problem_group.kind == QuestionProblemGroupKind.NO_DOCUMENT,
+                            problem_group.document_group_id == document_group_id,
+                        ),
+                    ),
+                )
+                # 가장 최근에 확정된 현재 분류가 먼저 온다. 같은 시각이면 id 가 큰 행이 이긴다.
+                .order_by(classification.effective_from.desc(), classification.id.desc())
+            )
+        ).all()
+
+        chosen: Optional[Any] = None
+        matched_count = 0
+        for row in rows:
+            if normalize_exact_question(row.user_query) != normalized:
+                continue
+            owner_id = (
+                row.document_owner_id
+                if row.kind == QuestionProblemGroupKind.DOCUMENT
+                else row.no_document_owner_id
+            )
+            # 위 조회가 이미 거르지만, 조회가 바뀌어도 다른 그룹 세부 문제를 쓰지 않게 한 번 더 막는다.
+            if owner_id != document_group_id:
+                continue
+            matched_count += 1
+            if chosen is None:
+                chosen = row
+        if chosen is None:
+            return None
+        return ExactQuestionLogMatch(
+            subproblem_id=chosen.subproblem_id,
+            key=chosen.key,
+            problem_group_id=chosen.problem_group_id,
+            current_version=chosen.current_version,
+            document_source_id=chosen.document_source_id,
+            document_key=chosen.document_key,
+            normalized_question=normalized,
+            source_rag_run_id=chosen.rag_run_id,
+            classification_id=chosen.classification_id,
+            matched_count=matched_count,
+        )
 
     # ------------------------------------------------------------------
     # 분류 실행

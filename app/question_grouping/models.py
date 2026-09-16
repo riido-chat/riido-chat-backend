@@ -170,6 +170,26 @@ class PresentedSubproblem:
 
 
 @dataclass(frozen=True)
+class ExactQuestionLogMatch:
+    """과거 첫 턴 질문 로그 중 가장 최근에 확정된 CONNECT 분류가 가리키는 세부 문제.
+
+    세부 문제 소속은 요청 문서 그룹으로 이미 검증했다. NO_DOCUMENT 문제 그룹이면
+    문서 칸이 비어 있다. ``matched_count`` 는 선택 전에 조건을 만족한 로그 수다.
+    """
+
+    subproblem_id: uuid.UUID
+    key: str
+    problem_group_id: uuid.UUID
+    current_version: int
+    document_source_id: Optional[int]
+    document_key: Optional[str]
+    normalized_question: str
+    source_rag_run_id: uuid.UUID
+    classification_id: int
+    matched_count: int
+
+
+@dataclass(frozen=True)
 class PresentedDocument:
     """판별에 D 번호로 제시한 문서. D 번호는 제시 순서다."""
 

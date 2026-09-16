@@ -9,6 +9,7 @@ ChatService 가 턴 흐름 사이사이에서 부른다(계획 1절 5~11단계).
 | 메서드 | commit | 설명 |
 | --- | --- | --- |
 | open_online_run | 직접 commit | 열린 ONLINE 분류 실행 조회/생성. 턴 잠금 없음 |
+| record_exact_question | 하지 않음 | 첫 턴이 같은 문서 그룹 과거 첫 턴 질문과 정확히 같으면 최신 CONNECT 분류로 판별 행과 캐시 시도. 일치 없으면 쓰지 않음 |
 | prepare | 재임베딩 checkpoint 만 직접 commit | 질문 벡터, 카탈로그, 후보, payload. 읽기는 열린 채 둔다 |
 | judge | 판별 checkpoint 를 직접 commit | 대기 중인 재임베딩 호출 마감 + 호출자 쓰기 + 판별 model_call 시작 |
 | record_judgment_and_gate | 하지 않음 | 호출 마감, 질문 임베딩, 게이트, 판별 행, 캐시 시도 |
@@ -82,6 +83,7 @@ from app.question_grouping.models import (
     JudgeFailure,
     JudgeFailureKind,
     JudgePresentation,
+    PresentedSubproblem,
     SubproblemCatalog,
     TurnJudgment,
 )
@@ -92,6 +94,7 @@ from app.question_grouping.payload import (
     presentation_seed,
 )
 from app.question_grouping.store import QuestionGroupingStore, served_citation_logs
+from app.question_grouping.attribution import subproblem_attribution
 from app.question_grouping.subproblem_search import rank_subproblems
 from app.retrieval.embedding import OPENAI_EMBEDDING_MODEL, OPENAI_EMBEDDING_PROVIDER
 from app.retrieval.models import HybridSearchCall
@@ -166,6 +169,7 @@ class PreparedJudgment:
     presentation: Optional[JudgePresentation] = None
     failure: Optional[JudgeFailure] = None
     failure_stage: Optional[str] = None
+    exact_match_metadata: Optional[Dict[str, Any]] = None
 
     @property
     def ready(self) -> bool:
@@ -181,6 +185,15 @@ class JudgedTurn:
     model_call_id: Optional[int]
     # 판별 checkpoint 에서 재임베딩 model_call 을 이미 마감(commit)했는가.
     embedding_call_finished: bool = False
+
+
+@dataclass(frozen=True)
+class ExactQuestionResult:
+    """정확 일치 기록과 SERVED 실패 복구에 필요한 내부 입력."""
+
+    recorded: "RecordedJudgment"
+    prepared: PreparedJudgment
+    judged: JudgedTurn
 
 
 @dataclass(frozen=True)
@@ -413,6 +426,126 @@ class QuestionGroupingService:
             document_group_id=document_group_id,
             index_version_id=index_version_id,
             classification_run_id=run_id,
+        )
+
+    async def record_exact_question(
+        self,
+        turn: GroupingTurn,
+        question: str,
+        *,
+        semantic_cache_enabled: bool,
+    ) -> Optional[ExactQuestionResult]:
+        """같은 문서 그룹의 과거 첫 턴 질문과 정확히 같으면 LLM·검색 없이 판별과 게이트를 기록한다.
+
+        일치한 로그 중 가장 최근에 확정된 현재 CONNECT 분류가 가리키는 세부 문제를 현재
+        개정으로 연결한다(로그끼리 세부 문제가 달라도 최신 분류가 이긴다). 일치가 없으면
+        아무 행도 쓰지 않고 None 을 돌려 호출자가 일반 판별로 진행한다. 게이트가 거절하면 기록만 반환하고
+        호출자가 일반 검색·생성으로 이어간다.
+        """
+
+        match = await self._store.find_exact_question_log_match(
+            turn.document_group_id,
+            question,
+            exclude_rag_run_id=turn.rag_run_id,
+        )
+        if match is None:
+            return None
+        scope = await self._catalog_reader.load_index_scope(turn.index_version_id)
+        if scope.document_group_id != turn.document_group_id:
+            return None
+        presented = PresentedSubproblem(
+            key=match.key,
+            subproblem_id=match.subproblem_id,
+            subproblem_version=match.current_version,
+            problem_group_id=match.problem_group_id,
+            document_source_id=match.document_source_id,
+            document_key=match.document_key or "",
+            canonical_answer_id=None,
+            similarity=1.0,
+            retrieval_rank=1,
+            presented_order=1,
+            inclusion_count=0,
+            exclusion_count=0,
+        )
+        prepared = PreparedJudgment(
+            turn=turn,
+            resolved_query=question,
+            seed=presentation_seed(turn.rag_run_id),
+            model=self._judge_client.model_name,
+            prompt_version=self._judge_client.prompt_version,
+            vector=QuestionVector(
+                embedding=None,
+                reused_retrieval_embedding=False,
+                retrieval_query=None,
+            ),
+            started=self._clock(),
+            scope=scope,
+            exact_match_metadata={
+                "matchSource": "QUESTION_LOG_EXACT",
+                "exactQuestionMatch": {
+                    "normalizedQuestion": match.normalized_question,
+                    "sourceRagRunId": str(match.source_rag_run_id),
+                    "sourceClassificationId": match.classification_id,
+                    "matchedCount": match.matched_count,
+                },
+            },
+        )
+        judgment = TurnJudgment(
+            decision=ClassificationDecision.CONNECT,
+            attribution=subproblem_attribution(match.problem_group_id),
+            subproblem=presented,
+        )
+        outcome = await self._evaluate_gate(
+            prepared, judgment, semantic_cache_enabled
+        )
+        canonical = (
+            None if outcome.inputs is None else outcome.inputs.canonical_answer
+        )
+        canonical_answer_id = None if canonical is None else canonical.canonical_answer_id
+        gate_block = gate_judgment_input(
+            outcome.gate,
+            citation_resolutions=outcome.resolutions,
+            canonical_answer_id=canonical_answer_id,
+        )
+        if outcome.data_error is not None:
+            gate_block["dataError"] = outcome.data_error
+        synthetic_judged = JudgedTurn(
+            call=JudgeCall(
+                trace=ModelCallTrace(
+                    provider=self._judge_client.provider,
+                    model_name=self._judge_client.model_name,
+                    succeeded=True,
+                    latency_ms=0,
+                    prompt_version=self._judge_client.prompt_version,
+                )
+            ),
+            judgment=judgment,
+            model_call_id=None,
+        )
+        recorded = await self._insert_rows(
+            prepared,
+            None,
+            outcome.gate,
+            gate_block,
+            latency_ms=_elapsed_ms(prepared.started, self._clock()),
+            resolutions=outcome.resolutions,
+            canonical_answer_id=canonical_answer_id,
+            judgment=judgment,
+            extra=prepared.exact_match_metadata,
+        )
+        if not recorded.served:
+            return ExactQuestionResult(
+                recorded=recorded, prepared=prepared, judged=synthetic_judged
+            )
+        assert canonical is not None
+        return ExactQuestionResult(
+            recorded=replace(
+                recorded,
+                served_citations=served_citation_logs(outcome.gate),
+                served_answer_markdown=canonical.content_markdown,
+            ),
+            prepared=prepared,
+            judged=synthetic_judged,
         )
 
     # ------------------------------------------------------------------
@@ -752,7 +885,9 @@ class QuestionGroupingService:
         await self._write_common(prepared, judged)
         outcome = await self._evaluate_gate(prepared, judged.judgment, semantic_cache_enabled)
         latency_ms = _elapsed_ms(prepared.started, self._clock())
-        canonical = outcome.inputs.canonical_answer
+        canonical = (
+            None if outcome.inputs is None else outcome.inputs.canonical_answer
+        )
         canonical_answer_id = (
             None if canonical is None else canonical.canonical_answer_id
         )
@@ -836,6 +971,11 @@ class QuestionGroupingService:
             citation_resolutions=recorded.citation_resolutions,
             canonical_answer_id=recorded.canonical_answer_id,
         )
+        extra = dict(prepared.exact_match_metadata or {})
+        extra["serveFailure"] = {
+            "gateOutcome": CacheAttemptOutcome.SERVED.value,
+            "cacheAttemptOutcome": CacheAttemptOutcome.REJECTED.value,
+        }
         return await self._insert_rows(
             prepared,
             judged,
@@ -844,12 +984,7 @@ class QuestionGroupingService:
             latency_ms=recorded.latency_ms,
             resolutions=recorded.citation_resolutions,
             canonical_answer_id=recorded.canonical_answer_id,
-            extra={
-                "serveFailure": {
-                    "gateOutcome": CacheAttemptOutcome.SERVED.value,
-                    "cacheAttemptOutcome": CacheAttemptOutcome.REJECTED.value,
-                }
-            },
+            extra=extra,
         )
 
     async def finalize_attribution(

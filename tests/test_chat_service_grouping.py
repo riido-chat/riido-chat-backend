@@ -46,13 +46,24 @@ from app.chat.schema import (
 )
 from app.chat.service import ChatService
 from app.core.model_trace import ModelCallTrace
-from app.database.models import ChatProfileRevisionStatus, ModelCallPurpose
+from app.database.models import (
+    CacheAttemptOutcome,
+    ChatProfileRevisionStatus,
+    ModelCallPurpose,
+)
 from app.document.document_key import (
     DEFAULT_DOCUMENT_GROUP_KEY,
     build_console_canonical_uri,
     build_upload_document_key,
 )
-from app.question_grouping.service import GroupingTurn, QuestionGroupingService
+from app.question_grouping.exact_question import exact_question_hash
+from app.question_grouping.models import GateResult
+from app.question_grouping.service import (
+    GroupingTurn,
+    ExactQuestionResult,
+    QuestionGroupingService,
+    RecordedJudgment,
+)
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import (
     HybridRetrievalResult,
@@ -68,6 +79,7 @@ CLASSIFICATION_RUN_ID = 5
 EMBEDDING_CALL_ID = 1
 
 SERVED_ANSWER = "멤버를 초대할 수 있습니다. [1] 업로드 문서도 참고하세요. [2]"
+CACHED_SERVED_ANSWER = f"{SERVED_ANSWER} (캐시된 답변)"
 SERVED_TITLE = "멤버 관리"
 SERVED_NODE_PATH = "멤버 관리 > 워크스페이스 > 멤버 초대"
 SERVED_URL = "https://docs.riido.io/member/invite"
@@ -189,7 +201,7 @@ def expected_served_response(
         status=ChatResponseStatus.COMPLETED,
         conversation_id=conversation_id,
         rag_run_id=rag_run_id,
-        answer=ChatAnswer(answer_markdown=SERVED_ANSWER),
+        answer=ChatAnswer(answer_markdown=CACHED_SERVED_ANSWER),
         citations=[
             ChatCitation(
                 citation_number=1,
@@ -392,7 +404,10 @@ class GroupingChatFixture:
             return self.serve_failure_recorded
 
         async def finalize_attribution(recorded, _citations):
-            self.events.append(f"finalize_attribution:{recorded.outcome}")
+            outcome = getattr(recorded, "outcome", None)
+            if outcome is None:
+                outcome = recorded.gate.outcome.value
+            self.events.append(f"finalize_attribution:{outcome}")
             return True
 
         grouping.open_online_run.side_effect = open_online_run
@@ -402,6 +417,8 @@ class GroupingChatFixture:
         grouping.record_preparation_failure.side_effect = record_preparation_failure
         grouping.record_serve_failure.side_effect = record_serve_failure
         grouping.finalize_attribution.side_effect = finalize_attribution
+        # 기본은 과거 첫 턴 질문 로그 일치가 없는 턴이다.
+        grouping.record_exact_question.return_value = None
 
 
 QUERY_EMBEDDING = ModelCallPurpose.QUERY_EMBEDDING.value
@@ -467,7 +484,7 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
         )
         fixture.log_store.complete_rag_run.assert_awaited_once_with(
             fixture.rag_run_id,
-            answer_content=SERVED_ANSWER,
+            answer_content=CACHED_SERVED_ANSWER,
             citations=list(served_citation_logs()),
             total_latency_ms=ANY,
         )
@@ -495,6 +512,168 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(CLASSIFICATION_RUN_ID, prepare_args[0].classification_run_id)
         self.assertEqual("질문", prepare_args[1])
         self.assertIs(fixture.search, prepare_args[2])
+
+    def _exact_result(self, outcome: CacheAttemptOutcome) -> ExactQuestionResult:
+        recorded = RecordedJudgment(
+            classification_id=1,
+            cache_attempt_id=1,
+            judgment=SimpleNamespace(),
+            gate=GateResult(
+                outcome=outcome,
+                canonical_answer_id=(uuid.uuid4() if outcome is CacheAttemptOutcome.SERVED else None),
+                rejection_reasons=("TEST_REJECTED",) if outcome is CacheAttemptOutcome.REJECTED else (),
+            ),
+            latency_ms=1,
+            served_answer_markdown=(SERVED_ANSWER if outcome is CacheAttemptOutcome.SERVED else None),
+            served_citations=(served_citation_logs() if outcome is CacheAttemptOutcome.SERVED else ()),
+        )
+        return ExactQuestionResult(
+            recorded=recorded,
+            prepared=SimpleNamespace(),
+            judged=SimpleNamespace(),
+        )
+
+    async def test_every_turn_start_stores_exact_question_hash(self) -> None:
+        for turn_no in (1, 2):
+            with self.subTest(turn_no=turn_no):
+                fixture = self._fixture(turn_no=turn_no)
+                if turn_no == 2:
+                    fixture.query_rewrite_service.rewrite.side_effect = self._new_topic_rewrite(
+                        "  추천   질문 "
+                    )
+
+                await self._answer(fixture, "  추천   질문 ")
+
+                kwargs = fixture.log_store.start_rag_run.await_args.kwargs
+                self.assertEqual("  추천   질문 ", kwargs["user_query"])
+                self.assertEqual(exact_question_hash("추천 질문"), kwargs["query_hash"])
+
+    async def test_exact_question_served_skips_search_judge_and_generation(self) -> None:
+        fixture = self._fixture()
+        fixture.grouping.record_exact_question.return_value = self._exact_result(
+            CacheAttemptOutcome.SERVED
+        )
+
+        response, _ = await self._answer(fixture, "추천 질문")
+
+        self.assertEqual(CACHED_SERVED_ANSWER, response.answer.answer_markdown)
+        fixture.grouping.record_exact_question.assert_awaited_once()
+        call = fixture.grouping.record_exact_question.await_args
+        self.assertEqual("추천 질문", call.args[1])
+        self.assertEqual(fixture.rag_run_id, call.args[0].rag_run_id)
+        fixture.retriever.search_with_trace.assert_not_awaited()
+        fixture.grouping.prepare.assert_not_awaited()
+        fixture.grouping.judge.assert_not_awaited()
+        fixture.generation_service.generate_answer.assert_not_awaited()
+        fixture.log_store.complete_rag_run.assert_awaited_once()
+        self.assertEqual(
+            CACHED_SERVED_ANSWER,
+            fixture.log_store.complete_rag_run.await_args.kwargs["answer_content"],
+        )
+
+    async def test_exact_question_rejection_is_committed_then_falls_back_to_generation(self) -> None:
+        fixture = self._fixture()
+        fixture.grouping.record_exact_question.return_value = self._exact_result(
+            CacheAttemptOutcome.REJECTED
+        )
+
+        response, _ = await self._answer(fixture, "추천 질문")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        # 정확 일치 게이트 기록을 검색 전에 확정해 검색 뒤 rollback 에서 살아남게 한다.
+        self.assertEqual(
+            TURN_START + ["open_online_run", "commit"],
+            fixture.events[: len(TURN_START) + 2],
+        )
+        fixture.retriever.search_with_trace.assert_awaited_once()
+        fixture.grouping.prepare.assert_not_awaited()
+        fixture.grouping.judge.assert_not_awaited()
+        fixture.grouping.record_judgment_and_gate.assert_not_awaited()
+        fixture.generation_service.generate_answer.assert_awaited_once()
+
+    async def test_exact_question_serve_failure_records_rejection_then_generates(self) -> None:
+        fixture = self._fixture()
+        exact = self._exact_result(CacheAttemptOutcome.SERVED)
+        fixture.grouping.record_exact_question.return_value = exact
+        fixture.grouping.record_serve_failure.return_value = recorded_judgment(
+            "REJECTED_SERVE_FAILED"
+        )
+        fixture.log_store.complete_rag_run.side_effect = [RuntimeError("write failed"), None]
+
+        response, _ = await self._answer(fixture, "추천 질문")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        fixture.grouping.record_serve_failure.assert_awaited_once_with(
+            exact.prepared, exact.judged, exact.recorded
+        )
+        fixture.generation_service.generate_answer.assert_awaited_once()
+        fixture.retriever.search_with_trace.assert_awaited_once()
+        fixture.grouping.judge.assert_not_awaited()
+
+    async def test_exact_question_gate_states_fall_back_without_second_judgment(self) -> None:
+        for outcome in (
+            CacheAttemptOutcome.SHADOW,
+            CacheAttemptOutcome.REJECTED,
+            CacheAttemptOutcome.GROUP_DISABLED,
+        ):
+            with self.subTest(outcome=outcome):
+                fixture = self._fixture()
+                fixture.grouping.record_exact_question.return_value = self._exact_result(
+                    outcome
+                )
+                response, _ = await self._answer(fixture, "추천 질문")
+
+                self.assertIsInstance(response, ChatCompletedResponse)
+                fixture.generation_service.generate_answer.assert_awaited_once()
+                fixture.grouping.prepare.assert_not_awaited()
+                fixture.grouping.judge.assert_not_awaited()
+
+    async def test_no_exact_question_match_runs_normal_judgment_without_extra_rows(self) -> None:
+        # 과거 첫 턴 질문 로그 일치가 없으면 서비스가 None 을 돌려준다.
+        fixture = self._fixture()
+        fixture.recorded = recorded_judgment("REJECTED")
+
+        response, _ = await self._answer(fixture, "처음 보는 질문")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        fixture.grouping.record_exact_question.assert_awaited_once()
+        self.assertEqual(
+            TURN_START + SEARCH_WITH_GROUPING + JUDGE_CHECKPOINT,
+            fixture.events[: len(TURN_START) + len(SEARCH_WITH_GROUPING) + len(JUDGE_CHECKPOINT)],
+        )
+        fixture.grouping.record_judgment_and_gate.assert_awaited_once()
+        fixture.grouping.record_serve_failure.assert_not_awaited()
+        fixture.generation_service.generate_answer.assert_awaited_once()
+
+    def _new_topic_rewrite(self, resolved_query: str):
+        call = QueryRewriteCall(
+            trace=ModelCallTrace(
+                provider="openai",
+                model_name="gpt-5.4-mini",
+                succeeded=True,
+                latency_ms=1,
+            ),
+            resolution=QueryResolution(
+                decision=QueryRewriteDecision.NEW_TOPIC,
+                resolved_query=resolved_query,
+                selected_turns=(),
+            ),
+        )
+
+        async def rewrite(_question, _candidates, *, before_model_call):
+            await before_model_call("openai", "gpt-5.4-mini", QUERY_REWRITE_PROMPT_VERSION)
+            return call
+
+        return rewrite
+
+    async def test_second_turn_same_text_bypasses_exact_question(self) -> None:
+        fixture = self._fixture(turn_no=2)
+        fixture.query_rewrite_service.rewrite.side_effect = self._new_topic_rewrite("추천 질문")
+
+        await self._answer(fixture, "추천 질문")
+
+        fixture.grouping.record_exact_question.assert_not_awaited()
+        fixture.retriever.search_with_trace.assert_awaited_once()
 
     async def test_profile_semantic_cache_flag_reaches_gate(self) -> None:
         fixture = self._fixture(semantic_cache_enabled=False)
@@ -754,7 +933,7 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([ProgressStage.RETRIEVING], stages)
         # 분류 실행은 검색 임베딩 checkpoint 전에 열지만 판별 행·시도는 만들지 않는다(R13).
         self.assertEqual(
-            ["open_online_run"],
+            ["open_online_run", "record_exact_question"],
             [name for name, _args, _kwargs in fixture.grouping.mock_calls],
         )
         self.assertEqual(
