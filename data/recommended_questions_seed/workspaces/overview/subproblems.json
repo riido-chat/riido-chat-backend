@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "document": {
+    "path": "workspaces/overview.md",
+    "title": "워크스페이스",
+    "parentPath": "workspaces",
+    "contentSha256": "3df65e1fe703c6efbfeb6421ec3ac2c6858858114a9578edc9f29add118832d8"
+  },
+  "subproblems": [
+    {
+      "key": "workspaces-overview.what-is-workspace",
+      "legacyId": null,
+      "name": "워크스페이스란",
+      "inclusionCriteria": [
+        "워크스페이스가 무엇인지 묻는 질문",
+        "회사나 조직에서 워크스페이스를 여러 개 만들어야 하는지 묻는 질문"
+      ],
+      "exclusionCriteria": [
+        "한 사용자가 여러 워크스페이스에 참여할 수 있는지 묻는 질문은 제외(→ 여러 워크스페이스 참여와 확인)",
+        "팀을 어떤 기준으로 나누면 좋은지 묻는 질문은 제외(→ 팀 구성 방식 권장)",
+        "워크스페이스를 만드는 방법을 묻는 질문은 제외. 가이드에 없다"
+      ],
+      "canonical": {
+        "contentMarkdown": "워크스페이스는 여러 팀과 프로젝트를 한 공간에서 관리할 수 있는 하나의 조직입니다 [1]. 하나의 조직에서는 하나의 워크스페이스를 운영하는 것을 권장합니다 [1].",
+        "applicabilityRules": [
+          "워크스페이스의 뜻과 조직당 개수 권장만 답한다.",
+          "워크스페이스 생성 방법은 가이드에 없어 다루지 않는다."
+        ],
+        "citations": [
+          {
+            "order": 1,
+            "documentPath": "workspaces/overview.md",
+            "sectionPath": [
+              "개요"
+            ],
+            "evidence": "워크스페이스는 여러 팀과 프로젝트를 한 공간에서 관리할 수 있는 하나의 조직입니다. 하나의 조직에서는 하나의 워크스페이스를 운영하는 것을 권장합니다."
+          }
+        ]
+      },
+      "reviewStatus": "approved",
+      "representativeQuestion": "워크스페이스는 무엇이고, 한 회사에서 워크스페이스를 여러 개 만들어야 하나요?",
+      "representativeQuestionMeta": {
+        "source": "NEW",
+        "matchedInclusion": [
+          1,
+          2
+        ],
+        "flags": []
+      },
+      "recommendedQuestions": [
+        "워크스페이스는 무엇인가요?"
+      ]
+    }
+  ]
+}

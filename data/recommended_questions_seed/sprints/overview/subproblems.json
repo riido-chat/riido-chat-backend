@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "document": {
+    "path": "sprints/overview.md",
+    "title": "스프린트",
+    "parentPath": "sprints",
+    "contentSha256": "24147e9e17eea227b777942636228494288a362d77cc81f157cdc026ad1e8e6b"
+  },
+  "subproblems": [
+    {
+      "key": "sprints-overview.what-is-sprint",
+      "legacyId": null,
+      "name": "스프린트란",
+      "inclusionCriteria": [
+        "스프린트가 무엇인지 묻는 질문",
+        "스프린트를 쓰면 무엇이 좋은지 묻는 질문"
+      ],
+      "exclusionCriteria": [
+        "스프린트를 켜는 방법을 묻는 질문은 제외(→ 스프린트 활성화)",
+        "스프린트 기간을 정하는 질문은 제외(→ 스프린트 기간)",
+        "스프린트 그래프를 묻는 질문은 제외(→ 스프린트 그래프란)"
+      ],
+      "canonical": {
+        "contentMarkdown": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위로, 팀이 정해진 기간과 마감일 안에서 집중적으로 업무를 진행하고 회고하는 방식입니다. [1]\n\n- **집중력 강화**: 기간과 마감일이 정해져 있어 팀이 목표한 작업에 집중할 수 있습니다. [1]\n- **지속적인 업무 리듬 형성**: 계획·실행·회고를 반복하며 안정적인 업무 흐름을 만들 수 있습니다. [1]\n- **점진적인 개선**: 단기간의 실행과 회고를 거듭해 팀의 일하는 방식을 점차 더 나아지게 할 수 있습니다. [1]\n- **업무 방식의 유연한 조정**: 프로젝트, 목표, 작업과 연결해 팀 상황에 맞게 업무 방식을 조정할 수 있습니다. [1]",
+        "citations": [
+          {
+            "order": 1,
+            "documentPath": "sprints/overview.md",
+            "sectionPath": [
+              "개요"
+            ]
+          }
+        ]
+      },
+      "reviewStatus": "approved",
+      "representativeQuestion": "스프린트는 무엇이고, 팀에서 쓰면 어떤 점이 좋나요?",
+      "representativeQuestionMeta": {
+        "source": "NEW",
+        "matchedInclusion": [
+          1,
+          2
+        ],
+        "flags": []
+      },
+      "recommendedQuestions": [
+        "스프린트는 무엇이고, 팀에서 쓰면 어떤 점이 좋나요?"
+      ]
+    },
+    {
+      "key": "sprints-overview.sprint-length",
+      "legacyId": null,
+      "name": "스프린트 기간",
+      "inclusionCriteria": [
+        "스프린트 기간을 몇 주까지 설정할 수 있는지 묻는 질문",
+        "팀에 맞는 스프린트 기간을 어떻게 정하면 좋은지 묻는 질문"
+      ],
+      "exclusionCriteria": [
+        "스프린트 시작 요일을 묻는 질문은 제외(→ 스프린트 시작 요일과 주기 변경)",
+        "진행 중에 주기를 바꾸면 어떻게 되는지 묻는 질문은 제외(→ 스프린트 시작 요일과 주기 변경)"
+      ],
+      "canonical": {
+        "contentMarkdown": "스프린트 기간은 주 단위로 최소 1주부터 최대 8주까지 설정할 수 있습니다 [1]. 일반적으로 1~2주는 짧은 반복과 빠른 실행에, 3주 이상은 중장기 프로젝트의 진행 추적에 적합합니다 [1]. 예를 들어 초기 스타트업 팀은 1주, 대규모 프로젝트 팀은 2~3주처럼 팀 규모와 업무 성격에 맞게 정하는 것을 권장합니다 [1].",
+        "applicabilityRules": [
+          "기간 설정 범위와 권장만 답한다.",
+          "시작 요일과 주기 변경은 다루지 않는다."
+        ],
+        "citations": [
+          {
+            "order": 1,
+            "documentPath": "sprints/overview.md",
+            "sectionPath": [
+              "스프린트 기간"
+            ],
+            "evidence": "주 단위로 설정할 수 있으며, 최소 1주부터 최대 8주까지 설정 가능합니다. 일반적으로 1~2주는 짧은 반복과 빠른 실행에 적합합니다. 3주 이상은 중장기 프로젝트의 진행 추적에 유용합니다. 팀 규모와 업무 성격에 따라 적정 주기를 설정하는 것을 권장합니다. 예: 초기 스타트업 팀 — 1주 / 대규모 프로젝트 팀 — 2~3주"
+          }
+        ]
+      },
+      "reviewStatus": "approved",
+      "representativeQuestion": "스프린트 기간은 몇 주까지 정할 수 있고, 팀에 맞는 기간은 어떻게 고르면 좋나요?",
+      "representativeQuestionMeta": {
+        "source": "NEW",
+        "matchedInclusion": [
+          1,
+          2
+        ],
+        "flags": []
+      },
+      "recommendedQuestions": [
+        "스프린트 기간은 몇 주까지 설정할 수 있나요?"
+      ]
+    },
+    {
+      "key": "sprints-overview.enable-sprint",
+      "legacyId": null,
+      "name": "스프린트 활성화",
+      "inclusionCriteria": [
+        "팀에서 스프린트를 켜는 방법을 묻는 질문",
+        "스프린트 설정이 어디 있는지 묻는 질문"
+      ],
+      "exclusionCriteria": [
+        "스프린트 기간, 시작 요일, 다가올 스프린트 개수 각각의 의미를 묻는 질문은 제외(→ 스프린트 기간, 스프린트 시작 요일과 주기 변경, 다가올 스프린트 미리 생성)",
+        "스프린트를 끄는 방법을 묻는 질문은 제외. 가이드에 없다",
+        "스프린트 자동화를 설정하는 질문은 제외(→ 스프린트 자동화 종류)"
+      ],
+      "canonical": {
+        "contentMarkdown": "스프린트 설정은 [팀 설정 > 스프린트]에서 관리합니다 [1]. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다 [1].",
+        "applicabilityRules": [
+          "스프린트 설정 위치와 활성화 조건만 답한다.",
+          "각 설정값의 의미와 스프린트 비활성화는 다루지 않는다."
+        ],
+        "citations": [
+          {
+            "order": 1,
+            "documentPath": "sprints/overview.md",
+            "sectionPath": [
+              "스프린트 설정"
+            ],
+            "evidence": "스프린트 설정은 [팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다."
+          }
+        ]
+      },
+      "reviewStatus": "approved",
+      "representativeQuestion": "팀에서 스프린트를 켜려면 어디에서 무엇을 설정해야 하나요?",
+      "representativeQuestionMeta": {
+        "source": "NEW",
+        "matchedInclusion": [
+          1,
+          2
+        ],
+        "flags": []
+      },
+      "recommendedQuestions": [
+        "스프린트는 어디에서 활성화하고 설정하나요?"
+      ]
+    }
+  ]
+}

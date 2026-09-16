@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "document": {
+    "path": "integrations/google-calendar.md",
+    "title": "구글 캘린더",
+    "parentPath": "integrations",
+    "contentSha256": "d828c11e04ac366cbecbdccb74ebf1a231eb006728ef9065fb8a46c8a17ee961"
+  },
+  "subproblems": [
+    {
+      "key": "google-calendar.sync-behavior",
+      "legacyId": null,
+      "name": "미팅 일정 동기화 방식",
+      "inclusionCriteria": [
+        "뤼이도 미팅과 구글 캘린더 일정이 어느 방향으로 동기화되는지 묻는 질문",
+        "어떤 변경이 구글 캘린더와 뤼이도에 서로 반영되는지 묻는 질문"
+      ],
+      "exclusionCriteria": [
+        "작업 마감일도 동기화되는지 묻는 질문은 제외(→ 작업 마감일 동기화 여부)",
+        "미팅을 삭제했을 때를 묻는 질문은 제외(→ 미팅 삭제 시 캘린더 반영)",
+        "구글 캘린더 알림을 묻는 질문은 제외(→ 구글 캘린더 알림 설정)"
+      ],
+      "canonical": {
+        "contentMarkdown": "연동이 활성화되면 뤼이도와 구글 캘린더 어느 쪽에서 수정한 일정이든 실시간으로 서로 반영됩니다 [1]. 뤼이도 → 구글 캘린더, 구글 캘린더 → 뤼이도 양쪽 모두 다음 변경이 자동으로 반영됩니다 [1].\n\n- 미팅 생성\n- 제목·설명 수정\n- 시간 및 장소 변경\n- 참여자 추가·제거",
+        "applicabilityRules": [
+          "미팅 일정의 양방향 동기화 항목만 답한다.",
+          "작업 마감일, 미팅 삭제, 알림은 다루지 않는다."
+        ],
+        "citations": [
+          {
+            "order": 1,
+            "documentPath": "integrations/google-calendar.md",
+            "sectionPath": [
+              "미팅 일정 동기화 방식"
+            ],
+            "evidence": "연동이 활성화되면, 뤼이도와 구글 캘린더 모두에서 수정한 일정이 실시간으로 서로 반영됩니다. … 뤼이도에서 다음과 같은 변경이 발생하면 자동으로 구글 캘린더에 반영됩니다. 미팅 생성 제목/설명 수정 시간 및 장소 변경 참여자 추가/제거 … 구글 캘린더에서 일정을 수정하면 뤼이도에 자동으로 반영됩니다."
+          }
+        ]
+      },
+      "reviewStatus": "approved",
+      "representativeQuestion": "미팅과 구글 캘린더 일정은 어느 쪽에서 바꿔도 서로 반영되고, 어떤 변경이 동기화되나요?",
+      "representativeQuestionMeta": {
+        "source": "NEW",
+        "matchedInclusion": [
+          1,
+          2
+        ],
+        "flags": []
+      },
+      "recommendedQuestions": [
+        "구글 캘린더를 연동하면 미팅 일정이 동기화되나요?"
+      ]
+    }
+  ]
+}

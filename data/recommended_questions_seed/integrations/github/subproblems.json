@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "document": {
+    "path": "integrations/github.md",
+    "title": "깃허브",
+    "parentPath": "integrations",
+    "contentSha256": "e6110e934f126e68f94875b3585a2fa001f272e6e4a3aedacdb31ca703254a23"
+  },
+  "subproblems": [
+    {
+      "key": "github.connect-workspace",
+      "legacyId": null,
+      "name": "깃허브 워크스페이스 연동",
+      "inclusionCriteria": [
+        "깃허브를 뤼이도 워크스페이스에 연동하는 절차를 묻는 질문",
+        "깃허브 Organization을 연결하는 위치를 묻는 질문",
+        "뤼이도와 GitHub를 연동하고 연결할 Repository 권한과 대상을 정하는 방법을 함께 묻는 질문"
+      ],
+      "exclusionCriteria": [
+        "연동 후 저장소를 연결하는 질문은 제외(→ 깃허브 저장소 연결)",
+        "연동을 해제하려는 질문은 제외. 가이드에 없다"
+      ],
+      "canonical": {
+        "contentMarkdown": "GitHub 연동은 워크스페이스 단위로 설정하며, 연결할 Repository를 지정해야 합니다. `[설정 > 워크스페이스 > 외부 연동 > Github]`로 이동한 뒤 **연동하기**를 클릭하고, 연결할 GitHub Organization을 선택하세요. [1]\n\n1. GitHub 설정 업데이트에서 뤼이도가 접근할 Repository 권한을 `All repositories` 또는 `Only select repositories` 중 하나로 설정합니다. [1]\n2. 권한이 부여된 Repository 가운데 뤼이도와 연결할 Repository를 추가합니다. [1]",
+        "citations": [
+          {
+            "order": 1,
+            "documentPath": "integrations/github.md",
+            "sectionPath": [
+              "연동 설정 가이드"
+            ]
+          }
+        ]
+      },
+      "reviewStatus": "approved",
+      "representativeQuestion": "깃허브 Organization을 워크스페이스에 연동하려면 어느 설정에서 시작하나요?",
+      "representativeQuestionMeta": {
+        "source": "NEW",
+        "matchedInclusion": [
+          1,
+          2
+        ],
+        "flags": []
+      },
+      "recommendedQuestions": [
+        "뤼이도와 GitHub를 연동하려면 어떻게 하나요?"
+      ]
+    }
+  ]
+}
