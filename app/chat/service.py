@@ -547,31 +547,18 @@ class ChatService:
         if on_progress_stage is not None:
             await on_progress_stage(ProgressStage.RETRIEVING)
 
-        if turn.turn_no == 1:
-            resolved_query = question
-        else:
-            resolution_outcome = await self._resolve_follow_up(
-                question,
-                conversation_id,
-                rag_run_id,
-                started,
-            )
-            if resolution_outcome.terminal_response is not None:
-                return resolution_outcome.terminal_response
-            if resolution_outcome.resolved_query is None:
-                raise RuntimeError("검색할 resolved_query가 확정되지 않았습니다.")
-            resolved_query = resolution_outcome.resolved_query
-
         grouping_turn: Optional[GroupingTurn] = None
         if turn.grouping_enabled:
             grouping_turn = await self._open_grouping_run(turn)
 
-        # 같은 문서 그룹의 과거 첫 턴 질문과 정확히 같으면 그 로그의 현재 분류를
-        # 검색·판별보다 먼저 정본 캐시 게이트에 넣는다. 게이트가 거절하면 같은 분류 행을
-        # 유지한 채 일반 검색·생성으로 이어가고, 일치가 없으면 아무 행도 쓰지 않는다.
+        # 모든 턴에서 사용자 원문이 같은 문서 그룹의 과거 첫 턴 질문과 정확히 같으면
+        # 그 로그의 현재 분류를 Query Rewrite·검색·판별보다 먼저 정본 캐시 게이트에 넣는다.
+        # 매핑 원천은 첫 턴 로그뿐이다(후속 턴 로그는 문맥에 기대므로 쓰지 않는다).
+        # 게이트가 거절하면 같은 분류 행을 유지한 채 기존 흐름(후속 턴은 Query Rewrite 포함)으로
+        # 이어가되 다시 판별하지 않고, 일치가 없으면 아무 행도 쓰지 않는다.
         grouping_recorded: Optional[RecordedJudgment] = None
         exact_grouping_recorded = False
-        if grouping_turn is not None and turn.turn_no == 1:
+        if grouping_turn is not None:
             exact_result = await self._require_grouping().record_exact_question(
                 grouping_turn,
                 question,
@@ -588,6 +575,16 @@ class ChatService:
                     response = _served_response(
                         grouping_recorded, turn.conversation_id, turn.rag_run_id
                     )
+                    if turn.turn_no > 1:
+                        # Query Rewrite 를 건너뛴 후속 턴은 원문을 독립 질문으로 확정한다.
+                        # 첫 턴 시작 상태와 같은 NEW_TOPIC·빈 문맥이다.
+                        await self._log_store.record_query_resolution(
+                            turn.rag_run_id,
+                            resolved_query=question,
+                            context_strategy=ContextStrategy.NEW_TOPIC,
+                            context_turn_count=0,
+                            context_snapshot=None,
+                        )
                     await self._log_store.complete_rag_run(
                         turn.rag_run_id,
                         answer_content=_cached_answer_markdown(
@@ -610,9 +607,24 @@ class ChatService:
                     )
                     await self._session.commit()
             elif grouping_recorded is not None:
-                # 정확 일치 게이트 결과는 검색 전에 확정해야 검색 후 rollback으로
-                # 분류·캐시 시도 행이 사라지지 않는다.
+                # 정확 일치 게이트 결과는 Query Rewrite·검색 전에 확정해야 검색 후
+                # rollback으로 분류·캐시 시도 행이 사라지지 않는다.
                 await self._session.commit()
+
+        if turn.turn_no == 1:
+            resolved_query = question
+        else:
+            resolution_outcome = await self._resolve_follow_up(
+                question,
+                conversation_id,
+                rag_run_id,
+                started,
+            )
+            if resolution_outcome.terminal_response is not None:
+                return resolution_outcome.terminal_response
+            if resolution_outcome.resolved_query is None:
+                raise RuntimeError("검색할 resolved_query가 확정되지 않았습니다.")
+            resolved_query = resolution_outcome.resolved_query
 
         embedding_model_call_id: Optional[int] = None
 
@@ -884,7 +896,7 @@ class ChatService:
                 conversation_id,
                 user_query=question,
                 index_version_id=effective_index_version_id,
-                # 모든 턴에 채워 두어야 이후 첫 턴 정확 일치 조회가 과거 로그를 찾는다.
+                # 모든 턴에 채운다. 정확 일치 조회는 이 값으로 과거 첫 턴 로그를 찾는다.
                 query_hash=exact_question_hash(question),
             )
         except ConversationUnavailableError as error:

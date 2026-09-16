@@ -9,7 +9,7 @@ ChatService 가 턴 흐름 사이사이에서 부른다(계획 1절 5~11단계).
 | 메서드 | commit | 설명 |
 | --- | --- | --- |
 | open_online_run | 직접 commit | 열린 ONLINE 분류 실행 조회/생성. 턴 잠금 없음 |
-| record_exact_question | 하지 않음 | 첫 턴이 같은 문서 그룹 과거 첫 턴 질문과 정확히 같으면 최신 CONNECT 분류로 판별 행과 캐시 시도. 일치 없으면 쓰지 않음 |
+| record_exact_question | 하지 않음 | 턴 원문이 같은 문서 그룹 과거 첫 턴 질문과 정확히 같으면 최신 CONNECT 분류로 판별 행과 캐시 시도. 일치 없으면 쓰지 않음 |
 | prepare | 재임베딩 checkpoint 만 직접 commit | 질문 벡터, 카탈로그, 후보, payload. 읽기는 열린 채 둔다 |
 | judge | 판별 checkpoint 를 직접 commit | 대기 중인 재임베딩 호출 마감 + 호출자 쓰기 + 판별 model_call 시작 |
 | record_judgment_and_gate | 하지 않음 | 호출 마감, 질문 임베딩, 게이트, 판별 행, 캐시 시도 |
@@ -435,12 +435,14 @@ class QuestionGroupingService:
         *,
         semantic_cache_enabled: bool,
     ) -> Optional[ExactQuestionResult]:
-        """같은 문서 그룹의 과거 첫 턴 질문과 정확히 같으면 LLM·검색 없이 판별과 게이트를 기록한다.
+        """턴 원문이 같은 문서 그룹의 과거 첫 턴 질문과 정확히 같으면 LLM·검색 없이 판별과 게이트를 기록한다.
 
+        첫 턴과 후속 턴 모두에서 Query Rewrite 전에 사용자 원문으로 부른다. 매핑 원천은
+        과거 첫 턴 로그뿐이다.
         일치한 로그 중 가장 최근에 확정된 현재 CONNECT 분류가 가리키는 세부 문제를 현재
         개정으로 연결한다(로그끼리 세부 문제가 달라도 최신 분류가 이긴다). 일치가 없으면
         아무 행도 쓰지 않고 None 을 돌려 호출자가 일반 판별로 진행한다. 게이트가 거절하면 기록만 반환하고
-        호출자가 일반 검색·생성으로 이어간다.
+        호출자가 일반 흐름(후속 턴은 Query Rewrite 포함)의 검색·생성으로 이어간다.
         """
 
         match = await self._store.find_exact_question_log_match(
