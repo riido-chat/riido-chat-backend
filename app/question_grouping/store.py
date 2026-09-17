@@ -254,6 +254,7 @@ class QuestionGroupingStore:
                         classification.rag_run_id == RagRun.id,
                         classification.effective_to.is_(None),
                         classification.decision == ClassificationDecision.CONNECT,
+                        classification.exact_cache_approved.is_(True),
                     ),
                 )
                 .join(subproblem, subproblem.id == classification.subproblem_id)

@@ -651,6 +651,32 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
         fixture.grouping.record_serve_failure.assert_not_awaited()
         fixture.generation_service.generate_answer.assert_awaited_once()
 
+    async def test_semantic_cache_disabled_skips_judgment_after_exact_cache_miss(self) -> None:
+        fixture = self._fixture(
+            semantic_cache_enabled=False,
+            exact_cache_enabled=True,
+        )
+        fixture.grouping.record_exact_question.return_value = None
+
+        response, _ = await self._answer(fixture, "처음 보는 질문")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        fixture.grouping.record_exact_question.assert_awaited_once()
+        fixture.grouping.prepare.assert_not_awaited()
+        fixture.grouping.judge.assert_not_awaited()
+        fixture.grouping.record_judgment_and_gate.assert_not_awaited()
+        fixture.generation_service.generate_answer.assert_awaited_once()
+
+    async def test_exact_cache_disabled_uses_semantic_judgment(self) -> None:
+        fixture = self._fixture(exact_cache_enabled=False)
+        fixture.recorded = recorded_judgment("REJECTED")
+
+        response, _ = await self._answer(fixture, "처음 보는 질문")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        fixture.grouping.record_exact_question.assert_not_awaited()
+        fixture.grouping.record_judgment_and_gate.assert_awaited_once()
+
     def _new_topic_rewrite(self, resolved_query: str):
         call = QueryRewriteCall(
             trace=ModelCallTrace(
@@ -763,14 +789,14 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
         fixture.grouping.record_judgment_and_gate.assert_not_awaited()
         fixture.generation_service.generate_answer.assert_awaited_once()
 
-    async def test_profile_semantic_cache_flag_reaches_gate(self) -> None:
+    async def test_profile_semantic_cache_disabled_skips_judgment(self) -> None:
         fixture = self._fixture(semantic_cache_enabled=False)
 
         await self._answer(fixture)
 
-        fixture.grouping.record_judgment_and_gate.assert_awaited_once_with(
-            fixture.prepared, fixture.judged, semantic_cache_enabled=False
-        )
+        fixture.grouping.prepare.assert_not_awaited()
+        fixture.grouping.judge.assert_not_awaited()
+        fixture.grouping.record_judgment_and_gate.assert_not_awaited()
 
     # ------------------------------------------------------------------
     # 생성으로 진행
