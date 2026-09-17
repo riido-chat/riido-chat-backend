@@ -235,6 +235,7 @@ class GroupingChatFixture:
         grouping_enabled: bool = True,
         inject_grouping: bool = True,
         semantic_cache_enabled: bool = True,
+        exact_cache_enabled: Optional[bool] = None,
         turn_no: int = 1,
         index_version_id: Optional[int] = INDEX_VERSION_ID,
     ) -> None:
@@ -247,11 +248,14 @@ class GroupingChatFixture:
         self.judged = SimpleNamespace(label="judged")
         self.recorded = recorded_judgment("SHADOW")
         self.serve_failure_recorded = recorded_judgment("REJECTED_SERVE_FAILED")
-        self.revision = SimpleNamespace(
+        revision_kwargs = dict(
             id=PROFILE_REVISION_ID,
             document_group_id=DOCUMENT_GROUP_ID,
             semantic_cache_enabled=semantic_cache_enabled,
         )
+        if exact_cache_enabled is not None:
+            revision_kwargs["exact_cache_enabled"] = exact_cache_enabled
+        self.revision = SimpleNamespace(**revision_kwargs)
 
         self.retriever = AsyncMock(spec=HybridRetriever)
         self.generation_service = AsyncMock(spec=GenerationService)
@@ -562,6 +566,7 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
         call = fixture.grouping.record_exact_question.await_args
         self.assertEqual("추천 질문", call.args[1])
         self.assertEqual(fixture.rag_run_id, call.args[0].rag_run_id)
+        self.assertTrue(call.kwargs["exact_cache_enabled"])
         fixture.retriever.search_with_trace.assert_not_awaited()
         fixture.grouping.prepare.assert_not_awaited()
         fixture.grouping.judge.assert_not_awaited()
@@ -1259,18 +1264,26 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
 class StartTurnGroupingFlagsTest(unittest.IsolatedAsyncioTestCase):
     async def test_turn_start_carries_grouping_flags(self) -> None:
         cases = {
-            "enabled": (dict(), True, True),
-            "cache_off": (dict(semantic_cache_enabled=False), True, False),
-            "switch_off": (dict(grouping_enabled=False), False, True),
-            "not_injected": (dict(inject_grouping=False), False, True),
-            "no_index_version": (dict(index_version_id=None), False, True),
+            "enabled": (dict(), True, True, True),
+            "cache_off": (dict(semantic_cache_enabled=False), True, False, False),
+            "exact_cache_off": (dict(exact_cache_enabled=False), True, True, False),
+            "exact_cache_on_semantic_cache_off": (
+                dict(semantic_cache_enabled=False, exact_cache_enabled=True),
+                True,
+                False,
+                True,
+            ),
+            "switch_off": (dict(grouping_enabled=False), False, True, True),
+            "not_injected": (dict(inject_grouping=False), False, True, True),
+            "no_index_version": (dict(index_version_id=None), False, True, True),
             "switch_off_cache_off": (
                 dict(grouping_enabled=False, semantic_cache_enabled=False),
                 False,
                 False,
+                False,
             ),
         }
-        for name, (kwargs, grouping_enabled, cache_enabled) in cases.items():
+        for name, (kwargs, grouping_enabled, cache_enabled, exact_cache_enabled) in cases.items():
             with self.subTest(case=name):
                 fixture = GroupingChatFixture(**kwargs)
                 fixture.start()
@@ -1281,6 +1294,7 @@ class StartTurnGroupingFlagsTest(unittest.IsolatedAsyncioTestCase):
 
                 self.assertEqual(grouping_enabled, turn.grouping_enabled)
                 self.assertEqual(cache_enabled, turn.semantic_cache_enabled)
+                self.assertEqual(exact_cache_enabled, turn.exact_cache_enabled)
                 self.assertEqual(TURN_START, fixture.events)
 
 

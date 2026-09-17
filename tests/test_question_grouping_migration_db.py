@@ -1,4 +1,4 @@
-"""질문 그룹핑 migration(20260915_13, 20260915_14)의 upgrade, 제약, downgrade 통합 테스트."""
+"""질문 그룹핑 migration(20260915_13~20260918_15)의 upgrade, 제약, downgrade 통합 테스트."""
 
 import asyncio
 import os
@@ -21,6 +21,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PARENT_REVISION = "20260912_12"
 GROUPING_REVISION = "20260915_13"
 CLEANUP_REVISION = "20260915_14"
+CACHE_SWITCH_REVISION = "20260918_15"
 
 NEW_TABLES = (
     "question_problem_groups",
@@ -98,7 +99,7 @@ class QuestionGroupingMigrationDbTest(unittest.IsolatedAsyncioTestCase):
 
         _alembic(self.scratch_url, "upgrade", "head")
         self.assertEqual(
-            CLEANUP_REVISION,
+            CACHE_SWITCH_REVISION,
             await self._scalar("SELECT version_num FROM alembic_version"),
         )
         for table in NEW_TABLES:
@@ -109,6 +110,7 @@ class QuestionGroupingMigrationDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(await self._table("question_access_audits"))
         self.assertFalse(await self._column("rag_runs", "sanitized_query"))
         self.assertTrue(await self._column("rag_runs", "query_hash"))
+        self.assertTrue(await self._column("chat_profile_revisions", "exact_cache_enabled"))
         # 기존 모델 호출 행은 새 허용 조합을 그대로 만족한다.
         self.assertEqual(2, await self._scalar("SELECT count(*) FROM model_calls"))
 

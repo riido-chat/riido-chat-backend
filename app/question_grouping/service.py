@@ -434,6 +434,7 @@ class QuestionGroupingService:
         question: str,
         *,
         semantic_cache_enabled: bool,
+        exact_cache_enabled: Optional[bool] = None,
     ) -> Optional[ExactQuestionResult]:
         """턴 원문이 같은 문서 그룹의 과거 첫 턴 질문과 정확히 같으면 LLM·검색 없이 판별과 게이트를 기록한다.
 
@@ -443,6 +444,9 @@ class QuestionGroupingService:
         개정으로 연결한다(로그끼리 세부 문제가 달라도 최신 분류가 이긴다). 일치가 없으면
         아무 행도 쓰지 않고 None 을 돌려 호출자가 일반 판별로 진행한다. 게이트가 거절하면 기록만 반환하고
         호출자가 일반 흐름(후속 턴은 Query Rewrite 포함)의 검색·생성으로 이어간다.
+
+        exact_cache_enabled가 주어지면 정확 일치 경로에만 그 값을 적용한다. None이면 기존
+        호출자와의 호환을 위해 semantic_cache_enabled를 사용한다.
         """
 
         match = await self._store.find_exact_question_log_match(
@@ -498,7 +502,11 @@ class QuestionGroupingService:
             subproblem=presented,
         )
         outcome = await self._evaluate_gate(
-            prepared, judgment, semantic_cache_enabled
+            prepared,
+            judgment,
+            semantic_cache_enabled
+            if exact_cache_enabled is None
+            else exact_cache_enabled,
         )
         canonical = (
             None if outcome.inputs is None else outcome.inputs.canonical_answer

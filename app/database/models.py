@@ -403,6 +403,9 @@ class ChatProfileRevision(Base):
     semantic_cache_enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
     )
+    exact_cache_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false"
+    )
     verifier_model_name: Mapped[Optional[str]] = mapped_column(String(150))
     verifier_prompt_version: Mapped[Optional[str]] = mapped_column(String(50))
     created_at: Mapped[Any] = mapped_column(
