@@ -436,10 +436,10 @@ class QuestionGroupingService:
         semantic_cache_enabled: bool,
         exact_cache_enabled: Optional[bool] = None,
     ) -> Optional[ExactQuestionResult]:
-        """턴 원문이 같은 문서 그룹의 과거 첫 턴 질문과 정확히 같으면 LLM·검색 없이 판별과 게이트를 기록한다.
+        """턴 원문이 같은 문서 그룹의 승인된 과거 첫 턴 질문과 정확히 같으면 LLM·검색 없이 판별과 게이트를 기록한다.
 
         첫 턴과 후속 턴 모두에서 Query Rewrite 전에 사용자 원문으로 부른다. 매핑 원천은
-        과거 첫 턴 로그뿐이다.
+        운영자가 exact_cache_approved 로 승인한 과거 첫 턴 로그뿐이다.
         일치한 로그 중 가장 최근에 확정된 현재 CONNECT 분류가 가리키는 세부 문제를 현재
         개정으로 연결한다(로그끼리 세부 문제가 달라도 최신 분류가 이긴다). 일치가 없으면
         아무 행도 쓰지 않고 None 을 돌려 호출자가 일반 판별로 진행한다. 게이트가 거절하면 기록만 반환하고

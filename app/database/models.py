@@ -887,6 +887,8 @@ class RagRun(Base):
     __table_args__ = (
         UniqueConstraint("conversation_id", "turn_no"),
         Index(None, "conversation_id", "created_at"),
+        # 정확 일치 캐시 후보는 정규화 질문 해시로 먼저 좁힌다.
+        Index(None, "query_hash"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -1358,6 +1360,10 @@ class QuestionClassification(Base):
         Boolean, nullable=False, server_default="false"
     )
     confidence: Mapped[Optional[float]] = mapped_column(Numeric)
+    # 추천 질문처럼 운영자가 명시적으로 승인한 질문 원문만 정확 일치 캐시의 원천이 된다.
+    exact_cache_approved: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false"
+    )
     judgment_input: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB)
     effective_from: Mapped[Any] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()

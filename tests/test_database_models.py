@@ -496,10 +496,13 @@ class DatabaseModelTest(unittest.TestCase):
 
 
     def test_rag_run_drops_sanitized_query_and_keeps_query_hash(self) -> None:
-        columns = set(RagRun.__table__.columns.keys())
+        table = RagRun.__table__
+        columns = set(table.columns.keys())
+        indexed_columns = {tuple(index.columns.keys()) for index in table.indexes}
 
         self.assertNotIn("sanitized_query", columns)
         self.assertIn("query_hash", columns)
+        self.assertIn(("query_hash",), indexed_columns)
 
     def test_model_call_links_classification_run_with_owner_combination(self) -> None:
         table = ModelCall.__table__
@@ -700,6 +703,7 @@ class DatabaseModelTest(unittest.TestCase):
         self.assertTrue(table.c.subproblem_id.nullable)
         self.assertFalse(table.c.problem_group_id.nullable)
         self.assertFalse(table.c.run_id.nullable)
+        self.assertFalse(table.c.exact_cache_approved.nullable)
         self.assertIsInstance(table.c.judgment_input.type, JSONB)
         self.assertNotIn("verified", table.columns.keys())
         self.assertEqual(

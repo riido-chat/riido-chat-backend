@@ -602,6 +602,19 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(body, polled.json())
         return body
 
+    async def _approve_exact_cache(self, rag_run_id: uuid.UUID) -> None:
+        """추천 질문으로 확인한 첫 턴만 정확 일치 캐시의 원천으로 승격한다."""
+
+        await self.session.execute(
+            update(QuestionClassification)
+            .where(
+                QuestionClassification.rag_run_id == rag_run_id,
+                QuestionClassification.effective_to.is_(None),
+            )
+            .values(exact_cache_approved=True)
+        )
+        await self.session.commit()
+
     async def _grouping_rows(self, rag_run_id: uuid.UUID):
         classifications = (
             await self.session.execute(
@@ -741,6 +754,7 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
         retriever, generation = self._build_service(judge, enabled=True)
 
         first = await self._ask()
+        await self._approve_exact_cache(uuid.UUID(first["ragRunId"]))
         second = await self._ask(f"  {QUESTION}  ")
         first_id, second_id = uuid.UUID(first["ragRunId"]), uuid.UUID(second["ragRunId"])
 
@@ -781,6 +795,7 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
         retriever, generation = self._build_service(judge, enabled=True)
 
         source = await self._ask()
+        await self._approve_exact_cache(uuid.UUID(source["ragRunId"]))
         other = await self._ask("구독 결제일을 바꾸고 싶어요")
         follow_up = await self._ask(QUESTION, other["conversationId"])
         source_id, follow_up_id = uuid.UUID(source["ragRunId"]), uuid.UUID(follow_up["ragRunId"])

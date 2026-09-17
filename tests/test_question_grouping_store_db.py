@@ -460,6 +460,7 @@ class ExactQuestionLogLookupDbTest(_StoreDbTestCase):
         source: Optional[DocumentSource] = None,
         run_id: Optional[int] = None,
         minutes: Optional[int] = None,
+        exact_cache_approved: bool = True,
     ) -> int:
         classification_id = await self.store.insert_classification(
             turn.id,
@@ -469,6 +470,11 @@ class ExactQuestionLogLookupDbTest(_StoreDbTestCase):
         )
         if minutes is not None:
             await self._set_effective_from(classification_id, minutes)
+        await self.session.execute(
+            update(QuestionClassification)
+            .where(QuestionClassification.id == classification_id)
+            .values(exact_cache_approved=exact_cache_approved)
+        )
         return classification_id
 
     async def _set_effective_from(self, classification_id: int, minutes: int) -> None:
@@ -488,9 +494,17 @@ class ExactQuestionLogLookupDbTest(_StoreDbTestCase):
         run_id: Optional[int] = None,
         turn_no: int = 1,
         minutes: Optional[int] = None,
+        exact_cache_approved: bool = True,
     ) -> RagRun:
         turn = await self._logged_turn(question, scope=scope, turn_no=turn_no)
-        await self._classify_connect(turn, subproblem, source=source, run_id=run_id, minutes=minutes)
+        await self._classify_connect(
+            turn,
+            subproblem,
+            source=source,
+            run_id=run_id,
+            minutes=minutes,
+            exact_cache_approved=exact_cache_approved,
+        )
         return turn
 
     async def _lookup(self, question: str = QUESTION, *, group_id: Optional[int] = None, exclude: Optional[uuid.UUID] = None):
@@ -521,6 +535,12 @@ class ExactQuestionLogLookupDbTest(_StoreDbTestCase):
         for changed in ("추 천 질문", "추천질문", "추천 질문입니다", "추천 질문?"):
             with self.subTest(changed=changed):
                 self.assertIsNone(await self._lookup(changed))
+
+    async def test_unapproved_question_log_is_not_an_exact_cache_match(self) -> None:
+        subproblem = await self._billing_subproblem()
+        await self._connect_log(subproblem, exact_cache_approved=False)
+
+        self.assertIsNone(await self._lookup())
 
     async def test_other_document_group_is_not_matched(self) -> None:
         other_group = await self.seed.group()
@@ -589,8 +609,13 @@ class ExactQuestionLogLookupDbTest(_StoreDbTestCase):
         presented = replace(
             self._presented(subproblem, self.billing), document_source_id=None, document_key=""
         )
-        await self.store.insert_classification(
+        classification_id = await self.store.insert_classification(
             turn.id, run_id=self.run_id, judgment=self._connect(presented), judgment_input=_gate_input("SERVED")
+        )
+        await self.session.execute(
+            update(QuestionClassification)
+            .where(QuestionClassification.id == classification_id)
+            .values(exact_cache_approved=True)
         )
 
         match = await self._lookup()

@@ -549,17 +549,19 @@ class ChatService:
             await on_progress_stage(ProgressStage.RETRIEVING)
 
         grouping_turn: Optional[GroupingTurn] = None
-        if turn.grouping_enabled:
+        if turn.grouping_enabled and (
+            turn.exact_cache_enabled or turn.semantic_cache_enabled
+        ):
             grouping_turn = await self._open_grouping_run(turn)
 
-        # 모든 턴에서 사용자 원문이 같은 문서 그룹의 과거 첫 턴 질문과 정확히 같으면
+        # 모든 턴에서 운영자가 승인한 과거 첫 턴 질문과 사용자 원문이 정확히 같으면
         # 그 로그의 현재 분류를 Query Rewrite·검색·판별보다 먼저 정본 캐시 게이트에 넣는다.
-        # 매핑 원천은 첫 턴 로그뿐이다(후속 턴 로그는 문맥에 기대므로 쓰지 않는다).
+        # 매핑 원천은 승인된 첫 턴 로그뿐이다(후속 턴 로그는 문맥에 기대므로 쓰지 않는다).
         # 게이트가 거절하면 같은 분류 행을 유지한 채 기존 흐름(후속 턴은 Query Rewrite 포함)으로
         # 이어가되 다시 판별하지 않고, 일치가 없으면 아무 행도 쓰지 않는다.
         grouping_recorded: Optional[RecordedJudgment] = None
         exact_grouping_recorded = False
-        if grouping_turn is not None:
+        if grouping_turn is not None and turn.exact_cache_enabled:
             exact_result = await self._require_grouping().record_exact_question(
                 grouping_turn,
                 question,
@@ -686,7 +688,11 @@ class ChatService:
 
         # 판별 경로는 검색 임베딩 호출 마감과 검색 후보 기록을 판별 트랜잭션에서 이미 끝냈다.
         retrieval_recorded = False
-        if grouping_turn is not None and not exact_grouping_recorded:
+        if (
+            grouping_turn is not None
+            and turn.semantic_cache_enabled
+            and not exact_grouping_recorded
+        ):
             grouping_outcome = await self._judge_and_gate(
                 turn,
                 grouping_turn,
