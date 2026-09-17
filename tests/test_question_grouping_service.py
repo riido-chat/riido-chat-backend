@@ -908,6 +908,20 @@ def _exact_match(subproblem_id: uuid.UUID = CANCEL_ID, key: str = "billing.cance
 
 
 class ExactQuestionTest(_ServiceTestCase):
+    async def test_exact_cache_can_serve_when_semantic_cache_is_disabled(self) -> None:
+        self.store.exact_match = _exact_match()
+
+        result = await self.service().record_exact_question(
+            self.turn,
+            QUESTION,
+            semantic_cache_enabled=False,
+            exact_cache_enabled=True,
+        )
+
+        self.assertIsNotNone(result)
+        self.assertTrue(result.recorded.served)
+        self.assertEqual(CacheAttemptOutcome.SERVED, result.recorded.gate.outcome)
+
     async def test_single_log_match_records_connect_and_serves_without_llm(self) -> None:
         self.store.exact_match = _exact_match()
 

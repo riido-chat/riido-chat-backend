@@ -217,6 +217,7 @@ class DatabaseModelTest(unittest.TestCase):
         self.assertFalse(table.c.generation_model_name.nullable)
         self.assertFalse(table.c.query_rewrite_model_name.nullable)
         self.assertFalse(table.c.semantic_cache_enabled.nullable)
+        self.assertFalse(table.c.exact_cache_enabled.nullable)
         self.assertTrue(table.c.verifier_model_name.nullable)
         partial_unique = {
             index.name: str(index.dialect_options["postgresql"]["where"])

@@ -398,6 +398,7 @@ class _TurnStart:
     # 앱 스위치 켜짐 AND 판별 서비스 주입 AND 프로필 판·문서 그룹·색인 판이 모두 있을 때만 True.
     grouping_enabled: bool = False
     semantic_cache_enabled: bool = False
+    exact_cache_enabled: bool = False
 
 
 @dataclass(frozen=True)
@@ -563,6 +564,7 @@ class ChatService:
                 grouping_turn,
                 question,
                 semantic_cache_enabled=turn.semantic_cache_enabled,
+                exact_cache_enabled=turn.exact_cache_enabled,
             )
             grouping_recorded = (
                 None
@@ -913,6 +915,16 @@ class ChatService:
             and document_group_id is not None
             and effective_index_version_id is not None
         )
+        semantic_cache_enabled = bool(
+            getattr(profile_revision, "semantic_cache_enabled", False)
+        )
+        exact_cache_config = getattr(profile_revision, "exact_cache_enabled", None)
+        # pre-split profile objects and lightweight test doubles inherit the old switch.
+        exact_cache_enabled = (
+            semantic_cache_enabled
+            if exact_cache_config is None
+            else bool(exact_cache_config)
+        )
         # commit 이후 객체 접근을 피하려고 식별자를 먼저 확정한다.
         turn = _TurnStart(
             conversation_id=conversation_id,
@@ -925,9 +937,8 @@ class ChatService:
             index_version_id=effective_index_version_id,
             retriever=selected_retriever,
             grouping_enabled=grouping_enabled,
-            semantic_cache_enabled=bool(
-                getattr(profile_revision, "semantic_cache_enabled", False)
-            ),
+            semantic_cache_enabled=semantic_cache_enabled,
+            exact_cache_enabled=exact_cache_enabled,
         )
         await self._session.commit()
         return turn

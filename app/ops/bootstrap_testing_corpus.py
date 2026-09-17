@@ -289,6 +289,7 @@ async def bootstrap() -> tuple[int, int, int]:
                 testing_revision.query_rewrite_model_name = REWRITE_MODEL
                 testing_revision.query_rewrite_prompt_version = REWRITE_PROMPT_VERSION
                 testing_revision.semantic_cache_enabled = False
+                testing_revision.exact_cache_enabled = False
             else:
                 max_version = await session.scalar(
                     select(func.max(ChatProfileRevision.version)).where(
@@ -305,6 +306,7 @@ async def bootstrap() -> tuple[int, int, int]:
                     query_rewrite_model_name=REWRITE_MODEL,
                     query_rewrite_prompt_version=REWRITE_PROMPT_VERSION,
                     semantic_cache_enabled=False,
+                    exact_cache_enabled=False,
                 )
                 session.add(testing_revision)
                 await session.flush()

@@ -368,6 +368,7 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
             query_rewrite_model_name=GENERATION_MODEL,
             query_rewrite_prompt_version=QUERY_REWRITE_PROMPT_VERSION,
             semantic_cache_enabled=True,
+            exact_cache_enabled=True,
         )
         await self.seed.add(revision)
         self.profile_revision_id = revision.id
