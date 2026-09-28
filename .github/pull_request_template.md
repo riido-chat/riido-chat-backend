@@ -11,6 +11,8 @@
 ## 체크리스트
 
 - [ ] 로컬에서 실행하여 정상 동작을 확인
+- [ ] SYSTEM_VERSION 변경 여부와 evaluation/SYSTEM_VERSIONS.md 기록
+- [ ] 평가 기록 (하지 않았으면 "미평가")
 
 ## 관련 이슈
 
