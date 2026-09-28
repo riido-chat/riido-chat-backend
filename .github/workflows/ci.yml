@@ -51,7 +51,7 @@ jobs:
           python-version: "3.12"
           cache: pip  # requirements.txt 해시 기준으로 의존성 캐시 (kiwipiepy 등 설치 시간 단축)
 
-      # 모델·프롬프트·검색 관련 파일이 바뀌었는데 SYSTEM_VERSION 을 올리지 않았거나
+      # 모델, 프롬프트, 검색 관련 파일이 바뀌었는데 SYSTEM_VERSION 을 올리지 않았거나
       # evaluation/SYSTEM_VERSIONS.md 에 행이 없으면 실패한다. 표준 라이브러리만 쓰므로 의존성 설치 전에 먼저 돌린다.
       - name: Check system version
         run: python scripts/check_system_version.py "origin/${{ github.base_ref }}"

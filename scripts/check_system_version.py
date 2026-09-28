@@ -3,16 +3,16 @@
 
 감시 경로(응답 동작에 영향을 주는 코드):
 
-- app/answering/                 생성 모델·프롬프트·근거 규칙
-- app/chat/query_rewrite.py      재작성 모델·프롬프트
-- app/question_grouping/         판별 모델·프롬프트·payload·캐시 게이트
-- app/retrieval/                 임베딩 모델·임베딩 문장·검색 파라미터
+- app/answering/                 생성 모델, 프롬프트, 근거 규칙
+- app/chat/query_rewrite.py      재작성 모델, 프롬프트
+- app/question_grouping/         판별 모델, 프롬프트, payload, 캐시 게이트
+- app/retrieval/                 임베딩 모델, 임베딩 문장, 검색 파라미터
 - app/document/clean.py          정제 규칙(검색 텍스트)
 - app/document/section_parser.py Section 경계
 - app/document/chunker.py        Chunk 구성
 - app/document/chunking_config.py 청킹 설정 판
 
-tests/, docs/, evaluation/ 과 수집·색인 실행 흐름(app/indexing/, 그 밖의 app/document/)은
+tests/, docs/, evaluation/ 과 수집과 색인 실행 흐름(app/indexing/, 그 밖의 app/document/)은
 감시하지 않는다.
 
 검사 규칙:
@@ -93,7 +93,7 @@ def read_system_version(source: str) -> Optional[str]:
 def parse_version_rows(markdown: str) -> List[str]:
     """SYSTEM_VERSIONS.md 표에서 첫 칸이 semver 인 행의 버전만 모은다.
 
-    버전 규칙 표(MAJOR/MINOR/PATCH)와 헤더·구분선은 첫 칸이 semver 가 아니라 빠진다.
+    버전 규칙 표(MAJOR/MINOR/PATCH)와 헤더와 구분선은 첫 칸이 semver 가 아니라 빠진다.
     """
 
     versions: List[str] = []
