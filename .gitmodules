@@ -1,0 +1,3 @@
+[submodule "evaluation/registry"]
+	path = evaluation/registry
+	url = ../riido-evals.git
