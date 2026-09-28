@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.core.system_version import SYSTEM_VERSION
 from app.database.session import get_db_session
 from app.main import create_app
 
@@ -28,7 +29,10 @@ class HealthApiTest(unittest.TestCase):
         response = self.client.get("/health")
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual({"status": "ok"}, response.json())
+        self.assertEqual(
+            {"status": "ok", "version": SYSTEM_VERSION},
+            response.json(),
+        )
 
     def test_database_health_check_returns_connected(self) -> None:
         response = self.client.get("/health/db")
