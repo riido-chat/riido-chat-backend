@@ -58,7 +58,6 @@ from app.question_grouping.catalog_reader import (
     QuestionCatalogReader,
 )
 from app.question_grouping.constants import (
-    JUDGE_REASONING_EFFORT,
     JUDGMENT_INPUT_SCHEMA_VERSION,
     REJECT_CANONICAL_DATA_INVALID,
     REJECT_CANONICAL_SERVE_FAILED,
@@ -242,19 +241,6 @@ class _GateOutcome:
 # ---------------------------------------------------------------------------
 
 
-def _usage_block(trace: Optional[ModelCallTrace]) -> Optional[Dict[str, Any]]:
-    if trace is None:
-        return None
-    return {
-        "input": trace.input_tokens,
-        "output": trace.output_tokens,
-        "cached": trace.cached_input_tokens,
-        "reasoning": trace.reasoning_tokens,
-        "latencyMs": trace.latency_ms,
-        "retryCount": trace.retry_count,
-    }
-
-
 def _output_block(prepared: PreparedJudgment, judged: Optional[JudgedTurn]) -> Any:
     if judged is None:
         return None
@@ -278,9 +264,14 @@ def build_judgment_input(
 
     UUID 는 문자열로 바꿔 JSON 으로 직렬화할 수 있게 한다. presentationSeed 는 rag_run_id 로
     만든 섞기 seed 라 같은 턴을 다시 판별하면 같은 제시 순서가 나온다(결정 10).
+
+    다른 표에 정본이 있는 값은 담지 않는다(v2). 판별과 재임베딩 호출의 토큰, 지연, 재시도는
+    model_calls(rag_run_id + classification_run_id, 목적별 한 행), 모델과 프롬프트 판은
+    model_calls 와 classification_runs, 추론 설정은 rag_runs.profile_revision_id 의 judge 구성
+    params, 색인 판과 문서 그룹은 rag_runs 와 classification_runs, 분류 실행은
+    question_classifications.run_id 가 정본이다. v1 행에는 이 값들이 함께 남아 있다.
     """
 
-    turn = prepared.turn
     vector = prepared.vector
     scope = prepared.scope
     catalog = prepared.catalog
@@ -300,12 +291,6 @@ def build_judgment_input(
     data: Dict[str, Any] = {
         "schemaVersion": JUDGMENT_INPUT_SCHEMA_VERSION,
         "resolvedQuery": prepared.resolved_query,
-        "promptVersion": prepared.prompt_version,
-        "model": prepared.model,
-        "reasoningEffort": JUDGE_REASONING_EFFORT,
-        "indexVersionId": turn.index_version_id,
-        "documentGroupId": turn.document_group_id,
-        "classificationRunId": turn.classification_run_id,
         "presentationSeed": prepared.seed,
         "embedding": {
             "embeddingConfigId": None if scope is None else scope.embedding_config_id,
@@ -314,7 +299,6 @@ def build_judgment_input(
             ),
             "reusedRetrievalEmbedding": vector.reused_retrieval_embedding,
             "retrievalQuery": vector.retrieval_query,
-            "usage": _usage_block(vector.trace),
         },
         "catalog": (
             None
@@ -345,7 +329,6 @@ def build_judgment_input(
                 "retryCount": retry_count,
             }
         ),
-        "usage": None if judged is None else _usage_block(judged.call.trace),
         "gate": gate_block,
     }
     if prepared.presentation is not None:

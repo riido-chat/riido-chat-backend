@@ -31,7 +31,8 @@ NO_DOCUMENT_GROUP_NAME = "가이드 밖 질문"
 
 # (document_version_id, chunking_config_id) 별 문서 outline LRU 캐시 크기.
 DOCUMENT_OUTLINE_CACHE_SIZE = 512
-JUDGMENT_INPUT_SCHEMA_VERSION = "v1"
+# v2: 다른 표에 정본이 있는 사용량, 모델, 프롬프트 판, 추론 설정, 색인 판, 문서 그룹, 분류 실행 칸을 뺐다.
+JUDGMENT_INPUT_SCHEMA_VERSION = "v2"
 
 # payload 식별자와 섞기 스트림
 DOCUMENT_ID_PREFIX = "D"
