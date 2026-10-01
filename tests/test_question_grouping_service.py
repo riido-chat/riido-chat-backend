@@ -4,6 +4,7 @@ import json
 import logging
 import unittest
 import uuid
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 from unittest.mock import patch
@@ -158,6 +159,7 @@ def _gate_inputs(
     applicability_rules: Tuple[str, ...] = (),
     document_enabled: bool = True,
     cited_document_enabled: bool = True,
+    canonical_created_at: Optional[datetime] = None,
 ) -> GateInputs:
     state = GateSubproblemState(
         CANCEL_ID, QuestionSubproblemStatus.APPROVED, serving_state, current_version, document_enabled
@@ -166,7 +168,9 @@ def _gate_inputs(
         return GateInputs(subproblem=state)
     return GateInputs(
         subproblem=state,
-        canonical_answer=GateCanonicalAnswer(canonical_id, current_version, "현재 정본 [1]", applicability_rules),
+        canonical_answer=GateCanonicalAnswer(
+            canonical_id, current_version, "현재 정본 [1]", applicability_rules, canonical_created_at
+        ),
         citations=(CITATION,),
         contexts_by_source_id={
             BILLING_SOURCE: CitationIndexContext(BILLING_VERSION, (section,), cited_document_enabled)
@@ -916,6 +920,8 @@ def _exact_match(
     current_version: int = 1,
     canonical_recorded: bool = False,
     canonical_id: Optional[uuid.UUID] = None,
+    approved: bool = False,
+    effective_from: Optional[datetime] = None,
 ) -> ExactQuestionLogMatch:
     return ExactQuestionLogMatch(
         subproblem_id=subproblem_id,
@@ -931,6 +937,8 @@ def _exact_match(
         source_subproblem_version=source_version,
         source_canonical_recorded=canonical_recorded,
         source_canonical_answer_id=canonical_id,
+        source_exact_cache_approved=approved,
+        source_effective_from=effective_from,
     )
 
 
@@ -1067,6 +1075,55 @@ class ExactQuestionTest(_ServiceTestCase):
                 self.assertEqual([], self.store.classifications)
                 self.assertEqual([], self.store.attempts)
                 self.assertEqual([reason], result.judgment_input["exactQuestionFallthrough"]["rejectionReasons"])
+
+    async def test_operator_approved_source_after_ruled_canonical_serves(self) -> None:
+        # DEV 추천 질문 원천 모양(#220): 제시 목록 JSON null 이라 본 정본 기록 없음, 운영자 승인,
+        # 현재 정본에 적용 제외 규칙 2개, 승인 시각이 정본 생성 뒤.
+        created = datetime(2026, 9, 30, 9, 0, tzinfo=timezone.utc)
+        self.store.exact_match = _exact_match(approved=True, effective_from=created + timedelta(hours=2))
+        self.catalog.gate_inputs = _gate_inputs(
+            applicability_rules=("규칙 1", "규칙 2"), canonical_created_at=created
+        )
+
+        result = await self.service().record_exact_question(
+            self.turn, QUESTION, semantic_cache_enabled=True
+        )
+
+        self.assertIsInstance(result, ExactQuestionResult)
+        self.assertTrue(result.recorded.served)
+        self.assertEqual(CacheAttemptOutcome.SERVED, result.recorded.gate.outcome)
+        self.assertEqual(CANONICAL_ID, result.recorded.canonical_answer_id)
+        self.assertEqual([], self.judge_client.payloads)
+
+    async def test_canonical_created_after_approval_falls_through(self) -> None:
+        created = datetime(2026, 9, 30, 9, 0, tzinfo=timezone.utc)
+        self.store.exact_match = _exact_match(approved=True, effective_from=created - timedelta(hours=2))
+        self.catalog.gate_inputs = _gate_inputs(
+            applicability_rules=("규칙 1", "규칙 2"), canonical_created_at=created
+        )
+
+        result = await self.service().record_exact_question(
+            self.turn, QUESTION, semantic_cache_enabled=True
+        )
+
+        self.assertIsInstance(result, ExactQuestionFallthrough)
+        self.assertEqual((EXACT_SOURCE_CANONICAL_UNVERIFIED,), result.rejection_reasons)
+        self.assertEqual([], self.store.classifications)
+        self.assertEqual([], self.store.attempts)
+
+    async def test_presented_canonical_column_match_serves(self) -> None:
+        # 저장소가 판별 행 presented_canonical_answer_id 칸을 본 정본 기록으로 넘긴 경우.
+        self.store.exact_match = _exact_match(
+            canonical_recorded=True, canonical_id=CANONICAL_ID, approved=True
+        )
+        self.catalog.gate_inputs = _gate_inputs(applicability_rules=("규칙 1", "규칙 2"))
+
+        result = await self.service().record_exact_question(
+            self.turn, QUESTION, semantic_cache_enabled=True
+        )
+
+        self.assertIsInstance(result, ExactQuestionResult)
+        self.assertTrue(result.recorded.served)
 
     async def test_fallthrough_reason_is_recorded_on_semantic_judgment_row(self) -> None:
         self.store.exact_match = _exact_match(

@@ -293,6 +293,10 @@ class QuestionGroupingStore:
                     classification.id.label("classification_id"),
                     classification.effective_from,
                     classification.subproblem_version.label("source_subproblem_version"),
+                    classification.exact_cache_approved,
+                    classification.presented_canonical_answer_id.label(
+                        "presented_canonical_column"
+                    ),
                     classification.judgment_input[
                         JUDGMENT_INPUT_SUBPROBLEM_CANDIDATES_FIELD
                     ]["items"].label("presented_items"),
@@ -364,6 +368,11 @@ class QuestionGroupingStore:
         canonical_recorded, canonical_answer_id = presented_canonical_answer(
             chosen.presented_items, chosen.subproblem_id
         )
+        # 제시 목록이 없어도(subproblemCandidates 가 없거나 JSON null) 판별 행 칸에 제시 정본이
+        # 있으면 그 값을 쓴다. 칸이 널이면 정본 없이 판별했는지 알 수 없어 기록 없음으로 둔다.
+        if not canonical_recorded and chosen.presented_canonical_column is not None:
+            canonical_recorded = True
+            canonical_answer_id = chosen.presented_canonical_column
         return ExactQuestionLogMatch(
             subproblem_id=chosen.subproblem_id,
             key=chosen.key,
@@ -378,6 +387,8 @@ class QuestionGroupingStore:
             source_subproblem_version=chosen.source_subproblem_version,
             source_canonical_recorded=canonical_recorded,
             source_canonical_answer_id=canonical_answer_id,
+            source_exact_cache_approved=chosen.exact_cache_approved,
+            source_effective_from=chosen.effective_from,
         )
 
     # ------------------------------------------------------------------

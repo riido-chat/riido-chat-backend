@@ -2,6 +2,7 @@ import json
 import unittest
 import uuid
 from dataclasses import replace
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Sequence
 
 from app.database.models import (
@@ -452,6 +453,8 @@ def _match(
     current_version: int = 2,
     recorded: bool = False,
     canonical_id: Optional[uuid.UUID] = None,
+    approved: bool = False,
+    effective_from: Optional[datetime] = None,
 ) -> ExactQuestionLogMatch:
     return ExactQuestionLogMatch(
         subproblem_id=SUBPROBLEM_ID,
@@ -467,6 +470,8 @@ def _match(
         source_subproblem_version=source_version,
         source_canonical_recorded=recorded,
         source_canonical_answer_id=canonical_id,
+        source_exact_cache_approved=approved,
+        source_effective_from=effective_from,
     )
 
 
@@ -520,6 +525,74 @@ class ExactSourceFallthroughTest(unittest.TestCase):
         for canonical in (CANONICAL, None):
             with self.subTest(canonical=canonical):
                 self.assertEqual((), exact_source_fallthrough_reasons(_match(), _inputs(canonical=canonical)))
+
+    def test_approved_source_after_ruled_canonical_creation_is_reused(self) -> None:
+        # DEV 추천 질문 원천 모양(#220): 제시 목록 없음, 운영자 승인, 현재 정본에 규칙 2개,
+        # 승인(effective_from)이 현재 정본 생성 뒤다. 같은 시각도 정본이 있던 때로 본다.
+        created = datetime(2026, 9, 30, 9, 0, tzinfo=timezone.utc)
+        ruled = replace(CANONICAL, applicability_rules=("규칙 1", "규칙 2"), created_at=created)
+        for effective_from in (created, created + timedelta(hours=3)):
+            with self.subTest(effective_from=effective_from):
+                result = exact_source_fallthrough_reasons(
+                    _match(approved=True, effective_from=effective_from), _inputs(canonical=ruled)
+                )
+
+                self.assertEqual((), result)
+
+    def test_approved_source_before_ruled_canonical_creation_falls_through(self) -> None:
+        # 승인 뒤에 정본이 새로 만들어졌으면 승인이 그 정본을 본 것이 아니다.
+        created = datetime(2026, 9, 30, 9, 0, tzinfo=timezone.utc)
+        ruled = replace(CANONICAL, applicability_rules=("규칙 1", "규칙 2"), created_at=created)
+
+        result = exact_source_fallthrough_reasons(
+            _match(approved=True, effective_from=created - timedelta(seconds=1)), _inputs(canonical=ruled)
+        )
+
+        self.assertEqual((EXACT_SOURCE_CANONICAL_UNVERIFIED,), result)
+
+    def test_approval_time_rule_needs_operator_approval_and_timestamps(self) -> None:
+        created = datetime(2026, 9, 30, 9, 0, tzinfo=timezone.utc)
+        later = created + timedelta(hours=1)
+        ruled = replace(CANONICAL, applicability_rules=("규칙 1",), created_at=created)
+        cases = (
+            ("승인 아님", _match(approved=False, effective_from=later), ruled),
+            ("원천 시각 없음", _match(approved=True), ruled),
+            ("정본 생성 시각 없음", _match(approved=True, effective_from=later), replace(ruled, created_at=None)),
+        )
+        for name, match, canonical in cases:
+            with self.subTest(name):
+                self.assertEqual(
+                    (EXACT_SOURCE_CANONICAL_UNVERIFIED,),
+                    exact_source_fallthrough_reasons(match, _inputs(canonical=canonical)),
+                )
+
+    def test_recorded_mismatch_is_not_rescued_by_approval_time(self) -> None:
+        # 본 정본이 기록돼 있으면 승인 시각과 관계없이 그 기록으로 판단한다.
+        created = datetime(2026, 9, 30, 9, 0, tzinfo=timezone.utc)
+        ruled = replace(CANONICAL, applicability_rules=("규칙 1",), created_at=created)
+
+        result = exact_source_fallthrough_reasons(
+            _match(
+                recorded=True,
+                canonical_id=uuid.UUID(int=77),
+                approved=True,
+                effective_from=created + timedelta(hours=1),
+            ),
+            _inputs(canonical=ruled),
+        )
+
+        self.assertEqual((EXACT_SOURCE_CANONICAL_CHANGED,), result)
+
+    def test_stale_revision_falls_through_before_approval_time_rule(self) -> None:
+        created = datetime(2026, 9, 30, 9, 0, tzinfo=timezone.utc)
+        ruled = replace(CANONICAL, applicability_rules=("규칙 1",), created_at=created)
+
+        result = exact_source_fallthrough_reasons(
+            _match(source_version=1, approved=True, effective_from=created + timedelta(hours=1)),
+            _inputs(canonical=ruled),
+        )
+
+        self.assertEqual((EXACT_SOURCE_SUBPROBLEM_VERSION_STALE,), result)
 
     def test_without_gate_inputs_only_revision_from_lookup_is_checked(self) -> None:
         self.assertEqual((), exact_source_fallthrough_reasons(_match(), None))

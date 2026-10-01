@@ -1,5 +1,8 @@
 import unittest
 import uuid
+from datetime import datetime, timezone
+from types import SimpleNamespace
+from typing import Any, Optional
 
 from app.chat.log_store import CitationLog
 from app.database.models import (
@@ -29,6 +32,7 @@ from app.question_grouping.models import (
     TurnJudgment,
 )
 from app.question_grouping.store import (
+    QuestionGroupingStore,
     presented_canonical_answer,
     presented_canonical_answer_id,
     served_citation_logs,
@@ -289,6 +293,79 @@ class PresentedCanonicalAnswerIdTest(unittest.TestCase):
         for judgment, judgment_input in cases:
             with self.subTest(judgment_input=judgment_input, decision=judgment.decision):
                 self.assertIsNone(presented_canonical_answer_id(judgment, judgment_input))
+
+
+class _RowsResult:
+    def __init__(self, rows) -> None:
+        self._rows = rows
+
+    def all(self):
+        return list(self._rows)
+
+
+class _RowsSession:
+    """find_exact_question_log_match 가 읽는 조회 결과 행만 돌려주는 가짜 세션."""
+
+    def __init__(self, rows) -> None:
+        self._rows = rows
+
+    async def execute(self, statement: Any) -> _RowsResult:
+        return _RowsResult(self._rows)
+
+
+class ExactQuestionLogMatchRowTest(unittest.IsolatedAsyncioTestCase):
+    """정확 일치 원천 행의 제시 정본 기록 여부와 승인 시각을 읽는 규칙(#220)."""
+
+    GROUP_ID = 5
+    APPROVED_AT = datetime(2026, 9, 30, 12, 0, tzinfo=timezone.utc)
+
+    def _row(self, *, presented_items: Any = None, column: Optional[uuid.UUID] = None) -> SimpleNamespace:
+        return SimpleNamespace(
+            classification_id=9,
+            effective_from=self.APPROVED_AT,
+            source_subproblem_version=3,
+            exact_cache_approved=True,
+            presented_canonical_column=column,
+            presented_items=presented_items,
+            rag_run_id=uuid.UUID(int=10),
+            user_query="추천 질문",
+            subproblem_id=PRESENTED.subproblem_id,
+            key=PRESENTED.key,
+            problem_group_id=PRESENTED.problem_group_id,
+            current_version=3,
+            kind=QuestionProblemGroupKind.DOCUMENT,
+            no_document_owner_id=None,
+            document_source_id=7,
+            document_key=PRESENTED.document_key,
+            document_owner_id=self.GROUP_ID,
+        )
+
+    async def _lookup(self, row: SimpleNamespace):
+        store = QuestionGroupingStore(_RowsSession([row]))
+        return await store.find_exact_question_log_match(
+            self.GROUP_ID, "추천 질문", exclude_rag_run_id=uuid.uuid4()
+        )
+
+    async def test_json_null_candidates_are_not_recorded(self) -> None:
+        # DEV 승인 원천은 judgment_input.subproblemCandidates 가 JSON null 이라 그 아래 items
+        # 조회 결과가 널이다. 제시 정본 칸도 널이면 본 정본을 모르는 것으로 둔다.
+        match = await self._lookup(self._row(presented_items=None))
+
+        self.assertEqual((False, None), (match.source_canonical_recorded, match.source_canonical_answer_id))
+        self.assertTrue(match.source_exact_cache_approved)
+        self.assertEqual(self.APPROVED_AT, match.source_effective_from)
+
+    async def test_presented_canonical_column_is_used_without_candidates(self) -> None:
+        match = await self._lookup(self._row(presented_items=None, column=CANONICAL_ID))
+
+        self.assertEqual((True, CANONICAL_ID), (match.source_canonical_recorded, match.source_canonical_answer_id))
+
+    async def test_candidates_take_precedence_over_column(self) -> None:
+        items = [PRESENTED.to_judgment_input()]
+
+        match = await self._lookup(self._row(presented_items=items, column=uuid.UUID(int=77)))
+
+        self.assertEqual((True, CANONICAL_ID), (match.source_canonical_recorded, match.source_canonical_answer_id))
 
 
 if __name__ == "__main__":
