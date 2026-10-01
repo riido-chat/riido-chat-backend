@@ -517,6 +517,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             user_query="질문",
             index_version_id=INDEX_VERSION_ID,
             query_hash=exact_question_hash("질문"),
+            profile_revision_id=None,
         )
 
     async def test_reuses_conversation_id_from_request(self) -> None:
@@ -531,6 +532,7 @@ class ChatServiceTest(unittest.IsolatedAsyncioTestCase):
             user_query="질문",
             index_version_id=INDEX_VERSION_ID,
             query_hash=exact_question_hash("질문"),
+            profile_revision_id=None,
         )
         self.assertEqual(existing_id, response.conversation_id)
 

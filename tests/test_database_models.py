@@ -55,6 +55,8 @@ from app.database.models import (
     IngestionStage,
     ModelCall,
     ModelCallPurpose,
+    ProfileRevisionComponent,
+    ProfileRevisionComponentRecordedBy,
     QuestionCacheAttempt,
     QuestionClassification,
     QuestionEmbedding,
@@ -74,6 +76,7 @@ ERD_TABLE_NAMES = {
     "document_groups",
     "document_group_sources",
     "chat_profiles",
+    "profile_revision_components",
     "chat_profile_revisions",
     "document_sources",
     "ingestion_runs",
@@ -808,6 +811,57 @@ class DatabaseModelTest(unittest.TestCase):
             }
             <= check_names
         )
+
+    def test_profile_revision_component_is_one_row_per_revision_stage(self) -> None:
+        table = ProfileRevisionComponent.__table__
+        unique_constraints = {
+            tuple(constraint.columns.keys())
+            for constraint in table.constraints
+            if isinstance(constraint, UniqueConstraint)
+        }
+        (revision_fk,) = table.c.revision_id.foreign_keys
+
+        self.assertIn(("revision_id", "stage"), unique_constraints)
+        self.assertEqual("chat_profile_revisions.id", revision_fk.target_fullname)
+        self.assertEqual("RESTRICT", revision_fk.ondelete)
+        self.assertEqual(
+            {"fk_profile_revision_components_revision_id"},
+            {constraint.name for constraint in table.foreign_key_constraints},
+        )
+        self.assertFalse(table.c.model_name.nullable)
+        self.assertFalse(table.c.prompt_version.nullable)
+        self.assertTrue(table.c.prompt_sha256.nullable)
+        self.assertTrue(table.c.params.nullable)
+        self.assertEqual(
+            {"BACKFILL", "PUBLISH"},
+            {member.value for member in ProfileRevisionComponentRecordedBy},
+        )
+
+    def test_run_provenance_columns_are_nullable(self) -> None:
+        rag_runs = RagRun.__table__
+        (profile_fk,) = rag_runs.c.profile_revision_id.foreign_keys
+        self.assertTrue(rag_runs.c.profile_revision_id.nullable)
+        self.assertEqual("chat_profile_revisions.id", profile_fk.target_fullname)
+        self.assertEqual("RESTRICT", profile_fk.ondelete)
+        self.assertTrue(rag_runs.c.build_version.nullable)
+
+        classifications = QuestionClassification.__table__
+        (canonical_fk,) = classifications.c.presented_canonical_answer_id.foreign_keys
+        self.assertTrue(classifications.c.presented_canonical_answer_id.nullable)
+        self.assertEqual("canonical_answers.id", canonical_fk.target_fullname)
+        self.assertEqual(
+            "fk_question_classifications_presented_canonical_answer_id",
+            canonical_fk.constraint.name,
+        )
+
+        canonical = CanonicalAnswer.__table__
+        for column in (
+            "generation_prompt_version",
+            "generation_prompt_sha256",
+            "generation_model_name",
+        ):
+            with self.subTest(column=column):
+                self.assertTrue(canonical.c[column].nullable)
 
     def test_constraint_names_fit_postgres_identifier_limit(self) -> None:
         names = [

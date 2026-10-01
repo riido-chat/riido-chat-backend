@@ -24,6 +24,9 @@ subproblems.json 을 모두 읽는다.
   id 는 해시에 넣지 않는다. 재색인으로 청크 id 만 바뀐 경우 정본을 교체하지 않고, 서빙 게이트가
   R17 로 현재 색인의 절을 찾는다. 새로 넣는 정본의 canonical_answer_citations 에는 이번에 해석한
   청크 id·문서 판 id 를 쓴다.
+- 정본의 canonical.generation(modelName, promptVersion, promptSha256, 모두 선택)은 새로 넣는
+  정본의 생성 출처 칸에 그대로 쓴다. 없으면 비운다. 해시에는 넣지 않아 출처만 다르면 정본을
+  바꾸지 않는다.
 - 입력에 없는 기존 세부 문제는 건드리지 않고 보고만 한다.
 - 모든 검증을 통과해야 쓴다. --apply 는 한 트랜잭션으로 쓰고 commit 한다.
 - 임베딩 호출은 model_calls 에 남기지 않는다(소유 조합 제약상 턴·실행에 속하지 않는 호출).
@@ -102,6 +105,10 @@ REVIEW_REJECTED = "rejected"
 REVIEW_STATUSES = (REVIEW_APPROVED, REVIEW_DRAFT, REVIEW_REJECTED)
 
 KEY_PATTERN = re.compile(r"^[a-z0-9][a-z0-9.-]*$")
+SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+# canonical_answers 생성 출처 칸 길이.
+MAX_GENERATION_MODEL_NAME_LENGTH = 150
+MAX_GENERATION_PROMPT_VERSION_LENGTH = 50
 MAX_KEY_LENGTH = 200
 MAX_NAME_LENGTH = 200
 MAX_ACTOR_LENGTH = 100
@@ -186,6 +193,15 @@ class SeedCitation:
 
 
 @dataclass(frozen=True)
+class SeedGeneration:
+    """정본 본문을 만든 생성 프롬프트와 모델(canonical.generation). 모르는 칸은 널이다."""
+
+    model_name: Optional[str] = None
+    prompt_version: Optional[str] = None
+    prompt_sha256: Optional[str] = None
+
+
+@dataclass(frozen=True)
 class SeedSubproblem:
     key: str
     name: str
@@ -196,6 +212,7 @@ class SeedSubproblem:
     citations: Tuple[SeedCitation, ...]
     review_status: str
     legacy_id: Optional[str] = None
+    generation: SeedGeneration = SeedGeneration()
 
 
 @dataclass(frozen=True)
@@ -365,6 +382,35 @@ def parse_document(
     )
 
 
+def _optional_text(mapping: Mapping[str, Any], name: str, where: str, max_length: int) -> Optional[str]:
+    value = _require(mapping, name, str, where, optional=True)
+    if value is None or not value.strip():
+        return None
+    value = value.strip()
+    if len(value) > max_length:
+        raise _SchemaError(f"{where}.{name} 은 {max_length}자 이하여야 합니다.")
+    return value
+
+
+def _parse_generation(canonical: Mapping[str, Any], where: str) -> SeedGeneration:
+    generation = _require(canonical, "generation", dict, where, optional=True)
+    if generation is None:
+        return SeedGeneration()
+    generation_where = f"{where}.generation"
+    prompt_sha256 = _require(generation, "promptSha256", str, generation_where, optional=True)
+    if prompt_sha256 is not None and not SHA256_PATTERN.match(prompt_sha256):
+        raise _SchemaError(f"{generation_where}.promptSha256 은 64자리 소문자 hex 여야 합니다.")
+    return SeedGeneration(
+        model_name=_optional_text(
+            generation, "modelName", generation_where, MAX_GENERATION_MODEL_NAME_LENGTH
+        ),
+        prompt_version=_optional_text(
+            generation, "promptVersion", generation_where, MAX_GENERATION_PROMPT_VERSION_LENGTH
+        ),
+        prompt_sha256=prompt_sha256,
+    )
+
+
 def _parse_subproblem(item: Mapping[str, Any], where: str) -> SeedSubproblem:
     canonical = _require(item, "canonical", dict, where)
     citations = []
@@ -393,6 +439,7 @@ def _parse_subproblem(item: Mapping[str, Any], where: str) -> SeedSubproblem:
         citations=tuple(sorted(citations, key=lambda citation: citation.order)),
         review_status=item["reviewStatus"],
         legacy_id=_require(item, "legacyId", str, where, optional=True),
+        generation=_parse_generation(canonical, f"{where}.canonical"),
     )
 
 
@@ -1590,6 +1637,9 @@ async def apply_seed_plan(
                 approval=CanonicalAnswerApproval.APPROVED,
                 approved_by=actor,
                 valid_from=now,
+                generation_prompt_version=seed.generation.prompt_version,
+                generation_prompt_sha256=seed.generation.prompt_sha256,
+                generation_model_name=seed.generation.model_name,
                 created_at=now,
             )
         )

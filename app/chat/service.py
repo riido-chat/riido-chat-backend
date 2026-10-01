@@ -913,6 +913,10 @@ class ChatService:
                 index_version_id=effective_index_version_id,
                 # 모든 턴에 채운다. 정확 일치 조회는 이 값으로 과거 첫 턴 로그를 찾는다.
                 query_hash=exact_question_hash(question),
+                # 판을 턴마다 고르게 되어도 턴 행 하나로 쓴 판을 찾도록 남긴다.
+                profile_revision_id=(
+                    None if profile_revision is None else profile_revision.id
+                ),
             )
         except ConversationUnavailableError as error:
             raise ConversationNotFoundError(

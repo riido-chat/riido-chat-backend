@@ -2,6 +2,7 @@
 
 - 문서 영역: document_sources → document_versions → content_nodes ↔ document_chunks(공유 PK 1:1)
 - 검색·색인 영역: embedding_configs, chunk_embeddings, index_versions, index_documents, index_runs
+- 프로필 영역: chat_profiles → chat_profile_revisions → profile_revision_components
 - 대화·RAG 영역: conversations → rag_runs → retrieval_results / model_calls / answer_citations / feedbacks
 - 질문 그룹핑 영역: question_problem_groups → question_subproblems → canonical_answers,
   classification_runs → question_classifications → question_cache_attempts
@@ -62,6 +63,14 @@ GROUP_SOURCE_DOCUMENT_GROUP_UNIQUE_CONSTRAINT = (
 CURRENT_CLASSIFICATION_CONSTRAINT = "uq_question_classifications_rag_run_id_current"
 OPEN_ONLINE_CLASSIFICATION_RUN_CONSTRAINT = "uq_classification_runs_open_online"
 APPROVED_CANONICAL_ANSWER_CONSTRAINT = "uq_canonical_answers_subproblem_id_approved"
+# 명명 규칙대로 referred table 까지 붙이면 63자를 넘어 이름을 직접 지정한다.
+PROFILE_REVISION_COMPONENT_REVISION_FK_CONSTRAINT = (
+    "fk_profile_revision_components_revision_id"
+)
+PRESENTED_CANONICAL_ANSWER_FK_CONSTRAINT = (
+    "fk_question_classifications_presented_canonical_answer_id"
+)
+SHA256_HEX_PATTERN = "^[0-9a-f]{64}$"
 
 # 턴, 분류 실행, 색인, 수집 중 어느 실행 칸을 함께 채울 수 있는지 정한다.
 # 즉시 판별은 턴과 분류 실행을 모두 채우고, 백필 판정은 분류 실행만 채운다.
@@ -173,6 +182,49 @@ class ChatProfileRevisionStatus(str, enum.Enum):
     TESTING = "TESTING"
     PUBLISHED = "PUBLISHED"
     RETIRED = "RETIRED"
+
+
+class ProfileRevisionComponentStage(str, enum.Enum):
+    """프로필 판 구성 행의 단계. 값마다 지문 표(app/core/prompt_fingerprints.json)의
+    component 가 하나로 정해진다(PROFILE_REVISION_COMPONENT_PROMPT_KEYS)."""
+
+    REWRITE = "rewrite"
+    JUDGE = "judge"
+    # 생성 단계 묶음 판(generation@vNN). 하위 네 단계의 지문을 묶은 지문이다.
+    GENERATION = "generation"
+    SOURCE_PLANNING = "source_planning"
+    SOURCE_PLANNING_REPAIR = "source_planning_repair"
+    ANSWER = "answer"
+    ANSWER_REPAIR = "answer_repair"
+
+
+# 단계 → 지문 표 component. prompt_key 는 "<component>@<prompt_version>" 이다.
+PROFILE_REVISION_COMPONENT_PROMPT_KEYS = {
+    ProfileRevisionComponentStage.REWRITE: "rewrite",
+    ProfileRevisionComponentStage.JUDGE: "judge",
+    ProfileRevisionComponentStage.GENERATION: "generation",
+    ProfileRevisionComponentStage.SOURCE_PLANNING: "generation.source_planning",
+    ProfileRevisionComponentStage.SOURCE_PLANNING_REPAIR: (
+        "generation.source_planning_repair"
+    ),
+    ProfileRevisionComponentStage.ANSWER: "generation.answer",
+    ProfileRevisionComponentStage.ANSWER_REPAIR: "generation.answer_repair",
+}
+PROFILE_REVISION_COMPONENT_PROMPT_KEY_CHECK = (
+    "prompt_key = (CASE stage"
+    + "".join(
+        f" WHEN '{stage.value}' THEN '{component}'"
+        for stage, component in PROFILE_REVISION_COMPONENT_PROMPT_KEYS.items()
+    )
+    + " END) || '@' || prompt_version"
+)
+
+
+class ProfileRevisionComponentRecordedBy(str, enum.Enum):
+    """구성 행을 쓴 경로. BACKFILL 은 마이그레이션이 판의 기존 칸에서 옮긴 값이다."""
+
+    BACKFILL = "BACKFILL"
+    PUBLISH = "PUBLISH"
 
 
 class AnswerStatus(str, enum.Enum):
@@ -408,6 +460,52 @@ class ChatProfileRevision(Base):
     )
     verifier_model_name: Mapped[Optional[str]] = mapped_column(String(150))
     verifier_prompt_version: Mapped[Optional[str]] = mapped_column(String(50))
+    created_at: Mapped[Any] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class ProfileRevisionComponent(Base):
+    """프로필 판의 단계별 모델과 프롬프트. 판마다 단계 하나에 한 행이다.
+
+    prompt_sha256 은 지문 표의 prompt_key 값과 같은 지시문 지문이다. 모르면 비운다.
+    params 는 결과에 영향을 주는 요청 설정(reasoning, max_output_tokens 등)을 실제로 보낼
+    때만 담는다.
+    """
+
+    __tablename__ = "profile_revision_components"
+    __table_args__ = (
+        UniqueConstraint("revision_id", "stage"),
+        CheckConstraint(PROFILE_REVISION_COMPONENT_PROMPT_KEY_CHECK, name="prompt_key"),
+        CheckConstraint(
+            f"prompt_sha256 IS NULL OR prompt_sha256 ~ '{SHA256_HEX_PATTERN}'",
+            name="prompt_sha256",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    revision_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(
+            "chat_profile_revisions.id",
+            ondelete="RESTRICT",
+            name=PROFILE_REVISION_COMPONENT_REVISION_FK_CONSTRAINT,
+        ),
+        nullable=False,
+    )
+    stage: Mapped[ProfileRevisionComponentStage] = mapped_column(
+        _status_enum(ProfileRevisionComponentStage, "component_stage", length=40),
+        nullable=False,
+    )
+    model_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    prompt_key: Mapped[str] = mapped_column(String(100), nullable=False)
+    prompt_version: Mapped[str] = mapped_column(String(50), nullable=False)
+    prompt_sha256: Mapped[Optional[str]] = mapped_column(String(64))
+    params: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB)
+    recorded_by: Mapped[ProfileRevisionComponentRecordedBy] = mapped_column(
+        _status_enum(ProfileRevisionComponentRecordedBy, "component_recorded_by"),
+        nullable=False,
+    )
     created_at: Mapped[Any] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -939,6 +1037,13 @@ class RagRun(Base):
     answer_schema_version: Mapped[Optional[str]] = mapped_column(String(50))
     citation_validated: Mapped[Optional[bool]] = mapped_column(Boolean)
     total_latency_ms: Mapped[Optional[int]] = mapped_column(Integer)
+    # 턴 시작 때 고른 프로필 판. 마이그레이션 이전 턴과 판 없이 도는 호출자는 비어 있다.
+    profile_revision_id: Mapped[Optional[int]] = mapped_column(
+        BigInteger,
+        ForeignKey("chat_profile_revisions.id", ondelete="RESTRICT"),
+    )
+    # 턴을 처리한 서버 빌드(BUILD_VERSION 환경변수, 없으면 unknown).
+    build_version: Mapped[Optional[str]] = mapped_column(String(100))
     created_at: Mapped[Any] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -1365,6 +1470,16 @@ class QuestionClassification(Base):
         Boolean, nullable=False, server_default="false"
     )
     judgment_input: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB)
+    # 판별에 보여 준 고른 세부 문제의 정본. judgment_input 제시 목록과 같은 값이다.
+    # 정본 없이 판별했거나 판별 호출이 없던 행(운영자 연결, 정확 일치 재사용)은 비어 있다.
+    presented_canonical_answer_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "canonical_answers.id",
+            ondelete="RESTRICT",
+            name=PRESENTED_CANONICAL_ANSWER_FK_CONSTRAINT,
+        ),
+    )
     effective_from: Mapped[Any] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -1405,6 +1520,11 @@ class CanonicalAnswer(Base):
             unique=True,
             postgresql_where=text("approval = 'APPROVED'"),
         ),
+        CheckConstraint(
+            "generation_prompt_sha256 IS NULL"
+            f" OR generation_prompt_sha256 ~ '{SHA256_HEX_PATTERN}'",
+            name="generation_prompt_sha256",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -1434,6 +1554,10 @@ class CanonicalAnswer(Base):
     approved_by: Mapped[Optional[str]] = mapped_column(String(100))
     valid_from: Mapped[Optional[Any]] = mapped_column(TIMESTAMP(timezone=True))
     valid_to: Mapped[Optional[Any]] = mapped_column(TIMESTAMP(timezone=True))
+    # 본문을 만든 생성 프롬프트와 모델. 시드 입력이 주지 않으면(손으로 쓴 정본 등) 비운다.
+    generation_prompt_version: Mapped[Optional[str]] = mapped_column(String(50))
+    generation_prompt_sha256: Mapped[Optional[str]] = mapped_column(String(64))
+    generation_model_name: Mapped[Optional[str]] = mapped_column(String(150))
     created_at: Mapped[Any] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )

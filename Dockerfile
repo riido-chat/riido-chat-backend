@@ -30,5 +30,10 @@ RUN useradd --create-home riido \
     && chown -R riido:riido /app
 USER riido
 
+# 턴 행(rag_runs.build_version)에 남는 빌드 식별자. deploy 워크플로가 커밋 SHA 를 넘긴다.
+# 값이 바뀌어도 앞 레이어 캐시가 깨지지 않도록 마지막에 둔다.
+ARG BUILD_VERSION=unknown
+ENV BUILD_VERSION=$BUILD_VERSION
+
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

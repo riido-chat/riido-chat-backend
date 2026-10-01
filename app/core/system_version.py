@@ -11,4 +11,4 @@ CI(scripts/check_system_version.py)가 동작 관련 파일 변경 시 버전 �
 """
 
 
-SYSTEM_VERSION = "1.1.0"
+SYSTEM_VERSION = "1.1.1"

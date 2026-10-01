@@ -21,6 +21,7 @@ from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from app.chat.schema import ChatCompletedResponse, ChatErrorResponse
+from app.core.build_info import BUILD_VERSION
 from app.core.config import get_settings
 from app.database.models import (
     AnswerStatus,
@@ -802,6 +803,38 @@ class RagLogStoreDbTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(3500, embedding_call.latency_ms)
         self.assertEqual(2, embedding_call.retry_count)
         self.assertEqual("embedding unavailable", embedding_call.error_message)
+
+    async def test_turn_records_profile_revision_and_build_version(self) -> None:
+        conversation = await self.store.create_conversation()
+        pinned = await self.store.start_rag_run(
+            conversation.id,
+            user_query="판 기록 질문",
+            index_version_id=self.index_version_id,
+            profile_revision_id=conversation.chat_profile_revision_id,
+            build_version="test-build",
+        )
+        await self.store.withhold_rag_run(
+            pinned.id, reason_code="INSUFFICIENT_EVIDENCE"
+        )
+        legacy = await self.store.start_rag_run(
+            conversation.id,
+            user_query="판 없이 도는 호출자",
+            index_version_id=self.index_version_id,
+        )
+        await self.session.flush()
+
+        rows = (
+            await self.session.execute(
+                select(RagRun.id, RagRun.profile_revision_id, RagRun.build_version)
+                .where(RagRun.id.in_([pinned.id, legacy.id]))
+            )
+        ).all()
+        by_id = {row.id: (row.profile_revision_id, row.build_version) for row in rows}
+        self.assertEqual(
+            (conversation.chat_profile_revision_id, "test-build"), by_id[pinned.id]
+        )
+        # 판을 넘기지 않으면 비우고, 빌드는 시작 때 읽은 값을 쓴다.
+        self.assertEqual((None, BUILD_VERSION), by_id[legacy.id])
 
     async def test_turn_numbers_increase_within_conversation(self) -> None:
         conversation = await self.store.create_conversation()

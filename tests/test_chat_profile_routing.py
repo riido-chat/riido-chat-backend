@@ -271,6 +271,7 @@ class ChatProfileRoutingTest(unittest.IsolatedAsyncioTestCase):
             user_query="질문",
             index_version_id=91,
             query_hash=exact_question_hash("질문"),
+            profile_revision_id=11,
         )
         self.assertIs(retriever, turn.retriever)
         self.assertEqual(11, turn.profile_revision_id)

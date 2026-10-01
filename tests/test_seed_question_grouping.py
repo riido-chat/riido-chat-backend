@@ -147,6 +147,48 @@ class ParseInputTest(unittest.TestCase):
         parsed = _parse(wrong_version, _document(OTHER_PATH, [missing_canonical, bad_order]))
         self.assertEqual([ERROR_SCHEMA, ERROR_SCHEMA, ERROR_SCHEMA], _codes(parsed))
 
+    def test_canonical_generation_provenance_is_optional(self) -> None:
+        sha256 = "a" * 64
+        with_generation = _subproblem("a.generated")
+        with_generation["canonical"]["generation"] = {
+            "modelName": " gpt-5.6-terra ",
+            "promptVersion": "v40",
+            "promptSha256": sha256,
+        }
+        partial = _subproblem("a.partial")
+        partial["canonical"]["generation"] = {"promptVersion": "v40", "modelName": "  "}
+        parsed = _parse(_document(subproblems=[_subproblem(), with_generation, partial]))
+
+        self.assertEqual([], _codes(parsed))
+        plain, generated, partial_item = parsed.documents[0].subproblems
+        self.assertEqual((None, None, None), (
+            plain.generation.model_name, plain.generation.prompt_version, plain.generation.prompt_sha256
+        ))
+        self.assertEqual(("gpt-5.6-terra", "v40", sha256), (
+            generated.generation.model_name,
+            generated.generation.prompt_version,
+            generated.generation.prompt_sha256,
+        ))
+        self.assertEqual((None, "v40", None), (
+            partial_item.generation.model_name,
+            partial_item.generation.prompt_version,
+            partial_item.generation.prompt_sha256,
+        ))
+
+    def test_canonical_generation_provenance_shape_errors(self) -> None:
+        cases = (
+            "not-an-object",
+            {"promptSha256": "A" * 64},
+            {"promptSha256": "a" * 63},
+            {"promptVersion": "v" * 51},
+            {"modelName": 40},
+        )
+        for generation in cases:
+            with self.subTest(generation=generation):
+                item = _subproblem()
+                item["canonical"]["generation"] = generation
+                self.assertEqual([ERROR_SCHEMA], _codes(_parse(_document(subproblems=[item]))))
+
     def test_load_input_from_directory_reads_nested_files(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
