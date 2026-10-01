@@ -56,6 +56,11 @@ jobs:
       - name: Check system version
         run: python scripts/check_system_version.py "origin/${{ github.base_ref }}"
 
+      # app/core/prompt_fingerprints.json 은 추가만 허용한다. 기존 키의 지문이 바뀌거나 키가 지워지면 실패한다.
+      # 지문이 실제 프롬프트와 같은지는 tests/test_prompt_fingerprints.py 가 확인한다.
+      - name: Check prompt fingerprints
+        run: python scripts/check_prompt_fingerprints.py "origin/${{ github.base_ref }}"
+
       - name: Install dependencies
         run: pip install -r requirements.txt
 
