@@ -44,6 +44,7 @@ from app.database.models import (
     QuestionEmbedding,
     QuestionProblemGroup,
     QuestionProblemGroupKind,
+    QuestionSubproblem,
     RagRun,
 )
 from app.question_grouping.attribution import document_attribution, initial_attribution, no_document_attribution
@@ -535,6 +536,44 @@ class ExactQuestionLogLookupDbTest(_StoreDbTestCase):
         for changed in ("추 천 질문", "추천질문", "추천 질문입니다", "추천 질문?"):
             with self.subTest(changed=changed):
                 self.assertIsNone(await self._lookup(changed))
+
+    async def test_returns_source_revision_and_presented_canonical(self) -> None:
+        subproblem = await self._billing_subproblem(current_version=3)
+        await self._connect_log(subproblem, minutes=1)
+
+        unrecorded = await self._lookup()
+
+        self.assertEqual((3, 3), (unrecorded.source_subproblem_version, unrecorded.current_version))
+        self.assertEqual((False, None), (unrecorded.source_canonical_recorded, unrecorded.source_canonical_answer_id))
+
+        canonical_id = uuid.uuid4()
+        presented = self._presented(subproblem, self.billing, canonical_id)
+        turn = await self._logged_turn(self.QUESTION)
+        classification_id = await self.store.insert_classification(
+            turn.id,
+            run_id=self.run_id,
+            judgment=self._connect(presented),
+            judgment_input={
+                **_gate_input("SERVED"),
+                "subproblemCandidates": {"seed": "s", "items": [presented.to_judgment_input()]},
+            },
+        )
+        await self._set_effective_from(classification_id, 2)
+        await self.session.execute(
+            update(QuestionClassification)
+            .where(QuestionClassification.id == classification_id)
+            .values(exact_cache_approved=True)
+        )
+        # 원천 분류 뒤에 세부 문제를 개정했다.
+        await self.session.execute(
+            update(QuestionSubproblem).where(QuestionSubproblem.id == subproblem.id).values(current_version=4)
+        )
+
+        recorded = await self._lookup()
+
+        self.assertEqual(classification_id, recorded.classification_id)
+        self.assertEqual((3, 4), (recorded.source_subproblem_version, recorded.current_version))
+        self.assertEqual((True, canonical_id), (recorded.source_canonical_recorded, recorded.source_canonical_answer_id))
 
     async def test_unapproved_question_log_is_not_an_exact_cache_match(self) -> None:
         subproblem = await self._billing_subproblem()

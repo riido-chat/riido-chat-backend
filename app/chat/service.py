@@ -83,6 +83,7 @@ from app.chat.profile import (
 )
 from app.question_grouping.exact_question import exact_question_hash
 from app.question_grouping.service import (
+    ExactQuestionFallthrough,
     ExactQuestionResult,
     GroupingTurn,
     QuestionGroupingService,
@@ -559,8 +560,11 @@ class ChatService:
         # 매핑 원천은 승인된 첫 턴 로그뿐이다(후속 턴 로그는 문맥에 기대므로 쓰지 않는다).
         # 게이트가 거절하면 같은 분류 행을 유지한 채 기존 흐름(후속 턴은 Query Rewrite 포함)으로
         # 이어가되 다시 판별하지 않고, 일치가 없으면 아무 행도 쓰지 않는다.
+        # 원천 분류 뒤에 세부 문제 개정이나 정본이 바뀌었으면 일치가 없는 것과 같이 진행하고,
+        # 유사 판별을 하면 그 판별 행에 재사용하지 않은 사유를 남긴다.
         grouping_recorded: Optional[RecordedJudgment] = None
         exact_grouping_recorded = False
+        exact_fallthrough: Optional[ExactQuestionFallthrough] = None
         if grouping_turn is not None and turn.exact_cache_enabled:
             exact_result = await self._require_grouping().record_exact_question(
                 grouping_turn,
@@ -573,6 +577,8 @@ class ChatService:
                 if not isinstance(exact_result, ExactQuestionResult)
                 else exact_result.recorded
             )
+            if isinstance(exact_result, ExactQuestionFallthrough):
+                exact_fallthrough = exact_result
             exact_grouping_recorded = grouping_recorded is not None
             if grouping_recorded is not None and grouping_recorded.served:
                 try:
@@ -700,6 +706,7 @@ class ChatService:
                 search,
                 embedding_model_call_id,
                 started,
+                exact_fallthrough=exact_fallthrough,
             )
             retrieval_recorded = True
             if grouping_outcome.response is not None:
@@ -1145,6 +1152,8 @@ class ChatService:
         search: HybridSearchCall,
         embedding_model_call_id: Optional[int],
         started: float,
+        *,
+        exact_fallthrough: Optional[ExactQuestionFallthrough] = None,
     ) -> _GroupingOutcome:
         """검색이 성공한 턴을 판별하고 게이트 결과를 기록한다.
 
@@ -1165,7 +1174,13 @@ class ChatService:
             )
             await self._record_retrieval_results(rag_run_id, search)
 
-        prepared = await grouping.prepare(grouping_turn, resolved_query, search)
+        # 정확 일치를 재사용하지 않은 턴만 사유를 넘겨 기존 호출 인자를 그대로 둔다.
+        prepare_kwargs: Dict[str, ExactQuestionFallthrough] = {}
+        if exact_fallthrough is not None:
+            prepare_kwargs["exact_fallthrough"] = exact_fallthrough
+        prepared = await grouping.prepare(
+            grouping_turn, resolved_query, search, **prepare_kwargs
+        )
         if not prepared.ready:
             await record_retrieval_logs()
             recorded = await grouping.record_preparation_failure(prepared)

@@ -15,11 +15,17 @@ from app.question_grouping.attribution import (
     no_document_attribution,
 )
 from app.question_grouping.constants import (
+    EXACT_SOURCE_CANONICAL_CHANGED,
+    EXACT_SOURCE_CANONICAL_UNVERIFIED,
+    EXACT_SOURCE_SUBPROBLEM_VERSION_STALE,
+    REJECT_CANONICAL_ANSWER_CHANGED,
     REJECT_CANONICAL_ANSWER_NOT_FOUND,
     REJECT_CANONICAL_CITATION_MISSING,
+    REJECT_CITED_DOCUMENT_DISABLED,
     REJECT_CITED_DOCUMENT_NOT_INDEXED,
     REJECT_CITED_SECTION_CHANGED,
     REJECT_CLASSIFICATION_NOT_CONNECTED,
+    REJECT_SUBPROBLEM_DOCUMENT_DISABLED,
     REJECT_SUBPROBLEM_NOT_APPROVED,
     REJECT_SUBPROBLEM_STOPPED,
     REJECT_SUBPROBLEM_UNUSED,
@@ -27,6 +33,7 @@ from app.question_grouping.constants import (
 )
 from app.question_grouping.gate import (
     evaluate_cache_gate,
+    exact_source_fallthrough_reasons,
     gate_judgment_input,
     resolve_citation,
     resolve_citations,
@@ -35,7 +42,9 @@ from app.question_grouping.models import (
     CanonicalCitationSnapshot,
     CitationIndexContext,
     CitationResolution,
+    ExactQuestionLogMatch,
     GateCanonicalAnswer,
+    GateInputs,
     GateSubproblemState,
     IndexedSection,
     JudgeFailure,
@@ -172,6 +181,18 @@ class ResolveCitationTest(unittest.TestCase):
         result = resolve_citation(_citation(), _context(12, stray))
 
         self.assertEqual(REJECT_CITED_SECTION_CHANGED, result.rejection_reason)
+
+    def test_disabled_document_fails_even_when_section_is_indexed(self) -> None:
+        context = CitationIndexContext(
+            indexed_document_version_id=11,
+            sections=(_section(101, version_id=11),),
+            document_enabled=False,
+        )
+
+        result = resolve_citation(_citation(), context)
+
+        self.assertFalse(result.passed)
+        self.assertEqual(REJECT_CITED_DOCUMENT_DISABLED, result.rejection_reason)
 
     def test_resolves_all_citations_in_order(self) -> None:
         citations = [
@@ -384,6 +405,128 @@ class CacheGateTest(unittest.TestCase):
                 )
                 self.assertTrue(all(len(reason) <= 50 for reason in result.rejection_reasons))
 
+
+    def test_judge_presented_canonical_must_match_served_canonical(self) -> None:
+        cases = (
+            replace(PRESENTED, canonical_answer_id=uuid.UUID(int=77)),
+            replace(PRESENTED, canonical_answer_id=None),
+        )
+        for presented in cases:
+            with self.subTest(presented=presented.canonical_answer_id):
+                judgment = replace(_connect(), subproblem=presented)
+
+                result = _gate(judgment)
+
+                self.assertEqual(CacheAttemptOutcome.REJECTED, result.outcome)
+                self.assertEqual((REJECT_CANONICAL_ANSWER_CHANGED,), result.rejection_reasons)
+
+    def test_judged_subproblem_version_must_be_current(self) -> None:
+        judgment = replace(_connect(), subproblem=replace(PRESENTED, subproblem_version=1))
+
+        result = _gate(judgment)
+
+        self.assertEqual((REJECT_SUBPROBLEM_VERSION_MISMATCH,), result.rejection_reasons)
+
+    def test_disabled_subproblem_document_is_rejected_before_serving_state(self) -> None:
+        for serving_state in QuestionSubproblemServingState:
+            with self.subTest(serving_state=serving_state):
+                state = replace(_state(serving_state), document_enabled=False)
+
+                result = _gate(subproblem=state)
+
+                self.assertEqual(CacheAttemptOutcome.REJECTED, result.outcome)
+                self.assertEqual((REJECT_SUBPROBLEM_DOCUMENT_DISABLED,), result.rejection_reasons)
+
+    def test_disabled_cited_document_is_rejected(self) -> None:
+        disabled = CitationResolution(citation_order=1, rejection_reason=REJECT_CITED_DOCUMENT_DISABLED)
+
+        result = _gate(resolutions=(disabled,))
+
+        self.assertEqual(CacheAttemptOutcome.REJECTED, result.outcome)
+        self.assertEqual((REJECT_CITED_DOCUMENT_DISABLED,), result.rejection_reasons)
+
+
+def _match(
+    *,
+    source_version: int = 2,
+    current_version: int = 2,
+    recorded: bool = False,
+    canonical_id: Optional[uuid.UUID] = None,
+) -> ExactQuestionLogMatch:
+    return ExactQuestionLogMatch(
+        subproblem_id=SUBPROBLEM_ID,
+        key="billing.cancel",
+        problem_group_id=uuid.UUID(int=3),
+        current_version=current_version,
+        document_source_id=7,
+        document_key="workspaces/plans-and-billing",
+        normalized_question="구독 취소",
+        source_rag_run_id=uuid.UUID(int=10),
+        classification_id=9,
+        matched_count=1,
+        source_subproblem_version=source_version,
+        source_canonical_recorded=recorded,
+        source_canonical_answer_id=canonical_id,
+    )
+
+
+def _inputs(
+    *,
+    current_version: int = 2,
+    canonical: Optional[GateCanonicalAnswer] = CANONICAL,
+) -> GateInputs:
+    return GateInputs(subproblem=_state(current_version=current_version), canonical_answer=canonical)
+
+
+class ExactSourceFallthroughTest(unittest.TestCase):
+    def test_same_revision_and_recorded_canonical_is_reused(self) -> None:
+        self.assertEqual((), exact_source_fallthrough_reasons(_match(recorded=True, canonical_id=CANONICAL_ID), _inputs()))
+
+    def test_stale_subproblem_revision_falls_through(self) -> None:
+        result = exact_source_fallthrough_reasons(
+            _match(source_version=1, recorded=True, canonical_id=CANONICAL_ID), _inputs()
+        )
+
+        self.assertEqual((EXACT_SOURCE_SUBPROBLEM_VERSION_STALE,), result)
+
+    def test_revision_is_compared_with_reread_state(self) -> None:
+        # 조회 때 읽은 개정이 같아도 게이트 입력의 현재 개정이 바뀌었으면 낡은 것이다.
+        result = exact_source_fallthrough_reasons(_match(current_version=2), _inputs(current_version=3))
+
+        self.assertEqual((EXACT_SOURCE_SUBPROBLEM_VERSION_STALE,), result)
+
+    def test_recorded_canonical_change_falls_through(self) -> None:
+        cases = (
+            (uuid.UUID(int=77), CANONICAL),
+            (None, CANONICAL),
+            (CANONICAL_ID, None),
+        )
+        for source_id, canonical in cases:
+            with self.subTest(source_id=source_id, canonical=canonical):
+                result = exact_source_fallthrough_reasons(
+                    _match(recorded=True, canonical_id=source_id), _inputs(canonical=canonical)
+                )
+
+                self.assertEqual((EXACT_SOURCE_CANONICAL_CHANGED,), result)
+
+    def test_unrecorded_canonical_with_applicability_rules_falls_through(self) -> None:
+        ruled = replace(CANONICAL, applicability_rules=("환불 금액 문의는 다루지 않는다",))
+
+        result = exact_source_fallthrough_reasons(_match(), _inputs(canonical=ruled))
+
+        self.assertEqual((EXACT_SOURCE_CANONICAL_UNVERIFIED,), result)
+
+    def test_unrecorded_canonical_without_rules_is_reused(self) -> None:
+        for canonical in (CANONICAL, None):
+            with self.subTest(canonical=canonical):
+                self.assertEqual((), exact_source_fallthrough_reasons(_match(), _inputs(canonical=canonical)))
+
+    def test_without_gate_inputs_only_revision_from_lookup_is_checked(self) -> None:
+        self.assertEqual((), exact_source_fallthrough_reasons(_match(), None))
+        self.assertEqual(
+            (EXACT_SOURCE_SUBPROBLEM_VERSION_STALE,),
+            exact_source_fallthrough_reasons(_match(source_version=1), None),
+        )
 
 
 class GateJudgmentInputTest(unittest.TestCase):

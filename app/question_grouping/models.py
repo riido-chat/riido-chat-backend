@@ -175,6 +175,11 @@ class ExactQuestionLogMatch:
 
     세부 문제 소속은 요청 문서 그룹으로 이미 검증했다. NO_DOCUMENT 문제 그룹이면
     문서 칸이 비어 있다. ``matched_count`` 는 선택 전에 조건을 만족한 로그 수다.
+
+    ``source_subproblem_version`` 은 원천 분류 행이 기록한 세부 문제 개정이다.
+    ``source_canonical_recorded`` 는 원천 분류의 judgment_input 제시 목록에 이 세부 문제가 있어
+    판별이 본 정본을 알 수 있는지다. 참이면 ``source_canonical_answer_id`` 가 그 정본이고,
+    널이면 정본 없이 판별했다는 뜻이다.
     """
 
     subproblem_id: uuid.UUID
@@ -187,6 +192,9 @@ class ExactQuestionLogMatch:
     source_rag_run_id: uuid.UUID
     classification_id: int
     matched_count: int
+    source_subproblem_version: int
+    source_canonical_recorded: bool = False
+    source_canonical_answer_id: Optional[uuid.UUID] = None
 
 
 @dataclass(frozen=True)
@@ -359,12 +367,17 @@ class TurnJudgment:
 
 @dataclass(frozen=True)
 class GateSubproblemState:
-    """게이트 직전에 다시 읽은 세부 문제 상태."""
+    """게이트 직전에 다시 읽은 세부 문제 상태.
+
+    document_enabled 는 세부 문제가 속한 문서(document_sources.enabled)가 켜져 있는지다.
+    문서가 없는 NO_DOCUMENT 문제 그룹이면 참이다.
+    """
 
     subproblem_id: uuid.UUID
     status: QuestionSubproblemStatus
     serving_state: QuestionSubproblemServingState
     current_version: int
+    document_enabled: bool = True
 
 
 @dataclass(frozen=True)
@@ -413,11 +426,13 @@ class CitationIndexContext:
 
     indexed_document_version_id 는 같은 document_source 중 턴 색인 판의
     index_documents 에 있는 판이고, 없으면 None 이다. sections 는 그 판의 절 중
-    턴 색인 판의 chunking_config 로 만든 것만 담는다.
+    턴 색인 판의 chunking_config 로 만든 것만 담는다. document_enabled 는 인용 문서
+    (document_sources.enabled)가 켜져 있는지다. 색인 판은 문서를 끈 뒤에도 남아 있을 수 있다.
     """
 
     indexed_document_version_id: Optional[int]
     sections: Tuple[IndexedSection, ...] = ()
+    document_enabled: bool = True
 
 
 @dataclass(frozen=True)

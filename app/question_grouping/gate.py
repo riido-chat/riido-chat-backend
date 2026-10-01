@@ -12,7 +12,11 @@ outcome 우선순위(R16, 먼저 걸리는 것을 기록한다):
 
 3단계는 한 단계 안의 실패 사유를 모두 모은다. 세부 문제가 APPROVED 가 아니거나
 정본이 없으면 그 사유 하나로 끝낸다. 정본 유효 기간(valid_from/to)은 보지 않는다(R17).
-입력은 게이트 직전에 다시 읽은 값이며 조회는 호출자가 한다.
+3단계는 판별이 본 세부 문제 개정과 정본이 지금과 같은지, 세부 문제 문서와 인용 문서가
+켜져 있는지도 본다. 입력은 게이트 직전에 다시 읽은 값이며 조회는 호출자가 한다.
+
+정확 일치 경로는 게이트 전에 exact_source_fallthrough_reasons 로 원천 분류를 지금도
+재사용할 수 있는지 먼저 본다.
 """
 
 import uuid
@@ -25,11 +29,17 @@ from app.database.models import (
     QuestionSubproblemStatus,
 )
 from app.question_grouping.constants import (
+    EXACT_SOURCE_CANONICAL_CHANGED,
+    EXACT_SOURCE_CANONICAL_UNVERIFIED,
+    EXACT_SOURCE_SUBPROBLEM_VERSION_STALE,
+    REJECT_CANONICAL_ANSWER_CHANGED,
     REJECT_CANONICAL_ANSWER_NOT_FOUND,
     REJECT_CANONICAL_CITATION_MISSING,
+    REJECT_CITED_DOCUMENT_DISABLED,
     REJECT_CITED_DOCUMENT_NOT_INDEXED,
     REJECT_CITED_SECTION_CHANGED,
     REJECT_CLASSIFICATION_NOT_CONNECTED,
+    REJECT_SUBPROBLEM_DOCUMENT_DISABLED,
     REJECT_SUBPROBLEM_NOT_APPROVED,
     REJECT_SUBPROBLEM_STOPPED,
     REJECT_SUBPROBLEM_UNUSED,
@@ -39,7 +49,9 @@ from app.question_grouping.models import (
     CanonicalCitationSnapshot,
     CitationIndexContext,
     CitationResolution,
+    ExactQuestionLogMatch,
     GateCanonicalAnswer,
+    GateInputs,
     GateResult,
     GateSubproblemState,
     IndexedSection,
@@ -63,8 +75,15 @@ def resolve_citation(
     2. 턴 색인에 든 같은 문서의 판에서 신원 해시와 내용 해시가 모두 같은 절.
     3. 내용 해시만 같은 절. 여럿이면 옛 node_order 와 가장 가까운 것, 같으면 앞 절.
     4. 실패. 문서가 턴 색인에 없으면 CITED_DOCUMENT_NOT_INDEXED, 아니면 CITED_SECTION_CHANGED.
+
+    인용 문서가 꺼져 있으면 절을 찾기 전에 CITED_DOCUMENT_DISABLED 로 실패한다.
     """
 
+    if not context.document_enabled:
+        return CitationResolution(
+            citation_order=citation.citation_order,
+            rejection_reason=REJECT_CITED_DOCUMENT_DISABLED,
+        )
     if context.indexed_document_version_id is None:
         return CitationResolution(
             citation_order=citation.citation_order,
@@ -189,8 +208,17 @@ def evaluate_cache_gate(
         return _rejected(REJECT_CANONICAL_ANSWER_NOT_FOUND)
 
     reasons: List[str] = []
-    if canonical_answer.subproblem_version != subproblem.current_version:
+    if (
+        canonical_answer.subproblem_version != subproblem.current_version
+        or judgment.subproblem.subproblem_version != subproblem.current_version
+    ):
         reasons.append(REJECT_SUBPROBLEM_VERSION_MISMATCH)
+    # 판별이 본 정본과 지금 서빙할 정본이 같아야 한다. 정본 행은 고치지 않고 새 행으로
+    # 바꾸므로 id 가 같으면 본문과 적용 제외 규칙도 같다.
+    if judgment.subproblem.canonical_answer_id != canonical_answer.canonical_answer_id:
+        reasons.append(REJECT_CANONICAL_ANSWER_CHANGED)
+    if not subproblem.document_enabled:
+        reasons.append(REJECT_SUBPROBLEM_DOCUMENT_DISABLED)
     resolutions = tuple(
         sorted(citation_resolutions, key=lambda item: item.citation_order)
     )
@@ -224,6 +252,45 @@ def evaluate_cache_gate(
         canonical_answer_id=canonical_answer_id,
         served_citations=resolutions,
     )
+
+
+def exact_source_fallthrough_reasons(
+    match: ExactQuestionLogMatch,
+    inputs: Optional[GateInputs],
+) -> Tuple[str, ...]:
+    """정확 일치 원천 분류를 이번 턴에 재사용하면 안 되는 사유. 비면 재사용한다.
+
+    정확 일치는 같은 정규화 질문에 대한 옛 판별을 그대로 쓴다. 그 판별이 본 세부 문제
+    개정과 정본이 지금도 같으면 포함 기준과 적용 제외 규칙에 대한 판단도 그대로 유효하다.
+
+    1. 원천 분류의 세부 문제 개정이 현재 개정과 다르면 EXACT_SOURCE_SUBPROBLEM_VERSION_STALE.
+    2. 원천 분류가 본 정본을 알면(제시 목록 기록) 그 id 가 현재 승인 정본 id 와 다르면 실패
+       (EXACT_SOURCE_CANONICAL_CHANGED). 정본 없이 판별했는데 지금 정본이 있어도 실패다.
+    3. 본 정본을 모르면(운영자 연결처럼 제시 목록이 없는 행) 현재 정본에 적용 제외 규칙이
+       있을 때만 실패한다(EXACT_SOURCE_CANONICAL_UNVERIFIED). 규칙 없는 정본은 세부 문제
+       개정이 같은 한 포함 기준 판단으로 충분하다고 본다.
+
+    inputs 가 없으면(게이트 입력 데이터 오류) 조회 때 읽은 현재 개정으로 1단계만 본다.
+    세부 문제가 없거나 승인되지 않은 경우는 게이트가 거부하도록 여기서 막지 않는다.
+    """
+
+    subproblem = None if inputs is None else inputs.subproblem
+    current_version = (
+        match.current_version if subproblem is None else subproblem.current_version
+    )
+    if match.source_subproblem_version != current_version:
+        return (EXACT_SOURCE_SUBPROBLEM_VERSION_STALE,)
+    if inputs is None:
+        return ()
+    canonical = inputs.canonical_answer
+    current_id = None if canonical is None else canonical.canonical_answer_id
+    if match.source_canonical_recorded:
+        if match.source_canonical_answer_id != current_id:
+            return (EXACT_SOURCE_CANONICAL_CHANGED,)
+        return ()
+    if canonical is not None and canonical.applicability_rules:
+        return (EXACT_SOURCE_CANONICAL_UNVERIFIED,)
+    return ()
 
 
 def gate_judgment_input(

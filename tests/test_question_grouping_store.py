@@ -29,6 +29,7 @@ from app.question_grouping.models import (
     TurnJudgment,
 )
 from app.question_grouping.store import (
+    presented_canonical_answer,
     served_citation_logs,
     validate_gate_result,
     validate_turn_judgment,
@@ -220,6 +221,35 @@ class ServedCitationLogsTest(unittest.TestCase):
         for gate in cases:
             with self.subTest(gate=gate), self.assertRaises(ValueError):
                 served_citation_logs(gate)
+
+
+class PresentedCanonicalAnswerTest(unittest.TestCase):
+    SUBPROBLEM_ID = uuid.UUID(int=1)
+
+    def test_presented_item_gives_recorded_canonical(self) -> None:
+        items = [
+            {"subproblemId": str(uuid.UUID(int=9)), "canonicalAnswerId": str(uuid.UUID(int=8))},
+            PRESENTED.to_judgment_input(),
+        ]
+
+        self.assertEqual((True, CANONICAL_ID), presented_canonical_answer(items, self.SUBPROBLEM_ID))
+
+    def test_presented_without_canonical_is_recorded_as_none(self) -> None:
+        items = [{"subproblemId": str(self.SUBPROBLEM_ID), "canonicalAnswerId": None}]
+
+        self.assertEqual((True, None), presented_canonical_answer(items, self.SUBPROBLEM_ID))
+
+    def test_missing_or_malformed_presentation_is_unknown(self) -> None:
+        cases = (
+            None,
+            {"items": []},
+            [{"subproblemId": str(uuid.UUID(int=9)), "canonicalAnswerId": None}],
+            [{"subproblemId": str(self.SUBPROBLEM_ID)}],
+            [{"subproblemId": str(self.SUBPROBLEM_ID), "canonicalAnswerId": "not-a-uuid"}],
+        )
+        for items in cases:
+            with self.subTest(items=items):
+                self.assertEqual((False, None), presented_canonical_answer(items, self.SUBPROBLEM_ID))
 
 
 if __name__ == "__main__":
