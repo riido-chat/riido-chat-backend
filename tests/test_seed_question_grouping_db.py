@@ -308,6 +308,9 @@ class SeedQuestionGroupingDbTest(unittest.IsolatedAsyncioTestCase):
                     CanonicalAnswer.approved_by,
                     CanonicalAnswer.valid_from,
                     CanonicalAnswer.valid_to,
+                    CanonicalAnswer.generation_prompt_version,
+                    CanonicalAnswer.generation_prompt_sha256,
+                    CanonicalAnswer.generation_model_name,
                 )
                 .where(CanonicalAnswer.subproblem_id == subproblem_id)
                 .order_by(CanonicalAnswer.created_at, CanonicalAnswer.id)
@@ -480,6 +483,11 @@ class SeedQuestionGroupingDbTest(unittest.IsolatedAsyncioTestCase):
 
         documents = self._documents()
         documents[0]["subproblems"][1]["canonical"]["contentMarkdown"] = "결제 주기는 월별 또는 연간입니다 [1]."
+        documents[0]["subproblems"][1]["canonical"]["generation"] = {
+            "modelName": "gpt-5.6-terra",
+            "promptVersion": "v40",
+            "promptSha256": "b" * 64,
+        }
         embedder = FakeEmbedder()
         report = await self._run(documents, embedder=embedder)
 
@@ -492,6 +500,15 @@ class SeedQuestionGroupingDbTest(unittest.IsolatedAsyncioTestCase):
         old, new = await self._canonicals(cycle.id)
         self.assertEqual((CanonicalAnswerApproval.REVOKED, CanonicalAnswerApproval.APPROVED), (old.approval, new.approval))
         self.assertEqual((1, "결제 주기는 월별 또는 연간입니다 [1]."), (new.subproblem_version, new.content_markdown))
+        # 생성 출처는 새 정본에만 쓰고, 입력에 없던 옛 정본은 비어 있다.
+        self.assertEqual(
+            ("v40", "b" * 64, "gpt-5.6-terra"),
+            (new.generation_prompt_version, new.generation_prompt_sha256, new.generation_model_name),
+        )
+        self.assertEqual(
+            (None, None, None),
+            (old.generation_prompt_version, old.generation_prompt_sha256, old.generation_model_name),
+        )
 
     async def _reindex_billing_with_same_sections(self) -> List[int]:
         """구독 및 결제 문서의 새 판을 같은 절 내용으로 만들고 새 ACTIVE 색인으로 바꾼다. 새 청크 id 를 돌려준다."""

@@ -180,6 +180,29 @@ def presented_canonical_answer(
     return False, None
 
 
+def presented_canonical_answer_id(
+    judgment: TurnJudgment,
+    judgment_input: Mapping[str, Any],
+) -> Optional[uuid.UUID]:
+    """판별 행 presented_canonical_answer_id. 판별에 보여 준 고른 세부 문제의 정본 id.
+
+    judgment_input 제시 목록(subproblemCandidates.items)에서 고른 세부 문제 항목을 읽는다.
+    정확 일치 원천 조회(presented_canonical_answer)와 같은 규칙이라 두 값이 어긋나지 않는다.
+    세부 문제를 고르지 않았거나 제시 목록이 없는 행(정확 일치 재사용, 운영자 연결)은 널이다.
+    """
+
+    subproblem = judgment.subproblem
+    if subproblem is None:
+        return None
+    candidates = judgment_input.get(JUDGMENT_INPUT_SUBPROBLEM_CANDIDATES_FIELD)
+    if not isinstance(candidates, Mapping):
+        return None
+    _, canonical_answer_id = presented_canonical_answer(
+        candidates.get("items"), subproblem.subproblem_id
+    )
+    return canonical_answer_id
+
+
 def served_citation_logs(gate: GateResult) -> Tuple[CitationLog, ...]:
     """SERVED 게이트의 인용 해석을 complete_rag_run 입력(CitationLog)으로 바꾼다.
 
@@ -554,6 +577,8 @@ class QuestionGroupingStore:
         - effective_from 은 지금, effective_to 는 널, is_composite 는 false, confidence 는
           정규화 결과에 있을 때만 채운다.
         - judgment_input 은 게이트 결과(gate 칸)까지 담아 한 번에 쓴다(결정 A).
+        - presented_canonical_answer_id 는 judgment_input 제시 목록에서 고른 세부 문제에
+          보여 준 정본이다(presented_canonical_answer_id 함수).
         - 분류 실행의 색인 판은 턴의 색인 판과 같아야 한다.
         - 같은 턴에 현재 행이 이미 있으면 부분 유니크
           (uq_question_classifications_rag_run_id_current)가 IntegrityError 를 낸다.
@@ -596,6 +621,9 @@ class QuestionGroupingStore:
             is_composite=False,
             confidence=None if normalized is None else normalized.confidence,
             judgment_input=dict(judgment_input),
+            presented_canonical_answer_id=presented_canonical_answer_id(
+                judgment, judgment_input
+            ),
             effective_from=_utcnow(),
             effective_to=None,
         )

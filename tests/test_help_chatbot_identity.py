@@ -250,6 +250,7 @@ EXACT_MATCH = ExactQuestionLogMatch(
     source_rag_run_id=SOURCE_RAG_RUN_ID,
     classification_id=901,
     matched_count=1,
+    source_subproblem_version=1,
 )
 PREVIOUS_TURN = QueryRewriteCandidateTurn(
     rag_run_id=PREVIOUS_RAG_RUN_ID,

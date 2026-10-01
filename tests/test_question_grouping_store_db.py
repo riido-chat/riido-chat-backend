@@ -203,6 +203,7 @@ class _StoreDbTestCase(unittest.IsolatedAsyncioTestCase):
                     QuestionClassification.is_composite,
                     QuestionClassification.confidence,
                     QuestionClassification.judgment_input,
+                    QuestionClassification.presented_canonical_answer_id,
                     QuestionClassification.effective_from,
                     QuestionClassification.effective_to,
                 ).where(QuestionClassification.id == classification_id)
@@ -546,7 +547,8 @@ class ExactQuestionLogLookupDbTest(_StoreDbTestCase):
         self.assertEqual((3, 3), (unrecorded.source_subproblem_version, unrecorded.current_version))
         self.assertEqual((False, None), (unrecorded.source_canonical_recorded, unrecorded.source_canonical_answer_id))
 
-        canonical_id = uuid.uuid4()
+        # 판별 행의 presented_canonical_answer_id 가 정본을 참조하므로 실제 정본을 만든다.
+        canonical_id = (await self.seed.canonical(subproblem, [])).id
         presented = self._presented(subproblem, self.billing, canonical_id)
         turn = await self._logged_turn(self.QUESTION)
         classification_id = await self.store.insert_classification(
@@ -568,6 +570,8 @@ class ExactQuestionLogLookupDbTest(_StoreDbTestCase):
         await self.session.execute(
             update(QuestionSubproblem).where(QuestionSubproblem.id == subproblem.id).values(current_version=4)
         )
+
+        self.assertEqual(canonical_id, (await self._classification(classification_id)).presented_canonical_answer_id)
 
         recorded = await self._lookup()
 
@@ -735,6 +739,8 @@ class ClassificationDbTest(_StoreDbTestCase):
         self.assertFalse(row.is_composite)
         self.assertAlmostEqual(0.82, float(row.confidence))
         self.assertEqual(judgment_input, row.judgment_input)
+        # 제시 목록이 없으면(운영자 연결, 정확 일치 재사용) 제시 정본을 모른다.
+        self.assertIsNone(row.presented_canonical_answer_id)
         self.assertIsNotNone(row.effective_from)
         self.assertIsNone(row.effective_to)
 

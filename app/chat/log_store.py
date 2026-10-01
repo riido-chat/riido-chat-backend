@@ -21,6 +21,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.chat.schema import MAX_RELATED_SECTIONS
+from app.core.build_info import BUILD_VERSION
 from app.database.models import (
     AnswerCitation,
     AnswerStatus,
@@ -240,11 +241,15 @@ class RagLogStore:
         user_query: str,
         index_version_id: int,
         query_hash: Optional[str] = None,
+        profile_revision_id: Optional[int] = None,
+        build_version: Optional[str] = None,
     ) -> RagRun:
         """ACTIVE 대화에 다음 턴을 PROCESSING 상태로 생성한다.
 
         대화 행을 잠근 뒤 PROCESSING 확인과 turn_no 채번을 한 transaction에서
         수행한다. 첫 턴은 NEW_TOPIC, 후속 턴은 UNRESOLVED로 시작한다.
+        profile_revision_id 는 이 턴에 고른 프로필 판, build_version 은 서버 빌드다.
+        build_version 을 넘기지 않으면 시작 때 읽은 BUILD_VERSION 을 쓴다.
         """
 
         if not user_query or not user_query.strip():
@@ -306,6 +311,8 @@ class RagLogStore:
             user_query=user_query,
             resolved_query=user_query if is_first_turn else None,
             query_hash=query_hash,
+            profile_revision_id=profile_revision_id,
+            build_version=BUILD_VERSION if build_version is None else build_version,
             context_strategy=(
                 ContextStrategy.NEW_TOPIC
                 if is_first_turn

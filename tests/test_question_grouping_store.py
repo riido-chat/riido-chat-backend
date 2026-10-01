@@ -30,6 +30,7 @@ from app.question_grouping.models import (
 )
 from app.question_grouping.store import (
     presented_canonical_answer,
+    presented_canonical_answer_id,
     served_citation_logs,
     validate_gate_result,
     validate_turn_judgment,
@@ -250,6 +251,44 @@ class PresentedCanonicalAnswerTest(unittest.TestCase):
         for items in cases:
             with self.subTest(items=items):
                 self.assertEqual((False, None), presented_canonical_answer(items, self.SUBPROBLEM_ID))
+
+
+
+class PresentedCanonicalAnswerIdTest(unittest.TestCase):
+    """판별 행 presented_canonical_answer_id 는 judgment_input 제시 목록에서 읽는다."""
+
+    def _input(self, items) -> dict:
+        return {"gate": {"outcome": "SERVED"}, "subproblemCandidates": {"seed": "s", "items": items}}
+
+    def test_connect_row_records_canonical_shown_for_chosen_subproblem(self) -> None:
+        other = {"subproblemId": str(uuid.UUID(int=9)), "canonicalAnswerId": str(uuid.UUID(int=8))}
+        judgment_input = self._input([other, PRESENTED.to_judgment_input()])
+
+        self.assertEqual(CANONICAL_ID, presented_canonical_answer_id(_connect(), judgment_input))
+
+    def test_shown_without_canonical_is_null(self) -> None:
+        judgment_input = self._input(
+            [{"subproblemId": str(PRESENTED.subproblem_id), "canonicalAnswerId": None}]
+        )
+
+        self.assertIsNone(presented_canonical_answer_id(_connect(), judgment_input))
+
+    def test_rows_without_judge_presentation_or_subproblem_are_null(self) -> None:
+        separate = TurnJudgment(
+            decision=ClassificationDecision.SEPARATE,
+            attribution=no_document_attribution(),
+        )
+        cases = (
+            # 정확 일치 재사용 행은 제시 목록이 없다(build_judgment_input 이 None 으로 둔다).
+            (_connect(), {"gate": {}, "subproblemCandidates": None}),
+            (_connect(), {"gate": {}}),
+            (_connect(), self._input([])),
+            # 세부 문제를 고르지 않은 행은 보여 준 정본이 여럿이어도 비운다.
+            (separate, self._input([PRESENTED.to_judgment_input()])),
+        )
+        for judgment, judgment_input in cases:
+            with self.subTest(judgment_input=judgment_input, decision=judgment.decision):
+                self.assertIsNone(presented_canonical_answer_id(judgment, judgment_input))
 
 
 if __name__ == "__main__":

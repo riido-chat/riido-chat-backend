@@ -97,7 +97,7 @@ class QuestionGroupingMigrationDbTest(unittest.IsolatedAsyncioTestCase):
         _alembic(self.scratch_url, "upgrade", PARENT_REVISION)
         seed = await self._seed_parent_schema()
 
-        _alembic(self.scratch_url, "upgrade", "head")
+        _alembic(self.scratch_url, "upgrade", EXACT_CACHE_APPROVAL_REVISION)
         self.assertEqual(
             EXACT_CACHE_APPROVAL_REVISION,
             await self._scalar("SELECT version_num FROM alembic_version"),
