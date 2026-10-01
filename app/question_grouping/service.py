@@ -9,7 +9,7 @@ ChatService 가 턴 흐름 사이사이에서 부른다(계획 1절 5~11단계).
 | 메서드 | commit | 설명 |
 | --- | --- | --- |
 | open_online_run | 직접 commit | 열린 ONLINE 분류 실행 조회/생성. 턴 잠금 없음 |
-| record_exact_question | 하지 않음 | 턴 원문이 같은 문서 그룹 과거 첫 턴 질문과 정확히 같으면 최신 CONNECT 분류로 판별 행과 캐시 시도. 일치 없으면 쓰지 않음 |
+| record_exact_question | 하지 않음 | 턴 원문이 같은 문서 그룹 과거 첫 턴 질문과 정확히 같으면 최신 CONNECT 분류로 판별 행과 캐시 시도. 일치 없거나 원천 분류가 낡았으면 쓰지 않음 |
 | prepare | 재임베딩 checkpoint 만 직접 commit | 질문 벡터, 카탈로그, 후보, payload. 읽기는 열린 채 둔다 |
 | judge | 판별 checkpoint 를 직접 commit | 대기 중인 재임베딩 호출 마감 + 호출자 쓰기 + 판별 model_call 시작 |
 | record_judgment_and_gate | 하지 않음 | 호출 마감, 질문 임베딩, 게이트, 판별 행, 캐시 시도 |
@@ -38,7 +38,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, field, replace
-from typing import Any, Awaitable, Callable, Dict, Optional, Sequence, Tuple
+from typing import Any, Awaitable, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -71,11 +71,13 @@ from app.question_grouping.document_candidates import (
 )
 from app.question_grouping.gate import (
     evaluate_cache_gate,
+    exact_source_fallthrough_reasons,
     gate_judgment_input,
     resolve_citations,
 )
 from app.question_grouping.models import (
     CitationResolution,
+    ExactQuestionLogMatch,
     GateInputs,
     GateResult,
     IndexScope,
@@ -194,6 +196,18 @@ class ExactQuestionResult:
     recorded: "RecordedJudgment"
     prepared: PreparedJudgment
     judged: JudgedTurn
+
+
+@dataclass(frozen=True)
+class ExactQuestionFallthrough:
+    """정확 일치 로그는 있지만 원천 분류를 재사용하지 않아 아무 행도 쓰지 않은 결과.
+
+    호출자는 일치 없음과 같이 일반 흐름으로 진행하고, 판별을 하면 prepare 에 넘겨 그 판별 행의
+    judgment_input.exactQuestionFallthrough 에 사유를 남긴다.
+    """
+
+    rejection_reasons: Tuple[str, ...]
+    judgment_input: Dict[str, Any]
 
 
 @dataclass(frozen=True)
@@ -362,6 +376,59 @@ def _safe_candidate_error_message(error: BaseException) -> str:
     return f"판별 후보를 만들지 못했습니다: {type(error).__name__}"
 
 
+def _data_error_outcome(
+    prepared: PreparedJudgment, error: CatalogDataError
+) -> _GateOutcome:
+    logger.warning(
+        "게이트 입력 데이터 오류로 서빙하지 않습니다: rag_run_id=%s",
+        prepared.turn.rag_run_id,
+        exc_info=error,
+    )
+    return _GateOutcome(
+        gate=GateResult(
+            outcome=CacheAttemptOutcome.REJECTED,
+            rejection_reasons=(REJECT_CANONICAL_DATA_INVALID,),
+        ),
+        data_error=_safe_candidate_error_message(error),
+    )
+
+
+def _exact_fallthrough_judgment_input(
+    match: ExactQuestionLogMatch,
+    inputs: Optional[GateInputs],
+    reasons: Sequence[str],
+) -> Dict[str, Any]:
+    """judgment_input.exactQuestionFallthrough. 재사용하지 않은 원천 분류와 비교한 현재 값."""
+
+    subproblem = None if inputs is None else inputs.subproblem
+    canonical = None if inputs is None else inputs.canonical_answer
+    return {
+        "exactQuestionFallthrough": {
+            "rejectionReasons": list(reasons),
+            "normalizedQuestion": match.normalized_question,
+            "sourceRagRunId": str(match.source_rag_run_id),
+            "sourceClassificationId": match.classification_id,
+            "matchedCount": match.matched_count,
+            "subproblemId": str(match.subproblem_id),
+            "sourceSubproblemVersion": match.source_subproblem_version,
+            "currentSubproblemVersion": (
+                match.current_version
+                if subproblem is None
+                else subproblem.current_version
+            ),
+            "sourceCanonicalRecorded": match.source_canonical_recorded,
+            "sourceCanonicalAnswerId": (
+                None
+                if match.source_canonical_answer_id is None
+                else str(match.source_canonical_answer_id)
+            ),
+            "currentCanonicalAnswerId": (
+                None if canonical is None else str(canonical.canonical_answer_id)
+            ),
+        }
+    }
+
+
 # ---------------------------------------------------------------------------
 # 서비스
 # ---------------------------------------------------------------------------
@@ -435,7 +502,7 @@ class QuestionGroupingService:
         *,
         semantic_cache_enabled: bool,
         exact_cache_enabled: Optional[bool] = None,
-    ) -> Optional[ExactQuestionResult]:
+    ) -> Optional[Union[ExactQuestionResult, ExactQuestionFallthrough]]:
         """턴 원문이 같은 문서 그룹의 승인된 과거 첫 턴 질문과 정확히 같으면 LLM·검색 없이 판별과 게이트를 기록한다.
 
         첫 턴과 후속 턴 모두에서 Query Rewrite 전에 사용자 원문으로 부른다. 매핑 원천은
@@ -447,6 +514,10 @@ class QuestionGroupingService:
 
         exact_cache_enabled가 주어지면 정확 일치 경로에만 그 값을 적용한다. None이면 기존
         호출자와의 호환을 위해 semantic_cache_enabled를 사용한다.
+
+        원천 분류 뒤에 세부 문제 개정이나 승인 정본이 바뀌었으면 옛 판별을 재사용하지 않는다
+        (gate.exact_source_fallthrough_reasons). 이때는 행을 쓰지 않고 ExactQuestionFallthrough 를
+        돌려 호출자가 일치 없음과 같이 일반 흐름(유사 판별 포함)으로 진행하게 한다.
         """
 
         match = await self._store.find_exact_question_log_match(
@@ -459,14 +530,42 @@ class QuestionGroupingService:
         scope = await self._catalog_reader.load_index_scope(turn.index_version_id)
         if scope.document_group_id != turn.document_group_id:
             return None
+        inputs: Optional[GateInputs] = None
+        data_error: Optional[CatalogDataError] = None
+        try:
+            inputs = await self._catalog_reader.load_gate_inputs(
+                match.subproblem_id, scope
+            )
+        except CatalogDataError as error:
+            data_error = error
+        fallthrough = exact_source_fallthrough_reasons(match, inputs)
+        if fallthrough:
+            logger.info(
+                "정확 일치 원천 분류를 재사용하지 않고 일반 흐름으로 진행합니다: "
+                "rag_run_id=%s, source_classification_id=%s, reasons=%s",
+                turn.rag_run_id,
+                match.classification_id,
+                ",".join(fallthrough),
+            )
+            return ExactQuestionFallthrough(
+                rejection_reasons=fallthrough,
+                judgment_input=_exact_fallthrough_judgment_input(
+                    match, inputs, fallthrough
+                ),
+            )
+        canonical_now = None if inputs is None else inputs.canonical_answer
         presented = PresentedSubproblem(
             key=match.key,
             subproblem_id=match.subproblem_id,
-            subproblem_version=match.current_version,
+            subproblem_version=match.source_subproblem_version,
             problem_group_id=match.problem_group_id,
             document_source_id=match.document_source_id,
             document_key=match.document_key or "",
-            canonical_answer_id=None,
+            # 원천 판별이 본 정본과 현재 정본이 같거나(기록됨) 적용 제외 규칙이 없음을 위에서
+            # 확인했으므로, 게이트의 제시 정본 검사에는 현재 정본을 넘긴다.
+            canonical_answer_id=(
+                None if canonical_now is None else canonical_now.canonical_answer_id
+            ),
             similarity=1.0,
             retrieval_rank=1,
             presented_order=1,
@@ -501,12 +600,17 @@ class QuestionGroupingService:
             attribution=subproblem_attribution(match.problem_group_id),
             subproblem=presented,
         )
-        outcome = await self._evaluate_gate(
-            prepared,
-            judgment,
-            semantic_cache_enabled
-            if exact_cache_enabled is None
-            else exact_cache_enabled,
+        outcome = (
+            _data_error_outcome(prepared, data_error)
+            if data_error is not None
+            else await self._evaluate_gate(
+                prepared,
+                judgment,
+                semantic_cache_enabled
+                if exact_cache_enabled is None
+                else exact_cache_enabled,
+                inputs=inputs,
+            )
         )
         canonical = (
             None if outcome.inputs is None else outcome.inputs.canonical_answer
@@ -567,10 +671,14 @@ class QuestionGroupingService:
         turn: GroupingTurn,
         resolved_query: str,
         search: HybridSearchCall,
+        *,
+        exact_fallthrough: Optional[ExactQuestionFallthrough] = None,
     ) -> PreparedJudgment:
         """질문 벡터, 세부 문제 top5, 문서 top5 와 outline, payload 를 만든다.
 
         - 검색이 성공한 턴에서만 부른다(R13).
+        - exact_fallthrough 가 있으면 이 턴 판별 행의 judgment_input 에 정확 일치를 재사용하지
+          않은 사유를 함께 남긴다.
         - 재임베딩할 때만 QUERY_EMBEDDING model_call 을 시작하고 commit 한다. 호출 결과는
           판별 checkpoint 또는 기록 트랜잭션에서 마감한다.
         - 재임베딩 API 오류와 후보 데이터 오류는 failure 로 담아 돌려준다(fail-open).
@@ -590,6 +698,9 @@ class QuestionGroupingService:
                 retrieval_query=search.retrieval_query,
             ),
             started=started,
+            exact_match_metadata=(
+                None if exact_fallthrough is None else exact_fallthrough.judgment_input
+            ),
         )
 
         vector, embedding_failure = await self._question_vector(
@@ -916,6 +1027,7 @@ class QuestionGroupingService:
             latency_ms=latency_ms,
             resolutions=outcome.resolutions,
             canonical_answer_id=canonical_answer_id,
+            extra=prepared.exact_match_metadata,
         )
         if not recorded.served:
             return recorded
@@ -953,6 +1065,7 @@ class QuestionGroupingService:
             gate_judgment_input(gate),
             latency_ms=_elapsed_ms(prepared.started, self._clock()),
             judgment=judgment,
+            extra=prepared.exact_match_metadata,
         )
 
     async def record_serve_failure(
@@ -1047,7 +1160,11 @@ class QuestionGroupingService:
         prepared: PreparedJudgment,
         judgment: TurnJudgment,
         semantic_cache_enabled: bool,
+        *,
+        inputs: Optional[GateInputs] = None,
     ) -> _GateOutcome:
+        """게이트 입력을 다시 읽어(inputs 가 주어지면 그 값으로) 게이트를 평가한다."""
+
         if (
             judgment.failed
             or judgment.decision != ClassificationDecision.CONNECT
@@ -1064,23 +1181,13 @@ class QuestionGroupingService:
             )
 
         assert prepared.scope is not None
-        try:
-            inputs = await self._catalog_reader.load_gate_inputs(
-                judgment.subproblem.subproblem_id, prepared.scope
-            )
-        except CatalogDataError as error:
-            logger.warning(
-                "게이트 입력 데이터 오류로 서빙하지 않습니다: rag_run_id=%s",
-                prepared.turn.rag_run_id,
-                exc_info=error,
-            )
-            return _GateOutcome(
-                gate=GateResult(
-                    outcome=CacheAttemptOutcome.REJECTED,
-                    rejection_reasons=(REJECT_CANONICAL_DATA_INVALID,),
-                ),
-                data_error=_safe_candidate_error_message(error),
-            )
+        if inputs is None:
+            try:
+                inputs = await self._catalog_reader.load_gate_inputs(
+                    judgment.subproblem.subproblem_id, prepared.scope
+                )
+            except CatalogDataError as error:
+                return _data_error_outcome(prepared, error)
         resolutions = resolve_citations(inputs.citations, inputs.contexts_by_source_id)
         gate = evaluate_cache_gate(
             judgment,

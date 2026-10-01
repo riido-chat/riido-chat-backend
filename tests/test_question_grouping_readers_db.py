@@ -49,8 +49,10 @@ from app.question_grouping.catalog_reader import (
     QuestionCatalogReader,
 )
 from app.question_grouping.constants import (
+    REJECT_CITED_DOCUMENT_DISABLED,
     REJECT_CITED_DOCUMENT_NOT_INDEXED,
     REJECT_CITED_SECTION_CHANGED,
+    REJECT_SUBPROBLEM_DOCUMENT_DISABLED,
     SUBPROBLEM_EMBEDDING_TEXT_VERSION,
 )
 from app.question_grouping.gate import evaluate_cache_gate, resolve_citations
@@ -671,6 +673,46 @@ class GateInputsDbTest(_DbTestCase):
         self.assertEqual(QuestionSubproblemServingState.STOPPED, inputs.subproblem.serving_state)
         self.assertIsNone(inputs.canonical_answer)
         self.assertEqual({}, dict(inputs.contexts_by_source_id))
+
+    async def test_reads_enabled_of_subproblem_and_cited_documents(self) -> None:
+        scope = await self.seed.index(self.group, self.chunking, self.embed, [self.v1, self.other_v1])
+
+        inputs, (resolution,) = await self._resolve(scope)
+        self.assertTrue(inputs.subproblem.document_enabled)
+        self.assertTrue(inputs.contexts_by_source_id[self.billing.id].document_enabled)
+        self.assertTrue(resolution.passed)
+
+        # 문서를 꺼도 이미 만든 색인 판에는 남아 있다. 게이트는 두 경로 모두 거부해야 한다.
+        self.billing.enabled = False
+        await self.session.flush()
+
+        inputs, (resolution,) = await self._resolve(scope)
+
+        self.assertFalse(inputs.subproblem.document_enabled)
+        context = inputs.contexts_by_source_id[self.billing.id]
+        self.assertFalse(context.document_enabled)
+        self.assertEqual(self.v1.id, context.indexed_document_version_id)
+        self.assertEqual(REJECT_CITED_DOCUMENT_DISABLED, resolution.rejection_reason)
+        gate = evaluate_cache_gate(
+            self._connect_judgment(),
+            subproblem=inputs.subproblem,
+            canonical_answer=inputs.canonical_answer,
+            citation_resolutions=(resolution,),
+            semantic_cache_enabled=True,
+        )
+        self.assertEqual(
+            (REJECT_SUBPROBLEM_DOCUMENT_DISABLED, REJECT_CITED_DOCUMENT_DISABLED),
+            gate.rejection_reasons,
+        )
+
+    async def test_no_document_subproblem_counts_as_enabled(self) -> None:
+        scope = await self.seed.index(self.group, self.chunking, self.embed, [self.v1])
+        problem_group = await self.seed.no_document_group(self.group)
+        outside = await self.seed.subproblem(problem_group, "outside.question")
+
+        inputs = await self.reader.load_gate_inputs(outside.id, scope)
+
+        self.assertTrue(inputs.subproblem.document_enabled)
 
     def _connect_judgment(self) -> TurnJudgment:
         presented = PresentedSubproblem(

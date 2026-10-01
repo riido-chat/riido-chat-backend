@@ -266,6 +266,8 @@ class QuestionCatalogReader:
         """게이트 직전의 세부 문제 상태, 승인 정본, 인용, 인용 문서의 턴 색인 맥락.
 
         세부 문제는 상태와 무관하게 읽어 게이트가 SUBPROBLEM_NOT_APPROVED 를 판단하게 한다.
+        세부 문제 문서와 인용 문서의 enabled 도 함께 읽어 카탈로그와 같은 문서 끄기 규칙(결정 E)을
+        게이트에서도 적용하게 한다. 정확 일치 경로는 카탈로그를 거치지 않기 때문이다.
         """
 
         state = await self._load_subproblem_state(subproblem_id)
@@ -293,7 +295,17 @@ class QuestionCatalogReader:
                     QuestionSubproblem.status,
                     QuestionSubproblem.serving_state,
                     QuestionSubproblem.current_version,
-                ).where(QuestionSubproblem.id == subproblem_id)
+                    DocumentSource.enabled.label("document_enabled"),
+                )
+                .join(
+                    QuestionProblemGroup,
+                    QuestionProblemGroup.id == QuestionSubproblem.problem_group_id,
+                )
+                .outerjoin(
+                    DocumentSource,
+                    DocumentSource.id == QuestionProblemGroup.document_source_id,
+                )
+                .where(QuestionSubproblem.id == subproblem_id)
             )
         ).one_or_none()
         if row is None:
@@ -303,6 +315,8 @@ class QuestionCatalogReader:
             status=row.status,
             serving_state=row.serving_state,
             current_version=row.current_version,
+            # NO_DOCUMENT 문제 그룹은 문서가 없어 널이다. 끌 문서가 없으므로 켜진 것으로 본다.
+            document_enabled=row.document_enabled is not False,
         )
 
     async def _load_approved_canonical(
@@ -397,11 +411,13 @@ class QuestionCatalogReader:
           (1단계의 같은 청크도 같은 절이다) 인용 절 해시와 같은 절만 읽는다.
 
         색인에 판이 없는 문서는 indexed_document_version_id=None 인 맥락을 넣는다.
+        문서가 꺼져 있으면 document_enabled=False 로 넣어 R17 전에 거부하게 한다.
         """
 
         source_ids = sorted({citation.document_source_id for citation in citations})
         if not source_ids:
             return {}
+        enabled = await self._enabled_by_source(source_ids)
         indexed = await self._indexed_versions_by_source(source_ids, scope)
         sections = await self._candidate_sections(
             indexed.values(),
@@ -419,8 +435,19 @@ class QuestionCatalogReader:
                     if version_id is not None
                     and section.document_version_id == version_id
                 ),
+                document_enabled=enabled.get(source_id, False),
             )
         return contexts
+
+    async def _enabled_by_source(self, source_ids: Sequence[int]) -> Dict[int, bool]:
+        rows = (
+            await self._session.execute(
+                select(DocumentSource.id, DocumentSource.enabled).where(
+                    DocumentSource.id.in_(source_ids)
+                )
+            )
+        ).all()
+        return {row.id: bool(row.enabled) for row in rows}
 
     async def _indexed_versions_by_source(
         self,

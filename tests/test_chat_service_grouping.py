@@ -61,6 +61,7 @@ from app.question_grouping.exact_question import exact_question_hash
 from app.question_grouping.models import GateResult
 from app.question_grouping.service import (
     GroupingTurn,
+    ExactQuestionFallthrough,
     ExactQuestionResult,
     QuestionGroupingService,
     RecordedJudgment,
@@ -377,7 +378,7 @@ class GroupingChatFixture:
                 classification_run_id=CLASSIFICATION_RUN_ID,
             )
 
-        async def prepare(_turn, _query, _search):
+        async def prepare(_turn, _query, _search, **_kwargs):
             self.events.append("prepare")
             return self.prepared
 
@@ -649,6 +650,41 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
         )
         fixture.grouping.record_judgment_and_gate.assert_awaited_once()
         fixture.grouping.record_serve_failure.assert_not_awaited()
+        fixture.generation_service.generate_answer.assert_awaited_once()
+
+    async def test_stale_exact_source_runs_normal_judgment_with_reason(self) -> None:
+        # 원천 분류가 낡으면 서비스가 행 없이 ExactQuestionFallthrough 를 돌려준다.
+        fixture = self._fixture()
+        fixture.recorded = recorded_judgment("REJECTED")
+        fallthrough = ExactQuestionFallthrough(
+            rejection_reasons=("EXACT_SOURCE_SUBPROBLEM_VERSION_STALE",),
+            judgment_input={"exactQuestionFallthrough": {}},
+        )
+        fixture.grouping.record_exact_question.return_value = fallthrough
+
+        response, _ = await self._answer(fixture, "추천 질문")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        self.assertEqual(
+            TURN_START + SEARCH_WITH_GROUPING + JUDGE_CHECKPOINT,
+            fixture.events[: len(TURN_START) + len(SEARCH_WITH_GROUPING) + len(JUDGE_CHECKPOINT)],
+        )
+        self.assertIs(fallthrough, fixture.grouping.prepare.await_args.kwargs["exact_fallthrough"])
+        fixture.grouping.record_judgment_and_gate.assert_awaited_once()
+        fixture.generation_service.generate_answer.assert_awaited_once()
+
+    async def test_stale_exact_source_without_semantic_cache_generates_without_rows(self) -> None:
+        fixture = self._fixture(semantic_cache_enabled=False, exact_cache_enabled=True)
+        fixture.grouping.record_exact_question.return_value = ExactQuestionFallthrough(
+            rejection_reasons=("EXACT_SOURCE_CANONICAL_CHANGED",),
+            judgment_input={"exactQuestionFallthrough": {}},
+        )
+
+        response, _ = await self._answer(fixture, "추천 질문")
+
+        self.assertIsInstance(response, ChatCompletedResponse)
+        fixture.grouping.prepare.assert_not_awaited()
+        fixture.grouping.record_judgment_and_gate.assert_not_awaited()
         fixture.generation_service.generate_answer.assert_awaited_once()
 
     async def test_semantic_cache_disabled_skips_judgment_after_exact_cache_miss(self) -> None:

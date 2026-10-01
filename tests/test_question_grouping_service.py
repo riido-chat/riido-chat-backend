@@ -27,11 +27,17 @@ from app.question_grouping.constants import (
     JUDGE_MODEL,
     JUDGE_PROMPT_VERSION,
     JUDGE_PROVIDER,
+    EXACT_SOURCE_CANONICAL_CHANGED,
+    EXACT_SOURCE_CANONICAL_UNVERIFIED,
+    EXACT_SOURCE_SUBPROBLEM_VERSION_STALE,
+    REJECT_CANONICAL_ANSWER_CHANGED,
     REJECT_CANONICAL_ANSWER_NOT_FOUND,
     REJECT_CANONICAL_DATA_INVALID,
     REJECT_CANONICAL_SERVE_FAILED,
+    REJECT_CITED_DOCUMENT_DISABLED,
     REJECT_CITED_SECTION_CHANGED,
     REJECT_CLASSIFICATION_NOT_CONNECTED,
+    REJECT_SUBPROBLEM_DOCUMENT_DISABLED,
     REJECT_SUBPROBLEM_VERSION_MISMATCH,
 )
 from app.question_grouping.models import (
@@ -55,6 +61,8 @@ from app.question_grouping.service import (
     FAILURE_STAGE_CANDIDATES,
     FAILURE_STAGE_JUDGE,
     FAILURE_STAGE_QUESTION_EMBEDDING,
+    ExactQuestionFallthrough,
+    ExactQuestionResult,
     GroupingTurn,
     QuestionGroupingService,
 )
@@ -146,15 +154,23 @@ def _gate_inputs(
     current_version: int = 1,
     canonical: bool = True,
     section: IndexedSection = SECTION,
+    canonical_id: uuid.UUID = CANONICAL_ID,
+    applicability_rules: Tuple[str, ...] = (),
+    document_enabled: bool = True,
+    cited_document_enabled: bool = True,
 ) -> GateInputs:
-    state = GateSubproblemState(CANCEL_ID, QuestionSubproblemStatus.APPROVED, serving_state, current_version)
+    state = GateSubproblemState(
+        CANCEL_ID, QuestionSubproblemStatus.APPROVED, serving_state, current_version, document_enabled
+    )
     if not canonical:
         return GateInputs(subproblem=state)
     return GateInputs(
         subproblem=state,
-        canonical_answer=GateCanonicalAnswer(CANONICAL_ID, 1, "현재 정본 [1]"),
+        canonical_answer=GateCanonicalAnswer(canonical_id, current_version, "현재 정본 [1]", applicability_rules),
         citations=(CITATION,),
-        contexts_by_source_id={BILLING_SOURCE: CitationIndexContext(BILLING_VERSION, (section,))},
+        contexts_by_source_id={
+            BILLING_SOURCE: CitationIndexContext(BILLING_VERSION, (section,), cited_document_enabled)
+        },
     )
 
 
@@ -892,18 +908,29 @@ class FinalizeAttributionTest(_ServiceTestCase):
         self.assertNotIn("commit", self.events[-2:])
 
 
-def _exact_match(subproblem_id: uuid.UUID = CANCEL_ID, key: str = "billing.cancel") -> ExactQuestionLogMatch:
+def _exact_match(
+    subproblem_id: uuid.UUID = CANCEL_ID,
+    key: str = "billing.cancel",
+    *,
+    source_version: int = 1,
+    current_version: int = 1,
+    canonical_recorded: bool = False,
+    canonical_id: Optional[uuid.UUID] = None,
+) -> ExactQuestionLogMatch:
     return ExactQuestionLogMatch(
         subproblem_id=subproblem_id,
         key=key,
         problem_group_id=CANCEL_GROUP,
-        current_version=1,
+        current_version=current_version,
         document_source_id=BILLING_SOURCE,
         document_key=BILLING_KEY,
         normalized_question=QUESTION,
         source_rag_run_id=uuid.UUID("77777777-7777-4777-8777-777777777777"),
         classification_id=9,
         matched_count=3,
+        source_subproblem_version=source_version,
+        source_canonical_recorded=canonical_recorded,
+        source_canonical_answer_id=canonical_id,
     )
 
 
@@ -988,6 +1015,144 @@ class ExactQuestionTest(_ServiceTestCase):
 
         self.assertEqual(INVITE_ID, result.recorded.judgment.subproblem.subproblem_id)
         self.assertEqual(INVITE_ID, self.store.classifications[0]["judgment"].subproblem.subproblem_id)
+
+    async def test_unchanged_revision_and_recorded_canonical_serves(self) -> None:
+        self.store.exact_match = _exact_match(canonical_recorded=True, canonical_id=CANONICAL_ID)
+
+        result = await self.service().record_exact_question(
+            self.turn, QUESTION, semantic_cache_enabled=True
+        )
+
+        self.assertIsInstance(result, ExactQuestionResult)
+        self.assertTrue(result.recorded.served)
+        self.assertEqual(1, result.recorded.judgment.subproblem_version)
+        self.assertEqual(CANONICAL_ID, result.recorded.canonical_answer_id)
+
+    async def test_stale_source_writes_nothing_and_falls_through(self) -> None:
+        cases = (
+            (
+                "세부 문제 개정 변경",
+                _exact_match(source_version=1, current_version=2, canonical_recorded=True, canonical_id=CANONICAL_ID),
+                _gate_inputs(current_version=2),
+                EXACT_SOURCE_SUBPROBLEM_VERSION_STALE,
+            ),
+            (
+                "정본 교체",
+                _exact_match(canonical_recorded=True, canonical_id=uuid.UUID(int=77)),
+                _gate_inputs(),
+                EXACT_SOURCE_CANONICAL_CHANGED,
+            ),
+            (
+                "본 정본 미상 + 적용 제외 규칙",
+                _exact_match(),
+                _gate_inputs(applicability_rules=("환불 금액 문의는 다루지 않는다",)),
+                EXACT_SOURCE_CANONICAL_UNVERIFIED,
+            ),
+        )
+        for name, match, inputs, reason in cases:
+            with self.subTest(name):
+                self.events.clear()
+                self.store.classifications.clear()
+                self.store.attempts.clear()
+                self.store.exact_match = match
+                self.catalog.gate_inputs = inputs
+
+                result = await self.service().record_exact_question(
+                    self.turn, QUESTION, semantic_cache_enabled=True
+                )
+
+                self.assertIsInstance(result, ExactQuestionFallthrough)
+                self.assertEqual((reason,), result.rejection_reasons)
+                self.assertEqual(["exact_lookup", "gate_inputs"], self.events)
+                self.assertEqual([], self.store.classifications)
+                self.assertEqual([], self.store.attempts)
+                self.assertEqual([reason], result.judgment_input["exactQuestionFallthrough"]["rejectionReasons"])
+
+    async def test_fallthrough_reason_is_recorded_on_semantic_judgment_row(self) -> None:
+        self.store.exact_match = _exact_match(
+            source_version=1, current_version=2, canonical_recorded=True, canonical_id=CANONICAL_ID
+        )
+        self.catalog.gate_inputs = _gate_inputs(current_version=2)
+        service = self.service()
+        fallthrough = await service.record_exact_question(
+            self.turn, QUESTION, semantic_cache_enabled=True
+        )
+        self.assertIsInstance(fallthrough, ExactQuestionFallthrough)
+
+        prepared = await service.prepare(self.turn, QUESTION, _search(), exact_fallthrough=fallthrough)
+        judged = await service.judge(prepared)
+        recorded = await service.record_judgment_and_gate(
+            prepared, judged, semantic_cache_enabled=True
+        )
+
+        # 판별은 카탈로그 개정 1 을 봤고 게이트 입력은 개정 2 라 서빙하지 않는다.
+        self.assertEqual(CacheAttemptOutcome.REJECTED, recorded.gate.outcome)
+        self.assertIn(REJECT_SUBPROBLEM_VERSION_MISMATCH, recorded.gate.rejection_reasons)
+        data = self.judgment_input()
+        self.assertNotIn("matchSource", data)
+        self.assertEqual(
+            {
+                "rejectionReasons": [EXACT_SOURCE_SUBPROBLEM_VERSION_STALE],
+                "normalizedQuestion": QUESTION,
+                "sourceRagRunId": "77777777-7777-4777-8777-777777777777",
+                "sourceClassificationId": 9,
+                "matchedCount": 3,
+                "subproblemId": str(CANCEL_ID),
+                "sourceSubproblemVersion": 1,
+                "currentSubproblemVersion": 2,
+                "sourceCanonicalRecorded": True,
+                "sourceCanonicalAnswerId": str(CANONICAL_ID),
+                "currentCanonicalAnswerId": str(CANONICAL_ID),
+            },
+            data["exactQuestionFallthrough"],
+        )
+
+    async def test_disabled_documents_are_rejected_on_exact_path(self) -> None:
+        cases = (
+            (_gate_inputs(document_enabled=False), REJECT_SUBPROBLEM_DOCUMENT_DISABLED),
+            (_gate_inputs(cited_document_enabled=False), REJECT_CITED_DOCUMENT_DISABLED),
+        )
+        for inputs, reason in cases:
+            with self.subTest(reason=reason):
+                self.store.exact_match = _exact_match()
+                self.catalog.gate_inputs = inputs
+
+                result = await self.service().record_exact_question(
+                    self.turn, QUESTION, semantic_cache_enabled=True
+                )
+
+                self.assertIsInstance(result, ExactQuestionResult)
+                self.assertFalse(result.recorded.served)
+                self.assertEqual((reason,), result.recorded.gate.rejection_reasons)
+                self.assertEqual((reason,), self.store.attempts[-1]["gate"].rejection_reasons)
+
+
+class SemanticGateRecheckTest(_ServiceTestCase):
+    async def test_disabled_documents_are_rejected_on_semantic_path(self) -> None:
+        cases = (
+            (_gate_inputs(document_enabled=False), REJECT_SUBPROBLEM_DOCUMENT_DISABLED),
+            (_gate_inputs(cited_document_enabled=False), REJECT_CITED_DOCUMENT_DISABLED),
+        )
+        for inputs, reason in cases:
+            with self.subTest(reason=reason):
+                self.catalog.gate_inputs = inputs
+
+                _, _, _, recorded = await self.run_turn()
+
+                self.assertEqual(CacheAttemptOutcome.REJECTED, recorded.gate.outcome)
+                self.assertEqual((reason,), recorded.gate.rejection_reasons)
+
+    async def test_canonical_changed_after_presentation_is_rejected(self) -> None:
+        # 카탈로그(판별 제시)는 CANONICAL_ID, 게이트 직전 재조회는 다른 승인 정본이다.
+        replaced = uuid.UUID("88888888-8888-4888-8888-888888888888")
+        self.catalog.gate_inputs = _gate_inputs(canonical_id=replaced)
+
+        _, _, _, recorded = await self.run_turn()
+
+        self.assertEqual(CacheAttemptOutcome.REJECTED, recorded.gate.outcome)
+        self.assertEqual((REJECT_CANONICAL_ANSWER_CHANGED,), recorded.gate.rejection_reasons)
+        self.assertIsNone(recorded.gate.canonical_answer_id)
+        self.assertEqual(str(replaced), self.judgment_input()["gate"]["canonicalAnswerId"])
 
 if __name__ == "__main__":
     unittest.main()

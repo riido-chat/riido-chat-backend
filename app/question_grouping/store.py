@@ -62,6 +62,8 @@ from app.question_grouping.exact_question import (
 MAX_REJECTION_REASON_LENGTH = 50
 # 판별 행 judgment_input 에 반드시 있어야 하는 게이트 칸(결정 A).
 JUDGMENT_INPUT_GATE_FIELD = "gate"
+# 판별 행 judgment_input 의 세부 문제 제시 목록(payload.presentation_judgment_input).
+JUDGMENT_INPUT_SUBPROBLEM_CANDIDATES_FIELD = "subproblemCandidates"
 
 CANONICAL_OUTCOMES = frozenset(
     {
@@ -149,6 +151,35 @@ def validate_gate_result(gate: GateResult) -> None:
             raise ValueError(f"거부 사유는 1~{MAX_REJECTION_REASON_LENGTH}자여야 합니다.")
 
 
+def presented_canonical_answer(
+    presented_items: Any,
+    subproblem_id: uuid.UUID,
+) -> Tuple[bool, Optional[uuid.UUID]]:
+    """원천 분류 judgment_input 제시 목록에서 이 세부 문제에 보여 준 정본 id 를 찾는다.
+
+    (기록 여부, 정본 id) 를 돌려준다. 제시 목록에 세부 문제가 있고 canonicalAnswerId 칸이
+    널이나 UUID 문자열이면 기록된 것이다(널은 정본 없이 판별). 제시 목록이 없거나(운영자
+    연결, 정확 일치로 쓴 행) 모양이 다르면 알 수 없는 것으로 본다.
+    """
+
+    if not isinstance(presented_items, list):
+        return False, None
+    target = str(subproblem_id)
+    for item in presented_items:
+        if not isinstance(item, Mapping) or item.get("subproblemId") != target:
+            continue
+        if "canonicalAnswerId" not in item:
+            return False, None
+        value = item["canonicalAnswerId"]
+        if value is None:
+            return True, None
+        try:
+            return True, uuid.UUID(str(value))
+        except ValueError:
+            return False, None
+    return False, None
+
+
 def served_citation_logs(gate: GateResult) -> Tuple[CitationLog, ...]:
     """SERVED 게이트의 인용 해석을 complete_rag_run 입력(CitationLog)으로 바꾼다.
 
@@ -213,6 +244,10 @@ class QuestionGroupingStore:
         (turn_no = 1)뿐이다. 후속 턴 로그는 이전 문맥에 기대어 판별됐을 수 있어 원천으로 쓰지 않는다.
         ``rag_runs.query_hash`` 로 좁히고 현재(effective_to IS NULL) CONNECT 분류 중
         effective_from 이 가장 최근인 행(같으면 분류 id 가 큰 행)의 세부 문제를 쓴다.
+        원천 분류가 기록한 세부 문제 개정과 제시 정본도 함께 돌려준다. 지금도 재사용할 수
+        있는지는 서비스가 게이트 입력과 비교해 정한다(gate.exact_source_fallthrough_reasons).
+        고른 행이 낡았어도 그 아래 옛 행으로 내려가지 않는다. 같은 질문의 최신 판단이 낡았으면
+        더 옛 판단도 믿을 근거가 없기 때문이다.
         세부 문제가 서로 달라도 충돌로 보지 않는다. 운영자가 로그 하나를 다시 연결하면
         그 행이 가장 최근의 현재 분류가 되므로, 빠른 경로가 스스로 쓴 행을 포함한 옛 로그를
         모두 다시 연결하지 않아도 바로 반영된다.
@@ -234,6 +269,10 @@ class QuestionGroupingStore:
                 select(
                     classification.id.label("classification_id"),
                     classification.effective_from,
+                    classification.subproblem_version.label("source_subproblem_version"),
+                    classification.judgment_input[
+                        JUDGMENT_INPUT_SUBPROBLEM_CANDIDATES_FIELD
+                    ]["items"].label("presented_items"),
                     RagRun.id.label("rag_run_id"),
                     RagRun.user_query,
                     subproblem.id.label("subproblem_id"),
@@ -299,6 +338,9 @@ class QuestionGroupingStore:
                 chosen = row
         if chosen is None:
             return None
+        canonical_recorded, canonical_answer_id = presented_canonical_answer(
+            chosen.presented_items, chosen.subproblem_id
+        )
         return ExactQuestionLogMatch(
             subproblem_id=chosen.subproblem_id,
             key=chosen.key,
@@ -310,6 +352,9 @@ class QuestionGroupingStore:
             source_rag_run_id=chosen.rag_run_id,
             classification_id=chosen.classification_id,
             matched_count=matched_count,
+            source_subproblem_version=chosen.source_subproblem_version,
+            source_canonical_recorded=canonical_recorded,
+            source_canonical_answer_id=canonical_answer_id,
         )
 
     # ------------------------------------------------------------------
