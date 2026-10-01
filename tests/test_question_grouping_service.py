@@ -508,15 +508,20 @@ class ConnectServedTest(_ServiceTestCase):
         self.assertIsNone(data["failure"])
         self.assertEqual("CONNECT", data["output"]["decision"])
         self.assertEqual(str(RAG_RUN_ID), data["presentationSeed"])
+        # 사용량, 모델, 프롬프트 판, 추론 설정, 색인 판, 문서 그룹, 분류 실행은 다른 표가 정본이다.
+        self.assertEqual("v2", data["schemaVersion"])
+        for removed in ("usage", "model", "promptVersion", "reasoningEffort", "indexVersionId", "documentGroupId", "classificationRunId"):
+            self.assertNotIn(removed, data)
+        judge_finished = self.log_store.finished[judge_call_id]
         self.assertEqual(
-            {"input": 5000, "output": 300, "cached": 4000, "reasoning": 120, "latencyMs": 1200, "retryCount": 0},
-            data["usage"],
+            {"input_tokens": 5000, "output_tokens": 300, "cached_input_tokens": 4000, "reasoning_tokens": 120, "latency_ms": 1200, "retry_count": 0},
+            {key: judge_finished[key] for key in ("input_tokens", "output_tokens", "cached_input_tokens", "reasoning_tokens", "latency_ms", "retry_count")},
         )
         self.assertEqual(str(CANCEL_ID), next(item["subproblemId"] for item in data["subproblemCandidates"]["items"] if item["key"] == "billing.cancel"))
         self.assertEqual({"dense": 10, "bm25": 10, "rrfK": 60}, data["documentCandidates"]["retrieval"])
         self.assertEqual({"itemCount": 2, "skippedMissingEmbedding": 1, "skippedEmbeddingConfigMismatch": 0}, data["catalog"])
         self.assertEqual(
-            {"embeddingConfigId": 9, "subproblemTextVersion": ["name-inclusion-v1"], "reusedRetrievalEmbedding": True, "retrievalQuery": QUESTION, "usage": None},
+            {"embeddingConfigId": 9, "subproblemTextVersion": ["name-inclusion-v1"], "reusedRetrievalEmbedding": True, "retrievalQuery": QUESTION},
             data["embedding"],
         )
 
@@ -647,7 +652,7 @@ class JudgeFailureTest(_ServiceTestCase):
         data = self.assert_failed_row(recorded, JudgeFailureKind.INVALID_OUTPUT, ExecutionStatus.SUCCESS)
         self.assertEqual(INVALID_UNPARSEABLE_OUTPUT, data["normalization"]["invalidReason"])
         self.assertEqual("{not json", data["output"])
-        self.assertIsNotNone(data["usage"])
+        self.assertNotIn("usage", data)
 
     async def test_unknown_subproblem_key_is_invalid(self) -> None:
         self.judge_client.call = JudgeCall(trace=_trace(), output_text=_connect_output(key="billing.unknown"))
@@ -715,7 +720,7 @@ class PreparationFailureTest(_ServiceTestCase):
         )
         self.assertIn("key 가 겹칩니다", data["failure"]["safeMessage"])
         self.assertIsNone(data["subproblemCandidates"])
-        self.assertIsNone(data["usage"])
+        self.assertNotIn("usage", data)
         self.assertEqual("FAILED", data["gate"]["outcome"])
 
     async def test_missing_outline_is_candidate_failure(self) -> None:
@@ -782,7 +787,8 @@ class QueryExpansionTest(_ServiceTestCase):
         data = self.judgment_input()
         self.assertFalse(data["embedding"]["reusedRetrievalEmbedding"])
         self.assertEqual("뤼이도 서비스 소개", data["embedding"]["retrievalQuery"])
-        self.assertEqual(12, data["embedding"]["usage"]["input"])
+        # 재임베딩 토큰은 model_calls 에만 남는다.
+        self.assertNotIn("usage", data["embedding"])
         self.assertEqual(CacheAttemptOutcome.SERVED, recorded.gate.outcome)
 
     async def test_reembedding_failure_is_fail_open(self) -> None:

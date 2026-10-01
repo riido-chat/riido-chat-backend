@@ -11,6 +11,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
+from sqlalchemy.dialects.postgresql import asyncpg as asyncpg_dialect
 
 from app.database.base import Base
 from app.database.models import (
@@ -221,7 +222,6 @@ class DatabaseModelTest(unittest.TestCase):
         self.assertFalse(table.c.query_rewrite_model_name.nullable)
         self.assertFalse(table.c.semantic_cache_enabled.nullable)
         self.assertFalse(table.c.exact_cache_enabled.nullable)
-        self.assertTrue(table.c.verifier_model_name.nullable)
         partial_unique = {
             index.name: str(index.dialect_options["postgresql"]["where"])
             for index in table.indexes
@@ -460,7 +460,6 @@ class DatabaseModelTest(unittest.TestCase):
             "CHUNK_EMBEDDING",
             "ANSWER_GENERATION",
             "QUERY_REWRITE",
-            "CONVERSATION_SUMMARY",
             "QUESTION_CLASSIFICATION",
         }
 
@@ -862,6 +861,26 @@ class DatabaseModelTest(unittest.TestCase):
         ):
             with self.subTest(column=column):
                 self.assertTrue(canonical.c[column].nullable)
+
+    def test_unused_turn_log_columns_are_dropped(self) -> None:
+        removed = {
+            ModelCall: {"estimated_cost"},
+            Conversation: {"summary_text", "summary_version", "summary_updated_turn_no"},
+            ChatProfileRevision: {"verifier_model_name", "verifier_prompt_version"},
+        }
+        for model, columns in removed.items():
+            with self.subTest(table=model.__tablename__):
+                self.assertFalse(columns & set(model.__table__.columns.keys()))
+
+    def test_rag_run_context_snapshot_stores_none_as_sql_null(self) -> None:
+        column_type = RagRun.__table__.c.context_snapshot.type
+        self.assertIsInstance(column_type, JSONB)
+        self.assertTrue(column_type.none_as_null)
+        dialect = asyncpg_dialect.dialect()
+        bind = column_type.dialect_impl(dialect).bind_processor(dialect)
+        # 기본 JSONB 는 None 을 JSON 'null' 로 보낸다. 이 칸은 SQL NULL 로 보낸다.
+        self.assertIsNone(bind(None))
+        self.assertEqual('{"a": 1}', bind({"a": 1}))
 
     def test_constraint_names_fit_postgres_identifier_limit(self) -> None:
         names = [
