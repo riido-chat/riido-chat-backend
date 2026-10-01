@@ -1,0 +1,16 @@
+{
+  "description": "모델에 보내는 프롬프트와 출력 스키마의 지문 표. 키는 <component>@<version>, 값은 sha256 hex. 정규화 규칙은 app/core/prompt_fingerprints.py 를 따른다. 키는 추가만 하고 기존 키의 값을 바꾸거나 지우지 않는다(scripts/check_prompt_fingerprints.py).",
+  "fingerprints": {
+    "generation.answer.output_schema@v23": "76fafd42a2292816645c9110946a1de03e08b43349b591990346d52423a7951f",
+    "generation.answer@v23": "7cefd4931821158f05581d5a4259a55d6a2b51ae559af69a16fa59b139707591",
+    "generation.answer_repair@v23-repair-1": "179ee279b1466e88bd411e3f7839c9751d78e30700a6e4ff14b771c3f3f477ad",
+    "generation.source_planning.output_schema@v34": "19fc519fdea6448eebd60e4fefbfdb2378f1113cb1fb1ff8ee0b4b34735d73b2",
+    "generation.source_planning@v34": "ee3dc5174145d29cf7dac4576e332462245cc5826530d977ce72291df1a4cbe3",
+    "generation.source_planning_repair@v34-repair-1": "290ad6c6e8c6f1679c3415ac6e2242afd429de10fd180864b8bf32d2e7a426db",
+    "generation@v40": "1f6eaf0b3aacfadf795ea309383cd8cf4d7e82144c9617e0634faccca81b97b3",
+    "judge.output_schema@question-grouping-v7-2": "b026d831ee66e22949388487b775bdb5ca2fbf2275524b9e6842d8bbc325c46b",
+    "judge@question-grouping-v7-2": "4e6fb86c0a8a0fb9210e3c4e3bbc1c385a88a887908f437982369316ace1b902",
+    "rewrite.output_schema@v10": "c8c7956a086f0a604885ae4b24d79d35110e91667ee33daf7261aae87387f81b",
+    "rewrite@v10": "acb11d87f3bf8fa496a978339a64e1998e24f002802224d1a784e28019aa3511"
+  }
+}
