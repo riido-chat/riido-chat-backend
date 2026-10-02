@@ -561,8 +561,9 @@ class QuestionGroupingService:
             problem_group_id=match.problem_group_id,
             document_source_id=match.document_source_id,
             document_key=match.document_key or "",
-            # 원천 판별이 본 정본과 현재 정본이 같거나(기록됨) 적용 제외 규칙이 없음을 위에서
-            # 확인했으므로, 게이트의 제시 정본 검사에는 현재 정본을 넘긴다.
+            # 원천 판별이 본 정본과 현재 정본이 같거나(기록됨), 현재 정본 생성 뒤 운영자가
+            # 승인했거나, 적용 제외 규칙이 없음을 위에서 확인했으므로 게이트의 제시 정본
+            # 검사에는 현재 정본을 넘긴다.
             canonical_answer_id=(
                 None if canonical_now is None else canonical_now.canonical_answer_id
             ),
