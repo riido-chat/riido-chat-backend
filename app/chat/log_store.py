@@ -703,7 +703,6 @@ class RagLogStore:
         output_tokens: Optional[int] = None,
         cached_input_tokens: Optional[int] = None,
         reasoning_tokens: Optional[int] = None,
-        estimated_cost: Optional[float] = None,
         latency_ms: Optional[int] = None,
         retry_count: int = 0,
         error_message: Optional[str] = None,
@@ -740,7 +739,6 @@ class RagLogStore:
         call.output_tokens = output_tokens
         call.cached_input_tokens = cached_input_tokens
         call.reasoning_tokens = reasoning_tokens
-        call.estimated_cost = estimated_cost
         call.latency_ms = latency_ms
         call.retry_count = retry_count
         call.error_message = error_message

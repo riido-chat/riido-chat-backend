@@ -266,7 +266,6 @@ class ModelCallPurpose(str, enum.Enum):
     CHUNK_EMBEDDING = "CHUNK_EMBEDDING"
     ANSWER_GENERATION = "ANSWER_GENERATION"
     QUERY_REWRITE = "QUERY_REWRITE"
-    CONVERSATION_SUMMARY = "CONVERSATION_SUMMARY"
     QUESTION_CLASSIFICATION = "QUESTION_CLASSIFICATION"
 
 
@@ -458,8 +457,6 @@ class ChatProfileRevision(Base):
     exact_cache_enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
     )
-    verifier_model_name: Mapped[Optional[str]] = mapped_column(String(150))
-    verifier_prompt_version: Mapped[Optional[str]] = mapped_column(String(50))
     created_at: Mapped[Any] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -966,9 +963,6 @@ class Conversation(Base):
         server_default=ConversationStatus.ACTIVE.value,
     )
     title: Mapped[Optional[str]] = mapped_column(String(300))
-    summary_text: Mapped[Optional[str]] = mapped_column(Text)
-    summary_version: Mapped[Optional[str]] = mapped_column(String(50))
-    summary_updated_turn_no: Mapped[Optional[int]] = mapped_column(Integer)
     created_at: Mapped[Any] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -1016,7 +1010,10 @@ class RagRun(Base):
     context_turn_count: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default="0"
     )
-    context_snapshot: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB)
+    # 문맥이 없으면 JSON null 이 아니라 SQL NULL 로 쓴다. 읽을 때는 둘 다 None 이다.
+    context_snapshot: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        JSONB(none_as_null=True)
+    )
     status: Mapped[AnswerStatus] = mapped_column(
         _status_enum(AnswerStatus, "answer_status"),
         nullable=False,
@@ -1133,7 +1130,6 @@ class ModelCall(Base):
     output_tokens: Mapped[Optional[int]] = mapped_column(Integer)
     cached_input_tokens: Mapped[Optional[int]] = mapped_column(Integer)
     reasoning_tokens: Mapped[Optional[int]] = mapped_column(Integer)
-    estimated_cost: Mapped[Optional[float]] = mapped_column(Numeric)
     latency_ms: Mapped[Optional[int]] = mapped_column(Integer)
     status: Mapped[ExecutionStatus] = mapped_column(
         _status_enum(ExecutionStatus, "model_call_execution_status"), nullable=False
