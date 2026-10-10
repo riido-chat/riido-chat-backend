@@ -220,6 +220,10 @@ def create_app() -> FastAPI:
     app.include_router(internal_test_chat_router)
     app.include_router(admin_documents_router)
     app.include_router(admin_question_log_router)
+    if get_settings().profile_revision_admin_enabled:
+        from app.admin.profile_revisions.router import router as profile_revisions_router
+
+        app.include_router(profile_revisions_router)
 
     @app.exception_handler(AdminApiError)
     async def handle_admin_api_error(

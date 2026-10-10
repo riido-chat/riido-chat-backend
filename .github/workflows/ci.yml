@@ -38,6 +38,8 @@ jobs:
     env:
       APP_ENV: test
       DATABASE_URL: postgresql+asyncpg://riido:riido@localhost:5432/riido
+      # 수명주기 검증은 이 일회용 서비스 안에서 고유한 임시 DB를 만들고 지운다.
+      PROFILE_LIFECYCLE_TEST_DATABASE_URL: postgresql+asyncpg://riido:riido@localhost:5432/riido
 
     steps:
       - uses: actions/checkout@v4
