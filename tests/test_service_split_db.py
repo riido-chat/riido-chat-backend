@@ -728,6 +728,7 @@ class TwoServicesServingDbTest(_ScratchDatabaseTest):
         version: int,
         generation_model: str = GENERATION_MODEL,
         rewrite_model: str = OPENAI_QUERY_REWRITE_MODEL,
+        rewrite_prompt_version: str = QUERY_REWRITE_PROMPT_VERSION,
     ) -> ChatProfileRevision:
         """지금 코드 구성의 PUBLISHED 프로필 버전과 구성 행을 한 트랜잭션에서 만든다."""
 
@@ -739,17 +740,20 @@ class TwoServicesServingDbTest(_ScratchDatabaseTest):
             generation_model_name=generation_model,
             generation_prompt_version=GENERATION_PROMPT_VERSION,
             query_rewrite_model_name=rewrite_model,
-            query_rewrite_prompt_version=QUERY_REWRITE_PROMPT_VERSION,
+            query_rewrite_prompt_version=rewrite_prompt_version,
         )
         session.add(revision)
         await session.flush()
-        session.add_all(
-            component_models(
-                revision.id,
-                generation_model=generation_model,
-                rewrite_model=rewrite_model,
-            )
+        rows = component_models(
+            revision.id,
+            generation_model=generation_model,
+            rewrite_model=rewrite_model,
         )
+        for row in rows:
+            if row.stage.value == "rewrite":
+                row.prompt_version = rewrite_prompt_version
+                row.prompt_key = f"rewrite@{rewrite_prompt_version}"
+        session.add_all(rows)
         await session.flush()
         return revision
 
@@ -845,23 +849,10 @@ class TwoServicesServingDbTest(_ScratchDatabaseTest):
             current = await session.get(ChatProfileRevision, self.test["revision_id"])
             current.status = ChatProfileRevisionStatus.RETIRED
             await session.flush()
+            # 구성은 생성부터 불변이다. 잘못된 등록부 참조도 최초 INSERT로 확정한다.
             broken = await self._publish(
-                session, self.test["profile_id"], self.test["group_id"], version=2
-            )
-            await session.execute(
-                text(
-                    "UPDATE profile_revision_components SET prompt_version = 'v9-missing', "
-                    "prompt_key = 'rewrite@v9-missing' "
-                    "WHERE revision_id = :id AND stage = 'rewrite'"
-                ),
-                {"id": broken.id},
-            )
-            await session.execute(
-                text(
-                    "UPDATE chat_profile_revisions SET query_rewrite_prompt_version = 'v9-missing' "
-                    "WHERE id = :id"
-                ),
-                {"id": broken.id},
+                session, self.test["profile_id"], self.test["group_id"], version=2,
+                rewrite_prompt_version="v9-missing",
             )
             await session.commit()
             broken_id = broken.id

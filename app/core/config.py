@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     # 질문 판별·정본 캐시 서빙 전체 스위치(R19). 꺼져 있으면 판별 행·캐시 시도·질문 임베딩
     # 저장 없이 기존 턴 흐름과 같다.
     question_grouping_enabled: bool = False
+    # 인증 적용 전 공개 환경에서 활성화하지 않는다. 이 설정은 인증을 대체하지 않는다.
+    profile_revision_admin_enabled: bool = False
 
     @property
     def cors_origin_list(self) -> List[str]:
