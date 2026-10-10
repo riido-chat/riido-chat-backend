@@ -227,6 +227,9 @@ def frozen_row(item_id: str, layer: str, judged: bool, entries: Dict[str, Dict[s
 def build_registry(root: Path, *, schema_from: Optional[Path] = None) -> Path:
     for sub in ("golden/items", "golden/suites", "golden/frozen", "scripts", "schemas", "criteria", "evals"):
         (root / sub).mkdir(parents=True, exist_ok=True)
+    # 스키마 검사 모듈 import 가 만든 캐시는 등록부 원본 변경이 아니다.
+    # 전역 Git 제외 설정이 없는 CI 에서도 두 번째 실행이 같은 등록부를 읽는다.
+    (root / ".gitignore").write_text("__pycache__/\n*.py[cod]\n", encoding="utf-8")
     entries = {entry["key"]: entry for entry in catalog_entries()}
     items: Dict[str, List[str]] = {"A": [], "B": []}
     rows = []
