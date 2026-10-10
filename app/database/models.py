@@ -60,6 +60,10 @@ DOCUMENT_SOURCE_GROUP_SOURCE_FK_CONSTRAINT = (
 GROUP_SOURCE_DOCUMENT_GROUP_UNIQUE_CONSTRAINT = (
     "uq_document_group_sources_id_document_group_id"
 )
+# 명명 규칙대로 붙이면 63자를 넘어 이름을 직접 지정한다.
+PROFILE_REVISION_PROFILE_GROUP_FK_CONSTRAINT = (
+    "fk_chat_profile_revisions_profile_id_document_group_id"
+)
 CURRENT_CLASSIFICATION_CONSTRAINT = "uq_question_classifications_rag_run_id_current"
 OPEN_ONLINE_CLASSIFICATION_RUN_CONSTRAINT = "uq_classification_runs_open_online"
 APPROVED_CANONICAL_ANSWER_CONSTRAINT = "uq_canonical_answers_subproblem_id_approved"
@@ -169,7 +173,7 @@ class ConversationStatus(str, enum.Enum):
 
 
 class ConversationChannel(str, enum.Enum):
-    """Endpoint channel that owns a conversation's pinned revision."""
+    """대화를 시작한 주소의 옛 표기. 서비스 판정은 conversations.profile_id 가 한다."""
 
     PUBLIC = "PUBLIC"
     INTERNAL_TEST = "INTERNAL_TEST"
@@ -185,7 +189,7 @@ class ChatProfileRevisionStatus(str, enum.Enum):
 
 
 class ProfileRevisionComponentStage(str, enum.Enum):
-    """프로필 판 구성 행의 단계. 값마다 지문 표(app/core/prompt_fingerprints.json)의
+    """프로필 버전 구성 행의 단계. 값마다 지문 표(app/prompts/fingerprints.json)의
     component 가 하나로 정해진다(PROFILE_REVISION_COMPONENT_PROMPT_KEYS)."""
 
     REWRITE = "rewrite"
@@ -392,13 +396,23 @@ class DocumentGroup(Base):
 
 
 class ChatProfile(Base):
-    """어떤 소비자에게 제공할 챗봇 프로필의 안정적인 식별자."""
+    """서비스 하나. 서비스마다 전용 문서 그룹 하나를 쓴다(1:1)."""
 
     __tablename__ = "chat_profiles"
+    __table_args__ = (
+        # 프로필 버전의 복합 외래키가 참조한다.
+        UniqueConstraint("id", "document_group_id"),
+    )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     profile_key: Mapped[str] = mapped_column(String(80), nullable=False, unique=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
+    document_group_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("document_groups.id", ondelete="RESTRICT"),
+        nullable=False,
+        unique=True,
+    )
     created_at: Mapped[Any] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -428,6 +442,13 @@ class ChatProfileRevision(Base):
             "profile_id",
             unique=True,
             postgresql_where=text("status = 'TESTING'"),
+        ),
+        # 프로필 버전은 자기 서비스의 문서 그룹만 쓴다. 다른 서비스의 문서 그룹은 DB 가 거부한다.
+        ForeignKeyConstraint(
+            ["profile_id", "document_group_id"],
+            ["chat_profiles.id", "chat_profiles.document_group_id"],
+            name=PROFILE_REVISION_PROFILE_GROUP_FK_CONSTRAINT,
+            ondelete="RESTRICT",
         ),
     )
 
@@ -946,6 +967,13 @@ class Conversation(Base):
         ),
         nullable=False,
     )
+    # 대화가 속한 서비스. 대화는 이 서비스의 주소로만 이어진다.
+    profile_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("chat_profiles.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    # 4단계에서 지운다. 그때까지 새 대화에도 서비스의 옛 표기를 쓴다.
     channel: Mapped[ConversationChannel] = mapped_column(
         _status_enum(ConversationChannel, "conversation_channel"),
         nullable=False,

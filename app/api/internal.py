@@ -102,13 +102,13 @@ async def reload_corpus(
     "/test-chat",
     response_model=ChatResponse,
     status_code=status.HTTP_200_OK,
-    summary="TESTING chat profile로 답변 생성 (internal)",
+    summary="HELP_CHATBOT_TEST 서비스로 답변 생성 (internal)",
 )
 async def test_chat(
     request: ChatRequest,
     service: ChatService = Depends(get_testing_chat_service),
 ) -> ChatResponse:
-    """Run the normal ChatService against the HELP_CHATBOT TESTING revision.
+    """Run the normal ChatService against the HELP_CHATBOT_TEST service.
 
     This route intentionally exposes no group_id or revision_id input.  It is
     an internal operational hook; authentication is left to the deployment

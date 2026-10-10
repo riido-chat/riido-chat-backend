@@ -3,8 +3,8 @@
 - 합성 fixture 만 쓴다. 문서 그룹·문서·청크·임베딩·ACTIVE 색인·PUBLISHED 프로필 판을 이 테스트의
   문서 그룹으로 만들고, 세부 문제와 정본은 시드 스크립트(run_seed, 가짜 임베딩)로 적재한다.
 - 공유 로컬 DB 에는 다른 ACTIVE 색인(HELP_CHATBOT, HELP_CHATBOT_TEST)과 PUBLISHED 프로필 판이
-  이미 있다. 검색기 팩토리가 이 테스트 색인만 돌려주고, 기존 PUBLISHED 판은 외부 트랜잭션 안에서
-  RETIRED 로 내렸다가 마지막 rollback 으로 되돌린다.
+  이미 있다. 검색기 팩토리가 이 테스트 색인만 돌려주고, 이 테스트 문서 그룹을 쓰는 서비스(프로필)를
+  따로 만들어 그 서비스로 답한다. 외부 트랜잭션 rollback 으로 모두 되돌린다.
 - 판별 모델, 검색, 생성, 질의 재작성은 가짜다(API 호출 없음). 판별 서비스는 실제 store·reader 다.
 - ChatService 가 Python 3.10+ 문법을 쓰므로 Python 3.12 환경에서 실행한다.
 
@@ -21,7 +21,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock
 
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import func, select, update
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from app.answering.models import (
@@ -33,7 +33,6 @@ from app.answering.models import (
 from app.answering.service import GenerationService
 from app.chat.dependencies import get_chat_service, get_rag_log_store
 from app.chat.log_store import RagLogStore
-from app.chat.profile import HELP_CHATBOT_PROFILE_KEY
 from app.chat.query_rewrite import QUERY_REWRITE_PROMPT_VERSION, QueryRewriteService
 from app.chat.service import ChatService
 from app.core.config import get_settings
@@ -53,6 +52,7 @@ from app.database.models import (
     ClassificationDecision,
     ClassificationRun,
     ContextStrategy,
+    ConversationChannel,
     DocumentSource,
     EmbeddingConfig,
     ExecutionStatus,
@@ -71,6 +71,7 @@ from app.database.models import (
 from app.database.session import get_db_session
 from app.main import create_app
 from app.ops.seed_question_grouping import CanonicalAction, parse_input, run_seed
+from app.profiles.services import ChatServiceRoute
 from app.question_grouping.constants import (
     JUDGE_MODEL,
     JUDGE_PROMPT_VERSION,
@@ -337,30 +338,21 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
         await self.session.flush()
 
     async def _seed_profile(self) -> None:
-        """HELP_CHATBOT 의 PUBLISHED 판을 이 테스트 문서 그룹으로 바꾼다(외부 트랜잭션 rollback 으로 복구)."""
+        """이 테스트 문서 그룹을 쓰는 서비스와 PUBLISHED 프로필 버전을 만든다(외부 트랜잭션 rollback 으로 복구)."""
 
-        profile = await self.session.scalar(
-            select(ChatProfile).where(ChatProfile.profile_key == HELP_CHATBOT_PROFILE_KEY)
+        profile = ChatProfile(
+            profile_key=f"QG_ACCEPTANCE_{uuid.uuid4().hex[:8]}",
+            name="판별 수용 테스트 서비스",
+            document_group_id=self.group.id,
         )
-        if profile is None:
-            profile = ChatProfile(profile_key=HELP_CHATBOT_PROFILE_KEY, name="이용가이드 챗봇")
-            await self.seed.add(profile)
-        await self.session.execute(
-            update(ChatProfileRevision)
-            .where(
-                ChatProfileRevision.profile_id == profile.id,
-                ChatProfileRevision.status == ChatProfileRevisionStatus.PUBLISHED,
-            )
-            .values(status=ChatProfileRevisionStatus.RETIRED)
-        )
-        version = await self.session.scalar(
-            select(func.coalesce(func.max(ChatProfileRevision.version), 0)).where(
-                ChatProfileRevision.profile_id == profile.id
-            )
+        await self.seed.add(profile)
+        self.chat_service_route = ChatServiceRoute(
+            profile_key=profile.profile_key,
+            channel=ConversationChannel.PUBLIC,
         )
         revision = ChatProfileRevision(
             profile_id=profile.id,
-            version=version + 1,
+            version=1,
             document_group_id=self.group.id,
             status=ChatProfileRevisionStatus.PUBLISHED,
             generation_model_name=GENERATION_MODEL,
@@ -578,7 +570,7 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
             log_store=self.log_store,
             session=self.session,
             index_version_id=None,
-            profile_status=ChatProfileRevisionStatus.PUBLISHED,
+            service=self.chat_service_route,
             retriever_factory=retriever_factory,
             question_grouping=grouping,
             question_grouping_enabled=enabled,

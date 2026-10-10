@@ -50,6 +50,7 @@ from app.chat.query_rewrite import (
     QueryRewriteTurnStatus,
 )
 from app.document.document_key import SOURCE_TYPE_GITBOOK
+from app.profiles.services import HELP_CHATBOT
 
 # WITHHELD 보류 사유 4종
 UNVERIFIABLE_ANSWER_REASON_CODE = "UNVERIFIABLE_ANSWER"
@@ -169,28 +170,48 @@ class RagLogStore:
         client_key: Optional[uuid.UUID] = None,
         chat_profile_revision_id: Optional[int] = None,
         channel: Optional[ConversationChannel] = None,
+        profile_id: Optional[int] = None,
     ) -> Conversation:
         """새 대화를 ACTIVE 상태로 생성한다."""
 
         if chat_profile_revision_id is None:
             # Legacy callers (including maintenance jobs) do not know the
-            # endpoint profile.  Keep them safe by resolving the published
-            # HELP_CHATBOT revision rather than leaving an unpinned row.
-            chat_profile_revision_id = await self._session.scalar(
-                select(ChatProfileRevision.id)
-                .join(ChatProfile, ChatProfile.id == ChatProfileRevision.profile_id)
-                .where(
-                    ChatProfile.profile_key == "HELP_CHATBOT",
-                    ChatProfileRevision.status
-                    == ChatProfileRevisionStatus.PUBLISHED,
+            # endpoint service.  Keep them safe by resolving the published
+            # revision of the /api/chat service rather than leaving an unpinned row.
+            row = (
+                await self._session.execute(
+                    select(ChatProfileRevision.id, ChatProfileRevision.profile_id)
+                    .join(
+                        ChatProfile, ChatProfile.id == ChatProfileRevision.profile_id
+                    )
+                    .where(
+                        ChatProfile.profile_key == HELP_CHATBOT.profile_key,
+                        ChatProfileRevision.status
+                        == ChatProfileRevisionStatus.PUBLISHED,
+                    )
+                )
+            ).one_or_none()
+            if row is None:
+                raise ValueError(
+                    f"{HELP_CHATBOT.profile_key} PUBLISHED 프로필 버전이 없습니다."
+                )
+            chat_profile_revision_id, profile_id = row
+            channel = channel or HELP_CHATBOT.channel
+        elif profile_id is None:
+            profile_id = await self._session.scalar(
+                select(ChatProfileRevision.profile_id).where(
+                    ChatProfileRevision.id == chat_profile_revision_id
                 )
             )
-            if chat_profile_revision_id is None:
-                raise ValueError("HELP_CHATBOT PUBLISHED 프로필 판이 없습니다.")
+            if profile_id is None:
+                raise ValueError(
+                    f"존재하지 않는 프로필 버전입니다: {chat_profile_revision_id}"
+                )
 
         conversation = Conversation(
             client_key=client_key,
             chat_profile_revision_id=chat_profile_revision_id,
+            profile_id=profile_id,
             channel=channel or ConversationChannel.PUBLIC,
             status=ConversationStatus.ACTIVE,
             created_at=_utcnow(),

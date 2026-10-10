@@ -59,10 +59,10 @@ from app.core.prompt_fingerprints import (
 )
 from app.database.models import (
     EMBEDDING_DIMENSIONS,
-    ChatProfileRevisionStatus,
     QuestionSubproblemServingState,
     QuestionSubproblemStatus,
 )
+from app.profiles.services import HELP_CHATBOT
 from app.question_grouping.judge_client import QuestionJudgeClient
 from app.question_grouping.models import (
     CanonicalCitationSnapshot,
@@ -96,6 +96,7 @@ RAG_RUN_ID = uuid.UUID("00000000-0000-4000-8000-000000002111")
 PREVIOUS_RAG_RUN_ID = uuid.UUID("00000000-0000-4000-8000-000000002110")
 SOURCE_RAG_RUN_ID = uuid.UUID("00000000-0000-4000-8000-000000002100")
 PROFILE_REVISION_ID = 21
+PROFILE_ID = 41
 DOCUMENT_GROUP_ID = 31
 INDEX_VERSION_ID = 41
 CLASSIFICATION_RUN_ID = 51
@@ -513,6 +514,7 @@ def _log_store(recorder: _Recorder, turn_no: int) -> AsyncMock:
 def _profile_revision(*, caches_enabled: bool) -> SimpleNamespace:
     return SimpleNamespace(
         id=PROFILE_REVISION_ID,
+        profile_id=PROFILE_ID,
         document_group_id=DOCUMENT_GROUP_ID,
         semantic_cache_enabled=caches_enabled,
         exact_cache_enabled=caches_enabled,
@@ -587,7 +589,7 @@ async def run_scenario(
         log_store=log_store,
         session=session,
         index_version_id=None,
-        profile_status=ChatProfileRevisionStatus.PUBLISHED,
+        service=HELP_CHATBOT,
         retriever_factory=lambda _group_id: (retriever, INDEX_VERSION_ID),
         question_grouping=grouping,
         question_grouping_enabled=True,
