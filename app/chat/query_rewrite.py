@@ -24,6 +24,7 @@ from app.core.model_trace import BeforeModelCallHook, ModelCallTrace
 from app.core.openai_error import is_transient_openai_error
 from app.core.openai_usage import cached_input_tokens as usage_cached_input_tokens
 from app.core.openai_usage import reasoning_tokens as usage_reasoning_tokens
+from app.core.stage_settings import StageSettings
 from app.answering.models import FinalWithheldReason
 
 
@@ -63,6 +64,15 @@ INTERNAL_ERROR_CODE = "INTERNAL_ERROR"
 
 # 지시문 본문은 app/prompts/rewrite/<version>.md 에 있다. 상수 이름은 기존 import 를 위한 별칭이다.
 QUERY_REWRITE_PROMPT_V4 = prompts.get("rewrite", QUERY_REWRITE_PROMPT_VERSION)
+# 프로필 버전 구성 행의 params 가 비었을 때 보내는 요청 설정.
+QUERY_REWRITE_DEFAULT_PARAMS = {"max_output_tokens": QUERY_REWRITE_MAX_OUTPUT_TOKENS}
+# 프로필 버전을 받지 않은 호출(평가 도구, 서비스 없는 조립)이 쓰는 코드 기본값.
+CODE_QUERY_REWRITE_STAGE = StageSettings(
+    model_name=OPENAI_QUERY_REWRITE_MODEL,
+    prompt_version=QUERY_REWRITE_PROMPT_VERSION,
+    instructions=QUERY_REWRITE_PROMPT_V4,
+    params=QUERY_REWRITE_DEFAULT_PARAMS,
+)
 
 
 class QueryRewriteDecision(str, Enum):
@@ -475,6 +485,7 @@ def build_context_snapshot(
 def _query_rewrite_trace(
     started: float,
     *,
+    stage: StageSettings,
     retry_count: int,
     input_tokens: Optional[int] = None,
     output_tokens: Optional[int] = None,
@@ -484,7 +495,7 @@ def _query_rewrite_trace(
 ) -> ModelCallTrace:
     return ModelCallTrace(
         provider=OPENAI_QUERY_REWRITE_PROVIDER,
-        model_name=OPENAI_QUERY_REWRITE_MODEL,
+        model_name=stage.model_name,
         succeeded=error is None,
         latency_ms=int((time.perf_counter() - started) * 1000),
         retry_count=retry_count,
@@ -492,7 +503,7 @@ def _query_rewrite_trace(
         output_tokens=output_tokens,
         cached_input_tokens=cached_input_tokens,
         reasoning_tokens=reasoning_tokens,
-        prompt_version=QUERY_REWRITE_PROMPT_VERSION,
+        prompt_version=stage.prompt_version,
         error_message=None if error is None else str(error),
     )
 
@@ -567,17 +578,22 @@ class QueryRewriteService:
         candidates: Sequence[QueryRewriteCandidateTurn],
         *,
         before_model_call: Optional[BeforeModelCallHook] = None,
+        stage: Optional[StageSettings] = None,
     ) -> QueryRewriteCall:
-        """논리적 호출 한 건으로 최대 두 번 시도해 검색 질의를 확정한다."""
+        """논리적 호출 한 건으로 최대 두 번 시도해 검색 질의를 확정한다.
 
+        stage 는 턴의 프로필 버전이 고른 모델, 프롬프트 버전, 요청 설정이다. 없으면 코드 기본값이다.
+        """
+
+        stage = CODE_QUERY_REWRITE_STAGE if stage is None else stage
         normalized_query, ordered_candidates, query_input = (
             _prepare_query_rewrite_input(user_query, candidates)
         )
         if before_model_call is not None:
             await before_model_call(
                 OPENAI_QUERY_REWRITE_PROVIDER,
-                OPENAI_QUERY_REWRITE_MODEL,
-                QUERY_REWRITE_PROMPT_VERSION,
+                stage.model_name,
+                stage.prompt_version,
             )
 
         started = time.perf_counter()
@@ -588,11 +604,11 @@ class QueryRewriteService:
         for attempt in range(MAX_QUERY_REWRITE_ATTEMPTS):
             try:
                 response = await self._client.responses.parse(
-                    model=OPENAI_QUERY_REWRITE_MODEL,
-                    instructions=QUERY_REWRITE_PROMPT_V4,
+                    model=stage.model_name,
+                    instructions=stage.instructions,
                     input=query_input,
                     text_format=QueryRewriteOutput,
-                    max_output_tokens=QUERY_REWRITE_MAX_OUTPUT_TOKENS,
+                    **stage.request_params(),
                 )
                 usage = getattr(response, "usage", None)
                 input_tokens = _add_token_count(
@@ -620,6 +636,7 @@ class QueryRewriteService:
                 return QueryRewriteCall(
                     trace=_query_rewrite_trace(
                         started,
+                        stage=stage,
                         retry_count=attempt,
                         input_tokens=input_tokens,
                         output_tokens=output_tokens,
@@ -636,6 +653,7 @@ class QueryRewriteService:
                     return QueryRewriteCall(
                         trace=_query_rewrite_trace(
                             started,
+                            stage=stage,
                             retry_count=attempt,
                             input_tokens=input_tokens,
                             output_tokens=output_tokens,
@@ -658,6 +676,7 @@ class QueryRewriteService:
                         return QueryRewriteCall(
                             trace=_query_rewrite_trace(
                                 started,
+                                stage=stage,
                                 retry_count=attempt,
                                 input_tokens=input_tokens,
                                 output_tokens=output_tokens,
@@ -671,6 +690,7 @@ class QueryRewriteService:
                     return QueryRewriteCall(
                         trace=_query_rewrite_trace(
                             started,
+                            stage=stage,
                             retry_count=attempt,
                             input_tokens=input_tokens,
                             output_tokens=output_tokens,
@@ -686,6 +706,7 @@ class QueryRewriteService:
                     return QueryRewriteCall(
                         trace=_query_rewrite_trace(
                             started,
+                            stage=stage,
                             retry_count=attempt,
                             input_tokens=input_tokens,
                             output_tokens=output_tokens,
@@ -699,6 +720,7 @@ class QueryRewriteService:
                 return QueryRewriteCall(
                     trace=_query_rewrite_trace(
                         started,
+                        stage=stage,
                         retry_count=attempt,
                         input_tokens=input_tokens,
                         output_tokens=output_tokens,

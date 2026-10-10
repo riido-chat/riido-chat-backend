@@ -1,7 +1,8 @@
 """모델에 실제로 보내는 프롬프트와 출력 스키마의 지문을 계산하는 규칙과 지문 표.
 
 지문 표는 같은 폴더의 fingerprints.json 이다. 키는 `<component>@<version>`,
-값은 sha256 hex 다. 운영 코드는 이 모듈을 부르지 않는다. 테스트
+값은 sha256 hex 다. 운영 코드에서는 프로필 버전 검사(app/profiles/stage_settings.py)만 표와
+계산 규칙을 읽어, 선택한 묶음 버전과 출력 스키마를 실행 중인 코드가 서빙할 수 있는지 본다. 테스트
 (tests/test_prompt_fingerprints.py)가 현재 버전의 지문이 표와 같은지 확인하고,
 tests/test_prompt_registry.py 가 버전 파일 본문이 표와 같은지 확인하며,
 CI(scripts/check_prompt_fingerprints.py)가 기존 키가 바뀌거나 지워지지 않았는지 확인한다.

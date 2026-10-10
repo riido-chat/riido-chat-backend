@@ -7,9 +7,9 @@ It is idempotent: a second run reuses matching target rows and the target's
 existing ACTIVE index.
 
 HELP_CHATBOT_TEST 는 자기 프로필과 문서 그룹을 쓰는 독립 서비스다. 프로필이 없으면 만들고,
-PUBLISHED 프로필 버전의 모델과 프롬프트 버전이 지금 코드와 같으면 그대로 쓴다. 다르거나 없으면
-지금 코드 구성으로 새 프로필 버전을 만들어 PUBLISHED 로 두고 이전 PUBLISHED 는 RETIRED 로 바꾼다.
-기존 프로필 버전의 구성 칸은 고치지 않는다.
+PUBLISHED 프로필 버전을 지금 코드로 서빙할 수 있으면(구성 행, 프롬프트 버전, 지문) 그대로 쓴다.
+서빙할 수 없거나 없으면 지금 코드 구성으로 새 프로필 버전과 구성 행을 만들어 PUBLISHED 로 두고
+이전 PUBLISHED 는 RETIRED 로 바꾼다. 기존 프로필 버전의 구성 칸은 고치지 않는다.
 """
 
 from __future__ import annotations
@@ -35,9 +35,16 @@ from app.database.models import (
     IndexDocument,
     IndexVersion,
     IndexVersionStatus,
+    ProfileRevisionComponent,
+    ProfileRevisionComponentRecordedBy,
 )
 from app.database.session import dispose_engine, get_session_factory
 from app.profiles.services import HELP_CHATBOT_TEST
+from app.profiles.stage_settings import (
+    code_components,
+    component_problems,
+    read_profile_components,
+)
 
 
 PRODUCTION_GROUP_KEY = "HELP_CHATBOT"
@@ -385,20 +392,10 @@ async def bootstrap() -> tuple[int, int, int]:
             return profile.id, published_revision.id, target_index.id
 
 
-def _matches_code(revision: ChatProfileRevision) -> bool:
-    """지금 코드가 이 프로필 버전을 서빙할 수 있는지(실행 시 모델 설정 검사와 같은 칸)."""
+def _matches_code(revision: ChatProfileRevision, components) -> bool:
+    """지금 코드가 이 프로필 버전을 서빙할 수 있는지(채팅 턴과 배포 후 점검과 같은 검사)."""
 
-    return (
-        revision.generation_model_name,
-        revision.generation_prompt_version,
-        revision.query_rewrite_model_name,
-        revision.query_rewrite_prompt_version,
-    ) == (
-        OPENAI_GENERATION_MODEL,
-        GENERATION_PROMPT_VERSION,
-        OPENAI_QUERY_REWRITE_MODEL,
-        QUERY_REWRITE_PROMPT_VERSION,
-    )
+    return not component_problems(revision, components)
 
 
 async def _test_service_revision(
@@ -432,7 +429,9 @@ async def _test_service_revision(
             ChatProfileRevision.status == ChatProfileRevisionStatus.PUBLISHED,
         )
     )
-    if published is not None and _matches_code(published):
+    if published is not None and _matches_code(
+        published, await read_profile_components(session, published.id)
+    ):
         return profile, published
     if published is not None:
         # 상태 칸만 바꾼다. PUBLISHED 는 프로필마다 하나라 새 프로필 버전보다 먼저 내린다.
@@ -457,6 +456,20 @@ async def _test_service_revision(
         exact_cache_enabled=False,
     )
     session.add(revision)
+    await session.flush()
+    for component in code_components():
+        session.add(
+            ProfileRevisionComponent(
+                revision_id=revision.id,
+                stage=component.stage,
+                model_name=component.model_name,
+                prompt_key=component.prompt_key,
+                prompt_version=component.prompt_version,
+                prompt_sha256=component.prompt_sha256,
+                params=component.params,
+                recorded_by=ProfileRevisionComponentRecordedBy.PUBLISH,
+            )
+        )
     await session.flush()
     return profile, revision
 

@@ -15,6 +15,7 @@ sha256 을 남기고, 시나리오마다 단계 순서와 model_calls 기록(목
 fixture 를 다시 만든다. 다시 만든 diff 는 리뷰에서 그대로 확인한다.
 """
 
+import importlib.util
 import json
 import os
 import unittest
@@ -88,6 +89,12 @@ from app.retrieval.vector_retriever import VectorRetriever
 
 
 FIXTURE_PATH = Path(__file__).resolve().parent / "fixtures" / "help_chatbot_identity.json"
+COMPONENTS_MIGRATION_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "alembic"
+    / "versions"
+    / "20261001_17_add_profile_revision_components.py"
+)
 UPDATE_ENV = "UPDATE_IDENTITY_SNAPSHOT"
 
 # 고정 식별자. 판별 payload 의 섞기 seed 가 rag_run_id 에서 나오므로 바꾸면 입력 지문이 바뀐다.
@@ -511,6 +518,45 @@ def _log_store(recorder: _Recorder, turn_no: int) -> AsyncMock:
     return store
 
 
+def _dev_component_rows() -> List[SimpleNamespace]:
+    """DEV PUBLISHED 프로필 버전과 같은 모양의 구성 행. 백필 migration 의 고정값으로 만든다.
+
+    턴은 이 행대로 단계별 모델과 프롬프트를 고르므로, 스냅샷이 그대로면 DEV 데이터에서 동작이 같다.
+    """
+
+    spec = importlib.util.spec_from_file_location("components_migration", COMPONENTS_MIGRATION_PATH)
+    migration = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(migration)
+
+    def row(stage, model, key, version, sha256, params=None):
+        return SimpleNamespace(
+            stage=stage,
+            model_name=model,
+            prompt_key=f"{key}@{version}",
+            prompt_version=version,
+            prompt_sha256=sha256,
+            params=params,
+        )
+
+    return [
+        row("rewrite", OPENAI_QUERY_REWRITE_MODEL, "rewrite", migration.REWRITE_VERSION, migration.REWRITE_SHA256),
+        row("generation", OPENAI_GENERATION_MODEL, "generation", migration.GENERATION_VERSION, migration.GENERATION_SHA256),
+        *(
+            row(stage, OPENAI_GENERATION_MODEL, component, version, sha256)
+            for stage, component, version, sha256 in migration.GENERATION_SUB_STAGES
+        ),
+        row(
+            "judge",
+            migration.JUDGE_MODEL,
+            "judge",
+            migration.JUDGE_VERSION,
+            migration.JUDGE_SHA256,
+            dict(migration.JUDGE_PARAMS),
+        ),
+    ]
+
+
 def _profile_revision(*, caches_enabled: bool) -> SimpleNamespace:
     return SimpleNamespace(
         id=PROFILE_REVISION_ID,
@@ -601,6 +647,9 @@ async def run_scenario(
     with patch(
         "app.chat.service.resolve_chat_profile_revision",
         new=AsyncMock(return_value=_profile_revision(caches_enabled=caches_enabled)),
+    ), patch(
+        "app.profiles.stage_settings.read_profile_components",
+        new=AsyncMock(return_value=_dev_component_rows()),
     ):
         response = await service.answer_question(
             question,

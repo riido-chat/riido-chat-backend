@@ -155,5 +155,90 @@ class EvaluateTest(unittest.TestCase):
         self.assertEqual([], errors)
 
 
+class EquivalenceGuardTest(unittest.TestCase):
+    def setUp(self) -> None:
+        import hashlib
+        import json
+        import tempfile
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from scripts import check_system_version as checker
+
+        self.checker = checker
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.changed = [WATCHED_FILE, checker.EQUIVALENCE_FILE]
+        files = {WATCHED_FILE} | {name.replace(".", "/") + ".py" for name in checker.EQUIVALENCE_TESTS}
+        for path in files | set(checker.EQUIVALENCE_SNAPSHOTS):
+            target = self.root / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("{}\n")
+        self.record = {
+            "baseCommit": "a" * 40,
+            "systemVersion": "1.2.2",
+            "files": {path: hashlib.sha256((self.root / path).read_bytes()).hexdigest() for path in files},
+            "snapshots": {path: hashlib.sha256(b"{}\n").hexdigest() for path in checker.EQUIVALENCE_SNAPSHOTS},
+        }
+        record_file = self.root / checker.EQUIVALENCE_FILE
+        record_file.parent.mkdir(parents=True)
+        record_file.write_text(json.dumps(self.record))
+        self.addCleanup(patch.stopall)
+        patch.object(checker, "ROOT", self.root).start()
+        patch.object(checker, "base_system_version", return_value="1.2.2").start()
+        patch.object(checker, "_git", side_effect=lambda *args: "a" * 40 if args[0] == "merge-base" else "{}\n").start()
+        self.run = patch.object(checker.subprocess, "run", return_value=SimpleNamespace(returncode=0)).start()
+
+    def validate(self):
+        return self.checker.equivalent_changes("origin/develop", self.changed, "1.2.2")
+
+    def test_unchanged_snapshot_and_proven_files_allow_same_version(self):
+        paths = self.validate()
+        self.assertEqual([WATCHED_FILE], paths)
+        self.assertEqual([], evaluate(self.changed, "1.2.2", "1.2.2", ["1.2.2"], paths))
+        self.assertEqual(list(self.checker.EQUIVALENCE_TESTS), self.run.call_args.args[0][-2:])
+
+    def test_old_record_cannot_exempt_another_pr(self):
+        self.changed.remove(self.checker.EQUIVALENCE_FILE)
+        self.assertEqual([], self.validate())
+        self.assertTrue(evaluate(self.changed, "1.2.2", "1.2.2", ["1.2.2"]))
+        self.run.assert_not_called()
+
+    def test_new_runtime_file_is_not_implicitly_exempt(self):
+        self.changed.append("app/chat/service.py")
+        with self.assertRaisesRegex(ValueError, "파일 목록"):
+            self.validate()
+        self.run.assert_not_called()
+
+    def test_file_change_after_proof_invalidates_exemption(self):
+        (self.root / WATCHED_FILE).write_text("changed\n")
+        with self.assertRaisesRegex(ValueError, "파일 지문"):
+            self.validate()
+
+    def test_rewritten_snapshot_cannot_claim_equivalence(self):
+        import hashlib
+        import json
+        path = self.checker.EQUIVALENCE_SNAPSHOTS[0]
+        (self.root / path).write_text("changed\n")
+        self.record["snapshots"][path] = hashlib.sha256(b"changed\n").hexdigest()
+        (self.root / self.checker.EQUIVALENCE_FILE).write_text(json.dumps(self.record))
+        with self.assertRaisesRegex(ValueError, "기준 동작 스냅샷"):
+            self.validate()
+
+    def test_failed_behavior_verification_refuses_exemption(self):
+        self.run.return_value.returncode = 1
+        with self.assertRaisesRegex(ValueError, "검증이 실패"):
+            self.validate()
+
+    def test_snapshot_update_flags_are_removed(self):
+        from unittest.mock import patch
+        with patch.dict(self.checker.os.environ, {"UPDATE_IDENTITY_SNAPSHOT": "1", "UPDATE_CHAT_CONTRACT_SNAPSHOT": "1"}):
+            self.validate()
+        env = self.run.call_args.kwargs["env"]
+        self.assertNotIn("UPDATE_IDENTITY_SNAPSHOT", env)
+        self.assertNotIn("UPDATE_CHAT_CONTRACT_SNAPSHOT", env)
+
+
+
 if __name__ == "__main__":
     unittest.main()

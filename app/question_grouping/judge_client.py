@@ -20,6 +20,7 @@ from app.core.model_trace import BeforeModelCallHook, ModelCallTrace
 from app.core.openai_error import is_transient_openai_error
 from app.core.openai_usage import cached_input_tokens as usage_cached_input_tokens
 from app.core.openai_usage import reasoning_tokens as usage_reasoning_tokens
+from app.core.stage_settings import StageSettings
 from app.question_grouping.constants import (
     JUDGE_MAX_ATTEMPTS,
     JUDGE_MAX_OUTPUT_TOKENS,
@@ -34,6 +35,19 @@ from app.question_grouping.constants import (
 from app.question_grouping.models import JudgeCall, JudgeFailure, JudgeFailureKind
 from app.question_grouping.prompt_v7_2 import JUDGE_INSTRUCTIONS, JUDGE_OUTPUT_SCHEMA
 
+
+# 프로필 버전 구성 행의 params 가 비었을 때 보내는 요청 설정. 백필 행의 params 와 같은 모양이다.
+JUDGE_DEFAULT_PARAMS = {
+    "reasoning": {"effort": JUDGE_REASONING_EFFORT},
+    "max_output_tokens": JUDGE_MAX_OUTPUT_TOKENS,
+}
+# 프로필 버전을 받지 않은 호출(평가 도구, 서비스 없는 조립)이 쓰는 코드 기본값.
+CODE_JUDGE_STAGE = StageSettings(
+    model_name=JUDGE_MODEL,
+    prompt_version=JUDGE_PROMPT_VERSION,
+    instructions=JUDGE_INSTRUCTIONS,
+    params=JUDGE_DEFAULT_PARAMS,
+)
 
 # API 상태·사유 값만 통과시켜 모델이 만든 문자열이 오류 문구에 섞이지 않게 한다.
 _STATUS_CODE_PATTERN = re.compile(r"^[A-Za-z0-9_.-]{1,40}$")
@@ -63,24 +77,34 @@ def safe_judge_error_message(error: BaseException) -> str:
     return f"판별 호출 중 오류: {type(error).__name__}"
 
 
-def build_judge_request(payload: Mapping[str, Any]) -> dict:
-    """responses.create 인자. PoC classify_structured 와 같은 요청 형태다."""
+def judge_text_format() -> dict:
+    """요청의 text.format 객체. 실행 중인 코드가 보내는 판별 출력 스키마다."""
 
     return {
-        "model": JUDGE_MODEL,
+        "type": "json_schema",
+        "name": JUDGE_OUTPUT_SCHEMA_NAME,
+        "strict": True,
+        "schema": JUDGE_OUTPUT_SCHEMA,
+    }
+
+
+def build_judge_request(
+    payload: Mapping[str, Any],
+    stage: Optional[StageSettings] = None,
+) -> dict:
+    """responses.create 인자. PoC classify_structured 와 같은 요청 형태다.
+
+    stage 는 턴의 프로필 버전이 고른 모델, 지시문, 요청 설정이다. 없으면 코드 기본값이다.
+    """
+
+    stage = CODE_JUDGE_STAGE if stage is None else stage
+    return {
+        "model": stage.model_name,
         "store": False,
-        "instructions": JUDGE_INSTRUCTIONS,
+        "instructions": stage.instructions,
         "input": json.dumps(payload, ensure_ascii=False),
-        "text": {
-            "format": {
-                "type": "json_schema",
-                "name": JUDGE_OUTPUT_SCHEMA_NAME,
-                "strict": True,
-                "schema": JUDGE_OUTPUT_SCHEMA,
-            }
-        },
-        "reasoning": {"effort": JUDGE_REASONING_EFFORT},
-        "max_output_tokens": JUDGE_MAX_OUTPUT_TOKENS,
+        "text": {"format": judge_text_format()},
+        **stage.request_params(),
     }
 
 
@@ -116,12 +140,16 @@ class QuestionJudgeClient:
         payload: Mapping[str, Any],
         *,
         before_model_call: Optional[BeforeModelCallHook] = None,
+        stage: Optional[StageSettings] = None,
     ) -> JudgeCall:
         """논리적 호출 한 건으로 최대 JUDGE_MAX_ATTEMPTS 번 시도한다."""
 
-        request = build_judge_request(payload)
+        stage = CODE_JUDGE_STAGE if stage is None else stage
+        request = build_judge_request(payload, stage)
         if before_model_call is not None:
-            await before_model_call(JUDGE_PROVIDER, JUDGE_MODEL, JUDGE_PROMPT_VERSION)
+            await before_model_call(
+                JUDGE_PROVIDER, stage.model_name, stage.prompt_version
+            )
 
         started = time.perf_counter()
         usage_totals = _UsageTotals()
@@ -141,6 +169,7 @@ class QuestionJudgeClient:
                     else JudgeFailureKind.INTERNAL_ERROR
                 )
                 return self._failed_call(
+                    stage,
                     started,
                     attempt,
                     usage_totals,
@@ -155,6 +184,7 @@ class QuestionJudgeClient:
                 details = getattr(response, "incomplete_details", None)
                 reason = _status_code(getattr(details, "reason", None))
                 return self._failed_call(
+                    stage,
                     started,
                     attempt,
                     usage_totals,
@@ -169,24 +199,26 @@ class QuestionJudgeClient:
 
             output_text = getattr(response, "output_text", None)
             return JudgeCall(
-                trace=self._trace(started, attempt, usage_totals),
+                trace=self._trace(stage, started, attempt, usage_totals),
                 output_text=output_text if isinstance(output_text, str) else None,
             )
 
     def _failed_call(
         self,
+        stage: StageSettings,
         started: float,
         attempt: int,
         usage_totals: "_UsageTotals",
         failure: JudgeFailure,
     ) -> JudgeCall:
         return JudgeCall(
-            trace=self._trace(started, attempt, usage_totals, failure=failure),
+            trace=self._trace(stage, started, attempt, usage_totals, failure=failure),
             failure=failure,
         )
 
     @staticmethod
     def _trace(
+        stage: StageSettings,
         started: float,
         attempt: int,
         usage_totals: "_UsageTotals",
@@ -195,7 +227,7 @@ class QuestionJudgeClient:
     ) -> ModelCallTrace:
         return ModelCallTrace(
             provider=JUDGE_PROVIDER,
-            model_name=JUDGE_MODEL,
+            model_name=stage.model_name,
             succeeded=failure is None,
             latency_ms=int((time.perf_counter() - started) * 1000),
             retry_count=attempt,
@@ -203,7 +235,7 @@ class QuestionJudgeClient:
             output_tokens=usage_totals.output_tokens,
             cached_input_tokens=usage_totals.cached_input_tokens,
             reasoning_tokens=usage_totals.reasoning_tokens,
-            prompt_version=JUDGE_PROMPT_VERSION,
+            prompt_version=stage.prompt_version,
             error_message=None if failure is None else failure.safe_message,
         )
 

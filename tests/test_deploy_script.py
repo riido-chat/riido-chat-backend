@@ -104,7 +104,20 @@ echo "/dev/root 31457280 1000 ${DF_AVAIL_KB} 50% /"
 """
 
 AWS_STUB = "#!/bin/sh\necho stub-token\n"
-CURL_STUB = "#!/bin/sh\nexit 0\n"
+# 요청한 주소를 기록하고, CURL_FAIL_URL 이 들어간 주소는 실패(HTTP 오류와 같은 종료 코드 22)로 끝낸다.
+CURL_STUB = """#!/bin/sh
+for arg in "$@"; do
+  case "$arg" in
+    http*) echo "$arg" >> "$CURL_STUB_LOG" ;;
+  esac
+done
+if [ -n "$CURL_FAIL_URL" ]; then
+  case "$*" in
+    *"$CURL_FAIL_URL"*) exit 22 ;;
+  esac
+fi
+exit 0
+"""
 
 
 def image_id(number: int) -> str:
@@ -127,8 +140,10 @@ class DeployScriptHarness:
         self.tmp = tmp
         self.state_path = tmp / "state.json"
         self.log_path = tmp / "docker.log"
+        self.curl_log_path = tmp / "curl.log"
         self.state_path.write_text(json.dumps(state))
         self.log_path.write_text("")
+        self.curl_log_path.write_text("")
         bin_dir = tmp / "bin"
         bin_dir.mkdir()
         for name, source in (
@@ -148,6 +163,7 @@ class DeployScriptHarness:
             "APP_DIR": str(self.app_dir),
             "DOCKER_STUB_STATE": str(self.state_path),
             "DOCKER_STUB_LOG": str(self.log_path),
+            "CURL_STUB_LOG": str(self.curl_log_path),
             "DF_AVAIL_KB": str(20 * 1024 * 1024),
         }
 
@@ -169,6 +185,9 @@ class DeployScriptHarness:
 
     def calls(self) -> List[List[str]]:
         return [json.loads(line) for line in self.log_path.read_text().splitlines()]
+
+    def curl_urls(self) -> List[str]:
+        return self.curl_log_path.read_text().splitlines()
 
     def removed(self) -> List[List[str]]:
         return [call[2:] for call in self.calls() if call[:2] == ["image", "rm"]]
@@ -282,6 +301,42 @@ class DeployFlowTest(unittest.TestCase):
                 sorted([image_id(4), image_id(5), image_id(9), image_id(20), image_id(21)]),
                 harness.remaining_ids(),
             )
+
+    def test_profile_versions_are_checked_after_health(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            harness = DeployScriptHarness(Path(directory), base_state())
+
+            result = harness.run_script(f"{ECR_REPO}:commit9")
+
+            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            self.assertEqual(
+                [
+                    "http://localhost:8000/health",
+                    "http://localhost:8000/health/db",
+                    "http://localhost:8000/health/profiles",
+                ],
+                harness.curl_urls(),
+            )
+            self.assertIn("프로필 버전 점검", result.stdout)
+
+    def test_unservable_profile_versions_fail_deploy_and_keep_rollback_images(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            harness = DeployScriptHarness(Path(directory), base_state())
+
+            result = harness.run_script(
+                f"{ECR_REPO}:commit9", CURL_FAIL_URL="/health/profiles"
+            )
+
+            self.assertNotEqual(0, result.returncode)
+            self.assertIn("프로필 버전 점검 실패", result.stderr)
+            self.assertNotIn("[deploy] 완료", result.stdout)
+            calls = harness.calls()
+            up_index = next(i for i, call in enumerate(calls) if call[:1] == ["compose"] and "up" in call)
+            after_up = calls[up_index + 1 :]
+            # 앱 로그를 남기고, 배포 후 이미지 정리는 하지 않아 이전 이미지가 롤백용으로 남는다.
+            self.assertTrue(any(call[:1] == ["compose"] and "logs" in call for call in after_up))
+            self.assertFalse(any(call[:2] == ["image", "rm"] for call in after_up))
+            self.assertIn(image_id(5), harness.remaining_ids())
 
     def test_low_disk_space_fails_before_pull(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

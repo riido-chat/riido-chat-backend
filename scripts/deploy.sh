@@ -172,6 +172,11 @@ check_free_space() {
   log "디스크 여유 공간 ${avail_mb}MB (${root}, 기준 ${MIN_FREE_DISK_MB}MB)"
 }
 
+# 등록된 서비스마다 PUBLISHED 프로필 버전을 서빙할 수 있으면 0. 사유는 앱 로그에 남는다
+check_profile_versions() {
+  curl -fsS http://localhost:8000/health/profiles > /dev/null 2>&1
+}
+
 main() {
   IMAGE_URI="${1:?배포할 이미지 URI를 인자로 전달하세요}"
   export IMAGE_URI
@@ -197,21 +202,37 @@ main() {
   docker compose -f "$COMPOSE_FILE" up -d
 
   log "헬스체크"
+  local healthy=0
   for _ in $(seq 1 15); do
     if curl -fsS http://localhost:8000/health > /dev/null 2>&1 \
       && curl -fsS http://localhost:8000/health/db > /dev/null 2>&1; then
-      log "완료"
-      # 새 이미지가 실행 중이므로 이전 이미지 중 최신 KEEP_APP_IMAGES 개만 롤백용으로 남는다
-      log "배포 후 이미지 정리"
-      cleanup_images
-      exit 0
+      healthy=1
+      break
     fi
     sleep 2
   done
+  if (( ! healthy )); then
+    echo "[deploy] 헬스체크 실패" >&2
+    docker compose -f "$COMPOSE_FILE" logs --tail 50 >&2
+    exit 1
+  fi
 
-  echo "[deploy] 헬스체크 실패" >&2
-  docker compose -f "$COMPOSE_FILE" logs --tail 50 >&2
-  exit 1
+  # 새 코드가 서비스마다 PUBLISHED 프로필 버전을 서빙할 수 있는지 확인한다(구성 행, 프롬프트 버전, 지문).
+  # 실패하면 배포를 실패로 끝내고 롤백할 이전 이미지를 지우지 않는다. 새 컨테이너는 그대로 떠 있고,
+  # 서빙할 수 없는 서비스의 채팅 요청은 기존 503 SERVICE_UNAVAILABLE 응답을 받는다.
+  log "프로필 버전 점검"
+  if ! check_profile_versions; then
+    echo "[deploy] 프로필 버전 점검 실패: 새 코드가 PUBLISHED 프로필 버전을 서빙할 수 없습니다." \
+      "이전 이미지로 다시 배포하거나 서빙 가능한 프로필 버전을 게시하세요" >&2
+    docker compose -f "$COMPOSE_FILE" logs --tail 50 >&2
+    exit 1
+  fi
+
+  log "완료"
+  # 새 이미지가 실행 중이므로 이전 이미지 중 최신 KEEP_APP_IMAGES 개만 롤백용으로 남는다
+  log "배포 후 이미지 정리"
+  cleanup_images
+  exit 0
 }
 
 # 테스트에서 source 로 함수만 불러올 수 있도록 직접 실행할 때만 main 을 호출한다

@@ -76,10 +76,12 @@ from app.chat.profile import (
     ChatProfileConfigurationError,
     ChatProfileUnavailableError,
     ConversationProfileMismatchError,
+    load_turn_stage_settings,
     resolve_chat_profile_revision,
-    validate_runtime_model_configuration,
 )
+from app.core.stage_settings import StageSettings
 from app.profiles.services import ChatServiceRoute
+from app.profiles.stage_settings import ProfileStageSettings
 from app.question_grouping.exact_question import exact_question_hash
 from app.question_grouping.service import (
     ExactQuestionFallthrough,
@@ -399,6 +401,9 @@ class _TurnStart:
     grouping_enabled: bool = False
     semantic_cache_enabled: bool = False
     exact_cache_enabled: bool = False
+    # 이번 턴의 프로필 버전이 고른 단계별 모델과 프롬프트. 서비스 없는 조립에서는 None 이고
+    # 각 클라이언트의 코드 기본값을 쓴다.
+    stage_settings: Optional[ProfileStageSettings] = None
 
 
 @dataclass(frozen=True)
@@ -628,6 +633,11 @@ class ChatService:
                 conversation_id,
                 rag_run_id,
                 started,
+                rewrite_stage=(
+                    None
+                    if turn.stage_settings is None
+                    else turn.stage_settings.rewrite
+                ),
             )
             if resolution_outcome.terminal_response is not None:
                 return resolution_outcome.terminal_response
@@ -749,9 +759,11 @@ class ChatService:
 
         generation_result: Optional[FinalGenerationResult] = None
         # 훅 미주입 시 generate_answer 호출 인자를 기존과 완전히 동일하게 둔다.
-        generation_kwargs: Dict[str, OnProgressStageHook] = {}
+        generation_kwargs: Dict[str, object] = {}
         if on_progress_stage is not None:
             generation_kwargs["on_progress_stage"] = on_progress_stage
+        if turn.stage_settings is not None:
+            generation_kwargs["stages"] = turn.stage_settings.generation
 
         try:
             generation_result = await self._generation_service.generate_answer(
@@ -865,16 +877,18 @@ class ChatService:
         conversation_id: Optional[uuid.UUID],
     ) -> _TurnStart:
         profile_revision: Optional[ChatProfileRevision] = None
+        stage_settings: Optional[ProfileStageSettings] = None
         if self._service is not None:
+            # 이어 가는 대화도 턴마다 서비스의 현재 PUBLISHED 프로필 버전을 고른다.
             profile_revision = await resolve_chat_profile_revision(
                 self._session,
                 service=self._service,
                 conversation_id=conversation_id,
             )
-            validate_runtime_model_configuration(
+            # 대화와 턴 행을 만들기 전에 그 프로필 버전을 서빙할 수 있는지 확인한다(fail closed).
+            stage_settings = await load_turn_stage_settings(
+                self._session,
                 profile_revision,
-                generation_service=self._generation_service,
-                query_rewrite_service=self._query_rewrite_service,
             )
 
         if conversation_id is None:
@@ -904,7 +918,7 @@ class ChatService:
                 index_version_id=effective_index_version_id,
                 # 모든 턴에 채운다. 정확 일치 조회는 이 값으로 과거 첫 턴 로그를 찾는다.
                 query_hash=exact_question_hash(question),
-                # 판을 턴마다 고르게 되어도 턴 행 하나로 쓴 판을 찾도록 남긴다.
+                # 턴마다 고른 프로필 버전이다. 대화의 시작 프로필 버전과 다를 수 있다.
                 profile_revision_id=(
                     None if profile_revision is None else profile_revision.id
                 ),
@@ -947,6 +961,7 @@ class ChatService:
             grouping_enabled=grouping_enabled,
             semantic_cache_enabled=semantic_cache_enabled,
             exact_cache_enabled=exact_cache_enabled,
+            stage_settings=stage_settings,
         )
         await self._session.commit()
         return turn
@@ -961,6 +976,8 @@ class ChatService:
         conversation_id: uuid.UUID,
         rag_run_id: uuid.UUID,
         started: float,
+        *,
+        rewrite_stage: Optional[StageSettings] = None,
     ) -> _QueryResolutionOutcome:
         candidates = await self._log_store.get_query_rewrite_candidates(rag_run_id)
         model_call_id: Optional[int] = None
@@ -981,10 +998,15 @@ class ChatService:
                 prompt_version,
             )
 
+        # 프로필 버전이 없는 조립은 기존 호출 인자를 그대로 둔다.
+        rewrite_kwargs: Dict[str, StageSettings] = (
+            {} if rewrite_stage is None else {"stage": rewrite_stage}
+        )
         call = await self._query_rewrite_service.rewrite(
             question,
             candidates,
             before_model_call=checkpoint_query_rewrite,
+            **rewrite_kwargs,
         )
         if model_call_id is None:
             raise RuntimeError("Query Rewrite ModelCall checkpoint가 실행되지 않았습니다.")
@@ -1133,10 +1155,17 @@ class ChatService:
 
         if turn.document_group_id is None or turn.index_version_id is None:
             raise RuntimeError("판별할 턴의 문서 그룹 또는 색인 판이 없습니다.")
+        # 프로필 버전이 없는 조립은 기존 호출 인자를 그대로 둔다.
+        judge_kwargs: Dict[str, StageSettings] = (
+            {}
+            if turn.stage_settings is None
+            else {"judge_stage": turn.stage_settings.judge}
+        )
         return await self._require_grouping().open_online_run(
             rag_run_id=turn.rag_run_id,
             document_group_id=turn.document_group_id,
             index_version_id=turn.index_version_id,
+            **judge_kwargs,
         )
 
     async def _judge_and_gate(
