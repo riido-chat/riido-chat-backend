@@ -5,6 +5,7 @@
 
 - app/answering/                 생성 모델, 프롬프트, 근거 규칙
 - app/chat/query_rewrite.py      재작성 모델, 프롬프트
+- app/prompts/                   프롬프트 본문 버전 파일, 지문 표
 - app/question_grouping/         판별 모델, 프롬프트, payload, 캐시 게이트
 - app/retrieval/                 임베딩 모델, 임베딩 문장, 검색 파라미터
 - app/document/clean.py          정제 규칙(검색 텍스트)
@@ -47,6 +48,7 @@ BASE_REF_ENV = "SYSTEM_VERSION_BASE_REF"
 WATCHED_PATHS: Tuple[str, ...] = (
     "app/answering/",
     "app/chat/query_rewrite.py",
+    "app/prompts/",
     "app/question_grouping/",
     "app/retrieval/",
     "app/document/clean.py",

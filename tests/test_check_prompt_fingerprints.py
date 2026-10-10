@@ -8,6 +8,7 @@ from tempfile import TemporaryDirectory
 from typing import Dict
 
 from scripts.check_prompt_fingerprints import (
+    LEGACY_TABLE_FILES,
     TABLE_FILE,
     TableFormatError,
     added_keys,
@@ -157,6 +158,34 @@ class MainWithGitRepositoryTest(unittest.TestCase):
         self._git("checkout", "-q", "-B", "work", "empty")
 
         self.assertEqual(0, self._run())
+
+    def _move_base_table_to_legacy_path(self) -> None:
+        # 기준 브랜치에는 표가 옛 경로에만 있고, 작업 브랜치에서 새 경로로 옮긴 상황.
+        legacy = self.root / LEGACY_TABLE_FILES[0]
+        legacy.parent.mkdir(parents=True, exist_ok=True)
+        self._git("checkout", "-q", "base")
+        self._git("mv", TABLE_FILE, LEGACY_TABLE_FILES[0])
+        self._commit("옛 경로의 기준 표")
+        self._git("checkout", "-q", "-B", "work", "base")
+        self._git("mv", LEGACY_TABLE_FILES[0], TABLE_FILE)
+
+    def test_legacy_table_at_base_is_compared(self) -> None:
+        self._move_base_table_to_legacy_path()
+        self._write({"rewrite@v1": HASH_A, "rewrite@v2": HASH_C})
+
+        self.assertEqual(0, self._run())
+
+    def test_changed_key_against_legacy_table_fails(self) -> None:
+        self._move_base_table_to_legacy_path()
+        self._write({"rewrite@v1": HASH_C})
+
+        self.assertEqual(1, self._run())
+
+    def test_removed_key_against_legacy_table_fails(self) -> None:
+        self._move_base_table_to_legacy_path()
+        self._write({"rewrite@v2": HASH_C})
+
+        self.assertEqual(1, self._run())
 
     def test_unknown_base_ref_fails(self) -> None:
         self.assertEqual(1, self._run("no-such-ref"))

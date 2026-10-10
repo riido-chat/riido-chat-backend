@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """프롬프트 지문 표의 기존 키가 바뀌거나 지워진 변경을 막는다(추가만 허용).
 
-표: app/core/prompt_fingerprints.json 의 "fingerprints" 객체. 키는 `<component>@<version>`,
-값은 모델에 보내는 내용의 sha256 이다. 같은 판의 내용이 바뀌면 판을 올리고 새 키를 더해야
+표: app/prompts/fingerprints.json 의 "fingerprints" 객체. 키는 `<component>@<version>`,
+값은 모델에 보내는 내용의 sha256 이다. 같은 버전의 내용이 바뀌면 버전을 올리고 새 키를 더해야
 하므로, 기준 ref 시점의 키는 현재 작업 트리에서도 같은 값으로 남아 있어야 한다.
+표는 app/core/prompt_fingerprints.json 에서 옮겨 왔으므로, 기준 ref 시점에 새 경로가 없으면
+옛 경로(LEGACY_TABLE_FILES)의 표와 비교한다.
 
 검사 규칙:
 
@@ -26,11 +28,13 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Mapping, Optional, Sequence
+from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TABLE_FILE = "app/core/prompt_fingerprints.json"
+TABLE_FILE = "app/prompts/fingerprints.json"
+# 기준 ref 에 TABLE_FILE 이 없을 때 차례로 찾는 옛 경로.
+LEGACY_TABLE_FILES: Tuple[str, ...] = ("app/core/prompt_fingerprints.json",)
 DEFAULT_BASE_REF = "origin/develop"
 BASE_REF_ENV = "PROMPT_FINGERPRINT_BASE_REF"
 
@@ -79,13 +83,13 @@ def evaluate(
     for key in sorted(base_table):
         if key not in head_table:
             errors.append(
-                f"기존 키 {key} 가 지워졌습니다. 옛 판의 지문은 이력으로 남겨 두세요."
+                f"기존 키 {key} 가 지워졌습니다. 옛 버전의 지문은 이력으로 남겨 두세요."
             )
         elif head_table[key] != base_table[key]:
             errors.append(
                 f"기존 키 {key} 의 지문이 바뀌었습니다 "
                 f"({base_table[key][:12]} -> {head_table[key][:12]}). "
-                "내용을 바꿨다면 판을 올리고 새 키를 추가하세요."
+                "내용을 바꿨다면 버전을 올리고 새 키를 추가하세요."
             )
     return errors
 
@@ -111,13 +115,15 @@ def _git(root: Path, *args: str) -> str:
 
 
 def base_table_source(base_ref: str, root: Path = ROOT) -> Optional[str]:
-    """base_ref 와 HEAD 의 merge-base 시점 표 원문. 그 시점에 파일이 없으면 None."""
+    """base_ref 와 HEAD 의 merge-base 시점 표 원문. 새 경로와 옛 경로 모두 없으면 None."""
 
     merge_base = _git(root, "merge-base", base_ref, "HEAD").strip()
-    try:
-        return _git(root, "show", f"{merge_base}:{TABLE_FILE}")
-    except subprocess.CalledProcessError:
-        return None
+    for table_file in (TABLE_FILE, *LEGACY_TABLE_FILES):
+        try:
+            return _git(root, "show", f"{merge_base}:{table_file}")
+        except subprocess.CalledProcessError:
+            continue
+    return None
 
 
 def build_parser() -> argparse.ArgumentParser:
