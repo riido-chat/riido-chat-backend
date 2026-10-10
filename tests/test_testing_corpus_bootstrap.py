@@ -31,8 +31,11 @@ class TestingCorpusBootstrapTest(unittest.TestCase):
         self.assertIn("HELP_CHATBOT_TEST", source)
         self.assertIn("활성 document_group_source가 없습니다", source)
         self.assertIn("IndexVersionStatus.ACTIVE", source)
-        self.assertIn('GENERATION_PROMPT_VERSION = "v38"', source)
-        self.assertIn('REWRITE_PROMPT_VERSION = "v8"', source)
+        # 서비스 B 는 자기 프로필의 PUBLISHED 프로필 버전으로 서빙하고, 구성은 지금 코드에서 읽는다.
+        self.assertIn("app.answering.generator", imports)
+        self.assertIn("app.chat.query_rewrite", imports)
+        self.assertIn("app.profiles.services", imports)
+        self.assertNotIn("ChatProfileRevisionStatus.TESTING", source)
 
 
 if __name__ == "__main__":

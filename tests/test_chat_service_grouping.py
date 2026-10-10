@@ -48,7 +48,6 @@ from app.chat.service import ChatService
 from app.core.model_trace import ModelCallTrace
 from app.database.models import (
     CacheAttemptOutcome,
-    ChatProfileRevisionStatus,
     ContextStrategy,
     ModelCallPurpose,
 )
@@ -57,6 +56,7 @@ from app.document.document_key import (
     build_console_canonical_uri,
     build_upload_document_key,
 )
+from app.profiles.services import HELP_CHATBOT
 from app.question_grouping.exact_question import exact_question_hash
 from app.question_grouping.models import GateResult
 from app.question_grouping.service import (
@@ -77,6 +77,7 @@ from app.retrieval.models import (
 INDEX_VERSION_ID = 91
 DOCUMENT_GROUP_ID = 23
 PROFILE_REVISION_ID = 11
+PROFILE_ID = 7
 CLASSIFICATION_RUN_ID = 5
 EMBEDDING_CALL_ID = 1
 
@@ -251,6 +252,7 @@ class GroupingChatFixture:
         self.serve_failure_recorded = recorded_judgment("REJECTED_SERVE_FAILED")
         revision_kwargs = dict(
             id=PROFILE_REVISION_ID,
+            profile_id=PROFILE_ID,
             document_group_id=DOCUMENT_GROUP_ID,
             semantic_cache_enabled=semantic_cache_enabled,
         )
@@ -278,7 +280,7 @@ class GroupingChatFixture:
             log_store=self.log_store,
             session=self.session,
             index_version_id=None,
-            profile_status=ChatProfileRevisionStatus.PUBLISHED,
+            service=HELP_CHATBOT,
             retriever_factory=lambda _group_id: (self.retriever, index_version_id),
             **(
                 {
@@ -1139,7 +1141,7 @@ class ChatServiceGroupingTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_legacy_service_without_profile_never_enables_grouping(self) -> None:
         fixture = self._fixture()
-        fixture.service._profile_status = None
+        fixture.service._service = None
         fixture.service._retriever = fixture.retriever
         fixture.service._retriever_factory = None
         fixture.service._index_version_id = INDEX_VERSION_ID

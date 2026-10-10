@@ -25,8 +25,6 @@ from app.chat.schema import (
 )
 from app.database.models import (
     ChatProfileRevision,
-    ChatProfileRevisionStatus,
-    ConversationChannel,
     ContextStrategy,
     ExecutionStatus,
     ModelCallPurpose,
@@ -81,6 +79,7 @@ from app.chat.profile import (
     resolve_chat_profile_revision,
     validate_runtime_model_configuration,
 )
+from app.profiles.services import ChatServiceRoute
 from app.question_grouping.exact_question import exact_question_hash
 from app.question_grouping.service import (
     ExactQuestionFallthrough,
@@ -446,7 +445,7 @@ class ChatService:
         log_store: RagLogStore,
         session: AsyncSession,
         index_version_id: Optional[int],
-        profile_status: Optional[ChatProfileRevisionStatus] = None,
+        service: Optional[ChatServiceRoute] = None,
         retriever_factory: Optional[
             Callable[[int], tuple[HybridRetriever, int]]
         ] = None,
@@ -459,7 +458,7 @@ class ChatService:
         self._log_store = log_store
         self._session = session
         self._index_version_id = index_version_id
-        self._profile_status = profile_status
+        self._service = service
         self._retriever_factory = retriever_factory
         self._question_grouping = question_grouping
         self._question_grouping_enabled = question_grouping_enabled
@@ -866,15 +865,10 @@ class ChatService:
         conversation_id: Optional[uuid.UUID],
     ) -> _TurnStart:
         profile_revision: Optional[ChatProfileRevision] = None
-        if self._profile_status is not None:
+        if self._service is not None:
             profile_revision = await resolve_chat_profile_revision(
                 self._session,
-                status=self._profile_status,
-                channel=(
-                    ConversationChannel.INTERNAL_TEST
-                    if self._profile_status == ChatProfileRevisionStatus.TESTING
-                    else ConversationChannel.PUBLIC
-                ),
+                service=self._service,
                 conversation_id=conversation_id,
             )
             validate_runtime_model_configuration(
@@ -889,11 +883,8 @@ class ChatService:
             else:
                 conversation = await self._log_store.create_conversation(
                     chat_profile_revision_id=profile_revision.id,
-                    channel=(
-                        ConversationChannel.INTERNAL_TEST
-                        if self._profile_status == ChatProfileRevisionStatus.TESTING
-                        else ConversationChannel.PUBLIC
-                    ),
+                    profile_id=profile_revision.profile_id,
+                    channel=self._service.channel,
                 )
             conversation_id = conversation.id
 

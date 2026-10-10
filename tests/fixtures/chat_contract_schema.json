@@ -1,0 +1,348 @@
+{
+  "request": {
+    "additionalProperties": false,
+    "description": "POST /api/chat 요청.",
+    "properties": {
+      "conversationId": {
+        "anyOf": [
+          {
+            "format": "uuid",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "없으면 새 대화를 만들고, 있으면 해당 대화의 다음 턴으로 잇는다",
+        "title": "Conversationid"
+      },
+      "question": {
+        "maxLength": 4000,
+        "minLength": 1,
+        "title": "Question",
+        "type": "string"
+      }
+    },
+    "required": [
+      "question"
+    ],
+    "title": "ChatRequest",
+    "type": "object"
+  },
+  "response": {
+    "$defs": {
+      "ChatAnswer": {
+        "additionalProperties": false,
+        "description": "정상 답변 본문.",
+        "properties": {
+          "answerMarkdown": {
+            "title": "Answermarkdown",
+            "type": "string"
+          }
+        },
+        "required": [
+          "answerMarkdown"
+        ],
+        "title": "ChatAnswer",
+        "type": "object"
+      },
+      "ChatCitation": {
+        "additionalProperties": false,
+        "description": "사용자에게 제공하는 검증된 출처.",
+        "properties": {
+          "citationNumber": {
+            "minimum": 1,
+            "title": "Citationnumber",
+            "type": "integer"
+          },
+          "documentTitle": {
+            "title": "Documenttitle",
+            "type": "string"
+          },
+          "sectionPath": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sectionpath",
+            "type": "array"
+          },
+          "sourceKind": {
+            "$ref": "#/$defs/CitationSourceKind"
+          },
+          "sourceUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourceurl"
+          }
+        },
+        "required": [
+          "citationNumber",
+          "documentTitle",
+          "sectionPath",
+          "sourceUrl",
+          "sourceKind"
+        ],
+        "title": "ChatCitation",
+        "type": "object"
+      },
+      "ChatCompletedResponse": {
+        "additionalProperties": false,
+        "description": "근거 검증까지 완료된 정상 답변.",
+        "properties": {
+          "answer": {
+            "$ref": "#/$defs/ChatAnswer"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/$defs/ChatCitation"
+            },
+            "minItems": 1,
+            "title": "Citations",
+            "type": "array"
+          },
+          "conversationId": {
+            "format": "uuid",
+            "title": "Conversationid",
+            "type": "string"
+          },
+          "ragRunId": {
+            "format": "uuid",
+            "title": "Ragrunid",
+            "type": "string"
+          },
+          "status": {
+            "const": "COMPLETED",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "conversationId",
+          "ragRunId",
+          "answer",
+          "citations"
+        ],
+        "title": "ChatCompletedResponse",
+        "type": "object"
+      },
+      "ChatError": {
+        "additionalProperties": false,
+        "description": "외부에 노출하는 기술 오류 정보.",
+        "properties": {
+          "code": {
+            "$ref": "#/$defs/ChatErrorCode"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "retryable": {
+            "title": "Retryable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "retryable"
+        ],
+        "title": "ChatError",
+        "type": "object"
+      },
+      "ChatErrorCode": {
+        "description": "Chat API가 외부에 제공하는 기술 오류 코드.",
+        "enum": [
+          "UPSTREAM_ERROR",
+          "MODEL_OUTPUT_INVALID",
+          "CITATION_VALIDATION_ERROR",
+          "INTERNAL_ERROR",
+          "SERVICE_UNAVAILABLE",
+          "NOT_FOUND",
+          "CONVERSATION_BUSY"
+        ],
+        "title": "ChatErrorCode",
+        "type": "string"
+      },
+      "ChatErrorResponse": {
+        "additionalProperties": false,
+        "description": "기술 실패로 답변하지 못한 결과.\n\ncorpus 미적재나 대화 조회 실패처럼 턴을 시작하지도 못한 경우가 있어\n두 식별자는 nullable이다.",
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "null"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/$defs/ChatCitation"
+            },
+            "maxItems": 0,
+            "title": "Citations",
+            "type": "array"
+          },
+          "conversationId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Conversationid"
+          },
+          "error": {
+            "$ref": "#/$defs/ChatError"
+          },
+          "ragRunId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Ragrunid"
+          },
+          "status": {
+            "const": "ERROR",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "answer",
+          "error",
+          "citations"
+        ],
+        "title": "ChatErrorResponse",
+        "type": "object"
+      },
+      "ChatWithheld": {
+        "additionalProperties": false,
+        "description": "정상적인 답변 보류 정보.",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "reasonCode": {
+            "$ref": "#/$defs/ChatWithheldReasonCode"
+          }
+        },
+        "required": [
+          "reasonCode",
+          "message"
+        ],
+        "title": "ChatWithheld",
+        "type": "object"
+      },
+      "ChatWithheldReasonCode": {
+        "description": "답변을 제공하지 않는 사용자-facing 사유 코드.",
+        "enum": [
+          "INSUFFICIENT_EVIDENCE",
+          "AMBIGUOUS_QUESTION",
+          "OUT_OF_SCOPE",
+          "UNVERIFIABLE_ANSWER"
+        ],
+        "title": "ChatWithheldReasonCode",
+        "type": "string"
+      },
+      "ChatWithheldResponse": {
+        "additionalProperties": false,
+        "description": "정상적으로 답변을 보류한 결과.",
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "null"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/$defs/ChatCitation"
+            },
+            "maxItems": 0,
+            "title": "Citations",
+            "type": "array"
+          },
+          "conversationId": {
+            "format": "uuid",
+            "title": "Conversationid",
+            "type": "string"
+          },
+          "ragRunId": {
+            "format": "uuid",
+            "title": "Ragrunid",
+            "type": "string"
+          },
+          "relatedSections": {
+            "items": {
+              "$ref": "#/$defs/ChatCitation"
+            },
+            "maxItems": 3,
+            "title": "Relatedsections",
+            "type": "array"
+          },
+          "status": {
+            "const": "WITHHELD",
+            "title": "Status",
+            "type": "string"
+          },
+          "withheld": {
+            "$ref": "#/$defs/ChatWithheld"
+          }
+        },
+        "required": [
+          "status",
+          "conversationId",
+          "ragRunId",
+          "answer",
+          "withheld",
+          "citations"
+        ],
+        "title": "ChatWithheldResponse",
+        "type": "object"
+      },
+      "CitationSourceKind": {
+        "description": "인용 출처의 종류. 클라이언트가 외부 링크 노출 여부를 판단한다.",
+        "enum": [
+          "GITBOOK",
+          "CONSOLE"
+        ],
+        "title": "CitationSourceKind",
+        "type": "string"
+      }
+    },
+    "discriminator": {
+      "mapping": {
+        "COMPLETED": "#/$defs/ChatCompletedResponse",
+        "ERROR": "#/$defs/ChatErrorResponse",
+        "WITHHELD": "#/$defs/ChatWithheldResponse"
+      },
+      "propertyName": "status"
+    },
+    "oneOf": [
+      {
+        "$ref": "#/$defs/ChatCompletedResponse"
+      },
+      {
+        "$ref": "#/$defs/ChatWithheldResponse"
+      },
+      {
+        "$ref": "#/$defs/ChatErrorResponse"
+      }
+    ]
+  }
+}

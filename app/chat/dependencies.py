@@ -14,8 +14,8 @@ from app.retrieval.embedding import OpenAIEmbedder
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.search_reader import SearchReader
 from app.retrieval.vector_retriever import VectorRetriever
-from app.database.models import ChatProfileRevisionStatus
 from app.core.config import get_settings
+from app.profiles.services import HELP_CHATBOT, HELP_CHATBOT_TEST, ChatServiceRoute
 from app.question_grouping.runtime import QuestionGroupingComponents
 
 
@@ -218,7 +218,7 @@ def get_chat_service(
         log_store=log_store,
         session=session,
         index_version_id=index_version_id,
-        profile_status=ChatProfileRevisionStatus.PUBLISHED,
+        service=HELP_CHATBOT,
         **kwargs,
     )
 
@@ -235,11 +235,11 @@ def get_testing_chat_service(
         get_question_grouping_components
     ),
 ) -> ChatService:
-    """Internal test endpoint's ChatService.
+    """Internal test endpoint's ChatService for the HELP_CHATBOT_TEST service.
 
-    Profile resolution happens inside ChatService once the TESTING revision and
-    its document group are known, so this dependency never accepts a group or
-    revision id from the request.
+    Profile resolution happens inside ChatService once the service's PUBLISHED
+    revision and its document group are known, so this dependency never accepts
+    a group or revision id from the request.
     """
 
     log_store = RagLogStore(session)
@@ -250,7 +250,7 @@ def get_testing_chat_service(
         log_store=log_store,
         session=session,
         index_version_id=None,
-        profile_status=ChatProfileRevisionStatus.TESTING,
+        service=HELP_CHATBOT_TEST,
         retriever_factory=lambda group_id: _build_group_retriever(
             corpus_registry, session, embedder, group_id
         ),
@@ -270,7 +270,7 @@ def build_chat_service(
     embedder: OpenAIEmbedder,
     generation_service: GenerationService,
     query_rewrite_service: QueryRewriteService,
-    profile_status: ChatProfileRevisionStatus = ChatProfileRevisionStatus.PUBLISHED,
+    service: ChatServiceRoute = HELP_CHATBOT,
     corpus_registry: CorpusRegistry | None = None,
     question_grouping: QuestionGroupingComponents | None = None,
 ) -> ChatService:
@@ -316,6 +316,6 @@ def build_chat_service(
         log_store=log_store,
         session=session,
         index_version_id=legacy_index_version_id,
-        profile_status=profile_status,
+        service=service,
         **kwargs,
     )

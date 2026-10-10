@@ -4,6 +4,10 @@
 -- The application command copies generated-identity corpus rows in one
 -- transaction and creates the target ACTIVE index. This SQL intentionally
 -- never creates HELP_CHATBOT_TEST or any corpus rows.
+-- Superseded by Alembic 20261010_20: HELP_CHATBOT_TEST is now its own chat
+-- profile, and the DB rejects the HELP_CHATBOT TESTING revision on the
+-- HELP_CHATBOT_TEST group that this script writes. Do not run it after that
+-- migration; the application command creates the service's revision.
 BEGIN;
 
 DO $$

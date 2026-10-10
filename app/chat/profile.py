@@ -10,12 +10,9 @@ from app.database.models import (
     ChatProfile,
     ChatProfileRevision,
     ChatProfileRevisionStatus,
-    ConversationChannel,
     Conversation,
 )
-
-
-HELP_CHATBOT_PROFILE_KEY = "HELP_CHATBOT"
+from app.profiles.services import ChatServiceRoute
 
 
 class ChatProfileUnavailableError(LookupError):
@@ -27,75 +24,62 @@ class ChatProfileConfigurationError(RuntimeError):
 
 
 class ConversationProfileMismatchError(LookupError):
-    """A conversation is pinned to another endpoint's profile revision."""
+    """A conversation belongs to another endpoint's service."""
 
 
 async def resolve_chat_profile_revision(
     session: AsyncSession,
     *,
-    status: ChatProfileRevisionStatus,
-    channel: Optional[ConversationChannel] = None,
+    service: ChatServiceRoute,
     conversation_id: Optional[uuid.UUID] = None,
 ) -> ChatProfileRevision:
-    """Resolve a pinned conversation revision or the current endpoint revision.
+    """Resolve a pinned conversation revision or the service's PUBLISHED revision.
 
-    The endpoint supplies only the lifecycle status (PUBLISHED for production or
-    TESTING for the internal endpoint).  A caller can therefore never select a
-    raw profile, group, or revision id from HTTP input.
+    The endpoint supplies only its service, so a caller can never select a raw
+    profile, group, or revision id from HTTP input.
     """
 
     if conversation_id is not None:
-        requested_channel = channel or (
-            ConversationChannel.INTERNAL_TEST
-            if status == ChatProfileRevisionStatus.TESTING
-            else ConversationChannel.PUBLIC
-        )
         conversation = await session.get(Conversation, conversation_id)
         if conversation is None or conversation.chat_profile_revision_id is None:
             raise ConversationProfileMismatchError(
                 f"프로필이 연결되지 않은 대화입니다: {conversation_id}"
             )
+        # 대화는 자기 서비스의 주소로만 이어진다.  서비스 칸이 없는 객체(옛 스키마나
+        # 잘못된 행)는 어느 주소에도 붙이지 않는다.
+        profile_id = getattr(conversation, "profile_id", None)
+        profile = (
+            None if profile_id is None else await session.get(ChatProfile, profile_id)
+        )
+        if profile is None or profile.profile_key != service.profile_key:
+            raise ConversationProfileMismatchError(
+                f"대화가 {service.profile_key} 서비스에 속하지 않습니다: {conversation_id}"
+            )
         revision = await session.get(
             ChatProfileRevision,
             conversation.chat_profile_revision_id,
         )
-        if revision is None:
+        if revision is None or revision.profile_id != profile.id:
             raise ConversationProfileMismatchError(
-                f"프로필 판을 찾을 수 없는 대화입니다: {conversation_id}"
-            )
-        profile = await session.get(ChatProfile, revision.profile_id)
-        if profile is None or profile.profile_key != HELP_CHATBOT_PROFILE_KEY:
-            raise ConversationProfileMismatchError(
-                f"대화가 HELP_CHATBOT 프로필에 연결되지 않았습니다: {conversation_id}"
-            )
-        # The migration makes channel non-null.  Treat an object that predates
-        # that schema (or a malformed row) as invalid instead of silently
-        # assigning it to the public endpoint.
-        try:
-            persisted_channel = conversation.channel
-        except AttributeError:
-            persisted_channel = None
-        if persisted_channel is None or persisted_channel != requested_channel:
-            raise ConversationProfileMismatchError(
-                f"대화의 endpoint channel이 요청과 다릅니다: {conversation_id}"
+                f"대화의 프로필 버전이 서비스와 다릅니다: {conversation_id}"
             )
         # A conversation keeps using the exact immutable revision it pinned,
-        # regardless of later lifecycle transitions.  Channel is the stable
-        # endpoint boundary; revision.status only selects new conversations.
+        # regardless of later lifecycle transitions.  revision.status only
+        # selects new conversations.
         return revision
 
     statement = (
         select(ChatProfileRevision)
         .join(ChatProfile, ChatProfile.id == ChatProfileRevision.profile_id)
         .where(
-            ChatProfile.profile_key == HELP_CHATBOT_PROFILE_KEY,
-            ChatProfileRevision.status == status,
+            ChatProfile.profile_key == service.profile_key,
+            ChatProfileRevision.status == ChatProfileRevisionStatus.PUBLISHED,
         )
     )
     revisions = list((await session.scalars(statement)).all())
     if len(revisions) != 1:
         raise ChatProfileUnavailableError(
-            f"HELP_CHATBOT의 {status.value} 프로필 판이 정확히 하나가 아닙니다."
+            f"{service.profile_key}의 PUBLISHED 프로필 버전이 정확히 하나가 아닙니다."
         )
     return revisions[0]
 

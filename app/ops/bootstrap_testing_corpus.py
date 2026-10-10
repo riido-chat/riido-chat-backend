@@ -5,6 +5,11 @@ The operation copies rows with generated identities and shared-PK relationships
 and is intended to run once against a remote dev database after migrations.
 It is idempotent: a second run reuses matching target rows and the target's
 existing ACTIVE index.
+
+HELP_CHATBOT_TEST 는 자기 프로필과 문서 그룹을 쓰는 독립 서비스다. 프로필이 없으면 만들고,
+PUBLISHED 프로필 버전의 모델과 프롬프트 버전이 지금 코드와 같으면 그대로 쓴다. 다르거나 없으면
+지금 코드 구성으로 새 프로필 버전을 만들어 PUBLISHED 로 두고 이전 PUBLISHED 는 RETIRED 로 바꾼다.
+기존 프로필 버전의 구성 칸은 고치지 않는다.
 """
 
 from __future__ import annotations
@@ -13,6 +18,8 @@ import asyncio
 from datetime import datetime, timezone
 from sqlalchemy import func, select
 
+from app.answering.generator import GENERATION_PROMPT_VERSION, OPENAI_GENERATION_MODEL
+from app.chat.query_rewrite import OPENAI_QUERY_REWRITE_MODEL, QUERY_REWRITE_PROMPT_VERSION
 from app.database.models import (
     ChatProfile,
     ChatProfileRevision,
@@ -30,15 +37,12 @@ from app.database.models import (
     IndexVersionStatus,
 )
 from app.database.session import dispose_engine, get_session_factory
+from app.profiles.services import HELP_CHATBOT_TEST
 
 
 PRODUCTION_GROUP_KEY = "HELP_CHATBOT"
 TEST_GROUP_KEY = "HELP_CHATBOT_TEST"
-TESTING_STATUS = ChatProfileRevisionStatus.TESTING.value
-EMBEDDING_MODEL = "gpt-5.6-terra"
-GENERATION_PROMPT_VERSION = "v38"
-REWRITE_MODEL = "gpt-5.4-mini"
-REWRITE_PROMPT_VERSION = "v8"
+TEST_PROFILE_NAME = "테스트 서비스"
 TEST_INDEX_VERSION = "bootstrap-help-chatbot-test-v1"
 
 
@@ -261,55 +265,9 @@ async def bootstrap() -> tuple[int, int, int]:
         async with session.begin():
             production_group = await _one_group(session, PRODUCTION_GROUP_KEY)
             target_group = await _one_group(session, TEST_GROUP_KEY)
-            profile = await session.scalar(
-                select(ChatProfile).where(
-                    ChatProfile.profile_key == PRODUCTION_GROUP_KEY
-                )
+            profile, published_revision = await _test_service_revision(
+                session, target_group
             )
-            if profile is None:
-                raise RuntimeError("HELP_CHATBOT chat profile이 없습니다.")
-
-            testing_revisions = list(
-                (
-                    await session.scalars(
-                        select(ChatProfileRevision).where(
-                            ChatProfileRevision.profile_id == profile.id,
-                            ChatProfileRevision.status == TESTING_STATUS,
-                        )
-                    )
-                ).all()
-            )
-            if len(testing_revisions) > 1:
-                raise RuntimeError("HELP_CHATBOT TESTING revision이 둘 이상입니다.")
-            if testing_revisions:
-                testing_revision = testing_revisions[0]
-                testing_revision.document_group_id = target_group.id
-                testing_revision.generation_model_name = EMBEDDING_MODEL
-                testing_revision.generation_prompt_version = GENERATION_PROMPT_VERSION
-                testing_revision.query_rewrite_model_name = REWRITE_MODEL
-                testing_revision.query_rewrite_prompt_version = REWRITE_PROMPT_VERSION
-                testing_revision.semantic_cache_enabled = False
-                testing_revision.exact_cache_enabled = False
-            else:
-                max_version = await session.scalar(
-                    select(func.max(ChatProfileRevision.version)).where(
-                        ChatProfileRevision.profile_id == profile.id
-                    )
-                )
-                testing_revision = ChatProfileRevision(
-                    profile_id=profile.id,
-                    version=(max_version or 0) + 1,
-                    document_group_id=target_group.id,
-                    status=ChatProfileRevisionStatus.TESTING,
-                    generation_model_name=EMBEDDING_MODEL,
-                    generation_prompt_version=GENERATION_PROMPT_VERSION,
-                    query_rewrite_model_name=REWRITE_MODEL,
-                    query_rewrite_prompt_version=REWRITE_PROMPT_VERSION,
-                    semantic_cache_enabled=False,
-                    exact_cache_enabled=False,
-                )
-                session.add(testing_revision)
-                await session.flush()
 
             target_group_source = await session.scalar(
                 select(DocumentGroupSource)
@@ -424,7 +382,83 @@ async def bootstrap() -> tuple[int, int, int]:
                         )
                     )
 
-            return profile.id, testing_revision.id, target_index.id
+            return profile.id, published_revision.id, target_index.id
+
+
+def _matches_code(revision: ChatProfileRevision) -> bool:
+    """지금 코드가 이 프로필 버전을 서빙할 수 있는지(실행 시 모델 설정 검사와 같은 칸)."""
+
+    return (
+        revision.generation_model_name,
+        revision.generation_prompt_version,
+        revision.query_rewrite_model_name,
+        revision.query_rewrite_prompt_version,
+    ) == (
+        OPENAI_GENERATION_MODEL,
+        GENERATION_PROMPT_VERSION,
+        OPENAI_QUERY_REWRITE_MODEL,
+        QUERY_REWRITE_PROMPT_VERSION,
+    )
+
+
+async def _test_service_revision(
+    session,
+    target_group: DocumentGroup,
+) -> tuple[ChatProfile, ChatProfileRevision]:
+    """HELP_CHATBOT_TEST 프로필과 지금 코드로 서빙할 수 있는 PUBLISHED 프로필 버전."""
+
+    profile = await session.scalar(
+        select(ChatProfile).where(
+            ChatProfile.profile_key == HELP_CHATBOT_TEST.profile_key
+        )
+    )
+    if profile is None:
+        profile = ChatProfile(
+            profile_key=HELP_CHATBOT_TEST.profile_key,
+            name=TEST_PROFILE_NAME,
+            document_group_id=target_group.id,
+        )
+        session.add(profile)
+        await session.flush()
+    elif profile.document_group_id != target_group.id:
+        raise RuntimeError(
+            "HELP_CHATBOT_TEST 프로필이 다른 문서 그룹을 씁니다: "
+            f"document_group_id={profile.document_group_id}"
+        )
+
+    published = await session.scalar(
+        select(ChatProfileRevision).where(
+            ChatProfileRevision.profile_id == profile.id,
+            ChatProfileRevision.status == ChatProfileRevisionStatus.PUBLISHED,
+        )
+    )
+    if published is not None and _matches_code(published):
+        return profile, published
+    if published is not None:
+        # 상태 칸만 바꾼다. PUBLISHED 는 프로필마다 하나라 새 프로필 버전보다 먼저 내린다.
+        published.status = ChatProfileRevisionStatus.RETIRED
+        await session.flush()
+
+    max_version = await session.scalar(
+        select(func.max(ChatProfileRevision.version)).where(
+            ChatProfileRevision.profile_id == profile.id
+        )
+    )
+    revision = ChatProfileRevision(
+        profile_id=profile.id,
+        version=(max_version or 0) + 1,
+        document_group_id=target_group.id,
+        status=ChatProfileRevisionStatus.PUBLISHED,
+        generation_model_name=OPENAI_GENERATION_MODEL,
+        generation_prompt_version=GENERATION_PROMPT_VERSION,
+        query_rewrite_model_name=OPENAI_QUERY_REWRITE_MODEL,
+        query_rewrite_prompt_version=QUERY_REWRITE_PROMPT_VERSION,
+        semantic_cache_enabled=False,
+        exact_cache_enabled=False,
+    )
+    session.add(revision)
+    await session.flush()
+    return profile, revision
 
 
 async def _main() -> None:
@@ -432,7 +466,7 @@ async def _main() -> None:
         profile_id, revision_id, index_id = await bootstrap()
         print(
             "HELP_CHATBOT_TEST bootstrap 완료: "
-            f"profile={profile_id}, testing_revision={revision_id}, index={index_id}"
+            f"profile={profile_id}, published_revision={revision_id}, index={index_id}"
         )
     finally:
         await dispose_engine()

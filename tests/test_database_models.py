@@ -5,6 +5,7 @@ from sqlalchemy import (
     BigInteger,
     CheckConstraint,
     Enum as SAEnum,
+    ForeignKeyConstraint,
     Integer,
     String,
     Text,
@@ -23,6 +24,7 @@ from app.database.models import (
     GROUP_SOURCE_DOCUMENT_GROUP_UNIQUE_CONSTRAINT,
     INDEX_VERSION_NO_CONSTRAINT,
     OPEN_ONLINE_CLASSIFICATION_RUN_CONSTRAINT,
+    PROFILE_REVISION_PROFILE_GROUP_FK_CONSTRAINT,
     AnswerCitation,
     AnswerStatus,
     AttributionSource,
@@ -211,6 +213,7 @@ class DatabaseModelTest(unittest.TestCase):
                 "id",
                 "profile_key",
                 "name",
+                "document_group_id",
                 "created_at",
                 "updated_at",
             },
@@ -251,6 +254,42 @@ class DatabaseModelTest(unittest.TestCase):
             )
         )
         self.assertEqual("PUBLISHED", ChatProfileRevisionStatus.PUBLISHED.value)
+
+    def test_profile_owns_one_document_group_and_revisions_must_use_it(self) -> None:
+        profile = ChatProfile.__table__
+        self.assertFalse(profile.c.document_group_id.nullable)
+        self.assertTrue(profile.c.document_group_id.unique)
+        self.assertEqual(
+            "document_groups.id",
+            next(iter(profile.c.document_group_id.foreign_keys)).target_fullname,
+        )
+        self.assertIn(
+            ("id", "document_group_id"),
+            {
+                tuple(constraint.columns.keys())
+                for constraint in profile.constraints
+                if isinstance(constraint, UniqueConstraint)
+            },
+        )
+        composite = next(
+            constraint
+            for constraint in ChatProfileRevision.__table__.constraints
+            if isinstance(constraint, ForeignKeyConstraint)
+            and constraint.name == PROFILE_REVISION_PROFILE_GROUP_FK_CONSTRAINT
+        )
+        self.assertEqual(["profile_id", "document_group_id"], composite.column_keys)
+        self.assertEqual(
+            ["chat_profiles.id", "chat_profiles.document_group_id"],
+            [element.target_fullname for element in composite.elements],
+        )
+        self.assertLessEqual(len(composite.name), 63)
+
+        conversation_profile = Conversation.__table__.c.profile_id
+        self.assertFalse(conversation_profile.nullable)
+        self.assertEqual(
+            "chat_profiles.id",
+            next(iter(conversation_profile.foreign_keys)).target_fullname,
+        )
 
     def test_conversation_profile_pin_is_required_and_restricts_delete(self) -> None:
         column = Conversation.__table__.c.chat_profile_revision_id
