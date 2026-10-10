@@ -30,6 +30,7 @@ from app.answering.models import (
     FinalAnswerStatus,
     FinalGenerationResult,
 )
+from app.answering.generator import GENERATION_PROMPT_VERSION
 from app.answering.service import GenerationService
 from app.chat.dependencies import get_chat_service, get_rag_log_store
 from app.chat.log_store import RagLogStore
@@ -92,6 +93,7 @@ from app.retrieval.models import (
     RetrievalResult,
 )
 from tests.test_question_grouping_readers_db import _available, _now, _Seed
+from tests.profile_components import component_models
 from tests.test_seed_question_grouping_db import FakeEmbedder
 
 BILLING_TITLE = "구독 및 결제"
@@ -103,7 +105,8 @@ CANONICAL = "설정에서 구독을 취소합니다 [1]. 멤버 초대는 따로
 CACHED_CANONICAL = f"{CANONICAL} (캐시된 답변)"
 QUESTION = "구독을 취소하고 싶어요"
 GENERATION_MODEL = "gpt-test"
-GENERATION_PROMPT = "v3"
+# 프로필 버전 구성 행은 등록부의 프롬프트 버전만 서빙한다. 모델 이름은 가짜다.
+GENERATION_PROMPT = GENERATION_PROMPT_VERSION
 
 # (신원 해시, 내용 해시, H2 제목, 본문)
 BILLING_SECTIONS = [
@@ -138,7 +141,7 @@ class FakeJudge:
         self._decide = decide
         self.payloads: List[Dict[str, Any]] = []
 
-    async def judge(self, payload, *, before_model_call=None) -> JudgeCall:
+    async def judge(self, payload, *, before_model_call=None, stage=None) -> JudgeCall:
         self.payloads.append(payload)
         await before_model_call(JUDGE_PROVIDER, JUDGE_MODEL, JUDGE_PROMPT_VERSION)
         return JudgeCall(
@@ -363,6 +366,12 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
             exact_cache_enabled=True,
         )
         await self.seed.add(revision)
+        for component in component_models(
+            revision.id,
+            generation_model=GENERATION_MODEL,
+            rewrite_model=GENERATION_MODEL,
+        ):
+            await self.seed.add(component)
         self.profile_revision_id = revision.id
 
     def _seed_input(self) -> List[Dict[str, Any]]:
@@ -543,8 +552,10 @@ class QuestionGroupingAcceptanceDbTest(unittest.IsolatedAsyncioTestCase):
             await before_model_call(OPENAI_EMBEDDING_PROVIDER, OPENAI_EMBEDDING_MODEL, None)
             return self._search_call(query)
 
-        async def generate(query, _results, *, before_model_call):
-            await before_model_call("openai", GENERATION_MODEL, GENERATION_PROMPT)
+        async def generate(query, _results, *, before_model_call, stages):
+            # 턴은 프로필 버전 구성 행의 생성 모델과 묶음 버전을 넘긴다.
+            self.assertEqual((GENERATION_MODEL, GENERATION_PROMPT), (stages.model_name, stages.prompt_version))
+            await before_model_call("openai", stages.model_name, stages.prompt_version)
             return self._generated(query)
 
         retriever.search_with_trace.side_effect = search

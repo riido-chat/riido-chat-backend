@@ -27,6 +27,7 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from app.answering.generator import GENERATION_PROMPT_VERSION
 from app.answering.models import (
     Citation,
     CitationSourceKind,
@@ -38,7 +39,14 @@ from app.chat.profile import (
     ConversationProfileMismatchError,
     resolve_chat_profile_revision,
 )
-from app.chat.query_rewrite import QueryRewriteService
+from app.chat.query_rewrite import (
+    OPENAI_QUERY_REWRITE_MODEL,
+    QUERY_REWRITE_PROMPT_VERSION,
+    QueryResolution,
+    QueryRewriteCall,
+    QueryRewriteDecision,
+    QueryRewriteService,
+)
 from app.chat.service import conversation_not_found_response
 from app.core.config import get_settings
 from app.core.model_trace import ModelCallTrace
@@ -60,7 +68,9 @@ from app.database.models import (
 from app.database.session import get_db_session
 from app.main import create_app
 from app.ops.bootstrap_testing_corpus import _test_service_revision
+from app.profiles.readiness import check_published_profile_versions
 from app.profiles.services import HELP_CHATBOT, HELP_CHATBOT_TEST
+from app.profiles.stage_settings import component_problems, read_profile_components
 from app.retrieval.corpus_state import CorpusRegistry, CorpusState
 from app.retrieval.models import (
     HybridRetrievalResult,
@@ -68,6 +78,7 @@ from app.retrieval.models import (
     RetrievalChunk,
     RetrievalResult,
 )
+from tests.profile_components import component_models
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -75,6 +86,8 @@ PARENT_REVISION = "20261001_19"
 SPLIT_REVISION = "20261010_20"
 PUBLIC_CONVERSATIONS = 3
 TEST_CONVERSATIONS = 2
+# 서빙 테스트의 가짜 생성 모델. 프롬프트 버전은 등록부의 것을 쓴다.
+GENERATION_MODEL = "gpt-test-generation"
 
 
 async def _available(url: str) -> bool:
@@ -520,19 +533,28 @@ class TwoServicesServingDbTest(_ScratchDatabaseTest):
         await super().asyncSetUp()
         _alembic(self.scratch_url, "upgrade", "head")
         self.sessions = async_sessionmaker(self.engine, expire_on_commit=False)
+        self.generation_stages = []
+        self.rewrite_stages = []
+        self.model_config = (
+            GENERATION_MODEL,
+            GENERATION_PROMPT_VERSION,
+            OPENAI_QUERY_REWRITE_MODEL,
+            QUERY_REWRITE_PROMPT_VERSION,
+        )
         async with self.sessions() as session:
-            public_revision = await session.scalar(
+            migrated = await session.scalar(
                 select(ChatProfileRevision).where(
                     ChatProfileRevision.status == ChatProfileRevisionStatus.PUBLISHED
                 )
             )
-            self.model_config = (
-                public_revision.generation_model_name,
-                public_revision.generation_prompt_version,
-                public_revision.query_rewrite_model_name,
-                public_revision.query_rewrite_prompt_version,
+            # 빈 DB migration 이 만든 프로필 버전(v38, v8)은 지금 코드로 서빙할 수 없다. 상태 칸만
+            # 내리고 지금 코드 구성으로 새 프로필 버전을 게시한다.
+            migrated.status = ChatProfileRevisionStatus.RETIRED
+            await session.flush()
+            public_group = await session.get(DocumentGroup, migrated.document_group_id)
+            public_revision = await self._publish(
+                session, migrated.profile_id, public_group.id, version=2
             )
-            public_group = await session.get(DocumentGroup, public_revision.document_group_id)
             test_group = DocumentGroup(
                 group_key="HELP_CHATBOT_TEST", name="테스트", consumer_key="HELP_CHATBOT"
             )
@@ -545,18 +567,9 @@ class TwoServicesServingDbTest(_ScratchDatabaseTest):
             )
             session.add(test_profile)
             await session.flush()
-            test_revision = ChatProfileRevision(
-                profile_id=test_profile.id,
-                version=1,
-                document_group_id=test_group.id,
-                status=ChatProfileRevisionStatus.PUBLISHED,
-                generation_model_name=self.model_config[0],
-                generation_prompt_version=self.model_config[1],
-                query_rewrite_model_name=self.model_config[2],
-                query_rewrite_prompt_version=self.model_config[3],
+            test_revision = await self._publish(
+                session, test_profile.id, test_group.id, version=1
             )
-            session.add(test_revision)
-            await session.flush()
             self.public = {
                 "profile_id": public_revision.profile_id,
                 "revision_id": public_revision.id,
@@ -642,17 +655,46 @@ class TwoServicesServingDbTest(_ScratchDatabaseTest):
     async def test_bootstrap_keeps_or_adds_published_revision_without_editing(self) -> None:
         async with self.sessions() as session:
             test_group = await session.get(DocumentGroup, self.test["group_id"])
-            with patch(
-                "app.ops.bootstrap_testing_corpus._matches_code", return_value=True
-            ):
-                profile, kept = await _test_service_revision(session, test_group)
+            # 지금 코드로 서빙할 수 있는 PUBLISHED 프로필 버전은 그대로 쓴다(구성 행 검사).
+            profile, kept = await _test_service_revision(session, test_group)
             self.assertEqual((self.test["profile_id"], self.test["revision_id"]), (profile.id, kept.id))
 
+        # 새 프로필 버전과 구성 행은 같은 트랜잭션에서 만든다. 되돌리면 둘 다 남지 않는다.
+        async with self.sessions() as session:
+            test_group = await session.get(DocumentGroup, self.test["group_id"])
+            with patch(
+                "app.ops.bootstrap_testing_corpus._matches_code", return_value=False
+            ):
+                _, discarded = await _test_service_revision(session, test_group)
+            discarded_id = discarded.id
+            await session.rollback()
+        self.assertEqual(
+            (0, 0),
+            (
+                await self._scalar(
+                    "SELECT count(*) FROM chat_profile_revisions WHERE id = :id",
+                    {"id": discarded_id},
+                ),
+                await self._scalar(
+                    "SELECT count(*) FROM profile_revision_components WHERE revision_id = :id",
+                    {"id": discarded_id},
+                ),
+            ),
+        )
+
+        async with self.sessions() as session:
+            test_group = await session.get(DocumentGroup, self.test["group_id"])
             with patch(
                 "app.ops.bootstrap_testing_corpus._matches_code", return_value=False
             ):
                 profile, created = await _test_service_revision(session, test_group)
             await session.commit()
+
+        async with self.sessions() as session:
+            rows = await read_profile_components(session, created.id)
+            self.assertEqual(7, len(rows))
+            self.assertEqual({"PUBLISH"}, {row.recorded_by.value for row in rows})
+            self.assertEqual((), component_problems(created, rows))
 
         self.assertNotEqual(self.test["revision_id"], created.id)
         self.assertEqual(
@@ -677,6 +719,178 @@ class TwoServicesServingDbTest(_ScratchDatabaseTest):
             ],
         )
 
+    @staticmethod
+    async def _publish(
+        session: AsyncSession,
+        profile_id: int,
+        group_id: int,
+        *,
+        version: int,
+        generation_model: str = GENERATION_MODEL,
+        rewrite_model: str = OPENAI_QUERY_REWRITE_MODEL,
+    ) -> ChatProfileRevision:
+        """지금 코드 구성의 PUBLISHED 프로필 버전과 구성 행을 한 트랜잭션에서 만든다."""
+
+        revision = ChatProfileRevision(
+            profile_id=profile_id,
+            version=version,
+            document_group_id=group_id,
+            status=ChatProfileRevisionStatus.PUBLISHED,
+            generation_model_name=generation_model,
+            generation_prompt_version=GENERATION_PROMPT_VERSION,
+            query_rewrite_model_name=rewrite_model,
+            query_rewrite_prompt_version=QUERY_REWRITE_PROMPT_VERSION,
+        )
+        session.add(revision)
+        await session.flush()
+        session.add_all(
+            component_models(
+                revision.id,
+                generation_model=generation_model,
+                rewrite_model=rewrite_model,
+            )
+        )
+        await session.flush()
+        return revision
+
+    async def test_next_turn_uses_newly_published_revision(self) -> None:
+        async with self._client() as client:
+            first = (await client.post("/api/chat", json={"question": "질문"})).json()
+            self.assertEqual("COMPLETED", first["status"], first)
+
+            # 대화 도중 새 프로필 버전을 게시한다. 이전 PUBLISHED 는 상태 칸만 바뀐다.
+            async with self.sessions() as session:
+                current = await session.get(ChatProfileRevision, self.public["revision_id"])
+                current.status = ChatProfileRevisionStatus.RETIRED
+                await session.flush()
+                switched = await self._publish(
+                    session,
+                    self.public["profile_id"],
+                    self.public["group_id"],
+                    version=3,
+                    generation_model="gpt-test-switched",
+                    rewrite_model="gpt-test-rewrite-switched",
+                )
+                switched_id = switched.id
+                await session.commit()
+
+            second = await client.post(
+                "/api/chat",
+                json={"question": "후속 질문", "conversationId": first["conversationId"]},
+            )
+
+        self.assertEqual(200, second.status_code, second.text)
+        self.assertEqual("COMPLETED", second.json()["status"])
+        # 턴마다 고른 프로필 버전이 턴 행에 남고, 대화 행은 시작 프로필 버전을 그대로 둔다.
+        self.assertEqual(
+            [(1, self.public["revision_id"]), (2, switched_id)],
+            [
+                tuple(row)
+                for row in await self._rows(
+                    "SELECT turn_no, profile_revision_id FROM rag_runs "
+                    "WHERE conversation_id = :id ORDER BY turn_no",
+                    {"id": uuid.UUID(first["conversationId"])},
+                )
+            ],
+        )
+        self.assertEqual(
+            self.public["revision_id"],
+            await self._scalar(
+                "SELECT chat_profile_revision_id FROM conversations WHERE id = :id",
+                {"id": uuid.UUID(first["conversationId"])},
+            ),
+        )
+        self.assertEqual(
+            [GENERATION_MODEL, "gpt-test-switched"],
+            [stages.model_name for stages in self.generation_stages],
+        )
+        self.assertEqual(
+            ["gpt-test-rewrite-switched"],
+            [stage.model_name for stage in self.rewrite_stages],
+        )
+        # model_calls 에는 실제로 부른 모델과 프롬프트 버전이 남는다.
+        self.assertEqual(
+            [
+                (1, "ANSWER_GENERATION", GENERATION_MODEL, GENERATION_PROMPT_VERSION),
+                (2, "ANSWER_GENERATION", "gpt-test-switched", GENERATION_PROMPT_VERSION),
+                (2, "QUERY_REWRITE", "gpt-test-rewrite-switched", QUERY_REWRITE_PROMPT_VERSION),
+            ],
+            sorted(
+                (
+                    tuple(row)
+                    for row in await self._rows(
+                        "SELECT r.turn_no, m.purpose, m.model_name, m.prompt_version "
+                        "FROM model_calls m JOIN rag_runs r ON r.id = m.rag_run_id "
+                        "WHERE r.conversation_id = :id AND m.purpose <> 'QUERY_EMBEDDING'",
+                        {"id": uuid.UUID(first["conversationId"])},
+                    )
+                ),
+                key=lambda row: (row[1], row[0]),
+            ),
+        )
+
+    async def test_readiness_reports_each_services_published_revision(self) -> None:
+        async with self.sessions() as session:
+            results = await check_published_profile_versions(session)
+        self.assertEqual(
+            [
+                ("HELP_CHATBOT", self.public["revision_id"], ()),
+                ("HELP_CHATBOT_TEST", self.test["revision_id"], ()),
+            ],
+            [(r.profile_key, r.profile_version_id, r.problems) for r in results],
+        )
+
+        # 구성 행이 등록부에 없는 버전을 가리키는 프로필 버전을 게시하면 그 서비스만 실패한다.
+        async with self.sessions() as session:
+            current = await session.get(ChatProfileRevision, self.test["revision_id"])
+            current.status = ChatProfileRevisionStatus.RETIRED
+            await session.flush()
+            broken = await self._publish(
+                session, self.test["profile_id"], self.test["group_id"], version=2
+            )
+            await session.execute(
+                text(
+                    "UPDATE profile_revision_components SET prompt_version = 'v9-missing', "
+                    "prompt_key = 'rewrite@v9-missing' "
+                    "WHERE revision_id = :id AND stage = 'rewrite'"
+                ),
+                {"id": broken.id},
+            )
+            await session.execute(
+                text(
+                    "UPDATE chat_profile_revisions SET query_rewrite_prompt_version = 'v9-missing' "
+                    "WHERE id = :id"
+                ),
+                {"id": broken.id},
+            )
+            await session.commit()
+            broken_id = broken.id
+        async with self.sessions() as session:
+            results = await check_published_profile_versions(session)
+        self.assertTrue(results[0].servable)
+        self.assertEqual((HELP_CHATBOT_TEST.profile_key, broken_id), (results[1].profile_key, results[1].profile_version_id))
+        self.assertEqual(
+            ("rewrite: 실행 중인 코드에 없는 프롬프트 버전 rewrite@v9-missing",),
+            results[1].problems,
+        )
+
+        # 그 서비스의 채팅은 기존 503 응답으로 답하지 않고, 다른 서비스는 계속 답한다.
+        async with self._client() as client:
+            public_response, test_response = await asyncio.gather(
+                client.post("/api/chat", json={"question": "질문"}),
+                client.post("/api/internal/test-chat", json={"question": "질문"}),
+            )
+        self.assertEqual(200, public_response.status_code, public_response.text)
+        self.assertEqual(503, test_response.status_code, test_response.text)
+        self.assertEqual("SERVICE_UNAVAILABLE", test_response.json()["error"]["code"])
+        self.assertEqual(
+            0,
+            await self._scalar(
+                "SELECT count(*) FROM rag_runs WHERE profile_revision_id = :id",
+                {"id": broken_id},
+            ),
+        )
+
     @asynccontextmanager
     async def _client(self) -> AsyncIterator[AsyncClient]:
         retrievers = {
@@ -688,6 +902,7 @@ class TwoServicesServingDbTest(_ScratchDatabaseTest):
         generation.generate_answer.side_effect = self._generate
         rewrite = AsyncMock(spec=QueryRewriteService)
         rewrite.model_name, rewrite.prompt_version = self.model_config[2:]
+        rewrite.rewrite.side_effect = self._rewrite
         registry = Mock(spec=CorpusRegistry)
         registry.is_legacy_compat = False
 
@@ -715,8 +930,30 @@ class TwoServicesServingDbTest(_ScratchDatabaseTest):
             ) as client:
                 yield client
 
-    async def _generate(self, query, results, *, before_model_call) -> FinalGenerationResult:
-        await before_model_call("openai", self.model_config[0], self.model_config[1])
+    async def _rewrite(self, question, _candidates, *, before_model_call, stage) -> QueryRewriteCall:
+        self.rewrite_stages.append(stage)
+        await before_model_call("openai", stage.model_name, stage.prompt_version)
+        return QueryRewriteCall(
+            trace=ModelCallTrace(
+                provider="openai",
+                model_name=stage.model_name,
+                succeeded=True,
+                latency_ms=5,
+                prompt_version=stage.prompt_version,
+            ),
+            resolution=QueryResolution(
+                decision=QueryRewriteDecision.NEW_TOPIC,
+                resolved_query=question,
+                selected_turns=(),
+            ),
+        )
+
+    async def _generate(
+        self, query, results, *, before_model_call, stages
+    ) -> FinalGenerationResult:
+        # 턴의 프로필 버전 구성 행이 고른 생성 모델과 묶음 버전으로 부른다.
+        self.generation_stages.append(stages)
+        await before_model_call("openai", stages.model_name, stages.prompt_version)
         chunk = results[0].chunk
         return FinalGenerationResult(
             status=FinalAnswerStatus.COMPLETED,
@@ -734,12 +971,12 @@ class TwoServicesServingDbTest(_ScratchDatabaseTest):
             ),
             model_call=ModelCallTrace(
                 provider="openai",
-                model_name=self.model_config[0],
+                model_name=stages.model_name,
                 succeeded=True,
                 latency_ms=30,
                 input_tokens=20,
                 output_tokens=10,
-                prompt_version=self.model_config[1],
+                prompt_version=stages.prompt_version,
             ),
         )
 

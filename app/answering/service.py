@@ -12,6 +12,7 @@ from app.chat.progress import OnProgressStageHook, ProgressStage
 from app.answering.generator import (
     GENERATION_PROMPT_VERSION,
     OPENAI_GENERATION_PROVIDER,
+    GenerationStageSettings,
     OpenAIGenerator,
     build_generation_context,
 )
@@ -449,6 +450,7 @@ def _failed_generation_trace(
     started: float,
     error: Exception,
     model_name: str,
+    prompt_version: str = GENERATION_PROMPT_VERSION,
 ) -> ModelCallTrace:
     """Generator가 trace를 만들기 전에 끝난 예상 밖 실패를 기록한다."""
 
@@ -457,7 +459,7 @@ def _failed_generation_trace(
         model_name=model_name,
         succeeded=False,
         latency_ms=int((time.perf_counter() - started) * 1000),
-        prompt_version=GENERATION_PROMPT_VERSION,
+        prompt_version=prompt_version,
         error_message=str(error),
     )
 
@@ -487,25 +489,39 @@ class GenerationService:
         *,
         before_model_call: Optional[BeforeModelCallHook] = None,
         on_progress_stage: Optional[OnProgressStageHook] = None,
+        stages: Optional[GenerationStageSettings] = None,
     ) -> FinalGenerationResult:
-        """Hybrid Top-5로 답변을 생성하고 최종 상태를 결정한다."""
+        """Hybrid Top-5로 답변을 생성하고 최종 상태를 결정한다.
+
+        stages 는 턴의 프로필 버전이 고른 단계별 설정이다. 없으면 generator 의 코드 기본값으로
+        부르고 호출 인자도 기존과 같게 둔다.
+        """
 
         sources = build_generation_context(retrieval_results)
-        model_name = self._generator.model_name
+        if stages is None:
+            model_name = self._generator.model_name
+            prompt_version = GENERATION_PROMPT_VERSION
+            stage_kwargs: Dict[str, GenerationStageSettings] = {}
+        else:
+            model_name = stages.model_name
+            prompt_version = stages.prompt_version
+            stage_kwargs = {"stages": stages}
         if before_model_call is not None:
             await before_model_call(
                 OPENAI_GENERATION_PROVIDER,
                 model_name,
-                GENERATION_PROMPT_VERSION,
+                prompt_version,
             )
 
         started = time.perf_counter()
         try:
-            call = await self._generator.generate_with_trace(question, sources)
+            call = await self._generator.generate_with_trace(
+                question, sources, **stage_kwargs
+            )
         except Exception as error:
             return _error_result(
                 _generation_error_code(error),
-                _failed_generation_trace(started, error, model_name),
+                _failed_generation_trace(started, error, model_name, prompt_version),
             )
 
         if call.error is not None:
@@ -536,6 +552,7 @@ class GenerationService:
                 question,
                 failed_stage_trace,
                 str(mismatch_error),
+                **stage_kwargs,
             )
             combined_model_call = _combine_model_traces(
                 call.trace,
@@ -600,6 +617,7 @@ class GenerationService:
                 question,
                 failed_stage_trace,
                 str(error),
+                **stage_kwargs,
             )
             combined_model_call = _combine_model_traces(
                 call.trace,

@@ -30,3 +30,6 @@ HELP_CHATBOT_TEST = ChatServiceRoute(
     profile_key="HELP_CHATBOT_TEST",
     channel=ConversationChannel.INTERNAL_TEST,
 )
+
+# 배포 후 점검(/health/profiles)이 PUBLISHED 프로필 버전을 확인하는 서비스. 주소를 추가하면 함께 넣는다.
+REGISTERED_SERVICES = (HELP_CHATBOT, HELP_CHATBOT_TEST)

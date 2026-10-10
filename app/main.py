@@ -320,7 +320,7 @@ def create_app() -> FastAPI:
         _: Request,
         exc: ChatProfileConfigurationError,
     ) -> JSONResponse:
-        logger.error("chat profile 모델 설정이 런타임과 일치하지 않습니다: %s", exc)
+        logger.error("선택한 프로필 버전을 실행 중인 코드로 서빙할 수 없습니다: %s", exc)
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content=corpus_unavailable_response().model_dump(

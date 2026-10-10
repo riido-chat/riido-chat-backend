@@ -45,6 +45,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.chat.log_store import CitationLog, RagLogStore
 from app.core.model_trace import ModelCallTrace
 from app.core.openai_error import is_transient_openai_error
+from app.core.stage_settings import StageSettings
 from app.database.models import (
     EMBEDDING_DIMENSIONS,
     CacheAttemptOutcome,
@@ -136,6 +137,8 @@ class GroupingTurn:
     document_group_id: int
     index_version_id: int
     classification_run_id: int
+    # 턴의 프로필 버전이 고른 판별 모델과 프롬프트 버전. 없으면 판별 클라이언트의 코드 기본값이다.
+    judge_stage: Optional[StageSettings] = None
 
 
 @dataclass(frozen=True)
@@ -456,19 +459,24 @@ class QuestionGroupingService:
         rag_run_id: uuid.UUID,
         document_group_id: int,
         index_version_id: int,
+        judge_stage: Optional[StageSettings] = None,
     ) -> GroupingTurn:
         """같은 설정의 열린 ONLINE 실행을 찾거나 열고 commit 한다.
+
+        judge_stage 가 있으면 실행의 모델과 프롬프트 버전은 그 값이다. 프로필 버전마다 판별 설정이
+        다르면 실행도 설정마다 따로 열린다.
 
         검색 임베딩 checkpoint(QUERY_EMBEDDING, rag_run_id + classification_run_id)보다 먼저
         부른다. 턴 잠금을 잡지 않는 공유 행이라 턴 쓰기가 섞이지 않은 시점에 부르고, 쓰기·commit
         실패는 그대로 올린다(fail-closed).
         """
 
+        model, prompt_version = self._judge_identity(judge_stage)
         run_id = await self._store.get_or_open_online_run(
             document_group_id=document_group_id,
             index_version_id=index_version_id,
-            model=self._judge_client.model_name,
-            prompt_version=self._judge_client.prompt_version,
+            model=model,
+            prompt_version=prompt_version,
         )
         await self._session.commit()
         return GroupingTurn(
@@ -476,7 +484,17 @@ class QuestionGroupingService:
             document_group_id=document_group_id,
             index_version_id=index_version_id,
             classification_run_id=run_id,
+            judge_stage=judge_stage,
         )
+
+    def _judge_identity(
+        self, judge_stage: Optional[StageSettings]
+    ) -> Tuple[str, str]:
+        """분류 실행과 판별 행에 남길 (모델, 프롬프트 버전). 실제로 부르는 값과 같다."""
+
+        if judge_stage is None:
+            return self._judge_client.model_name, self._judge_client.prompt_version
+        return judge_stage.model_name, judge_stage.prompt_version
 
     async def record_exact_question(
         self,
@@ -556,12 +574,13 @@ class QuestionGroupingService:
             inclusion_count=0,
             exclusion_count=0,
         )
+        judge_model, judge_prompt_version = self._judge_identity(turn.judge_stage)
         prepared = PreparedJudgment(
             turn=turn,
             resolved_query=question,
             seed=presentation_seed(turn.rag_run_id),
-            model=self._judge_client.model_name,
-            prompt_version=self._judge_client.prompt_version,
+            model=judge_model,
+            prompt_version=judge_prompt_version,
             vector=QuestionVector(
                 embedding=None,
                 reused_retrieval_embedding=False,
@@ -611,10 +630,10 @@ class QuestionGroupingService:
             call=JudgeCall(
                 trace=ModelCallTrace(
                     provider=self._judge_client.provider,
-                    model_name=self._judge_client.model_name,
+                    model_name=prepared.model,
                     succeeded=True,
                     latency_ms=0,
-                    prompt_version=self._judge_client.prompt_version,
+                    prompt_version=prepared.prompt_version,
                 )
             ),
             judgment=judgment,
@@ -670,12 +689,13 @@ class QuestionGroupingService:
         """
 
         started = self._clock()
+        judge_model, judge_prompt_version = self._judge_identity(turn.judge_stage)
         base = PreparedJudgment(
             turn=turn,
             resolved_query=resolved_query,
             seed=presentation_seed(turn.rag_run_id),
-            model=self._judge_client.model_name,
-            prompt_version=self._judge_client.prompt_version,
+            model=judge_model,
+            prompt_version=judge_prompt_version,
             vector=QuestionVector(
                 embedding=None,
                 reused_retrieval_embedding=False,
@@ -910,10 +930,16 @@ class QuestionGroupingService:
                 vector.model_call_id is not None and vector.trace is not None
             )
 
+        # 프로필 버전이 판별 설정을 고른 턴만 stage 를 넘겨 기존 호출 인자를 그대로 둔다.
+        stage_kwargs: Dict[str, StageSettings] = (
+            {} if turn.judge_stage is None else {"stage": turn.judge_stage}
+        )
         started = self._clock()
         try:
             call = await self._judge_client.judge(
-                prepared.presentation.payload, before_model_call=checkpoint
+                prepared.presentation.payload,
+                before_model_call=checkpoint,
+                **stage_kwargs,
             )
         except Exception as error:  # noqa: BLE001 - checkpoint 오류만 올린다
             if state["checkpoint_error"]:

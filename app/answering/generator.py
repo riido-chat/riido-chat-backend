@@ -13,6 +13,7 @@ from app.core.model_trace import ModelCallTrace
 from app.core.openai_error import is_transient_openai_error
 from app.core.openai_usage import cached_input_tokens as usage_cached_input_tokens
 from app.core.openai_usage import reasoning_tokens as usage_reasoning_tokens
+from app.core.stage_settings import StageSettings
 from app.answering.models import (
     GenerationCall,
     GenerationAnswerType,
@@ -69,6 +70,51 @@ ANSWER_REPAIR_PROMPT_V17 = with_repair_instructions(
 PROCEDURE_EVIDENCE_RULES = prompts.get(
     "generation.procedure_evidence_rules", PROCEDURE_EVIDENCE_RULES_VERSION
 )
+
+
+@dataclass(frozen=True)
+class GenerationStageSettings:
+    """생성 논리 호출 한 건의 단계별 설정.
+
+    prompt_version 은 묶음 버전(generation@vNN)이고 model_calls 의 ANSWER_GENERATION 행에 남는다.
+    model_name 도 그 행에 남는 모델이다. 하위 네 단계는 각자의 모델, 지시문, 요청 설정으로 호출한다.
+    """
+
+    model_name: str
+    prompt_version: str
+    source_planning: StageSettings
+    source_planning_repair: StageSettings
+    answer: StageSettings
+    answer_repair: StageSettings
+
+
+def code_generation_stages(model_name: str = OPENAI_GENERATION_MODEL) -> GenerationStageSettings:
+    """프로필 버전을 받지 않은 호출이 쓰는 코드 기본값. 생성 호출은 요청 설정을 보내지 않는다."""
+
+    return GenerationStageSettings(
+        model_name=model_name,
+        prompt_version=GENERATION_PROMPT_VERSION,
+        source_planning=StageSettings(
+            model_name=model_name,
+            prompt_version=SOURCE_PLANNING_PROMPT_VERSION,
+            instructions=SOURCE_PLANNING_PROMPT_V11,
+        ),
+        source_planning_repair=StageSettings(
+            model_name=model_name,
+            prompt_version=SOURCE_PLANNING_REPAIR_PROMPT_VERSION,
+            instructions=SOURCE_PLANNING_REPAIR_PROMPT_V11,
+        ),
+        answer=StageSettings(
+            model_name=model_name,
+            prompt_version=ANSWER_PROMPT_VERSION,
+            instructions=ANSWER_PROMPT_V17,
+        ),
+        answer_repair=StageSettings(
+            model_name=model_name,
+            prompt_version=ANSWER_REPAIR_PROMPT_VERSION,
+            instructions=ANSWER_REPAIR_PROMPT_V17,
+        ),
+    )
 
 
 def build_generation_context(
@@ -302,19 +348,27 @@ class OpenAIGenerator:
 
         self._client = client
         self._model_name = model_name
+        self._code_stages = code_generation_stages(model_name)
 
     @property
     def model_name(self) -> str:
         return self._model_name
 
+    @property
+    def code_stages(self) -> GenerationStageSettings:
+        """프로필 버전을 받지 않은 호출이 쓰는 이 클라이언트의 기본 단계 설정."""
+
+        return self._code_stages
+
     async def generate(
         self,
         question: str,
         sources: Sequence[GenerationContextSource],
+        stages: Optional[GenerationStageSettings] = None,
     ) -> GenerationResult:
         """같은 호출에서 답변 생성과 answerability 판단을 수행한다."""
 
-        call = await self.generate_with_trace(question, sources)
+        call = await self.generate_with_trace(question, sources, stages)
         if call.error is not None:
             raise call.error
         return call.result
@@ -323,13 +377,16 @@ class OpenAIGenerator:
         self,
         question: str,
         sources: Sequence[GenerationContextSource],
+        stages: Optional[GenerationStageSettings] = None,
     ) -> GenerationCall:
         """Source 선택과 답변 생성의 합산 관측값을 반환한다.
 
         두 단계는 Generation 논리 호출 1건이며 retry_count에는 정상적인 두 번째
-        호출이 아니라 일시 오류로 실제 재시도한 횟수만 합산한다.
+        호출이 아니라 일시 오류로 실제 재시도한 횟수만 합산한다. stages 는 턴의 프로필
+        버전이 고른 단계별 설정이고, 없으면 이 클라이언트의 코드 기본값이다.
         """
 
+        stages = self._code_stages if stages is None else stages
         started = time.perf_counter()
         total_retry_count = 0
         total_input_tokens: Optional[int] = None
@@ -339,7 +396,7 @@ class OpenAIGenerator:
 
         generation_input = build_generation_input(question, sources)
         plan_call = await self._parse_with_retry(
-            instructions=SOURCE_PLANNING_PROMPT_V11,
+            stage=stages.source_planning,
             input_text=generation_input,
             text_format=GenerationSourcePlan,
         )
@@ -355,7 +412,7 @@ class OpenAIGenerator:
         ):
             repair_started = time.perf_counter()
             repair_call = await self._parse_with_retry(
-                instructions=SOURCE_PLANNING_REPAIR_PROMPT_V11,
+                stage=stages.source_planning_repair,
                 input_text=build_source_planning_repair_input(
                     question,
                     sources,
@@ -369,19 +426,20 @@ class OpenAIGenerator:
             repair_usage = getattr(repair_call.response, "usage", None)
             planning_regeneration_trace = _generation_trace(
                 repair_started,
-                model_name=self._model_name,
+                model_name=stages.source_planning_repair.model_name,
                 retry_count=repair_call.retry_count,
                 input_tokens=getattr(repair_usage, "input_tokens", None),
                 output_tokens=getattr(repair_usage, "output_tokens", None),
                 cached_input_tokens=usage_cached_input_tokens(repair_usage),
                 reasoning_tokens=usage_reasoning_tokens(repair_usage),
                 error=repair_call.error,
-                prompt_version=SOURCE_PLANNING_REPAIR_PROMPT_VERSION,
+                prompt_version=stages.source_planning_repair.prompt_version,
             )
             plan_call = repair_call
 
         if plan_call.error is not None:
             return self._error_call(
+                stages,
                 started,
                 plan_call.error,
                 total_retry_count,
@@ -436,12 +494,13 @@ class OpenAIGenerator:
             return GenerationCall(
                 trace=_generation_trace(
                     started,
-                    model_name=self._model_name,
+                    model_name=stages.model_name,
                     retry_count=total_retry_count,
                     input_tokens=total_input_tokens,
                     output_tokens=total_output_tokens,
                     cached_input_tokens=total_cached_input_tokens,
                     reasoning_tokens=total_reasoning_tokens,
+                    prompt_version=stages.prompt_version,
                 ),
                 result=result,
                 stage_trace=GenerationStageTrace(
@@ -454,6 +513,7 @@ class OpenAIGenerator:
             selected_sources = select_required_sources(plan, sources)
         except Exception as error:
             return self._error_call(
+                stages,
                 started,
                 error,
                 total_retry_count,
@@ -468,13 +528,14 @@ class OpenAIGenerator:
             )
 
         answer_call = await self._parse_with_retry(
-            instructions=ANSWER_PROMPT_V17,
+            stage=stages.answer,
             input_text=build_answer_input(question, selected_sources, plan),
             text_format=GenerationResult,
         )
         total_retry_count += answer_call.retry_count
         if answer_call.error is not None:
             return self._error_call(
+                stages,
                 started,
                 answer_call.error,
                 total_retry_count,
@@ -512,12 +573,13 @@ class OpenAIGenerator:
         return GenerationCall(
             trace=_generation_trace(
                 started,
-                model_name=self._model_name,
+                model_name=stages.model_name,
                 retry_count=total_retry_count,
                 input_tokens=total_input_tokens,
                 output_tokens=total_output_tokens,
                 cached_input_tokens=total_cached_input_tokens,
                 reasoning_tokens=total_reasoning_tokens,
+                prompt_version=stages.prompt_version,
             ),
             result=result,
             stage_trace=GenerationStageTrace(
@@ -534,9 +596,12 @@ class OpenAIGenerator:
         question: str,
         stage_trace: GenerationStageTrace,
         validation_error: str,
+        stages: Optional[GenerationStageSettings] = None,
     ) -> GenerationCall:
         """같은 계획과 Source로 answer 단계만 한 번 다시 생성한다."""
 
+        stages = self._code_stages if stages is None else stages
+        repair = stages.answer_repair
         plan = stage_trace.source_plan
         previous_result = stage_trace.pre_validation_result
         if plan is None or previous_result is None:
@@ -544,10 +609,10 @@ class OpenAIGenerator:
             return GenerationCall(
                 trace=_generation_trace(
                     time.perf_counter(),
-                    model_name=self._model_name,
+                    model_name=repair.model_name,
                     retry_count=0,
                     error=error,
-                    prompt_version=ANSWER_REPAIR_PROMPT_VERSION,
+                    prompt_version=repair.prompt_version,
                 ),
                 error=error,
                 stage_trace=stage_trace,
@@ -555,7 +620,7 @@ class OpenAIGenerator:
 
         started = time.perf_counter()
         answer_call = await self._parse_with_retry(
-            instructions=ANSWER_REPAIR_PROMPT_V17,
+            stage=repair,
             input_text=build_answer_repair_input(
                 question,
                 stage_trace.selected_sources,
@@ -568,14 +633,14 @@ class OpenAIGenerator:
         usage = getattr(answer_call.response, "usage", None)
         repair_trace = _generation_trace(
             started,
-            model_name=self._model_name,
+            model_name=repair.model_name,
             retry_count=answer_call.retry_count,
             input_tokens=getattr(usage, "input_tokens", None),
             output_tokens=getattr(usage, "output_tokens", None),
             cached_input_tokens=usage_cached_input_tokens(usage),
             reasoning_tokens=usage_reasoning_tokens(usage),
             error=answer_call.error,
-            prompt_version=ANSWER_REPAIR_PROMPT_VERSION,
+            prompt_version=repair.prompt_version,
         )
         result = (
             None
@@ -603,19 +668,23 @@ class OpenAIGenerator:
     async def _parse_with_retry(
         self,
         *,
-        instructions: str,
+        stage: StageSettings,
         input_text: str,
         text_format: Any,
     ) -> _ParsedResponseCall:
-        """한 단계의 Structured Output 호출만 일시 오류에 한해 재시도한다."""
+        """한 단계의 Structured Output 호출만 일시 오류에 한해 재시도한다.
+
+        요청 설정(stage.params)이 없으면 기존과 같이 model, instructions, input, text_format 만 보낸다.
+        """
 
         for attempt in range(MAX_GENERATION_ATTEMPTS):
             try:
                 response = await self._client.responses.parse(
-                    model=self._model_name,
-                    instructions=instructions,
+                    model=stage.model_name,
+                    instructions=stage.instructions,
                     input=input_text,
                     text_format=text_format,
+                    **stage.request_params(),
                 )
                 if response.output_parsed is None:
                     raise RuntimeError(
@@ -635,6 +704,7 @@ class OpenAIGenerator:
 
     def _error_call(
         self,
+        stages: GenerationStageSettings,
         started: float,
         error: Exception,
         retry_count: int,
@@ -648,13 +718,14 @@ class OpenAIGenerator:
         return GenerationCall(
             trace=_generation_trace(
                 started,
-                model_name=self._model_name,
+                model_name=stages.model_name,
                 retry_count=retry_count,
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
                 cached_input_tokens=cached_input_tokens,
                 reasoning_tokens=reasoning_tokens,
                 error=error,
+                prompt_version=stages.prompt_version,
             ),
             error=error,
             stage_trace=stage_trace,

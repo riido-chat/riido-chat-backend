@@ -296,7 +296,12 @@ class GroupingChatFixture:
                 "app.chat.service.resolve_chat_profile_revision",
                 new=AsyncMock(return_value=self.revision),
             ),
-            patch("app.chat.service.validate_runtime_model_configuration", new=Mock()),
+            # 단계별 설정 선택은 test_profile_stage_settings 가 본다. 여기서는 판별 흐름만 보므로
+            # 프로필 버전 설정 없이 각 가짜 클라이언트의 기존 호출 인자를 그대로 둔다.
+            patch(
+                "app.chat.service.load_turn_stage_settings",
+                new=AsyncMock(return_value=None),
+            ),
         ]
 
     def start(self) -> None:
