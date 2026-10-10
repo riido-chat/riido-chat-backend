@@ -519,6 +519,8 @@ class GateInputsDbTest(_DbTestCase):
         self.assertEqual(1, inputs.canonical_answer.subproblem_version)
         self.assertEqual("billing.cancel 정본 [1]", inputs.canonical_answer.content_markdown)
         self.assertEqual(("관리자만",), inputs.canonical_answer.applicability_rules)
+        # 정확 일치 승인 시각과 비교하는 정본 생성 시각(#220)도 같은 조회에서 읽는다.
+        self.assertIsNotNone(inputs.canonical_answer.created_at)
         (citation,) = inputs.citations
         self.assertEqual(
             (1, self.v1_chunks[1], self.v1.id, self.billing.id, "c-cancel", 1, "id-cancel"),

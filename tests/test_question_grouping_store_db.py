@@ -579,6 +579,42 @@ class ExactQuestionLogLookupDbTest(_StoreDbTestCase):
         self.assertEqual((3, 4), (recorded.source_subproblem_version, recorded.current_version))
         self.assertEqual((True, canonical_id), (recorded.source_canonical_recorded, recorded.source_canonical_answer_id))
 
+    async def test_json_null_candidates_and_presented_column(self) -> None:
+        # DEV 승인 원천 모양(#220): subproblemCandidates 키는 있고 값은 JSON null.
+        subproblem = await self._billing_subproblem(current_version=3)
+        turn = await self._logged_turn(self.QUESTION)
+        classification_id = await self.store.insert_classification(
+            turn.id,
+            run_id=self.run_id,
+            judgment=self._connect(self._presented(subproblem, self.billing)),
+            judgment_input={**_gate_input("SERVED"), "subproblemCandidates": None},
+        )
+        await self._set_effective_from(classification_id, 2)
+        await self.session.execute(
+            update(QuestionClassification)
+            .where(QuestionClassification.id == classification_id)
+            .values(exact_cache_approved=True)
+        )
+
+        unrecorded = await self._lookup()
+
+        self.assertEqual(classification_id, unrecorded.classification_id)
+        self.assertEqual((False, None), (unrecorded.source_canonical_recorded, unrecorded.source_canonical_answer_id))
+        self.assertTrue(unrecorded.source_exact_cache_approved)
+        self.assertEqual(self.BASE_TIME + timedelta(minutes=2), unrecorded.source_effective_from)
+
+        # 제시 목록이 없어도 판별 행 칸에 제시 정본이 있으면 그 값을 본 정본으로 쓴다.
+        canonical_id = (await self.seed.canonical(subproblem, [])).id
+        await self.session.execute(
+            update(QuestionClassification)
+            .where(QuestionClassification.id == classification_id)
+            .values(presented_canonical_answer_id=canonical_id)
+        )
+
+        recorded = await self._lookup()
+
+        self.assertEqual((True, canonical_id), (recorded.source_canonical_recorded, recorded.source_canonical_answer_id))
+
     async def test_unapproved_question_log_is_not_an_exact_cache_match(self) -> None:
         subproblem = await self._billing_subproblem()
         await self._connect_log(subproblem, exact_cache_approved=False)

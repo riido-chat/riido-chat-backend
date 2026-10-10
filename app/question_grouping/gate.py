@@ -264,11 +264,15 @@ def exact_source_fallthrough_reasons(
     개정과 정본이 지금도 같으면 포함 기준과 적용 제외 규칙에 대한 판단도 그대로 유효하다.
 
     1. 원천 분류의 세부 문제 개정이 현재 개정과 다르면 EXACT_SOURCE_SUBPROBLEM_VERSION_STALE.
-    2. 원천 분류가 본 정본을 알면(제시 목록 기록) 그 id 가 현재 승인 정본 id 와 다르면 실패
-       (EXACT_SOURCE_CANONICAL_CHANGED). 정본 없이 판별했는데 지금 정본이 있어도 실패다.
-    3. 본 정본을 모르면(운영자 연결처럼 제시 목록이 없는 행) 현재 정본에 적용 제외 규칙이
-       있을 때만 실패한다(EXACT_SOURCE_CANONICAL_UNVERIFIED). 규칙 없는 정본은 세부 문제
-       개정이 같은 한 포함 기준 판단으로 충분하다고 본다.
+    2. 원천 분류가 본 정본을 알면(제시 목록 기록이나 판별 행 presented_canonical_answer_id)
+       그 id 가 현재 승인 정본 id 와 다르면 실패(EXACT_SOURCE_CANONICAL_CHANGED). 정본 없이
+       판별했는데 지금 정본이 있어도 실패다.
+    3. 본 정본을 모르면(운영자 연결처럼 제시 목록이 없는 행) 운영자가 승인한 원천
+       (exact_cache_approved)이고 분류 확정 시각(effective_from)이 현재 정본 생성 시각 이후면
+       현재 정본이 있을 때 승인한 것으로 보고 재사용한다(#220).
+    4. 그 밖에는 현재 정본에 적용 제외 규칙이 있을 때만 실패한다
+       (EXACT_SOURCE_CANONICAL_UNVERIFIED). 규칙 없는 정본은 세부 문제 개정이 같은 한
+       포함 기준 판단으로 충분하다고 본다.
 
     inputs 가 없으면(게이트 입력 데이터 오류) 조회 때 읽은 현재 개정으로 1단계만 본다.
     세부 문제가 없거나 승인되지 않은 경우는 게이트가 거부하도록 여기서 막지 않는다.
@@ -288,9 +292,16 @@ def exact_source_fallthrough_reasons(
         if match.source_canonical_answer_id != current_id:
             return (EXACT_SOURCE_CANONICAL_CHANGED,)
         return ()
-    if canonical is not None and canonical.applicability_rules:
-        return (EXACT_SOURCE_CANONICAL_UNVERIFIED,)
-    return ()
+    if canonical is None or not canonical.applicability_rules:
+        return ()
+    if (
+        match.source_exact_cache_approved
+        and match.source_effective_from is not None
+        and canonical.created_at is not None
+        and match.source_effective_from >= canonical.created_at
+    ):
+        return ()
+    return (EXACT_SOURCE_CANONICAL_UNVERIFIED,)
 
 
 def gate_judgment_input(

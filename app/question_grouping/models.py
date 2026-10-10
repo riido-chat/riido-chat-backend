@@ -7,6 +7,7 @@ DB 조회와 쓰기는 이 모델을 채우거나 읽기만 한다. 저장 값�
 
 import enum
 import uuid
+from datetime import datetime
 from dataclasses import dataclass, field
 from typing import Any, Dict, Mapping, Optional, Tuple
 
@@ -179,7 +180,10 @@ class ExactQuestionLogMatch:
     ``source_subproblem_version`` 은 원천 분류 행이 기록한 세부 문제 개정이다.
     ``source_canonical_recorded`` 는 원천 분류의 judgment_input 제시 목록에 이 세부 문제가 있어
     판별이 본 정본을 알 수 있는지다. 참이면 ``source_canonical_answer_id`` 가 그 정본이고,
-    널이면 정본 없이 판별했다는 뜻이다.
+    널이면 정본 없이 판별했다는 뜻이다. 제시 목록이 없어도 판별 행의
+    presented_canonical_answer_id 칸에 값이 있으면 그 값을 본 정본으로 기록된 것으로 본다.
+    ``source_exact_cache_approved`` 와 ``source_effective_from`` 은 원천 분류의 운영자 승인
+    여부와 확정 시각이다. 제시 목록이 없는 승인 행이 현재 정본을 보고 승인됐는지 판단한다.
     """
 
     subproblem_id: uuid.UUID
@@ -195,6 +199,8 @@ class ExactQuestionLogMatch:
     source_subproblem_version: int
     source_canonical_recorded: bool = False
     source_canonical_answer_id: Optional[uuid.UUID] = None
+    source_exact_cache_approved: bool = False
+    source_effective_from: Optional[datetime] = None
 
 
 @dataclass(frozen=True)
@@ -382,12 +388,13 @@ class GateSubproblemState:
 
 @dataclass(frozen=True)
 class GateCanonicalAnswer:
-    """게이트 직전에 다시 읽은 세부 문제의 APPROVED 정본."""
+    """게이트 직전에 다시 읽은 세부 문제의 APPROVED 정본. created_at 은 정본 행 생성 시각이다."""
 
     canonical_answer_id: uuid.UUID
     subproblem_version: int
     content_markdown: str
     applicability_rules: Tuple[str, ...] = ()
+    created_at: Optional[datetime] = None
 
 
 @dataclass(frozen=True)

@@ -330,6 +330,7 @@ class QuestionCatalogReader:
                     CanonicalAnswer.subproblem_version,
                     CanonicalAnswer.content_markdown,
                     CanonicalAnswer.applicability_rules,
+                    CanonicalAnswer.created_at,
                 ).where(
                     CanonicalAnswer.subproblem_id == subproblem_id,
                     CanonicalAnswer.approval == CanonicalAnswerApproval.APPROVED,
@@ -343,6 +344,7 @@ class QuestionCatalogReader:
             subproblem_version=row.subproblem_version,
             content_markdown=row.content_markdown,
             applicability_rules=applicability_rules_from_json(row.applicability_rules),
+            created_at=row.created_at,
         )
 
     async def load_canonical_citations(
