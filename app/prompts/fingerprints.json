@@ -1,5 +1,5 @@
 {
-  "description": "모델에 보내는 프롬프트와 출력 스키마의 지문 표. 키는 <component>@<version>, 값은 sha256 hex. 정규화 규칙은 app/core/prompt_fingerprints.py 를 따른다. 키는 추가만 하고 기존 키의 값을 바꾸거나 지우지 않는다(scripts/check_prompt_fingerprints.py).",
+  "description": "모델에 보내는 프롬프트와 출력 스키마의 지문 표. 키는 <component>@<version>, 값은 sha256 hex. 정규화 규칙은 app/prompts/fingerprints.py 를 따른다. 키는 추가만 하고 기존 키의 값을 바꾸거나 지우지 않는다(scripts/check_prompt_fingerprints.py).",
   "fingerprints": {
     "generation.answer.output_schema@v23": "76fafd42a2292816645c9110946a1de03e08b43349b591990346d52423a7951f",
     "generation.answer@v23": "7cefd4931821158f05581d5a4259a55d6a2b51ae559af69a16fa59b139707591",
