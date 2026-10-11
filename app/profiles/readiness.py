@@ -29,6 +29,7 @@ class ServiceReadiness:
     profile_key: str
     profile_version_id: Optional[int]
     problems: Tuple[str, ...]
+    version: Optional[int] = None
 
     @property
     def servable(self) -> bool:
@@ -65,6 +66,7 @@ async def check_service(
         profile_key=service.profile_key,
         profile_version_id=revision.id,
         problems=component_problems(revision, rows),
+        version=revision.version,
     )
 
 

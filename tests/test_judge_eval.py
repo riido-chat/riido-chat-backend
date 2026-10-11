@@ -265,7 +265,58 @@ def build_registry(root: Path, *, schema_from: Optional[Path] = None) -> Path:
         for name in ("validate.py", "stages.py", "sources.py", "freeze_judge_inputs.py"):
             shutil.copy(schema_from / "scripts" / name, root / "scripts" / name)
     else:
-        (root / "schemas/eval-result.schema.json").write_text("{}", encoding="utf-8")
+        (root / "schemas/eval-result.schema.json").write_text(
+            json.dumps(
+                {
+                    "properties": {
+                        "schemaVersion": {"enum": ["1", "2"]},
+                        "target": {
+                            "required": ["buildCommit", "profileKey", "profileRevisionId"],
+                            "properties": {
+                                "buildCommit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+                                "profileKey": {"type": "string", "minLength": 1},
+                                "profileRevisionId": {"type": "integer", "minimum": 1},
+                            },
+                        },
+                    },
+                    "allOf": [
+                        {
+                            "if": {"properties": {"schemaVersion": {"const": "2"}}},
+                            "then": {
+                                "required": ["target", "guideIndex", "summary"],
+                                "properties": {
+                                    "systemVersion": {"type": "null"},
+                                    "guideIndex": {
+                                        "type": "object",
+                                        "required": ["indexVersionId"],
+                                        "properties": {"indexVersionId": {"type": "integer", "minimum": 1}},
+                                    },
+                                    "summary": {
+                                        "required": ["inputs"],
+                                        "properties": {
+                                            "inputs": {
+                                                "required": ["catalogFingerprint"],
+                                                "properties": {
+                                                    "catalogFingerprint": {"type": "string", "minLength": 1}
+                                                },
+                                            }
+                                        },
+                                    },
+                                    "fixedInputs": {
+                                        "if": {"type": "object"},
+                                        "then": {
+                                            "required": ["baselineBuildCommit", "path"],
+                                            "properties": {"baselineSystemVersion": {"type": "null"}},
+                                        },
+                                    },
+                                },
+                            },
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
         (root / "scripts/validate.py").write_text(FAKE_VALIDATE, encoding="utf-8")
     frozen_files = {}
     for name in ("judge-inputs-20990101.jsonl", "catalog-HELP_CHATBOT-20990101.json", "environment-20990101.json"):
@@ -395,7 +446,8 @@ class RegistryCase(unittest.TestCase):
 
     def config(self, judge="luna", suite=SUITE_A, name="out", **kwargs) -> cli.RunConfig:
         prices = Prices(0.20, 1.20, None) if judge == "luna" else Prices(0.042, None, None)
-        defaults = dict(registry=self.root, output=self.tmp / "out" / f"{name}.json", system_version="1.2.1",
+        defaults = dict(registry=self.root, output=self.tmp / "out" / f"{name}.json",
+                        build_commit="a" * 40, profile_key="HELP_CHATBOT", profile_revision_id=12,
                         criteria=self.criteria_a if suite == SUITE_A else None, prices=prices, concurrency=2)
         defaults.update(kwargs)
         return cli.RunConfig(suite=suite, judge=judge, golden_version=GOLDEN_VERSION, **defaults)
@@ -409,6 +461,24 @@ class RegistryCase(unittest.TestCase):
             return []
         return [json.loads(line) for line in path.read_text().splitlines() if json.loads(line).get("kind") == "run"]
 
+    def update_environment(self, update):
+        manifest_path = self.root / "golden/manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        relative = next(
+            name for name in manifest["frozen"]["files"] if Path(name).name.startswith("environment-")
+        )
+        environment_path = self.root / relative
+        environment = json.loads(environment_path.read_text(encoding="utf-8"))
+        update(environment)
+        environment_path.write_text(json.dumps(environment), encoding="utf-8")
+        manifest["frozen"]["files"][relative] = {
+            "sha256": sha256(environment_path),
+            "bytes": environment_path.stat().st_size,
+        }
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+        git(self.root, "add", relative, "golden/manifest.json")
+        git(self.root, "commit", "-q", "-m", "update synthetic environment")
+
 
 # ---------------------------------------------------------------- 입력 동일성
 
@@ -419,6 +489,14 @@ class InputIdentityTest(RegistryCase):
         transport = FakeJevTransport()
         luna = self.run_live(self.config("luna", name="luna"), luna_adapter(openai))
         jev = self.run_live(self.config("jev", name="jev"), jev_adapter(transport))
+
+        self.assertEqual(luna["schemaVersion"], "2")
+        self.assertEqual(
+            luna["target"],
+            {"buildCommit": "a" * 40, "profileKey": "HELP_CHATBOT", "profileRevisionId": 12},
+        )
+        self.assertNotIn("systemVersion", luna)
+        self.assertEqual(luna["fixedInputs"]["baselineBuildCommit"], "0" * 40)
 
         luna_raw = [json.loads(l) for l in (self.tmp / "out/luna.raw.jsonl").read_text().splitlines()]
         jev_raw = [json.loads(l) for l in (self.tmp / "out/jev.raw.jsonl").read_text().splitlines()]
@@ -442,6 +520,27 @@ class InputIdentityTest(RegistryCase):
 
         comparison = cli.compare_results(self.root, self.tmp / "out/luna.json", self.tmp / "out/jev.json")
         self.assertTrue(comparison["inputsIdentical"])
+
+    def test_rescore_keeps_reading_legacy_v1_result(self):
+        current = self.run_live(self.config("luna", name="current"), luna_adapter())
+        legacy = dict(current)
+        legacy["schemaVersion"] = "1"
+        legacy["systemVersion"] = "1.2.1"
+        legacy.pop("target")
+        legacy["fixedInputs"] = {
+            "baselineSystemVersion": "1.2.1",
+            "path": current["fixedInputs"]["path"],
+        }
+        legacy_path = self.tmp / "out" / "legacy.json"
+        legacy_path.write_text(json.dumps(legacy), encoding="utf-8")
+        (self.tmp / "out" / "legacy.raw.jsonl").write_text(
+            (self.tmp / "out" / "current.raw.jsonl").read_text(encoding="utf-8"), encoding="utf-8"
+        )
+
+        rescored, scores, _ = cli.rescore(self.root, legacy_path)
+
+        self.assertEqual("1", rescored["schemaVersion"])
+        self.assertEqual(len(current["results"]), len(scores))
 
     def test_compare_refuses_different_inputs(self):
         self.run_live(self.config("luna", name="luna"), luna_adapter())
@@ -537,6 +636,35 @@ class HoldoutTest(RegistryCase):
 
 
 class RunCapTest(RegistryCase):
+    def test_live_refuses_missing_index_identity_before_ledger_or_adapter(self):
+        self.update_environment(lambda env: env["index"].pop("indexVersionId"))
+
+        with mock.patch.object(cli, "_live_adapter", side_effect=AssertionError("adapter created too early")):
+            with self.assertRaisesRegex(GoldenError, "기준 색인 버전 ID"):
+                asyncio.run(cli.execute_run(self.config("luna"), None))
+
+        self.assertEqual(self.ledger_runs(), [])
+
+    def test_live_refuses_missing_catalog_fingerprint_before_ledger_or_adapter(self):
+        self.update_environment(lambda env: env["catalog"].pop("fingerprint"))
+
+        with mock.patch.object(cli, "_live_adapter", side_effect=AssertionError("adapter created too early")):
+            with self.assertRaisesRegex(GoldenError, "기준 카탈로그 지문"):
+                asyncio.run(cli.execute_run(self.config("luna"), None))
+
+        self.assertEqual(self.ledger_runs(), [])
+
+    def test_live_refuses_v1_result_schema_before_ledger(self):
+        schema_path = self.root / "schemas/eval-result.schema.json"
+        schema_path.write_text(json.dumps({"properties": {"schemaVersion": {"enum": ["1"]}}}), encoding="utf-8")
+        git(self.root, "add", "schemas/eval-result.schema.json")
+        git(self.root, "commit", "-q", "-m", "legacy result schema")
+
+        with self.assertRaisesRegex(GoldenError, "schemaVersion 2"):
+            self.run_live(self.config("luna"), luna_adapter())
+
+        self.assertEqual(self.ledger_runs(), [])
+
     def test_two_runs_per_suite_model_golden_version(self):
         first = self.run_live(self.config("luna", name="r1"), luna_adapter())
         second = self.run_live(self.config("luna", name="r2"), luna_adapter())
@@ -564,11 +692,22 @@ class RunCapTest(RegistryCase):
         with self.assertRaisesRegex(GoldenError, "이미 있습니다"):
             self.run_live(self.config("jev", name="ok"), jev_adapter())
 
-    def test_live_needs_criteria_system_version_and_clean_registry(self):
+    def test_live_needs_criteria_target_identity_and_clean_registry(self):
         with self.assertRaisesRegex(GoldenError, "criteria"):
             self.run_live(self.config("luna", criteria=None), luna_adapter())
-        with self.assertRaisesRegex(GoldenError, "system-version"):
-            self.run_live(self.config("luna", system_version=None), luna_adapter())
+        for kwargs, expected in (
+            ({"build_commit": None}, "build-commit"),
+            ({"build_commit": "bad"}, "build-commit"),
+            ({"profile_key": None}, "profile-key"),
+            ({"profile_revision_id": None}, "profile-revision-id"),
+            ({"profile_revision_id": 0}, "profile-revision-id"),
+        ):
+            with self.subTest(kwargs=kwargs), self.assertRaisesRegex(GoldenError, expected):
+                self.run_live(self.config("luna", **kwargs), luna_adapter())
+        with mock.patch.object(cli, "_live_adapter", side_effect=AssertionError("adapter created too early")):
+            with self.assertRaisesRegex(GoldenError, "build-commit"):
+                asyncio.run(cli.execute_run(self.config("luna", build_commit=None), None))
+        self.assertEqual(self.ledger_runs(), [])
         (self.root / "golden/suites/rules.json").write_text((self.root / "golden/suites/rules.json").read_text() + " ")
         with self.assertRaisesRegex(GoldenError, "커밋하지 않은 변경"):
             self.run_live(self.config("luna"), luna_adapter())

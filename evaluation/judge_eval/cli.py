@@ -5,8 +5,9 @@
 
     # 실제 측정 (--live 가 있어야 실제 API 를 부른다)
     python -m evaluation.judge_eval run --suite judge-official-A --judge jev --golden-version 1.0.0 \\
-        --criteria criteria/<파일>.md --system-version 1.2.1 --input-price <USD/100만 토큰> \\
-        --output evaluation/registry/evals/<버전>/judge-official-A.jev.run1.json --live
+        --criteria criteria/<파일>.md --build-commit <40자리 SHA> --profile-key HELP_CHATBOT \\
+        --profile-revision-id 12 --input-price <USD/100만 토큰> \\
+        --output evaluation/registry/evals/<실행 ID>/judge-official-A.jev.run1.json --live
 
     # 결과 다시 채점, 두 결과 짝 비교
     python -m evaluation.judge_eval score --result <결과.json>
@@ -54,9 +55,9 @@ from evaluation.judge_eval.scoring import TurnScore, compare, score_turn, summar
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REGISTRY = PROJECT_ROOT / "evaluation" / "registry"
 RUNNER_NAME = "evaluation/judge_eval"
-RUNNER_VERSION = "judge-eval-v1"
+RUNNER_VERSION = "judge-eval-v2"
 SCHEMA_PATH = Path("schemas") / "eval-result.schema.json"
-SEMVER = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
+COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
 
 
 @dataclass
@@ -69,7 +70,9 @@ class RunConfig:
     ledger: Optional[Path] = None
     criteria: Optional[str] = None
     holdout: bool = False
-    system_version: Optional[str] = None
+    build_commit: Optional[str] = None
+    profile_key: Optional[str] = None
+    profile_revision_id: Optional[int] = None
     health_checked_at: Optional[str] = None
     payload_check: str = "strict"
     prices: Optional[Prices] = None
@@ -169,13 +172,11 @@ def _app_revision() -> Dict[str, Any]:
     return {"gitRevision": revision, "dirty": bool(status) if status is not None else True}
 
 
-def _baseline_system_version(environment: Dict[str, Any]) -> str:
-    """동결 입력을 만든 앱 커밋의 SYSTEM_VERSION 상수. 읽지 못하면 unknown."""
+def _baseline_build_commit(environment: Dict[str, Any]) -> Optional[str]:
+    """고정 입력을 만든 앱 저장소의 커밋을 반환한다."""
 
     commit = (environment.get("mainRepo") or {}).get("commit")
-    source = _git_output(PROJECT_ROOT, "show", f"{commit}:app/core/system_version.py") if commit else None
-    match = re.search(r'^SYSTEM_VERSION\s*=\s*"([^"]+)"', source or "", re.MULTILINE)
-    return match.group(1) if match else "unknown"
+    return commit if isinstance(commit, str) and COMMIT_SHA.fullmatch(commit) else None
 
 
 def load_schema_checker(golden: Golden):
@@ -202,6 +203,69 @@ def load_schema_checker(golden: Golden):
     return checker
 
 
+def schema_supports_identity_v2(golden: Golden) -> bool:
+    schema = json.loads((golden.root / SCHEMA_PATH).read_text(encoding="utf-8"))
+    version = schema.get("properties", {}).get("schemaVersion", {})
+    if "2" not in version.get("enum", []):
+        return False
+    branch = next(
+        (
+            clause.get("then", {})
+            for clause in schema.get("allOf", [])
+            if isinstance(clause, dict)
+            and clause.get("if", {}).get("properties", {}).get("schemaVersion", {}).get("const") == "2"
+        ),
+        {},
+    )
+    target = schema.get("properties", {}).get("target", {})
+    required_target = {"buildCommit", "profileKey", "profileRevisionId"}
+    if not required_target.issubset(target.get("required", [])):
+        return False
+    target_properties = target.get("properties", {})
+    if any(name not in target_properties for name in required_target):
+        return False
+    if (
+        target_properties["buildCommit"].get("type") != "string"
+        or target_properties["buildCommit"].get("pattern") != r"^[0-9a-f]{40}$"
+        or target_properties["profileKey"].get("type") != "string"
+        or target_properties["profileKey"].get("minLength", 0) < 1
+        or target_properties["profileRevisionId"].get("type") != "integer"
+        or target_properties["profileRevisionId"].get("minimum", 0) < 1
+    ):
+        return False
+    if "target" not in branch.get("required", []):
+        return False
+    branch_properties = branch.get("properties", {})
+    if branch_properties.get("systemVersion", {}).get("type") != "null":
+        return False
+    fixed_inputs = branch_properties.get("fixedInputs", {})
+    legacy_field = fixed_inputs.get("then", {}).get("properties", {}).get("baselineSystemVersion", {})
+    guide_index = branch_properties.get("guideIndex", {})
+    index_version = guide_index.get("properties", {}).get("indexVersionId", {})
+    if (
+        guide_index.get("type") != "object"
+        or "indexVersionId" not in guide_index.get("required", [])
+        or index_version.get("type") != "integer"
+        or index_version.get("minimum", 0) < 1
+    ):
+        return False
+    summary = branch_properties.get("summary", {})
+    summary_inputs = summary.get("properties", {}).get("inputs", {})
+    catalog_fingerprint = summary_inputs.get("properties", {}).get("catalogFingerprint", {})
+    if (
+        "inputs" not in summary.get("required", [])
+        or "catalogFingerprint" not in summary_inputs.get("required", [])
+        or catalog_fingerprint.get("type") != "string"
+        or catalog_fingerprint.get("minLength", 0) < 1
+    ):
+        return False
+    return (
+        fixed_inputs.get("if", {}).get("type") == "object"
+        and {"baselineBuildCommit", "path"}.issubset(fixed_inputs.get("then", {}).get("required", []))
+        and legacy_field.get("type") == "null"
+    )
+
+
 def _display_path(path: Path, golden: Golden) -> str:
     """결과와 기록부에 남길 경로. 등록부나 앱 저장소 안이면 상대 경로, 밖이면 파일 이름만 남긴다."""
 
@@ -221,8 +285,31 @@ def _raw_path(output: Path) -> Path:
 def _check_live_preconditions(config: RunConfig, golden: Golden) -> None:
     if golden.commit is None or golden.dirty:
         raise GoldenError("등록부가 git 커밋 상태가 아니거나 golden, schemas, scripts, criteria 에 커밋하지 않은 변경이 있습니다")
-    if not config.system_version or not SEMVER.match(config.system_version):
-        raise GoldenError("--system-version 에 서버가 보고한 시스템 버전(x.y.z)을 준다")
+    if not isinstance(config.build_commit, str) or not COMMIT_SHA.fullmatch(config.build_commit):
+        raise GoldenError("--build-commit 에 서버가 보고한 40자리 소문자 커밋 SHA를 준다")
+    if not isinstance(config.profile_key, str) or not config.profile_key.strip():
+        raise GoldenError("--profile-key 에 서빙 중인 프로필 키를 준다")
+    if (
+        not isinstance(config.profile_revision_id, int)
+        or isinstance(config.profile_revision_id, bool)
+        or config.profile_revision_id < 1
+    ):
+        raise GoldenError("--profile-revision-id 에 서빙 중인 양의 프로필 버전 ID를 준다")
+    environment = golden_mod.load_environment(golden)
+    if _baseline_build_commit(environment) is None:
+        raise GoldenError("동결 입력 환경에 기준 앱 커밋 SHA가 없습니다")
+    index_version_id = (environment.get("index") or {}).get("indexVersionId")
+    if (
+        not isinstance(index_version_id, int)
+        or isinstance(index_version_id, bool)
+        or index_version_id < 1
+    ):
+        raise GoldenError("동결 입력 환경에 양의 기준 색인 버전 ID가 없습니다")
+    catalog_fingerprint = (environment.get("catalog") or {}).get("fingerprint")
+    if not isinstance(catalog_fingerprint, str) or not catalog_fingerprint.strip():
+        raise GoldenError("동결 입력 환경에 기준 카탈로그 지문이 없습니다")
+    if not schema_supports_identity_v2(golden):
+        raise GoldenError("평가 등록부 결과 스키마가 schemaVersion 2를 지원하지 않습니다")
     if config.output is None:
         raise GoldenError("--output 이 필요합니다")
     if config.output.exists() or _raw_path(config.output).exists():
@@ -270,15 +357,19 @@ def _input_set_sha256(turns: Sequence[PreparedTurn]) -> str:
     return golden_mod.sha256_bytes(joined.encode("utf-8"))
 
 
-async def execute_run(config: RunConfig, adapter: Any) -> Dict[str, Any]:
+async def execute_run(config: RunConfig, adapter: Optional[Any]) -> Dict[str, Any]:
     """관문을 모두 지나면 기록부에 실행을 남기고 판별을 돌린 뒤 결과를 쓴다. 결과 객체를 돌려준다."""
 
     variant: Variant = variant_by_name(config.judge)
-    if adapter.variant.name != variant.name:
-        raise GoldenError(f"어댑터({adapter.variant.name})와 --judge({variant.name})가 다릅니다")
     golden = golden_mod.open_golden(config.registry, config.golden_version)
     _gate_holdout_and_criteria(config, golden, live=True)
     _check_live_preconditions(config, golden)
+    checker = load_schema_checker(golden)
+    if adapter is None:
+        adapter = _live_adapter(config.judge)
+    assert adapter is not None
+    if adapter.variant.name != variant.name:
+        raise GoldenError(f"어댑터({adapter.variant.name})와 --judge({variant.name})가 다릅니다")
     ledger_path = config.ledger_path(golden)
     holdout = golden.is_holdout(config.suite)
     slot = ledger_mod.next_slot(
@@ -291,7 +382,6 @@ async def execute_run(config: RunConfig, adapter: Any) -> Dict[str, Any]:
             f"재구성한 판별 요청 {status['unverified']}/{status['judgedTurns']}턴이 동결 payloadSha256 과 다릅니다. "
             "동결 보충 파일(문서 outline, 정본 적용 제외 규칙)을 등록하거나, 사전 등록 기준에 적고 --payload-check record 로 돌린다"
         )
-    checker = load_schema_checker(golden)
     assert config.output is not None
     ledger_mod.append_run(
         ledger_path,
@@ -385,8 +475,12 @@ async def execute_run(config: RunConfig, adapter: Any) -> Dict[str, Any]:
 
     env_index = prepared.environment.get("index") or {}
     result: Dict[str, Any] = {
-        "schemaVersion": "1",
-        "systemVersion": config.system_version,
+        "schemaVersion": "2",
+        "target": {
+            "buildCommit": config.build_commit,
+            "profileKey": config.profile_key,
+            "profileRevisionId": config.profile_revision_id,
+        },
         "goldenVersion": golden.version,
         "goldenCommit": golden.commit,
         "suite": config.suite,
@@ -406,7 +500,7 @@ async def execute_run(config: RunConfig, adapter: Any) -> Dict[str, Any]:
         },
         "models": {"judge": variant.stage_model()},
         "fixedInputs": {
-            "baselineSystemVersion": _baseline_system_version(prepared.environment),
+            "baselineBuildCommit": _baseline_build_commit(prepared.environment),
             "path": golden.relative(golden.judge_inputs),
         },
         "repeat": 1,
@@ -540,7 +634,9 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--ledger", type=Path, help="실행 기록부 (기본 <등록부>/evals/run-ledger.jsonl)")
     run.add_argument("--criteria", help="등록부 기준 상대 경로 criteria/<파일>.md")
     run.add_argument("--holdout", action="store_true", help="보류 시험셋 묶음을 연다 (확정한 criteria 필요)")
-    run.add_argument("--system-version")
+    run.add_argument("--build-commit", help="서버가 /health 에 보고한 40자리 빌드 커밋 SHA")
+    run.add_argument("--profile-key", help="/health/profiles 에서 확인한 프로필 키")
+    run.add_argument("--profile-revision-id", type=int, help="/health/profiles 에서 확인한 서빙 프로필 버전 ID")
     run.add_argument("--health-checked-at")
     run.add_argument("--payload-check", choices=("strict", "record"), default="strict")
     run.add_argument("--input-price", type=float, help="USD/100만 입력 토큰")
@@ -586,7 +682,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ledger=args.ledger,
                 criteria=args.criteria,
                 holdout=args.holdout,
-                system_version=args.system_version,
+                build_commit=args.build_commit,
+                profile_key=args.profile_key,
+                profile_revision_id=args.profile_revision_id,
                 health_checked_at=args.health_checked_at,
                 payload_check=args.payload_check,
                 prices=_prices(args),
@@ -596,7 +694,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             if args.estimate:
                 print(json.dumps(run_estimate(config), ensure_ascii=False, indent=2))
                 return 0
-            result = asyncio.run(execute_run(config, _live_adapter(args.judge)))
+            result = asyncio.run(execute_run(config, None))
             print(json.dumps({"output": str(args.output), "runNo": result["runNo"], "cost": result["cost"]}, ensure_ascii=False))
             return 0
         if args.command == "score":
