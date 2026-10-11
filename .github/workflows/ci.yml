@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # 시스템 버전 검사가 기준 브랜치(origin/<base>)와 diff 하려면 전체 이력이 필요하다.
+          # 프롬프트 지문 검사가 기준 브랜치(origin/<base>)와 diff 하려면 전체 이력이 필요하다.
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
@@ -60,11 +60,6 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-
-      # 모델, 프롬프트, 검색 관련 파일이 바뀌었는데 SYSTEM_VERSION 을 올리지 않았거나
-      # evaluation/SYSTEM_VERSIONS.md 에 행이 없으면 실패한다. 동작 동일성 예외의 합성 검증에 앱 의존성이 필요해 설치 뒤 실행한다.
-      - name: Check system version
-        run: python scripts/check_system_version.py "origin/${{ github.base_ref }}"
 
       # 스키마를 최신(head)으로 만든다.
       # 이 단계가 있어야 DB 통합 테스트(test_rag_log_store_db)가 skip 되지 않고 실제로 돈다.
