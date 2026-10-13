@@ -1,16 +1,16 @@
-"""근거 검색 이후 답변 출처 선택과 생성을 고정 순서로 실행한다."""
+"""문맥 해석부터 근거 기반 답변 생성까지 정해진 순서로 실행한다."""
 
 import logging
 import uuid
 from dataclasses import dataclass
-from typing import Awaitable, Callable, Generic, Optional, Sequence, TypeVar
+from typing import Awaitable, Callable, Generic, Optional, TypeVar
 
 from app.answering.generator import GenerationStageSettings
 from app.answering.models import FinalGenerationResult, GenerationStageTrace
 from app.answering.service import GenerationService
 from app.chat.progress import OnProgressStageHook
 from app.core.model_trace import BeforeModelCallHook
-from app.retrieval.models import HybridRetrievalResult
+from app.retrieval.models import HybridSearchCall
 
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,9 @@ SourceDecision = TypeVar("SourceDecision")
 class AnswerQuestionResult(Generic[SourceDecision]):
     """유스케이스 단계 결과. 기록과 외부 응답 변환은 채팅 계층이 맡는다."""
 
+    resolved_query: Optional[str]
+    retrieval: Optional[HybridSearchCall]
+    flow_terminated: bool
     source_decision: Optional[SourceDecision]
     source_handled: bool
     generation_result: Optional[FinalGenerationResult]
@@ -29,16 +32,16 @@ class AnswerQuestionResult(Generic[SourceDecision]):
 
 
 class AnswerQuestion(Generic[SourceDecision]):
-    """출처 선택 뒤 생성하는 답변 유스케이스."""
+    """문맥 해석, 근거 검색, 출처 선택, 답변 생성을 정해진 순서로 실행한다."""
 
     def __init__(self, generation_service: GenerationService) -> None:
         self._generation_service = generation_service
 
     async def execute(
         self,
-        resolved_query: str,
-        evidence: Sequence[HybridRetrievalResult],
         *,
+        resolve_query: Callable[[], Awaitable[Optional[str]]],
+        retrieve: Callable[[str], Awaitable[HybridSearchCall]],
         choose_source: Optional[
             Callable[[], Awaitable[SourceDecision]]
         ] = None,
@@ -51,7 +54,31 @@ class AnswerQuestion(Generic[SourceDecision]):
         ] = None,
         rag_run_id: Optional[uuid.UUID] = None,
     ) -> AnswerQuestionResult[SourceDecision]:
-        """출처를 먼저 선택하고, 재사용으로 끝나지 않을 때만 답변을 생성한다."""
+        """문맥 해석과 검색 뒤 출처를 선택하고, 재사용으로 끝나지 않을 때만 생성한다."""
+
+        resolved_query = await resolve_query()
+        if resolved_query is None:
+            return AnswerQuestionResult(
+                resolved_query=None,
+                retrieval=None,
+                flow_terminated=True,
+                source_decision=None,
+                source_handled=False,
+                generation_result=None,
+                generation_error=None,
+            )
+
+        retrieval_result = await retrieve(resolved_query)
+        if retrieval_result.error is not None:
+            return AnswerQuestionResult(
+                resolved_query=resolved_query,
+                retrieval=retrieval_result,
+                flow_terminated=True,
+                source_decision=None,
+                source_handled=False,
+                generation_result=None,
+                generation_error=None,
+            )
 
         source_decision: Optional[SourceDecision] = None
         if choose_source is not None:
@@ -60,6 +87,9 @@ class AnswerQuestion(Generic[SourceDecision]):
             source_decision = await choose_source()
             if await handle_source(source_decision):
                 return AnswerQuestionResult(
+                    resolved_query=resolved_query,
+                    retrieval=retrieval_result,
+                    flow_terminated=False,
                     source_decision=source_decision,
                     source_handled=True,
                     generation_result=None,
@@ -76,7 +106,7 @@ class AnswerQuestion(Generic[SourceDecision]):
         try:
             generation_result = await self._generation_service.generate_answer(
                 resolved_query,
-                evidence,
+                retrieval_result.fused_results,
                 before_model_call=before_model_call,
                 **generation_kwargs,
             )
@@ -94,6 +124,9 @@ class AnswerQuestion(Generic[SourceDecision]):
                     )
         except Exception as error:
             return AnswerQuestionResult(
+                resolved_query=resolved_query,
+                retrieval=retrieval_result,
+                flow_terminated=False,
                 source_decision=source_decision,
                 source_handled=False,
                 generation_result=generation_result,
@@ -101,6 +134,9 @@ class AnswerQuestion(Generic[SourceDecision]):
             )
 
         return AnswerQuestionResult(
+            resolved_query=resolved_query,
+            retrieval=retrieval_result,
+            flow_terminated=False,
             source_decision=source_decision,
             source_handled=False,
             generation_result=generation_result,

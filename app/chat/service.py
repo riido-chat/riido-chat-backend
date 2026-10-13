@@ -5,7 +5,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, replace
-from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -65,7 +65,7 @@ from app.answering.models import (
     FinalWithheldReason,
     GenerationStageTrace,
 )
-from app.answering.use_case import AnswerQuestion
+from app.answering.use_case import AnswerQuestion, AnswerQuestionResult
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import (
     HybridRetrievalResult,
@@ -83,7 +83,7 @@ from app.chat.profile import (
 from app.core.stage_settings import StageSettings
 from app.profiles.services import ChatServiceRoute
 from app.profiles.stage_settings import ProfileStageSettings
-from app.question_grouping.exact_cache import ExactAnswerCache
+from app.question_grouping.exact_cache import ExactAnswerCache, ExactCacheDecision
 from app.question_grouping.exact_question import exact_question_hash
 from app.question_grouping.router import AnswerSourceDecision, AnswerSourceRouter
 from app.question_grouping.service import (
@@ -564,66 +564,19 @@ class ChatService:
         grouping_recorded: Optional[RecordedJudgment] = None
         exact_grouping_recorded = False
         exact_fallthrough: Optional[ExactQuestionFallthrough] = None
-        if grouping_turn is not None and turn.exact_cache_enabled:
-            exact_decision = await ExactAnswerCache(
-                self._require_grouping()
-            ).inspect(
-                grouping_turn,
-                question,
-                semantic_cache_enabled=turn.semantic_cache_enabled,
-                exact_cache_enabled=turn.exact_cache_enabled,
-            )
-            grouping_recorded = exact_decision.recorded
-            exact_fallthrough = exact_decision.fallthrough
-            exact_grouping_recorded = not exact_decision.allow_similar_judgment
-            if grouping_recorded is not None and grouping_recorded.served:
-                exact_result = exact_decision.result
-                if not isinstance(exact_result, ExactQuestionResult):
-                    raise RuntimeError("정확 일치 서빙 결과의 복구 정보가 없습니다.")
-                try:
-                    response = _served_response(
-                        grouping_recorded, turn.conversation_id, turn.rag_run_id
-                    )
-                    if turn.turn_no > 1:
-                        # Query Rewrite 를 건너뛴 후속 턴은 원문을 독립 질문으로 확정한다.
-                        # 첫 턴 시작 상태와 같은 NEW_TOPIC·빈 문맥이다.
-                        await self._log_store.record_query_resolution(
-                            turn.rag_run_id,
-                            resolved_query=question,
-                            context_strategy=ContextStrategy.NEW_TOPIC,
-                            context_turn_count=0,
-                            context_snapshot=None,
-                        )
-                    await self._log_store.complete_rag_run(
-                        turn.rag_run_id,
-                        answer_content=_cached_answer_markdown(
-                            grouping_recorded.served_answer_markdown
-                        ),
-                        citations=list(grouping_recorded.served_citations),
-                        total_latency_ms=_elapsed_ms(started),
-                    )
-                    await self._session.commit()
-                    return response
-                except Exception:
-                    logger.exception(
-                        "정확 일치 질문 정본 답변 서빙 기록 실패로 생성으로 진행합니다: rag_run_id=%s",
-                        turn.rag_run_id,
-                    )
-                    grouping_recorded = await self._require_grouping().record_serve_failure(
-                        exact_result.prepared,
-                        exact_result.judged,
-                        grouping_recorded,
-                    )
-                    await self._session.commit()
-            elif grouping_recorded is not None:
-                # 정확 일치 게이트 결과는 Query Rewrite·검색 전에 확정해야 검색 후
-                # rollback으로 분류·캐시 시도 행이 사라지지 않는다.
-                await self._session.commit()
 
-        if turn.turn_no == 1:
-            resolved_query = question
-        else:
-            resolution_outcome = await self._resolve_follow_up(
+        resolved_query: Optional[str] = None
+        terminal_response: Optional[ChatResponse] = None
+        search: Optional[HybridSearchCall] = None
+        embedding_model_call_id: Optional[int] = None
+
+        async def resolve_query() -> Optional[str]:
+            nonlocal resolved_query, terminal_response
+            if turn.turn_no == 1:
+                resolved_query = question
+                return resolved_query
+
+            outcome = await self._resolve_follow_up(
                 question,
                 conversation_id,
                 rag_run_id,
@@ -634,13 +587,9 @@ class ChatService:
                     else turn.stage_settings.rewrite
                 ),
             )
-            if resolution_outcome.terminal_response is not None:
-                return resolution_outcome.terminal_response
-            if resolution_outcome.resolved_query is None:
-                raise RuntimeError("검색할 resolved_query가 확정되지 않았습니다.")
-            resolved_query = resolution_outcome.resolved_query
-
-        embedding_model_call_id: Optional[int] = None
+            resolved_query = outcome.resolved_query
+            terminal_response = outcome.terminal_response
+            return resolved_query
 
         async def checkpoint_embedding(
             provider: str,
@@ -663,38 +612,17 @@ class ChatService:
                 ),
             )
 
-        if retriever is None:
-            raise RuntimeError("검색기가 구성되지 않았습니다.")
-        search = await retriever.search_with_trace(
-            resolved_query,
-            before_model_call=checkpoint_embedding,
-        )
-        # Vector read transaction을 닫고, 확보한 로그는 다음 transaction에서 마감한다.
-        await self._session.rollback()
-
-        if search.error is not None:
-            search_error_code = self._search_error_code(search)
-            logger.warning(
-                "검색에 실패했습니다: rag_run_id=%s",
-                rag_run_id,
-                exc_info=search.error,
+        async def retrieve(resolved: str) -> HybridSearchCall:
+            nonlocal search
+            if retriever is None:
+                raise RuntimeError("검색기가 구성되지 않았습니다.")
+            search = await retriever.search_with_trace(
+                resolved,
+                before_model_call=checkpoint_embedding,
             )
-            recorded = await self._record_turn(
-                rag_run_id,
-                search,
-                None,
-                None,
-                _elapsed_ms(started),
-                embedding_model_call_id=embedding_model_call_id,
-                record_retrieval=True,
-            )
-            if not recorded:
-                return _internal_error_response(conversation_id, rag_run_id)
-            return chat_error_response(
-                search_error_code,
-                conversation_id,
-                rag_run_id,
-            )
+            # Vector read transaction을 닫고, 확보한 로그는 다음 transaction에서 마감한다.
+            await self._session.rollback()
+            return search
 
         retrieval_recorded = False
         grouping_response: Optional[ChatResponse] = None
@@ -712,6 +640,8 @@ class ChatService:
 
             # Generation 시작 commit에 앞서 확보한 Retrieval 로그도 함께 확정한다.
             if not retrieval_recorded:
+                if search is None:
+                    raise RuntimeError("Generation 전에 검색 결과가 없습니다.")
                 await self._finish_model_call(
                     embedding_model_call_id,
                     search.embedding_call,
@@ -734,15 +664,11 @@ class ChatService:
             if on_progress_stage is not None:
                 await on_progress_stage(ProgressStage.GENERATING)
 
-        should_select_source = (
-            grouping_turn is not None
-            and turn.semantic_cache_enabled
-            and not exact_grouping_recorded
-        )
-
         async def choose_source() -> AnswerSourceDecision:
             if grouping_turn is None:
                 raise RuntimeError("답변 출처를 고를 판별 실행이 없습니다.")
+            if resolved_query is None or search is None:
+                raise RuntimeError("답변 출처를 고르기 전에 검색 결과가 없습니다.")
             return await self._select_answer_source(
                 turn,
                 grouping_turn,
@@ -791,27 +717,133 @@ class ChatService:
                 await self._session.commit()
                 return False
 
-        answer_result = await AnswerQuestion(
-            self._generation_service
-        ).execute(
-            resolved_query,
-            search.fused_results,
-            choose_source=choose_source if should_select_source else None,
-            handle_source=handle_source if should_select_source else None,
-            before_model_call=checkpoint_generation,
-            stages=(
-                None
-                if turn.stage_settings is None
-                else turn.stage_settings.generation
-            ),
-            on_progress_stage=on_progress_stage,
-            on_generation_stage_trace=(
-                None
-                if on_generation_stage_trace is None
-                else lambda trace: on_generation_stage_trace(rag_run_id, trace)
-            ),
-            rag_run_id=rag_run_id,
-        )
+        async def handle_exact_decision(
+            decision: ExactCacheDecision,
+        ) -> Optional[ChatResponse]:
+            nonlocal grouping_recorded, exact_grouping_recorded, exact_fallthrough
+            grouping_recorded = decision.recorded
+            exact_fallthrough = decision.fallthrough
+            exact_grouping_recorded = not decision.allow_similar_judgment
+            if grouping_recorded is not None and grouping_recorded.served:
+                exact_result = decision.result
+                if not isinstance(exact_result, ExactQuestionResult):
+                    raise RuntimeError("정확 일치 서빙 결과의 복구 정보가 없습니다.")
+                try:
+                    response = _served_response(
+                        grouping_recorded, turn.conversation_id, turn.rag_run_id
+                    )
+                    if turn.turn_no > 1:
+                        # Query Rewrite를 건너뛴 후속 턴은 원문을 독립 질문으로 확정한다.
+                        await self._log_store.record_query_resolution(
+                            turn.rag_run_id,
+                            resolved_query=question,
+                            context_strategy=ContextStrategy.NEW_TOPIC,
+                            context_turn_count=0,
+                            context_snapshot=None,
+                        )
+                    await self._log_store.complete_rag_run(
+                        turn.rag_run_id,
+                        answer_content=_cached_answer_markdown(
+                            grouping_recorded.served_answer_markdown
+                        ),
+                        citations=list(grouping_recorded.served_citations),
+                        total_latency_ms=_elapsed_ms(started),
+                    )
+                    await self._session.commit()
+                    return response
+                except Exception:
+                    logger.exception(
+                        "정확 일치 질문 정본 답변 서빙 기록 실패로 생성으로 진행합니다: rag_run_id=%s",
+                        turn.rag_run_id,
+                    )
+                    grouping_recorded = await self._require_grouping().record_serve_failure(
+                        exact_result.prepared,
+                        exact_result.judged,
+                        grouping_recorded,
+                    )
+                    await self._session.commit()
+            elif grouping_recorded is not None:
+                # 정확 일치 판정 기록은 검색 단계의 rollback 전에 확정한다.
+                await self._session.commit()
+            return None
+
+        async def run_answer_question() -> AnswerQuestionResult[AnswerSourceDecision]:
+            source_selection_enabled = (
+                grouping_turn is not None
+                and turn.semantic_cache_enabled
+                and not exact_grouping_recorded
+            )
+            return await AnswerQuestion(self._generation_service).execute(
+                resolve_query=resolve_query,
+                retrieve=retrieve,
+                choose_source=choose_source if source_selection_enabled else None,
+                handle_source=handle_source if source_selection_enabled else None,
+                before_model_call=checkpoint_generation,
+                stages=(
+                    None
+                    if turn.stage_settings is None
+                    else turn.stage_settings.generation
+                ),
+                on_progress_stage=on_progress_stage,
+                on_generation_stage_trace=(
+                    None
+                    if on_generation_stage_trace is None
+                    else lambda trace: on_generation_stage_trace(rag_run_id, trace)
+                ),
+                rag_run_id=rag_run_id,
+            )
+
+        if grouping_turn is not None and turn.exact_cache_enabled:
+            exact_execution = await ExactAnswerCache[
+                Union[ChatResponse, AnswerQuestionResult[AnswerSourceDecision]]
+            ](self._require_grouping()).execute(
+                grouping_turn,
+                question,
+                semantic_cache_enabled=turn.semantic_cache_enabled,
+                exact_cache_enabled=turn.exact_cache_enabled,
+                handle_decision=handle_exact_decision,
+                next_step=lambda _decision: run_answer_question(),
+            )
+            if exact_execution.cache_handled:
+                return cast(ChatResponse, exact_execution.result)
+            answer_result = cast(
+                AnswerQuestionResult[AnswerSourceDecision],
+                exact_execution.result,
+            )
+        else:
+            answer_result = await run_answer_question()
+        if answer_result.flow_terminated:
+            if answer_result.retrieval is None:
+                if terminal_response is None:
+                    raise RuntimeError("문맥 해석이 끝났지만 응답이 없습니다.")
+                return terminal_response
+
+            search = answer_result.retrieval
+            search_error_code = self._search_error_code(search)
+            logger.warning(
+                "검색에 실패했습니다: rag_run_id=%s",
+                rag_run_id,
+                exc_info=search.error,
+            )
+            recorded = await self._record_turn(
+                rag_run_id,
+                search,
+                None,
+                None,
+                _elapsed_ms(started),
+                embedding_model_call_id=embedding_model_call_id,
+                record_retrieval=True,
+            )
+            if not recorded:
+                return _internal_error_response(conversation_id, rag_run_id)
+            return chat_error_response(
+                search_error_code,
+                conversation_id,
+                rag_run_id,
+            )
+
+        if resolved_query is None or search is None:
+            raise RuntimeError("답변 생성에 필요한 검색 결과가 없습니다.")
         if answer_result.source_handled:
             if grouping_response is None:
                 raise RuntimeError("정본 답변을 선택했지만 응답이 없습니다.")
