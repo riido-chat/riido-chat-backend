@@ -6,6 +6,7 @@
 """
 
 import re
+import unicodedata
 from dataclasses import dataclass
 from typing import FrozenSet, Optional, Sequence, Tuple
 
@@ -25,6 +26,36 @@ ERROR_NO_CITATION_MARKERS = "NO_CITATION_MARKERS"
 ERROR_DUPLICATE_CITATION_ORDER = "DUPLICATE_CITATION_ORDER"
 ERROR_MARKER_WITHOUT_CITATION = "MARKER_WITHOUT_CITATION"
 ERROR_CITATION_NOT_REFERENCED = "CITATION_NOT_REFERENCED"
+
+# Known script contamination observed in Korean canonical answers. This deliberately
+# targets only Bengali and Georgian letters instead of imposing a Korean-only
+# character allowlist. The Unicode names identify these scripts without rejecting
+# ordinary Hangul, Latin extensions, symbols, or emoji.
+_SUSPECT_SCRIPT_NAMES = ("BENGALI", "GEORGIAN")
+_SUSPECT_SCRIPT_LABELS = {"BENGALI": "벵골", "GEORGIAN": "조지아"}
+
+
+def _mixed_suspect_scripts(content_markdown: str) -> Tuple[str, ...]:
+    """Return suspect script names in a Korean-context body, excluding code."""
+
+    text = strip_code_regions(content_markdown)
+    hangul_count = 0
+    script_counts = {script: 0 for script in _SUSPECT_SCRIPT_NAMES}
+    for char in text:
+        name = unicodedata.name(char, "")
+        if "HANGUL" in name and unicodedata.category(char).startswith("L"):
+            hangul_count += 1
+        elif unicodedata.category(char).startswith("L"):
+            for script in _SUSPECT_SCRIPT_NAMES:
+                if script in name:
+                    script_counts[script] += 1
+
+    # Any Hangul outside code marks Korean context; bodies with no Hangul remain
+    # unaffected. This narrow check can still flag a legitimate Bengali or
+    # Georgian quotation inside Korean prose.
+    if not hangul_count:
+        return ()
+    return tuple(script for script, count in script_counts.items() if count)
 
 
 @dataclass(frozen=True)
@@ -94,4 +125,8 @@ def check_canonical_content(content_markdown: str) -> Optional[str]:
         validate_answer_content(as_markers)
     except UnverifiableAnswerError as error:
         return str(error)
+    mixed_scripts = _mixed_suspect_scripts(content_markdown)
+    if mixed_scripts:
+        labels = ", ".join(_SUSPECT_SCRIPT_LABELS[script] for script in mixed_scripts)
+        return f"정본 본문에 한국어 맥락의 {labels} 문자가 포함되어 있습니다."
     return None

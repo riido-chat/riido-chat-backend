@@ -274,6 +274,19 @@ class ValidationTest(unittest.TestCase):
             [(issue.key, issue.code) for issue in parsed.errors],
         )
 
+    def test_rejects_bengali_and_georgian_contamination_before_seed(self) -> None:
+        bengali = _subproblem("a.bengali")
+        bengali["canonical"]["contentMarkdown"] = "설정에서 취소하고 তারপর 저장합니다 [1]."
+        georgian = _subproblem("a.georgian")
+        georgian["canonical"]["contentMarkdown"] = "설정에서 취소하고 შემდეგ 저장합니다 [1]."
+
+        parsed = _parse(_document(subproblems=[bengali, georgian]))
+
+        self.assertEqual(
+            [("a.bengali", ERROR_ANSWER_CONTENT), ("a.georgian", ERROR_ANSWER_CONTENT)],
+            [(issue.key, issue.code) for issue in parsed.errors],
+        )
+
     def test_criteria_must_round_trip_one_per_line(self) -> None:
         newline = _subproblem(inclusionCriteria=["한 줄\n두 줄"])
         bullet = _subproblem("a.bullet", exclusionCriteria=["- 기호로 시작"])

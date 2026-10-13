@@ -6,6 +6,7 @@ from app.question_grouping.canonical_validation import (
     ERROR_MARKER_WITHOUT_CITATION,
     ERROR_NO_CITATION_MARKERS,
     ERROR_NO_CITATIONS,
+    check_canonical_content,
     check_canonical_citations,
     extract_citation_numbers,
 )
@@ -75,6 +76,55 @@ class CheckCanonicalCitationsTest(unittest.TestCase):
         result = check_canonical_citations("A [1].", [1, 1])
 
         self.assertEqual((ERROR_DUPLICATE_CITATION_ORDER,), result.errors)
+
+
+class CheckCanonicalContentTest(unittest.TestCase):
+    def test_rejects_bengali_letters_mixed_into_korean_body(self) -> None:
+        reason = check_canonical_content("설정에서 알림을 끄고 তারপর 다시 저장합니다.")
+
+        self.assertEqual(
+            "정본 본문에 한국어 맥락의 벵골 문자가 포함되어 있습니다.", reason
+        )
+
+    def test_rejects_georgian_letters_mixed_into_korean_body(self) -> None:
+        reason = check_canonical_content("설정에서 알림을 끄고 შემდეგ 다시 저장합니다.")
+
+        self.assertEqual(
+            "정본 본문에 한국어 맥락의 조지아 문자가 포함되어 있습니다.", reason
+        )
+
+    def test_ignores_suspect_letters_inside_code_regions(self) -> None:
+        markdown = "설정에서 확인합니다. `তারপর`\n\n```text\nშემდეგ\n```"
+
+        self.assertIsNone(check_canonical_content(markdown))
+
+    def test_rejects_short_korean_context(self) -> None:
+        self.assertEqual(
+            "정본 본문에 한국어 맥락의 벵골 문자가 포함되어 있습니다.",
+            check_canonical_content("확인 তারপর 저장 [1]."),
+        )
+        self.assertEqual(
+            "정본 본문에 한국어 맥락의 조지아 문자가 포함되어 있습니다.",
+            check_canonical_content("확인 შემდეგ 저장 [1]."),
+        )
+
+    def test_preserves_normal_korean_english_emoji_latin_and_math(self) -> None:
+        markdown = "설정(Settings)을 엽니다 😊 café; 계산은 x ≤ 3, ∑x 입니다."
+
+        self.assertIsNone(check_canonical_content(markdown))
+
+    def test_existing_link_error_keeps_priority_over_script_error(self) -> None:
+        markdown = "[설정](https://example.com)에서 확인하고 তারপর 저장합니다."
+
+        self.assertEqual(
+            "답변 본문에 링크 또는 HTML이 포함됐습니다.",
+            check_canonical_content(markdown),
+        )
+
+    def test_preserves_body_written_only_in_another_language(self) -> None:
+        self.assertIsNone(check_canonical_content("This is a normal English answer."))
+        self.assertIsNone(check_canonical_content("বাংলায় লেখা একটি স্বাভাবিক উত্তর।"))
+        self.assertIsNone(check_canonical_content("ეს არის ჩვეულებრივი პასუხი."))
 
 
 if __name__ == "__main__":
