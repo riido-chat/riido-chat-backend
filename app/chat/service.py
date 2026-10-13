@@ -82,7 +82,9 @@ from app.chat.profile import (
 from app.core.stage_settings import StageSettings
 from app.profiles.services import ChatServiceRoute
 from app.profiles.stage_settings import ProfileStageSettings
+from app.question_grouping.exact_cache import ExactAnswerCache
 from app.question_grouping.exact_question import exact_question_hash
+from app.question_grouping.router import AnswerSourceRouter
 from app.question_grouping.service import (
     ExactQuestionFallthrough,
     ExactQuestionResult,
@@ -570,21 +572,21 @@ class ChatService:
         exact_grouping_recorded = False
         exact_fallthrough: Optional[ExactQuestionFallthrough] = None
         if grouping_turn is not None and turn.exact_cache_enabled:
-            exact_result = await self._require_grouping().record_exact_question(
+            exact_decision = await ExactAnswerCache(
+                self._require_grouping()
+            ).inspect(
                 grouping_turn,
                 question,
                 semantic_cache_enabled=turn.semantic_cache_enabled,
                 exact_cache_enabled=turn.exact_cache_enabled,
             )
-            grouping_recorded = (
-                None
-                if not isinstance(exact_result, ExactQuestionResult)
-                else exact_result.recorded
-            )
-            if isinstance(exact_result, ExactQuestionFallthrough):
-                exact_fallthrough = exact_result
-            exact_grouping_recorded = grouping_recorded is not None
+            grouping_recorded = exact_decision.recorded
+            exact_fallthrough = exact_decision.fallthrough
+            exact_grouping_recorded = not exact_decision.allow_similar_judgment
             if grouping_recorded is not None and grouping_recorded.served:
+                exact_result = exact_decision.result
+                if not isinstance(exact_result, ExactQuestionResult):
+                    raise RuntimeError("정확 일치 서빙 결과의 복구 정보가 없습니다.")
                 try:
                     response = _served_response(
                         grouping_recorded, turn.conversation_id, turn.rag_run_id
@@ -708,7 +710,7 @@ class ChatService:
             and turn.semantic_cache_enabled
             and not exact_grouping_recorded
         ):
-            grouping_outcome = await self._judge_and_gate(
+            grouping_outcome = await self._select_answer_source(
                 turn,
                 grouping_turn,
                 resolved_query,
@@ -1168,7 +1170,7 @@ class ChatService:
             **judge_kwargs,
         )
 
-    async def _judge_and_gate(
+    async def _select_answer_source(
         self,
         turn: _TurnStart,
         grouping_turn: GroupingTurn,
@@ -1198,32 +1200,21 @@ class ChatService:
             )
             await self._record_retrieval_results(rag_run_id, search)
 
-        # 정확 일치를 재사용하지 않은 턴만 사유를 넘겨 기존 호출 인자를 그대로 둔다.
-        prepare_kwargs: Dict[str, ExactQuestionFallthrough] = {}
-        if exact_fallthrough is not None:
-            prepare_kwargs["exact_fallthrough"] = exact_fallthrough
-        prepared = await grouping.prepare(
-            grouping_turn, resolved_query, search, **prepare_kwargs
-        )
-        if not prepared.ready:
-            await record_retrieval_logs()
-            recorded = await grouping.record_preparation_failure(prepared)
-            await self._session.commit()
-            return _GroupingOutcome(recorded=recorded)
-
-        judged = await grouping.judge(
-            prepared,
-            before_checkpoint=record_retrieval_logs,
-        )
-        recorded = await grouping.record_judgment_and_gate(
-            prepared,
-            judged,
+        decision = await AnswerSourceRouter(grouping).choose(
+            grouping_turn,
+            resolved_query,
+            search,
             semantic_cache_enabled=turn.semantic_cache_enabled,
+            before_judgment=record_retrieval_logs,
+            exact_fallthrough=exact_fallthrough,
         )
-        if not recorded.served:
+        recorded = decision.recorded
+        if not decision.uses_canonical_answer:
             await self._session.commit()
             return _GroupingOutcome(recorded=recorded)
 
+        if decision.judged is None:
+            raise RuntimeError("정본 서빙 결정에 판별 기록이 없습니다.")
         try:
             response = _served_response(recorded, turn.conversation_id, rag_run_id)
             await self._log_store.complete_rag_run(
@@ -1241,7 +1232,11 @@ class ChatService:
                 rag_run_id,
             )
             # rollback 뒤 새 트랜잭션에서 다시 쓴다. 이 쓰기마저 실패하면 올린다.
-            recorded = await grouping.record_serve_failure(prepared, judged, recorded)
+            recorded = await grouping.record_serve_failure(
+                decision.prepared,
+                decision.judged,
+                recorded,
+            )
             await self._session.commit()
             return _GroupingOutcome(recorded=recorded)
         return _GroupingOutcome(recorded=recorded, response=response)
