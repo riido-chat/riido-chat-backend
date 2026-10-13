@@ -65,6 +65,7 @@ from app.answering.models import (
     FinalWithheldReason,
     GenerationStageTrace,
 )
+from app.answering.use_case import AnswerQuestion
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import (
     HybridRetrievalResult,
@@ -84,7 +85,7 @@ from app.profiles.services import ChatServiceRoute
 from app.profiles.stage_settings import ProfileStageSettings
 from app.question_grouping.exact_cache import ExactAnswerCache
 from app.question_grouping.exact_question import exact_question_hash
-from app.question_grouping.router import AnswerSourceRouter
+from app.question_grouping.router import AnswerSourceDecision, AnswerSourceRouter
 from app.question_grouping.service import (
     ExactQuestionFallthrough,
     ExactQuestionResult,
@@ -409,14 +410,6 @@ class _TurnStart:
 
 
 @dataclass(frozen=True)
-class _GroupingOutcome:
-    """판별·게이트 기록 결과. response 가 있으면 정본 서빙으로 턴을 이미 마감했다."""
-
-    recorded: RecordedJudgment
-    response: Optional[ChatResponse] = None
-
-
-@dataclass(frozen=True)
 class _QueryResolutionOutcome:
     resolved_query: Optional[str]
     terminal_response: Optional[ChatResponse] = None
@@ -703,26 +696,8 @@ class ChatService:
                 rag_run_id,
             )
 
-        # 판별 경로는 검색 임베딩 호출 마감과 검색 후보 기록을 판별 트랜잭션에서 이미 끝냈다.
         retrieval_recorded = False
-        if (
-            grouping_turn is not None
-            and turn.semantic_cache_enabled
-            and not exact_grouping_recorded
-        ):
-            grouping_outcome = await self._select_answer_source(
-                turn,
-                grouping_turn,
-                resolved_query,
-                search,
-                embedding_model_call_id,
-                started,
-                exact_fallthrough=exact_fallthrough,
-            )
-            retrieval_recorded = True
-            if grouping_outcome.response is not None:
-                return grouping_outcome.response
-            grouping_recorded = grouping_outcome.recorded
+        grouping_response: Optional[ChatResponse] = None
 
         generation_checkpoint: Optional[_ModelCallCheckpoint] = None
 
@@ -759,21 +734,93 @@ class ChatService:
             if on_progress_stage is not None:
                 await on_progress_stage(ProgressStage.GENERATING)
 
-        generation_result: Optional[FinalGenerationResult] = None
-        # 훅 미주입 시 generate_answer 호출 인자를 기존과 완전히 동일하게 둔다.
-        generation_kwargs: Dict[str, object] = {}
-        if on_progress_stage is not None:
-            generation_kwargs["on_progress_stage"] = on_progress_stage
-        if turn.stage_settings is not None:
-            generation_kwargs["stages"] = turn.stage_settings.generation
+        should_select_source = (
+            grouping_turn is not None
+            and turn.semantic_cache_enabled
+            and not exact_grouping_recorded
+        )
 
-        try:
-            generation_result = await self._generation_service.generate_answer(
+        async def choose_source() -> AnswerSourceDecision:
+            if grouping_turn is None:
+                raise RuntimeError("답변 출처를 고를 판별 실행이 없습니다.")
+            return await self._select_answer_source(
+                turn,
+                grouping_turn,
                 resolved_query,
-                search.fused_results,
-                before_model_call=checkpoint_generation,
-                **generation_kwargs,
+                search,
+                embedding_model_call_id,
+                exact_fallthrough=exact_fallthrough,
             )
+
+        async def handle_source(decision: AnswerSourceDecision) -> bool:
+            nonlocal grouping_recorded, grouping_response, retrieval_recorded
+            grouping_recorded = decision.recorded
+            retrieval_recorded = True
+            if not decision.uses_canonical_answer:
+                await self._session.commit()
+                return False
+
+            if decision.judged is None:
+                raise RuntimeError("정본 서빙 결정에 판별 기록이 없습니다.")
+            try:
+                grouping_response = _served_response(
+                    decision.recorded,
+                    turn.conversation_id,
+                    turn.rag_run_id,
+                )
+                await self._log_store.complete_rag_run(
+                    turn.rag_run_id,
+                    answer_content=_cached_answer_markdown(
+                        decision.recorded.served_answer_markdown
+                    ),
+                    citations=list(decision.recorded.served_citations),
+                    total_latency_ms=_elapsed_ms(started),
+                )
+                await self._session.commit()
+                return True
+            except Exception:
+                logger.exception(
+                    "정본 답변 서빙을 기록하지 못해 생성으로 진행합니다: rag_run_id=%s",
+                    turn.rag_run_id,
+                )
+                grouping_recorded = await self._require_grouping().record_serve_failure(
+                    decision.prepared,
+                    decision.judged,
+                    decision.recorded,
+                )
+                await self._session.commit()
+                return False
+
+        answer_result = await AnswerQuestion(
+            self._generation_service
+        ).execute(
+            resolved_query,
+            search.fused_results,
+            choose_source=choose_source if should_select_source else None,
+            handle_source=handle_source if should_select_source else None,
+            before_model_call=checkpoint_generation,
+            stages=(
+                None
+                if turn.stage_settings is None
+                else turn.stage_settings.generation
+            ),
+            on_progress_stage=on_progress_stage,
+            on_generation_stage_trace=(
+                None
+                if on_generation_stage_trace is None
+                else lambda trace: on_generation_stage_trace(rag_run_id, trace)
+            ),
+            rag_run_id=rag_run_id,
+        )
+        if answer_result.source_handled:
+            if grouping_response is None:
+                raise RuntimeError("정본 답변을 선택했지만 응답이 없습니다.")
+            return grouping_response
+
+        generation_result = answer_result.generation_result
+        try:
+            if answer_result.generation_error is not None:
+                raise answer_result.generation_error
             if generation_checkpoint is None:
                 raise RuntimeError("Generation ModelCall checkpoint가 실행되지 않았습니다.")
             if generation_result.model_call is None:
@@ -787,22 +834,6 @@ class ChatService:
                         missing_trace_error,
                     ),
                 )
-
-            if (
-                on_generation_stage_trace is not None
-                and generation_result.stage_trace is not None
-            ):
-                try:
-                    on_generation_stage_trace(
-                        rag_run_id,
-                        generation_result.stage_trace,
-                    )
-                except Exception:
-                    logger.exception(
-                        "평가용 Generation 단계 trace 전달에 실패했습니다: "
-                        "rag_run_id=%s",
-                        rag_run_id,
-                    )
 
             response = _to_chat_response(
                 generation_result,
@@ -1177,17 +1208,13 @@ class ChatService:
         resolved_query: str,
         search: HybridSearchCall,
         embedding_model_call_id: Optional[int],
-        started: float,
         *,
         exact_fallthrough: Optional[ExactQuestionFallthrough] = None,
-    ) -> _GroupingOutcome:
-        """검색이 성공한 턴을 판별하고 게이트 결과를 기록한다.
+    ) -> AnswerSourceDecision:
+        """검색이 성공한 턴에서 답변 출처 판별을 준비한다.
 
-        검색 임베딩 호출 마감과 검색 후보 기록은 여기서 한 번만 한다. 판별 준비가 끝났으면
-        판별 checkpoint 트랜잭션에, 준비에 실패했으면 실패 행과 같은 트랜잭션에 넣는다.
-        SERVED 면 같은 트랜잭션에서 턴을 완료하고 commit 한 뒤 응답을 돌려준다. 그 쓰기가
-        실패하면 REJECTED[CANONICAL_SERVE_FAILED] 로 다시 기록하고 생성으로 진행한다.
-        판별 외 쓰기·commit 실패는 그대로 올린다(fail-closed).
+        검색 임베딩 호출 마감과 검색 후보 기록은 판별 checkpoint 전에 끝낸다.
+        답변 출처 선택 이후의 턴 기록과 트랜잭션은 호출자가 처리한다.
         """
 
         grouping = self._require_grouping()
@@ -1208,38 +1235,7 @@ class ChatService:
             before_judgment=record_retrieval_logs,
             exact_fallthrough=exact_fallthrough,
         )
-        recorded = decision.recorded
-        if not decision.uses_canonical_answer:
-            await self._session.commit()
-            return _GroupingOutcome(recorded=recorded)
-
-        if decision.judged is None:
-            raise RuntimeError("정본 서빙 결정에 판별 기록이 없습니다.")
-        try:
-            response = _served_response(recorded, turn.conversation_id, rag_run_id)
-            await self._log_store.complete_rag_run(
-                rag_run_id,
-                answer_content=_cached_answer_markdown(
-                    recorded.served_answer_markdown
-                ),
-                citations=list(recorded.served_citations),
-                total_latency_ms=_elapsed_ms(started),
-            )
-            await self._session.commit()
-        except Exception:
-            logger.exception(
-                "정본 답변 서빙을 기록하지 못해 생성으로 진행합니다: rag_run_id=%s",
-                rag_run_id,
-            )
-            # rollback 뒤 새 트랜잭션에서 다시 쓴다. 이 쓰기마저 실패하면 올린다.
-            recorded = await grouping.record_serve_failure(
-                decision.prepared,
-                decision.judged,
-                recorded,
-            )
-            await self._session.commit()
-            return _GroupingOutcome(recorded=recorded)
-        return _GroupingOutcome(recorded=recorded, response=response)
+        return decision
 
     # ------------------------------------------------------------------
     # 외부 모델 호출 checkpoint
