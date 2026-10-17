@@ -87,6 +87,10 @@ from app.question_grouping.models import (
     TurnJudgment,
 )
 from app.question_grouping.outline_reader import DocumentOutlineReader
+from app.question_grouping.question_vector import (
+    QuestionVectorDimensionError,
+    resolve_question_vector,
+)
 from app.question_grouping.payload import (
     presentation_judgment_input,
     presentation_seed,
@@ -344,6 +348,8 @@ def build_judgment_input(
 
 
 def _safe_embedding_error_message(error: BaseException) -> str:
+    if isinstance(error, QuestionVectorDimensionError):
+        return str(error)
     status = getattr(error, "status_code", None)
     if isinstance(status, int):
         return f"질문 임베딩 호출 실패: HTTP {status}"
@@ -752,100 +758,49 @@ class QuestionGroupingService:
         resolved_query: str,
         search: HybridSearchCall,
     ) -> Tuple[QuestionVector, Optional[JudgeFailure]]:
-        retrieval_query = search.retrieval_query
-        if (
-            retrieval_query is not None
-            and retrieval_query == resolved_query
-            and search.query_embedding
-        ):
-            embedding = tuple(float(value) for value in search.query_embedding)
-            failure = self._dimension_failure(embedding)
-            vector = QuestionVector(
-                embedding=None if failure is not None else embedding,
-                reused_retrieval_embedding=True,
-                retrieval_query=retrieval_query,
+        model_call_id: Optional[int] = None
+
+        async def checkpoint() -> None:
+            nonlocal model_call_id
+            call = await self._log_store.start_model_call(
+                purpose=ModelCallPurpose.QUERY_EMBEDDING.value,
+                provider=OPENAI_EMBEDDING_PROVIDER,
+                model_name=OPENAI_EMBEDDING_MODEL,
+                rag_run_id=turn.rag_run_id,
+                classification_run_id=turn.classification_run_id,
             )
-            return vector, failure
+            model_call_id = call.id
+            await self._session.commit()
 
-        # checkpoint 쓰기와 commit 실패는 fail-closed 로 올린다.
-        call = await self._log_store.start_model_call(
-            purpose=ModelCallPurpose.QUERY_EMBEDDING.value,
-            provider=OPENAI_EMBEDDING_PROVIDER,
-            model_name=OPENAI_EMBEDDING_MODEL,
-            rag_run_id=turn.rag_run_id,
-            classification_run_id=turn.classification_run_id,
+        result = await resolve_question_vector(
+            resolved_query,
+            search,
+            self._embedder,
+            before_model_call=checkpoint,
+            clock=self._clock,
         )
-        model_call_id = call.id
-        await self._session.commit()
-
-        started = self._clock()
-        attempt = 0
-        while True:
-            try:
-                response = await asyncio.to_thread(
-                    self._embedder.embed_many_with_usage,
-                    [resolved_query],
-                    sdk_max_retries=0,
-                    timeout=QUERY_EMBEDDING_TIMEOUT_SECONDS,
-                )
-                break
-            except Exception as error:  # noqa: BLE001 - 판별 실패로 기록한다
-                if attempt + 1 < QUERY_EMBEDDING_MAX_ATTEMPTS and is_transient_openai_error(
-                    error
-                ):
-                    await asyncio.sleep(
-                        QUERY_EMBEDDING_INITIAL_RETRY_DELAY_SECONDS * (2**attempt)
-                    )
-                    attempt += 1
-                    continue
-                logger.warning(
-                    "판별용 질문 임베딩에 실패했습니다: rag_run_id=%s",
-                    turn.rag_run_id,
-                    exc_info=error,
-                )
-                message = _safe_embedding_error_message(error)
-                trace = ModelCallTrace(
-                    provider=OPENAI_EMBEDDING_PROVIDER,
-                    model_name=OPENAI_EMBEDDING_MODEL,
-                    succeeded=False,
-                    latency_ms=_elapsed_ms(started, self._clock()),
-                    retry_count=attempt,
-                    error_message=message,
-                )
-                kind = (
-                    JudgeFailureKind.API_ERROR
-                    if getattr(error, "status_code", None) is not None
-                    or is_transient_openai_error(error)
-                    else JudgeFailureKind.INTERNAL_ERROR
-                )
-                return (
-                    QuestionVector(
-                        embedding=None,
-                        reused_retrieval_embedding=False,
-                        retrieval_query=retrieval_query,
-                        model_call_id=model_call_id,
-                        trace=trace,
-                    ),
-                    JudgeFailure(kind=kind, safe_message=message),
-                )
-
-        embedding = tuple(float(value) for value in response.embeddings[0])
-        trace = ModelCallTrace(
-            provider=OPENAI_EMBEDDING_PROVIDER,
-            model_name=OPENAI_EMBEDDING_MODEL,
-            succeeded=True,
-            latency_ms=_elapsed_ms(started, self._clock()),
-            retry_count=attempt + response.retry_count,
-            input_tokens=response.input_tokens,
-        )
-        failure = self._dimension_failure(embedding)
+        failure: Optional[JudgeFailure] = None
+        if result.error is not None:
+            logger.warning(
+                "판별용 질문 임베딩에 실패했습니다: rag_run_id=%s",
+                turn.rag_run_id,
+                exc_info=result.error,
+            )
+            message = _safe_embedding_error_message(result.error)
+            kind = (
+                JudgeFailureKind.API_ERROR
+                if getattr(result.error, "status_code", None) is not None
+                or is_transient_openai_error(result.error)
+                else JudgeFailureKind.INTERNAL_ERROR
+            )
+            failure = JudgeFailure(kind=kind, safe_message=message)
         return (
             QuestionVector(
-                embedding=None if failure is not None else embedding,
-                reused_retrieval_embedding=False,
-                retrieval_query=retrieval_query,
+                embedding=result.embedding,
+                reused_retrieval_embedding=result.reused_retrieval_embedding,
+                retrieval_query=search.retrieval_query,
                 model_call_id=model_call_id,
-                trace=trace,
+                trace=result.trace,
             ),
             failure,
         )
