@@ -28,7 +28,8 @@ class CachePathCliTests(unittest.IsolatedAsyncioTestCase):
                 {
                     "group": "cache-path",
                     "goldenVersion": "g-v1",
-                    "inputs": {"draftsSha256": None, "judgeLabelsSha256": None},
+                    "sourceCorpusVersion": "corpus-v1",
+                    "inputs": {"draftsSha256": "d" * 64, "judgeLabelsSha256": "e" * 64},
                     "turns": [
                         {
                             "itemId": "ITEM-1",
@@ -152,6 +153,8 @@ class CachePathCliTests(unittest.IsolatedAsyncioTestCase):
                 {
                     "group": "cache-path",
                     "goldenVersion": "g-v1",
+                    "sourceCorpusVersion": "corpus-v1",
+                    "inputs": {"draftsSha256": "d" * 64, "judgeLabelsSha256": "e" * 64},
                     "turns": [{"itemId": "ITEM-1", "turnNo": 1}],
                 },
                 calls["factory"][2],

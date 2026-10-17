@@ -52,12 +52,21 @@ class _TraceCollector:
 
 
 def project_reference_manifest(manifest: Mapping[str, Any]) -> dict[str, Any]:
-    """Keep golden labels and path details inside the scoring task."""
-    return {
+    """Expose only run provenance and item references to service profiles."""
+    projected = {
         "group": manifest["group"],
         "goldenVersion": manifest["goldenVersion"],
         "turns": [_turn_reference(turn) for turn in manifest["turns"]],
     }
+    if "sourceCorpusVersion" in manifest:
+        projected["sourceCorpusVersion"] = manifest["sourceCorpusVersion"]
+    if "inputs" in manifest:
+        inputs = manifest["inputs"]
+        projected["inputs"] = {
+            "draftsSha256": inputs["draftsSha256"],
+            "judgeLabelsSha256": inputs["judgeLabelsSha256"],
+        }
+    return projected
 
 
 def _turn_reference(turn: Mapping[str, Any]) -> dict[str, Any]:

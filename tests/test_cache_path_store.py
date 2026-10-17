@@ -9,6 +9,7 @@ from unittest.mock import AsyncMock, Mock
 
 from app.answering.trace import ReplayContext
 from app.answering.use_case import AnswerQuestion
+from app.core.model_trace import ModelCallTrace
 from app.retrieval.models import HybridSearchCall
 from evaluation.cache_path_eval.execution import (
     CacheDecisionCallbacks,
@@ -16,6 +17,11 @@ from evaluation.cache_path_eval.execution import (
     CacheDecisionMetrics,
 )
 from evaluation.cache_path_eval.runner import evaluate
+from evaluation.cache_path_eval.evidence import (
+    CacheRuntimeEvidence,
+    ModelCallEvidence,
+    RetrievalCandidateEvidence,
+)
 from evaluation.cache_path_eval.store import (
     CachePathRunMetadata,
     CachePathRunStore,
@@ -69,6 +75,19 @@ class CachePathRunStoreTests(unittest.IsolatedAsyncioTestCase):
                         next_stage="NOT_APPLICABLE",
                         model_calls=1,
                         embedding_calls=0,
+                        evidence=CacheRuntimeEvidence(
+                            seed="seed-1",
+                            retrieval_candidates=(RetrievalCandidateEvidence(3, 5, 8, 1),),
+                            model_calls=(
+                                ModelCallEvidence.from_trace(
+                                    "QUERY_REWRITE",
+                                    ModelCallTrace(
+                                        "openai", "model-x", False, 2,
+                                        error_message="private error detail",
+                                    ),
+                                ),
+                            ),
+                        ),
                     )
                 ),
             ),
@@ -119,6 +138,12 @@ class CachePathRunStoreTests(unittest.IsolatedAsyncioTestCase):
             (root / "golden").mkdir()
             (root / "golden" / "manifest.json").write_text("{}", encoding="utf-8")
             store = CachePathRunStore(root)
+            store.reserve(metadata)
+            store.checkpoint(metadata, observation)
+            checkpoint_path = next((root / "evals/cache-path/checkpoints/run-1").glob("*.json"))
+            checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+            self.assertEqual("seed-1", checkpoint["evidence"]["seed"])
+            self.assertNotIn("private error detail", checkpoint_path.read_text(encoding="utf-8"))
             destination = store.write_run(
                 metadata,
                 manifest=manifest,
@@ -132,6 +157,9 @@ class CachePathRunStoreTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual("EXACT_CACHE_LOOKUP", first_event["stage"])
             self.assertEqual("NOT_CONFIGURED", first_event["detailCode"])
             self.assertEqual(context.code_revision, persisted["target"]["appBuildCommit"])
+            self.assertEqual("seed-1", persisted["observations"][0]["evidence"]["seed"])
+            self.assertEqual(3, persisted["observations"][0]["evidence"]["retrievalCandidates"][0]["chunkId"])
+            self.assertNotIn("private error detail", destination.read_text(encoding="utf-8"))
             self.assertNotIn("private source question", destination.read_text(encoding="utf-8"))
             with self.assertRaises(CachePathStoreError):
                 store.write_run(

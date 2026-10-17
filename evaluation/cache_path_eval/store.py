@@ -13,6 +13,7 @@ from typing import Any, Mapping, Sequence
 
 from app.answering.trace import AnswerExecutionTrace
 from evaluation.cache_path_eval.execution import CacheDecisionObservation
+from evaluation.cache_path_eval.evidence import CacheRuntimeEvidence
 from evaluation.core.run import EvaluationFailure
 
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
@@ -152,6 +153,7 @@ class CachePathRunStore:
                     **expected[key],
                     **observation.to_row(),
                     "trace": _trace_to_dict(trace),
+                    **_evidence_field(observation.evidence),
                 }
             )
         if actual != set(expected):
@@ -274,7 +276,11 @@ class CachePathRunStore:
         self._validate_trace(trace, metadata, observation)
         directory = self._registry_root / "evals" / "cache-path" / "checkpoints" / metadata.run_id
         directory.mkdir(parents=True, exist_ok=True)
-        record = {**observation.to_row(), "trace": _trace_to_dict(trace)}
+        record = {
+            **observation.to_row(),
+            "trace": _trace_to_dict(trace),
+            **_evidence_field(observation.evidence),
+        }
         destination = directory / f"{_safe_filename(observation.item_id)}-{observation.turn_no}.json"
         rendered = json.dumps(record, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n"
         self._write_create_only(destination, rendered)
@@ -470,6 +476,17 @@ def _trace_to_dict(trace: AnswerExecutionTrace) -> dict[str, Any]:
     }
 
 
+def _evidence_field(evidence: CacheRuntimeEvidence | None) -> dict[str, Any]:
+    if evidence is None:
+        return {}
+    if type(evidence) is not CacheRuntimeEvidence:
+        raise CachePathStoreError("runtime evidence 형식이 잘못되었습니다.")
+    try:
+        return {"evidence": evidence.to_dict()}
+    except (AttributeError, TypeError, ValueError) as error:
+        raise CachePathStoreError("runtime evidence 형식이 잘못되었습니다.") from error
+
+
 def _safe_filename(value: str) -> str:
     sanitized = re.sub(r"[^A-Za-z0-9._-]+", "_", value).strip("._-")
     return sanitized[:80] or "item"
@@ -521,14 +538,14 @@ def _validate_summary(summary: Mapping[str, Any]) -> None:
             if not isinstance(section, dict) or set(section) != expected:
                 raise CachePathStoreError("집계 결과 세부 형식이 잘못되었습니다.")
         for section in (metric["nextStage"], metric["latencyMs"]):
-            for value in section.values():
+            for field_name, value in section.items():
                 if value is not None and (
                     isinstance(value, bool)
                     or not isinstance(value, (int, float))
                     or value < 0
                     or (
                         section is metric["nextStage"]
-                        and "passRate" in section
+                        and field_name == "passRate"
                         and value > 1
                     )
                 ):

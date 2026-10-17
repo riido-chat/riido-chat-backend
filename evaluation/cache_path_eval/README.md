@@ -1,9 +1,9 @@
 # 캐시 경로 오프라인 평가
 
-이 도구는 캐시 서비스를 실행하지 않는다. 동결된 cache-path 선택 manifest와 별도로
-수집한 턴별 관측값(JSONL)을 대조해 P1/P3/P4/P6 경로별 집계 결과를 만든다. 이 방식으로
-합성 입력을 검증할 수 있고, 나중에 승인된 실행에서 얻은 관측값도 같은 결과 형식으로
-기록할 수 있다.
+이 디렉터리는 두 경로를 제공한다. `runner.py`는 동결된 cache-path 선택 manifest와 별도로
+수집한 턴별 관측값(JSONL)을 대조해 P1/P3/P4/P6 경로별 집계를 만든다. `cli.py`는 등록된
+서비스 profile과 실행 adapter를 주입받아 공통 평가 lifecycle에서 cache-only replay를 수행하고,
+텍스트 없는 결과와 trace를 비공개 등록부에 기록한다.
 
 선택 manifest는 비공개 평가 등록부의 `scripts/build_cache_suite.py`가 만든다. 질문·답변
 텍스트는 결과에 복사하지 않는다. 관측 JSONL에는 manifest의 `itemId`, `turnNo`와 다음
@@ -31,8 +31,7 @@ python -m evaluation.cache_path_eval.runner \
 ```
 
 출력 파일은 이미 존재하면 덮어쓰지 않는다. 이 명령은 DB, 모델, 임베딩 서비스나 네트워크를
-호출하지 않는다. 관측값을 만드는 실제 실행 절차와 시스템·프로필 식별자는 별도 승인 및
-사전 등록이 필요하며 이 도구가 이를 대신하지 않는다.
+호출하지 않는다. 실제 cache-only replay는 아래 서비스 profile 경계에서 실행한다.
 
 ## 운영 유스케이스와 실행 범위
 
@@ -42,7 +41,7 @@ python -m evaluation.cache_path_eval.runner \
 검색, 검색 후 의미 캐시 판정으로 이어진다. 정확 캐시가 답을 제공하면 질의 재작성과 검색도
 건너뛴다. 어느 경로든 답변 생성에는 진입하지 않는다.
 
-검색 전 정확 캐시와 검색 후 의미 캐시는 서로 다른 포트다. 각 서비스 어댑터가 같은 평가 전용
+검색 전 정확 캐시와 검색 후 의미 캐시는 서로 다른 포트다. Riido profile이 같은 평가 전용
 읽기 데이터와 선택한 서비스 프로필을 사용해 두 포트를 조립한다. 운영 `ChatService`의 콜백을
 평가에 넘기지 않는다. 그 콜백은 운영 로그·분류·캐시 시도 기록을 쓰기 때문이다. 평가 결과와
 단계별 추적은 비공개 등록부에 쓰며, 골든 문항 원문은 결과에 복사하지 않는다. 답변 생성을
@@ -66,8 +65,9 @@ checkpoint는 `checkpoints/<run-id>/<item>-<turn>.json`, 실행 실패는
 `failure-trace.schema.json`을 따른다.
 
 manifest 검증과 결과 저장은 같은 검증 함수를 사용한다. factory 시그니처는 유지하지만 전달되는
-manifest에는 `group`, `goldenVersion`, 그리고 `itemId`/`turnNo`만 있는 turns가 포함된다.
-각 replay-context 및 cache callback에는 `itemId`와 `turnNo`만 전달한다. `path`, `kind`,
+manifest에는 `group`, `goldenVersion`, 선택적인 `sourceCorpusVersion`, 입력 provenance 해시,
+그리고 `itemId`/`turnNo`만 있는 turns가 포함된다. 각 replay-context 및 cache callback에는
+`itemId`와 `turnNo`만 전달한다. `path`, `kind`,
 `expectedServed`, `expectedJudgeDecision` 등 정답 라벨과 골든 경로 정보는 점수 계산을 맡은 평가
 task 내부에만 남는다. CLI의 사전 중복 확인은 읽기 전용이며, 실제 run 소유권은 공통 lifecycle이
 원자적으로 예약한다. 따라서 중복 동시 실행에서도 callback과 평가 실행은 한 번만 시작된다.
@@ -75,16 +75,34 @@ profile factory는 설정 객체만 조립하고 DB·네트워크·모델 작업
 
 `CacheDecisionService`는 후보 준비, judge 호출 정규화, gate 판단, 정확 캐시 원천의 최신성
 확인을 공유한다. 이는 운영 DB 쓰기가 없는 결정 core이며, 주입된 judge client는 외부 모델 호출을
-할 수 있다. 운영 서비스 facade에는 의도적으로 production embedding retry와
-`_question_vector` model-call checkpoint, exact-question-log lookup이 남아 있다. 이 결합은 실제
-읽기 전용 DB/profile runtime을 붙이기 전에 해소해야 한다.
+할 수 있다. `ReadOnlyRiidoServiceData`는 선택한 profile/index/embedding 설정을 검증하고 각 턴마다
+PostgreSQL repeatable-read, read-only snapshot을 연다. 각 snapshot은 턴 종료 때 rollback/close한다.
+한 턴 안에서는 일관된 snapshot이지만 여러 턴이 하나의 DB 시점을 공유하지 않으므로 승인 상태가
+턴 사이에 달라질 수 있다.
 
-`runner.py`는 여전히 관측 JSONL을 집계하는 오프라인 도구이며 DB·모델·임베딩을 호출하지 않는다.
-`cli.py`는 명시적 config와 profile factory를 받지만, 현재 서비스별 읽기 전용 DB 어댑터 및 기본
-실행 profile은 등록되어 있지 않다. CLI의 기본 진입점은 `CacheDecisionExecutionAdapter`가
-주입되지 않으면 거부한다. 현재 자동화된 검증은 fake callback/client를 사용하며, 실제 DB replay나
-유료 model/embedding 실행 및 비용 검증을 의미하지 않는다. 관측에는 모델/임베딩 호출 횟수만
-기록하고 금액은 수집하지 않는다.
+Riido 연결은 production exact-log reader와 question-vector helper를 재사용한다. 임베딩 재시도
+정책은 helper에 공유되고, 운영 facade에는 `_question_vector` 모델 호출 checkpoint와 실패 매핑,
+exact-question-log lookup이 남아 있다. Eval 연결은 운영 기록 writer를 사용하지 않는다. DB guarded
+test는 read-only 트랜잭션이 쓰기를 거부하는지 검사하며 전체 live replay를 수행하지 않는다. 일반 자동
+검증은 fake reader/model client를 사용하고, 실제 DB replay 또는 유료 model/embedding 실행과 비용
+검증을 뜻하지 않는다.
+관측은 논리적 model-call 횟수를 기록하고 retry 시도는 trace의 `retryCount`에 남기며 금액은
+수집하지 않는다.
+
+`profiles.riido_chat.register_riido_chat_profile`은 `HELP_CHATBOT` 또는
+`HELP_CHATBOT_TEST`를 명시해 factory를 등록한다. 호출자는 `ReadOnlyRiidoServiceData`에 session
+factory를, profile에 embedder/rewrite/judge 의존성을 직접 주입해야 한다. profile factory 생성은
+이 의존성을 실행하지 않으며 callback 실행은 run 예약 뒤에 시작한다. Bootstrap은 등록 후
+`run_cache_path_cli(..., execution_adapter=create_riido_cache_decision_execution_adapter())`를
+호출한다. CLI의 기본 `main()`은 DB/model 의존성을 만들지 않고 adapter가 주입되지 않으면 거부한다.
+private registry의 `golden/manifest.json`은 `golden_commit`에 고정되고,
+`golden/sources/cache-drafts.json`은 frozen manifest hash 및 선택 manifest의 `draftsSha256`로
+검증되며 draft 진단 상태(`status: draft`)도 확인한다. Runtime은 고정된 source corpus에서 질문과
+명시된 이전 턴 문맥을 비공개로 읽고 운영과 동일하게 가장 최근의 유효한 이전 턴 최대 5개만
+rewrite 입력으로 제공한다. 미지원된 prior-turn 상태는 fail closed 한다. 공개 manifest와 결과에는
+그 원문을 복사하지 않는다.
+Factory에는 source corpus version, 입력 provenance 해시, `{itemId, turnNo}` 참조만 전달하고,
+runtime judge 입력에서는 `path`, `kind`, expected labels를 제외한다.
 
 ## 프로필 선택 실행 경계
 

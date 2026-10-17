@@ -6,8 +6,9 @@ database session or persists raw questions, answers, or retrieval contents.
 """
 
 import time
+import logging
 from dataclasses import dataclass
-from typing import Any, Optional, Protocol
+from typing import Any, Awaitable, Callable, Optional, Protocol
 
 from app.answering.ports import (
     PreRetrievalCacheHandlerPort,
@@ -37,6 +38,7 @@ class CacheDecisionMetrics:
     next_stage: str
     model_calls: int
     embedding_calls: int
+    evidence: Any = None
 
 
 class CacheDecisionSummarizerPort(Protocol):
@@ -57,6 +59,7 @@ class CacheDecisionObservation:
     model_calls: int
     embedding_calls: int
     execution_trace: Optional[AnswerExecutionTrace] = None
+    evidence: Any = None
 
     def __post_init__(self) -> None:
         if (
@@ -115,6 +118,7 @@ class CacheDecisionCallbacks:
     inspect_exact_cache: Optional[PreRetrievalCacheInspectorPort[Any]] = None
     handle_exact_cache: Optional[PreRetrievalCacheHandlerPort[Any]] = None
     should_choose_source: Optional[SourceSelectionEnabledPort] = None
+    finalize: Optional[Callable[[], Awaitable[None]]] = None
 
 
 class CacheOnlyGenerationAttempt(RuntimeError):
@@ -154,33 +158,56 @@ class CacheDecisionExecutionAdapter:
             raise ValueError("평가 문항 ID와 1 이상의 턴 번호가 필요합니다.")
 
         started = time.perf_counter()
-        result = await self._answer_question.execute(
-            resolve_query=callbacks.resolve_query,
-            retrieve=callbacks.retrieve,
-            inspect_pre_retrieval_cache=callbacks.inspect_exact_cache,
-            handle_pre_retrieval_cache=callbacks.handle_exact_cache,
-            choose_source=callbacks.choose_source,
-            should_choose_source=callbacks.should_choose_source,
-            # This callback both prevents accidental generation and guards against
-            # a future regression that ignores the requested execution target.
-            before_model_call=_forbid_generation,
-            target=AnswerExecutionTarget.CACHE_DECISION,
-            replay_context=replay_context,
-            trace_recorder=trace_recorder,
-        )
-        if not result.generation_skipped or result.generation_result is not None:
-            raise CacheOnlyGenerationAttempt(
-                "캐시 전용 실행 결과에서 답변 생성이 생략되지 않았습니다."
+        execution_error: Optional[BaseException] = None
+        try:
+            result = await self._answer_question.execute(
+                resolve_query=callbacks.resolve_query,
+                retrieve=callbacks.retrieve,
+                inspect_pre_retrieval_cache=callbacks.inspect_exact_cache,
+                handle_pre_retrieval_cache=callbacks.handle_exact_cache,
+                choose_source=callbacks.choose_source,
+                should_choose_source=callbacks.should_choose_source,
+                # This callback both prevents accidental generation and guards against
+                # a future regression that ignores the requested execution target.
+                before_model_call=_forbid_generation,
+                target=AnswerExecutionTarget.CACHE_DECISION,
+                replay_context=replay_context,
+                trace_recorder=trace_recorder,
             )
+            if not result.generation_skipped or result.generation_result is not None:
+                raise CacheOnlyGenerationAttempt(
+                    "캐시 전용 실행 결과에서 답변 생성이 생략되지 않았습니다."
+                )
 
-        metrics = callbacks.summarize(result)
-        return CacheDecisionObservation(
-            item_id=item_id,
-            turn_no=turn_no,
-            outcome=metrics.outcome,
-            next_stage=metrics.next_stage,
-            latency_ms=max(0, int((time.perf_counter() - started) * 1000)),
-            model_calls=metrics.model_calls,
-            embedding_calls=metrics.embedding_calls,
-            execution_trace=result.execution_trace,
-        )
+            metrics = callbacks.summarize(result)
+            return CacheDecisionObservation(
+                item_id=item_id,
+                turn_no=turn_no,
+                outcome=metrics.outcome,
+                next_stage=metrics.next_stage,
+                latency_ms=max(0, int((time.perf_counter() - started) * 1000)),
+                model_calls=metrics.model_calls,
+                embedding_calls=metrics.embedding_calls,
+                execution_trace=result.execution_trace,
+                evidence=metrics.evidence,
+            )
+        except BaseException as error:
+            execution_error = error
+            raise
+        finally:
+            if callbacks.finalize is not None:
+                try:
+                    await callbacks.finalize()
+                except BaseException as cleanup_error:
+                    if execution_error is None:
+                        raise
+                    add_note = getattr(execution_error, "add_note", None)
+                    if callable(add_note):
+                        add_note(
+                            "Per-turn cache snapshot cleanup also failed: "
+                            f"{type(cleanup_error).__name__}"
+                        )
+                    logging.getLogger(__name__).error(
+                        "Per-turn cache snapshot cleanup failed while preserving the execution error",
+                        exc_info=cleanup_error,
+                    )

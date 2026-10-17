@@ -1,53 +1,97 @@
 """Tests for the injectable Riido Chat cache-path profile boundary."""
 
+import tempfile
 import unittest
-from unittest.mock import AsyncMock, Mock
+from pathlib import Path
+from unittest.mock import Mock
 
-from app.answering.trace import ReplayContext
-from evaluation.cache_path_eval.execution import CacheDecisionCallbacks
+from app.retrieval.embedding import OPENAI_EMBEDDING_MODEL
 from evaluation.cache_path_eval.profiles.riido_chat import (
     RiidoChatCachePathEvaluationProfile,
+    create_riido_chat_profile_factory,
 )
+from evaluation.cache_path_eval.store import CachePathRunMetadata
 
 
-class RiidoChatCachePathEvaluationProfileTests(unittest.IsolatedAsyncioTestCase):
-    async def test_delegates_selected_read_data_and_evaluation_provenance(self):
-        callbacks = CacheDecisionCallbacks(
-            resolve_query=AsyncMock(),
-            retrieve=AsyncMock(),
-            choose_source=AsyncMock(),
-            summarize=Mock(),
+class RiidoChatCachePathEvaluationProfileTests(unittest.TestCase):
+    def test_factory_accepts_only_reference_projection_and_stays_inert(self):
+        metadata = CachePathRunMetadata(
+            run_id="profile-factory",
+            golden_version="golden-v1",
+            golden_commit="a" * 40,
+            source_corpus_version="corpus-v1",
+            app_build_commit="b" * 40,
+            service_key="HELP_CHATBOT",
+            profile_revision_id=1,
+            document_group_id=2,
+            index_version_id=3,
+            embedding_config_id=4,
+            cache_policy_version="policy-v1",
+            embedding_model_version=OPENAI_EMBEDDING_MODEL,
+            judge_model_version="judge-v1",
+            judge_prompt_version="prompt-v1",
+            executed_at="2026-10-17T00:00:00Z",
         )
-        selected_turn = {"itemId": "SYN-1", "turnNo": 1, "path": "P1"}
-        metadata = object()
-        replay_context = ReplayContext(
-            run_id="run-1",
-            item_id="SYN-1",
-            turn_no=1,
-            golden_version="golden-explicit",
+        manifest = {
+            "group": "cache-path",
+            "goldenVersion": "golden-v1",
+            "sourceCorpusVersion": "corpus-v1",
+            "inputs": {"draftsSha256": "c" * 64, "judgeLabelsSha256": "d" * 64},
+            "turns": [{"itemId": "SYN-1", "turnNo": 1}],
+        }
+        dependencies = [Mock(name="service_data"), Mock(name="embedder"), Mock(name="rewrite"), Mock(name="judge")]
+        with tempfile.TemporaryDirectory() as temp:
+            factory = create_riido_chat_profile_factory(
+                service_key="HELP_CHATBOT",
+                service_data=dependencies[0],
+                embedder=dependencies[1],
+                query_rewrite_service=dependencies[2],
+                judge_client=dependencies[3],
+                golden_root=Path(temp),
+            )
+            profile = factory(config={}, metadata=metadata, manifest=manifest)
+
+        self.assertIsInstance(profile, RiidoChatCachePathEvaluationProfile)
+        for dependency in dependencies:
+            dependency.assert_not_called()
+
+    def test_factory_rejects_golden_labels_and_route_fields(self):
+        metadata = CachePathRunMetadata(
+            run_id="profile-labels",
+            golden_version="golden-v1",
+            golden_commit="a" * 40,
             source_corpus_version=None,
-            service_version="service-explicit",
-            code_revision="a" * 40,
-            cache_policy_version="policy-explicit",
+            app_build_commit="b" * 40,
+            service_key="HELP_CHATBOT",
+            profile_revision_id=1,
+            document_group_id=2,
+            index_version_id=3,
+            embedding_config_id=4,
+            cache_policy_version="policy-v1",
+            embedding_model_version=OPENAI_EMBEDDING_MODEL,
+            judge_model_version="judge-v1",
+            judge_prompt_version="prompt-v1",
+            executed_at="2026-10-17T00:00:00Z",
         )
-        read_only_data = Mock()
-        read_only_data.callbacks_for_turn = AsyncMock(return_value=callbacks)
-        evaluation_context = Mock()
-        evaluation_context.replay_context_for_turn.return_value = replay_context
-        profile = RiidoChatCachePathEvaluationProfile(
-            cache_data=read_only_data,
-            evaluation_context=evaluation_context,
-        )
-
-        actual_callbacks = await profile.callbacks_for_turn(selected_turn)
-        actual_context = profile.replay_context_for_turn(metadata, selected_turn)
-
-        self.assertIs(callbacks, actual_callbacks)
-        self.assertIs(replay_context, actual_context)
-        read_only_data.callbacks_for_turn.assert_awaited_once_with(selected_turn)
-        evaluation_context.replay_context_for_turn.assert_called_once_with(
-            metadata, selected_turn
-        )
+        with tempfile.TemporaryDirectory() as temp:
+            factory = create_riido_chat_profile_factory(
+                service_key="HELP_CHATBOT",
+                service_data=object(),
+                embedder=object(),
+                query_rewrite_service=object(),
+                judge_client=object(),
+                golden_root=Path(temp),
+            )
+            with self.assertRaises(ValueError):
+                factory(
+                    config={},
+                    metadata=metadata,
+                    manifest={
+                        "group": "cache-path",
+                        "goldenVersion": "golden-v1",
+                        "turns": [{"itemId": "SYN-1", "turnNo": 1, "expectedServed": True}],
+                    },
+                )
 
 
 if __name__ == "__main__":
