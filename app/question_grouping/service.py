@@ -58,22 +58,19 @@ from app.question_grouping.catalog_reader import (
     IndexScopeNotFoundError,
     QuestionCatalogReader,
 )
+from app.question_grouping.cache_decision import CacheDecisionService
 from app.question_grouping.constants import (
     JUDGMENT_INPUT_SCHEMA_VERSION,
     REJECT_CANONICAL_DATA_INVALID,
     REJECT_CANONICAL_SERVE_FAILED,
 )
-from app.question_grouping.decision import build_turn_judgment, failed_turn_judgment
+from app.question_grouping.decision import failed_turn_judgment
 from app.question_grouping.document_candidates import (
-    attach_outlines,
     document_retrieval_settings,
-    rank_documents_from_search,
 )
 from app.question_grouping.gate import (
     evaluate_cache_gate,
-    exact_source_fallthrough_reasons,
     gate_judgment_input,
-    resolve_citations,
 )
 from app.question_grouping.models import (
     CitationResolution,
@@ -91,13 +88,11 @@ from app.question_grouping.models import (
 )
 from app.question_grouping.outline_reader import DocumentOutlineReader
 from app.question_grouping.payload import (
-    build_judge_presentation,
     presentation_judgment_input,
     presentation_seed,
 )
 from app.question_grouping.store import QuestionGroupingStore, served_citation_logs
 from app.question_grouping.attribution import subproblem_attribution
-from app.question_grouping.subproblem_search import rank_subproblems
 from app.retrieval.embedding import OPENAI_EMBEDDING_MODEL, OPENAI_EMBEDDING_PROVIDER
 from app.retrieval.models import HybridSearchCall
 from app.retrieval.vector_retriever import (
@@ -447,6 +442,9 @@ class QuestionGroupingService:
         self._store = store or QuestionGroupingStore(session, log_store)
         self._catalog_reader = catalog_reader or QuestionCatalogReader(session)
         self._outline_reader = outline_reader or DocumentOutlineReader(session)
+        self._cache_decisions = CacheDecisionService(
+            self._catalog_reader, self._outline_reader
+        )
         self._clock = clock
 
     # ------------------------------------------------------------------
@@ -528,18 +526,17 @@ class QuestionGroupingService:
         )
         if match is None:
             return None
-        scope = await self._catalog_reader.load_index_scope(turn.index_version_id)
-        if scope.document_group_id != turn.document_group_id:
+        inspection = await self._cache_decisions.inspect_exact_source(
+            match,
+            index_version_id=turn.index_version_id,
+            document_group_id=turn.document_group_id,
+        )
+        scope = inspection.scope
+        if not inspection.scope_matches_document_group:
             return None
-        inputs: Optional[GateInputs] = None
-        data_error: Optional[CatalogDataError] = None
-        try:
-            inputs = await self._catalog_reader.load_gate_inputs(
-                match.subproblem_id, scope
-            )
-        except CatalogDataError as error:
-            data_error = error
-        fallthrough = exact_source_fallthrough_reasons(match, inputs)
+        inputs = inspection.inputs
+        data_error = inspection.data_error
+        fallthrough = inspection.fallthrough_reasons
         if fallthrough:
             logger.info(
                 "정확 일치 원천 분류를 재사용하지 않고 일반 흐름으로 진행합니다: "
@@ -719,27 +716,16 @@ class QuestionGroupingService:
             )
         assert vector.embedding is not None
 
-        scope: Optional[IndexScope] = None
-        catalog: Optional[SubproblemCatalog] = None
-        try:
-            scope = await self._catalog_reader.load_index_scope(turn.index_version_id)
-            if scope.document_group_id != turn.document_group_id:
-                raise CatalogDataError(
-                    "색인 판의 문서 그룹이 턴의 문서 그룹과 다릅니다: "
-                    f"index={scope.document_group_id}, turn={turn.document_group_id}"
-                )
-            catalog = await self._catalog_reader.load_subproblem_catalog(scope)
-            subproblems = rank_subproblems(vector.embedding, catalog.items)
-            ranked_documents = rank_documents_from_search(search)
-            outlines = await self._outline_reader.load_outlines(
-                [item.document_version_id for item in ranked_documents],
-                chunking_config_id=scope.chunking_config_id,
-            )
-            documents = attach_outlines(ranked_documents, outlines)
-            presentation = build_judge_presentation(
-                resolved_query, subproblems, documents, seed=prepared.seed
-            )
-        except (CatalogDataError, IndexScopeNotFoundError, ValueError) as error:
+        candidates = await self._cache_decisions.prepare_candidates(
+            resolved_query=resolved_query,
+            embedding=vector.embedding,
+            index_version_id=turn.index_version_id,
+            document_group_id=turn.document_group_id,
+            retrieval=search,
+            seed=prepared.seed,
+        )
+        if not candidates.ready:
+            error = candidates.error
             logger.warning(
                 "판별 후보를 만들지 못해 판별 실패로 기록합니다: rag_run_id=%s",
                 turn.rag_run_id,
@@ -747,17 +733,17 @@ class QuestionGroupingService:
             )
             return replace(
                 prepared,
-                scope=scope,
-                catalog=catalog,
-                failure=JudgeFailure(
-                    kind=JudgeFailureKind.INTERNAL_ERROR,
-                    safe_message=_safe_candidate_error_message(error),
-                ),
-                failure_stage=FAILURE_STAGE_CANDIDATES,
+                scope=candidates.scope,
+                catalog=candidates.catalog,
+                failure=candidates.failure,
+                failure_stage=candidates.failure_stage,
             )
 
         return replace(
-            prepared, scope=scope, catalog=catalog, presentation=presentation
+            prepared,
+            scope=candidates.scope,
+            catalog=candidates.catalog,
+            presentation=candidates.presentation,
         )
 
     async def _question_vector(
@@ -900,7 +886,6 @@ class QuestionGroupingService:
         state: Dict[str, Any] = {
             "model_call_id": None,
             "embedding_finished": False,
-            "checkpoint_error": False,
         }
 
         async def checkpoint(
@@ -923,60 +908,23 @@ class QuestionGroupingService:
                 model_call_id = call.id
                 await self._session.commit()
             except BaseException:
-                state["checkpoint_error"] = True
                 raise
             state["model_call_id"] = model_call_id
             state["embedding_finished"] = (
                 vector.model_call_id is not None and vector.trace is not None
             )
 
-        # 프로필 버전이 판별 설정을 고른 턴만 stage 를 넘겨 기존 호출 인자를 그대로 둔다.
-        stage_kwargs: Dict[str, StageSettings] = (
-            {} if turn.judge_stage is None else {"stage": turn.judge_stage}
+        decision = await self._cache_decisions.judge(
+            client=self._judge_client,
+            presentation=prepared.presentation,
+            model=prepared.model,
+            prompt_version=prepared.prompt_version,
+            stage=turn.judge_stage,
+            before_model_call=checkpoint,
+            clock=self._clock,
         )
-        started = self._clock()
-        try:
-            call = await self._judge_client.judge(
-                prepared.presentation.payload,
-                before_model_call=checkpoint,
-                **stage_kwargs,
-            )
-        except Exception as error:  # noqa: BLE001 - checkpoint 오류만 올린다
-            if state["checkpoint_error"]:
-                raise
-            logger.warning(
-                "판별 호출 중 예상하지 못한 오류가 발생했습니다: rag_run_id=%s",
-                turn.rag_run_id,
-                exc_info=error,
-            )
-            failure = JudgeFailure(
-                kind=JudgeFailureKind.INTERNAL_ERROR,
-                safe_message=f"판별 호출 중 오류: {type(error).__name__}",
-            )
-            call = JudgeCall(
-                trace=ModelCallTrace(
-                    provider=self._judge_client.provider,
-                    model_name=prepared.model,
-                    succeeded=False,
-                    latency_ms=_elapsed_ms(started, self._clock()),
-                    prompt_version=prepared.prompt_version,
-                    error_message=failure.safe_message,
-                ),
-                failure=failure,
-            )
-
-        try:
-            judgment = build_turn_judgment(call, prepared.presentation)
-        except Exception as error:  # noqa: BLE001 - 정규화 결함도 판별 실패다
-            logger.exception(
-                "판별 응답을 정규화하지 못했습니다: rag_run_id=%s", turn.rag_run_id
-            )
-            judgment = failed_turn_judgment(
-                JudgeFailure(
-                    kind=JudgeFailureKind.INTERNAL_ERROR,
-                    safe_message=f"판별 응답 정규화 오류: {type(error).__name__}",
-                )
-            )
+        call = decision.call
+        judgment = decision.judgment
         if judgment.failed:
             logger.info(
                 "판별 실패로 기록합니다: rag_run_id=%s, kind=%s",
@@ -1189,24 +1137,20 @@ class QuestionGroupingService:
                     semantic_cache_enabled=semantic_cache_enabled,
                 )
             )
-
         assert prepared.scope is not None
-        if inputs is None:
-            try:
-                inputs = await self._catalog_reader.load_gate_inputs(
-                    judgment.subproblem.subproblem_id, prepared.scope
-                )
-            except CatalogDataError as error:
-                return _data_error_outcome(prepared, error)
-        resolutions = resolve_citations(inputs.citations, inputs.contexts_by_source_id)
-        gate = evaluate_cache_gate(
+        decision = await self._cache_decisions.decide_gate(
             judgment,
-            subproblem=inputs.subproblem,
-            canonical_answer=inputs.canonical_answer,
-            citation_resolutions=resolutions,
+            scope=prepared.scope,
             semantic_cache_enabled=semantic_cache_enabled,
+            inputs=inputs,
         )
-        return _GateOutcome(gate=gate, resolutions=resolutions, inputs=inputs)
+        if decision.data_error is not None:
+            return _data_error_outcome(prepared, decision.data_error)
+        return _GateOutcome(
+            gate=decision.gate,
+            resolutions=decision.citation_resolutions,
+            inputs=decision.inputs,
+        )
 
     async def _insert_rows(
         self,
