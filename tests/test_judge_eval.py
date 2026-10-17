@@ -58,6 +58,7 @@ from evaluation.judge_eval.scoring import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 GOLDEN_VERSION = "9.9.9"
+REAL_GOLDEN_VERSION = "1.0.1"
 SUITE_A = "judge-official-A"
 SUITE_B = "judge-official-B"
 GIT = ["git", "-c", "user.name=judge-eval-test", "-c", "user.email=judge-eval@example.invalid", "-c", "commit.gpgsign=false"]
@@ -912,11 +913,25 @@ class SchemaConformanceTest(RegistryCase):
 @unittest.skipIf(REAL is None or not (REAL / "golden/frozen").exists(), "실제 골든셋이 없어 건너뜀")
 class RealRegistryTest(unittest.TestCase):
     def test_judge_official_a_estimate_and_b_refusal(self):
-        config = cli.RunConfig(suite=SUITE_A, judge="luna", golden_version="1.0.0", registry=REAL)
+        config = cli.RunConfig(suite=SUITE_A, judge="luna", golden_version=REAL_GOLDEN_VERSION, registry=REAL)
         estimate = cli.run_estimate(config)
         self.assertEqual((estimate["turns"], estimate["calls"]), (132, 132))
         with self.assertRaises(HoldoutRefused):
-            cli.run_estimate(cli.RunConfig(suite=SUITE_B, judge="luna", golden_version="1.0.0", registry=REAL))
+            cli.run_estimate(
+                cli.RunConfig(suite=SUITE_B, judge="luna", golden_version=REAL_GOLDEN_VERSION, registry=REAL)
+            )
+
+    def test_issue_218_readjudicated_labels_are_present_in_real_registry(self):
+        labels = {}
+        with (REAL / "golden" / "items" / "A.jsonl").open(encoding="utf-8") as source:
+            for line in source:
+                item = json.loads(line)
+                if item.get("id") in {"A-faq-054", "A-faq-067"}:
+                    labels[item["id"]] = item["turns"][0]["expectedJudgeDecision"]
+        self.assertEqual(
+            {"A-faq-054": "UNCLASSIFIED", "A-faq-067": "SEPARATE"},
+            labels,
+        )
 
 
 if __name__ == "__main__":
