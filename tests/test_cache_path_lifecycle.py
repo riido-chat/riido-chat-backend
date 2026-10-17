@@ -61,11 +61,14 @@ class _Profile:
     def __init__(self, fail_callback=False, fail_context_on=None):
         self.callback_calls = []
         self.context_calls = []
+        self.callback_turn_keys = []
+        self.context_turn_keys = []
         self.fail_callback = fail_callback
         self.fail_context_on = fail_context_on
 
     def replay_context_for_turn(self, metadata, turn):
         self.context_calls.append(turn["itemId"])
+        self.context_turn_keys.append(set(turn))
         if turn["itemId"] == self.fail_context_on:
             raise RuntimeError("private context preparation failure")
         return ReplayContext(
@@ -82,6 +85,7 @@ class _Profile:
 
     async def callbacks_for_turn(self, turn):
         self.callback_calls.append(turn["itemId"])
+        self.callback_turn_keys.append(set(turn))
         if self.fail_callback:
             raise RuntimeError("private question must not be stored")
         return object()
@@ -151,6 +155,15 @@ class _Execution:
 
 
 class CachePathLifecycleTests(unittest.IsolatedAsyncioTestCase):
+    async def test_profile_context_and_callbacks_receive_only_turn_references(self):
+        profile, store = _Profile(), _Store()
+        await execute_cache_path_run(
+            manifest=_manifest(), metadata=_metadata(), profile=profile,
+            store=store, execution_adapter=_Execution(),
+        )
+        self.assertEqual([{"itemId", "turnNo"}], profile.context_turn_keys)
+        self.assertEqual([{"itemId", "turnNo"}], profile.callback_turn_keys)
+
     async def test_concurrent_same_run_id_executes_only_once(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

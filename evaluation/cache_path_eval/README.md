@@ -65,9 +65,11 @@ checkpoint는 `checkpoints/<run-id>/<item>-<turn>.json`, 실행 실패는
 `checkpoint.schema.json`, `failed-run.schema.json`, `run.schema.json`에 정의돼 있다. 실패 단계 trace는
 `failure-trace.schema.json`을 따른다.
 
-manifest 검증과 결과 저장은 같은 검증 함수를 사용한다. profile factory에는 복사본만 전달하고,
-각 replay/context callback에도 분리된 턴 사전을 전달해 frozen 기대 라벨과 경로가 점수 계산 중
-바뀌지 않게 한다. CLI의 사전 중복 확인은 읽기 전용이며, 실제 run 소유권은 공통 lifecycle이
+manifest 검증과 결과 저장은 같은 검증 함수를 사용한다. factory 시그니처는 유지하지만 전달되는
+manifest에는 `group`, `goldenVersion`, 그리고 `itemId`/`turnNo`만 있는 turns가 포함된다.
+각 replay-context 및 cache callback에는 `itemId`와 `turnNo`만 전달한다. `path`, `kind`,
+`expectedServed`, `expectedJudgeDecision` 등 정답 라벨과 골든 경로 정보는 점수 계산을 맡은 평가
+task 내부에만 남는다. CLI의 사전 중복 확인은 읽기 전용이며, 실제 run 소유권은 공통 lifecycle이
 원자적으로 예약한다. 따라서 중복 동시 실행에서도 callback과 평가 실행은 한 번만 시작된다.
 profile factory는 설정 객체만 조립하고 DB·네트워크·모델 작업을 시작하지 않아야 한다.
 

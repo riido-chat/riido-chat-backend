@@ -11,14 +11,16 @@ import argparse
 import asyncio
 import json
 import sys
-from copy import deepcopy
 from dataclasses import fields
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional, Sequence
 
 from evaluation.cache_path_eval.execution import CacheDecisionExecutionAdapter
 from evaluation.cache_path_eval.profile_registry import resolve_profile_factory
-from evaluation.cache_path_eval.run import execute_cache_path_run
+from evaluation.cache_path_eval.run import (
+    execute_cache_path_run,
+    project_reference_manifest,
+)
 from evaluation.cache_path_eval.store import CachePathRunMetadata, CachePathRunStore
 
 
@@ -79,7 +81,11 @@ async def run_cache_path_cli(
     store.validate_manifest(metadata, manifest)
     store.check_available(metadata)
     factory = profile_factory_resolver(metadata.service_key)
-    profile = factory(config=profile_config, metadata=metadata, manifest=deepcopy(manifest))
+    profile = factory(
+        config=profile_config,
+        metadata=metadata,
+        manifest=project_reference_manifest(manifest),
+    )
     if asyncio.iscoroutine(profile):
         profile = await profile
     return await execute_cache_path_run(

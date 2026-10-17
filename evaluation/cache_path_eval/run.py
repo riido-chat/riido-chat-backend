@@ -51,6 +51,19 @@ class _TraceCollector:
         self.traces.append(trace)
 
 
+def project_reference_manifest(manifest: Mapping[str, Any]) -> dict[str, Any]:
+    """Keep golden labels and path details inside the scoring task."""
+    return {
+        "group": manifest["group"],
+        "goldenVersion": manifest["goldenVersion"],
+        "turns": [_turn_reference(turn) for turn in manifest["turns"]],
+    }
+
+
+def _turn_reference(turn: Mapping[str, Any]) -> dict[str, Any]:
+    return {"itemId": turn["itemId"], "turnNo": turn["turnNo"]}
+
+
 class _CachePathTask:
     def __init__(
         self,
@@ -78,7 +91,7 @@ class _CachePathTask:
     ) -> None:
         for turn in turns:
             self._failure_turn = turn
-            context = self.profile.replay_context_for_turn(metadata, dict(turn))
+            context = self.profile.replay_context_for_turn(metadata, _turn_reference(turn))
             self._validate_context(context, metadata, turn)
             self._contexts[(turn["itemId"], turn["turnNo"])] = context
         self._failure_turn = None
@@ -91,7 +104,7 @@ class _CachePathTask:
         replay_context = self._contexts[(turn["itemId"], turn["turnNo"])]
         self._validate_context(replay_context, metadata, turn)
         self._failure_turn = turn
-        callbacks = await self.profile.callbacks_for_turn(dict(turn))
+        callbacks = await self.profile.callbacks_for_turn(_turn_reference(turn))
         self._failure_turn = None
         return _PreparedTurn(callbacks, replay_context)
 

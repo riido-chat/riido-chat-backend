@@ -92,7 +92,7 @@ class CachePathCliTests(unittest.IsolatedAsyncioTestCase):
 
             def factory(*, config, metadata, manifest):
                 self.assertTrue(calls.get("availability_checked"))
-                calls["factory"] = (config, metadata.service_key, manifest["goldenVersion"])
+                calls["factory"] = (config, metadata.service_key, manifest)
                 return Profile()
 
             register_profile("test-service", factory)
@@ -148,6 +148,14 @@ class CachePathCliTests(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual("test-service", calls["factory"][1])
             self.assertEqual({"selector": "safe"}, calls["factory"][0])
+            self.assertEqual(
+                {
+                    "group": "cache-path",
+                    "goldenVersion": "g-v1",
+                    "turns": [{"itemId": "ITEM-1", "turnNo": 1}],
+                },
+                calls["factory"][2],
+            )
             self.assertEqual("ITEM-1", calls["turn"])
             self.assertEqual(root, calls["store_root"])
             self.assertTrue(calls["availability_checked"])
