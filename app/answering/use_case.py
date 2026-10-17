@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import time
 import uuid
 from dataclasses import dataclass
 from enum import Enum
@@ -12,15 +13,30 @@ from app.answering.models import FinalGenerationResult, GenerationStageTrace
 from app.chat.progress import OnProgressStageHook
 from app.core.model_trace import BeforeModelCallHook
 from app.retrieval.models import HybridSearchCall
+from app.answering.ports import (
+    AnswerGeneratorPort,
+    QueryResolverPort,
+    RetrievalPort,
+    SourceHandlerPort,
+    SourceSelectorPort,
+)
+from app.answering.trace import (
+    AnswerExecutionTrace,
+    ExecutionStage,
+    ExecutionTraceEvent,
+    ExecutionTraceRecorder,
+    ReplayContext,
+    StageOutcome,
+)
 
 if TYPE_CHECKING:
     from app.answering.generator import GenerationStageSettings
-    from app.answering.service import GenerationService
 
 
 logger = logging.getLogger(__name__)
 
 SourceDecision = TypeVar("SourceDecision")
+StageResult = TypeVar("StageResult")
 
 
 class AnswerExecutionTarget(str, Enum):
@@ -47,23 +63,22 @@ class AnswerQuestionResult(Generic[SourceDecision]):
     generation_result: Optional[FinalGenerationResult]
     generation_error: Optional[Exception]
     generation_skipped: bool = False
+    execution_trace: Optional[AnswerExecutionTrace] = None
 
 
 class AnswerQuestion(Generic[SourceDecision]):
     """문맥 해석, 근거 검색, 출처 선택, 답변 생성을 정해진 순서로 실행한다."""
 
-    def __init__(self, generation_service: GenerationService) -> None:
+    def __init__(self, generation_service: AnswerGeneratorPort) -> None:
         self._generation_service = generation_service
 
     async def execute(
         self,
         *,
-        resolve_query: Callable[[], Awaitable[Optional[str]]],
-        retrieve: Callable[[str], Awaitable[HybridSearchCall]],
-        choose_source: Optional[
-            Callable[[], Awaitable[SourceDecision]]
-        ] = None,
-        handle_source: Optional[Callable[[SourceDecision], Awaitable[bool]]] = None,
+        resolve_query: QueryResolverPort,
+        retrieve: RetrievalPort,
+        choose_source: Optional[SourceSelectorPort[SourceDecision]] = None,
+        handle_source: Optional[SourceHandlerPort[SourceDecision]] = None,
         before_model_call: BeforeModelCallHook,
         stages: Optional[GenerationStageSettings] = None,
         on_progress_stage: Optional[OnProgressStageHook] = None,
@@ -72,6 +87,8 @@ class AnswerQuestion(Generic[SourceDecision]):
         ] = None,
         rag_run_id: Optional[uuid.UUID] = None,
         target: AnswerExecutionTarget = AnswerExecutionTarget.FULL_ANSWER,
+        replay_context: Optional[ReplayContext] = None,
+        trace_recorder: Optional[ExecutionTraceRecorder] = None,
     ) -> AnswerQuestionResult[SourceDecision]:
         """운영 흐름을 실행하되 요청한 단계에서 종료한다.
 
@@ -83,9 +100,87 @@ class AnswerQuestion(Generic[SourceDecision]):
         if target is AnswerExecutionTarget.CACHE_DECISION and choose_source is None:
             raise ValueError("CACHE_DECISION 대상에는 캐시 판정 함수가 필요합니다.")
 
-        resolved_query = await resolve_query()
+        trace_events: list[ExecutionTraceEvent] = []
+        trace_id = uuid.uuid4()
+        trace_recorded = False
+
+        def build_trace() -> Optional[AnswerExecutionTrace]:
+            if replay_context is None:
+                return None
+            return AnswerExecutionTrace(
+                trace_id=trace_id,
+                target=target.value,
+                replay_context=replay_context,
+                events=tuple(trace_events),
+            )
+
+        def record_trace() -> None:
+            nonlocal trace_recorded
+            trace = build_trace()
+            if trace is None or trace_recorder is None or trace_recorded:
+                return
+            trace_recorded = True
+            try:
+                trace_recorder.record(trace)
+            except Exception:
+                logger.exception("실행 trace 저장에 실패했습니다: trace_id=%s", trace_id)
+
+        async def run_stage(
+            stage: ExecutionStage,
+            operation: Callable[..., Awaitable[StageResult]],
+            *args: object,
+            **operation_kwargs: object,
+        ) -> StageResult:
+            started = time.perf_counter()
+            try:
+                value = await operation(*args, **operation_kwargs)
+            except Exception as error:
+                trace_events.append(
+                    ExecutionTraceEvent(
+                        stage=stage,
+                        outcome=StageOutcome.FAILED,
+                        duration_ms=max(
+                            0, int((time.perf_counter() - started) * 1000)
+                        ),
+                        detail_code=type(error).__name__,
+                    )
+                )
+                record_trace()
+                raise
+            trace_events.append(
+                ExecutionTraceEvent(
+                    stage=stage,
+                    outcome=StageOutcome.SUCCEEDED,
+                    duration_ms=max(
+                        0, int((time.perf_counter() - started) * 1000)
+                    ),
+                )
+            )
+            return value
+
+        def make_result(**kwargs: object) -> AnswerQuestionResult[SourceDecision]:
+            trace = build_trace()
+            record_trace()
+            return AnswerQuestionResult(execution_trace=trace, **kwargs)  # type: ignore[arg-type]
+
+        resolved_query = await run_stage(ExecutionStage.QUERY_RESOLUTION, resolve_query)
         if resolved_query is None:
-            return AnswerQuestionResult(
+            trace_events.append(
+                ExecutionTraceEvent(
+                    ExecutionStage.RETRIEVAL, StageOutcome.SKIPPED
+                )
+            )
+            trace_events.append(
+                ExecutionTraceEvent(
+                    ExecutionStage.SOURCE_SELECTION, StageOutcome.SKIPPED
+                )
+            )
+            trace_events.append(
+                ExecutionTraceEvent(
+                    ExecutionStage.ANSWER_GENERATION, StageOutcome.SKIPPED
+                )
+            )
+            return make_result(
                 resolved_query=None,
                 retrieval=None,
                 flow_terminated=True,
@@ -96,9 +191,19 @@ class AnswerQuestion(Generic[SourceDecision]):
                 generation_skipped=True,
             )
 
-        retrieval_result = await retrieve(resolved_query)
+        retrieval_result = await run_stage(ExecutionStage.RETRIEVAL, retrieve, resolved_query)
         if retrieval_result.error is not None:
-            return AnswerQuestionResult(
+            trace_events.append(
+                ExecutionTraceEvent(
+                    ExecutionStage.SOURCE_SELECTION, StageOutcome.SKIPPED
+                )
+            )
+            trace_events.append(
+                ExecutionTraceEvent(
+                    ExecutionStage.ANSWER_GENERATION, StageOutcome.SKIPPED
+                )
+            )
+            return make_result(
                 resolved_query=resolved_query,
                 retrieval=retrieval_result,
                 flow_terminated=True,
@@ -111,9 +216,23 @@ class AnswerQuestion(Generic[SourceDecision]):
 
         source_decision: Optional[SourceDecision] = None
         if choose_source is not None:
-            source_decision = await choose_source()
+            source_decision = await run_stage(ExecutionStage.SOURCE_SELECTION, choose_source)
             if target is AnswerExecutionTarget.CACHE_DECISION:
-                return AnswerQuestionResult(
+                trace_events.append(
+                    ExecutionTraceEvent(
+                        ExecutionStage.SOURCE_HANDLING,
+                        StageOutcome.SKIPPED,
+                        detail_code="CACHE_DECISION_TARGET",
+                    )
+                )
+                trace_events.append(
+                    ExecutionTraceEvent(
+                        ExecutionStage.ANSWER_GENERATION,
+                        StageOutcome.SKIPPED,
+                        detail_code="CACHE_DECISION_TARGET",
+                    )
+                )
+                return make_result(
                     resolved_query=resolved_query,
                     retrieval=retrieval_result,
                     flow_terminated=False,
@@ -126,8 +245,14 @@ class AnswerQuestion(Generic[SourceDecision]):
 
             if handle_source is None:
                 raise ValueError("답변 출처 선택에는 결과 처리 함수가 필요합니다.")
-            if await handle_source(source_decision):
-                return AnswerQuestionResult(
+            source_handled = await run_stage(ExecutionStage.SOURCE_HANDLING, handle_source, source_decision)
+            if source_handled:
+                trace_events.append(
+                    ExecutionTraceEvent(
+                        ExecutionStage.ANSWER_GENERATION, StageOutcome.SKIPPED
+                    )
+                )
+                return make_result(
                     resolved_query=resolved_query,
                     retrieval=retrieval_result,
                     flow_terminated=False,
@@ -146,7 +271,9 @@ class AnswerQuestion(Generic[SourceDecision]):
             generation_kwargs["stages"] = stages
 
         try:
-            generation_result = await self._generation_service.generate_answer(
+            generation_result = await run_stage(
+                ExecutionStage.ANSWER_GENERATION,
+                self._generation_service.generate_answer,
                 resolved_query,
                 retrieval_result.fused_results,
                 before_model_call=before_model_call,
@@ -165,7 +292,7 @@ class AnswerQuestion(Generic[SourceDecision]):
                         rag_run_id,
                     )
         except Exception as error:
-            return AnswerQuestionResult(
+            return make_result(
                 resolved_query=resolved_query,
                 retrieval=retrieval_result,
                 flow_terminated=False,
@@ -175,7 +302,7 @@ class AnswerQuestion(Generic[SourceDecision]):
                 generation_error=error,
             )
 
-        return AnswerQuestionResult(
+        return make_result(
             resolved_query=resolved_query,
             retrieval=retrieval_result,
             flow_terminated=False,

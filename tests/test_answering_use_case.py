@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 from app.answering.use_case import AnswerExecutionTarget, AnswerQuestion
+from app.answering.trace import ExecutionStage, ReplayContext, StageOutcome
 from app.retrieval.models import HybridSearchCall
 
 
@@ -89,4 +90,35 @@ class AnswerQuestionExecutionTargetTests(unittest.IsolatedAsyncioTestCase):
                 before_model_call=AsyncMock(),
                 target=AnswerExecutionTarget.CACHE_DECISION,
             )
+
+    async def test_stage_failure_is_recorded_without_input_text(self):
+        recorder = SimpleNamespace(record=lambda trace: setattr(recorder, "trace", trace))
+        self.resolve_query.side_effect = RuntimeError("private question failed")
+        context = ReplayContext(
+            run_id="run-1",
+            item_id="SYN-2",
+            turn_no=1,
+            golden_version="golden-v1",
+            source_corpus_version=None,
+            service_version="service-a",
+            code_revision="abc123",
+            cache_policy_version="policy-v1",
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "private question failed"):
+            await self.use_case.execute(
+                resolve_query=self.resolve_query,
+                retrieve=self.retrieve,
+                choose_source=self.choose_source,
+                before_model_call=AsyncMock(),
+                replay_context=context,
+                trace_recorder=recorder,
+            )
+
+        self.assertEqual(
+            (ExecutionStage.QUERY_RESOLUTION, StageOutcome.FAILED),
+            (recorder.trace.events[0].stage, recorder.trace.events[0].outcome),
+        )
+        self.assertEqual("RuntimeError", recorder.trace.events[0].detail_code)
+        self.assertNotIn("private question", repr(recorder.trace))
 

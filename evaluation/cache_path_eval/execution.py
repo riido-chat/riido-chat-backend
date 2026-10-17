@@ -7,14 +7,19 @@ database session or persists raw questions, answers, or retrieval contents.
 
 import time
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Optional
+from typing import Any, Optional, Protocol
 
+from app.answering.ports import QueryResolverPort, RetrievalPort, SourceSelectorPort
 from app.answering.use_case import (
     AnswerExecutionTarget,
     AnswerQuestion,
     AnswerQuestionResult,
 )
-from app.retrieval.models import HybridSearchCall
+from app.answering.trace import (
+    AnswerExecutionTrace,
+    ExecutionTraceRecorder,
+    ReplayContext,
+)
 
 
 @dataclass(frozen=True)
@@ -25,6 +30,12 @@ class CacheDecisionMetrics:
     next_stage: str
     model_calls: int
     embedding_calls: int
+
+
+class CacheDecisionSummarizerPort(Protocol):
+    def __call__(
+        self, result: AnswerQuestionResult[Any]
+    ) -> CacheDecisionMetrics: ...
 
 
 @dataclass(frozen=True)
@@ -38,6 +49,7 @@ class CacheDecisionObservation:
     latency_ms: int
     model_calls: int
     embedding_calls: int
+    execution_trace: Optional[AnswerExecutionTrace] = None
 
     def __post_init__(self) -> None:
         if (
@@ -89,12 +101,10 @@ class CacheDecisionCallbacks:
     grouping and turn logs.
     """
 
-    resolve_query: Callable[[], Awaitable[Optional[str]]]
-    retrieve: Callable[[str], Awaitable[HybridSearchCall]]
-    choose_source: Callable[[], Awaitable[Any]]
-    summarize: Callable[
-        [AnswerQuestionResult[Any]], CacheDecisionMetrics
-    ]
+    resolve_query: QueryResolverPort
+    retrieve: RetrievalPort
+    choose_source: SourceSelectorPort[Any]
+    summarize: CacheDecisionSummarizerPort
 
 
 class CacheOnlyGenerationAttempt(RuntimeError):
@@ -121,6 +131,8 @@ class CacheDecisionExecutionAdapter:
         item_id: str,
         turn_no: int,
         callbacks: CacheDecisionCallbacks,
+        replay_context: Optional[ReplayContext] = None,
+        trace_recorder: Optional[ExecutionTraceRecorder] = None,
     ) -> CacheDecisionObservation:
         if (
             not isinstance(item_id, str)
@@ -140,6 +152,8 @@ class CacheDecisionExecutionAdapter:
             # a future regression that ignores the requested execution target.
             before_model_call=_forbid_generation,
             target=AnswerExecutionTarget.CACHE_DECISION,
+            replay_context=replay_context,
+            trace_recorder=trace_recorder,
         )
         if not result.generation_skipped or result.generation_result is not None:
             raise CacheOnlyGenerationAttempt(
@@ -155,4 +169,5 @@ class CacheDecisionExecutionAdapter:
             latency_ms=max(0, int((time.perf_counter() - started) * 1000)),
             model_calls=metrics.model_calls,
             embedding_calls=metrics.embedding_calls,
+            execution_trace=result.execution_trace,
         )
