@@ -5,7 +5,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, replace
-from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union, cast
+from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -65,7 +65,11 @@ from app.answering.models import (
     FinalWithheldReason,
     GenerationStageTrace,
 )
-from app.answering.use_case import AnswerQuestion, AnswerQuestionResult
+from app.answering.use_case import (
+    AnswerExecutionTarget,
+    AnswerQuestion,
+    AnswerQuestionResult,
+)
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import (
     HybridRetrievalResult,
@@ -564,6 +568,7 @@ class ChatService:
         grouping_recorded: Optional[RecordedJudgment] = None
         exact_grouping_recorded = False
         exact_fallthrough: Optional[ExactQuestionFallthrough] = None
+        exact_cache_response: Optional[ChatResponse] = None
 
         resolved_query: Optional[str] = None
         terminal_response: Optional[ChatResponse] = None
@@ -678,6 +683,13 @@ class ChatService:
                 exact_fallthrough=exact_fallthrough,
             )
 
+        async def should_choose_source() -> bool:
+            return (
+                grouping_turn is not None
+                and turn.semantic_cache_enabled
+                and not exact_grouping_recorded
+            )
+
         async def handle_source(decision: AnswerSourceDecision) -> bool:
             nonlocal grouping_recorded, grouping_response, retrieval_recorded
             grouping_recorded = decision.recorded
@@ -767,17 +779,43 @@ class ChatService:
                 await self._session.commit()
             return None
 
+        async def inspect_exact_cache() -> ExactCacheDecision:
+            return await ExactAnswerCache(self._require_grouping()).inspect(
+                grouping_turn,
+                question,
+                semantic_cache_enabled=turn.semantic_cache_enabled,
+                exact_cache_enabled=turn.exact_cache_enabled,
+            )
+
+        async def handle_exact_cache(decision: object) -> bool:
+            nonlocal exact_cache_response
+            if not isinstance(decision, ExactCacheDecision):
+                raise TypeError("검색 전 캐시 조회 결과 형식이 잘못되었습니다.")
+            exact_cache_response = await handle_exact_decision(decision)
+            return exact_cache_response is not None
+
         async def run_answer_question() -> AnswerQuestionResult[AnswerSourceDecision]:
-            source_selection_enabled = (
-                grouping_turn is not None
-                and turn.semantic_cache_enabled
-                and not exact_grouping_recorded
+            source_selection_configured = (
+                grouping_turn is not None and turn.semantic_cache_enabled
             )
             return await AnswerQuestion(self._generation_service).execute(
                 resolve_query=resolve_query,
                 retrieve=retrieve,
-                choose_source=choose_source if source_selection_enabled else None,
-                handle_source=handle_source if source_selection_enabled else None,
+                inspect_pre_retrieval_cache=(
+                    inspect_exact_cache
+                    if grouping_turn is not None and turn.exact_cache_enabled
+                    else None
+                ),
+                handle_pre_retrieval_cache=(
+                    handle_exact_cache
+                    if grouping_turn is not None and turn.exact_cache_enabled
+                    else None
+                ),
+                choose_source=choose_source if source_selection_configured else None,
+                should_choose_source=(
+                    should_choose_source if source_selection_configured else None
+                ),
+                handle_source=handle_source if source_selection_configured else None,
                 before_model_call=checkpoint_generation,
                 stages=(
                     None
@@ -791,27 +829,14 @@ class ChatService:
                     else lambda trace: on_generation_stage_trace(rag_run_id, trace)
                 ),
                 rag_run_id=rag_run_id,
+                target=AnswerExecutionTarget.FULL_ANSWER,
             )
 
-        if grouping_turn is not None and turn.exact_cache_enabled:
-            exact_execution = await ExactAnswerCache[
-                Union[ChatResponse, AnswerQuestionResult[AnswerSourceDecision]]
-            ](self._require_grouping()).execute(
-                grouping_turn,
-                question,
-                semantic_cache_enabled=turn.semantic_cache_enabled,
-                exact_cache_enabled=turn.exact_cache_enabled,
-                handle_decision=handle_exact_decision,
-                next_step=lambda _decision: run_answer_question(),
-            )
-            if exact_execution.cache_handled:
-                return cast(ChatResponse, exact_execution.result)
-            answer_result = cast(
-                AnswerQuestionResult[AnswerSourceDecision],
-                exact_execution.result,
-            )
-        else:
-            answer_result = await run_answer_question()
+        answer_result = await run_answer_question()
+        if answer_result.pre_retrieval_handled:
+            if exact_cache_response is None:
+                raise RuntimeError("정확 캐시가 처리됐지만 응답이 없습니다.")
+            return exact_cache_response
         if answer_result.flow_terminated:
             if answer_result.retrieval is None:
                 if terminal_response is None:

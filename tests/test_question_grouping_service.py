@@ -740,6 +740,8 @@ class PreparationFailureTest(_ServiceTestCase):
 
         self.assertEqual(FAILURE_STAGE_QUESTION_EMBEDDING, prepared.failure_stage)
         self.assertIsNone(prepared.vector.embedding)
+        self.assertEqual("질문 벡터 차원이 1536이 아닙니다: 2", prepared.failure.safe_message)
+        self.assertEqual(JudgeFailureKind.INTERNAL_ERROR, prepared.failure.kind)
         await service.record_preparation_failure(prepared)
         self.assertEqual([], self.store.embeddings)
 

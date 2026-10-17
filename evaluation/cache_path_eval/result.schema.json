@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Offline cache-path evaluation result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["resultSchemaVersion", "group", "runMode", "goldenVersion", "sourceCorpusVersion", "inputs", "summary"],
+  "properties": {
+    "resultSchemaVersion": {"const": 1},
+    "group": {"const": "cache-path"},
+    "runMode": {"const": "offline-observations"},
+    "goldenVersion": {"type": "string"},
+    "sourceCorpusVersion": {"type": ["string", "null"]},
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["draftsSha256", "judgeLabelsSha256", "observationsSha256"],
+      "properties": {
+        "draftsSha256": {"type": ["string", "null"]},
+        "judgeLabelsSha256": {"type": ["string", "null"]},
+        "observationsSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "summary": {"$ref": "#/$defs/groupedSummary"}
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["turns", "outcomes", "ineligibleServed", "nextStage", "latencyMs", "modelCalls", "embeddingCalls"],
+      "properties": {
+        "turns": {"type": "integer", "minimum": 0},
+        "outcomes": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "ineligibleServed": {"type": "integer", "minimum": 0},
+        "nextStage": {
+          "type": "object", "additionalProperties": false,
+          "required": ["passed", "failed", "notApplicable", "passRate", "denominator"],
+          "properties": {
+            "passed": {"type": "integer", "minimum": 0},
+            "failed": {"type": "integer", "minimum": 0},
+            "notApplicable": {"type": "integer", "minimum": 0},
+            "passRate": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+            "denominator": {"type": "integer", "minimum": 0}
+          }
+        },
+        "latencyMs": {
+          "type": "object", "additionalProperties": false,
+          "required": ["total", "mean", "median"],
+          "properties": {
+            "total": {"type": "integer", "minimum": 0},
+            "mean": {"type": ["number", "null"], "minimum": 0},
+            "median": {"type": ["number", "null"], "minimum": 0}
+          }
+        },
+        "modelCalls": {"type": "integer", "minimum": 0},
+        "embeddingCalls": {"type": "integer", "minimum": 0}
+      }
+    },
+    "groupedSummary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["all", "paths"],
+      "properties": {
+        "all": {"$ref": "#/$defs/metric"},
+        "paths": {
+          "type": "object", "additionalProperties": {
+            "type": "object", "additionalProperties": {"$ref": "#/$defs/metric"},
+            "minProperties": 1
+          }
+        }
+      }
+    }
+  }
+}
