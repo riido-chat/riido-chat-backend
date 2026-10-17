@@ -15,9 +15,12 @@ from app.core.model_trace import BeforeModelCallHook
 from app.retrieval.models import HybridSearchCall
 from app.answering.ports import (
     AnswerGeneratorPort,
+    PreRetrievalCacheHandlerPort,
+    PreRetrievalCacheInspectorPort,
     QueryResolverPort,
     RetrievalPort,
     SourceHandlerPort,
+    SourceSelectionEnabledPort,
     SourceSelectorPort,
 )
 from app.answering.trace import (
@@ -42,9 +45,9 @@ StageResult = TypeVar("StageResult")
 class AnswerExecutionTarget(str, Enum):
     """마지막으로 실행할 답변 경로 단계.
 
-    CACHE_DECISION 은 운영 답변 흐름의 앞부분(질의 확정, 검색, 캐시 판정)만
-    실행한다. 캐시 결과를 앱 응답으로 처리하거나 운영 로그에 기록하지 않고,
-    답변 생성 호출도 피한다.
+    CACHE_DECISION 은 검색 전 정확 캐시부터 질의 확정, 검색, 의미 캐시 판정까지
+    운영 순서대로 실행한 뒤 멈춘다. 캐시 결과를 앱 응답으로 처리하거나 운영 로그에
+    기록하지 않고, 답변 생성 호출도 피한다.
     """
 
     FULL_ANSWER = "FULL_ANSWER"
@@ -64,6 +67,8 @@ class AnswerQuestionResult(Generic[SourceDecision]):
     generation_error: Optional[Exception]
     generation_skipped: bool = False
     execution_trace: Optional[AnswerExecutionTrace] = None
+    pre_retrieval_decision: Optional[object] = None
+    pre_retrieval_handled: bool = False
 
 
 class AnswerQuestion(Generic[SourceDecision]):
@@ -77,7 +82,14 @@ class AnswerQuestion(Generic[SourceDecision]):
         *,
         resolve_query: QueryResolverPort,
         retrieve: RetrievalPort,
+        inspect_pre_retrieval_cache: Optional[
+            PreRetrievalCacheInspectorPort[object]
+        ] = None,
+        handle_pre_retrieval_cache: Optional[
+            PreRetrievalCacheHandlerPort[object]
+        ] = None,
         choose_source: Optional[SourceSelectorPort[SourceDecision]] = None,
+        should_choose_source: Optional[SourceSelectionEnabledPort] = None,
         handle_source: Optional[SourceHandlerPort[SourceDecision]] = None,
         before_model_call: BeforeModelCallHook,
         stages: Optional[GenerationStageSettings] = None,
@@ -92,11 +104,15 @@ class AnswerQuestion(Generic[SourceDecision]):
     ) -> AnswerQuestionResult[SourceDecision]:
         """운영 흐름을 실행하되 요청한 단계에서 종료한다.
 
-        CACHE_DECISION 은 운영과 같은 질의·검색·캐시 출처 선택을 수행한 뒤
-        판정 결과를 돌려준다. 출처 처리 콜백을 실행하지 않으며, 캐시 미적중이어도
-        답변 생성에는 진입하지 않는다.
+        CACHE_DECISION 은 검색 전 정확 캐시, 질의·검색·검색 후 캐시 출처 선택을
+        운영과 같은 순서로 수행한 뒤 판정 결과를 돌려준다. 결과 처리 콜백을
+        평가에서 제공한 어댑터가 소유하며, 답변 생성에는 진입하지 않는다.
         """
 
+        if (inspect_pre_retrieval_cache is None) != (
+            handle_pre_retrieval_cache is None
+        ):
+            raise ValueError("검색 전 캐시 조회와 결과 처리 함수는 함께 지정해야 합니다.")
         if target is AnswerExecutionTarget.CACHE_DECISION and choose_source is None:
             raise ValueError("CACHE_DECISION 대상에는 캐시 판정 함수가 필요합니다.")
 
@@ -163,6 +179,53 @@ class AnswerQuestion(Generic[SourceDecision]):
             record_trace()
             return AnswerQuestionResult(execution_trace=trace, **kwargs)  # type: ignore[arg-type]
 
+        pre_retrieval_decision: Optional[object] = None
+        pre_retrieval_handled = False
+        if inspect_pre_retrieval_cache is not None:
+            assert handle_pre_retrieval_cache is not None
+            pre_retrieval_decision = await run_stage(
+                ExecutionStage.EXACT_CACHE_LOOKUP, inspect_pre_retrieval_cache
+            )
+            pre_retrieval_handled = await run_stage(
+                ExecutionStage.EXACT_CACHE_HANDLING,
+                handle_pre_retrieval_cache,
+                pre_retrieval_decision,
+            )
+            if pre_retrieval_handled:
+                for skipped_stage in (
+                    ExecutionStage.QUERY_RESOLUTION,
+                    ExecutionStage.RETRIEVAL,
+                    ExecutionStage.SOURCE_SELECTION,
+                    ExecutionStage.ANSWER_GENERATION,
+                ):
+                    trace_events.append(
+                        ExecutionTraceEvent(
+                            skipped_stage,
+                            StageOutcome.SKIPPED,
+                            detail_code="EXACT_CACHE_HANDLED",
+                        )
+                    )
+                return make_result(
+                    resolved_query=None,
+                    retrieval=None,
+                    flow_terminated=True,
+                    source_decision=None,
+                    source_handled=False,
+                    generation_result=None,
+                    generation_error=None,
+                    generation_skipped=True,
+                    pre_retrieval_decision=pre_retrieval_decision,
+                    pre_retrieval_handled=True,
+                )
+        else:
+            trace_events.append(
+                ExecutionTraceEvent(
+                    ExecutionStage.EXACT_CACHE_LOOKUP,
+                    StageOutcome.SKIPPED,
+                    detail_code="NOT_CONFIGURED",
+                )
+            )
+
         resolved_query = await run_stage(ExecutionStage.QUERY_RESOLUTION, resolve_query)
         if resolved_query is None:
             trace_events.append(
@@ -189,6 +252,8 @@ class AnswerQuestion(Generic[SourceDecision]):
                 generation_result=None,
                 generation_error=None,
                 generation_skipped=True,
+                pre_retrieval_decision=pre_retrieval_decision,
+                pre_retrieval_handled=pre_retrieval_handled,
             )
 
         retrieval_result = await run_stage(ExecutionStage.RETRIEVAL, retrieve, resolved_query)
@@ -212,10 +277,17 @@ class AnswerQuestion(Generic[SourceDecision]):
                 generation_result=None,
                 generation_error=None,
                 generation_skipped=True,
+                pre_retrieval_decision=pre_retrieval_decision,
+                pre_retrieval_handled=pre_retrieval_handled,
             )
 
         source_decision: Optional[SourceDecision] = None
-        if choose_source is not None:
+        source_selection_enabled = choose_source is not None
+        if choose_source is not None and should_choose_source is not None:
+            source_selection_enabled = await run_stage(
+                ExecutionStage.SOURCE_SELECTION_POLICY, should_choose_source
+            )
+        if choose_source is not None and source_selection_enabled:
             source_decision = await run_stage(ExecutionStage.SOURCE_SELECTION, choose_source)
             if target is AnswerExecutionTarget.CACHE_DECISION:
                 trace_events.append(
@@ -241,6 +313,8 @@ class AnswerQuestion(Generic[SourceDecision]):
                     generation_result=None,
                     generation_error=None,
                     generation_skipped=True,
+                    pre_retrieval_decision=pre_retrieval_decision,
+                    pre_retrieval_handled=pre_retrieval_handled,
                 )
 
             if handle_source is None:
@@ -261,6 +335,47 @@ class AnswerQuestion(Generic[SourceDecision]):
                     generation_result=None,
                     generation_error=None,
                     generation_skipped=True,
+                    pre_retrieval_decision=pre_retrieval_decision,
+                    pre_retrieval_handled=pre_retrieval_handled,
+                )
+        else:
+            trace_events.append(
+                ExecutionTraceEvent(
+                    ExecutionStage.SOURCE_SELECTION,
+                    StageOutcome.SKIPPED,
+                    detail_code=(
+                        "POLICY_DISABLED"
+                        if choose_source is not None
+                        else "NOT_CONFIGURED"
+                    ),
+                )
+            )
+            if target is AnswerExecutionTarget.CACHE_DECISION:
+                trace_events.append(
+                    ExecutionTraceEvent(
+                        ExecutionStage.SOURCE_HANDLING,
+                        StageOutcome.SKIPPED,
+                        detail_code="POLICY_DISABLED",
+                    )
+                )
+                trace_events.append(
+                    ExecutionTraceEvent(
+                        ExecutionStage.ANSWER_GENERATION,
+                        StageOutcome.SKIPPED,
+                        detail_code="CACHE_DECISION_TARGET",
+                    )
+                )
+                return make_result(
+                    resolved_query=resolved_query,
+                    retrieval=retrieval_result,
+                    flow_terminated=False,
+                    source_decision=None,
+                    source_handled=False,
+                    generation_result=None,
+                    generation_error=None,
+                    generation_skipped=True,
+                    pre_retrieval_decision=pre_retrieval_decision,
+                    pre_retrieval_handled=pre_retrieval_handled,
                 )
 
         generation_result: Optional[FinalGenerationResult] = None
@@ -300,8 +415,9 @@ class AnswerQuestion(Generic[SourceDecision]):
                 source_handled=False,
                 generation_result=generation_result,
                 generation_error=error,
+                pre_retrieval_decision=pre_retrieval_decision,
+                pre_retrieval_handled=pre_retrieval_handled,
             )
-
         return make_result(
             resolved_query=resolved_query,
             retrieval=retrieval_result,
@@ -310,4 +426,6 @@ class AnswerQuestion(Generic[SourceDecision]):
             source_handled=False,
             generation_result=generation_result,
             generation_error=None,
+            pre_retrieval_decision=pre_retrieval_decision,
+            pre_retrieval_handled=pre_retrieval_handled,
         )

@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Private cache-path execution record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "group", "runId", "goldenVersion", "goldenCommit",
+    "sourceCorpusVersion", "inputs", "target", "versions", "executedAt",
+    "summary", "observations"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "group": {"const": "cache-path"},
+    "runId": {"type": "string", "minLength": 1},
+    "goldenVersion": {"type": "string", "minLength": 1},
+    "goldenCommit": {"$ref": "#/$defs/sha40"},
+    "sourceCorpusVersion": {"type": ["string", "null"]},
+    "inputs": {
+      "type": "object", "additionalProperties": false,
+      "required": ["draftsSha256", "judgeLabelsSha256", "observationsSha256"],
+      "properties": {
+        "draftsSha256": {"$ref": "#/$defs/sha256"},
+        "judgeLabelsSha256": {"$ref": "#/$defs/sha256"},
+        "observationsSha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "target": {
+      "type": "object", "additionalProperties": false,
+      "required": ["appBuildCommit", "serviceKey", "profileRevisionId", "documentGroupId", "indexVersionId", "embeddingConfigId"],
+      "properties": {
+        "appBuildCommit": {"$ref": "#/$defs/sha40"},
+        "serviceKey": {"type": "string", "minLength": 1},
+        "profileRevisionId": {"type": "integer", "minimum": 1},
+        "documentGroupId": {"type": "integer", "minimum": 1},
+        "indexVersionId": {"type": "integer", "minimum": 1},
+        "embeddingConfigId": {"type": "integer", "minimum": 1}
+      }
+    },
+    "versions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["cachePolicy", "embeddingModel", "judgeModel", "judgePrompt"],
+      "properties": {
+        "cachePolicy": {"type": "string", "minLength": 1},
+        "embeddingModel": {"type": ["string", "null"]},
+        "judgeModel": {"type": ["string", "null"]},
+        "judgePrompt": {"type": ["string", "null"]}
+      }
+    },
+    "executedAt": {"type": "string", "format": "date-time"},
+    "summary": {"$ref": "#/$defs/summary"},
+    "observations": {
+      "type": "array", "minItems": 1,
+      "items": {"$ref": "#/$defs/observation"}
+    }
+  },
+  "$defs": {
+    "sha40": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "metric": {
+      "type": "object", "additionalProperties": false,
+      "required": ["turns", "outcomes", "ineligibleServed", "nextStage", "latencyMs", "modelCalls", "embeddingCalls"],
+      "properties": {
+        "turns": {"type": "integer", "minimum": 0},
+        "outcomes": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "ineligibleServed": {"type": "integer", "minimum": 0},
+        "nextStage": {
+          "type": "object", "additionalProperties": false,
+          "required": ["passed", "failed", "notApplicable", "passRate", "denominator"],
+          "properties": {
+            "passed": {"type": "integer", "minimum": 0},
+            "failed": {"type": "integer", "minimum": 0},
+            "notApplicable": {"type": "integer", "minimum": 0},
+            "passRate": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+            "denominator": {"type": "integer", "minimum": 0}
+          }
+        },
+        "latencyMs": {
+          "type": "object", "additionalProperties": false,
+          "required": ["total", "mean", "median"],
+          "properties": {
+            "total": {"type": "integer", "minimum": 0},
+            "mean": {"type": ["number", "null"], "minimum": 0},
+            "median": {"type": ["number", "null"], "minimum": 0}
+          }
+        },
+        "modelCalls": {"type": "integer", "minimum": 0},
+        "embeddingCalls": {"type": "integer", "minimum": 0}
+      }
+    },
+    "summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["all", "paths"],
+      "properties": {
+        "all": {"$ref": "#/$defs/metric"},
+        "paths": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object", "additionalProperties": {"$ref": "#/$defs/metric"},
+            "minProperties": 1
+          }
+        }
+      }
+    },
+    "event": {
+      "type": "object", "additionalProperties": false,
+      "required": ["stage", "outcome", "durationMs", "detailCode"],
+      "properties": {
+        "stage": {"type": "string"},
+        "outcome": {"enum": ["SUCCEEDED", "FAILED", "SKIPPED"]},
+        "durationMs": {"type": "integer", "minimum": 0},
+        "detailCode": {"type": ["string", "null"]}
+      }
+    },
+    "observation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["itemId", "path", "turnNo", "kind", "outcome", "nextStage", "latencyMs", "modelCalls", "embeddingCalls", "trace"],
+      "properties": {
+        "itemId": {"type": "string", "minLength": 1},
+        "path": {"enum": ["P1", "P3", "P4", "P6"]},
+        "turnNo": {"type": "integer", "minimum": 1},
+        "kind": {"enum": ["exact_hit", "judge", "context_only"]},
+        "expectedExactHit": {"type": "boolean"},
+        "expectedServed": {"type": "boolean"},
+        "expectedJudgeDecision": {"type": "string"},
+        "expectedSubproblemKeysAny": {"type": "array", "items": {"type": "string"}},
+        "outcome": {"enum": ["SERVED", "SHADOW", "GROUP_DISABLED", "REJECTED", "SKIPPED", "FAILED"]},
+        "nextStage": {"enum": ["PASS", "FAIL", "NOT_APPLICABLE"]},
+        "latencyMs": {"type": "integer", "minimum": 0},
+        "modelCalls": {"type": "integer", "minimum": 0},
+        "embeddingCalls": {"type": "integer", "minimum": 0},
+        "trace": {
+          "type": "object", "additionalProperties": false,
+          "required": ["traceId", "target", "events"],
+          "properties": {
+            "traceId": {"type": "string", "format": "uuid"},
+            "target": {"enum": ["FULL_ANSWER", "CACHE_DECISION"]},
+            "events": {"type": "array", "items": {"$ref": "#/$defs/event"}}
+          }
+        }
+      }
+    }
+  }
+}

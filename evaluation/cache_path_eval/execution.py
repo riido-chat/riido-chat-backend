@@ -9,7 +9,14 @@ import time
 from dataclasses import dataclass
 from typing import Any, Optional, Protocol
 
-from app.answering.ports import QueryResolverPort, RetrievalPort, SourceSelectorPort
+from app.answering.ports import (
+    PreRetrievalCacheHandlerPort,
+    PreRetrievalCacheInspectorPort,
+    QueryResolverPort,
+    RetrievalPort,
+    SourceSelectionEnabledPort,
+    SourceSelectorPort,
+)
 from app.answering.use_case import (
     AnswerExecutionTarget,
     AnswerQuestion,
@@ -105,6 +112,9 @@ class CacheDecisionCallbacks:
     retrieve: RetrievalPort
     choose_source: SourceSelectorPort[Any]
     summarize: CacheDecisionSummarizerPort
+    inspect_exact_cache: Optional[PreRetrievalCacheInspectorPort[Any]] = None
+    handle_exact_cache: Optional[PreRetrievalCacheHandlerPort[Any]] = None
+    should_choose_source: Optional[SourceSelectionEnabledPort] = None
 
 
 class CacheOnlyGenerationAttempt(RuntimeError):
@@ -147,7 +157,10 @@ class CacheDecisionExecutionAdapter:
         result = await self._answer_question.execute(
             resolve_query=callbacks.resolve_query,
             retrieve=callbacks.retrieve,
+            inspect_pre_retrieval_cache=callbacks.inspect_exact_cache,
+            handle_pre_retrieval_cache=callbacks.handle_exact_cache,
             choose_source=callbacks.choose_source,
+            should_choose_source=callbacks.should_choose_source,
             # This callback both prevents accidental generation and guards against
             # a future regression that ignores the requested execution target.
             before_model_call=_forbid_generation,

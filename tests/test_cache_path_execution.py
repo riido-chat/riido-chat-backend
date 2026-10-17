@@ -71,6 +71,7 @@ class CacheDecisionExecutionAdapterTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual("abc123", observation.execution_trace.replay_context.code_revision)
         self.assertEqual(
             [
+                (ExecutionStage.EXACT_CACHE_LOOKUP, StageOutcome.SKIPPED),
                 (ExecutionStage.QUERY_RESOLUTION, StageOutcome.SUCCEEDED),
                 (ExecutionStage.RETRIEVAL, StageOutcome.SUCCEEDED),
                 (ExecutionStage.SOURCE_SELECTION, StageOutcome.SUCCEEDED),
@@ -83,6 +84,42 @@ class CacheDecisionExecutionAdapterTests(unittest.IsolatedAsyncioTestCase):
         trace_recorder.record.assert_called_once_with(observation.execution_trace)
         generation.generate_answer.assert_not_awaited()
         summarize.assert_called_once()
+
+    async def test_exact_cache_decision_can_stop_before_query_resolution(self):
+        generation = SimpleNamespace(generate_answer=AsyncMock())
+        adapter = CacheDecisionExecutionAdapter(AnswerQuestion(generation))
+        resolve_query = AsyncMock(return_value="must not resolve")
+        retrieve = AsyncMock(return_value=HybridSearchCall())
+        exact = AsyncMock(return_value=SimpleNamespace(outcome="SERVED"))
+        handle_exact = AsyncMock(return_value=True)
+        summarize = Mock(
+            return_value=CacheDecisionMetrics(
+                outcome="SERVED",
+                next_stage="NOT_APPLICABLE",
+                model_calls=1,
+                embedding_calls=0,
+            )
+        )
+
+        observation = await adapter.execute(
+            item_id="SYN-EXACT",
+            turn_no=1,
+            callbacks=CacheDecisionCallbacks(
+                resolve_query=resolve_query,
+                retrieve=retrieve,
+                choose_source=AsyncMock(),
+                summarize=summarize,
+                inspect_exact_cache=exact,
+                handle_exact_cache=handle_exact,
+            ),
+        )
+
+        self.assertEqual("SERVED", observation.outcome)
+        exact.assert_awaited_once()
+        handle_exact.assert_awaited_once()
+        resolve_query.assert_not_awaited()
+        retrieve.assert_not_awaited()
+        generation.generate_answer.assert_not_awaited()
 
 
 if __name__ == "__main__":

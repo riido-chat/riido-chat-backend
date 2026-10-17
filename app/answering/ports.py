@@ -31,6 +31,18 @@ class SourceHandlerPort(Protocol[SourceDecision]):
     def __call__(self, decision: SourceDecision) -> Awaitable[bool]: ...
 
 
+class SourceSelectionEnabledPort(Protocol):
+    def __call__(self) -> Awaitable[bool]: ...
+
+
+class PreRetrievalCacheInspectorPort(Protocol[SourceDecision]):
+    def __call__(self) -> Awaitable[SourceDecision]: ...
+
+
+class PreRetrievalCacheHandlerPort(Protocol[SourceDecision]):
+    def __call__(self, decision: SourceDecision) -> Awaitable[bool]: ...
+
+
 class AnswerGeneratorPort(Protocol):
     async def generate_answer(
         self, resolved_query: str, candidates: list[Any], **kwargs: Any
