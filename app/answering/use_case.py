@@ -1,17 +1,21 @@
 """문맥 해석부터 근거 기반 답변 생성까지 정해진 순서로 실행한다."""
 
+from __future__ import annotations
+
 import logging
 import uuid
 from dataclasses import dataclass
 from enum import Enum
-from typing import Awaitable, Callable, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Awaitable, Callable, Generic, Optional, TypeVar
 
-from app.answering.generator import GenerationStageSettings
 from app.answering.models import FinalGenerationResult, GenerationStageTrace
-from app.answering.service import GenerationService
 from app.chat.progress import OnProgressStageHook
 from app.core.model_trace import BeforeModelCallHook
 from app.retrieval.models import HybridSearchCall
+
+if TYPE_CHECKING:
+    from app.answering.generator import GenerationStageSettings
+    from app.answering.service import GenerationService
 
 
 logger = logging.getLogger(__name__)
@@ -89,6 +93,7 @@ class AnswerQuestion(Generic[SourceDecision]):
                 source_handled=False,
                 generation_result=None,
                 generation_error=None,
+                generation_skipped=True,
             )
 
         retrieval_result = await retrieve(resolved_query)
@@ -101,6 +106,7 @@ class AnswerQuestion(Generic[SourceDecision]):
                 source_handled=False,
                 generation_result=None,
                 generation_error=None,
+                generation_skipped=True,
             )
 
         source_decision: Optional[SourceDecision] = None
