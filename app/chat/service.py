@@ -65,7 +65,11 @@ from app.answering.models import (
     FinalWithheldReason,
     GenerationStageTrace,
 )
-from app.answering.use_case import AnswerQuestion, AnswerQuestionResult
+from app.answering.use_case import (
+    AnswerExecutionTarget,
+    AnswerQuestion,
+    AnswerQuestionResult,
+)
 from app.retrieval.hybrid_retriever import HybridRetriever
 from app.retrieval.models import (
     HybridRetrievalResult,
@@ -791,6 +795,7 @@ class ChatService:
                     else lambda trace: on_generation_stage_trace(rag_run_id, trace)
                 ),
                 rag_run_id=rag_run_id,
+                target=AnswerExecutionTarget.FULL_ANSWER,
             )
 
         if grouping_turn is not None and turn.exact_cache_enabled:

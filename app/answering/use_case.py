@@ -3,6 +3,7 @@
 import logging
 import uuid
 from dataclasses import dataclass
+from enum import Enum
 from typing import Awaitable, Callable, Generic, Optional, TypeVar
 
 from app.answering.generator import GenerationStageSettings
@@ -18,6 +19,18 @@ logger = logging.getLogger(__name__)
 SourceDecision = TypeVar("SourceDecision")
 
 
+class AnswerExecutionTarget(str, Enum):
+    """마지막으로 실행할 답변 경로 단계.
+
+    CACHE_DECISION 은 운영 답변 흐름의 앞부분(질의 확정, 검색, 캐시 판정)만
+    실행한다. 캐시 결과를 앱 응답으로 처리하거나 운영 로그에 기록하지 않고,
+    답변 생성 호출도 피한다.
+    """
+
+    FULL_ANSWER = "FULL_ANSWER"
+    CACHE_DECISION = "CACHE_DECISION"
+
+
 @dataclass(frozen=True)
 class AnswerQuestionResult(Generic[SourceDecision]):
     """유스케이스 단계 결과. 기록과 외부 응답 변환은 채팅 계층이 맡는다."""
@@ -29,6 +42,7 @@ class AnswerQuestionResult(Generic[SourceDecision]):
     source_handled: bool
     generation_result: Optional[FinalGenerationResult]
     generation_error: Optional[Exception]
+    generation_skipped: bool = False
 
 
 class AnswerQuestion(Generic[SourceDecision]):
@@ -53,8 +67,17 @@ class AnswerQuestion(Generic[SourceDecision]):
             Callable[[GenerationStageTrace], None]
         ] = None,
         rag_run_id: Optional[uuid.UUID] = None,
+        target: AnswerExecutionTarget = AnswerExecutionTarget.FULL_ANSWER,
     ) -> AnswerQuestionResult[SourceDecision]:
-        """문맥 해석과 검색 뒤 출처를 선택하고, 재사용으로 끝나지 않을 때만 생성한다."""
+        """운영 흐름을 실행하되 요청한 단계에서 종료한다.
+
+        CACHE_DECISION 은 운영과 같은 질의·검색·캐시 출처 선택을 수행한 뒤
+        판정 결과를 돌려준다. 출처 처리 콜백을 실행하지 않으며, 캐시 미적중이어도
+        답변 생성에는 진입하지 않는다.
+        """
+
+        if target is AnswerExecutionTarget.CACHE_DECISION and choose_source is None:
+            raise ValueError("CACHE_DECISION 대상에는 캐시 판정 함수가 필요합니다.")
 
         resolved_query = await resolve_query()
         if resolved_query is None:
@@ -82,9 +105,21 @@ class AnswerQuestion(Generic[SourceDecision]):
 
         source_decision: Optional[SourceDecision] = None
         if choose_source is not None:
+            source_decision = await choose_source()
+            if target is AnswerExecutionTarget.CACHE_DECISION:
+                return AnswerQuestionResult(
+                    resolved_query=resolved_query,
+                    retrieval=retrieval_result,
+                    flow_terminated=False,
+                    source_decision=source_decision,
+                    source_handled=False,
+                    generation_result=None,
+                    generation_error=None,
+                    generation_skipped=True,
+                )
+
             if handle_source is None:
                 raise ValueError("답변 출처 선택에는 결과 처리 함수가 필요합니다.")
-            source_decision = await choose_source()
             if await handle_source(source_decision):
                 return AnswerQuestionResult(
                     resolved_query=resolved_query,
@@ -94,6 +129,7 @@ class AnswerQuestion(Generic[SourceDecision]):
                     source_handled=True,
                     generation_result=None,
                     generation_error=None,
+                    generation_skipped=True,
                 )
 
         generation_result: Optional[FinalGenerationResult] = None
