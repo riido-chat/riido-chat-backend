@@ -1,0 +1,35 @@
+# 캐시 경로 오프라인 평가
+
+이 도구는 캐시 서비스를 실행하지 않는다. 동결된 cache-path 선택 manifest와 별도로
+수집한 턴별 관측값(JSONL)을 대조해 P1/P3/P4/P6 경로별 집계 결과를 만든다. 이 방식으로
+합성 입력을 검증할 수 있고, 나중에 승인된 실행에서 얻은 관측값도 같은 결과 형식으로
+기록할 수 있다.
+
+선택 manifest는 비공개 평가 등록부의 `scripts/build_cache_suite.py`가 만든다. 질문·답변
+텍스트는 결과에 복사하지 않는다. 관측 JSONL에는 manifest의 `itemId`, `turnNo`와 다음
+필드만 허용한다.
+
+| 필드 | 의미 |
+| --- | --- |
+| `outcome` | `SERVED`, `SHADOW`, `GROUP_DISABLED`, `REJECTED`, `SKIPPED`, `FAILED` 중 실제 관측 결과 |
+| `nextStage` | `PASS`, `FAIL`, `NOT_APPLICABLE`; PASS 비율의 분모는 PASS와 FAIL 합계 |
+| `latencyMs` | 해당 턴의 캐시 경로 처리 시간(0 이상의 정수) |
+| `modelCalls` | 관측된 모델 호출 횟수 |
+| `embeddingCalls` | 관측된 임베딩 호출 횟수 |
+
+모든 manifest 턴을 한 번씩 기록해야 한다. `expectedServed`가 false인 턴에서 `SERVED`가
+관측되면 `ineligibleServed`에 집계한다. `context_only`는 `expectedServed` 기준이 없으므로
+이 지표의 분모에 포함되지 않는다. 결과 파일에는 개별 문항 ID와 원문이 없고 집계값 및
+입력 파일 SHA-256만 담긴다. 입력에 질문·답변 등 허용되지 않은 필드가 있으면 실행을
+거부한다.
+
+```sh
+python -m evaluation.cache_path_eval.runner \
+  --manifest /private/path/cache-path-manifest.json \
+  --observations /private/path/cache-observations.jsonl \
+  --out /private/path/cache-path-result.json
+```
+
+출력 파일은 이미 존재하면 덮어쓰지 않는다. 이 명령은 DB, 모델, 임베딩 서비스나 네트워크를
+호출하지 않는다. 관측값을 만드는 실제 실행 절차와 시스템·프로필 식별자는 별도 승인 및
+사전 등록이 필요하며 이 도구가 이를 대신하지 않는다.
