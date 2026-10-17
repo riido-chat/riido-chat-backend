@@ -55,3 +55,16 @@ python -m evaluation.cache_path_eval.runner \
 질문·답변·후보·문서 본문을 허용하지 않는다. 다만 특정 서비스의 실제 평가 전용 읽기 어댑터와
 프로필을 선택하는 CLI 설정은 아직 없다. 기존 `runner` CLI는 계속 모델과 DB를 호출하지 않는
 오프라인 집계기다.
+
+## 프로필 선택 실행 경계
+
+`cli.py`는 명시적으로 제공한 실행 설정과 frozen manifest를 읽고, `service_key`로 등록된 프로필을
+선택해 공통 실행기에 전달한다. `profile_registry.py`는 프로필 팩토리 선택만 담당하며 DB, 모델,
+임베딩 클라이언트를 만들지 않는다. `RiidoChatCachePathEvaluationProfile`도 읽기 전용 서비스 데이터
+포트와 비공개 평가 provenance 포트를 주입받는 경계다.
+
+현재 실제 서비스별 읽기 데이터 어댑터와 기본 프로필 등록은 아직 없다. `python -m
+evaluation.cache_path_eval.cli`는 서비스 런처가 `CacheDecisionExecutionAdapter`를 주입하지 않으면
+의도적으로 거부한다. 따라서 이 단계의 프로필 선택은 테스트 가능한 실행 조립부이며, 배포 DB를
+대상으로 한 실제 실행 도구가 아니다. 운영 `ChatService`의 콜백을 재사용하면 그룹 판정·캐시 시도·턴
+로그를 운영 테이블에 쓸 수 있으므로 평가 어댑터로 등록해서는 안 된다.
