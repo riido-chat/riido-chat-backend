@@ -82,6 +82,24 @@ class CachePathRunTests(unittest.IsolatedAsyncioTestCase):
                 )
 
         class Store:
+            def validate_manifest(self, _metadata, received_manifest):
+                return received_manifest["turns"]
+
+            def reserve(self, _metadata):
+                self.reserved = True
+
+            def checkpoint(self, _metadata, observation):
+                self.checkpoints = getattr(self, "checkpoints", []) + [observation]
+
+            def fail(self, _metadata, failure):
+                self.failure = failure
+
+            def begin_finalization(self, _metadata):
+                self.finalizing = True
+
+            def succeed(self, _metadata):
+                self.succeeded = True
+
             def write_run(self, received_metadata, **kwargs):
                 self.metadata = received_metadata
                 self.record = kwargs
@@ -170,9 +188,23 @@ class CachePathRunTests(unittest.IsolatedAsyncioTestCase):
                 )
 
         class Store:
-            def write_failed_trace(self, _metadata, **kwargs):
-                self.failure = kwargs
-                return "/private/failure.json"
+            def validate_manifest(self, _metadata, received_manifest):
+                return received_manifest["turns"]
+
+            def reserve(self, _metadata):
+                self.reserved = True
+
+            def checkpoint(self, _metadata, observation):
+                self.checkpoints = getattr(self, "checkpoints", []) + [observation]
+
+            def fail(self, _metadata, failure):
+                self.failure = failure
+
+            def begin_finalization(self, _metadata):
+                self.finalizing = True
+
+            def succeed(self, _metadata):
+                self.succeeded = True
 
         store = Store()
         with self.assertRaisesRegex(RuntimeError, "private question"):
@@ -186,7 +218,7 @@ class CachePathRunTests(unittest.IsolatedAsyncioTestCase):
                 ),
             )
 
-        trace = store.failure["trace"]
+        trace = store.failure.detail["trace"]
         failed = [event for event in trace.events if event.outcome.value == "FAILED"]
         self.assertEqual("QUERY_RESOLUTION", failed[0].stage.value)
         self.assertEqual("RuntimeError", failed[0].detail_code)

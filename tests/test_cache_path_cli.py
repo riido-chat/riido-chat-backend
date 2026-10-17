@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
+from app.answering.trace import ReplayContext
 from evaluation.cache_path_eval.cli import load_run_config, run_cache_path_cli
 from evaluation.cache_path_eval.execution import CacheDecisionObservation
 from evaluation.cache_path_eval.profile_registry import (
@@ -77,9 +78,20 @@ class CachePathCliTests(unittest.IsolatedAsyncioTestCase):
                     return object()
 
                 def replay_context_for_turn(self, _metadata, _turn):
-                    return object()
+                    return ReplayContext(
+                        run_id="cli-run",
+                        item_id="ITEM-1",
+                        turn_no=1,
+                        golden_version="g-v1",
+                        source_corpus_version=None,
+                        service_version="test-service",
+                        code_revision="a" * 40,
+                        cache_policy_version="policy-1",
+                        embedding_model_version=None,
+                    )
 
             def factory(*, config, metadata, manifest):
+                self.assertTrue(calls.get("availability_checked"))
                 calls["factory"] = (config, metadata.service_key, manifest["goldenVersion"])
                 return Profile()
 
@@ -88,6 +100,27 @@ class CachePathCliTests(unittest.IsolatedAsyncioTestCase):
             class FakeStore:
                 def __init__(self, registry_root):
                     calls["store_root"] = registry_root
+
+                def validate_manifest(self, _metadata, manifest):
+                    return manifest["turns"]
+
+                def check_available(self, _metadata):
+                    calls["availability_checked"] = True
+
+                def reserve(self, _metadata):
+                    calls["reserved"] = True
+
+                def checkpoint(self, _metadata, _observation):
+                    calls["checkpointed"] = True
+
+                def succeed(self, _metadata):
+                    calls["succeeded"] = True
+
+                def fail(self, _metadata, _failure):
+                    calls["failed"] = True
+
+                def begin_finalization(self, _metadata):
+                    calls["finalizing"] = True
 
                 def write_run(self, _metadata, **kwargs):
                     calls["written"] = kwargs
@@ -117,6 +150,7 @@ class CachePathCliTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual({"selector": "safe"}, calls["factory"][0])
             self.assertEqual("ITEM-1", calls["turn"])
             self.assertEqual(root, calls["store_root"])
+            self.assertTrue(calls["availability_checked"])
             self.assertEqual(str(root / "result.json"), result.result_path)
 
     def test_requires_all_explicit_metadata_fields(self):

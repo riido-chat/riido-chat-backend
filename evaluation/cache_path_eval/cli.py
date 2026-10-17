@@ -11,6 +11,7 @@ import argparse
 import asyncio
 import json
 import sys
+from copy import deepcopy
 from dataclasses import fields
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional, Sequence
@@ -71,11 +72,16 @@ async def run_cache_path_cli(
         raise ValueError("선택 manifest가 cache-path 형식이 아닙니다.")
     if manifest.get("goldenVersion") != metadata.golden_version:
         raise ValueError("manifest와 실행 metadata의 goldenVersion이 다릅니다.")
+    # Read-only precheck avoids constructing a profile for known duplicate IDs.
+    # The factory must remain local and side-effect-free; atomic reservation occurs
+    # in the shared lifecycle before any profile callback can run.
+    store = store_factory(registry_root)
+    store.validate_manifest(metadata, manifest)
+    store.check_available(metadata)
     factory = profile_factory_resolver(metadata.service_key)
-    profile = factory(config=profile_config, metadata=metadata, manifest=manifest)
+    profile = factory(config=profile_config, metadata=metadata, manifest=deepcopy(manifest))
     if asyncio.iscoroutine(profile):
         profile = await profile
-    store = store_factory(registry_root)
     return await execute_cache_path_run(
         manifest=manifest,
         metadata=metadata,

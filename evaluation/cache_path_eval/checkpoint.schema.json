@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Private cache-path turn checkpoint",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["itemId", "turnNo", "outcome", "nextStage", "latencyMs", "modelCalls", "embeddingCalls", "trace"],
+  "properties": {
+    "itemId": {"type": "string", "minLength": 1},
+    "turnNo": {"type": "integer", "minimum": 1},
+    "outcome": {"enum": ["SERVED", "SHADOW", "GROUP_DISABLED", "REJECTED", "SKIPPED", "FAILED"]},
+    "nextStage": {"enum": ["PASS", "FAIL", "NOT_APPLICABLE"]},
+    "latencyMs": {"type": "integer", "minimum": 0},
+    "modelCalls": {"type": "integer", "minimum": 0},
+    "embeddingCalls": {"type": "integer", "minimum": 0},
+    "trace": {"$ref": "#/$defs/trace"}
+  },
+  "$defs": {
+    "trace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["traceId", "target", "events"],
+      "properties": {
+        "traceId": {"type": "string", "format": "uuid"},
+        "target": {"enum": ["FULL_ANSWER", "CACHE_DECISION"]},
+        "events": {"type": "array", "items": {"$ref": "#/$defs/event"}}
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage", "outcome", "durationMs", "detailCode"],
+      "properties": {
+        "stage": {"type": "string"},
+        "outcome": {"enum": ["SUCCEEDED", "FAILED", "SKIPPED"]},
+        "durationMs": {"type": "integer", "minimum": 0},
+        "detailCode": {"type": ["string", "null"], "pattern": "^[A-Za-z][A-Za-z0-9_]{0,99}$"}
+      }
+    }
+  }
+}

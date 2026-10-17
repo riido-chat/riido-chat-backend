@@ -13,6 +13,7 @@ from typing import Any, Mapping, Sequence
 
 from app.answering.trace import AnswerExecutionTrace
 from evaluation.cache_path_eval.execution import CacheDecisionObservation
+from evaluation.core.run import EvaluationFailure
 
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _SHA64 = re.compile(r"^[0-9a-f]{64}$")
@@ -129,64 +130,11 @@ class CachePathRunStore:
         summary: Mapping[str, Any],
         observation_sha256: str,
     ) -> Path:
-        if manifest.get("group") != "cache-path":
-            raise CachePathStoreError("cache-path manifest가 아닙니다.")
-        if manifest.get("goldenVersion") != metadata.golden_version:
-            raise CachePathStoreError("manifest와 실행 메타데이터의 골든셋 버전이 다릅니다.")
+        turns = self.validate_manifest(metadata, manifest)
         if not _SHA64.fullmatch(observation_sha256):
             raise CachePathStoreError("관측 결과 해시는 64자리 SHA-256이어야 합니다.")
-        turns = manifest.get("turns")
-        if not isinstance(turns, list):
-            raise CachePathStoreError("manifest에 문항 턴 목록이 없습니다.")
         manifest_inputs = manifest.get("inputs")
-        if not isinstance(manifest_inputs, dict) or set(manifest_inputs) != {
-            "draftsSha256",
-            "judgeLabelsSha256",
-        }:
-            raise CachePathStoreError("manifest 입력 해시가 없거나 형식이 잘못되었습니다.")
-        if any(
-            value is not None
-            and (not isinstance(value, str) or not _SHA64.fullmatch(value))
-            for value in manifest_inputs.values()
-        ):
-            raise CachePathStoreError("manifest 입력 해시 형식이 잘못되었습니다.")
-
-        expected = {}
-        for turn in turns:
-            if not isinstance(turn, dict):
-                raise CachePathStoreError("manifest 턴 형식이 잘못되었습니다.")
-            key = (turn.get("itemId"), turn.get("turnNo"))
-            if set(turn) - _MANIFEST_TURN_FIELDS:
-                raise CachePathStoreError("결과 manifest에 텍스트 등 허용되지 않은 필드가 있습니다.")
-            if (
-                not isinstance(key[0], str)
-                or not key[0]
-                or not isinstance(key[1], int)
-                or isinstance(key[1], bool)
-                or key[1] < 1
-                or turn.get("path") not in {"P1", "P3", "P4", "P6"}
-                or turn.get("kind") not in {"exact_hit", "judge", "context_only"}
-            ):
-                raise CachePathStoreError("manifest 턴의 식별자나 분류가 잘못되었습니다.")
-            if not isinstance(turn.get("expectedExactHit"), bool):
-                raise CachePathStoreError("manifest 턴의 정확 일치 기대값이 잘못되었습니다.")
-            if "expectedServed" in turn and not isinstance(turn["expectedServed"], bool):
-                raise CachePathStoreError("manifest 턴의 서빙 기대값이 잘못되었습니다.")
-            if turn.get("kind") == "judge":
-                if turn.get("expectedJudgeDecision") not in {
-                    "CONNECT",
-                    "SEPARATE",
-                    "UNCLASSIFIED",
-                }:
-                    raise CachePathStoreError("manifest 판별 기대값이 잘못되었습니다.")
-                keys = turn.get("expectedSubproblemKeysAny")
-                if not isinstance(keys, list) or any(
-                    not isinstance(value, str) for value in keys
-                ):
-                    raise CachePathStoreError("manifest 세부 문제 key가 잘못되었습니다.")
-            if key in expected:
-                raise CachePathStoreError("manifest에 중복 문항 턴이 있습니다.")
-            expected[key] = turn
+        expected = {(turn["itemId"], turn["turnNo"]): turn for turn in turns}
 
         actual = set()
         serialized_observations = []
@@ -245,6 +193,167 @@ class CachePathRunStore:
         destination.parent.mkdir(parents=True, exist_ok=True)
         self._write_create_only(destination, rendered)
         return destination
+
+    def validate_manifest(
+        self, metadata: CachePathRunMetadata, manifest: Mapping[str, Any]
+    ) -> list[dict[str, Any]]:
+        """Validate all cache-path inputs before profiles can perform service work."""
+        if manifest.get("group") != "cache-path":
+            raise CachePathStoreError("cache-path manifest가 아닙니다.")
+        if manifest.get("goldenVersion") != metadata.golden_version:
+            raise CachePathStoreError("manifest와 실행 메타데이터의 골든셋 버전이 다릅니다.")
+        turns = manifest.get("turns")
+        if not isinstance(turns, list) or not turns:
+            raise CachePathStoreError("manifest에 문항 턴 목록이 없습니다.")
+        manifest_inputs = manifest.get("inputs")
+        if not isinstance(manifest_inputs, dict) or set(manifest_inputs) != {"draftsSha256", "judgeLabelsSha256"}:
+            raise CachePathStoreError("manifest 입력 해시가 없거나 형식이 잘못되었습니다.")
+        if any(value is not None and (not isinstance(value, str) or not _SHA64.fullmatch(value)) for value in manifest_inputs.values()):
+            raise CachePathStoreError("manifest 입력 해시 형식이 잘못되었습니다.")
+        expected: set[tuple[str, int]] = set()
+        for turn in turns:
+            if not isinstance(turn, dict):
+                raise CachePathStoreError("manifest 턴 형식이 잘못되었습니다.")
+            if set(turn) - _MANIFEST_TURN_FIELDS:
+                raise CachePathStoreError("결과 manifest에 텍스트 등 허용되지 않은 필드가 있습니다.")
+            item_id, turn_no = turn.get("itemId"), turn.get("turnNo")
+            if (
+                not isinstance(item_id, str) or not item_id
+                or not isinstance(turn_no, int) or isinstance(turn_no, bool) or turn_no < 1
+                or turn.get("path") not in {"P1", "P3", "P4", "P6"}
+                or turn.get("kind") not in {"exact_hit", "judge", "context_only"}
+                or not isinstance(turn.get("expectedExactHit"), bool)
+            ):
+                raise CachePathStoreError("manifest 턴의 식별자나 분류가 잘못되었습니다.")
+            if "expectedServed" in turn and not isinstance(turn["expectedServed"], bool):
+                raise CachePathStoreError("manifest 턴의 서빙 기대값이 잘못되었습니다.")
+            if turn["kind"] == "context_only" and "expectedServed" in turn:
+                raise CachePathStoreError("context-only 턴에는 캐시 기대 결과를 둘 수 없습니다.")
+            if turn["kind"] != "context_only" and not isinstance(turn.get("expectedServed"), bool):
+                raise CachePathStoreError("캐시 기대 결과가 없습니다.")
+            if turn["kind"] == "judge":
+                if turn.get("expectedJudgeDecision") not in {"CONNECT", "SEPARATE", "UNCLASSIFIED"}:
+                    raise CachePathStoreError("manifest 판별 기대값이 잘못되었습니다.")
+                keys = turn.get("expectedSubproblemKeysAny")
+                if not isinstance(keys, list) or any(not isinstance(value, str) for value in keys):
+                    raise CachePathStoreError("manifest 세부 문제 key가 잘못되었습니다.")
+            key = (item_id, turn_no)
+            if key in expected:
+                raise CachePathStoreError("manifest에 중복 문항 턴이 있습니다.")
+            expected.add(key)
+        return turns
+
+    def reserve(self, metadata: CachePathRunMetadata) -> None:
+        """Atomically reserve this run ID before any expensive service callback."""
+        self.check_available(metadata)
+        state_dir = self._registry_root / "evals" / "cache-path" / "state"
+        state_dir.mkdir(parents=True, exist_ok=True)
+        destination = self._run_state_path(metadata)
+        initial = {"schemaVersion": 1, "runId": metadata.run_id, "status": "RUNNING", "checkpointCount": 0}
+        encoded = json.dumps(initial, sort_keys=True, separators=(",", ":")) + "\n"
+        try:
+            descriptor = os.open(destination, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        except FileExistsError as error:
+            raise CachePathStoreError(f"run_id가 이미 예약되었습니다: {metadata.run_id}") from error
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
+
+    def check_available(self, metadata: CachePathRunMetadata) -> None:
+        """Read-only duplicate check used before profile factory construction."""
+        result = self._registry_root / "evals" / "cache-path" / f"{metadata.run_id}.json"
+        if result.exists() or self._run_state_path(metadata).exists():
+            raise CachePathStoreError(f"run_id가 이미 예약되었습니다: {metadata.run_id}")
+
+    def checkpoint(self, metadata: CachePathRunMetadata, observation: CacheDecisionObservation) -> None:
+        """Durably retain one successful, allowlisted observation."""
+        trace = observation.execution_trace
+        if trace is None:
+            raise CachePathStoreError("재현용 실행 trace가 없는 관측은 checkpoint하지 않습니다.")
+        self._validate_trace(trace, metadata, observation)
+        directory = self._registry_root / "evals" / "cache-path" / "checkpoints" / metadata.run_id
+        directory.mkdir(parents=True, exist_ok=True)
+        record = {**observation.to_row(), "trace": _trace_to_dict(trace)}
+        destination = directory / f"{_safe_filename(observation.item_id)}-{observation.turn_no}.json"
+        rendered = json.dumps(record, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n"
+        self._write_create_only(destination, rendered)
+        state = self._read_state(metadata)
+        state["checkpointCount"] += 1
+        state["lastCheckpoint"] = {"itemId": observation.item_id, "turnNo": observation.turn_no}
+        self._write_atomic(self._run_state_path(metadata), state)
+
+    def fail(self, metadata: CachePathRunMetadata, failure: EvaluationFailure) -> None:
+        """Persist stage and exception type only; raw exception text is discarded."""
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,99}", failure.stage):
+            safe_stage = "unknown"
+        else:
+            safe_stage = failure.stage
+        error_type = failure.error_type if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,99}", failure.error_type) else "Exception"
+        detail = failure.detail if isinstance(failure.detail, dict) else {}
+        item_id = detail.get("itemId")
+        turn_no = detail.get("turnNo")
+        final_result = self._registry_root / "evals" / "cache-path" / f"{metadata.run_id}.json"
+        finalization_incomplete = final_result.exists()
+        run_status = "FINALIZATION_INCOMPLETE" if finalization_incomplete else "FAILED"
+        record: dict[str, Any] = {
+            "schemaVersion": 1,
+            "group": "cache-path-failed-run",
+            "runId": metadata.run_id,
+            "status": run_status,
+            "failureStage": safe_stage,
+            "errorType": error_type,
+        }
+        if isinstance(item_id, str) and item_id and isinstance(turn_no, int) and not isinstance(turn_no, bool) and turn_no >= 1:
+            record.update(itemId=item_id, turnNo=turn_no)
+        trace = detail.get("trace")
+        if isinstance(trace, AnswerExecutionTrace):
+            self._validate_trace_context(trace, metadata, item_id, turn_no)
+            record["trace"] = _trace_to_dict(trace)
+        destination = self._registry_root / "evals" / "cache-path" / "failures" / f"{metadata.run_id}.json"
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        self._write_create_only(destination, json.dumps(record, ensure_ascii=False, sort_keys=True, indent=2) + "\n")
+        state = self._read_state(metadata)
+        state.update(status=run_status, failureStage=safe_stage, errorType=error_type)
+        self._write_atomic(self._run_state_path(metadata), state)
+
+    def begin_finalization(self, metadata: CachePathRunMetadata) -> None:
+        state = self._read_state(metadata)
+        state["status"] = "FINALIZING"
+        self._write_atomic(self._run_state_path(metadata), state)
+
+    def succeed(self, metadata: CachePathRunMetadata) -> None:
+        state = self._read_state(metadata)
+        state["status"] = "SUCCEEDED"
+        self._write_atomic(self._run_state_path(metadata), state)
+
+    def _run_state_path(self, metadata: CachePathRunMetadata) -> Path:
+        return self._registry_root / "evals" / "cache-path" / "state" / f"{metadata.run_id}.json"
+
+    def _read_state(self, metadata: CachePathRunMetadata) -> dict[str, Any]:
+        try:
+            value = json.loads(self._run_state_path(metadata).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise CachePathStoreError("run 상태를 읽을 수 없습니다.") from error
+        if not isinstance(value, dict) or value.get("runId") != metadata.run_id:
+            raise CachePathStoreError("run 상태가 올바르지 않습니다.")
+        return value
+
+    @staticmethod
+    def _write_atomic(destination: Path, value: Mapping[str, Any]) -> None:
+        rendered = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n"
+        temp_fd, temp_name = tempfile.mkstemp(prefix=f".{destination.stem}.", suffix=".tmp", dir=destination.parent)
+        try:
+            with os.fdopen(temp_fd, "w", encoding="utf-8") as stream:
+                stream.write(rendered)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temp_name, destination)
+        finally:
+            try:
+                os.unlink(temp_name)
+            except FileNotFoundError:
+                pass
 
     def write_failed_trace(
         self,
