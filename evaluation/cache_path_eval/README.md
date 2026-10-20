@@ -89,6 +89,12 @@ test는 read-only 트랜잭션이 쓰기를 거부하는지 검사하며 전체 
 관측은 논리적 model-call 횟수를 기록하고 retry 시도는 trace의 `retryCount`에 남기며 금액은
 수집하지 않는다.
 
+질문 분류 모델 호출에는 선택적으로 `requestEvidence`를 기록할 수 있다. 이 필드는 공통 입력,
+정규화된 논리 요청, 지시문 해시와 입력 변환 버전 및 응답 모델 식별자만 담으며 원문 입력이나
+요청 텍스트를 저장하지 않는다. 제공자가 응답한 모델 식별자를 기록하며, 별칭인 경우 고정 버전을
+증명하지 않는다. 반환값이 없거나 안전한 식별자 형식이 아니면 `null`로 기록한다. 기존 checkpoint와
+실행 기록에서는 이 필드가 생략될 수 있다.
+
 `profiles.riido_chat.register_riido_chat_profile`은 `HELP_CHATBOT` 또는
 `HELP_CHATBOT_TEST`를 명시해 factory를 등록한다. 호출자는 `ReadOnlyRiidoServiceData`에 session
 factory를, profile에 embedder/rewrite/judge 의존성을 직접 주입해야 한다. profile factory 생성은

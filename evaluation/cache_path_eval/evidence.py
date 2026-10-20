@@ -6,12 +6,13 @@ import re
 from dataclasses import dataclass
 from typing import Optional
 
-from app.core.model_trace import ModelCallTrace
+from app.core.model_trace import ModelCallTrace, ModelRequestEvidence
 
 _SAFE_TOKEN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}$")
 _MODEL_PURPOSES = frozenset(
     {"QUERY_REWRITE", "QUERY_EMBEDDING", "QUESTION_CLASSIFICATION"}
 )
+_SHA256 = re.compile(r"^[a-f0-9]{64}$")
 
 
 def _safe_optional_token(name: str, value: Optional[str]) -> None:
@@ -76,6 +77,50 @@ class SubproblemCandidateEvidence:
 
 
 @dataclass(frozen=True)
+class ModelRequestEvidenceRecord:
+    """Text-free hashes and identifiers for a logical model request."""
+
+    common_input_sha256: str
+    request_sha256: str
+    input_transform_version: str
+    instructions_sha256: str
+    response_model_name: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        for name in ("common_input_sha256", "request_sha256", "instructions_sha256"):
+            value = getattr(self, name)
+            if type(value) is not str or not _SHA256.fullmatch(value):
+                raise ValueError(f"{name} must be a lowercase SHA-256 digest")
+        for name in ("input_transform_version", "response_model_name"):
+            _safe_optional_token(name, getattr(self, name))
+        if self.input_transform_version is None:
+            raise ValueError("input_transform_version must be a safe identifier")
+
+    @classmethod
+    def from_trace(
+        cls, evidence: ModelRequestEvidence
+    ) -> "ModelRequestEvidenceRecord":
+        if not isinstance(evidence, ModelRequestEvidence):
+            raise TypeError("evidence must be a ModelRequestEvidence")
+        return cls(
+            common_input_sha256=evidence.common_input_sha256,
+            request_sha256=evidence.request_sha256,
+            input_transform_version=evidence.input_transform_version,
+            instructions_sha256=evidence.instructions_sha256,
+            response_model_name=evidence.response_model_name,
+        )
+
+    def to_dict(self) -> dict[str, Optional[str]]:
+        return {
+            "commonInputSha256": self.common_input_sha256,
+            "requestSha256": self.request_sha256,
+            "inputTransformVersion": self.input_transform_version,
+            "instructionsSha256": self.instructions_sha256,
+            "responseModelName": self.response_model_name,
+        }
+
+
+@dataclass(frozen=True)
 class ModelCallEvidence:
     purpose: str
     provider: str
@@ -88,6 +133,7 @@ class ModelCallEvidence:
     output_tokens: Optional[int]
     cached_input_tokens: Optional[int]
     reasoning_tokens: Optional[int]
+    request_evidence: Optional[ModelRequestEvidenceRecord] = None
 
     def __post_init__(self) -> None:
         if type(self.purpose) is not str or self.purpose not in _MODEL_PURPOSES:
@@ -97,6 +143,11 @@ class ModelCallEvidence:
             if type(value) is not str or not _SAFE_TOKEN.fullmatch(value):
                 raise ValueError(f"{name} must be a safe identifier")
         _safe_optional_token("prompt_version", self.prompt_version)
+        if self.request_evidence is not None:
+            if self.purpose != "QUESTION_CLASSIFICATION":
+                raise ValueError("request_evidence is only allowed for question classification")
+            if type(self.request_evidence) is not ModelRequestEvidenceRecord:
+                raise ValueError("request_evidence must be a ModelRequestEvidenceRecord or None")
         if type(self.succeeded) is not bool:
             raise ValueError("succeeded must be a boolean")
         for name in ("latency_ms", "retry_count"):
@@ -128,10 +179,15 @@ class ModelCallEvidence:
             output_tokens=trace.output_tokens,
             cached_input_tokens=trace.cached_input_tokens,
             reasoning_tokens=trace.reasoning_tokens,
+            request_evidence=(
+                ModelRequestEvidenceRecord.from_trace(trace.request_evidence)
+                if trace.request_evidence is not None
+                else None
+            ),
         )
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        data: dict[str, object] = {
             "purpose": self.purpose,
             "provider": self.provider,
             "modelName": self.model_name,
@@ -144,6 +200,9 @@ class ModelCallEvidence:
             "cachedInputTokens": self.cached_input_tokens,
             "reasoningTokens": self.reasoning_tokens,
         }
+        if self.request_evidence is not None:
+            data["requestEvidence"] = self.request_evidence.to_dict()
+        return data
 
 
 @dataclass(frozen=True)

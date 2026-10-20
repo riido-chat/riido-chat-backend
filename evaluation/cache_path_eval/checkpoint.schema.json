@@ -65,7 +65,25 @@
         "inputTokens": {"$ref": "#/$defs/nonnegativeIntegerOrNull"},
         "outputTokens": {"$ref": "#/$defs/nonnegativeIntegerOrNull"},
         "cachedInputTokens": {"$ref": "#/$defs/nonnegativeIntegerOrNull"},
-        "reasoningTokens": {"$ref": "#/$defs/nonnegativeIntegerOrNull"}
+        "reasoningTokens": {"$ref": "#/$defs/nonnegativeIntegerOrNull"},
+        "requestEvidence": {"$ref": "#/$defs/modelRequestEvidence"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"purpose": {"enum": ["QUERY_REWRITE", "QUERY_EMBEDDING"]}}},
+          "then": {"not": {"required": ["requestEvidence"]}}
+        }
+      ]
+    },
+    "modelRequestEvidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["commonInputSha256", "requestSha256", "inputTransformVersion", "instructionsSha256", "responseModelName"],
+      "properties": {
+        "commonInputSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "requestSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "inputTransformVersion": {"$ref": "#/$defs/safeToken"},
+        "instructionsSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "responseModelName": {"$ref": "#/$defs/safeTokenOrNull"}
       }
     },
     "safeToken": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}$"},

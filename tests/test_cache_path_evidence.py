@@ -4,7 +4,7 @@ import json
 import unittest
 from pathlib import Path
 
-from app.core.model_trace import ModelCallTrace
+from app.core.model_trace import ModelCallTrace, ModelRequestEvidence
 from evaluation.cache_path_eval.evidence import (
     CacheRuntimeEvidence,
     ModelCallEvidence,
@@ -43,6 +43,45 @@ class CacheRuntimeEvidenceTests(unittest.TestCase):
             },
             set(decoded),
         )
+
+    def test_request_evidence_is_allowlisted_and_only_added_when_present(self):
+        request = ModelRequestEvidence(
+            common_input_sha256="a" * 64,
+            request_sha256="b" * 64,
+            input_transform_version="question-v2",
+            instructions_sha256="c" * 64,
+            response_model_name="QuestionDecision",
+        )
+        evidence = ModelCallEvidence.from_trace(
+            "QUESTION_CLASSIFICATION",
+            ModelCallTrace(
+                "openai", "gpt-6-luna", True, 17,
+                request_evidence=request,
+            ),
+        )
+        encoded = json.dumps(evidence.to_dict())
+        decoded = json.loads(encoded)
+        self.assertEqual(
+            {
+                "commonInputSha256": "a" * 64,
+                "requestSha256": "b" * 64,
+                "inputTransformVersion": "question-v2",
+                "instructionsSha256": "c" * 64,
+                "responseModelName": "QuestionDecision",
+            },
+            decoded["requestEvidence"],
+        )
+        self.assertNotIn("raw user input", encoded.lower())
+        self.assertNotIn("requestEvidence", ModelCallEvidence.from_trace(
+            "QUESTION_CLASSIFICATION", ModelCallTrace("openai", "model-x", True, 1)
+        ).to_dict())
+        with self.assertRaises(ValueError):
+            ModelCallEvidence.from_trace(
+                "QUERY_REWRITE",
+                ModelCallTrace("openai", "model-x", True, 1, request_evidence=request),
+            )
+        with self.assertRaises(ValueError):
+            ModelRequestEvidence("A" * 64, "b" * 64, "v1", "c" * 64)
 
     def test_runtime_evidence_is_canonical_and_schema_is_strict(self):
         evidence = CacheRuntimeEvidence(
