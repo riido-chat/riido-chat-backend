@@ -7,11 +7,57 @@ ChatService가 담당한다.
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+import hashlib
+import json
+import re
 from typing import Optional
 
 
 BeforeModelCallHook = Callable[[str, str, Optional[str]], Awaitable[None]]
 """외부 모델 호출 직전에 provider, model, prompt version을 전달하는 hook."""
+
+
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
+_SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
+
+
+def canonical_request_sha256(value: object) -> str:
+    """Hash a logical JSON value using the shared stable encoding."""
+
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+@dataclass(frozen=True)
+class ModelRequestEvidence:
+    """Hashes and safe identifiers describing one logical model request."""
+
+    common_input_sha256: str
+    request_sha256: str
+    input_transform_version: str
+    instructions_sha256: str
+    response_model_name: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        for field_name in ("common_input_sha256", "request_sha256", "instructions_sha256"):
+            value = getattr(self, field_name)
+            if not isinstance(value, str) or not _SHA256.fullmatch(value):
+                raise ValueError(f"{field_name} must be a lowercase SHA-256 digest")
+        if not isinstance(self.input_transform_version, str) or not _SAFE_IDENTIFIER.fullmatch(
+            self.input_transform_version
+        ):
+            raise ValueError("input_transform_version must be a safe identifier")
+        if self.response_model_name is not None and (
+            not isinstance(self.response_model_name, str)
+            or not _SAFE_IDENTIFIER.fullmatch(self.response_model_name)
+        ):
+            raise ValueError("response_model_name must be a safe identifier or None")
 
 
 @dataclass(frozen=True)
@@ -38,3 +84,4 @@ class ModelCallTrace:
     reasoning_tokens: Optional[int] = None
     prompt_version: Optional[str] = None
     error_message: Optional[str] = None
+    request_evidence: Optional[ModelRequestEvidence] = None

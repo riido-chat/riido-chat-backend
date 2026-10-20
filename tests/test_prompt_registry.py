@@ -79,8 +79,8 @@ class PromptRegistryTableTest(unittest.TestCase):
             with self.subTest(key=key):
                 self.assertIn(version, prompts.versions(component))
 
-    def test_registers_the_current_eleven_keys(self) -> None:
-        self.assertEqual(11, len(self.table))
+    def test_registers_the_current_twelve_keys(self) -> None:
+        self.assertEqual(12, len(self.table))
         self.assertEqual(
             [
                 ("generation.answer", "v23"),
@@ -88,6 +88,7 @@ class PromptRegistryTableTest(unittest.TestCase):
                 ("generation.procedure_evidence_rules", "v1"),
                 ("generation.source_planning", "v34"),
                 ("generation.source_planning_repair", "v34-repair-1"),
+                ("judge", "jev-cache-choice-context-v1"),
                 ("judge", "question-grouping-v7-2"),
                 ("rewrite", "v10"),
             ],

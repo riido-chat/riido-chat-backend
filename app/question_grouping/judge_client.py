@@ -8,6 +8,8 @@
 """
 
 import asyncio
+import copy
+import hashlib
 import json
 import re
 import time
@@ -16,7 +18,12 @@ from typing import Any, Mapping, Optional
 from openai import APIConnectionError, APIStatusError, AsyncOpenAI
 
 from app.core.config import get_settings
-from app.core.model_trace import BeforeModelCallHook, ModelCallTrace
+from app.core.model_trace import (
+    BeforeModelCallHook,
+    ModelCallTrace,
+    ModelRequestEvidence,
+    canonical_request_sha256,
+)
 from app.core.openai_error import is_transient_openai_error
 from app.core.openai_usage import cached_input_tokens as usage_cached_input_tokens
 from app.core.openai_usage import reasoning_tokens as usage_reasoning_tokens
@@ -51,6 +58,7 @@ CODE_JUDGE_STAGE = StageSettings(
 
 # API 상태·사유 값만 통과시켜 모델이 만든 문자열이 오류 문구에 섞이지 않게 한다.
 _STATUS_CODE_PATTERN = re.compile(r"^[A-Za-z0-9_.-]{1,40}$")
+_SAFE_MODEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
 
 
 def _status_code(value: object) -> str:
@@ -146,6 +154,14 @@ class QuestionJudgeClient:
 
         stage = CODE_JUDGE_STAGE if stage is None else stage
         request = build_judge_request(payload, stage)
+        request_evidence = ModelRequestEvidence(
+            common_input_sha256=canonical_request_sha256(payload),
+            request_sha256=canonical_request_sha256(request),
+            input_transform_version="openai-judge-json-v1",
+            instructions_sha256=hashlib.sha256(
+                stage.instructions.encode("utf-8")
+            ).hexdigest(),
+        )
         if before_model_call is not None:
             await before_model_call(
                 JUDGE_PROVIDER, stage.model_name, stage.prompt_version
@@ -156,7 +172,7 @@ class QuestionJudgeClient:
         attempt = 0
         while True:
             try:
-                response = await self._client.responses.create(**request)
+                response = await self._client.responses.create(**copy.deepcopy(request))
             except Exception as error:  # noqa: BLE001 - 실패는 JudgeCall 로 올린다
                 can_retry = attempt + 1 < JUDGE_MAX_ATTEMPTS
                 if can_retry and is_transient_openai_error(error):
@@ -176,6 +192,7 @@ class QuestionJudgeClient:
                     JudgeFailure(
                         kind=kind, safe_message=safe_judge_error_message(error)
                     ),
+                    request_evidence,
                 )
 
             usage_totals.add(getattr(response, "usage", None))
@@ -195,11 +212,29 @@ class QuestionJudgeClient:
                             f"status={_status_code(status)}, reason={reason}"
                         ),
                     ),
+                    request_evidence,
                 )
 
             output_text = getattr(response, "output_text", None)
             return JudgeCall(
-                trace=self._trace(stage, started, attempt, usage_totals),
+                trace=self._trace(
+                    stage,
+                    started,
+                    attempt,
+                    usage_totals,
+                    request_evidence=ModelRequestEvidence(
+                        common_input_sha256=request_evidence.common_input_sha256,
+                        request_sha256=request_evidence.request_sha256,
+                        input_transform_version=request_evidence.input_transform_version,
+                        instructions_sha256=request_evidence.instructions_sha256,
+                        response_model_name=(
+                            response.model
+                            if isinstance(getattr(response, "model", None), str)
+                            and _SAFE_MODEL_PATTERN.fullmatch(response.model)
+                            else None
+                        ),
+                    ),
+                ),
                 output_text=output_text if isinstance(output_text, str) else None,
             )
 
@@ -210,9 +245,17 @@ class QuestionJudgeClient:
         attempt: int,
         usage_totals: "_UsageTotals",
         failure: JudgeFailure,
+        request_evidence: Optional[ModelRequestEvidence] = None,
     ) -> JudgeCall:
         return JudgeCall(
-            trace=self._trace(stage, started, attempt, usage_totals, failure=failure),
+            trace=self._trace(
+                stage,
+                started,
+                attempt,
+                usage_totals,
+                failure=failure,
+                request_evidence=request_evidence,
+            ),
             failure=failure,
         )
 
@@ -224,6 +267,7 @@ class QuestionJudgeClient:
         usage_totals: "_UsageTotals",
         *,
         failure: Optional[JudgeFailure] = None,
+        request_evidence: Optional[ModelRequestEvidence] = None,
     ) -> ModelCallTrace:
         return ModelCallTrace(
             provider=JUDGE_PROVIDER,
@@ -237,6 +281,7 @@ class QuestionJudgeClient:
             reasoning_tokens=usage_totals.reasoning_tokens,
             prompt_version=stage.prompt_version,
             error_message=None if failure is None else failure.safe_message,
+            request_evidence=request_evidence,
         )
 
 

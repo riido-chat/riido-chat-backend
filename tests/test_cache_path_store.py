@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, Mock
 
 from app.answering.trace import ReplayContext
 from app.answering.use_case import AnswerQuestion
-from app.core.model_trace import ModelCallTrace
+from app.core.model_trace import ModelCallTrace, ModelRequestEvidence
 from app.retrieval.models import HybridSearchCall
 from evaluation.cache_path_eval.execution import (
     CacheDecisionCallbacks,
@@ -80,10 +80,17 @@ class CachePathRunStoreTests(unittest.IsolatedAsyncioTestCase):
                             retrieval_candidates=(RetrievalCandidateEvidence(3, 5, 8, 1),),
                             model_calls=(
                                 ModelCallEvidence.from_trace(
-                                    "QUERY_REWRITE",
+                                    "QUESTION_CLASSIFICATION",
                                     ModelCallTrace(
                                         "openai", "model-x", False, 2,
                                         error_message="private error detail",
+                                        request_evidence=ModelRequestEvidence(
+                                            common_input_sha256="a" * 64,
+                                            request_sha256="b" * 64,
+                                            input_transform_version="question-v2",
+                                            instructions_sha256="c" * 64,
+                                            response_model_name="QuestionDecision",
+                                        ),
                                     ),
                                 ),
                             ),
@@ -143,6 +150,11 @@ class CachePathRunStoreTests(unittest.IsolatedAsyncioTestCase):
             checkpoint_path = next((root / "evals/cache-path/checkpoints/run-1").glob("*.json"))
             checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
             self.assertEqual("seed-1", checkpoint["evidence"]["seed"])
+            self.assertEqual(
+                "b" * 64,
+                checkpoint["evidence"]["modelCalls"][0]["requestEvidence"]["requestSha256"],
+            )
+            self.assertNotIn("private source question", checkpoint_path.read_text(encoding="utf-8"))
             self.assertNotIn("private error detail", checkpoint_path.read_text(encoding="utf-8"))
             destination = store.write_run(
                 metadata,
@@ -158,6 +170,10 @@ class CachePathRunStoreTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual("NOT_CONFIGURED", first_event["detailCode"])
             self.assertEqual(context.code_revision, persisted["target"]["appBuildCommit"])
             self.assertEqual("seed-1", persisted["observations"][0]["evidence"]["seed"])
+            self.assertEqual(
+                "b" * 64,
+                persisted["observations"][0]["evidence"]["modelCalls"][0]["requestEvidence"]["requestSha256"],
+            )
             self.assertEqual(3, persisted["observations"][0]["evidence"]["retrievalCandidates"][0]["chunkId"])
             self.assertNotIn("private error detail", destination.read_text(encoding="utf-8"))
             self.assertNotIn("private source question", destination.read_text(encoding="utf-8"))

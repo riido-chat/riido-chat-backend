@@ -30,6 +30,7 @@ from app.prompts.fingerprints import (
 from app.question_grouping import prompt_v7_2
 from app.question_grouping.constants import JUDGE_PROMPT_VERSION
 from app.question_grouping.judge_client import build_judge_request
+from app.question_grouping.jev_judge_client import JEV_CONTEXT_PROMPT, JEV_PROMPT_VERSION
 from app.question_grouping.prompt_v7_2 import JUDGE_INSTRUCTIONS_SHA256
 
 
@@ -78,6 +79,7 @@ def current_fingerprints() -> Dict[str, str]:
         ),
         f"judge@{judge}": sha256_text(prompt_v7_2.JUDGE_INSTRUCTIONS),
         f"judge.output_schema@{judge}": sha256_json(judge_format),
+        f"judge@{JEV_PROMPT_VERSION}": sha256_text(JEV_CONTEXT_PROMPT),
     }
 
 
