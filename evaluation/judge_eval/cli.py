@@ -625,7 +625,12 @@ def compare_results(registry: Path, base: Path, candidate: Path, *, holdout: boo
 # ---------------------------------------------------------------- 명령줄
 
 
-def _live_adapter(judge: str) -> Any:
+def _live_adapter(
+    judge: str,
+    *,
+    max_attempts: Optional[int] = None,
+    max_output_tokens: Optional[int] = None,
+) -> Any:
     from evaluation.judge_eval.clients import (
         ClaudeJudge,
         JevJudge,
@@ -635,18 +640,23 @@ def _live_adapter(judge: str) -> Any:
     )
 
     if judge == "luna":
-        return LunaJudge()
+        return LunaJudge(max_attempts=max_attempts)
     if judge == "jev":
         key = os.environ.get("TYPESAFE_API_KEY", "").strip()
         if not key:
             raise GoldenError("TYPESAFE_API_KEY 환경 변수가 필요합니다")
-        return JevJudge(urllib_jev_transport(key))
+        return JevJudge(urllib_jev_transport(key), max_attempts=max_attempts)
     if not judge.startswith("claude-"):
         raise GoldenError(f"지원하지 않는 판별 모델입니다: {judge}")
     key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
     if not key:
         raise GoldenError("ANTHROPIC_API_KEY 환경 변수가 필요합니다")
-    return ClaudeJudge(urllib_claude_transport(key), variant=variant_by_name(judge))
+    return ClaudeJudge(
+        urllib_claude_transport(key),
+        variant=variant_by_name(judge),
+        max_attempts=max_attempts,
+        max_output_tokens=max_output_tokens,
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:

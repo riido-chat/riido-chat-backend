@@ -16,6 +16,7 @@
 """
 
 import asyncio
+import copy
 import hashlib
 import json
 import time
@@ -33,8 +34,10 @@ from app.question_grouping.constants import (
     JUDGE_PROVIDER,
     JUDGE_REASONING_EFFORT,
 )
-from app.question_grouping.decision import build_turn_judgment
+from app.question_grouping.decision import build_turn_judgment, normalize_judgment
 from app.question_grouping.judge_client import QuestionJudgeClient, build_judge_request
+from app.core.stage_settings import StageSettings
+from app.question_grouping.prompt_v7_2 import JUDGE_INSTRUCTIONS, JUDGE_OUTPUT_SCHEMA
 from evaluation.judge_eval.inputs import PreparedTurn, request_sha256
 
 JEV_RULES_PATH = Path(__file__).with_name("jev_rules_set_p.json")
@@ -52,24 +55,34 @@ JEV_MAX_ATTEMPTS = 2
 JEV_RETRY_DELAY_SECONDS = 2.0
 JEV_TIMEOUT_SECONDS = 90.0
 
+# This is a model comparison, not the currently configured production default.
+# Keep the prompt and judgment normalization on the production path while pinning
+# the requested OpenAI comparison model explicitly.
+LUNA_COMPARISON_MODEL = "gpt-6-luna"
+LUNA_COMPARISON_STAGE = StageSettings(
+    model_name=LUNA_COMPARISON_MODEL,
+    prompt_version=JUDGE_PROMPT_VERSION,
+    instructions=JUDGE_INSTRUCTIONS,
+    params={
+        "reasoning": {"effort": JUDGE_REASONING_EFFORT},
+        "max_output_tokens": JUDGE_MAX_OUTPUT_TOKENS,
+    },
+)
+
 CLAUDE_ENDPOINT = "https://api.anthropic.com/v1/messages"
-CLAUDE_PROMPT_VERSION = "cache-grouping-claude-v1"
+CLAUDE_PROMPT_VERSION = JUDGE_PROMPT_VERSION
 CLAUDE_MAX_ATTEMPTS = 2
 CLAUDE_MAX_OUTPUT_TOKENS = 256
 CLAUDE_TIMEOUT_SECONDS = 90.0
 CLAUDE_API_VERSION = "2023-06-01"
 CLAUDE_TOOL_NAME = "submit_judge_result"
-CLAUDE_SYSTEM = """Classify the current user question against only the candidate subproblems in the supplied JSON payload. Use the question, context, candidate descriptions, canonical answers, and document candidates exactly as supplied. Never invent a candidate key. CONNECT requires one presented candidate key that answers the question. SEPARATE means no presented candidate applies. Use UNCLASSIFIED when the evidence is ambiguous or insufficient. Call submit_judge_result exactly once and provide no other response."""
-CLAUDE_RESULT_SCHEMA: Dict[str, Any] = {
-    "type": "object",
-    "properties": {
-        "decision": {"type": "string", "enum": ["CONNECT", "SEPARATE", "UNCLASSIFIED"]},
-        "subproblemKey": {"type": ["string", "null"]},
-        "confidence": {"type": ["number", "null"]},
-    },
-    "required": ["decision", "subproblemKey", "confidence"],
-    "additionalProperties": False,
-}
+CLAUDE_SYSTEM = JUDGE_INSTRUCTIONS
+# Anthropic's strict tool schema rejects numeric minimum/maximum constraints.
+# Keep the same fields and production normalization, but enforce confidence bounds
+# in normalize_judgment (which already rejects non-finite/out-of-range values).
+CLAUDE_RESULT_SCHEMA: Dict[str, Any] = copy.deepcopy(JUDGE_OUTPUT_SCHEMA)
+CLAUDE_RESULT_SCHEMA["properties"]["confidence"].pop("minimum", None)
+CLAUDE_RESULT_SCHEMA["properties"]["confidence"].pop("maximum", None)
 
 
 @dataclass(frozen=True)
@@ -97,7 +110,7 @@ VARIANTS: Dict[str, Variant] = {
     "luna": Variant(
         name="luna",
         provider=JUDGE_PROVIDER,
-        model=JUDGE_MODEL,
+        model=LUNA_COMPARISON_MODEL,
         prompt_version=JUDGE_PROMPT_VERSION,
         reasoning_effort=JUDGE_REASONING_EFFORT,
         max_attempts=JUDGE_MAX_ATTEMPTS,
@@ -154,7 +167,7 @@ for _claude_name, _claude_model in (
             "tool": CLAUDE_TOOL_NAME,
             "maxOutputTokens": CLAUDE_MAX_OUTPUT_TOKENS,
             "maxAttempts": CLAUDE_MAX_ATTEMPTS,
-            "inputSemantics": "prepared payload JSON bytes preserved as the sole user message",
+            "inputSemantics": "production v7.2 instructions and output schema; prepared payload JSON bytes preserved as the sole user message",
             "systemPromptSha256": hashlib.sha256(CLAUDE_SYSTEM.encode("utf-8")).hexdigest(),
             "toolSchemaSha256": hashlib.sha256(
                 json.dumps(
@@ -218,16 +231,21 @@ class JudgeOutcome:
 class LunaJudge:
     variant = VARIANTS["luna"]
 
-    def __init__(self, openai_client: Any = None) -> None:
+    def __init__(self, openai_client: Any = None, *, max_attempts: Optional[int] = None) -> None:
         # openai_client 가 None 이면 QuestionJudgeClient 가 설정의 OPENAI_API_KEY 로 만든다 (--live 전용).
         self._client = QuestionJudgeClient(client=openai_client)
+        self._max_attempts = self.variant.max_attempts if max_attempts is None else max_attempts
+        if self._max_attempts < 1:
+            raise ValueError("max_attempts must be positive")
 
     async def judge(self, turn: PreparedTurn) -> JudgeOutcome:
         assert turn.payload_bytes is not None and turn.presentation is not None
         payload = json.loads(turn.payload_bytes)
         if build_judge_request(payload)["input"].encode("utf-8") != turn.payload_bytes:
             raise RuntimeError(f"{turn.key}: luna 요청 input 이 준비한 payload 와 다릅니다")
-        call = await self._client.judge(payload)
+        call = await self._client.judge(
+            payload, stage=LUNA_COMPARISON_STAGE, max_attempts=self._max_attempts
+        )
         trace = call.trace
         usage = Usage(
             input_tokens=trace.input_tokens,
@@ -255,6 +273,11 @@ class LunaJudge:
             raw={
                 "output": None if normalized is None else normalized.raw_output,
                 "normalization": None if normalized is None else normalized.normalization_judgment_input(),
+                "responseModel": (
+                    None
+                    if trace.request_evidence is None
+                    else trace.request_evidence.response_model_name
+                ),
             },
             latency_ms=trace.latency_ms,
             usage=usage,
@@ -304,9 +327,18 @@ def _transient(outcome: Mapping[str, Any]) -> bool:
 class JevJudge:
     variant = VARIANTS["jev"]
 
-    def __init__(self, transport: JevTransport, *, retry_delay: float = JEV_RETRY_DELAY_SECONDS) -> None:
+    def __init__(
+        self,
+        transport: JevTransport,
+        *,
+        retry_delay: float = JEV_RETRY_DELAY_SECONDS,
+        max_attempts: Optional[int] = None,
+    ) -> None:
         self._transport = transport
         self._retry_delay = retry_delay
+        self._max_attempts = self.variant.max_attempts if max_attempts is None else max_attempts
+        if self._max_attempts < 1:
+            raise ValueError("max_attempts must be positive")
 
     async def judge(self, turn: PreparedTurn) -> JudgeOutcome:
         assert turn.payload_bytes is not None
@@ -315,7 +347,7 @@ class JevJudge:
         started = time.perf_counter()
         attempts = 1
         outcome = await self._transport(body)
-        if _transient(outcome) and attempts < JEV_MAX_ATTEMPTS:
+        if _transient(outcome) and attempts < self._max_attempts:
             await asyncio.sleep(self._retry_delay)
             attempts += 1
             outcome = await self._transport(body)
@@ -366,12 +398,18 @@ class JevJudge:
 ClaudeTransport = Callable[[Dict[str, Any]], Awaitable[Dict[str, Any]]]
 
 
-def build_claude_request(payload_bytes: bytes, *, model: str, force_tool: bool = True) -> Dict[str, Any]:
+def build_claude_request(
+    payload_bytes: bytes,
+    *,
+    model: str,
+    force_tool: bool = True,
+    max_tokens: int = CLAUDE_MAX_OUTPUT_TOKENS,
+) -> Dict[str, Any]:
     """Build the Claude request while keeping the prepared payload verbatim."""
 
     return {
         "model": model,
-        "max_tokens": CLAUDE_MAX_OUTPUT_TOKENS,
+        "max_tokens": max_tokens,
         "system": CLAUDE_SYSTEM,
         "messages": [{"role": "user", "content": payload_bytes.decode("utf-8")}],
         "tools": [{
@@ -394,10 +432,27 @@ def _claude_transient(outcome: Mapping[str, Any]) -> bool:
 class ClaudeJudge:
     variant = VARIANTS["claude-haiku"]
 
-    def __init__(self, transport: ClaudeTransport, *, variant: Optional[Variant] = None) -> None:
+    def __init__(
+        self,
+        transport: ClaudeTransport,
+        *,
+        variant: Optional[Variant] = None,
+        max_attempts: Optional[int] = None,
+        max_output_tokens: Optional[int] = None,
+    ) -> None:
         self._transport = transport
         if variant is not None:
             self.variant = variant
+        self._max_attempts = self.variant.max_attempts if max_attempts is None else max_attempts
+        self._max_output_tokens = (
+            self.variant.settings.get("maxOutputTokens", CLAUDE_MAX_OUTPUT_TOKENS)
+            if max_output_tokens is None
+            else max_output_tokens
+        )
+        if self._max_attempts < 1:
+            raise ValueError("max_attempts must be positive")
+        if self._max_output_tokens < 1:
+            raise ValueError("max_output_tokens must be positive")
 
     async def judge(self, turn: PreparedTurn) -> JudgeOutcome:
         assert turn.payload_bytes is not None
@@ -405,6 +460,7 @@ class ClaudeJudge:
             turn.payload_bytes,
             model=self.variant.model,
             force_tool=self.variant.settings.get("toolChoice") == "tool",
+            max_tokens=self._max_output_tokens,
         )
         if request["messages"][0]["content"].encode("utf-8") != turn.payload_bytes:
             raise RuntimeError(f"{turn.key}: Claude 요청 input 이 준비한 payload 와 다릅니다")
@@ -416,7 +472,7 @@ class ClaudeJudge:
                 outcome = await self._transport(request)
             except Exception as error:  # noqa: BLE001 - do not leak request or credential details
                 outcome = {"ok": False, "httpStatus": None, "error": type(error).__name__, "retryable": True}
-            if _claude_transient(outcome) and attempts < CLAUDE_MAX_ATTEMPTS:
+            if _claude_transient(outcome) and attempts < self._max_attempts:
                 await asyncio.sleep(0.5)
                 continue
             break
@@ -440,55 +496,33 @@ class ClaudeJudge:
             cached_input_tokens=usage_body.get("cache_read_input_tokens"),
         )
         blocks = response.get("content") or []
+        stop_reason = response.get("stop_reason")
         submitted = next(
             (block.get("input") for block in blocks if block.get("type") == "tool_use" and block.get("name") == CLAUDE_TOOL_NAME),
             None,
         )
-        raw = {"model": response.get("model"), "result": submitted}
+        raw = {"model": response.get("model"), "result": submitted, "stopReason": stop_reason}
+        if stop_reason == "max_tokens":
+            return JudgeOutcome(
+                decision="UNCLASSIFIED", error="Claude 응답이 출력 토큰 한도에 도달했습니다",
+                raw=raw, latency_ms=latency, usage=usage, attempts=attempts,
+            )
         if not isinstance(submitted, Mapping):
             return JudgeOutcome(
                 decision="UNCLASSIFIED", invalid_reason="UNPARSEABLE_OUTPUT", raw=raw,
                 latency_ms=latency, usage=usage, attempts=attempts,
             )
 
-        decision = submitted.get("decision")
-        key = submitted.get("subproblemKey")
-        confidence = submitted.get("confidence")
-        presented = set(turn.presented_keys)
-        valid_confidence = confidence is None or (
-            isinstance(confidence, (int, float)) and not isinstance(confidence, bool) and 0 <= confidence <= 1
-        )
-        if not valid_confidence:
-            return JudgeOutcome(
-                decision="UNCLASSIFIED", invalid_reason="INVALID_CONFIDENCE", raw=raw,
-                latency_ms=latency, usage=usage, attempts=attempts,
-            )
-        if decision == "CONNECT":
-            if not isinstance(key, str) or key not in presented:
-                return JudgeOutcome(
-                    decision="UNCLASSIFIED", invalid_reason="UNKNOWN_SUBPROBLEM_KEY", raw=raw,
-                    confidence=float(confidence) if confidence is not None else None,
-                    latency_ms=latency, usage=usage, attempts=attempts,
-                )
-        elif decision == "SEPARATE":
-            if key is not None:
-                return JudgeOutcome(
-                    decision="UNCLASSIFIED", invalid_reason="INCONSISTENT_RESULT", raw=raw,
-                    confidence=float(confidence) if confidence is not None else None,
-                    latency_ms=latency, usage=usage, attempts=attempts,
-                )
-        elif decision == "UNCLASSIFIED":
-            key = None
-        else:
-            return JudgeOutcome(
-                decision="UNCLASSIFIED", invalid_reason="UNPARSEABLE_OUTPUT", raw=raw,
-                latency_ms=latency, usage=usage, attempts=attempts,
-            )
+        normalized = normalize_judgment(json.dumps(submitted, ensure_ascii=False), turn.presentation)
+        decision = normalized.decision.value
+        key = None if normalized.subproblem is None else normalized.subproblem.key
         return JudgeOutcome(
             decision=decision,
             subproblem_key=key,
-            confidence=float(confidence) if confidence is not None else None,
-            raw=raw,
+            confidence=normalized.confidence,
+            invalid_reason=normalized.invalid_reason,
+            raw={"model": response.get("model"), "output": submitted,
+                 "normalization": normalized.normalization_judgment_input()},
             latency_ms=latency,
             usage=usage,
             attempts=attempts,
@@ -559,14 +593,14 @@ class Prices:
     cached_input: Optional[float] = None
 
 
-# luna 단가: evaluation/run_generation_model_comparison.py CANDIDATE_CONFIGS 의 gpt-5.6-luna (0.20, 1.20).
-# 캐시 입력 단가는 저장소에 없다 (#204 작업 목록 "평가 단가표에 캐시 입력 단가" 대기).
-# Jev 단가는 저장소에 없다. 인자로 받는다.
+# Luna 비교 단가: OpenAI 공식 가격표의 gpt-6-luna 짧은 문맥 표준 단가 (USD / MTok).
+# 캐시 입력은 실행에서 사용될 수 있으므로 upperUsd 는 캐시 할인을 제외한 상한으로 남긴다.
+# Jev 가격은 TypeSafe 공식 공개 가격표의 입력 토큰 단가이며 출력은 무료다.
 # Claude rates are Anthropic first-party API standard input/output and cache-read prices (USD/MTok),
 # from https://platform.claude.com/docs/en/about-claude/pricing. Haiku's input rate assumes prompts <= 100k tokens.
 DEFAULT_PRICES: Dict[str, Prices] = {
-    "luna": Prices(input=0.20, output=1.20, cached_input=None),
-    "jev": Prices(input=None, output=None, cached_input=None),
+    "luna": Prices(input=0.10, output=0.50, cached_input=0.01),
+    "jev": Prices(input=0.042, output=0.0, cached_input=None),
     "claude-haiku": Prices(input=0.10, output=0.50, cached_input=0.01),
     "claude-sonnet": Prices(input=2.0, output=10.0, cached_input=0.10),
     "claude-opus": Prices(input=4.0, output=20.0, cached_input=0.20),
@@ -621,16 +655,23 @@ def turn_cost(variant: str, usage: Usage, prices: Prices) -> Dict[str, Optional[
     return {"cachedUsd": cached, "upperUsd": upper}
 
 
-def estimate(variant: Variant, prepared: List[PreparedTurn], prices: Prices) -> Dict[str, Any]:
+def estimate(
+    variant: Variant,
+    prepared: List[PreparedTurn],
+    prices: Prices,
+    *,
+    max_output_tokens: Optional[int] = None,
+) -> Dict[str, Any]:
     judged = [turn for turn in prepared if turn.judged]
     ratio = CHARS_PER_TOKEN[variant.name]
     multiplier = TOKENIZER_TOKEN_MULTIPLIER.get(variant.name, 1.0)
     input_tokens = [int(-(-request_chars(variant.name, turn) * multiplier // ratio)) for turn in judged]
     total_input = sum(input_tokens)
     mean_output = MEAN_OUTPUT_TOKENS[variant.name]
-    max_output = JUDGE_MAX_OUTPUT_TOKENS if variant.name == "luna" else (
+    default_max_output = JUDGE_MAX_OUTPUT_TOKENS if variant.name == "luna" else (
         CLAUDE_MAX_OUTPUT_TOKENS if variant.name.startswith("claude-") else 0
     )
+    max_output = default_max_output if max_output_tokens is None else max_output_tokens
     result: Dict[str, Any] = {
         "variant": variant.name,
         "model": variant.model,

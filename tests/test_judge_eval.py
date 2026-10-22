@@ -25,6 +25,7 @@ from unittest import mock
 
 from app.database.models import QuestionSubproblemServingState
 from app.question_grouping.judge_client import build_judge_request
+from app.question_grouping.prompt_v7_2 import JUDGE_INSTRUCTIONS, JUDGE_OUTPUT_SCHEMA
 from app.question_grouping.models import (
     CatalogCanonicalAnswer,
     DocumentCandidate,
@@ -37,6 +38,8 @@ from evaluation.judge_eval import cli
 from evaluation.judge_eval import golden as golden_mod
 from evaluation.judge_eval.clients import (
     CLAUDE_TOOL_NAME,
+    CLAUDE_RESULT_SCHEMA,
+    CLAUDE_SYSTEM,
     ClaudeJudge,
     DEFAULT_PRICES,
     JEV_NONE_KEY,
@@ -398,8 +401,10 @@ class FakeResponses:
         self.script = script
         self.fail = set(fail)
         self.inputs: Dict[str, str] = {}
+        self.requests: List[Dict[str, Any]] = []
 
     async def create(self, **request):
+        self.requests.append(request)
         payload = json.loads(request["input"])
         item_id = item_of(payload["question"])
         self.inputs[item_id] = request["input"]
@@ -441,7 +446,12 @@ class FakeJevTransport:
 
 class FakeClaudeTransport:
     def __init__(self, result=None, statuses=None):
-        self.result = result or {"decision": "SEPARATE", "subproblemKey": None, "confidence": 0.99}
+        self.result = result or {
+            "decision": "SEPARATE", "groupId": None, "subproblemId": None, "confidence": 0.99,
+            "rationaleCode": "NO_MATCH", "matchedCriteria": [], "conflictingCriteria": [],
+            "ambiguityReason": None, "documentDecision": "NONE", "documentCandidateId": None,
+            "documentRationaleCode": "NO_CANDIDATE_COVERS",
+        }
         self.requests: List[Dict[str, Any]] = []
         self.statuses = list(statuses or [])
 
@@ -455,6 +465,7 @@ class FakeClaudeTransport:
             "body": {
                 "model": "claude-haiku-5-5",
                 "content": [{"type": "tool_use", "name": CLAUDE_TOOL_NAME, "input": self.result}],
+                "stop_reason": "tool_use",
                 "usage": {"input_tokens": 2600, "output_tokens": 24, "cache_read_input_tokens": 100},
             },
         }
@@ -478,7 +489,7 @@ class RegistryCase(unittest.TestCase):
         self.criteria_a = commit_criteria(self.root, "judge-a.md")
 
     def config(self, judge="luna", suite=SUITE_A, name="out", **kwargs) -> cli.RunConfig:
-        prices = Prices(0.20, 1.20, None) if judge == "luna" else Prices(0.042, None, None)
+        prices = Prices(0.10, 0.50, 0.01) if judge == "luna" else Prices(0.042, None, None)
         defaults = dict(registry=self.root, output=self.tmp / "out" / f"{name}.json",
                         build_commit="a" * 40, profile_key="HELP_CHATBOT", profile_revision_id=12,
                         criteria=self.criteria_a if suite == SUITE_A else None, prices=prices, concurrency=2)
@@ -517,6 +528,12 @@ class RegistryCase(unittest.TestCase):
 
 
 class InputIdentityTest(RegistryCase):
+    def test_luna_comparison_pins_gpt6_luna_without_changing_production_default(self):
+        openai = FakeOpenAI()
+        self.run_live(self.config("luna", name="luna-model-pin"), luna_adapter(openai))
+        self.assertTrue(openai.responses.requests)
+        self.assertEqual({request["model"] for request in openai.responses.requests}, {"gpt-6-luna"})
+
     def test_both_models_receive_the_same_payload_bytes(self):
         openai = FakeOpenAI()
         transport = FakeJevTransport()
@@ -729,7 +746,7 @@ class RunCapTest(RegistryCase):
         # 다른 모델은 따로 센다
         self.assertEqual(self.run_live(self.config("jev", name="j1"), jev_adapter())["runNo"], 1)
         self.assertEqual([(r["model"], r["runNo"]) for r in self.ledger_runs()],
-                         [("gpt-5.6-luna", 1), ("gpt-5.6-luna", 2), ("jev-latest", 1)])
+                         [("gpt-6-luna", 1), ("gpt-6-luna", 2), ("jev-latest", 1)])
 
     def test_failed_run_still_counts_and_output_not_overwritten(self):
         class Boom:
@@ -804,18 +821,34 @@ class ClaudeAdapterTest(RegistryCase):
             [{"type": "tool", "name": CLAUDE_TOOL_NAME}, {"type": "auto"}, {"type": "auto"}, {"type": "auto"}],
         )
         self.assertTrue(all(request["tools"][0]["strict"] for request in requests))
+        self.assertEqual(CLAUDE_SYSTEM, JUDGE_INSTRUCTIONS)
+        expected_schema = json.loads(json.dumps(JUDGE_OUTPUT_SCHEMA))
+        expected_schema["properties"]["confidence"].pop("minimum")
+        expected_schema["properties"]["confidence"].pop("maximum")
+        self.assertEqual(CLAUDE_RESULT_SCHEMA, expected_schema)
+        self.assertTrue(all(request["system"] == JUDGE_INSTRUCTIONS for request in requests))
 
     def test_mapping_rejects_unknown_keys_and_inconsistent_decisions(self):
         turn = next(turn for turn in cli.prepare(self.config("claude-haiku"), live=True).turns if turn.judged)
         for result, reason in (
-            ({"decision": "CONNECT", "subproblemKey": "invented", "confidence": 0.99}, "UNKNOWN_SUBPROBLEM_KEY"),
-            ({"decision": "SEPARATE", "subproblemKey": turn.presented_keys[0], "confidence": 0.99}, "INCONSISTENT_RESULT"),
-            ({"decision": "CONNECT", "subproblemKey": turn.presented_keys[0], "confidence": 1.1}, "INVALID_CONFIDENCE"),
+            ({"decision": "CONNECT", "groupId": None, "subproblemId": "invented", "confidence": 0.99,
+              "rationaleCode": "MATCH", "matchedCriteria": [], "conflictingCriteria": [], "ambiguityReason": None,
+              "documentDecision": "SUBPROBLEM_DOCUMENT", "documentCandidateId": None, "documentRationaleCode": None},
+             "UNKNOWN_SUBPROBLEM_KEY"),
+            ({"decision": "CONNECT", "groupId": None, "subproblemId": turn.presented_keys[0], "confidence": 1.1,
+              "rationaleCode": "MATCH", "matchedCriteria": [], "conflictingCriteria": [], "ambiguityReason": None,
+              "documentDecision": "SUBPROBLEM_DOCUMENT", "documentCandidateId": None, "documentRationaleCode": None},
+             None),
         ):
             with self.subTest(result=result):
                 outcome = asyncio.run(ClaudeJudge(FakeClaudeTransport(result)).judge(turn))
-                self.assertEqual((outcome.decision, outcome.subproblem_key, outcome.invalid_reason),
-                                 ("UNCLASSIFIED", None, reason))
+                if reason is None:
+                    self.assertEqual((outcome.decision, outcome.subproblem_key, outcome.invalid_reason),
+                                     ("CONNECT", turn.presented_keys[0], None))
+                    self.assertIsNone(outcome.confidence)
+                else:
+                    self.assertEqual((outcome.decision, outcome.subproblem_key, outcome.invalid_reason),
+                                     ("UNCLASSIFIED", None, reason))
 
     def test_usage_latency_attempts_and_safe_error_recording(self):
         turn = next(turn for turn in cli.prepare(self.config("claude-haiku"), live=True).turns if turn.judged)
@@ -833,6 +866,33 @@ class ClaudeAdapterTest(RegistryCase):
         failed = asyncio.run(ClaudeJudge(SecretFailure()).judge(turn))
         self.assertEqual(failed.error, "Claude 호출 실패: transport failure")
         self.assertNotIn("sk-secret", failed.error)
+
+    def test_single_attempt_mode_does_not_retry_billable_smoke_calls(self):
+        turn = next(turn for turn in cli.prepare(self.config("claude-haiku"), live=True).turns if turn.judged)
+        transport = FakeClaudeTransport(statuses=[503])
+        outcome = asyncio.run(ClaudeJudge(transport, max_attempts=1).judge(turn))
+        self.assertEqual((outcome.attempts, len(transport.requests)), (1, 1))
+
+        jev_transport = FakeJevTransport(statuses=[503])
+        jev_outcome = asyncio.run(JevJudge(jev_transport, retry_delay=0.0, max_attempts=1).judge(turn))
+        self.assertEqual((jev_outcome.attempts, len(jev_transport.bodies)), (1, 1))
+
+        openai = FakeOpenAI(fail={"A-t1"})
+        luna_outcome = asyncio.run(LunaJudge(openai, max_attempts=1).judge(turn))
+        self.assertEqual((luna_outcome.attempts, len(openai.responses.requests)), (1, 1))
+
+    def test_max_token_stop_is_recorded_as_incomplete_response(self):
+        turn = next(turn for turn in cli.prepare(self.config("claude-haiku"), live=True).turns if turn.judged)
+
+        class TruncatedClaudeTransport:
+            async def __call__(self, request):
+                response = await FakeClaudeTransport().__call__(request)
+                response["body"]["stop_reason"] = "max_tokens"
+                return response
+
+        outcome = asyncio.run(ClaudeJudge(TruncatedClaudeTransport(), max_attempts=1).judge(turn))
+        self.assertEqual(outcome.error, "Claude 응답이 출력 토큰 한도에 도달했습니다")
+        self.assertEqual(outcome.raw["stopReason"], "max_tokens")
 
     def test_request_preserves_utf8_payload_bytes_and_cli_selects_claude(self):
         turn = next(turn for turn in cli.prepare(self.config("claude-haiku"), live=True).turns if turn.judged)
@@ -992,14 +1052,14 @@ class RunScoringTest(RegistryCase):
         _, rescored, _ = cli.rescore(self.root, self.tmp / "out/luna.json")
         self.assertEqual(summarize(list(rescored.values())), luna["summary"]["scoring"])
         # 결과 칸
-        self.assertEqual(luna["models"]["judge"]["model"], "gpt-5.6-luna")
+        self.assertEqual(luna["models"]["judge"]["model"], "gpt-6-luna")
         self.assertEqual(luna["models"]["judge"]["promptVersion"], "question-grouping-v7-2")
         self.assertEqual(jev["models"]["judge"]["model"], "jev-latest")
         self.assertEqual(luna["goldenVersion"], GOLDEN_VERSION)
         self.assertRegex(luna["goldenCommit"], r"^[0-9a-f]{40}$")
         outcomes = {r["itemId"]: r["outcome"] for r in luna["results"]}
         self.assertEqual(outcomes["A-t7"], "SKIPPED")
-        self.assertAlmostEqual(luna["cost"]["upperUsd"], 5 * (5000 * 0.2 + 300 * 1.2) / 1e6)
+        self.assertAlmostEqual(luna["cost"]["upperUsd"], 5 * (5000 * 0.1 + 300 * 0.5) / 1e6)
         self.assertEqual(luna["summary"]["latency"]["n"], 5)
         self.assertEqual(luna["summary"]["inputs"]["payloadCheck"], {"judgedTurns": 5, "verified": 5, "unverified": 0, "mode": "strict"})
 

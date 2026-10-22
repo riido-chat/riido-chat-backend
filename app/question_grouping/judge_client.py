@@ -149,9 +149,12 @@ class QuestionJudgeClient:
         *,
         before_model_call: Optional[BeforeModelCallHook] = None,
         stage: Optional[StageSettings] = None,
+        max_attempts: int = JUDGE_MAX_ATTEMPTS,
     ) -> JudgeCall:
-        """논리적 호출 한 건으로 최대 JUDGE_MAX_ATTEMPTS 번 시도한다."""
+        """한 논리 호출을 지정 횟수까지 시도한다 (기본은 운영 설정)."""
 
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be positive")
         stage = CODE_JUDGE_STAGE if stage is None else stage
         request = build_judge_request(payload, stage)
         request_evidence = ModelRequestEvidence(
@@ -174,7 +177,7 @@ class QuestionJudgeClient:
             try:
                 response = await self._client.responses.create(**copy.deepcopy(request))
             except Exception as error:  # noqa: BLE001 - 실패는 JudgeCall 로 올린다
-                can_retry = attempt + 1 < JUDGE_MAX_ATTEMPTS
+                can_retry = attempt + 1 < max_attempts
                 if can_retry and is_transient_openai_error(error):
                     attempt += 1
                     await asyncio.sleep(JUDGE_RETRY_DELAY_SECONDS)
