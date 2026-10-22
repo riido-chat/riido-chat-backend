@@ -1,0 +1,394 @@
+import asyncio
+import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy import select
+
+from app.document.ingestion_service import AdminApiError
+from app.admin.router import router as admin_documents_router
+from app.admin.question_insights.router import router as admin_question_log_router
+from app.admin.schema import AdminErrorCode, AdminErrorResponse
+from app.chat.router import corpus_unavailable_response
+from app.chat.router import router as chat_router
+from app.chat.feedback import (
+    feedback_not_allowed_response,
+    rag_run_not_found_response,
+)
+from app.chat.feedback import router as feedback_router
+from app.api.health import router as health_router
+from app.api.internal import router as internal_router
+from app.api.internal import test_chat_router as internal_test_chat_router
+from app.chat.rag_run import rag_run_result_not_found_response
+from app.chat.rag_run import router as rag_run_router
+from app.core.config import get_settings
+from app.database.session import dispose_engine, get_session_factory
+from app.document.stale_runs import close_interrupted_runs
+from app.chat.service import (
+    ConversationNotFoundError,
+    conversation_busy_response,
+    conversation_not_found_response,
+)
+from app.retrieval.corpus_state import CorpusNotLoadedError, CorpusState
+from app.retrieval.corpus_state import CorpusRegistry
+from app.database.models import IndexVersion, IndexVersionStatus
+from app.answering.service import GenerationService
+from app.chat.log_store import (
+    ConversationBusyError,
+    FeedbackNotAllowedError,
+    RagRunNotFoundError,
+)
+from app.chat.query_rewrite import QueryRewriteService
+from app.chat.profile import (
+    ChatProfileConfigurationError,
+    ChatProfileUnavailableError,
+    ConversationProfileMismatchError,
+)
+from app.chat.rag_run_view import RagRunResultNotFoundError
+from app.answering.generator import OpenAIGenerator
+from app.retrieval.embedding import OpenAIEmbedder
+from app.retrieval.search_reader import ActiveIndexNotFoundError, SearchReader
+from app.question_grouping.runtime import create_question_grouping_components
+
+
+logger = logging.getLogger(__name__)
+
+# 운영자 콘솔 경로만 오류 형식을 통일한다. 챗봇 경로는 기존 계약을 유지한다.
+ADMIN_PATH_PREFIX = "/api/admin"
+
+
+def _validation_message(exc: RequestValidationError) -> str:
+    """첫 오류 하나만 사람이 읽을 문장으로 만든다."""
+
+    errors = exc.errors()
+    if not errors:
+        return "요청 형식이 올바르지 않습니다."
+    first = errors[0]
+    reason = first.get("msg", "값이 올바르지 않습니다.")
+    if first.get("type") == "value_error":
+        # validator가 직접 쓴 문장은 그대로 화면에 띄운다.
+        return reason.removeprefix("Value error, ")
+    field = ".".join(str(part) for part in first.get("loc", ()) if part != "body")
+    return f"{field}: {reason}" if field else reason
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    # 응답 스트림보다 오래 사는 파이프라인 task를 앱이 소유한다.
+    app.state.pipeline_tasks = set()
+    try:
+        await _close_interrupted_runs()
+        corpus_state = CorpusState(get_settings().corpus_dir)
+        corpus_registry = CorpusRegistry(get_settings().corpus_dir)
+        app.state.corpus_state = corpus_state
+        app.state.corpus_registry = corpus_registry
+        await _load_corpus_if_available(corpus_state, corpus_registry)
+        app.state.embedder = OpenAIEmbedder()
+        app.state.generation_service = GenerationService(OpenAIGenerator())
+        app.state.query_rewrite_service = QueryRewriteService()
+        # 판별 스위치가 꺼져 있으면 None 이라 ChatService 에 판별을 주입하지 않는다.
+        app.state.question_grouping = create_question_grouping_components(
+            get_settings()
+        )
+        yield
+    finally:
+        # 살아 있는 파이프라인이 끝난 뒤에 engine을 정리해야 세션이 깨지지 않는다.
+        await _drain_pipeline_tasks(app)
+        await dispose_engine()
+
+
+async def _close_interrupted_runs() -> None:
+    """이전 프로세스가 남긴 PROCESSING 실행을 마감한다.
+
+    마감하지 않으면 작업 잠금이 그 행을 보고 그룹을 영구히 막는다.
+    실패해도 기동은 계속한다. 잠금이 막힐 뿐 서비스는 답할 수 있다.
+    """
+
+    try:
+        async with get_session_factory()() as session:
+            await close_interrupted_runs(session)
+    except Exception:
+        logger.exception("중단된 실행을 정리하지 못했습니다.")
+
+
+async def _drain_pipeline_tasks(app: FastAPI) -> None:
+    """실행 중인 파이프라인 task가 모두 끝날 때까지 기다린다."""
+
+    pending = set(getattr(app.state, "pipeline_tasks", None) or ())
+    if not pending:
+        return
+
+    logger.info("실행 중인 파이프라인 %d건을 기다립니다.", len(pending))
+    # 하나가 실패해도 나머지 정리를 막지 않는다. 예외는 producer가 이미 처리했다.
+    await asyncio.gather(*pending, return_exceptions=True)
+
+
+async def _load_corpus_if_available(
+    corpus_state: CorpusState,
+    corpus_registry: CorpusRegistry | None = None,
+) -> None:
+    """ACTIVE index가 준비되어 있으면 BM25 corpus를 적재한다."""
+
+    try:
+        async with get_session_factory()() as session:
+            # Unit tests replace SearchReader with a Mock and exercise the
+            # original single-corpus lifecycle.  Keep that contract while the
+            # real application uses the registry path below.
+            if corpus_registry is None or not isinstance(SearchReader, type):
+                chunks = await SearchReader(session).load_active_chunks()
+                if corpus_registry is None:
+                    snapshot = corpus_state.replace(chunks)
+                else:
+                    prepared = corpus_state.prepare(chunks)
+                    corpus_state.publish(prepared)
+                    # Compatibility for mocked single-corpus startup tests;
+                    # real startup always loads registry entries by DB group.
+                    corpus_registry.replace_legacy(chunks, prepared=prepared)
+                    snapshot = corpus_state.snapshot()
+            else:
+                group_ids = list(
+                    (
+                        await session.scalars(
+                            select(IndexVersion.document_group_id)
+                            .where(
+                                IndexVersion.status == IndexVersionStatus.ACTIVE
+                            )
+                            .order_by(IndexVersion.document_group_id)
+                        )
+                    ).all()
+                )
+                if not group_ids:
+                    raise ActiveIndexNotFoundError(
+                        "ACTIVE index version이 없습니다."
+                    )
+                # Keep the legacy default state for existing internal/admin
+                # endpoints.  It is only valid when one group is active.
+                if len(group_ids) == 1:
+                    group_id = group_ids[0]
+                    chunks = await SearchReader(
+                        session,
+                        document_group_id=group_id,
+                    ).load_active_chunks()
+                    prepared = corpus_registry.prepare(group_id, chunks)
+                    corpus_registry.publish(group_id, prepared)
+                    corpus_state.publish(prepared)
+                    snapshot = corpus_state.snapshot()
+                else:
+                    for group_id in group_ids:
+                        chunks = await SearchReader(
+                            session,
+                            document_group_id=group_id,
+                        ).load_active_chunks()
+                        corpus_registry.replace(group_id, chunks)
+                    snapshot = corpus_registry.snapshot(group_ids[0])
+    except (ActiveIndexNotFoundError, ValueError) as exc:
+        logger.warning("corpus 미적재 상태로 기동합니다: %s", exc)
+        return
+
+    logger.info(
+        "corpus 적재 완료: 문서 %d개, Chunk %d개",
+        snapshot.document_count,
+        snapshot.chunk_count,
+    )
+
+
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title="Riido RAG Chatbot API",
+        version="0.1.0",
+        lifespan=lifespan,
+    )
+    # 브라우저에서 다른 오리진의 FE가 호출하므로 허용 목록을 명시한다.
+    # 로그인이 없어 쿠키를 쓰지 않으므로 credentials는 허용하지 않는다.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=get_settings().cors_origin_list,
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type"],
+    )
+
+    app.include_router(health_router)
+    app.include_router(chat_router)
+    app.include_router(feedback_router)
+    app.include_router(rag_run_router)
+    app.include_router(internal_router)
+    app.include_router(internal_test_chat_router)
+    app.include_router(admin_documents_router)
+    app.include_router(admin_question_log_router)
+    if get_settings().profile_revision_admin_enabled:
+        from app.admin.profile_revisions.router import router as profile_revisions_router
+
+        app.include_router(profile_revisions_router)
+
+    @app.exception_handler(AdminApiError)
+    async def handle_admin_api_error(
+        _: Request,
+        exc: AdminApiError,
+    ) -> JSONResponse:
+        logger.info("Admin 요청을 처리할 수 없습니다: %s", exc)
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=AdminErrorResponse(
+                code=AdminErrorCode(exc.code),
+                message=exc.message,
+            ).model_dump(mode="json", by_alias=True),
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def handle_request_validation_error(
+        request: Request,
+        exc: RequestValidationError,
+    ) -> JSONResponse:
+        """운영자 API 의 422 를 다른 오류와 같은 형식으로 돌려준다.
+
+        FastAPI 기본 응답은 {"detail": [...]} 라 code 를 읽는 FE 공통 처리가
+        422 에서만 깨진다. 콘솔 밖 경로는 기본 형식을 그대로 둔다.
+        """
+
+        if not request.url.path.startswith(ADMIN_PATH_PREFIX):
+            return JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content={"detail": exc.errors()},
+            )
+
+        logger.info("Admin 요청 형식이 올바르지 않습니다: %s", exc.errors())
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content=AdminErrorResponse(
+                code=AdminErrorCode.INVALID_REQUEST,
+                message=_validation_message(exc),
+            ).model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+
+    @app.exception_handler(CorpusNotLoadedError)
+    async def handle_corpus_not_loaded(
+        _: Request,
+        exc: CorpusNotLoadedError,
+    ) -> JSONResponse:
+        logger.warning("corpus 미적재 상태에서 요청을 받았습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content=corpus_unavailable_response().model_dump(
+                mode="json",
+                by_alias=True,
+            ),
+        )
+
+    @app.exception_handler(ConversationNotFoundError)
+    async def handle_conversation_not_found(
+        _: Request,
+        exc: ConversationNotFoundError,
+    ) -> JSONResponse:
+        logger.info("이어갈 수 없는 대화로 요청을 받았습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=conversation_not_found_response().model_dump(
+                mode="json",
+                by_alias=True,
+            ),
+        )
+
+    @app.exception_handler(ConversationProfileMismatchError)
+    async def handle_conversation_profile_mismatch(
+        _: Request,
+        exc: ConversationProfileMismatchError,
+    ) -> JSONResponse:
+        logger.info("endpoint와 다른 프로필의 대화로 요청을 받았습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=conversation_not_found_response().model_dump(
+                mode="json", by_alias=True
+            ),
+        )
+
+    @app.exception_handler(ChatProfileUnavailableError)
+    async def handle_chat_profile_unavailable(
+        _: Request,
+        exc: ChatProfileUnavailableError,
+    ) -> JSONResponse:
+        logger.warning("사용 가능한 chat profile이 없습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content=corpus_unavailable_response().model_dump(
+                mode="json", by_alias=True
+            ),
+        )
+
+    @app.exception_handler(ChatProfileConfigurationError)
+    async def handle_chat_profile_configuration_error(
+        _: Request,
+        exc: ChatProfileConfigurationError,
+    ) -> JSONResponse:
+        logger.error("선택한 프로필 버전을 실행 중인 코드로 서빙할 수 없습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content=corpus_unavailable_response().model_dump(
+                mode="json", by_alias=True
+            ),
+        )
+
+    @app.exception_handler(ConversationBusyError)
+    async def handle_conversation_busy(
+        _: Request,
+        exc: ConversationBusyError,
+    ) -> JSONResponse:
+        logger.info("처리 중인 대화로 중복 요청을 받았습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content=conversation_busy_response(exc.conversation_id).model_dump(
+                mode="json",
+                by_alias=True,
+            ),
+        )
+
+    @app.exception_handler(RagRunNotFoundError)
+    async def handle_rag_run_not_found(
+        _: Request,
+        exc: RagRunNotFoundError,
+    ) -> JSONResponse:
+        logger.info("존재하지 않는 답변에 피드백 요청을 받았습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=rag_run_not_found_response().model_dump(
+                mode="json",
+                by_alias=True,
+            ),
+        )
+
+    @app.exception_handler(FeedbackNotAllowedError)
+    async def handle_feedback_not_allowed(
+        _: Request,
+        exc: FeedbackNotAllowedError,
+    ) -> JSONResponse:
+        logger.info("평가할 수 없는 답변에 피드백 요청을 받았습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content=feedback_not_allowed_response().model_dump(
+                mode="json",
+                by_alias=True,
+            ),
+        )
+
+    @app.exception_handler(RagRunResultNotFoundError)
+    async def handle_rag_run_result_not_found(
+        _: Request,
+        exc: RagRunResultNotFoundError,
+    ) -> JSONResponse:
+        logger.info("존재하지 않는 답변의 결과를 조회했습니다: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=rag_run_result_not_found_response().model_dump(
+                mode="json",
+                by_alias=True,
+            ),
+        )
+
+    return app
+
+
+app = create_app()

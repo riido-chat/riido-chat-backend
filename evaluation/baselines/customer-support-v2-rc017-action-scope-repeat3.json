@@ -1,0 +1,1010 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-08T17:54:10.044073+00:00",
+  "casesVersion": "real-customer-cases-v2",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "c687f17a7f09a6bc61f6db9dd5acebba31cda207",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.6-terra"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v8",
+        "sha256": "6382fe3033a461b851ee88b65c0c8a24aeb74ac940df13fbc3e96ea1f79c3dbb"
+      },
+      "sourcePlanning": {
+        "version": "v21",
+        "sha256": "2ef5286747abc11ecbb87b4f8a37c8145ca86748592a987caf3a901ac08c3ef9"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v21-repair-1",
+        "sha256": "3aaa82d9314bbe6004de9ce1eeee86d867b3f34efa1f8373998f2f8bec8eadf7"
+      },
+      "answer": {
+        "version": "v21",
+        "sha256": "9afaf45fc0f0d7cc4eaef3af37b4179d36cfe482b6c8a5504cdd71e9751a1643"
+      },
+      "answerValidationRegeneration": {
+        "version": "v21-repair-1",
+        "sha256": "23a77c53d67f0307ab715b937ff22361799ba84e49b46a4e693b1f88fc37ddcc"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "c687f17a7f09a6bc61f6db9dd5acebba31cda207",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.6-terra",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v30"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 3,
+    "uniqueCaseCount": 1,
+    "totalCaseExecutionCount": 3,
+    "passedCaseExecutionCount": 3,
+    "failedCaseExecutionCount": 0,
+    "executionErrorCaseExecutionCount": 0,
+    "criteriaMismatchCaseExecutionCount": 0,
+    "perCase": [
+      {
+        "id": "RC017",
+        "executionCount": 3,
+        "passedCount": 3,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 3,
+        "passedCount": 3,
+        "failedCount": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-08T17:53:54.971775+00:00",
+      "results": [
+        {
+          "id": "RC017",
+          "description": "Github PR 생성 후 티켓이 자동 생성되지 않는다는 문의",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "31ec11a2-dec6-4a49-8c57-966d2e1bbe62",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "31ec11a2-dec6-4a49-8c57-966d2e1bbe62",
+                "ragRunId": "b389f451-f4e5-4dbc-abbe-e0ec26e6fd91",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+                "resolvedQuery": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 6062,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 35,
+                    "outputTokens": null,
+                    "latencyMs": 516,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 4781,
+                    "outputTokens": 185,
+                    "latencyMs": 5453,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.031099324975891997,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.480648445203488,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.34794861332849114,
+                            "latencyMs": 548
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3317,
+                        "documentVersionId": 2436,
+                        "documentId": "d639f52b10eb",
+                        "sectionId": "d639f52b10eb:f9d910a50c33",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "구글 캘린더 연동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/meetings/automations.md",
+                        "contentHash": "ce996c4e6872bafd018408467bbdfa29b142f4127ecbff3840a1489e60b651b6",
+                        "content": "워크스페이스와 구글 계정을 연동하면, 뤼이도에서 생성된 미팅이 자동으로 구글 캘린더에 등록됩니다. 반대로 구글 캘린더에서 생성한 일정도 뤼이도 내 미팅 목록에 자동으로 표시됩니다. 미팅 제목, 참여자, 시간, 장소가 양방향으로 동기화됩니다. 구글 캘린더 연동 설정 방법은 [가이드](https://docs.riido.io/integrations/google-calendar.md)에서 자세히 확인할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031024531024531024,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 3.7244372378659367,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.35199288152544495,
+                            "latencyMs": 548
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3345,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:b8b2000bc35a",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "8e1b55cfcdfe65e7ddba24792c5535486b021c4078d520ef8d7941a193baec1e",
+                        "content": "구글 캘린더 연동은 워크스페이스 단위에서 설정한 뒤, 팀별로 연결할 세부 캘린더를 지정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Google Calendar]로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 구글 계정을 승인합니다.\n\n#### 2) 팀별 캘린더 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 연결할 구글 캘린더를 선택합니다.\n2. 각 팀은 하나의 구글 캘린더와 1:1 연결되며, 해당 팀의 모든 미팅 일정이 연결된 캘린더와 동기화됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 구글 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 3.468356981717751,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.35144243202367575,
+                            "latencyMs": 548
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3330,
+                        "documentVersionId": 2441,
+                        "documentId": "b86425eb9784",
+                        "sectionId": "b86425eb9784:fb7196c378c9",
+                        "documentTitle": "깃허브",
+                        "sectionPath": [
+                          "깃허브",
+                          "작업 상태 자동화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/github.md",
+                        "contentHash": "0be8e5658aa6481bd7daa25fdbb168b21f729187a31fb90d00d9b90d317e53f1",
+                        "content": "연결된 브랜치에 업데이트가 생길 경우, 뤼이도 작업 상태를 자동으로 업데이트하여 수동 작업을 완전히 제거합니다.\n\n#### 1. 기본 자동화 설정\n\n최초 연동시, 팀의 작업 흐름에 맞게 다음과 같은 자동화가 기본적으로 설정되어 있습니다. PR이 Merge될 경우, 뤼이도의 작업 상태가 자동으로 완료로 변경됩니다.\n\n| Github Action | 뤼이도 상태 |\n| ------------- | ------ |\n| Merge         | 완료     |\n\n#### 2. 자동화 커스텀\n\n상태 자동화는 팀의 특성에 맞게 세부적으로 커스텀 할 수 있습니다. \\[설정 > 워크스페이스 > 외부 연동 > Github] 페이지에서 커스텀이 가능합니다. 상태 자동화는 팀과 관련된 설정이기 때문에, 워크스페이스에 존재하는 각 팀별로 설정 업데이트가 필요합니다.\n\n자동화를 적용할 수 있는 깃허브 액션은 `Branch Create`, `PR Open`, `PR Close`, `Merge`로 총 4가지가 존재합니다.\n\n팀별 상태는 팀별 \\[설장 > 팀 > 작업 상태] 페이지에서 커스텀 가능하며, 뤼이도의 작업 상태에 대한 상세한 설명은 [작업 상태](https://docs.riido.io/teams/statuses)에서 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.02919863597612958,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 8,
+                            "rawScore": 2.8446769648338144,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.34786253305603965,
+                            "latencyMs": 548
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.40836439357206467,
+                            "latencyMs": 548
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 4781,
+                        "outputTokens": 185,
+                        "latencyMs": 5453,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    },
+    {
+      "repeatNo": 2,
+      "executedAt": "2026-09-08T17:54:01.065937+00:00",
+      "results": [
+        {
+          "id": "RC017",
+          "description": "Github PR 생성 후 티켓이 자동 생성되지 않는다는 문의",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "4a138675-d95e-49be-939f-35373f651918",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "4a138675-d95e-49be-939f-35373f651918",
+                "ragRunId": "b0039678-48d0-47e7-9aee-43dc61c8fbcd",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+                "resolvedQuery": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 5047,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 35,
+                    "outputTokens": null,
+                    "latencyMs": 535,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 4781,
+                    "outputTokens": 133,
+                    "latencyMs": 4466,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.031099324975891997,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.480648445203488,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.34794861332849114,
+                            "latencyMs": 551
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3317,
+                        "documentVersionId": 2436,
+                        "documentId": "d639f52b10eb",
+                        "sectionId": "d639f52b10eb:f9d910a50c33",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "구글 캘린더 연동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/meetings/automations.md",
+                        "contentHash": "ce996c4e6872bafd018408467bbdfa29b142f4127ecbff3840a1489e60b651b6",
+                        "content": "워크스페이스와 구글 계정을 연동하면, 뤼이도에서 생성된 미팅이 자동으로 구글 캘린더에 등록됩니다. 반대로 구글 캘린더에서 생성한 일정도 뤼이도 내 미팅 목록에 자동으로 표시됩니다. 미팅 제목, 참여자, 시간, 장소가 양방향으로 동기화됩니다. 구글 캘린더 연동 설정 방법은 [가이드](https://docs.riido.io/integrations/google-calendar.md)에서 자세히 확인할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031024531024531024,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 3.7244372378659367,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.35199288152544495,
+                            "latencyMs": 551
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3345,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:b8b2000bc35a",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "8e1b55cfcdfe65e7ddba24792c5535486b021c4078d520ef8d7941a193baec1e",
+                        "content": "구글 캘린더 연동은 워크스페이스 단위에서 설정한 뒤, 팀별로 연결할 세부 캘린더를 지정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Google Calendar]로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 구글 계정을 승인합니다.\n\n#### 2) 팀별 캘린더 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 연결할 구글 캘린더를 선택합니다.\n2. 각 팀은 하나의 구글 캘린더와 1:1 연결되며, 해당 팀의 모든 미팅 일정이 연결된 캘린더와 동기화됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 구글 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 3.468356981717751,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.35144243202367575,
+                            "latencyMs": 551
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3330,
+                        "documentVersionId": 2441,
+                        "documentId": "b86425eb9784",
+                        "sectionId": "b86425eb9784:fb7196c378c9",
+                        "documentTitle": "깃허브",
+                        "sectionPath": [
+                          "깃허브",
+                          "작업 상태 자동화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/github.md",
+                        "contentHash": "0be8e5658aa6481bd7daa25fdbb168b21f729187a31fb90d00d9b90d317e53f1",
+                        "content": "연결된 브랜치에 업데이트가 생길 경우, 뤼이도 작업 상태를 자동으로 업데이트하여 수동 작업을 완전히 제거합니다.\n\n#### 1. 기본 자동화 설정\n\n최초 연동시, 팀의 작업 흐름에 맞게 다음과 같은 자동화가 기본적으로 설정되어 있습니다. PR이 Merge될 경우, 뤼이도의 작업 상태가 자동으로 완료로 변경됩니다.\n\n| Github Action | 뤼이도 상태 |\n| ------------- | ------ |\n| Merge         | 완료     |\n\n#### 2. 자동화 커스텀\n\n상태 자동화는 팀의 특성에 맞게 세부적으로 커스텀 할 수 있습니다. \\[설정 > 워크스페이스 > 외부 연동 > Github] 페이지에서 커스텀이 가능합니다. 상태 자동화는 팀과 관련된 설정이기 때문에, 워크스페이스에 존재하는 각 팀별로 설정 업데이트가 필요합니다.\n\n자동화를 적용할 수 있는 깃허브 액션은 `Branch Create`, `PR Open`, `PR Close`, `Merge`로 총 4가지가 존재합니다.\n\n팀별 상태는 팀별 \\[설장 > 팀 > 작업 상태] 페이지에서 커스텀 가능하며, 뤼이도의 작업 상태에 대한 상세한 설명은 [작업 상태](https://docs.riido.io/teams/statuses)에서 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.02919863597612958,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 8,
+                            "rawScore": 2.8446769648338144,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.34786253305603965,
+                            "latencyMs": 551
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.40836439357206467,
+                            "latencyMs": 551
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 4781,
+                        "outputTokens": 133,
+                        "latencyMs": 4466,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        }
+      ]
+    },
+    {
+      "repeatNo": 3,
+      "executedAt": "2026-09-08T17:54:06.151720+00:00",
+      "results": [
+        {
+          "id": "RC017",
+          "description": "Github PR 생성 후 티켓이 자동 생성되지 않는다는 문의",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "c84e528b-6f1e-420b-970b-6b78bd75b255",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "c84e528b-6f1e-420b-970b-6b78bd75b255",
+                "ragRunId": "91912d21-63f5-4fa7-a854-137dc110699d",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+                "resolvedQuery": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 3854,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 35,
+                    "outputTokens": null,
+                    "latencyMs": 168,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 4781,
+                    "outputTokens": 97,
+                    "latencyMs": 3623,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "깃헙 연동하고 pr 보냇는데 자동으로 티켓이 안 따지네요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.031099324975891997,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.480648445203488,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.34794861332849114,
+                            "latencyMs": 184
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3317,
+                        "documentVersionId": 2436,
+                        "documentId": "d639f52b10eb",
+                        "sectionId": "d639f52b10eb:f9d910a50c33",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "구글 캘린더 연동"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/meetings/automations.md",
+                        "contentHash": "ce996c4e6872bafd018408467bbdfa29b142f4127ecbff3840a1489e60b651b6",
+                        "content": "워크스페이스와 구글 계정을 연동하면, 뤼이도에서 생성된 미팅이 자동으로 구글 캘린더에 등록됩니다. 반대로 구글 캘린더에서 생성한 일정도 뤼이도 내 미팅 목록에 자동으로 표시됩니다. 미팅 제목, 참여자, 시간, 장소가 양방향으로 동기화됩니다. 구글 캘린더 연동 설정 방법은 [가이드](https://docs.riido.io/integrations/google-calendar.md)에서 자세히 확인할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031024531024531024,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 3.7244372378659367,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.35199288152544495,
+                            "latencyMs": 184
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3345,
+                        "documentVersionId": 2445,
+                        "documentId": "5623097e1502",
+                        "sectionId": "5623097e1502:b8b2000bc35a",
+                        "documentTitle": "구글 캘린더",
+                        "sectionPath": [
+                          "구글 캘린더",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md",
+                        "contentHash": "8e1b55cfcdfe65e7ddba24792c5535486b021c4078d520ef8d7941a193baec1e",
+                        "content": "구글 캘린더 연동은 워크스페이스 단위에서 설정한 뒤, 팀별로 연결할 세부 캘린더를 지정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Google Calendar]로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 구글 계정을 승인합니다.\n\n#### 2) 팀별 캘린더 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 연결할 구글 캘린더를 선택합니다.\n2. 각 팀은 하나의 구글 캘린더와 1:1 연결되며, 해당 팀의 모든 미팅 일정이 연결된 캘린더와 동기화됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 구글 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 참여자를 자동으로 할당할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 3.468356981717751,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.35144243202367575,
+                            "latencyMs": 184
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3330,
+                        "documentVersionId": 2441,
+                        "documentId": "b86425eb9784",
+                        "sectionId": "b86425eb9784:fb7196c378c9",
+                        "documentTitle": "깃허브",
+                        "sectionPath": [
+                          "깃허브",
+                          "작업 상태 자동화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/github.md",
+                        "contentHash": "0be8e5658aa6481bd7daa25fdbb168b21f729187a31fb90d00d9b90d317e53f1",
+                        "content": "연결된 브랜치에 업데이트가 생길 경우, 뤼이도 작업 상태를 자동으로 업데이트하여 수동 작업을 완전히 제거합니다.\n\n#### 1. 기본 자동화 설정\n\n최초 연동시, 팀의 작업 흐름에 맞게 다음과 같은 자동화가 기본적으로 설정되어 있습니다. PR이 Merge될 경우, 뤼이도의 작업 상태가 자동으로 완료로 변경됩니다.\n\n| Github Action | 뤼이도 상태 |\n| ------------- | ------ |\n| Merge         | 완료     |\n\n#### 2. 자동화 커스텀\n\n상태 자동화는 팀의 특성에 맞게 세부적으로 커스텀 할 수 있습니다. \\[설정 > 워크스페이스 > 외부 연동 > Github] 페이지에서 커스텀이 가능합니다. 상태 자동화는 팀과 관련된 설정이기 때문에, 워크스페이스에 존재하는 각 팀별로 설정 업데이트가 필요합니다.\n\n자동화를 적용할 수 있는 깃허브 액션은 `Branch Create`, `PR Open`, `PR Close`, `Merge`로 총 4가지가 존재합니다.\n\n팀별 상태는 팀별 \\[설장 > 팀 > 작업 상태] 페이지에서 커스텀 가능하며, 뤼이도의 작업 상태에 대한 상세한 설명은 [작업 상태](https://docs.riido.io/teams/statuses)에서 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.02919863597612958,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 8,
+                            "rawScore": 2.8446769648338144,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.34786253305603965,
+                            "latencyMs": 184
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3339,
+                        "documentVersionId": 2443,
+                        "documentId": "43e5e2414349",
+                        "sectionId": "43e5e2414349:9976bd5ed072",
+                        "documentTitle": "슬랙",
+                        "sectionPath": [
+                          "슬랙",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/slack.md",
+                        "contentHash": "2e8762dbe99701ae567dfefda3c392305e4572110db000de215908ca3186d34f",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 슬랙 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 비공개 채널을 연결할 수 있나요?\n\n가능합니다.\n\n워크스페이스를 연동하면 슬랙에서 뤼이도 봇을 언급할 수 있습니다. 연결하고자 하는 비공개 채널에 뤼이도 봇을 언급(@riido)하여 초대하면 뤼이도의 슬랙 연동 채널에 해당 채널이 표시됩니다.\n\n### 슬랙 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 슬랙 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.40836439357206467,
+                            "latencyMs": 184
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 4781,
+                        "outputTokens": 97,
+                        "latencyMs": 3623,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        }
+      ]
+    }
+  ]
+}

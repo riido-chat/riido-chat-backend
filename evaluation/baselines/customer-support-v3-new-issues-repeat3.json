@@ -1,0 +1,2878 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-09T02:24:59.710722+00:00",
+  "casesVersion": "real-customer-cases-v3",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "c687f17a7f09a6bc61f6db9dd5acebba31cda207",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.6-terra"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v8",
+        "sha256": "6382fe3033a461b851ee88b65c0c8a24aeb74ac940df13fbc3e96ea1f79c3dbb"
+      },
+      "sourcePlanning": {
+        "version": "v21",
+        "sha256": "2ef5286747abc11ecbb87b4f8a37c8145ca86748592a987caf3a901ac08c3ef9"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v21-repair-1",
+        "sha256": "3aaa82d9314bbe6004de9ce1eeee86d867b3f34efa1f8373998f2f8bec8eadf7"
+      },
+      "answer": {
+        "version": "v21",
+        "sha256": "9afaf45fc0f0d7cc4eaef3af37b4179d36cfe482b6c8a5504cdd71e9751a1643"
+      },
+      "answerValidationRegeneration": {
+        "version": "v21-repair-1",
+        "sha256": "23a77c53d67f0307ab715b937ff22361799ba84e49b46a4e693b1f88fc37ddcc"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "c687f17a7f09a6bc61f6db9dd5acebba31cda207",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.6-terra",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v30"
+      },
+      {
+        "purpose": "QUERY_REWRITE",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v8"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 3,
+    "uniqueCaseCount": 2,
+    "totalCaseExecutionCount": 6,
+    "passedCaseExecutionCount": 3,
+    "failedCaseExecutionCount": 3,
+    "executionErrorCaseExecutionCount": 0,
+    "criteriaMismatchCaseExecutionCount": 3,
+    "perCase": [
+      {
+        "id": "RC050",
+        "executionCount": 3,
+        "passedCount": 0,
+        "failedCount": 3
+      },
+      {
+        "id": "RC061",
+        "executionCount": 3,
+        "passedCount": 3,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 6,
+        "passedCount": 3,
+        "failedCount": 3
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-09T02:24:20.803466+00:00",
+      "results": [
+        {
+          "id": "RC050",
+          "description": "회원 탈퇴 방법 문의의 다른 표현",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": false,
+          "conversationId": "241cf60c-3571-4385-8a51-1e0dce1eca35",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "어떻게 탈퇴할 수 있나요",
+              "passed": false,
+              "failures": [
+                "withheld reason 불일치: expected_any=['INSUFFICIENT_EVIDENCE'], actual=AMBIGUOUS_QUESTION"
+              ],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "241cf60c-3571-4385-8a51-1e0dce1eca35",
+                "ragRunId": "fbb016c9-a1a3-42b0-8e7c-ebabe2ee3f20",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "AMBIGUOUS_QUESTION",
+                  "message": "질문의 범위가 너무 넓거나 의미가 명확하지 않아 답변하기 어렵습니다. 질문을 조금 더 구체적으로 작성해주세요."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "어떻게 탈퇴할 수 있나요",
+                "resolvedQuery": "어떻게 탈퇴할 수 있나요",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "AMBIGUOUS_QUESTION",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 3448,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 15,
+                    "outputTokens": null,
+                    "latencyMs": 611,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 4537,
+                    "outputTokens": 105,
+                    "latencyMs": 2755,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "어떻게 탈퇴할 수 있나요",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "어떻게 탈퇴할 수 있나요"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3232,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:6a09b6285b28",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "멤버 비활성화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "3c7ba56137fad745d3f659f2eec123126b1ce27eca49c41ffb7c46d977e00ac9",
+                        "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.33108178976768765,
+                            "latencyMs": 640
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3238,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:e993da30a527",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "특별 지원 프로그램"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "004605154da8d9a53f6387fc6178cd0ea3cf3dc900319dff120b2cc5db252dd2",
+                        "content": "뤼이도는 다양한 조직과 개인이 더 효율적으로 프로젝트를 관리하고 협업할 수 있도록 특별 지원 프로그램을 운영하고 있습니다.\n\n#### 교육 프로그램\n\n재학 중인 학생이라면, 뤼이도의 유료 요금제를 무료로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 학교 이메일이나 학생증 등을 통한 인증 요청 과정이 있을 수 있습니다.\n\n#### 비영리 단체 프로그램\n\n비영리 단체는 뤼이도의 유료 요금제를 최대 70% 할인된 가격으로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 비영리 단체임을 증명하는 서류 제출이 필요할 수 있습니다.\n\n#### 스타트업 프로그램\n\n현재 뤼이도는 별도의 스타트업 전용 프로그램을 운영하고 있지 않습니다. 다만, 뤼이도를 활용해 팀의 실행력을 높이고자 하는 스타트업의 제안은 언제든 환영합니다. 좋은 제안이나 협업 아이디어가 있다면 [고객 문의](https://swyg.channel.io/home)를 통해 제안 바랍니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 1.89455902639722,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3243,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:26bbdd776a1e",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "4d4539e8b14b91e51d63fe24c71eb00ab812043bad06a5e7073815f72a1ebf67",
+                        "content": "#### 팀 생성 및 참여\n\n새로운 팀을 만들거나 기존 팀에 참여하려면, 설정 페이지의 \\[팀]에서 관리할 수 있습니다. 또는 설정 페이지의 좌측 사이드바 하단의 ‘팀 추가’ 버튼을 클릭하여 생성할 수도 있습니다. 단, 비공개 팀은 팀 관리자의 초대를 받아야 참여할 수 있습니다.\n\n팀의 생성 가능 개수는 워크스페이스의 요금제에 따라 제한이 있습니다.\n\n요금제: Free / 팀 개수: 2\n요금제: Pro / 팀 개수: 3\n요금제: Business / 팀 개수: 무제한\n요금제: Enterprise / 팀 개수: 무제한\n\n#### 팀 떠나기\n\n팀 멤버 설정 페이지에서 스스로를 비활성화하면, 팀에서 떠날 수 있습니다.\n\n#### 팀 삭제\n\n팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.32425781228906514,
+                            "latencyMs": 640
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3273,
+                        "documentVersionId": 2424,
+                        "documentId": "fcb3c228f5a0",
+                        "sectionId": "fcb3c228f5a0:7ce560cd7b49",
+                        "documentTitle": "운영: 보관 작업",
+                        "sectionPath": [
+                          "운영: 보관 작업",
+                          "보관된 작업을 다시 활성화하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/archived-items.md",
+                        "contentHash": "7a19fe9b4e00e9ba41f7823dc3c0e3a02fc541788ea61cfce244bae47cfdb5b0",
+                        "content": "보관된 작업은 언제든 다시 활성화하여, 실행 가능한 상태로 되돌릴 수 있습니다. 업데이트가 필요한 기능이나 추가 개선이 필요할 때, 보관된 작업을 꺼내어 실행 흐름으로 자연스럽게 이어갈 수 있습니다.\n\n프로젝트나 목표 단위로만 다시 활성화할 수도 있으며, 이 경우 하위 작업은 보관 상태로 유지됩니다. 이 방식을 통해 필요한 작업만 선별적으로 이어갈 수 있으며, 불필요한 복잡도를 줄일 수 있습니다.\n\n이처럼 모든 기록은 그대로 보존되어 과거의 맥락을 잃지 않은 채 이어받을 수 있습니다. 이는 뤼이도의 철학인 “지속적인 개선과 성장”을 실천하는 가장 직접적인 방식입니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 1.8679181981296622,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3280,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:281921125b1e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "링크"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "06a8048e734d4f507e00a8d0a916de833fb901c300c0ef49d0d90de12c7a179f",
+                        "content": "팀에서 자주 사용하는 외부 리소스(API 문서, 데이터 대시보드, 인프라 페이지 등)를 한곳에 모아 관리할 수 있습니다.\n\n링크는 섹션 단위로 그룹화할 수 있어, 주제별로 체계적으로 정리하고 빠르게 접근할 수 있습니다. 이를 통해 파편화된 외부 정보를 모으고, 협업 효율을 높일 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.015873015873015872,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 1.863289682159825,
+                            "latencyMs": 0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 4537,
+                        "outputTokens": 105,
+                        "latencyMs": 2755,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "AMBIGUOUS_QUESTION"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "AMBIGUOUS_QUESTION"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC061",
+          "description": "자동 결제 환불 문의 뒤 계정별 결제 정보와 카드 해지를 요청",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "7a732a96-3356-4434-aa1a-e306d8c644ea",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "7a732a96-3356-4434-aa1a-e306d8c644ea",
+                "ragRunId": "2c058450-91f2-4c68-bdb3-77470430bb44",
+                "answer": {
+                  "answerMarkdown": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "구독 및 결제",
+                    "sectionPath": [
+                      "구독 변경 또는 취소"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                "resolvedQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4561,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 69,
+                    "outputTokens": null,
+                    "latencyMs": 219,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 7893,
+                    "outputTokens": 182,
+                    "latencyMs": 4296,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "구독 및 결제"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3235,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:5e49b96fcb2e",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제 및 청구 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "fc84217e5bab3fc4c62dc9963134cef9c953a9fb1f07f6688ea883fadb5e0d8e",
+                        "content": "결제 관리를 위해서는 설정 페이지의 \\[워크스페이스 > 청구] 페이지에서 확인할 수 있습니다. 현재 워크스페이스의 요금제, 결제 정보, 이전 결제 내역을 확인할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 18.495977734915087,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.381953526213191,
+                            "latencyMs": 234
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3236,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:18af4c7df7aa",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "구독 변경 또는 취소"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "d552e0ca80bf3da68c875b6056e8e2c56247b5a5ff887a97d6dd6243f336a854",
+                        "content": "워크스페이스 관리자는 요금제를 변경하거나 취소할 수 있습니다. 상위 요금제로 업그레이드할 경우에는 즉시 반영되며, 하위 요금제로 다운그레이드 하거나, 구독을 취소하는 경우 다음 구독 주기에 맞춰 적용됩니다. 만약, 월별 결제 주기를 사용하고 있다면 결제 월의 마지막 날에 적용이 되며, 연간 결제 주기를 사용하고 있다면 결제 연도 마지막 날에 적용됩니다.\n\n뤼이도는 구독 기간 중 구독 취소에 대한 환불을 제공하지 않습니다. 따라서 처음에는 월간 결제로 시작해 충분히 효용을 느낀 뒤 연간 결제로 전환하는 것을 권장합니다.\n\n구독을 취소하여 무료 요금제로 전환되더라도 워크스페이스는 삭제되지 않고 다음과 같이 유지됩니다:\n\n* 그 어떤 데이터도 삭제되지 않습니다.\n* 만약 200개가 넘는 작업이 생성되었다면, 더 이상 새로운 작업을 생성할 수 없습니다.\n* 만약 팀이 2개 이상이라면, 더 이상 새로운 팀을 생성할 수 없습니다.\n* 모든 워크스페이스 멤버는 관리자가 됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 22.140732206321974,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3477172280582608,
+                            "latencyMs": 234
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3237,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:c6dbd3a17dd8",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "워크스페이스에 멤버 추가하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "a93f12fb3de6ebca267444688f4e2eaab08d8880777944f6788e69cdc7c2f0a3",
+                        "content": "#### 월간 요금제\n\n월간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면, 다음 결제일에 새로운 멤버에 대한 비용이 포함되며, 지난 청구 주기에 추가한 멤버에 대한 일할 계산된 요금이 소급 적용됩니다.\n\n#### 연간 요금제\n\n연간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면 다음 달 요금제 시작일과 같은 일자에 청구서를 받게 되며, 아래 두 가지 비용이 포함됩니다.\n\n* 연간 요금제의 잔여기간 동안 신규 멤버 추가로 발생하는 금액\n* 신규 멤버가 워크스페이스에 참여하여 결제일 전까지의 기간만큼 일할 계산하여 소급 적용된 금액",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03128054740957967,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 8.84260522187678,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.3563787545116216,
+                            "latencyMs": 234
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3234,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:dd62a0b71715",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "257173081d1bcff0fd64c72f08ed19e0de6f533557ceaba7577d66258c913bbe",
+                        "content": "뤼이도의 요금은 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. 하나의 워크스페이스는 하나의 구독과 결제 정보를 가지게 됩니다.\n\n결제 후 멤버를 비활성화하면, 해당 인원만큼 유료 시트가 남게 됩니다. 해당 시트는 새 사용자를 초대할 때 사용할 수 있습니다.\n\n뤼이도의 결제는 월별 결제와 연간 결제 두 가지 주기를 지원합니다.\n\n**월별 결제**\n결제일은 최초 결제 시작일을 기준으로, 매달 동일하게 청구됩니다. (예: 3월 10일에 최초 결제가 시작되었다면, 이후 매달 10일에 결제)\n\n결제 기간 중 새로운 사용자를 추가하더라도 즉시 결제되지 않습니다. 대신 추가된 사용자의 사용 기간만큼, 다음 결제일에 소급 반영되어 청구됩니다.\n\n**연간 결제**\n결제일은 최초 결제일로부터 1년마다 자동 갱신되며, 연간 결제는 월별 요금 대비 20% 할인이 적용됩니다. (예: 2025년 3월 10일에 최초 결제가 시작되었다면, 이후 매년 3월 10일에 결제)\n\n중간에 새로운 사용자를 추가할 경우, 추가된 인원에 대한 금액이 다음 달 요금제 시작일에 계산되어 청구됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 15.57676645020521,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.3471703352002872,
+                            "latencyMs": 234
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3362,
+                        "documentVersionId": 2449,
+                        "documentId": "a7061c4853df",
+                        "sectionId": "a7061c4853df:73e63632e555",
+                        "documentTitle": "휴지통",
+                        "sectionPath": [
+                          "휴지통",
+                          "복구 및 영구 삭제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/trash.md",
+                        "contentHash": "8a5c72f41d87c81930f5de6399ed251b9e0da4509f30f9965fb12b675a730e49",
+                        "content": "#### 복구\n\n* 실수로 삭제한 항목은 휴지통 또는 해당 페이지 상단 배너의 ‘복구’ 버튼을 통해 즉시 되돌릴 수 있습니다.\n* 복구된 항목은 삭제 이전의 위치(예: 원래 속한 프로젝트나 팀)로 자동 복원됩니다.\n\n#### 영구 삭제\n\n* 더 이상 보관할 필요가 없는 항목은 휴지통 또는 해당 페이지 상단 배너의 ‘영구 삭제’ 버튼을 눌러 즉시 삭제할 수 있습니다.\n* 영구 삭제된 항목은 시스템 상에서도 복구할 수 없습니다.\n\n휴지통에 보관되는 기간(30일)이 지나면, 모든 데이터는 자동으로 삭제됩니다. 삭제 이후에는 시스템 상에서도 복원할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 10.48933265446201,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.33077615711570396,
+                            "latencyMs": 234
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 7893,
+                        "outputTokens": 182,
+                        "latencyMs": 4296,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "구독 기간 중 구독 취소에 대한 환불 가능 여부",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3236,
+                          "documentVersionId": 2416,
+                          "documentId": "95a1b20de638",
+                          "sectionId": "95a1b20de638:18af4c7df7aa",
+                          "documentTitle": "구독 및 결제",
+                          "sectionPath": [
+                            "구독 및 결제",
+                            "구독 변경 또는 취소"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                          "content": "워크스페이스 관리자는 요금제를 변경하거나 취소할 수 있습니다. 상위 요금제로 업그레이드할 경우에는 즉시 반영되며, 하위 요금제로 다운그레이드 하거나, 구독을 취소하는 경우 다음 구독 주기에 맞춰 적용됩니다. 만약, 월별 결제 주기를 사용하고 있다면 결제 월의 마지막 날에 적용이 되며, 연간 결제 주기를 사용하고 있다면 결제 연도 마지막 날에 적용됩니다.\n\n뤼이도는 구독 기간 중 구독 취소에 대한 환불을 제공하지 않습니다. 따라서 처음에는 월간 결제로 시작해 충분히 효용을 느낀 뒤 연간 결제로 전환하는 것을 권장합니다.\n\n구독을 취소하여 무료 요금제로 전환되더라도 워크스페이스는 삭제되지 않고 다음과 같이 유지됩니다:\n\n* 그 어떤 데이터도 삭제되지 않습니다.\n* 만약 200개가 넘는 작업이 생성되었다면, 더 이상 새로운 작업을 생성할 수 없습니다.\n* 만약 팀이 2개 이상이라면, 더 이상 새로운 팀을 생성할 수 없습니다.\n* 모든 워크스페이스 멤버는 관리자가 됩니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "7a732a96-3356-4434-aa1a-e306d8c644ea",
+                "ragRunId": "1d05851b-9e7e-417b-9336-7d49e0240941",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+                "resolvedQuery": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 4161,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v8",
+                    "inputTokens": 3626,
+                    "outputTokens": 31,
+                    "latencyMs": 976,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 47,
+                    "outputTokens": null,
+                    "latencyMs": 385,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 4498,
+                    "outputTokens": 135,
+                    "latencyMs": 2712,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "2c058450-91f2-4c68-bdb3-77470430bb44",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                        "resolvedQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                        "answerContent": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3237,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:c6dbd3a17dd8",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "워크스페이스에 멤버 추가하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "a93f12fb3de6ebca267444688f4e2eaab08d8880777944f6788e69cdc7c2f0a3",
+                        "content": "#### 월간 요금제\n\n월간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면, 다음 결제일에 새로운 멤버에 대한 비용이 포함되며, 지난 청구 주기에 추가한 멤버에 대한 일할 계산된 요금이 소급 적용됩니다.\n\n#### 연간 요금제\n\n연간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면 다음 달 요금제 시작일과 같은 일자에 청구서를 받게 되며, 아래 두 가지 비용이 포함됩니다.\n\n* 연간 요금제의 잔여기간 동안 신규 멤버 추가로 발생하는 금액\n* 신규 멤버가 워크스페이스에 참여하여 결제일 전까지의 기간만큼 일할 계산하여 소급 적용된 금액",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 12.302299874589826,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.49046807719161034,
+                            "latencyMs": 400
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3234,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:dd62a0b71715",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "257173081d1bcff0fd64c72f08ed19e0de6f533557ceaba7577d66258c913bbe",
+                        "content": "뤼이도의 요금은 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. 하나의 워크스페이스는 하나의 구독과 결제 정보를 가지게 됩니다.\n\n결제 후 멤버를 비활성화하면, 해당 인원만큼 유료 시트가 남게 됩니다. 해당 시트는 새 사용자를 초대할 때 사용할 수 있습니다.\n\n뤼이도의 결제는 월별 결제와 연간 결제 두 가지 주기를 지원합니다.\n\n**월별 결제**\n결제일은 최초 결제 시작일을 기준으로, 매달 동일하게 청구됩니다. (예: 3월 10일에 최초 결제가 시작되었다면, 이후 매달 10일에 결제)\n\n결제 기간 중 새로운 사용자를 추가하더라도 즉시 결제되지 않습니다. 대신 추가된 사용자의 사용 기간만큼, 다음 결제일에 소급 반영되어 청구됩니다.\n\n**연간 결제**\n결제일은 최초 결제일로부터 1년마다 자동 갱신되며, 연간 결제는 월별 요금 대비 20% 할인이 적용됩니다. (예: 2025년 3월 10일에 최초 결제가 시작되었다면, 이후 매년 3월 10일에 결제)\n\n중간에 새로운 사용자를 추가할 경우, 추가된 인원에 대한 금액이 다음 달 요금제 시작일에 계산되어 청구됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 11.779468887710436,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.4479265552581163,
+                            "latencyMs": 400
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3236,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:18af4c7df7aa",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "구독 변경 또는 취소"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "d552e0ca80bf3da68c875b6056e8e2c56247b5a5ff887a97d6dd6243f336a854",
+                        "content": "워크스페이스 관리자는 요금제를 변경하거나 취소할 수 있습니다. 상위 요금제로 업그레이드할 경우에는 즉시 반영되며, 하위 요금제로 다운그레이드 하거나, 구독을 취소하는 경우 다음 구독 주기에 맞춰 적용됩니다. 만약, 월별 결제 주기를 사용하고 있다면 결제 월의 마지막 날에 적용이 되며, 연간 결제 주기를 사용하고 있다면 결제 연도 마지막 날에 적용됩니다.\n\n뤼이도는 구독 기간 중 구독 취소에 대한 환불을 제공하지 않습니다. 따라서 처음에는 월간 결제로 시작해 충분히 효용을 느낀 뒤 연간 결제로 전환하는 것을 권장합니다.\n\n구독을 취소하여 무료 요금제로 전환되더라도 워크스페이스는 삭제되지 않고 다음과 같이 유지됩니다:\n\n* 그 어떤 데이터도 삭제되지 않습니다.\n* 만약 200개가 넘는 작업이 생성되었다면, 더 이상 새로운 작업을 생성할 수 없습니다.\n* 만약 팀이 2개 이상이라면, 더 이상 새로운 팀을 생성할 수 없습니다.\n* 모든 워크스페이스 멤버는 관리자가 됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031746031746031744,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.087081000343343,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.45891041707080016,
+                            "latencyMs": 400
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3235,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:5e49b96fcb2e",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제 및 청구 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "fc84217e5bab3fc4c62dc9963134cef9c953a9fb1f07f6688ea883fadb5e0d8e",
+                        "content": "결제 관리를 위해서는 설정 페이지의 \\[워크스페이스 > 청구] 페이지에서 확인할 수 있습니다. 현재 워크스페이스의 요금제, 결제 정보, 이전 결제 내역을 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031544957774465976,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 7.121241316389323,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5561242440204225,
+                            "latencyMs": 400
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3229,
+                        "documentVersionId": 2414,
+                        "documentId": "7591069b70f9",
+                        "sectionId": "7591069b70f9:97c40b93dde0",
+                        "documentTitle": "워크스페이스",
+                        "sectionPath": [
+                          "워크스페이스",
+                          "여러 워크스페이스에 참여"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/overview.md",
+                        "contentHash": "8e5d25e542e0e41679f6ff5ffb6c3af8059fdf46b9259e7c8f67c3f9e9672513",
+                        "content": "사용자는 여러 워크스페이스에 참여할 수 있습니다. 좌측 상단의 워크스페이스 이름을 클릭하여, 참여 중인 모든 워크스페이스를 확인할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.02967032967032967,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 6.205302244875242,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.44219372070810503,
+                            "latencyMs": 400
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 4498,
+                        "outputTokens": 135,
+                        "latencyMs": 2712,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "MULTI_DETAIL",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    },
+    {
+      "repeatNo": 2,
+      "executedAt": "2026-09-09T02:24:33.081875+00:00",
+      "results": [
+        {
+          "id": "RC050",
+          "description": "회원 탈퇴 방법 문의의 다른 표현",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": false,
+          "conversationId": "72a87684-1544-4e2a-a8c3-3d9a481c9ad7",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "어떻게 탈퇴할 수 있나요",
+              "passed": false,
+              "failures": [
+                "withheld reason 불일치: expected_any=['INSUFFICIENT_EVIDENCE'], actual=AMBIGUOUS_QUESTION"
+              ],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "72a87684-1544-4e2a-a8c3-3d9a481c9ad7",
+                "ragRunId": "a2cba24e-1643-4cab-8d2f-a3768b783378",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "AMBIGUOUS_QUESTION",
+                  "message": "질문의 범위가 너무 넓거나 의미가 명확하지 않아 답변하기 어렵습니다. 질문을 조금 더 구체적으로 작성해주세요."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "어떻게 탈퇴할 수 있나요",
+                "resolvedQuery": "어떻게 탈퇴할 수 있나요",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "AMBIGUOUS_QUESTION",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2640,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 15,
+                    "outputTokens": null,
+                    "latencyMs": 165,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 4537,
+                    "outputTokens": 113,
+                    "latencyMs": 2427,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "어떻게 탈퇴할 수 있나요",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "어떻게 탈퇴할 수 있나요"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3232,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:6a09b6285b28",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "멤버 비활성화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "3c7ba56137fad745d3f659f2eec123126b1ce27eca49c41ffb7c46d977e00ac9",
+                        "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.33108178976768765,
+                            "latencyMs": 179
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3238,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:e993da30a527",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "특별 지원 프로그램"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "004605154da8d9a53f6387fc6178cd0ea3cf3dc900319dff120b2cc5db252dd2",
+                        "content": "뤼이도는 다양한 조직과 개인이 더 효율적으로 프로젝트를 관리하고 협업할 수 있도록 특별 지원 프로그램을 운영하고 있습니다.\n\n#### 교육 프로그램\n\n재학 중인 학생이라면, 뤼이도의 유료 요금제를 무료로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 학교 이메일이나 학생증 등을 통한 인증 요청 과정이 있을 수 있습니다.\n\n#### 비영리 단체 프로그램\n\n비영리 단체는 뤼이도의 유료 요금제를 최대 70% 할인된 가격으로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 비영리 단체임을 증명하는 서류 제출이 필요할 수 있습니다.\n\n#### 스타트업 프로그램\n\n현재 뤼이도는 별도의 스타트업 전용 프로그램을 운영하고 있지 않습니다. 다만, 뤼이도를 활용해 팀의 실행력을 높이고자 하는 스타트업의 제안은 언제든 환영합니다. 좋은 제안이나 협업 아이디어가 있다면 [고객 문의](https://swyg.channel.io/home)를 통해 제안 바랍니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 1.89455902639722,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3243,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:26bbdd776a1e",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "4d4539e8b14b91e51d63fe24c71eb00ab812043bad06a5e7073815f72a1ebf67",
+                        "content": "#### 팀 생성 및 참여\n\n새로운 팀을 만들거나 기존 팀에 참여하려면, 설정 페이지의 \\[팀]에서 관리할 수 있습니다. 또는 설정 페이지의 좌측 사이드바 하단의 ‘팀 추가’ 버튼을 클릭하여 생성할 수도 있습니다. 단, 비공개 팀은 팀 관리자의 초대를 받아야 참여할 수 있습니다.\n\n팀의 생성 가능 개수는 워크스페이스의 요금제에 따라 제한이 있습니다.\n\n요금제: Free / 팀 개수: 2\n요금제: Pro / 팀 개수: 3\n요금제: Business / 팀 개수: 무제한\n요금제: Enterprise / 팀 개수: 무제한\n\n#### 팀 떠나기\n\n팀 멤버 설정 페이지에서 스스로를 비활성화하면, 팀에서 떠날 수 있습니다.\n\n#### 팀 삭제\n\n팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.32425781228906514,
+                            "latencyMs": 179
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3273,
+                        "documentVersionId": 2424,
+                        "documentId": "fcb3c228f5a0",
+                        "sectionId": "fcb3c228f5a0:7ce560cd7b49",
+                        "documentTitle": "운영: 보관 작업",
+                        "sectionPath": [
+                          "운영: 보관 작업",
+                          "보관된 작업을 다시 활성화하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/archived-items.md",
+                        "contentHash": "7a19fe9b4e00e9ba41f7823dc3c0e3a02fc541788ea61cfce244bae47cfdb5b0",
+                        "content": "보관된 작업은 언제든 다시 활성화하여, 실행 가능한 상태로 되돌릴 수 있습니다. 업데이트가 필요한 기능이나 추가 개선이 필요할 때, 보관된 작업을 꺼내어 실행 흐름으로 자연스럽게 이어갈 수 있습니다.\n\n프로젝트나 목표 단위로만 다시 활성화할 수도 있으며, 이 경우 하위 작업은 보관 상태로 유지됩니다. 이 방식을 통해 필요한 작업만 선별적으로 이어갈 수 있으며, 불필요한 복잡도를 줄일 수 있습니다.\n\n이처럼 모든 기록은 그대로 보존되어 과거의 맥락을 잃지 않은 채 이어받을 수 있습니다. 이는 뤼이도의 철학인 “지속적인 개선과 성장”을 실천하는 가장 직접적인 방식입니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 1.8679181981296622,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3280,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:281921125b1e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "링크"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "06a8048e734d4f507e00a8d0a916de833fb901c300c0ef49d0d90de12c7a179f",
+                        "content": "팀에서 자주 사용하는 외부 리소스(API 문서, 데이터 대시보드, 인프라 페이지 등)를 한곳에 모아 관리할 수 있습니다.\n\n링크는 섹션 단위로 그룹화할 수 있어, 주제별로 체계적으로 정리하고 빠르게 접근할 수 있습니다. 이를 통해 파편화된 외부 정보를 모으고, 협업 효율을 높일 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.015873015873015872,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 1.863289682159825,
+                            "latencyMs": 0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 4537,
+                        "outputTokens": 113,
+                        "latencyMs": 2427,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "AMBIGUOUS_QUESTION"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "AMBIGUOUS_QUESTION"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        },
+        {
+          "id": "RC061",
+          "description": "자동 결제 환불 문의 뒤 계정별 결제 정보와 카드 해지를 요청",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "ea4efc8e-74e3-4f75-9023-0116d1b9e68e",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "ea4efc8e-74e3-4f75-9023-0116d1b9e68e",
+                "ragRunId": "5f531978-1e0f-44d8-9ce7-4d59fbf66ff5",
+                "answer": {
+                  "answerMarkdown": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "구독 및 결제",
+                    "sectionPath": [
+                      "구독 변경 또는 취소"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                "resolvedQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4800,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 69,
+                    "outputTokens": null,
+                    "latencyMs": 178,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 7893,
+                    "outputTokens": 182,
+                    "latencyMs": 4578,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "구독 및 결제"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3235,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:5e49b96fcb2e",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제 및 청구 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "fc84217e5bab3fc4c62dc9963134cef9c953a9fb1f07f6688ea883fadb5e0d8e",
+                        "content": "결제 관리를 위해서는 설정 페이지의 \\[워크스페이스 > 청구] 페이지에서 확인할 수 있습니다. 현재 워크스페이스의 요금제, 결제 정보, 이전 결제 내역을 확인할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 18.495977734915087,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.381953526213191,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3236,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:18af4c7df7aa",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "구독 변경 또는 취소"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "d552e0ca80bf3da68c875b6056e8e2c56247b5a5ff887a97d6dd6243f336a854",
+                        "content": "워크스페이스 관리자는 요금제를 변경하거나 취소할 수 있습니다. 상위 요금제로 업그레이드할 경우에는 즉시 반영되며, 하위 요금제로 다운그레이드 하거나, 구독을 취소하는 경우 다음 구독 주기에 맞춰 적용됩니다. 만약, 월별 결제 주기를 사용하고 있다면 결제 월의 마지막 날에 적용이 되며, 연간 결제 주기를 사용하고 있다면 결제 연도 마지막 날에 적용됩니다.\n\n뤼이도는 구독 기간 중 구독 취소에 대한 환불을 제공하지 않습니다. 따라서 처음에는 월간 결제로 시작해 충분히 효용을 느낀 뒤 연간 결제로 전환하는 것을 권장합니다.\n\n구독을 취소하여 무료 요금제로 전환되더라도 워크스페이스는 삭제되지 않고 다음과 같이 유지됩니다:\n\n* 그 어떤 데이터도 삭제되지 않습니다.\n* 만약 200개가 넘는 작업이 생성되었다면, 더 이상 새로운 작업을 생성할 수 없습니다.\n* 만약 팀이 2개 이상이라면, 더 이상 새로운 팀을 생성할 수 없습니다.\n* 모든 워크스페이스 멤버는 관리자가 됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 22.140732206321974,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3477172280582608,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3237,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:c6dbd3a17dd8",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "워크스페이스에 멤버 추가하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "a93f12fb3de6ebca267444688f4e2eaab08d8880777944f6788e69cdc7c2f0a3",
+                        "content": "#### 월간 요금제\n\n월간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면, 다음 결제일에 새로운 멤버에 대한 비용이 포함되며, 지난 청구 주기에 추가한 멤버에 대한 일할 계산된 요금이 소급 적용됩니다.\n\n#### 연간 요금제\n\n연간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면 다음 달 요금제 시작일과 같은 일자에 청구서를 받게 되며, 아래 두 가지 비용이 포함됩니다.\n\n* 연간 요금제의 잔여기간 동안 신규 멤버 추가로 발생하는 금액\n* 신규 멤버가 워크스페이스에 참여하여 결제일 전까지의 기간만큼 일할 계산하여 소급 적용된 금액",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03128054740957967,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 8.84260522187678,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.3563787545116216,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3234,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:dd62a0b71715",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "257173081d1bcff0fd64c72f08ed19e0de6f533557ceaba7577d66258c913bbe",
+                        "content": "뤼이도의 요금은 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. 하나의 워크스페이스는 하나의 구독과 결제 정보를 가지게 됩니다.\n\n결제 후 멤버를 비활성화하면, 해당 인원만큼 유료 시트가 남게 됩니다. 해당 시트는 새 사용자를 초대할 때 사용할 수 있습니다.\n\n뤼이도의 결제는 월별 결제와 연간 결제 두 가지 주기를 지원합니다.\n\n**월별 결제**\n결제일은 최초 결제 시작일을 기준으로, 매달 동일하게 청구됩니다. (예: 3월 10일에 최초 결제가 시작되었다면, 이후 매달 10일에 결제)\n\n결제 기간 중 새로운 사용자를 추가하더라도 즉시 결제되지 않습니다. 대신 추가된 사용자의 사용 기간만큼, 다음 결제일에 소급 반영되어 청구됩니다.\n\n**연간 결제**\n결제일은 최초 결제일로부터 1년마다 자동 갱신되며, 연간 결제는 월별 요금 대비 20% 할인이 적용됩니다. (예: 2025년 3월 10일에 최초 결제가 시작되었다면, 이후 매년 3월 10일에 결제)\n\n중간에 새로운 사용자를 추가할 경우, 추가된 인원에 대한 금액이 다음 달 요금제 시작일에 계산되어 청구됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 15.57676645020521,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.3471703352002872,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3362,
+                        "documentVersionId": 2449,
+                        "documentId": "a7061c4853df",
+                        "sectionId": "a7061c4853df:73e63632e555",
+                        "documentTitle": "휴지통",
+                        "sectionPath": [
+                          "휴지통",
+                          "복구 및 영구 삭제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/trash.md",
+                        "contentHash": "8a5c72f41d87c81930f5de6399ed251b9e0da4509f30f9965fb12b675a730e49",
+                        "content": "#### 복구\n\n* 실수로 삭제한 항목은 휴지통 또는 해당 페이지 상단 배너의 ‘복구’ 버튼을 통해 즉시 되돌릴 수 있습니다.\n* 복구된 항목은 삭제 이전의 위치(예: 원래 속한 프로젝트나 팀)로 자동 복원됩니다.\n\n#### 영구 삭제\n\n* 더 이상 보관할 필요가 없는 항목은 휴지통 또는 해당 페이지 상단 배너의 ‘영구 삭제’ 버튼을 눌러 즉시 삭제할 수 있습니다.\n* 영구 삭제된 항목은 시스템 상에서도 복구할 수 없습니다.\n\n휴지통에 보관되는 기간(30일)이 지나면, 모든 데이터는 자동으로 삭제됩니다. 삭제 이후에는 시스템 상에서도 복원할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 10.48933265446201,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.33077615711570396,
+                            "latencyMs": 191
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 7893,
+                        "outputTokens": 182,
+                        "latencyMs": 4578,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "구독 기간 중 구독 취소에 대한 환불 가능 여부",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3236,
+                          "documentVersionId": 2416,
+                          "documentId": "95a1b20de638",
+                          "sectionId": "95a1b20de638:18af4c7df7aa",
+                          "documentTitle": "구독 및 결제",
+                          "sectionPath": [
+                            "구독 및 결제",
+                            "구독 변경 또는 취소"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                          "content": "워크스페이스 관리자는 요금제를 변경하거나 취소할 수 있습니다. 상위 요금제로 업그레이드할 경우에는 즉시 반영되며, 하위 요금제로 다운그레이드 하거나, 구독을 취소하는 경우 다음 구독 주기에 맞춰 적용됩니다. 만약, 월별 결제 주기를 사용하고 있다면 결제 월의 마지막 날에 적용이 되며, 연간 결제 주기를 사용하고 있다면 결제 연도 마지막 날에 적용됩니다.\n\n뤼이도는 구독 기간 중 구독 취소에 대한 환불을 제공하지 않습니다. 따라서 처음에는 월간 결제로 시작해 충분히 효용을 느낀 뒤 연간 결제로 전환하는 것을 권장합니다.\n\n구독을 취소하여 무료 요금제로 전환되더라도 워크스페이스는 삭제되지 않고 다음과 같이 유지됩니다:\n\n* 그 어떤 데이터도 삭제되지 않습니다.\n* 만약 200개가 넘는 작업이 생성되었다면, 더 이상 새로운 작업을 생성할 수 없습니다.\n* 만약 팀이 2개 이상이라면, 더 이상 새로운 팀을 생성할 수 없습니다.\n* 모든 워크스페이스 멤버는 관리자가 됩니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "ea4efc8e-74e3-4f75-9023-0116d1b9e68e",
+                "ragRunId": "be9b5cb6-97a6-45cb-9730-0da1bbf179bd",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+                "resolvedQuery": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 7577,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v8",
+                    "inputTokens": 3626,
+                    "outputTokens": 31,
+                    "latencyMs": 1267,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 47,
+                    "outputTokens": null,
+                    "latencyMs": 186,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 4498,
+                    "outputTokens": 330,
+                    "latencyMs": 6044,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "5f531978-1e0f-44d8-9ce7-4d59fbf66ff5",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                        "resolvedQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                        "answerContent": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3237,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:c6dbd3a17dd8",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "워크스페이스에 멤버 추가하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "a93f12fb3de6ebca267444688f4e2eaab08d8880777944f6788e69cdc7c2f0a3",
+                        "content": "#### 월간 요금제\n\n월간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면, 다음 결제일에 새로운 멤버에 대한 비용이 포함되며, 지난 청구 주기에 추가한 멤버에 대한 일할 계산된 요금이 소급 적용됩니다.\n\n#### 연간 요금제\n\n연간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면 다음 달 요금제 시작일과 같은 일자에 청구서를 받게 되며, 아래 두 가지 비용이 포함됩니다.\n\n* 연간 요금제의 잔여기간 동안 신규 멤버 추가로 발생하는 금액\n* 신규 멤버가 워크스페이스에 참여하여 결제일 전까지의 기간만큼 일할 계산하여 소급 적용된 금액",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 12.302299874589826,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.49046807719161034,
+                            "latencyMs": 200
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3234,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:dd62a0b71715",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "257173081d1bcff0fd64c72f08ed19e0de6f533557ceaba7577d66258c913bbe",
+                        "content": "뤼이도의 요금은 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. 하나의 워크스페이스는 하나의 구독과 결제 정보를 가지게 됩니다.\n\n결제 후 멤버를 비활성화하면, 해당 인원만큼 유료 시트가 남게 됩니다. 해당 시트는 새 사용자를 초대할 때 사용할 수 있습니다.\n\n뤼이도의 결제는 월별 결제와 연간 결제 두 가지 주기를 지원합니다.\n\n**월별 결제**\n결제일은 최초 결제 시작일을 기준으로, 매달 동일하게 청구됩니다. (예: 3월 10일에 최초 결제가 시작되었다면, 이후 매달 10일에 결제)\n\n결제 기간 중 새로운 사용자를 추가하더라도 즉시 결제되지 않습니다. 대신 추가된 사용자의 사용 기간만큼, 다음 결제일에 소급 반영되어 청구됩니다.\n\n**연간 결제**\n결제일은 최초 결제일로부터 1년마다 자동 갱신되며, 연간 결제는 월별 요금 대비 20% 할인이 적용됩니다. (예: 2025년 3월 10일에 최초 결제가 시작되었다면, 이후 매년 3월 10일에 결제)\n\n중간에 새로운 사용자를 추가할 경우, 추가된 인원에 대한 금액이 다음 달 요금제 시작일에 계산되어 청구됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 11.779468887710436,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.4479265552581163,
+                            "latencyMs": 200
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3236,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:18af4c7df7aa",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "구독 변경 또는 취소"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "d552e0ca80bf3da68c875b6056e8e2c56247b5a5ff887a97d6dd6243f336a854",
+                        "content": "워크스페이스 관리자는 요금제를 변경하거나 취소할 수 있습니다. 상위 요금제로 업그레이드할 경우에는 즉시 반영되며, 하위 요금제로 다운그레이드 하거나, 구독을 취소하는 경우 다음 구독 주기에 맞춰 적용됩니다. 만약, 월별 결제 주기를 사용하고 있다면 결제 월의 마지막 날에 적용이 되며, 연간 결제 주기를 사용하고 있다면 결제 연도 마지막 날에 적용됩니다.\n\n뤼이도는 구독 기간 중 구독 취소에 대한 환불을 제공하지 않습니다. 따라서 처음에는 월간 결제로 시작해 충분히 효용을 느낀 뒤 연간 결제로 전환하는 것을 권장합니다.\n\n구독을 취소하여 무료 요금제로 전환되더라도 워크스페이스는 삭제되지 않고 다음과 같이 유지됩니다:\n\n* 그 어떤 데이터도 삭제되지 않습니다.\n* 만약 200개가 넘는 작업이 생성되었다면, 더 이상 새로운 작업을 생성할 수 없습니다.\n* 만약 팀이 2개 이상이라면, 더 이상 새로운 팀을 생성할 수 없습니다.\n* 모든 워크스페이스 멤버는 관리자가 됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031746031746031744,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.087081000343343,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.45891041707080016,
+                            "latencyMs": 200
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3235,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:5e49b96fcb2e",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제 및 청구 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "fc84217e5bab3fc4c62dc9963134cef9c953a9fb1f07f6688ea883fadb5e0d8e",
+                        "content": "결제 관리를 위해서는 설정 페이지의 \\[워크스페이스 > 청구] 페이지에서 확인할 수 있습니다. 현재 워크스페이스의 요금제, 결제 정보, 이전 결제 내역을 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031544957774465976,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 7.121241316389323,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5561242440204225,
+                            "latencyMs": 200
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3229,
+                        "documentVersionId": 2414,
+                        "documentId": "7591069b70f9",
+                        "sectionId": "7591069b70f9:97c40b93dde0",
+                        "documentTitle": "워크스페이스",
+                        "sectionPath": [
+                          "워크스페이스",
+                          "여러 워크스페이스에 참여"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/overview.md",
+                        "contentHash": "8e5d25e542e0e41679f6ff5ffb6c3af8059fdf46b9259e7c8f67c3f9e9672513",
+                        "content": "사용자는 여러 워크스페이스에 참여할 수 있습니다. 좌측 상단의 워크스페이스 이름을 클릭하여, 참여 중인 모든 워크스페이스를 확인할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.02967032967032967,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 6.205302244875242,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.44219372070810503,
+                            "latencyMs": 200
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 4498,
+                        "outputTokens": 330,
+                        "latencyMs": 6044,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "MULTI_DETAIL",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        }
+      ]
+    },
+    {
+      "repeatNo": 3,
+      "executedAt": "2026-09-09T02:24:48.194215+00:00",
+      "results": [
+        {
+          "id": "RC050",
+          "description": "회원 탈퇴 방법 문의의 다른 표현",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": false,
+          "conversationId": "20a70387-2121-44ed-8077-9b52b09e268d",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "어떻게 탈퇴할 수 있나요",
+              "passed": false,
+              "failures": [
+                "withheld reason 불일치: expected_any=['INSUFFICIENT_EVIDENCE'], actual=AMBIGUOUS_QUESTION"
+              ],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "20a70387-2121-44ed-8077-9b52b09e268d",
+                "ragRunId": "e51688a9-3a98-4d8f-acca-f3e2ac0a5f52",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "AMBIGUOUS_QUESTION",
+                  "message": "질문의 범위가 너무 넓거나 의미가 명확하지 않아 답변하기 어렵습니다. 질문을 조금 더 구체적으로 작성해주세요."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "어떻게 탈퇴할 수 있나요",
+                "resolvedQuery": "어떻게 탈퇴할 수 있나요",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "AMBIGUOUS_QUESTION",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2882,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 15,
+                    "outputTokens": null,
+                    "latencyMs": 219,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 4537,
+                    "outputTokens": 113,
+                    "latencyMs": 2615,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "어떻게 탈퇴할 수 있나요",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "어떻게 탈퇴할 수 있나요"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3232,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:6a09b6285b28",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "멤버 비활성화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "3c7ba56137fad745d3f659f2eec123126b1ce27eca49c41ffb7c46d977e00ac9",
+                        "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.33108178976768765,
+                            "latencyMs": 230
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3238,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:e993da30a527",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "특별 지원 프로그램"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "004605154da8d9a53f6387fc6178cd0ea3cf3dc900319dff120b2cc5db252dd2",
+                        "content": "뤼이도는 다양한 조직과 개인이 더 효율적으로 프로젝트를 관리하고 협업할 수 있도록 특별 지원 프로그램을 운영하고 있습니다.\n\n#### 교육 프로그램\n\n재학 중인 학생이라면, 뤼이도의 유료 요금제를 무료로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 학교 이메일이나 학생증 등을 통한 인증 요청 과정이 있을 수 있습니다.\n\n#### 비영리 단체 프로그램\n\n비영리 단체는 뤼이도의 유료 요금제를 최대 70% 할인된 가격으로 이용할 수 있습니다. 지원은 [고객 문의](https://swyg.channel.io/home)를 통해 신청할 수 있으며, 비영리 단체임을 증명하는 서류 제출이 필요할 수 있습니다.\n\n#### 스타트업 프로그램\n\n현재 뤼이도는 별도의 스타트업 전용 프로그램을 운영하고 있지 않습니다. 다만, 뤼이도를 활용해 팀의 실행력을 높이고자 하는 스타트업의 제안은 언제든 환영합니다. 좋은 제안이나 협업 아이디어가 있다면 [고객 문의](https://swyg.channel.io/home)를 통해 제안 바랍니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 1.89455902639722,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3243,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:26bbdd776a1e",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "4d4539e8b14b91e51d63fe24c71eb00ab812043bad06a5e7073815f72a1ebf67",
+                        "content": "#### 팀 생성 및 참여\n\n새로운 팀을 만들거나 기존 팀에 참여하려면, 설정 페이지의 \\[팀]에서 관리할 수 있습니다. 또는 설정 페이지의 좌측 사이드바 하단의 ‘팀 추가’ 버튼을 클릭하여 생성할 수도 있습니다. 단, 비공개 팀은 팀 관리자의 초대를 받아야 참여할 수 있습니다.\n\n팀의 생성 가능 개수는 워크스페이스의 요금제에 따라 제한이 있습니다.\n\n요금제: Free / 팀 개수: 2\n요금제: Pro / 팀 개수: 3\n요금제: Business / 팀 개수: 무제한\n요금제: Enterprise / 팀 개수: 무제한\n\n#### 팀 떠나기\n\n팀 멤버 설정 페이지에서 스스로를 비활성화하면, 팀에서 떠날 수 있습니다.\n\n#### 팀 삭제\n\n팀을 삭제하면, 해당 팀과 관련된 모든 데이터가 영구적으로 삭제됩니다. 삭제된 팀은 뤼이도 시스템에서도 복구할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.32425781228906514,
+                            "latencyMs": 230
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3273,
+                        "documentVersionId": 2424,
+                        "documentId": "fcb3c228f5a0",
+                        "sectionId": "fcb3c228f5a0:7ce560cd7b49",
+                        "documentTitle": "운영: 보관 작업",
+                        "sectionPath": [
+                          "운영: 보관 작업",
+                          "보관된 작업을 다시 활성화하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/archived-items.md",
+                        "contentHash": "7a19fe9b4e00e9ba41f7823dc3c0e3a02fc541788ea61cfce244bae47cfdb5b0",
+                        "content": "보관된 작업은 언제든 다시 활성화하여, 실행 가능한 상태로 되돌릴 수 있습니다. 업데이트가 필요한 기능이나 추가 개선이 필요할 때, 보관된 작업을 꺼내어 실행 흐름으로 자연스럽게 이어갈 수 있습니다.\n\n프로젝트나 목표 단위로만 다시 활성화할 수도 있으며, 이 경우 하위 작업은 보관 상태로 유지됩니다. 이 방식을 통해 필요한 작업만 선별적으로 이어갈 수 있으며, 불필요한 복잡도를 줄일 수 있습니다.\n\n이처럼 모든 기록은 그대로 보존되어 과거의 맥락을 잃지 않은 채 이어받을 수 있습니다. 이는 뤼이도의 철학인 “지속적인 개선과 성장”을 실천하는 가장 직접적인 방식입니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 1.8679181981296622,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3280,
+                        "documentVersionId": 2426,
+                        "documentId": "1c0005b1dfeb",
+                        "sectionId": "1c0005b1dfeb:281921125b1e",
+                        "documentTitle": "대시보드",
+                        "sectionPath": [
+                          "대시보드",
+                          "링크"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/dashboards.md",
+                        "contentHash": "06a8048e734d4f507e00a8d0a916de833fb901c300c0ef49d0d90de12c7a179f",
+                        "content": "팀에서 자주 사용하는 외부 리소스(API 문서, 데이터 대시보드, 인프라 페이지 등)를 한곳에 모아 관리할 수 있습니다.\n\n링크는 섹션 단위로 그룹화할 수 있어, 주제별로 체계적으로 정리하고 빠르게 접근할 수 있습니다. 이를 통해 파편화된 외부 정보를 모으고, 협업 효율을 높일 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.015873015873015872,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 1.863289682159825,
+                            "latencyMs": 0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 4537,
+                        "outputTokens": 113,
+                        "latencyMs": 2615,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "AMBIGUOUS_QUESTION"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "AMBIGUOUS_QUESTION"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        },
+        {
+          "id": "RC061",
+          "description": "자동 결제 환불 문의 뒤 계정별 결제 정보와 카드 해지를 요청",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "defa5ea6-b812-4c31-9210-81c6da160192",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "defa5ea6-b812-4c31-9210-81c6da160192",
+                "ragRunId": "4901a41c-86bc-4169-a6bc-ae2947f78fc0",
+                "answer": {
+                  "answerMarkdown": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "구독 및 결제",
+                    "sectionPath": [
+                      "구독 변경 또는 취소"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                "resolvedQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4371,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 69,
+                    "outputTokens": null,
+                    "latencyMs": 146,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 7892,
+                    "outputTokens": 176,
+                    "latencyMs": 4172,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "구독 및 결제"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3235,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:5e49b96fcb2e",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제 및 청구 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "fc84217e5bab3fc4c62dc9963134cef9c953a9fb1f07f6688ea883fadb5e0d8e",
+                        "content": "결제 관리를 위해서는 설정 페이지의 \\[워크스페이스 > 청구] 페이지에서 확인할 수 있습니다. 현재 워크스페이스의 요금제, 결제 정보, 이전 결제 내역을 확인할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 18.495977734915087,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.381953526213191,
+                            "latencyMs": 156
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3236,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:18af4c7df7aa",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "구독 변경 또는 취소"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "d552e0ca80bf3da68c875b6056e8e2c56247b5a5ff887a97d6dd6243f336a854",
+                        "content": "워크스페이스 관리자는 요금제를 변경하거나 취소할 수 있습니다. 상위 요금제로 업그레이드할 경우에는 즉시 반영되며, 하위 요금제로 다운그레이드 하거나, 구독을 취소하는 경우 다음 구독 주기에 맞춰 적용됩니다. 만약, 월별 결제 주기를 사용하고 있다면 결제 월의 마지막 날에 적용이 되며, 연간 결제 주기를 사용하고 있다면 결제 연도 마지막 날에 적용됩니다.\n\n뤼이도는 구독 기간 중 구독 취소에 대한 환불을 제공하지 않습니다. 따라서 처음에는 월간 결제로 시작해 충분히 효용을 느낀 뒤 연간 결제로 전환하는 것을 권장합니다.\n\n구독을 취소하여 무료 요금제로 전환되더라도 워크스페이스는 삭제되지 않고 다음과 같이 유지됩니다:\n\n* 그 어떤 데이터도 삭제되지 않습니다.\n* 만약 200개가 넘는 작업이 생성되었다면, 더 이상 새로운 작업을 생성할 수 없습니다.\n* 만약 팀이 2개 이상이라면, 더 이상 새로운 팀을 생성할 수 없습니다.\n* 모든 워크스페이스 멤버는 관리자가 됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 22.140732206321974,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3477172280582608,
+                            "latencyMs": 156
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3237,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:c6dbd3a17dd8",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "워크스페이스에 멤버 추가하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "a93f12fb3de6ebca267444688f4e2eaab08d8880777944f6788e69cdc7c2f0a3",
+                        "content": "#### 월간 요금제\n\n월간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면, 다음 결제일에 새로운 멤버에 대한 비용이 포함되며, 지난 청구 주기에 추가한 멤버에 대한 일할 계산된 요금이 소급 적용됩니다.\n\n#### 연간 요금제\n\n연간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면 다음 달 요금제 시작일과 같은 일자에 청구서를 받게 되며, 아래 두 가지 비용이 포함됩니다.\n\n* 연간 요금제의 잔여기간 동안 신규 멤버 추가로 발생하는 금액\n* 신규 멤버가 워크스페이스에 참여하여 결제일 전까지의 기간만큼 일할 계산하여 소급 적용된 금액",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03128054740957967,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 8.84260522187678,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.3563787545116216,
+                            "latencyMs": 156
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3234,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:dd62a0b71715",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "257173081d1bcff0fd64c72f08ed19e0de6f533557ceaba7577d66258c913bbe",
+                        "content": "뤼이도의 요금은 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. 하나의 워크스페이스는 하나의 구독과 결제 정보를 가지게 됩니다.\n\n결제 후 멤버를 비활성화하면, 해당 인원만큼 유료 시트가 남게 됩니다. 해당 시트는 새 사용자를 초대할 때 사용할 수 있습니다.\n\n뤼이도의 결제는 월별 결제와 연간 결제 두 가지 주기를 지원합니다.\n\n**월별 결제**\n결제일은 최초 결제 시작일을 기준으로, 매달 동일하게 청구됩니다. (예: 3월 10일에 최초 결제가 시작되었다면, 이후 매달 10일에 결제)\n\n결제 기간 중 새로운 사용자를 추가하더라도 즉시 결제되지 않습니다. 대신 추가된 사용자의 사용 기간만큼, 다음 결제일에 소급 반영되어 청구됩니다.\n\n**연간 결제**\n결제일은 최초 결제일로부터 1년마다 자동 갱신되며, 연간 결제는 월별 요금 대비 20% 할인이 적용됩니다. (예: 2025년 3월 10일에 최초 결제가 시작되었다면, 이후 매년 3월 10일에 결제)\n\n중간에 새로운 사용자를 추가할 경우, 추가된 인원에 대한 금액이 다음 달 요금제 시작일에 계산되어 청구됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 15.57676645020521,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.3471703352002872,
+                            "latencyMs": 156
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3362,
+                        "documentVersionId": 2449,
+                        "documentId": "a7061c4853df",
+                        "sectionId": "a7061c4853df:73e63632e555",
+                        "documentTitle": "휴지통",
+                        "sectionPath": [
+                          "휴지통",
+                          "복구 및 영구 삭제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/trash.md",
+                        "contentHash": "8a5c72f41d87c81930f5de6399ed251b9e0da4509f30f9965fb12b675a730e49",
+                        "content": "#### 복구\n\n* 실수로 삭제한 항목은 휴지통 또는 해당 페이지 상단 배너의 ‘복구’ 버튼을 통해 즉시 되돌릴 수 있습니다.\n* 복구된 항목은 삭제 이전의 위치(예: 원래 속한 프로젝트나 팀)로 자동 복원됩니다.\n\n#### 영구 삭제\n\n* 더 이상 보관할 필요가 없는 항목은 휴지통 또는 해당 페이지 상단 배너의 ‘영구 삭제’ 버튼을 눌러 즉시 삭제할 수 있습니다.\n* 영구 삭제된 항목은 시스템 상에서도 복구할 수 없습니다.\n\n휴지통에 보관되는 기간(30일)이 지나면, 모든 데이터는 자동으로 삭제됩니다. 삭제 이후에는 시스템 상에서도 복원할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 10.48933265446201,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.33077615711570396,
+                            "latencyMs": 156
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 7892,
+                        "outputTokens": 176,
+                        "latencyMs": 4172,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "구독 기간 중 구독 취소 시 환불 가능 여부",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3236,
+                          "documentVersionId": 2416,
+                          "documentId": "95a1b20de638",
+                          "sectionId": "95a1b20de638:18af4c7df7aa",
+                          "documentTitle": "구독 및 결제",
+                          "sectionPath": [
+                            "구독 및 결제",
+                            "구독 변경 또는 취소"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                          "content": "워크스페이스 관리자는 요금제를 변경하거나 취소할 수 있습니다. 상위 요금제로 업그레이드할 경우에는 즉시 반영되며, 하위 요금제로 다운그레이드 하거나, 구독을 취소하는 경우 다음 구독 주기에 맞춰 적용됩니다. 만약, 월별 결제 주기를 사용하고 있다면 결제 월의 마지막 날에 적용이 되며, 연간 결제 주기를 사용하고 있다면 결제 연도 마지막 날에 적용됩니다.\n\n뤼이도는 구독 기간 중 구독 취소에 대한 환불을 제공하지 않습니다. 따라서 처음에는 월간 결제로 시작해 충분히 효용을 느낀 뒤 연간 결제로 전환하는 것을 권장합니다.\n\n구독을 취소하여 무료 요금제로 전환되더라도 워크스페이스는 삭제되지 않고 다음과 같이 유지됩니다:\n\n* 그 어떤 데이터도 삭제되지 않습니다.\n* 만약 200개가 넘는 작업이 생성되었다면, 더 이상 새로운 작업을 생성할 수 없습니다.\n* 만약 팀이 2개 이상이라면, 더 이상 새로운 팀을 생성할 수 없습니다.\n* 모든 워크스페이스 멤버는 관리자가 됩니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "defa5ea6-b812-4c31-9210-81c6da160192",
+                "ragRunId": "235d97cd-6c09-4a08-9db5-1893a3359b17",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+                "resolvedQuery": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 4166,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v8",
+                    "inputTokens": 3626,
+                    "outputTokens": 31,
+                    "latencyMs": 993,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 47,
+                    "outputTokens": null,
+                    "latencyMs": 199,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v30",
+                    "inputTokens": 4498,
+                    "outputTokens": 135,
+                    "latencyMs": 2895,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다.",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "4901a41c-86bc-4169-a6bc-ae2947f78fc0",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                        "resolvedQuery": "이전 프로젝트 때문에 결제수단을 등록해두었는데 오늘 자동 결제가 되었어요. 이제 더 이상 쓸 일이 없는데 환불 받을 수 있을까요?",
+                        "answerContent": "뤼이도는 구독 기간 중 구독을 취소하더라도 환불을 제공하지 않습니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "결제된 워크스페이스와 금액이 맞는지 확인해주시고, 가능하다면 등록된 카드도 해지 부탁드립니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3237,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:c6dbd3a17dd8",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "워크스페이스에 멤버 추가하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "a93f12fb3de6ebca267444688f4e2eaab08d8880777944f6788e69cdc7c2f0a3",
+                        "content": "#### 월간 요금제\n\n월간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면, 다음 결제일에 새로운 멤버에 대한 비용이 포함되며, 지난 청구 주기에 추가한 멤버에 대한 일할 계산된 요금이 소급 적용됩니다.\n\n#### 연간 요금제\n\n연간 요금제를 구독 중인 워크스페이스에 멤버를 추가하면 다음 달 요금제 시작일과 같은 일자에 청구서를 받게 되며, 아래 두 가지 비용이 포함됩니다.\n\n* 연간 요금제의 잔여기간 동안 신규 멤버 추가로 발생하는 금액\n* 신규 멤버가 워크스페이스에 참여하여 결제일 전까지의 기간만큼 일할 계산하여 소급 적용된 금액",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 12.302299874589826,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.4904240585990358,
+                            "latencyMs": 211
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3234,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:dd62a0b71715",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "257173081d1bcff0fd64c72f08ed19e0de6f533557ceaba7577d66258c913bbe",
+                        "content": "뤼이도의 요금은 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. 하나의 워크스페이스는 하나의 구독과 결제 정보를 가지게 됩니다.\n\n결제 후 멤버를 비활성화하면, 해당 인원만큼 유료 시트가 남게 됩니다. 해당 시트는 새 사용자를 초대할 때 사용할 수 있습니다.\n\n뤼이도의 결제는 월별 결제와 연간 결제 두 가지 주기를 지원합니다.\n\n**월별 결제**\n결제일은 최초 결제 시작일을 기준으로, 매달 동일하게 청구됩니다. (예: 3월 10일에 최초 결제가 시작되었다면, 이후 매달 10일에 결제)\n\n결제 기간 중 새로운 사용자를 추가하더라도 즉시 결제되지 않습니다. 대신 추가된 사용자의 사용 기간만큼, 다음 결제일에 소급 반영되어 청구됩니다.\n\n**연간 결제**\n결제일은 최초 결제일로부터 1년마다 자동 갱신되며, 연간 결제는 월별 요금 대비 20% 할인이 적용됩니다. (예: 2025년 3월 10일에 최초 결제가 시작되었다면, 이후 매년 3월 10일에 결제)\n\n중간에 새로운 사용자를 추가할 경우, 추가된 인원에 대한 금액이 다음 달 요금제 시작일에 계산되어 청구됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 11.779468887710436,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.44790537610707404,
+                            "latencyMs": 211
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3236,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:18af4c7df7aa",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "구독 변경 또는 취소"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "d552e0ca80bf3da68c875b6056e8e2c56247b5a5ff887a97d6dd6243f336a854",
+                        "content": "워크스페이스 관리자는 요금제를 변경하거나 취소할 수 있습니다. 상위 요금제로 업그레이드할 경우에는 즉시 반영되며, 하위 요금제로 다운그레이드 하거나, 구독을 취소하는 경우 다음 구독 주기에 맞춰 적용됩니다. 만약, 월별 결제 주기를 사용하고 있다면 결제 월의 마지막 날에 적용이 되며, 연간 결제 주기를 사용하고 있다면 결제 연도 마지막 날에 적용됩니다.\n\n뤼이도는 구독 기간 중 구독 취소에 대한 환불을 제공하지 않습니다. 따라서 처음에는 월간 결제로 시작해 충분히 효용을 느낀 뒤 연간 결제로 전환하는 것을 권장합니다.\n\n구독을 취소하여 무료 요금제로 전환되더라도 워크스페이스는 삭제되지 않고 다음과 같이 유지됩니다:\n\n* 그 어떤 데이터도 삭제되지 않습니다.\n* 만약 200개가 넘는 작업이 생성되었다면, 더 이상 새로운 작업을 생성할 수 없습니다.\n* 만약 팀이 2개 이상이라면, 더 이상 새로운 팀을 생성할 수 없습니다.\n* 모든 워크스페이스 멤버는 관리자가 됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031746031746031744,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.087081000343343,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.4588869647281957,
+                            "latencyMs": 211
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3235,
+                        "documentVersionId": 2416,
+                        "documentId": "95a1b20de638",
+                        "sectionId": "95a1b20de638:5e49b96fcb2e",
+                        "documentTitle": "구독 및 결제",
+                        "sectionPath": [
+                          "구독 및 결제",
+                          "결제 및 청구 관리"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md",
+                        "contentHash": "fc84217e5bab3fc4c62dc9963134cef9c953a9fb1f07f6688ea883fadb5e0d8e",
+                        "content": "결제 관리를 위해서는 설정 페이지의 \\[워크스페이스 > 청구] 페이지에서 확인할 수 있습니다. 현재 워크스페이스의 요금제, 결제 정보, 이전 결제 내역을 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031544957774465976,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 7.121241316389323,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5560907144899297,
+                            "latencyMs": 211
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3229,
+                        "documentVersionId": 2414,
+                        "documentId": "7591069b70f9",
+                        "sectionId": "7591069b70f9:97c40b93dde0",
+                        "documentTitle": "워크스페이스",
+                        "sectionPath": [
+                          "워크스페이스",
+                          "여러 워크스페이스에 참여"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/overview.md",
+                        "contentHash": "8e5d25e542e0e41679f6ff5ffb6c3af8059fdf46b9259e7c8f67c3f9e9672513",
+                        "content": "사용자는 여러 워크스페이스에 참여할 수 있습니다. 좌측 상단의 워크스페이스 이름을 클릭하여, 참여 중인 모든 워크스페이스를 확인할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.02967032967032967,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 10,
+                            "rawScore": 6.205302244875242,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.44214768210762834,
+                            "latencyMs": 211
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v30",
+                        "inputTokens": 4498,
+                        "outputTokens": 135,
+                        "latencyMs": 2895,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "MULTI_DETAIL",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        }
+      ]
+    }
+  ]
+}

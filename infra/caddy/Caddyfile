@@ -1,0 +1,10 @@
+api.riido-chat.site {
+    @internal path /internal /internal/*
+    handle @internal {
+        respond "Not Found" 404
+    }
+
+    handle {
+        reverse_proxy 127.0.0.1:8000
+    }
+}

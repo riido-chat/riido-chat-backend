@@ -1,0 +1,880 @@
+{
+  "experimentVersion": "openai-generation-model-comparison-v1",
+  "executedAt": "2026-09-08T07:31:52.625885+00:00",
+  "repositoryRevision": "ae2c49f190538ad825d2bb12d287c09cb19e0f16",
+  "candidateConfigs": [
+    {
+      "id": "A",
+      "model": "gpt-5.4-mini",
+      "input_price_per_million_usd": 0.75,
+      "output_price_per_million_usd": 4.5
+    },
+    {
+      "id": "C",
+      "model": "gpt-5.6-terra",
+      "input_price_per_million_usd": 2.0,
+      "output_price_per_million_usd": 12.0
+    }
+  ],
+  "prompts": {
+    "generation": "v24",
+    "sourcePlanning": "v15",
+    "answer": "v20"
+  },
+  "fixedInputs": {
+    "casesPath": "evaluation/mvp_quality_100_cases.json",
+    "casesSha256": "76256dc1bb4963a50e9f928a04838afa484e44762805f0b5834384082c540096",
+    "fixtureSourcePath": "evaluation/baselines/mvp-quality-v2-rechecked-recheck-20260907T165121Z.json",
+    "fixtureSourceSha256": "aee9c75bcce48f2cbd6b52d6a508aac727a1e7f86086a38d5f30961c929d212a",
+    "turnCount": 2,
+    "retrievalFrozen": true,
+    "queryRewriteFrozen": true
+  },
+  "excludedCaseIds": [
+    "MQ027",
+    "MQ040",
+    "MQ066"
+  ],
+  "runs": [
+    {
+      "candidateId": "A",
+      "model": "gpt-5.4-mini",
+      "repeatNo": 1,
+      "results": [
+        {
+          "caseId": "MQ025",
+          "turnNo": 1,
+          "description": "프로젝트 목표 작업 계층",
+          "originalQuestion": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "generationQuery": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "passed": false,
+          "failures": [
+            "기대 Citation 문서가 없음: expected_any=['실행: 작업', '핵심 개념'], actual=['작업 관계도']"
+          ],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "프로젝트, 목표, 작업, 하위작업은 `프로젝트 → 목표 → 작업 → 하위 작업` 순서로 구성됩니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "작업 관계도",
+              "sectionPath": [
+                "작업 관계도",
+                "개요"
+              ],
+              "sourceUrl": "https://docs.riido.io/views/diagram.md"
+            }
+          ],
+          "latencyMs": 3542,
+          "inputTokens": 6547,
+          "outputTokens": 126,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "DEFINITION",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "프로젝트, 목표, 작업, 하위작업의 구성 순서",
+                  "source_ids": [
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_2"
+            ],
+            "selectedSectionIds": [
+              "9b9516882026:e32fcf17e277"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "MQ026",
+          "turnNo": 1,
+          "description": "작업 속성과 보기",
+          "originalQuestion": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "generationQuery": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "작업에는 여러 속성 정보를 넣을 수 있고, 리스트·칸반·그래프·캘린더 보기로 확인할 수 있습니다. [1][2]\n\n- 키 값: 프로젝트, 목표, 작업, 하위작업 모두에 사용할 수 있습니다. [1]\n- 시작일: 프로젝트, 작업, 하위작업에 사용할 수 있고, 목표에는 사용할 수 없습니다. [1]\n- 마감일: 프로젝트, 목표, 작업, 하위작업에 사용할 수 있습니다. [1]\n- 참여자: 프로젝트와 작업, 하위작업에 사용할 수 있으며 프로젝트는 1명만 가능합니다. [1]\n- 라벨: 프로젝트, 목표, 작업, 하위작업에 사용할 수 있습니다. [1]\n- 상태: 프로젝트와 목표는 완료 여부만 일부 제한적으로 사용할 수 있고, 작업과 하위작업에는 사용할 수 있습니다. [1]\n- 스코어: 목표는 총점 기준으로 일부 제한적으로 사용할 수 있고, 작업에 사용할 수 있으며 프로젝트와 하위작업에는 사용할 수 없습니다. [1]\n- 리스트: 작업을 빠르게 스캔하거나 정렬할 때 적합한 가장 기본적인 보기입니다. [2]\n- 칸반: 상태를 기준으로 작업 흐름을 보드 형태로 시각화한 보기입니다. [2]\n- 그래프: 작업의 우선순위를 한눈에 파악할 수 있는 보기입니다. [2]\n- 캘린더: 마감일과 일정을 중심으로 작업을 정리하고 확인할 수 있는 보기입니다. [2]",
+          "citations": [
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "속성"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            },
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "다양한 보기"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            }
+          ],
+          "latencyMs": 4951,
+          "inputTokens": 6776,
+          "outputTokens": 484,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "FEATURE_SUMMARY",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [
+                {
+                  "information_unit": "작업에 넣을 수 있는 정보",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                },
+                {
+                  "information_unit": "작업을 확인할 수 있는 보기",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5",
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "949ddd65a2a5:4c10db99d1ad",
+              "949ddd65a2a5:28c75fba571f"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    },
+    {
+      "candidateId": "A",
+      "model": "gpt-5.4-mini",
+      "repeatNo": 2,
+      "results": [
+        {
+          "caseId": "MQ025",
+          "turnNo": 1,
+          "description": "프로젝트 목표 작업 계층",
+          "originalQuestion": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "generationQuery": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "passed": false,
+          "failures": [
+            "기대 Citation 문서가 없음: expected_any=['실행: 작업', '핵심 개념'], actual=['작업 관계도']"
+          ],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "프로젝트, 목표, 작업, 하위작업은 `프로젝트 → 목표 → 작업 → 하위 작업` 순서로 구성됩니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "작업 관계도",
+              "sectionPath": [
+                "작업 관계도",
+                "개요"
+              ],
+              "sourceUrl": "https://docs.riido.io/views/diagram.md"
+            }
+          ],
+          "latencyMs": 2495,
+          "inputTokens": 6550,
+          "outputTokens": 129,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "DEFINITION",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼",
+                  "source_ids": [
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_2"
+            ],
+            "selectedSectionIds": [
+              "9b9516882026:e32fcf17e277"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "MQ026",
+          "turnNo": 1,
+          "description": "작업 속성과 보기",
+          "originalQuestion": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "generationQuery": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "작업에는 여러 속성 정보를 넣을 수 있고, 리스트·칸반·그래프·캘린더 보기로 확인할 수 있습니다. [1] [2]\n\n- 넣을 수 있는 정보: 키 값, 시작일, 마감일, 참여자, 라벨, 상태, 스코어입니다. 작업은 형태에 따라 이 속성 정보를 가질 수 있으며, 참여자와 상태, 스코어는 대상에 따라 일부 제한이 있습니다. [1]\n- 확인할 수 있는 보기: 리스트, 칸반, 그래프, 캘린더입니다. 리스트는 기본 보기로 작업을 빠르게 스캔하거나 정렬할 때 적합하고, 칸반은 상태 기준의 흐름을 보드 형태로 보여주며, 그래프는 우선순위를 한눈에 파악하게 하고, 캘린더는 마감일과 일정을 중심으로 정리해 보여줍니다. [2]",
+          "citations": [
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "속성"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            },
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "다양한 보기"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            }
+          ],
+          "latencyMs": 4769,
+          "inputTokens": 6776,
+          "outputTokens": 326,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "FEATURE_SUMMARY",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [
+                {
+                  "information_unit": "작업에 넣을 수 있는 정보",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                },
+                {
+                  "information_unit": "작업을 확인할 수 있는 보기",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5",
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "949ddd65a2a5:4c10db99d1ad",
+              "949ddd65a2a5:28c75fba571f"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    },
+    {
+      "candidateId": "A",
+      "model": "gpt-5.4-mini",
+      "repeatNo": 3,
+      "results": [
+        {
+          "caseId": "MQ025",
+          "turnNo": 1,
+          "description": "프로젝트 목표 작업 계층",
+          "originalQuestion": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "generationQuery": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "프로젝트, 목표, 작업, 하위작업은 위에서 아래로 계층적으로 구성됩니다. [1]\n\n즉, 큰 단위인 프로젝트 안에 목표가 있고, 목표는 하나 이상의 작업으로 구성되며, 작업을 더 세분화한 단위가 하위작업입니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "구조"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            }
+          ],
+          "latencyMs": 5044,
+          "inputTokens": 6760,
+          "outputTokens": 165,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "DEFINITION",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "프로젝트, 목표, 작업, 하위작업의 구성 순서",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "949ddd65a2a5:09e9b2c9384c"
+            ],
+            "planningAttemptCount": 2,
+            "planningRegenerationCount": 1,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "MQ026",
+          "turnNo": 1,
+          "description": "작업 속성과 보기",
+          "originalQuestion": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "generationQuery": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "작업에는 속성 정보와 다양한 보기 방식을 사용할 수 있습니다. [1][2]\n\n- 작업에 넣을 수 있는 정보: 키 값, 시작일, 마감일, 참여자, 라벨, 상태, 스코어를 넣을 수 있습니다. 다만 스코어는 작업에서 사용 가능하고, 상태와 참여자는 일부 제한이 있습니다. [1]\n- 작업을 확인할 수 있는 보기: 리스트, 칸반, 그래프, 캘린더 보기로 확인하고 관리할 수 있습니다. 리스트는 가장 기본적인 보기, 칸반은 상태 기준 보드, 그래프는 우선순위 파악, 캘린더는 마감일과 일정을 중심으로 확인하는 방식입니다. [2]",
+          "citations": [
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "속성"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            },
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "다양한 보기"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            }
+          ],
+          "latencyMs": 4068,
+          "inputTokens": 6776,
+          "outputTokens": 282,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "FEATURE_SUMMARY",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [
+                {
+                  "information_unit": "작업에 넣을 수 있는 정보",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                },
+                {
+                  "information_unit": "작업을 확인할 수 있는 보기",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5",
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "949ddd65a2a5:4c10db99d1ad",
+              "949ddd65a2a5:28c75fba571f"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    },
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "repeatNo": 1,
+      "results": [
+        {
+          "caseId": "MQ025",
+          "turnNo": 1,
+          "description": "프로젝트 목표 작업 계층",
+          "originalQuestion": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "generationQuery": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "프로젝트 → 목표 → 작업 → 하위작업 순으로 구성됩니다. 프로젝트는 팀 전체의 큰 업무 단위이고, 그 안에 목표와 작업이 이어지며 작업을 더 세분화하면 하위작업으로 관리할 수 있습니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "구조"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            }
+          ],
+          "latencyMs": 4525,
+          "inputTokens": 6607,
+          "outputTokens": 152,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "DEFINITION",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "프로젝트, 목표, 작업, 하위작업의 계층 구성 순서",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "949ddd65a2a5:09e9b2c9384c"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "MQ026",
+          "turnNo": 1,
+          "description": "작업 속성과 보기",
+          "originalQuestion": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "generationQuery": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "작업에는 일정·담당·분류·진행 상태·점수 등의 속성을 넣고, 목적에 맞는 보기로 확인·관리할 수 있습니다.\n\n- 키 값: 작업에 사용할 수 있습니다. [1]\n- 시작일·마감일: 작업에 사용할 수 있습니다. [1]\n- 참여자: 작업에 지정할 수 있습니다. [1]\n- 라벨: 작업에 사용할 수 있습니다. [1]\n- 상태: 작업에 설정할 수 있습니다. [1]\n- 스코어: 작업에 설정할 수 있습니다. [1]\n- 리스트: 작업을 빠르게 스캔하거나 정렬하기에 적합하며, 뤼이도의 계층 구조를 명확하게 보여줍니다. [2]\n- 칸반: 상태를 기준으로 작업 흐름을 보드 형태로 시각화합니다. [2]\n- 그래프: 작업의 우선순위를 한눈에 파악할 수 있습니다. [2]\n- 캘린더: 마감일과 일정을 중심으로 작업을 정리하고 확인할 수 있습니다. [2]",
+          "citations": [
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "속성"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            },
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "다양한 보기"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            }
+          ],
+          "latencyMs": 7166,
+          "inputTokens": 6779,
+          "outputTokens": 447,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "FEATURE_SUMMARY",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [
+                {
+                  "information_unit": "작업에 넣을 수 있는 정보(속성)",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                },
+                {
+                  "information_unit": "작업을 확인할 수 있는 보기",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5",
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "949ddd65a2a5:4c10db99d1ad",
+              "949ddd65a2a5:28c75fba571f"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    },
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "repeatNo": 2,
+      "results": [
+        {
+          "caseId": "MQ025",
+          "turnNo": 1,
+          "description": "프로젝트 목표 작업 계층",
+          "originalQuestion": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "generationQuery": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "프로젝트는 팀 전체가 집중하는 큰 업무 단위이며, 그 안에 목표가 포함됩니다. 목표는 하나 이상의 작업으로, 작업은 필요에 따라 하위작업으로 더 세분화됩니다. 즉 **프로젝트 → 목표 → 작업 → 하위작업** 순서입니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "구조"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            }
+          ],
+          "latencyMs": 4298,
+          "inputTokens": 6605,
+          "outputTokens": 159,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "DEFINITION",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "프로젝트, 목표, 작업, 하위작업의 구성 순서",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "949ddd65a2a5:09e9b2c9384c"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "MQ026",
+          "turnNo": 1,
+          "description": "작업 속성과 보기",
+          "originalQuestion": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "generationQuery": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "작업에는 일정·담당·분류·진행 상태·점수 정보를 설정할 수 있으며, 목적에 맞는 여러 보기로 확인하고 관리할 수 있습니다.\n\n- 키 값: 작업의 키 값을 사용할 수 있습니다. [1]\n- 시작일·마감일: 작업의 시작일과 마감일을 설정할 수 있습니다. [1]\n- 참여자: 작업에 참여자를 지정할 수 있습니다. [1]\n- 라벨: 작업에 라벨을 지정할 수 있습니다. [1]\n- 상태: 작업의 상태를 관리할 수 있습니다. [1]\n- 스코어: 작업에 스코어를 설정할 수 있습니다. [1]\n- 리스트: 작업을 빠르게 스캔하거나 정렬하고, 뤼이도의 계층 구조를 명확하게 확인할 수 있습니다. [2]\n- 칸반: 상태를 기준으로 작업 흐름을 보드 형태로 시각화해 확인할 수 있습니다. [2]\n- 그래프: 작업의 우선순위를 한눈에 파악할 수 있습니다. [2]\n- 캘린더: 마감일과 일정을 중심으로 작업을 정리하고 확인할 수 있습니다. [2]",
+          "citations": [
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "속성"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            },
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "다양한 보기"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            }
+          ],
+          "latencyMs": 6831,
+          "inputTokens": 6776,
+          "outputTokens": 448,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "FEATURE_SUMMARY",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [
+                {
+                  "information_unit": "작업에 넣을 수 있는 정보",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                },
+                {
+                  "information_unit": "작업을 확인할 수 있는 보기",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5",
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "949ddd65a2a5:4c10db99d1ad",
+              "949ddd65a2a5:28c75fba571f"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    },
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "repeatNo": 3,
+      "results": [
+        {
+          "caseId": "MQ025",
+          "turnNo": 1,
+          "description": "프로젝트 목표 작업 계층",
+          "originalQuestion": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "generationQuery": "프로젝트, 목표, 작업, 하위작업은 어떤 순서로 구성돼?",
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "프로젝트 → 목표 → 작업 → 하위작업 순으로 구성됩니다. 프로젝트는 팀 전체가 집중하는 큰 업무 단위이고, 그 안에 목표가 포함되며 목표는 하나 이상의 작업으로 구성됩니다. 작업은 실제 실행 단위이며, 필요하면 작업을 더 세분화한 하위작업으로 나눌 수 있습니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "구조"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            }
+          ],
+          "latencyMs": 4457,
+          "inputTokens": 6605,
+          "outputTokens": 193,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "DEFINITION",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "프로젝트, 목표, 작업, 하위작업의 구성 순서",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "949ddd65a2a5:09e9b2c9384c"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "MQ026",
+          "turnNo": 1,
+          "description": "작업 속성과 보기",
+          "originalQuestion": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "generationQuery": "작업에는 어떤 정보를 넣을 수 있고 어떤 보기로 확인할 수 있어?",
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "작업에는 일정·담당·분류·진행 상태와 우선순위 관련 정보를 넣고, 목적에 맞는 보기로 확인·관리할 수 있습니다.\n\n- 키 값: 작업의 키 값을 설정할 수 있습니다. [1]\n- 시작일·마감일: 작업의 시작일과 마감일을 지정할 수 있습니다. [1]\n- 참여자: 작업 참여자를 지정할 수 있습니다. [1]\n- 라벨: 작업을 분류하기 위한 라벨을 설정할 수 있습니다. [1]\n- 상태: 작업의 진행 상태를 관리할 수 있습니다. [1]\n- 스코어: 작업의 스코어를 설정할 수 있습니다. [1]\n\n- 리스트: 작업을 빠르게 스캔하거나 정렬하고, 뤼이도의 계층 구조를 명확히 확인할 수 있습니다. [2]\n- 칸반: 상태를 기준으로 작업 흐름을 보드 형태로 시각화해 확인할 수 있습니다. [2]\n- 그래프: 작업의 우선순위를 한눈에 파악할 수 있습니다. [2]\n- 캘린더: 마감일과 일정을 중심으로 작업을 정리하고 확인할 수 있습니다. [2]",
+          "citations": [
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "속성"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            },
+            {
+              "documentTitle": "실행: 작업",
+              "sectionPath": [
+                "실행: 작업",
+                "다양한 보기"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+            }
+          ],
+          "latencyMs": 6803,
+          "inputTokens": 6776,
+          "outputTokens": 479,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "FEATURE_SUMMARY",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [
+                {
+                  "information_unit": "작업에 넣을 수 있는 정보",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                },
+                {
+                  "information_unit": "작업을 확인할 수 있는 보기",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5",
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "949ddd65a2a5:4c10db99d1ad",
+              "949ddd65a2a5:28c75fba571f"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    }
+  ],
+  "summaries": [
+    {
+      "candidateId": "A",
+      "model": "gpt-5.4-mini",
+      "turnExecutionCount": 6,
+      "passedCount": 4,
+      "failedCount": 2,
+      "errorCount": 0,
+      "completedCount": 6,
+      "withheldCount": 0,
+      "inputTokens": 40185,
+      "outputTokens": 1512,
+      "estimatedCostUsd": 0.036943,
+      "averageLatencyMs": 4145,
+      "p50LatencyMs": 4068,
+      "p95LatencyMs": 5044,
+      "planningRegenerationCount": 1,
+      "validationRegenerationCount": 0
+    },
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "turnExecutionCount": 6,
+      "passedCount": 6,
+      "failedCount": 0,
+      "errorCount": 0,
+      "completedCount": 6,
+      "withheldCount": 0,
+      "inputTokens": 40148,
+      "outputTokens": 1878,
+      "estimatedCostUsd": 0.102832,
+      "averageLatencyMs": 5680,
+      "p50LatencyMs": 4525,
+      "p95LatencyMs": 7166,
+      "planningRegenerationCount": 0,
+      "validationRegenerationCount": 0
+    }
+  ]
+}

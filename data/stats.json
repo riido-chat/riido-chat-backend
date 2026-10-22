@@ -1,0 +1,38 @@
+{
+  "pages": 40,
+  "length": {
+    "avg": 1833,
+    "min": 795,
+    "max": 6425
+  },
+  "headers": {
+    "1": 40,
+    "2": 144,
+    "3": 26,
+    "4": 76
+  },
+  "images": {
+    "total": 122,
+    "empty_alt": 122
+  },
+  "tables": {
+    "markdown_rows": 26,
+    "html": 7
+  },
+  "details_blocks": 24,
+  "gitbook_syntax": {
+    "column": 4,
+    "columns": 2,
+    "embed": 1,
+    "hint": 11,
+    "step": 15,
+    "stepper": 4,
+    "tab": 5,
+    "tabs": 2
+  },
+  "repeated_first_lines": {
+    "> For the complete documentation index, see [llms.txt](https": 40,
+    "# 자동화": 2,
+    "# MCP 서버": 2
+  }
+}

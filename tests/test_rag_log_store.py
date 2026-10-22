@@ -1,0 +1,339 @@
+import unittest
+import uuid
+from datetime import datetime, timezone
+from unittest.mock import AsyncMock, call as mock_call
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database.models import (
+    AnswerStatus,
+    Conversation,
+    ExecutionStatus,
+    Feedback,
+    FeedbackRating,
+    ModelCall,
+    ModelCallPurpose,
+    RagRun,
+)
+from app.chat.log_store import (
+    CitationLog,
+    FeedbackNotAllowedError,
+    RagLogStore,
+    RagRunNotFoundError,
+)
+
+
+class RagLogStoreModelCallTest(unittest.IsolatedAsyncioTestCase):
+    def setUp(self) -> None:
+        self.session = AsyncMock(spec=AsyncSession)
+        self.store = RagLogStore(self.session)
+        self.rag_run_id = uuid.uuid4()
+        self.conversation_id = uuid.uuid4()
+
+    def _processing_run(self) -> RagRun:
+        return RagRun(
+            id=self.rag_run_id,
+            conversation_id=self.conversation_id,
+            status=AnswerStatus.PROCESSING,
+        )
+
+    async def test_records_four_and_five_citations_without_count_rejection(self) -> None:
+        for count in (4, 5):
+            with self.subTest(count=count):
+                run = self._processing_run()
+                self.store._get_processing_run = AsyncMock(return_value=run)
+                self.store._touch_conversation = AsyncMock()
+                citations = [
+                    CitationLog(
+                        chunk_id=index,
+                        document_version_id=index,
+                        citation_order=index,
+                        document_title_snapshot=f"문서 {index}",
+                        node_path_snapshot="섹션",
+                        source_uri_snapshot=f"https://docs.riido.io/{index}",
+                    )
+                    for index in range(1, count + 1)
+                ]
+                result = await self.store.complete_rag_run(
+                    run.id, answer_content="근거 있는 답변", citations=citations
+                )
+                self.assertEqual(AnswerStatus.COMPLETED, result.status)
+                self.assertTrue(result.citation_validated)
+                saved = list(self.session.add_all.call_args.args[0])
+                self.assertEqual(count, len(saved))
+                self.assertEqual(
+                    list(range(1, count + 1)),
+                    [citation.citation_order for citation in saved],
+                )
+
+    async def test_rejects_completed_answer_without_citations(self) -> None:
+        with self.assertRaisesRegex(ValueError, "최소 1개"):
+            await self.store.complete_rag_run(
+                self.rag_run_id, answer_content="본문", citations=[]
+            )
+        self.session.add_all.assert_not_called()
+
+    def _prepare_rag_run_lock(self, *, final_scalar=None) -> None:
+        run = self._processing_run()
+        self.session.get.side_effect = lambda model, _id: (
+            run if model is RagRun else final_scalar
+        )
+        scalar_results = [Conversation(id=self.conversation_id), run]
+        if final_scalar is not None:
+            scalar_results.append(final_scalar)
+        self.session.scalar.side_effect = scalar_results
+
+    async def test_starts_model_call_in_processing_without_result_metrics(
+        self,
+    ) -> None:
+        self._prepare_rag_run_lock()
+
+        call = await self.store.start_model_call(
+            rag_run_id=self.rag_run_id,
+            purpose=ModelCallPurpose.EMBEDDING.value,
+            provider="openai",
+            model_name="text-embedding-test",
+        )
+
+        self.assertEqual(ExecutionStatus.PROCESSING, call.status)
+        self.assertEqual(0, call.retry_count)
+        self.assertIsNone(call.input_tokens)
+        self.assertIsNone(call.output_tokens)
+        self.assertIsNone(call.latency_ms)
+        self.assertIsNone(call.error_message)
+        self.session.add.assert_called_once_with(call)
+        self.session.flush.assert_awaited_once_with()
+        self.assertIsNone(call.classification_run_id)
+
+    async def test_starts_turn_model_call_with_classification_run(self) -> None:
+        self._prepare_rag_run_lock()
+
+        call = await self.store.start_model_call(
+            rag_run_id=self.rag_run_id,
+            classification_run_id=11,
+            purpose=ModelCallPurpose.QUESTION_CLASSIFICATION.value,
+            provider="openai",
+            model_name="gpt-test",
+            prompt_version="question-grouping-v7-2",
+        )
+
+        self.assertEqual(self.rag_run_id, call.rag_run_id)
+        self.assertEqual(11, call.classification_run_id)
+        self.assertIsNone(call.index_run_id)
+        self.assertEqual(ExecutionStatus.PROCESSING, call.status)
+        # 턴에 속한 호출은 기존처럼 대화 → 턴 잠금을 먼저 잡는다.
+        self.assertEqual(2, self.session.scalar.await_count)
+
+    async def test_starts_classification_run_call_without_turn(self) -> None:
+        call = await self.store.start_model_call(
+            classification_run_id=11,
+            purpose=ModelCallPurpose.QUESTION_CLASSIFICATION.value,
+            provider="openai",
+            model_name="gpt-test",
+        )
+
+        self.assertIsNone(call.rag_run_id)
+        self.assertEqual(11, call.classification_run_id)
+        self.session.scalar.assert_not_awaited()
+        self.session.add.assert_called_once_with(call)
+
+    async def test_rejects_model_call_without_owner(self) -> None:
+        with self.assertRaisesRegex(ValueError, "classification_run_id"):
+            await self.store.start_model_call(
+                purpose=ModelCallPurpose.QUESTION_CLASSIFICATION.value,
+                provider="openai",
+                model_name="gpt-test",
+            )
+        self.session.add.assert_not_called()
+
+    async def test_finishes_same_processing_model_call(self) -> None:
+        call = ModelCall(
+            id=7,
+            rag_run_id=self.rag_run_id,
+            purpose=ModelCallPurpose.GENERATION,
+            provider="openai",
+            model_name="gpt-test",
+            status=ExecutionStatus.PROCESSING,
+            retry_count=0,
+        )
+        self._prepare_rag_run_lock(final_scalar=call)
+
+        finished = await self.store.finish_model_call(
+            7,
+            status=ExecutionStatus.FAILED,
+            input_tokens=100,
+            output_tokens=20,
+            cached_input_tokens=64,
+            reasoning_tokens=8,
+            latency_ms=4500,
+            retry_count=1,
+            error_message="upstream timeout",
+        )
+
+        self.assertIs(call, finished)
+        self.assertEqual(64, finished.cached_input_tokens)
+        self.assertEqual(8, finished.reasoning_tokens)
+        self.assertEqual(ExecutionStatus.FAILED, finished.status)
+        self.assertEqual(1, finished.retry_count)
+        self.assertEqual(4500, finished.latency_ms)
+        self.assertEqual("upstream timeout", finished.error_message)
+        self.assertEqual(
+            [mock_call(ModelCall, 7), mock_call(RagRun, self.rag_run_id)],
+            self.session.get.await_args_list,
+        )
+        self.session.flush.assert_awaited_once_with()
+
+    async def test_rejects_finishing_an_already_finished_call(self) -> None:
+        model_call = ModelCall(
+            id=7,
+            rag_run_id=self.rag_run_id,
+            purpose=ModelCallPurpose.GENERATION,
+            provider="openai",
+            model_name="gpt-test",
+            status=ExecutionStatus.SUCCESS,
+            retry_count=0,
+        )
+        self._prepare_rag_run_lock(final_scalar=model_call)
+
+        with self.assertRaisesRegex(ValueError, "PROCESSING"):
+            await self.store.finish_model_call(
+                7,
+                status=ExecutionStatus.FAILED,
+            )
+
+        self.session.flush.assert_not_awaited()
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+
+class RagLogStoreFeedbackTest(unittest.IsolatedAsyncioTestCase):
+    def setUp(self) -> None:
+        self.session = AsyncMock(spec=AsyncSession)
+        self.store = RagLogStore(self.session)
+        self.rag_run_id = uuid.uuid4()
+        self.session.get.return_value = self._run(AnswerStatus.COMPLETED)
+        self.session.scalar.return_value = None
+
+    # ------------------------------------------------------------------
+    # 등록과 변경
+    # ------------------------------------------------------------------
+
+    async def test_registers_first_rating(self) -> None:
+        feedback = await self.store.set_feedback(
+            self.rag_run_id,
+            rating=FeedbackRating.GOOD,
+        )
+
+        self.assertEqual(FeedbackRating.GOOD, feedback.rating)
+        self.assertEqual(self.rag_run_id, feedback.rag_run_id)
+        self.assertEqual(feedback.created_at, feedback.updated_at)
+        self.session.add.assert_called_once_with(feedback)
+
+    async def test_changes_rating_and_stamps_updated_at(self) -> None:
+        existing = self._feedback(FeedbackRating.GOOD)
+        self.session.scalar.return_value = existing
+
+        feedback = await self.store.set_feedback(
+            self.rag_run_id,
+            rating=FeedbackRating.BAD,
+        )
+
+        self.assertIs(existing, feedback)
+        self.assertEqual(FeedbackRating.BAD, feedback.rating)
+        self.assertGreater(feedback.updated_at, feedback.created_at)
+        self.session.add.assert_not_called()
+
+    async def test_same_rating_leaves_updated_at_untouched(self) -> None:
+        existing = self._feedback(FeedbackRating.GOOD)
+        stamped_at = existing.updated_at
+        self.session.scalar.return_value = existing
+
+        feedback = await self.store.set_feedback(
+            self.rag_run_id,
+            rating=FeedbackRating.GOOD,
+        )
+
+        self.assertEqual(FeedbackRating.GOOD, feedback.rating)
+        self.assertEqual(stamped_at, feedback.updated_at)
+        self.session.add.assert_not_called()
+
+    # ------------------------------------------------------------------
+    # 해제
+    # ------------------------------------------------------------------
+
+    async def test_clears_existing_rating(self) -> None:
+        existing = self._feedback(FeedbackRating.BAD)
+        self.session.scalar.return_value = existing
+
+        cleared = await self.store.clear_feedback(self.rag_run_id)
+
+        self.assertTrue(cleared)
+        self.session.delete.assert_awaited_once_with(existing)
+
+    async def test_clearing_absent_rating_is_a_no_op(self) -> None:
+        cleared = await self.store.clear_feedback(self.rag_run_id)
+
+        self.assertFalse(cleared)
+        self.session.delete.assert_not_awaited()
+        self.session.flush.assert_not_awaited()
+
+    # ------------------------------------------------------------------
+    # 대상 턴 검증
+    # ------------------------------------------------------------------
+
+    async def test_allows_withheld_turn(self) -> None:
+        self.session.get.return_value = self._run(AnswerStatus.WITHHELD)
+
+        feedback = await self.store.set_feedback(
+            self.rag_run_id,
+            rating=FeedbackRating.BAD,
+        )
+
+        self.assertEqual(FeedbackRating.BAD, feedback.rating)
+
+    async def test_rejects_turns_that_have_no_answer_to_rate(self) -> None:
+        for status in (
+            AnswerStatus.PROCESSING,
+            AnswerStatus.ERROR,
+            AnswerStatus.CANCELLED,
+        ):
+            with self.subTest(status=status):
+                self.session.get.return_value = self._run(status)
+
+                with self.assertRaises(FeedbackNotAllowedError):
+                    await self.store.set_feedback(
+                        self.rag_run_id,
+                        rating=FeedbackRating.GOOD,
+                    )
+                with self.assertRaises(FeedbackNotAllowedError):
+                    await self.store.clear_feedback(self.rag_run_id)
+
+        self.session.add.assert_not_called()
+        self.session.delete.assert_not_awaited()
+
+    async def test_rejects_unknown_rag_run(self) -> None:
+        self.session.get.return_value = None
+
+        with self.assertRaises(RagRunNotFoundError):
+            await self.store.set_feedback(
+                self.rag_run_id,
+                rating=FeedbackRating.GOOD,
+            )
+        with self.assertRaises(RagRunNotFoundError):
+            await self.store.clear_feedback(self.rag_run_id)
+
+    # ------------------------------------------------------------------
+
+    def _run(self, status: AnswerStatus) -> RagRun:
+        return RagRun(id=self.rag_run_id, status=status)
+
+    def _feedback(self, rating: FeedbackRating) -> Feedback:
+        stamped_at = datetime(2026, 8, 26, tzinfo=timezone.utc)
+        return Feedback(
+            rag_run_id=self.rag_run_id,
+            rating=rating,
+            created_at=stamped_at,
+            updated_at=stamped_at,
+        )

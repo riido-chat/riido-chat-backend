@@ -1,0 +1,3589 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-06T09:07:52.328136+00:00",
+  "casesVersion": "v3",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "4ec0c8a00423b51d0b624319caa314983d033301",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.4-mini"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v3",
+        "sha256": "7bc9d807d37827d2a8f2b2e8bc9b184191c5cc4b947b3c78c9dd991da2d8c801"
+      },
+      "sourcePlanning": {
+        "version": "v10",
+        "sha256": "d40cfa917d38d02a13123b1f405a3d7a2faad1078cba6edec89c16389291fe5d"
+      },
+      "answer": {
+        "version": "v17",
+        "sha256": "80cef0103ccf34c25d627ed255eafd7281dca8afe161d6655ac33d50aec76b10"
+      },
+      "answerValidationRegeneration": {
+        "version": "v17-repair-1",
+        "sha256": "ef07e7aaaaf3b0b54aba075deba6225fa2e7287a58eb0a13e5ccb0bab18cc589"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 0,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "4ec0c8a00423b51d0b624319caa314983d033301",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v18"
+      },
+      {
+        "purpose": "QUERY_REWRITE",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v3"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 5,
+    "uniqueCaseCount": 1,
+    "totalCaseExecutionCount": 5,
+    "passedCaseExecutionCount": 4,
+    "failedCaseExecutionCount": 1,
+    "perCase": [
+      {
+        "id": "MT02",
+        "executionCount": 5,
+        "passedCount": 4,
+        "failedCount": 1
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 5,
+        "passedCount": 4,
+        "failedCount": 1
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-06T09:07:12.591807+00:00",
+      "results": [
+        {
+          "id": "MT02",
+          "description": "명시된 후속 대상의 공개 범위 질문",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "96992399-802f-4a61-9832-62cb2a803be1",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "저장된 보기가 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "96992399-802f-4a61-9832-62cb2a803be1",
+                "ragRunId": "e6782ddd-97a1-4f55-bda1-65e264f7a7dd",
+                "answer": {
+                  "answerMarkdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 도와줍니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "저장된 보기",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "저장된 보기가 뭐야?",
+                "resolvedQuery": "저장된 보기가 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4158,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 10,
+                    "outputTokens": null,
+                    "latencyMs": 785,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v18",
+                    "inputTokens": 5076,
+                    "outputTokens": 158,
+                    "latencyMs": 3276,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "저장된 보기"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "저장된 보기가 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "저장된 보기가 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3287,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:294a258fc7b7",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 편집하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "09661a57156b0135ac0251aaabdfdbc0f85f7cd2e29eab714d699af503bc874e",
+                        "content": "저장된 보기 페이지에서 필터나 정렬을 수정할 경우, 다음 두 가지 방식으로 저장할 수 있습니다.\n\n* 저장: 현재 보고 있는 보기를 그대로 덮어씁니다.\n* 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 9.855819387952415,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.6229049191420902,
+                            "latencyMs": 822
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3284,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:4cf1d0445a55",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "e7afd5b0757aa68f8f710d5dde8970e7252b199c505ad7be7cbb3970e488f00c",
+                        "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 7.521272184177585,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6770494841681082,
+                            "latencyMs": 822
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.144854181103378,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6341670277438521,
+                            "latencyMs": 822
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.164764505647277,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5447742194999484,
+                            "latencyMs": 822
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.49241621725505,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5413926068872553,
+                            "latencyMs": 822
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v18",
+                        "inputTokens": 5076,
+                        "outputTokens": 158,
+                        "latencyMs": 3276,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "DEFINITION",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "저장된 보기가 무엇인지",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3284,
+                          "documentVersionId": 2428,
+                          "documentId": "333984364686",
+                          "sectionId": "333984364686:4cf1d0445a55",
+                          "documentTitle": "저장된 보기",
+                          "sectionPath": [
+                            "저장된 보기",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                          "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 도와줍니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 도와줍니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "그 보기는 나만 볼 수 있어?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "96992399-802f-4a61-9832-62cb2a803be1",
+                "ragRunId": "130bf9e1-8af1-4234-9fe8-3baf3b5d58b6",
+                "answer": {
+                  "answerMarkdown": "네, 저장된 보기는 나만 볼 수 있게 설정할 수 있습니다. 보기를 만들 때 개인용으로 사용할지, 팀 전체에 공개할지 공개 범위를 선택할 수 있습니다. [1]\n\n개인용인 **나만 보기(비공개)**는 개인 참고용이나 실험적인 설정을 저장할 때 적합합니다. 반대로 **팀 보기(공개)**로 만들면 팀 전체가 동일한 기준으로 볼 수 있습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "저장된 보기",
+                    "sectionPath": [
+                      "공개 범위"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "그 보기는 나만 볼 수 있어?",
+                "resolvedQuery": "저장된 보기는 나만 볼 수 있나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4065,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v3",
+                    "inputTokens": 2927,
+                    "outputTokens": 40,
+                    "latencyMs": 1073,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 15,
+                    "outputTokens": null,
+                    "latencyMs": 177,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v18",
+                    "inputTokens": 4950,
+                    "outputTokens": 199,
+                    "latencyMs": 2726,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "저장된 보기"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "그 보기는 나만 볼 수 있어?",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "e6782ddd-97a1-4f55-bda1-65e264f7a7dd",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "저장된 보기가 뭐야?",
+                        "answerContent": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 도와줍니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "e6782ddd-97a1-4f55-bda1-65e264f7a7dd",
+                        "userQuery": "저장된 보기가 뭐야?",
+                        "answerContent": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 도와줍니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "저장된 보기는 나만 볼 수 있나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3287,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:294a258fc7b7",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 편집하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "09661a57156b0135ac0251aaabdfdbc0f85f7cd2e29eab714d699af503bc874e",
+                        "content": "저장된 보기 페이지에서 필터나 정렬을 수정할 경우, 다음 두 가지 방식으로 저장할 수 있습니다.\n\n* 저장: 현재 보고 있는 보기를 그대로 덮어씁니다.\n* 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 15.182745036293015,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5743041921133675,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03225806451612903,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 14.242016772848974,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5897798404180319,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 11.35152689435186,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5659259678199933,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3363,
+                        "documentVersionId": 2449,
+                        "documentId": "a7061c4853df",
+                        "sectionId": "a7061c4853df:4c7aa16de474",
+                        "documentTitle": "휴지통",
+                        "sectionPath": [
+                          "휴지통",
+                          "삭제된 페이지 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/trash.md",
+                        "contentHash": "3e3cedb5706f60a295a960f3a579c47dc4421c2ed54219e5a2567defcef68cba",
+                        "content": "* 휴지통에 있는 항목은 삭제 전과 동일한 형태로 열람이 가능합니다.\n* 페이지 상단에는 ‘삭제된 페이지’임을 안내하는 배너가 표시되어 쉽게 구분할 수 있습니다.\n* 페이지 내에서도 ‘복구’ 또는 ‘영구 삭제’를 바로 실행할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 8.764528991012885,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.42803859507030384,
+                            "latencyMs": 191
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029877369007803793,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 6.264961265753051,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5206814914432168,
+                            "latencyMs": 191
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v18",
+                        "inputTokens": 4950,
+                        "outputTokens": 199,
+                        "latencyMs": 2726,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "저장된 보기는 나만 볼 수 있는지 여부와 공개 범위 선택 가능 여부",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3285,
+                          "documentVersionId": 2428,
+                          "documentId": "333984364686",
+                          "sectionId": "333984364686:ba056589ecd1",
+                          "documentTitle": "저장된 보기",
+                          "sectionPath": [
+                            "저장된 보기",
+                            "공개 범위"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                          "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "네, 저장된 보기는 나만 볼 수 있게 설정할 수 있습니다. 보기를 만들 때 개인용으로 사용할지, 팀 전체에 공개할지 공개 범위를 선택할 수 있습니다. [SOURCE_2]\n\n개인용인 **나만 보기(비공개)**는 개인 참고용이나 실험적인 설정을 저장할 때 적합합니다. 반대로 **팀 보기(공개)**로 만들면 팀 전체가 동일한 기준으로 볼 수 있습니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "네, 저장된 보기는 나만 볼 수 있게 설정할 수 있습니다. 보기를 만들 때 개인용으로 사용할지, 팀 전체에 공개할지 공개 범위를 선택할 수 있습니다. [1]\n\n개인용인 **나만 보기(비공개)**는 개인 참고용이나 실험적인 설정을 저장할 때 적합합니다. 반대로 **팀 보기(공개)**로 만들면 팀 전체가 동일한 기준으로 볼 수 있습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    },
+    {
+      "repeatNo": 2,
+      "executedAt": "2026-09-06T09:07:20.910137+00:00",
+      "results": [
+        {
+          "id": "MT02",
+          "description": "명시된 후속 대상의 공개 범위 질문",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": false,
+          "conversationId": "23729d1c-e406-4cfc-8ff0-201a94c0357a",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "저장된 보기가 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "23729d1c-e406-4cfc-8ff0-201a94c0357a",
+                "ragRunId": "1e0d5a88-f0e9-4a35-87f6-897f3da1ba8b",
+                "answer": {
+                  "answerMarkdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 도와줍니다. [1]\n\n또한 나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통 기준을 공유할 수 있어 협업의 일관성을 높이는 데도 도움이 됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "저장된 보기",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "저장된 보기가 뭐야?",
+                "resolvedQuery": "저장된 보기가 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2837,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 10,
+                    "outputTokens": null,
+                    "latencyMs": 158,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v18",
+                    "inputTokens": 5073,
+                    "outputTokens": 203,
+                    "latencyMs": 2625,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "저장된 보기"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "저장된 보기가 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "저장된 보기가 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3287,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:294a258fc7b7",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 편집하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "09661a57156b0135ac0251aaabdfdbc0f85f7cd2e29eab714d699af503bc874e",
+                        "content": "저장된 보기 페이지에서 필터나 정렬을 수정할 경우, 다음 두 가지 방식으로 저장할 수 있습니다.\n\n* 저장: 현재 보고 있는 보기를 그대로 덮어씁니다.\n* 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 9.855819387952415,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.6229049191420902,
+                            "latencyMs": 173
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3284,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:4cf1d0445a55",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "e7afd5b0757aa68f8f710d5dde8970e7252b199c505ad7be7cbb3970e488f00c",
+                        "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 7.521272184177585,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6770494841681082,
+                            "latencyMs": 173
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.144854181103378,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6341670277438521,
+                            "latencyMs": 173
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.164764505647277,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5447742194999484,
+                            "latencyMs": 173
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.49241621725505,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5413926068872553,
+                            "latencyMs": 173
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v18",
+                        "inputTokens": 5073,
+                        "outputTokens": 203,
+                        "latencyMs": 2625,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "DEFINITION",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "저장된 보기",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3284,
+                          "documentVersionId": 2428,
+                          "documentId": "333984364686",
+                          "sectionId": "333984364686:4cf1d0445a55",
+                          "documentTitle": "저장된 보기",
+                          "sectionPath": [
+                            "저장된 보기",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                          "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 도와줍니다. [SOURCE_2]\n\n또한 나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통 기준을 공유할 수 있어 협업의 일관성을 높이는 데도 도움이 됩니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 도와줍니다. [1]\n\n또한 나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통 기준을 공유할 수 있어 협업의 일관성을 높이는 데도 도움이 됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "그 보기는 나만 볼 수 있어?",
+              "passed": false,
+              "failures": [
+                "resolvedQuery에 키워드가 없음: '저장된 보기' (actual='저장된 보는 나만 볼 수 있나요?')"
+              ],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "23729d1c-e406-4cfc-8ff0-201a94c0357a",
+                "ragRunId": "19593d86-43eb-4ba4-9fa6-e55a590ed678",
+                "answer": {
+                  "answerMarkdown": "네, 저장된 보기는 나만 보이도록 만들 수 있습니다. 보기를 만들 때 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있으며, **나만 보기(비공개)**는 개인 참고용이나 실험적인 설정을 저장할 때 적합합니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "저장된 보기",
+                    "sectionPath": [
+                      "공개 범위"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "그 보기는 나만 볼 수 있어?",
+                "resolvedQuery": "저장된 보는 나만 볼 수 있나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 3946,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v3",
+                    "inputTokens": 2973,
+                    "outputTokens": 39,
+                    "latencyMs": 1282,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 14,
+                    "outputTokens": null,
+                    "latencyMs": 156,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v18",
+                    "inputTokens": 4939,
+                    "outputTokens": 159,
+                    "latencyMs": 2424,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "저장된 보기"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "그 보기는 나만 볼 수 있어?",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "1e0d5a88-f0e9-4a35-87f6-897f3da1ba8b",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "저장된 보기가 뭐야?",
+                        "answerContent": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 도와줍니다. [1]\n\n또한 나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통 기준을 공유할 수 있어 협업의 일관성을 높이는 데도 도움이 됩니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "1e0d5a88-f0e9-4a35-87f6-897f3da1ba8b",
+                        "userQuery": "저장된 보기가 뭐야?",
+                        "answerContent": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 도와줍니다. [1]\n\n또한 나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통 기준을 공유할 수 있어 협업의 일관성을 높이는 데도 도움이 됩니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "저장된 보는 나만 볼 수 있나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3287,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:294a258fc7b7",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 편집하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "09661a57156b0135ac0251aaabdfdbc0f85f7cd2e29eab714d699af503bc874e",
+                        "content": "저장된 보기 페이지에서 필터나 정렬을 수정할 경우, 다음 두 가지 방식으로 저장할 수 있습니다.\n\n* 저장: 현재 보고 있는 보기를 그대로 덮어씁니다.\n* 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 15.182745036293015,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5117793547539131,
+                            "latencyMs": 169
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 14.242016772848974,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5074091914144331,
+                            "latencyMs": 169
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 11.35152689435186,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.49841686587596323,
+                            "latencyMs": 169
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3363,
+                        "documentVersionId": 2449,
+                        "documentId": "a7061c4853df",
+                        "sectionId": "a7061c4853df:4c7aa16de474",
+                        "documentTitle": "휴지통",
+                        "sectionPath": [
+                          "휴지통",
+                          "삭제된 페이지 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/trash.md",
+                        "contentHash": "3e3cedb5706f60a295a960f3a579c47dc4421c2ed54219e5a2567defcef68cba",
+                        "content": "* 휴지통에 있는 항목은 삭제 전과 동일한 형태로 열람이 가능합니다.\n* 페이지 상단에는 ‘삭제된 페이지’임을 안내하는 배너가 표시되어 쉽게 구분할 수 있습니다.\n* 페이지 내에서도 ‘복구’ 또는 ‘영구 삭제’를 바로 실행할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 8.764528991012885,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.4025867115873505,
+                            "latencyMs": 169
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029877369007803793,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 6.264961265753051,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.47024645898431994,
+                            "latencyMs": 169
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v18",
+                        "inputTokens": 4939,
+                        "outputTokens": 159,
+                        "latencyMs": 2424,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "저장된 보는 나만 볼 수 있나요?",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3285,
+                          "documentVersionId": 2428,
+                          "documentId": "333984364686",
+                          "sectionId": "333984364686:ba056589ecd1",
+                          "documentTitle": "저장된 보기",
+                          "sectionPath": [
+                            "저장된 보기",
+                            "공개 범위"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                          "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "네, 저장된 보기는 나만 보이도록 만들 수 있습니다. 보기를 만들 때 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있으며, **나만 보기(비공개)**는 개인 참고용이나 실험적인 설정을 저장할 때 적합합니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "네, 저장된 보기는 나만 보이도록 만들 수 있습니다. 보기를 만들 때 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있으며, **나만 보기(비공개)**는 개인 참고용이나 실험적인 설정을 저장할 때 적합합니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        }
+      ]
+    },
+    {
+      "repeatNo": 3,
+      "executedAt": "2026-09-06T09:07:27.770549+00:00",
+      "results": [
+        {
+          "id": "MT02",
+          "description": "명시된 후속 대상의 공개 범위 질문",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "f33e3354-6cf6-49b9-b364-964bbe46e1f5",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "저장된 보기가 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "f33e3354-6cf6-49b9-b364-964bbe46e1f5",
+                "ragRunId": "89baa2e2-c0df-48ed-8a7a-158c2a9fefb7",
+                "answer": {
+                  "answerMarkdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 해줍니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "저장된 보기",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "저장된 보기가 뭐야?",
+                "resolvedQuery": "저장된 보기가 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 3996,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 10,
+                    "outputTokens": null,
+                    "latencyMs": 190,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v18",
+                    "inputTokens": 5075,
+                    "outputTokens": 156,
+                    "latencyMs": 3757,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "저장된 보기"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "저장된 보기가 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "저장된 보기가 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3287,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:294a258fc7b7",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 편집하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "09661a57156b0135ac0251aaabdfdbc0f85f7cd2e29eab714d699af503bc874e",
+                        "content": "저장된 보기 페이지에서 필터나 정렬을 수정할 경우, 다음 두 가지 방식으로 저장할 수 있습니다.\n\n* 저장: 현재 보고 있는 보기를 그대로 덮어씁니다.\n* 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 9.855819387952415,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.6229049191420902,
+                            "latencyMs": 204
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3284,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:4cf1d0445a55",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "e7afd5b0757aa68f8f710d5dde8970e7252b199c505ad7be7cbb3970e488f00c",
+                        "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 7.521272184177585,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6770494841681082,
+                            "latencyMs": 204
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.144854181103378,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6341670277438521,
+                            "latencyMs": 204
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.164764505647277,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5447742194999484,
+                            "latencyMs": 204
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.49241621725505,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5413926068872553,
+                            "latencyMs": 204
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v18",
+                        "inputTokens": 5075,
+                        "outputTokens": 156,
+                        "latencyMs": 3757,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "DEFINITION",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "저장된 보기의 의미",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3284,
+                          "documentVersionId": 2428,
+                          "documentId": "333984364686",
+                          "sectionId": "333984364686:4cf1d0445a55",
+                          "documentTitle": "저장된 보기",
+                          "sectionPath": [
+                            "저장된 보기",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                          "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 해줍니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 해줍니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "그 보기는 나만 볼 수 있어?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "f33e3354-6cf6-49b9-b364-964bbe46e1f5",
+                "ragRunId": "405ac6a1-a1a8-4ce5-81b5-983071793f12",
+                "answer": {
+                  "answerMarkdown": "저장된 보기는 **나만 보기(비공개)**로 설정할 수 있어서, 개인용으로만 보이게 할 수 있습니다. 또한 **팀 보기(공개)**로도 선택할 수 있어 팀 전체와 공유할 수도 있습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "저장된 보기",
+                    "sectionPath": [
+                      "공개 범위"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "그 보기는 나만 볼 수 있어?",
+                "resolvedQuery": "저장된 보기는 나만 볼 수 있나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 6067,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v3",
+                    "inputTokens": 2926,
+                    "outputTokens": 40,
+                    "latencyMs": 1229,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 15,
+                    "outputTokens": null,
+                    "latencyMs": 359,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v18",
+                    "inputTokens": 4960,
+                    "outputTokens": 162,
+                    "latencyMs": 4401,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "저장된 보기"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "그 보기는 나만 볼 수 있어?",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "89baa2e2-c0df-48ed-8a7a-158c2a9fefb7",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "저장된 보기가 뭐야?",
+                        "answerContent": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 해줍니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "89baa2e2-c0df-48ed-8a7a-158c2a9fefb7",
+                        "userQuery": "저장된 보기가 뭐야?",
+                        "answerContent": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 해줍니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "저장된 보기는 나만 볼 수 있나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3287,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:294a258fc7b7",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 편집하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "09661a57156b0135ac0251aaabdfdbc0f85f7cd2e29eab714d699af503bc874e",
+                        "content": "저장된 보기 페이지에서 필터나 정렬을 수정할 경우, 다음 두 가지 방식으로 저장할 수 있습니다.\n\n* 저장: 현재 보고 있는 보기를 그대로 덮어씁니다.\n* 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 15.182745036293015,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5741737598830854,
+                            "latencyMs": 372
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03225806451612903,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 14.242016772848974,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5896594443648925,
+                            "latencyMs": 372
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 11.35152689435186,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5658778796743981,
+                            "latencyMs": 372
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3363,
+                        "documentVersionId": 2449,
+                        "documentId": "a7061c4853df",
+                        "sectionId": "a7061c4853df:4c7aa16de474",
+                        "documentTitle": "휴지통",
+                        "sectionPath": [
+                          "휴지통",
+                          "삭제된 페이지 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/trash.md",
+                        "contentHash": "3e3cedb5706f60a295a960f3a579c47dc4421c2ed54219e5a2567defcef68cba",
+                        "content": "* 휴지통에 있는 항목은 삭제 전과 동일한 형태로 열람이 가능합니다.\n* 페이지 상단에는 ‘삭제된 페이지’임을 안내하는 배너가 표시되어 쉽게 구분할 수 있습니다.\n* 페이지 내에서도 ‘복구’ 또는 ‘영구 삭제’를 바로 실행할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 8.764528991012885,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.4280648667180611,
+                            "latencyMs": 372
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029877369007803793,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 6.264961265753051,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5204982649137523,
+                            "latencyMs": 372
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v18",
+                        "inputTokens": 4960,
+                        "outputTokens": 162,
+                        "latencyMs": 4401,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "저장된 보기의 공개 범위는 나만 보기(비공개)와 팀 보기(공개)로 선택할 수 있다",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3285,
+                          "documentVersionId": 2428,
+                          "documentId": "333984364686",
+                          "sectionId": "333984364686:ba056589ecd1",
+                          "documentTitle": "저장된 보기",
+                          "sectionPath": [
+                            "저장된 보기",
+                            "공개 범위"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                          "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "저장된 보기는 **나만 보기(비공개)**로 설정할 수 있어서, 개인용으로만 보이게 할 수 있습니다. 또한 **팀 보기(공개)**로도 선택할 수 있어 팀 전체와 공유할 수도 있습니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "저장된 보기는 **나만 보기(비공개)**로 설정할 수 있어서, 개인용으로만 보이게 할 수 있습니다. 또한 **팀 보기(공개)**로도 선택할 수 있어 팀 전체와 공유할 수도 있습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        }
+      ]
+    },
+    {
+      "repeatNo": 4,
+      "executedAt": "2026-09-06T09:07:37.910719+00:00",
+      "results": [
+        {
+          "id": "MT02",
+          "description": "명시된 후속 대상의 공개 범위 질문",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "1d74a2c7-2b5b-4f61-b567-22c30cecf69e",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "저장된 보기가 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "1d74a2c7-2b5b-4f61-b567-22c30cecf69e",
+                "ragRunId": "ac5a50b6-ed68-4e6a-9733-9466ae5f76ed",
+                "answer": {
+                  "answerMarkdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해 두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "저장된 보기",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "저장된 보기가 뭐야?",
+                "resolvedQuery": "저장된 보기가 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2931,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 10,
+                    "outputTokens": null,
+                    "latencyMs": 177,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v18",
+                    "inputTokens": 5075,
+                    "outputTokens": 157,
+                    "latencyMs": 2704,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "저장된 보기"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "저장된 보기가 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "저장된 보기가 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3287,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:294a258fc7b7",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 편집하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "09661a57156b0135ac0251aaabdfdbc0f85f7cd2e29eab714d699af503bc874e",
+                        "content": "저장된 보기 페이지에서 필터나 정렬을 수정할 경우, 다음 두 가지 방식으로 저장할 수 있습니다.\n\n* 저장: 현재 보고 있는 보기를 그대로 덮어씁니다.\n* 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 9.855819387952415,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.6229049191420902,
+                            "latencyMs": 189
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3284,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:4cf1d0445a55",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "e7afd5b0757aa68f8f710d5dde8970e7252b199c505ad7be7cbb3970e488f00c",
+                        "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 7.521272184177585,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6770494841681082,
+                            "latencyMs": 189
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.144854181103378,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6341670277438521,
+                            "latencyMs": 189
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.164764505647277,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5447742194999484,
+                            "latencyMs": 189
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.49241621725505,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5413926068872553,
+                            "latencyMs": 189
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v18",
+                        "inputTokens": 5075,
+                        "outputTokens": 157,
+                        "latencyMs": 2704,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "DEFINITION",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "저장된 보기의 의미",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3284,
+                          "documentVersionId": 2428,
+                          "documentId": "333984364686",
+                          "sectionId": "333984364686:4cf1d0445a55",
+                          "documentTitle": "저장된 보기",
+                          "sectionPath": [
+                            "저장된 보기",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                          "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해 두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해 두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "그 보기는 나만 볼 수 있어?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "1d74a2c7-2b5b-4f61-b567-22c30cecf69e",
+                "ragRunId": "595c443d-ad31-45e0-9379-f2673f9f25fd",
+                "answer": {
+                  "answerMarkdown": "네, 저장된 보기는 나만 보이도록 만들 수 있습니다. 보기를 만들 때 개인용으로 사용할지 팀 전체에 공개할지 선택할 수 있으며, `나만 보기(비공개)`는 개인 참고용이나 실험적인 설정을 저장할 때 적합합니다. [1]\n\n반대로 `팀 보기(공개)`로 설정하면 팀 전체가 같은 기준으로 보기를 확인합니다. 팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제도 할 수 있습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "저장된 보기",
+                    "sectionPath": [
+                      "공개 범위"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "그 보기는 나만 볼 수 있어?",
+                "resolvedQuery": "저장된 보기는 나만 볼 수 있나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4265,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v3",
+                    "inputTokens": 2927,
+                    "outputTokens": 40,
+                    "latencyMs": 1440,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 15,
+                    "outputTokens": null,
+                    "latencyMs": 140,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v18",
+                    "inputTokens": 4947,
+                    "outputTokens": 224,
+                    "latencyMs": 2606,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "저장된 보기"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "그 보기는 나만 볼 수 있어?",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "ac5a50b6-ed68-4e6a-9733-9466ae5f76ed",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "저장된 보기가 뭐야?",
+                        "answerContent": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해 두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "ac5a50b6-ed68-4e6a-9733-9466ae5f76ed",
+                        "userQuery": "저장된 보기가 뭐야?",
+                        "answerContent": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해 두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "저장된 보기는 나만 볼 수 있나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3287,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:294a258fc7b7",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 편집하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "09661a57156b0135ac0251aaabdfdbc0f85f7cd2e29eab714d699af503bc874e",
+                        "content": "저장된 보기 페이지에서 필터나 정렬을 수정할 경우, 다음 두 가지 방식으로 저장할 수 있습니다.\n\n* 저장: 현재 보고 있는 보기를 그대로 덮어씁니다.\n* 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 15.182745036293015,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5743041921133675,
+                            "latencyMs": 152
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03225806451612903,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 14.242016772848974,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5897798404180319,
+                            "latencyMs": 152
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 11.35152689435186,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5659259678199933,
+                            "latencyMs": 152
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3363,
+                        "documentVersionId": 2449,
+                        "documentId": "a7061c4853df",
+                        "sectionId": "a7061c4853df:4c7aa16de474",
+                        "documentTitle": "휴지통",
+                        "sectionPath": [
+                          "휴지통",
+                          "삭제된 페이지 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/trash.md",
+                        "contentHash": "3e3cedb5706f60a295a960f3a579c47dc4421c2ed54219e5a2567defcef68cba",
+                        "content": "* 휴지통에 있는 항목은 삭제 전과 동일한 형태로 열람이 가능합니다.\n* 페이지 상단에는 ‘삭제된 페이지’임을 안내하는 배너가 표시되어 쉽게 구분할 수 있습니다.\n* 페이지 내에서도 ‘복구’ 또는 ‘영구 삭제’를 바로 실행할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 8.764528991012885,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.42803859507030384,
+                            "latencyMs": 152
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029877369007803793,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 6.264961265753051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5206814914432168,
+                            "latencyMs": 152
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v18",
+                        "inputTokens": 4947,
+                        "outputTokens": 224,
+                        "latencyMs": 2606,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "저장된 보기를 나만 볼 수 있는지 여부와 공개 범위",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3285,
+                          "documentVersionId": 2428,
+                          "documentId": "333984364686",
+                          "sectionId": "333984364686:ba056589ecd1",
+                          "documentTitle": "저장된 보기",
+                          "sectionPath": [
+                            "저장된 보기",
+                            "공개 범위"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                          "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "네, 저장된 보기는 나만 보이도록 만들 수 있습니다. 보기를 만들 때 개인용으로 사용할지 팀 전체에 공개할지 선택할 수 있으며, `나만 보기(비공개)`는 개인 참고용이나 실험적인 설정을 저장할 때 적합합니다. [SOURCE_2]\n\n반대로 `팀 보기(공개)`로 설정하면 팀 전체가 같은 기준으로 보기를 확인합니다. 팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제도 할 수 있습니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "네, 저장된 보기는 나만 보이도록 만들 수 있습니다. 보기를 만들 때 개인용으로 사용할지 팀 전체에 공개할지 선택할 수 있으며, `나만 보기(비공개)`는 개인 참고용이나 실험적인 설정을 저장할 때 적합합니다. [1]\n\n반대로 `팀 보기(공개)`로 설정하면 팀 전체가 같은 기준으로 보기를 확인합니다. 팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제도 할 수 있습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 4
+        }
+      ]
+    },
+    {
+      "repeatNo": 5,
+      "executedAt": "2026-09-06T09:07:45.181024+00:00",
+      "results": [
+        {
+          "id": "MT02",
+          "description": "명시된 후속 대상의 공개 범위 질문",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "189e0d6d-0aa5-4950-b9c7-46d3fb332097",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "저장된 보기가 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "189e0d6d-0aa5-4950-b9c7-46d3fb332097",
+                "ragRunId": "08dff951-7115-4dfe-aedc-7d10e34ea901",
+                "answer": {
+                  "answerMarkdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람하도록 도와줍니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "저장된 보기",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "저장된 보기가 뭐야?",
+                "resolvedQuery": "저장된 보기가 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2549,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 10,
+                    "outputTokens": null,
+                    "latencyMs": 144,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v18",
+                    "inputTokens": 5075,
+                    "outputTokens": 155,
+                    "latencyMs": 2348,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "저장된 보기"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "저장된 보기가 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "저장된 보기가 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3287,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:294a258fc7b7",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 편집하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "09661a57156b0135ac0251aaabdfdbc0f85f7cd2e29eab714d699af503bc874e",
+                        "content": "저장된 보기 페이지에서 필터나 정렬을 수정할 경우, 다음 두 가지 방식으로 저장할 수 있습니다.\n\n* 저장: 현재 보고 있는 보기를 그대로 덮어씁니다.\n* 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 9.855819387952415,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.6229049191420902,
+                            "latencyMs": 157
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3284,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:4cf1d0445a55",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "e7afd5b0757aa68f8f710d5dde8970e7252b199c505ad7be7cbb3970e488f00c",
+                        "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.032018442622950824,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 7.521272184177585,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6770494841681082,
+                            "latencyMs": 157
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.144854181103378,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6341670277438521,
+                            "latencyMs": 157
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.164764505647277,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5447742194999484,
+                            "latencyMs": 157
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.49241621725505,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5413926068872553,
+                            "latencyMs": 157
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v18",
+                        "inputTokens": 5075,
+                        "outputTokens": 155,
+                        "latencyMs": 2348,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "DEFINITION",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "저장된 보기의 의미",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3284,
+                          "documentVersionId": 2428,
+                          "documentId": "333984364686",
+                          "sectionId": "333984364686:4cf1d0445a55",
+                          "documentTitle": "저장된 보기",
+                          "sectionPath": [
+                            "저장된 보기",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                          "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람하도록 도와줍니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람하도록 도와줍니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "그 보기는 나만 볼 수 있어?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "189e0d6d-0aa5-4950-b9c7-46d3fb332097",
+                "ragRunId": "a9cb8c46-8d5d-49e4-8834-4599dd3e9a84",
+                "answer": {
+                  "answerMarkdown": "저장된 보기는 나만 볼 수도 있고, 팀 전체에 공개할 수도 있습니다. 보기를 만들 때 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다. [1]\n\n개인용은 `나만 보기(비공개)`로, 개인 참고용이거나 실험적인 설정을 저장할 때 적합합니다. 팀 보기(`공개`)는 팀 전체가 동일한 기준으로 작업을 확인할 수 있도록 공유됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "저장된 보기",
+                    "sectionPath": [
+                      "공개 범위"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "그 보기는 나만 볼 수 있어?",
+                "resolvedQuery": "저장된 보기는 나만 볼 수 있나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4532,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v3",
+                    "inputTokens": 2925,
+                    "outputTokens": 40,
+                    "latencyMs": 1382,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 15,
+                    "outputTokens": null,
+                    "latencyMs": 152,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v18",
+                    "inputTokens": 4947,
+                    "outputTokens": 204,
+                    "latencyMs": 2913,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "저장된 보기"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "그 보기는 나만 볼 수 있어?",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "08dff951-7115-4dfe-aedc-7d10e34ea901",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "저장된 보기가 뭐야?",
+                        "answerContent": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람하도록 도와줍니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "08dff951-7115-4dfe-aedc-7d10e34ea901",
+                        "userQuery": "저장된 보기가 뭐야?",
+                        "answerContent": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람하도록 도와줍니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "저장된 보기는 나만 볼 수 있나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3287,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:294a258fc7b7",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 편집하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "09661a57156b0135ac0251aaabdfdbc0f85f7cd2e29eab714d699af503bc874e",
+                        "content": "저장된 보기 페이지에서 필터나 정렬을 수정할 경우, 다음 두 가지 방식으로 저장할 수 있습니다.\n\n* 저장: 현재 보고 있는 보기를 그대로 덮어씁니다.\n* 다른 이름으로 저장: 기존 보기를 유지한 채, 새로운 이름으로 별도의 보기를 저장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.032266458495966696,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 15.182745036293015,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5743041921133675,
+                            "latencyMs": 165
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03225806451612903,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 14.242016772848974,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5897798404180319,
+                            "latencyMs": 165
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3286,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:5db9d1f52377",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "보기 생성하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "7bd8f1d26fc42d82c183a0bdbd3ff4341e5ec0da0cae2d972ea7a253b00b8584",
+                        "content": "저장된 보기는 두 가지 방식으로 생성할 수 있습니다.\n\n#### 1. 사이드바에서 새로 만들기\n\n사이드바의 ‘저장된 보기’ 메뉴를 클릭해 새로운 보기를 생성할 수 있습니다. 이 방법을 사용하면 작업 또는 백로그 중 어느 페이지에 대한 보기인지 선택하고, 처음부터 조건을 설정해 만들 수 있습니다.\n\n#### 2. 현재 필터 조건 저장\n\n백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 후, 우측 상단의 ‘저장된 보기 생성’ 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. 반복적으로 확인해야 하는 조건이 있다면 이 방식이 가장 빠르고 간편합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03149801587301587,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 11.35152689435186,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5659259678199933,
+                            "latencyMs": 165
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3363,
+                        "documentVersionId": 2449,
+                        "documentId": "a7061c4853df",
+                        "sectionId": "a7061c4853df:4c7aa16de474",
+                        "documentTitle": "휴지통",
+                        "sectionPath": [
+                          "휴지통",
+                          "삭제된 페이지 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/trash.md",
+                        "contentHash": "3e3cedb5706f60a295a960f3a579c47dc4421c2ed54219e5a2567defcef68cba",
+                        "content": "* 휴지통에 있는 항목은 삭제 전과 동일한 형태로 열람이 가능합니다.\n* 페이지 상단에는 ‘삭제된 페이지’임을 안내하는 배너가 표시되어 쉽게 구분할 수 있습니다.\n* 페이지 내에서도 ‘복구’ 또는 ‘영구 삭제’를 바로 실행할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030536130536130537,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 8.764528991012885,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.42803859507030384,
+                            "latencyMs": 165
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3359,
+                        "documentVersionId": 2448,
+                        "documentId": "688dd8ac7efd",
+                        "sectionId": "688dd8ac7efd:0d980cb3f519",
+                        "documentTitle": "필터",
+                        "sectionPath": [
+                          "필터",
+                          "저장된 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/filters.md",
+                        "contentHash": "b8224b40bba21db34a1d8da6418d8a820a7bf6eb89c2f07f9f9c73348ba0c15d",
+                        "content": "필터를 적용하면, 우측에 ‘저장된 보기 생성’ 버튼이 활성화됩니다. 버튼을 클릭하면 현재 설정된 필터 조건이 그대로 저장되어 언제든 동일한 조건으로 다시 접근할 수 있습니다.\n\n자세한 내용은 [저장된 보기](https://docs.riido.io/views/custom-views.md) 페이지에서 확인할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029877369007803793,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 6.264961265753051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5206814914432168,
+                            "latencyMs": 165
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v18",
+                        "inputTokens": 4947,
+                        "outputTokens": 204,
+                        "latencyMs": 2913,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "저장된 보기는 나만 볼 수 있는지 여부와 공개 범위",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3285,
+                          "documentVersionId": 2428,
+                          "documentId": "333984364686",
+                          "sectionId": "333984364686:ba056589ecd1",
+                          "documentTitle": "저장된 보기",
+                          "sectionPath": [
+                            "저장된 보기",
+                            "공개 범위"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                          "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "저장된 보기는 나만 볼 수도 있고, 팀 전체에 공개할 수도 있습니다. 보기를 만들 때 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다. [SOURCE_2]\n\n개인용은 `나만 보기(비공개)`로, 개인 참고용이거나 실험적인 설정을 저장할 때 적합합니다. 팀 보기(`공개`)는 팀 전체가 동일한 기준으로 작업을 확인할 수 있도록 공유됩니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "저장된 보기는 나만 볼 수도 있고, 팀 전체에 공개할 수도 있습니다. 보기를 만들 때 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다. [1]\n\n개인용은 `나만 보기(비공개)`로, 개인 참고용이거나 실험적인 설정을 저장할 때 적합합니다. 팀 보기(`공개`)는 팀 전체가 동일한 기준으로 작업을 확인할 수 있도록 공유됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 5
+        }
+      ]
+    }
+  ]
+}

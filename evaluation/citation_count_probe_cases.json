@@ -1,0 +1,48 @@
+{
+  "version": "citation-count-probe-v1",
+  "purpose": "여러 정보 단위를 함께 요청했을 때 최종 고유 Citation의 관측 최대치를 확인한다. 출처 5개 사용을 강요하지 않으며, 통과율은 키워드 기반 예비 평가다.",
+  "cases": [
+    {
+      "id": "CP01",
+      "mode": "NEW_CONVERSATION",
+      "description": "스프린트 설정 위치·기간·시작 요일·다가올 스프린트·자동화 역할",
+      "turns": [{
+        "question": "스프린트 설정 위치, 기간의 최소·최대 범위, 시작 요일을 바꿀 때 현재 스프린트가 어떻게 되는지, 다가올 스프린트를 미리 만드는 목적을 각각 설명해줘. 스프린트 시작·종료 때 쓰는 자동화의 역할도 함께 알려줘.",
+        "expectedStatus": "COMPLETED",
+        "expectedAnswerConceptGroups": [
+          ["팀 설정"], ["1주"], ["8주"], ["현재 스프린트"],
+          ["다가올", "미리"], ["자동화"]
+        ],
+        "minimumCitationCount": 1
+      }]
+    },
+    {
+      "id": "CP02",
+      "mode": "NEW_CONVERSATION",
+      "description": "슬랙 핵심 기능·설정·알림 조정·비공개 채널·댓글",
+      "turns": [{
+        "question": "슬랙 연동의 핵심 기능, 워크스페이스와 팀별 연결 절차, 알림을 줄이는 방법, 비공개 채널 연결 방법을 각각 설명해줘. 뤼이도 댓글이 제공되는 작업 단위와 댓글 알림의 슬랙 연동도 함께 알려줘.",
+        "expectedStatus": "COMPLETED",
+        "expectedAnswerConceptGroups": [
+          ["실시간"], ["댓글"], ["리포트"], ["워크스페이스"],
+          ["팀"], ["알림"], ["비공개"], ["백로그"], ["미팅"]
+        ],
+        "minimumCitationCount": 1
+      }]
+    },
+    {
+      "id": "CP03",
+      "mode": "NEW_CONVERSATION",
+      "description": "작업 계층·속성·관계도·백로그 전환·스프린트",
+      "turns": [{
+        "question": "프로젝트·목표·작업·하위작업의 계층과 시작일·마감일 속성 차이를 설명해줘. 작업 관계도에서 이 계층을 어떻게 보는지, 백로그를 작업으로 전환하면 기존 정보가 유지되는지, 스프린트가 어떤 역할인지도 각각 알려줘.",
+        "expectedStatus": "COMPLETED",
+        "expectedAnswerConceptGroups": [
+          ["프로젝트"], ["목표"], ["하위"], ["시작일"], ["마감일"],
+          ["관계도"], ["백로그"], ["유지"], ["스프린트"]
+        ],
+        "minimumCitationCount": 1
+      }]
+    }
+  ]
+}

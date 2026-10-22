@@ -1,0 +1,451 @@
+{
+  "description": "HELP_CHATBOT 턴 흐름의 모델 요청과 단계 순서. tests/test_help_chatbot_identity.py 가 만든다. 손으로 고치지 않는다.",
+  "scenarios": {
+    "caches_disabled": {
+      "modelCallLogs": [
+        {
+          "classificationRun": false,
+          "modelName": "text-embedding-3-large",
+          "promptVersion": null,
+          "provider": "openai",
+          "purpose": "QUERY_EMBEDDING"
+        },
+        {
+          "classificationRun": false,
+          "modelName": "gpt-5.6-terra",
+          "promptVersion": "v40",
+          "provider": "openai",
+          "purpose": "ANSWER_GENERATION"
+        }
+      ],
+      "modelRequests": [
+        {
+          "inputSha256": "81ecc1f951e07cf4912393966f3bc8ad160a5e22a4ce24e6f12d1b47e2c3eeda",
+          "instructionsSha256": null,
+          "maxOutputTokens": null,
+          "model": "text-embedding-3-large",
+          "options": {
+            "dimensions": 1536,
+            "encoding_format": "float"
+          },
+          "outputSchemaSha256": null,
+          "reasoning": null,
+          "requestKeys": [
+            "dimensions",
+            "encoding_format",
+            "input",
+            "model"
+          ],
+          "stage": "query_embedding"
+        },
+        {
+          "inputSha256": "f3762ac333323b42409a73024d9ebf189ee6d5482f3d72856e82ec062036ae32",
+          "instructionsSha256": "ee3dc5174145d29cf7dac4576e332462245cc5826530d977ce72291df1a4cbe3",
+          "maxOutputTokens": null,
+          "model": "gpt-5.6-terra",
+          "options": {},
+          "outputSchemaSha256": "19fc519fdea6448eebd60e4fefbfdb2378f1113cb1fb1ff8ee0b4b34735d73b2",
+          "reasoning": null,
+          "requestKeys": [
+            "input",
+            "instructions",
+            "model",
+            "text_format"
+          ],
+          "stage": "generation.source_planning"
+        },
+        {
+          "inputSha256": "aabb5555d9eb92f3db71a0633ecae22ec3d95ec6f9e81cac35b84f1c5085b0f7",
+          "instructionsSha256": "7cefd4931821158f05581d5a4259a55d6a2b51ae559af69a16fa59b139707591",
+          "maxOutputTokens": null,
+          "model": "gpt-5.6-terra",
+          "options": {},
+          "outputSchemaSha256": "76fafd42a2292816645c9110946a1de03e08b43349b591990346d52423a7951f",
+          "reasoning": null,
+          "requestKeys": [
+            "input",
+            "instructions",
+            "model",
+            "text_format"
+          ],
+          "stage": "generation.answer"
+        }
+      ],
+      "progressStages": [
+        "RETRIEVING",
+        "GENERATING",
+        "VALIDATING"
+      ],
+      "response": {
+        "answerMarkdownSha256": "e8cc8c821c971c454d8407fe511a39dc32c9204dbfb5f7512210e1db71d39da6",
+        "citationCount": 1,
+        "status": "COMPLETED"
+      },
+      "stages": [
+        "query_embedding",
+        "generation.source_planning",
+        "generation.answer",
+        "rag_run:COMPLETED"
+      ]
+    },
+    "exact_cache_serve": {
+      "modelCallLogs": [],
+      "modelRequests": [],
+      "progressStages": [
+        "RETRIEVING"
+      ],
+      "response": {
+        "answerMarkdownSha256": "d2f2c82621b392b713850ff6a43ac25173737f3adde65420937219db96a2d873",
+        "citationCount": 1,
+        "status": "COMPLETED"
+      },
+      "stages": [
+        "exact_cache_lookup",
+        "cache_attempt:SERVED",
+        "rag_run:COMPLETED"
+      ]
+    },
+    "first_turn": {
+      "modelCallLogs": [
+        {
+          "classificationRun": true,
+          "modelName": "text-embedding-3-large",
+          "promptVersion": null,
+          "provider": "openai",
+          "purpose": "QUERY_EMBEDDING"
+        },
+        {
+          "classificationRun": true,
+          "modelName": "gpt-5.6-luna",
+          "promptVersion": "question-grouping-v7-2",
+          "provider": "openai",
+          "purpose": "QUESTION_CLASSIFICATION"
+        },
+        {
+          "classificationRun": false,
+          "modelName": "gpt-5.6-terra",
+          "promptVersion": "v40",
+          "provider": "openai",
+          "purpose": "ANSWER_GENERATION"
+        }
+      ],
+      "modelRequests": [
+        {
+          "inputSha256": "81ecc1f951e07cf4912393966f3bc8ad160a5e22a4ce24e6f12d1b47e2c3eeda",
+          "instructionsSha256": null,
+          "maxOutputTokens": null,
+          "model": "text-embedding-3-large",
+          "options": {
+            "dimensions": 1536,
+            "encoding_format": "float"
+          },
+          "outputSchemaSha256": null,
+          "reasoning": null,
+          "requestKeys": [
+            "dimensions",
+            "encoding_format",
+            "input",
+            "model"
+          ],
+          "stage": "query_embedding"
+        },
+        {
+          "inputSha256": "de33f505a44015adae5ccc525f7abc80697bd432ea9bce9836120b7bc6e5541c",
+          "instructionsSha256": "4e6fb86c0a8a0fb9210e3c4e3bbc1c385a88a887908f437982369316ace1b902",
+          "maxOutputTokens": 1024,
+          "model": "gpt-5.6-luna",
+          "options": {
+            "store": false
+          },
+          "outputSchemaSha256": "b026d831ee66e22949388487b775bdb5ca2fbf2275524b9e6842d8bbc325c46b",
+          "reasoning": {
+            "effort": "low"
+          },
+          "requestKeys": [
+            "input",
+            "instructions",
+            "max_output_tokens",
+            "model",
+            "reasoning",
+            "store",
+            "text"
+          ],
+          "stage": "judge"
+        },
+        {
+          "inputSha256": "f3762ac333323b42409a73024d9ebf189ee6d5482f3d72856e82ec062036ae32",
+          "instructionsSha256": "ee3dc5174145d29cf7dac4576e332462245cc5826530d977ce72291df1a4cbe3",
+          "maxOutputTokens": null,
+          "model": "gpt-5.6-terra",
+          "options": {},
+          "outputSchemaSha256": "19fc519fdea6448eebd60e4fefbfdb2378f1113cb1fb1ff8ee0b4b34735d73b2",
+          "reasoning": null,
+          "requestKeys": [
+            "input",
+            "instructions",
+            "model",
+            "text_format"
+          ],
+          "stage": "generation.source_planning"
+        },
+        {
+          "inputSha256": "aabb5555d9eb92f3db71a0633ecae22ec3d95ec6f9e81cac35b84f1c5085b0f7",
+          "instructionsSha256": "7cefd4931821158f05581d5a4259a55d6a2b51ae559af69a16fa59b139707591",
+          "maxOutputTokens": null,
+          "model": "gpt-5.6-terra",
+          "options": {},
+          "outputSchemaSha256": "76fafd42a2292816645c9110946a1de03e08b43349b591990346d52423a7951f",
+          "reasoning": null,
+          "requestKeys": [
+            "input",
+            "instructions",
+            "model",
+            "text_format"
+          ],
+          "stage": "generation.answer"
+        }
+      ],
+      "progressStages": [
+        "RETRIEVING",
+        "GENERATING",
+        "VALIDATING"
+      ],
+      "response": {
+        "answerMarkdownSha256": "e8cc8c821c971c454d8407fe511a39dc32c9204dbfb5f7512210e1db71d39da6",
+        "citationCount": 1,
+        "status": "COMPLETED"
+      },
+      "stages": [
+        "exact_cache_lookup",
+        "query_embedding",
+        "judge",
+        "cache_attempt:REJECTED",
+        "generation.source_planning",
+        "generation.answer",
+        "rag_run:COMPLETED"
+      ]
+    },
+    "follow_up_turn": {
+      "modelCallLogs": [
+        {
+          "classificationRun": false,
+          "modelName": "gpt-5.4-mini",
+          "promptVersion": "v10",
+          "provider": "openai",
+          "purpose": "QUERY_REWRITE"
+        },
+        {
+          "classificationRun": true,
+          "modelName": "text-embedding-3-large",
+          "promptVersion": null,
+          "provider": "openai",
+          "purpose": "QUERY_EMBEDDING"
+        },
+        {
+          "classificationRun": true,
+          "modelName": "gpt-5.6-luna",
+          "promptVersion": "question-grouping-v7-2",
+          "provider": "openai",
+          "purpose": "QUESTION_CLASSIFICATION"
+        },
+        {
+          "classificationRun": false,
+          "modelName": "gpt-5.6-terra",
+          "promptVersion": "v40",
+          "provider": "openai",
+          "purpose": "ANSWER_GENERATION"
+        }
+      ],
+      "modelRequests": [
+        {
+          "inputSha256": "25f9057c4351ce83c56a73ea0bb94a4ce7aeab4b916e2fb460d794181fc0aca8",
+          "instructionsSha256": "acb11d87f3bf8fa496a978339a64e1998e24f002802224d1a784e28019aa3511",
+          "maxOutputTokens": 512,
+          "model": "gpt-5.4-mini",
+          "options": {},
+          "outputSchemaSha256": "c8c7956a086f0a604885ae4b24d79d35110e91667ee33daf7261aae87387f81b",
+          "reasoning": null,
+          "requestKeys": [
+            "input",
+            "instructions",
+            "max_output_tokens",
+            "model",
+            "text_format"
+          ],
+          "stage": "query_rewrite"
+        },
+        {
+          "inputSha256": "b6580f72017f661218108613c650b4a9d9f5abf6e3d5accab13826292d9f1024",
+          "instructionsSha256": null,
+          "maxOutputTokens": null,
+          "model": "text-embedding-3-large",
+          "options": {
+            "dimensions": 1536,
+            "encoding_format": "float"
+          },
+          "outputSchemaSha256": null,
+          "reasoning": null,
+          "requestKeys": [
+            "dimensions",
+            "encoding_format",
+            "input",
+            "model"
+          ],
+          "stage": "query_embedding"
+        },
+        {
+          "inputSha256": "5025f240916f3ed87ccfe8a1ae550523821b5ee2ccf4cf7cc22f9c77cfc92f64",
+          "instructionsSha256": "4e6fb86c0a8a0fb9210e3c4e3bbc1c385a88a887908f437982369316ace1b902",
+          "maxOutputTokens": 1024,
+          "model": "gpt-5.6-luna",
+          "options": {
+            "store": false
+          },
+          "outputSchemaSha256": "b026d831ee66e22949388487b775bdb5ca2fbf2275524b9e6842d8bbc325c46b",
+          "reasoning": {
+            "effort": "low"
+          },
+          "requestKeys": [
+            "input",
+            "instructions",
+            "max_output_tokens",
+            "model",
+            "reasoning",
+            "store",
+            "text"
+          ],
+          "stage": "judge"
+        },
+        {
+          "inputSha256": "60e10296f15bc74e2c50a91a17e23d418cb26170ffbd31dfdc08036ad43e10f3",
+          "instructionsSha256": "ee3dc5174145d29cf7dac4576e332462245cc5826530d977ce72291df1a4cbe3",
+          "maxOutputTokens": null,
+          "model": "gpt-5.6-terra",
+          "options": {},
+          "outputSchemaSha256": "19fc519fdea6448eebd60e4fefbfdb2378f1113cb1fb1ff8ee0b4b34735d73b2",
+          "reasoning": null,
+          "requestKeys": [
+            "input",
+            "instructions",
+            "model",
+            "text_format"
+          ],
+          "stage": "generation.source_planning"
+        },
+        {
+          "inputSha256": "3c037ce2593938b5cc432c3daa4be0501afd7c60b63716c1d43b26db10dc9dd6",
+          "instructionsSha256": "7cefd4931821158f05581d5a4259a55d6a2b51ae559af69a16fa59b139707591",
+          "maxOutputTokens": null,
+          "model": "gpt-5.6-terra",
+          "options": {},
+          "outputSchemaSha256": "76fafd42a2292816645c9110946a1de03e08b43349b591990346d52423a7951f",
+          "reasoning": null,
+          "requestKeys": [
+            "input",
+            "instructions",
+            "model",
+            "text_format"
+          ],
+          "stage": "generation.answer"
+        }
+      ],
+      "progressStages": [
+        "RETRIEVING",
+        "GENERATING",
+        "VALIDATING"
+      ],
+      "response": {
+        "answerMarkdownSha256": "e8cc8c821c971c454d8407fe511a39dc32c9204dbfb5f7512210e1db71d39da6",
+        "citationCount": 1,
+        "status": "COMPLETED"
+      },
+      "stages": [
+        "exact_cache_lookup",
+        "query_rewrite",
+        "query_embedding",
+        "judge",
+        "cache_attempt:REJECTED",
+        "generation.source_planning",
+        "generation.answer",
+        "rag_run:COMPLETED"
+      ]
+    },
+    "semantic_cache_serve": {
+      "modelCallLogs": [
+        {
+          "classificationRun": true,
+          "modelName": "text-embedding-3-large",
+          "promptVersion": null,
+          "provider": "openai",
+          "purpose": "QUERY_EMBEDDING"
+        },
+        {
+          "classificationRun": true,
+          "modelName": "gpt-5.6-luna",
+          "promptVersion": "question-grouping-v7-2",
+          "provider": "openai",
+          "purpose": "QUESTION_CLASSIFICATION"
+        }
+      ],
+      "modelRequests": [
+        {
+          "inputSha256": "81ecc1f951e07cf4912393966f3bc8ad160a5e22a4ce24e6f12d1b47e2c3eeda",
+          "instructionsSha256": null,
+          "maxOutputTokens": null,
+          "model": "text-embedding-3-large",
+          "options": {
+            "dimensions": 1536,
+            "encoding_format": "float"
+          },
+          "outputSchemaSha256": null,
+          "reasoning": null,
+          "requestKeys": [
+            "dimensions",
+            "encoding_format",
+            "input",
+            "model"
+          ],
+          "stage": "query_embedding"
+        },
+        {
+          "inputSha256": "de33f505a44015adae5ccc525f7abc80697bd432ea9bce9836120b7bc6e5541c",
+          "instructionsSha256": "4e6fb86c0a8a0fb9210e3c4e3bbc1c385a88a887908f437982369316ace1b902",
+          "maxOutputTokens": 1024,
+          "model": "gpt-5.6-luna",
+          "options": {
+            "store": false
+          },
+          "outputSchemaSha256": "b026d831ee66e22949388487b775bdb5ca2fbf2275524b9e6842d8bbc325c46b",
+          "reasoning": {
+            "effort": "low"
+          },
+          "requestKeys": [
+            "input",
+            "instructions",
+            "max_output_tokens",
+            "model",
+            "reasoning",
+            "store",
+            "text"
+          ],
+          "stage": "judge"
+        }
+      ],
+      "progressStages": [
+        "RETRIEVING"
+      ],
+      "response": {
+        "answerMarkdownSha256": "d2f2c82621b392b713850ff6a43ac25173737f3adde65420937219db96a2d873",
+        "citationCount": 1,
+        "status": "COMPLETED"
+      },
+      "stages": [
+        "exact_cache_lookup",
+        "query_embedding",
+        "judge",
+        "cache_attempt:SERVED",
+        "rag_run:COMPLETED"
+      ]
+    }
+  }
+}

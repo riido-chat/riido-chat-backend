@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://riido-evals.invalid/schemas/cache-path-run-state.schema.json",
+  "title": "Cache path private run state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "status", "checkpointCount"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "runId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$" },
+    "status": { "enum": ["RUNNING", "FINALIZING", "SUCCEEDED", "FAILED", "FINALIZATION_INCOMPLETE"] },
+    "checkpointCount": { "type": "integer", "minimum": 0 },
+    "lastCheckpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["itemId", "turnNo"],
+      "properties": {
+        "itemId": { "type": "string", "minLength": 1 },
+        "turnNo": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "failureStage": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,99}$" },
+    "errorType": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,99}$" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "enum": ["FAILED", "FINALIZATION_INCOMPLETE"] } } },
+      "then": { "required": ["failureStage", "errorType"] }
+    },
+    {
+      "if": { "properties": { "status": { "enum": ["RUNNING", "FINALIZING", "SUCCEEDED"] } } },
+      "then": { "not": { "anyOf": [{ "required": ["failureStage"] }, { "required": ["errorType"] }] } }
+    }
+  ]
+}

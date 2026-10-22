@@ -1,0 +1,159 @@
+{
+  "version": "billing-policy-v1",
+  "description": "구독 및 결제 문서의 사용자 시트 기준과 멤버 변동 시 청구 정책을 평가한다.",
+  "recommendedRepeat": 3,
+  "cases": [
+    {
+      "id": "BP001",
+      "mode": "NEW_CONVERSATION",
+      "description": "사용자 추가 시 요금 증가 여부",
+      "turns": [
+        {
+          "question": "사람이 추가되면 요금이 더 나와?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [
+            ["사용자", "시트"],
+            ["추가"],
+            ["요금", "비용"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구독 및 결제"]
+        }
+      ]
+    },
+    {
+      "id": "BP002",
+      "mode": "NEW_CONVERSATION",
+      "description": "결제 기간 중 추가 사용자의 즉시 결제 여부",
+      "turns": [
+        {
+          "question": "결제 기간 중에 사용자를 추가하면 그 자리에서 바로 결제돼?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [
+            ["즉시 결제되지", "바로 결제되지", "즉시 청구되지", "바로 청구되지"],
+            ["다음 결제일"],
+            ["소급"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구독 및 결제"]
+        }
+      ]
+    },
+    {
+      "id": "BP003",
+      "mode": "NEW_CONVERSATION",
+      "description": "월간 요금제 중간 합류자의 청구 방식",
+      "turns": [
+        {
+          "question": "월간 요금제를 쓰다가 중간에 팀원이 합류하면 비용은 언제 어떻게 청구해?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [
+            ["다음 결제일"],
+            ["일할", "사용 기간만큼"],
+            ["소급"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구독 및 결제"]
+        }
+      ]
+    },
+    {
+      "id": "BP004",
+      "mode": "NEW_CONVERSATION",
+      "description": "연간 요금제의 추가 인원 청구 시점과 비용",
+      "turns": [
+        {
+          "question": "연간 결제 중에 멤버를 추가하면 언제 어떤 비용이 청구돼?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [
+            ["다음 달"],
+            ["잔여기간", "잔여 기간", "남은 기간"],
+            ["일할"],
+            ["소급"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구독 및 결제"]
+        }
+      ]
+    },
+    {
+      "id": "BP005",
+      "mode": "NEW_CONVERSATION",
+      "description": "워크스페이스 사용자 시트 기반 요금 계산",
+      "turns": [
+        {
+          "question": "뤼이도 요금은 팀 개수 기준이야, 사용자 수 기준이야?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [
+            ["워크스페이스"],
+            ["사용자", "시트"],
+            ["수", "개수"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구독 및 결제"]
+        }
+      ]
+    },
+    {
+      "id": "BP006",
+      "mode": "NEW_CONVERSATION",
+      "description": "워크스페이스별 구독과 결제 정보",
+      "turns": [
+        {
+          "question": "워크스페이스가 두 개면 구독과 결제 정보도 각각 따로 관리돼?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [
+            ["워크스페이스"],
+            ["하나의 구독", "구독과 결제 정보", "구독 및 결제 정보"],
+            ["각각", "각 워크스페이스", "워크스페이스마다"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구독 및 결제"]
+        }
+      ]
+    },
+    {
+      "id": "BP007",
+      "mode": "NEW_CONVERSATION",
+      "description": "비활성화 후 남은 유료 시트 재사용",
+      "turns": [
+        {
+          "question": "결제한 멤버를 비활성화하면 남은 자리를 다른 사람 초대할 때 다시 쓸 수 있어?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [
+            ["유료 시트", "시트"],
+            ["남"],
+            ["새 사용자", "다른 사람"],
+            ["초대"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구독 및 결제"]
+        }
+      ]
+    },
+    {
+      "id": "BP008",
+      "mode": "NEW_CONVERSATION",
+      "description": "월별 결제일 산정 기준",
+      "turns": [
+        {
+          "question": "3월 10일에 월간 결제를 시작했다면 다음 결제는 언제야?",
+          "expectedStatus": "COMPLETED",
+          "expectedPlanningStatus": "ANSWERABLE",
+          "expectedAnswerConceptGroups": [
+            ["매달 10일", "4월 10일"]
+          ],
+          "minimumCitationCount": 1,
+          "expectedCitationDocumentTitlesAny": ["구독 및 결제"]
+        }
+      ]
+    }
+  ]
+}

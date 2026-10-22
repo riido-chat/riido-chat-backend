@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://riido-evals.invalid/schemas/evaluation-plan.schema.json",
+  "title": "Private evaluation plan result index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "planId", "group", "selectionSha256", "planSha256", "inputSha256", "preparationEvidence", "variants"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "planId": {"$ref": "#/$defs/id"},
+    "group": {"$ref": "#/$defs/id"},
+    "selectionSha256": {"$ref": "#/$defs/sha256"},
+    "planSha256": {"$ref": "#/$defs/sha256"},
+    "inputSha256": {"$ref": "#/$defs/sha256"},
+    "preparationEvidence": {"$ref": "#/$defs/configObject"},
+    "variants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/variant"}
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$"},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "configuration": {"$ref": "#/$defs/configObject"},
+    "configValue": {
+      "oneOf": [
+        {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,199}$"},
+        {"type": "number"},
+        {"type": "boolean"},
+        {"type": "null"},
+        {"type": "array", "items": {"$ref": "#/$defs/configValue"}},
+        {"$ref": "#/$defs/configObject"}
+      ]
+    },
+    "configObject": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$": {"$ref": "#/$defs/configValue"}
+      },
+      "additionalProperties": false
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["variantId", "runId", "configuration", "configSha256", "resultPath", "resultSha256", "status"],
+      "properties": {
+        "variantId": {"$ref": "#/$defs/id"},
+        "runId": {"$ref": "#/$defs/id"},
+        "configuration": {"$ref": "#/$defs/configuration"},
+        "configSha256": {"$ref": "#/$defs/sha256"},
+        "resultPath": {"type": "string", "minLength": 1},
+        "resultSha256": {"$ref": "#/$defs/sha256"},
+        "status": {"enum": ["SUCCEEDED"]}
+      }
+    }
+  }
+}

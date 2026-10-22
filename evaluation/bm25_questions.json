@@ -1,0 +1,212 @@
+[
+  {
+    "id": "Q01",
+    "question": "새로 들어온 요청을 검토한 뒤 백로그나 바로 실행할 작업으로 넘기려면 어떻게 해야 하나요?",
+    "expected_document": "계획: 대기 작업",
+    "expected_section": "작업 처리",
+    "evaluation_purpose": "Section 및 content 검색 확인. 사용자의 '넘기다'라는 표현으로 승인·전환 절차를 찾는지 확인"
+  },
+  {
+    "id": "Q02",
+    "question": "백로그 항목을 프로젝트나 실제 작업으로 바꾸면 기존 정보도 그대로 따라가나요?",
+    "expected_document": "계획: 백로그",
+    "expected_section": "작업으로 전환",
+    "evaluation_purpose": "Section 검색과 전환 후 정보 유지에 대한 content 검색 확인"
+  },
+  {
+    "id": "Q03",
+    "question": "현재 적용한 필터와 정렬 조건을 저장해서 다음에도 똑같이 불러오려면 어떻게 하나요?",
+    "expected_document": "저장된 보기",
+    "expected_section": "보기 생성하기",
+    "evaluation_purpose": "기능명을 직접 언급하지 않은 질문에서 content 검색이 가능한지 확인"
+  },
+  {
+    "id": "Q04",
+    "question": "빈 문서에 팀에서 만든 문서 템플릿을 적용하려면 어떻게 해야 하나요?",
+    "expected_document": "문서 템플릿",
+    "expected_section": "템플릿 적용",
+    "evaluation_purpose": "Document title과 Section title 검색 확인"
+  },
+  {
+    "id": "Q05",
+    "question": "보관함에 넣은 완료 작업을 다시 진행 가능한 상태로 되돌릴 수 있나요?",
+    "expected_document": "운영: 보관 작업",
+    "expected_section": "보관된 작업을 다시 활성화하기",
+    "evaluation_purpose": "Section 및 content 검색 확인. '활성화'와 '진행 가능한 상태'의 대응 확인"
+  },
+  {
+    "id": "Q06",
+    "question": "실수로 삭제한 작업을 원래 프로젝트와 팀 위치로 복구하려면 어떻게 하나요?",
+    "expected_document": "휴지통",
+    "expected_section": "복구 및 영구 삭제",
+    "evaluation_purpose": "복구 위치에 관한 세부 content 검색 확인"
+  },
+  {
+    "id": "Q07",
+    "question": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?",
+    "expected_document": "비공개 팀",
+    "expected_section": "설정",
+    "evaluation_purpose": "Document title과 일반적인 Section title을 함께 사용하는 검색 확인"
+  },
+  {
+    "id": "Q08",
+    "question": "스프린트 시작 요일을 바꾸면 현재 진행 중인 스프린트에는 어떻게 반영되나요?",
+    "expected_document": "스프린트",
+    "expected_section": "스프린트 시작 요일",
+    "evaluation_purpose": "Section title 검색과 설정 변경 시점에 관한 content 검색 확인"
+  },
+  {
+    "id": "Q09",
+    "question": "앞으로 진행할 스프린트 세 개를 미리 생성하려면 어떤 설정을 사용해야 하나요?",
+    "expected_document": "스프린트",
+    "expected_section": "미리 생성할 다가올 스프린트 개수",
+    "evaluation_purpose": "자연어로 표현된 수량 설정과 Section 검색 확인"
+  },
+  {
+    "id": "Q10",
+    "question": "특정 페이지나 댓글에서 더 이상 알림을 받고 싶지 않을 때는 어떻게 끄나요?",
+    "expected_document": "알림",
+    "expected_section": "알림 설정",
+    "evaluation_purpose": "Section과 content 검색 확인"
+  },
+  {
+    "id": "Q11",
+    "question": "저장된 보기를 나만 사용하거나 팀 전체에 공개하도록 설정할 수 있나요?",
+    "expected_document": "저장된 보기",
+    "expected_section": "공개 범위",
+    "evaluation_purpose": "Document title과 공개 범위 Section 검색 확인"
+  },
+  {
+    "id": "Q12",
+    "question": "팀에서 새로운 작업 상태를 추가하거나 기존 상태를 삭제하려면 어디서 설정하나요?",
+    "expected_document": "작업 상태",
+    "expected_section": "설정",
+    "evaluation_purpose": "Document title과 설정 본문 검색 확인"
+  },
+  {
+    "id": "Q13",
+    "question": "뤄이도 워크스페이스를 슬랙과 연결하고 팀별 알림 채널을 지정하려면 어떻게 해야 하나요?",
+    "expected_document": "슬랙",
+    "expected_section": "연동 설정 가이드",
+    "evaluation_purpose": "Integration Document title과 Section 검색 확인"
+  },
+  {
+    "id": "Q14",
+    "question": "디스코드 서버를 뤄이도에 연결한 다음 팀별 채널을 지정하는 방법을 알려주세요.",
+    "expected_document": "디스코드",
+    "expected_section": "연동 설정 가이드",
+    "evaluation_purpose": "유사한 연동 문서 사이에서 올바른 Document를 구분하는지 확인"
+  },
+  {
+    "id": "Q15",
+    "question": "구글 캘린더를 워크스페이스에 연동하고 팀별 캘린더를 선택하려면 어떻게 하나요?",
+    "expected_document": "구글 캘린더",
+    "expected_section": "연동 설정 가이드",
+    "evaluation_purpose": "Document title 검색과 단계별 연동 content 검색 확인"
+  },
+  {
+    "id": "Q16",
+    "question": "깃허브 Organization과 Repository를 뤄이도 워크스페이스에 연결하는 절차가 궁금해요.",
+    "expected_document": "깃허브",
+    "expected_section": "연동 설정 가이드",
+    "evaluation_purpose": "한글 질문에서 영문 metadata와 연동 단계가 포함된 Section을 찾는지 확인"
+  },
+  {
+    "id": "Q17",
+    "question": "피그마에서 뤄이도 플러그인을 설치하고 계정을 연결하려면 어떻게 해야 하나요?",
+    "expected_document": "피그마",
+    "expected_section": "연동 설정 가이드",
+    "evaluation_purpose": "Document title, 플러그인 키워드, 설치 단계에 대한 content 검색 확인"
+  },
+  {
+    "id": "Q18",
+    "question": "ChatGPT에 뤄이도 MCP를 연결하려면 어떤 설정을 해야 하나요?",
+    "expected_document": "MCP 서버",
+    "expected_section": "설치 가이드",
+    "evaluation_purpose": "Section 내부 H3 구조에 포함된 ChatGPT 설치 절차 검색 확인"
+  },
+  {
+    "id": "Q19",
+    "question": "구글 캘린더를 연결했는데 작업 마감일이 캘린더에 표시되지 않아요. 연동 오류인가요?",
+    "expected_document": "구글 캘린더",
+    "expected_section": "자주 묻는 질문 (FAQ)",
+    "evaluation_purpose": "부정 답변과 '미팅만 연동된다'는 content 검색 확인"
+  },
+  {
+    "id": "Q20",
+    "question": "슬랙 연동 후 알림이 너무 많이 오는데 알림 범위를 줄일 수 있나요?",
+    "expected_document": "슬랙",
+    "expected_section": "자주 묻는 질문 (FAQ)",
+    "evaluation_purpose": "문제 상황 표현과 FAQ content 검색 확인"
+  },
+  {
+    "id": "Q21",
+    "question": "슬랙 연동 설정에서 비공개 채널이 보이지 않는데 어떻게 연결하나요?",
+    "expected_document": "슬랙",
+    "expected_section": "자주 묻는 질문 (FAQ)",
+    "evaluation_purpose": "비공개 채널에 봇을 초대하는 해결 방법의 content 검색 확인"
+  },
+  {
+    "id": "Q22",
+    "question": "기존 작업 상태를 삭제하려고 하는데 삭제되지 않는 이유가 무엇인가요?",
+    "expected_document": "작업 상태",
+    "expected_section": "설정",
+    "evaluation_purpose": "상태가 적용된 작업이 없어야 한다는 제한 조건의 content 검색 확인"
+  },
+  {
+    "id": "Q23",
+    "question": "비활성화한 워크스페이스 멤버를 완전히 삭제할 수 없어요. 다시 초대하면 새 계정이 만들어지나요?",
+    "expected_document": "멤버",
+    "expected_section": "멤버 비활성화",
+    "evaluation_purpose": "영구 삭제 제한과 재초대 시 계정 복원에 대한 복합 content 검색 확인"
+  },
+  {
+    "id": "Q24",
+    "question": "팀을 삭제했는데 다시 복구할 수 있나요?",
+    "expected_document": "팀",
+    "expected_section": "팀 관리",
+    "evaluation_purpose": "삭제된 팀과 데이터는 복구할 수 없다는 주의사항 검색 확인"
+  },
+  {
+    "id": "Q25",
+    "question": "워크스페이스와 팀은 각각 어떤 단위이고 서로 어떤 관계인가요?",
+    "expected_document": "핵심 개념",
+    "expected_section": "기본 개념",
+    "evaluation_purpose": "여러 H3 개념이 포함된 하나의 Section에서 복합 개념 검색 확인"
+  },
+  {
+    "id": "Q26",
+    "question": "대기 작업과 백로그는 어떤 차이가 있고 각각 언제 사용하는 공간인가요?",
+    "expected_document": "작업 흐름으로 이해하는 프로젝트 관리",
+    "expected_section": "작업 구조",
+    "evaluation_purpose": "Section 내부의 여러 작업 단계 설명을 함께 찾는지 확인"
+  },
+  {
+    "id": "Q27",
+    "question": "프로젝트, 목표, 작업, 하위작업은 어떤 계층 구조로 구성되나요?",
+    "expected_document": "실행: 작업",
+    "expected_section": "구조",
+    "evaluation_purpose": "Document title보다 Section 본문의 세부 용어 일치가 검색에 미치는 영향 확인"
+  },
+  {
+    "id": "Q28",
+    "question": "작업 관계에서 '차단 중'과 '차단됨'은 어떻게 다른가요?",
+    "expected_document": "작업간 연결",
+    "expected_section": "관계 유형별 동작",
+    "evaluation_purpose": "서로 유사한 관계 용어를 포함한 content 검색 확인"
+  },
+  {
+    "id": "Q29",
+    "question": "스프린트 그래프의 보라색 점선과 보라색 실선은 각각 무엇을 의미하나요?",
+    "expected_document": "스프린트 그래프",
+    "expected_section": "그래프 보는 법",
+    "evaluation_purpose": "색상과 선 형태처럼 본문에만 존재하는 세부 표현 검색 확인"
+  },
+  {
+    "id": "Q30",
+    "question": "뤄이도 AI 에이전트는 기존 AI 도구와 무엇이 다르고 어떤 프로젝트 맥락을 이해하나요?",
+    "expected_document": "AI 에이전트 (Beta)",
+    "expected_section": "개요",
+    "evaluation_purpose": "Document title 검색과 기능 개념에 대한 content 검색 확인"
+  }
+]

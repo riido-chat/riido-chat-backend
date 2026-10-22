@@ -1,0 +1,797 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-07T15:24:45.829049+00:00",
+  "casesVersion": "procedure-evidence-v1",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "86dbe93c3b5100995d7da3f32f04b384940c4387",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.4-mini"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v4",
+        "sha256": "ddf49dae6d4ddcf3521d550040bc93a3fd398da026ab1cfbe1cba8075ec4bd8d"
+      },
+      "sourcePlanning": {
+        "version": "v13",
+        "sha256": "c1882075dbdf082c7756157590e0d54f17ab782626989cb0d6b593619bdb5c9c"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v13-repair-1",
+        "sha256": "ed3c38a724bd85cb96883b944599989baaccd4758dfd257e8f9714fc80faa68f"
+      },
+      "answer": {
+        "version": "v19",
+        "sha256": "fd85ed761a5ee2b75e71152326d8996125543120cc8ed1e74a94224a659f758d"
+      },
+      "answerValidationRegeneration": {
+        "version": "v19-repair-1",
+        "sha256": "2cd158c96ca9d39f2fdc9ed0ed1678ec302e68916ba2b3fd51f913c8e80ad509"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "86dbe93c3b5100995d7da3f32f04b384940c4387",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v22"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 1,
+    "uniqueCaseCount": 2,
+    "totalCaseExecutionCount": 2,
+    "passedCaseExecutionCount": 2,
+    "failedCaseExecutionCount": 0,
+    "perCase": [
+      {
+        "id": "PE02",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "PE03",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "NEW_CONVERSATION",
+        "executionCount": 2,
+        "passedCount": 2,
+        "failedCount": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-07T15:24:36.550714+00:00",
+      "results": [
+        {
+          "id": "PE02",
+          "description": "직접 절차 존재: 팀을 비공개로 전환",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "93e71c56-84e1-4c86-a3f2-05fece82df8e",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "93e71c56-84e1-4c86-a3f2-05fece82df8e",
+                "ragRunId": "698203be-336c-4218-a907-bbc670e830b3",
+                "answer": {
+                  "answerMarkdown": "설정 페이지의 **[팀 설정 > 일반]**에서 **공개 범위**를 설정하시면 됩니다. 여기서 **‘비공개’**를 선택한 뒤 설정을 저장하면 팀이 즉시 비공개로 전환됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "비공개 팀",
+                    "sectionPath": [
+                      "설정"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?",
+                "resolvedQuery": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 5664,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 31,
+                    "outputTokens": null,
+                    "latencyMs": 371,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v22",
+                    "inputTokens": 5963,
+                    "outputTokens": 157,
+                    "latencyMs": 5206,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "비공개 팀"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3246,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:6c9e58fb04ca",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "8f595c4bd7a8c483681c14d04b92232b8b1accd4d7883d24ff936d1177bec76d",
+                        "content": "비공개 팀으로 전환하려면 설정 페이지의 \\[팀 설정 > 일반]의 공개 범위에서 ‘비공개’를 선택하세요. 설정을 저장하면 즉시 팀이 비공개로 전환됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.429899627572265,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.7520906033396546,
+                            "latencyMs": 401
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3244,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:9f525d515668",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "b2d092eb68fcb946d2d5bd17906c2cda67d1608e10a2d249a5a50edfaf45d2fb",
+                        "content": "비공개 팀은 비즈니스 요금제 이상부터 사용할 수 있습니다. 워크스페이스의 모든 사용자는 새로운 팀을 만들 때 비공개로 설정하거나, 본인이 참여 중인 팀을 비공개 팀으로 전환할 수 있습니다.\n\n비공개 팀은 주로 고객 데이터, HR, 재무 관리처럼 일부 멤버만 접근해야 하는 작업을 안전하게 관리할 때 사용됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03225806451612903,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 11.091670402553223,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5927509856731025,
+                            "latencyMs": 401
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3241,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:9135af8d0050",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "dfc1e6e35a9f4efd3d036645e4753a28ac17c87f0b7502e917b18e80c344d7ce",
+                        "content": "팀 정보를 수정하거나 여러 기능을 활용하기 위해서는 팀 설정 페이지를 이용해야 합니다. 팀 설정 페이지는 우측 사이드바의 팀 이름에 마우스를 올릴 경우 나타나는 ‘설정 아이콘’을 클릭하거나, 설정 페이지에서 수정할 팀을 선택하여 접근할 수 있습니다.\n\n팀 설정 페이지에서는 팀 이름 및 로고와 같이 기본적인 업데이트부터, 스프린트 활성화 여부, 작업 상태까지 업데이트할 수 있습니다.\n\n팀 설정 메뉴: 일반 / 설정 정보: 팀 로고, 이름, 팀 공개 범위\n팀 설정 메뉴: 멤버 / 설정 정보: 팀에 속한 멤버 관리\n팀 설정 메뉴: 스프린트 / 설정 정보: 스프린트 활성화 및 자동화 규칙\n팀 설정 메뉴: 작업 상태 / 설정 정보: 작업 상태 추가 및 삭제, 깃허브 자동화 연결\n팀 설정 메뉴: 템플릿 / 설정 정보: 팀 단위의 문서 템플릿",
+                        "fusedRank": 3,
+                        "fusedScore": 0.030798389007344232,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 4.4652357304086125,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5642516287164767,
+                            "latencyMs": 401
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3285,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:ba056589ecd1",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "공개 범위"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "78b56ac06aba4174fbaebf31a4b4dc61d60ad9b9a372732b8629ddbc139c9bef",
+                        "content": "보기를 만들 때, 해당 보기를 개인용으로 사용할지 또는 팀 전체에 공개할지 선택할 수 있습니다.\n\n* 팀 보기 (공개): 팀 전체가 동일한 기준으로 작업을 확인할 수 있어 협업에 유용합니다.\n* 나만 보기 (비공개): 개인 참고용 이거나 실험적인 설정을 저장할 때 적합합니다.\n\n팀 보기의 필터 조건은 모든 팀원에게 동일하게 표시되며, 권한이 있는 사용자는 수정이나 삭제가 가능합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.030798389007344232,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 7.579797940319072,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.4792015277932802,
+                            "latencyMs": 401
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030303030303030304,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 5.442855958222796,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.5057399686697251,
+                            "latencyMs": 401
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v22",
+                        "inputTokens": 5963,
+                        "outputTokens": 157,
+                        "latencyMs": 5206,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3246,
+                          "documentVersionId": 2418,
+                          "documentId": "6c3b150c3146",
+                          "sectionId": "6c3b150c3146:6c9e58fb04ca",
+                          "documentTitle": "비공개 팀",
+                          "sectionPath": [
+                            "비공개 팀",
+                            "설정"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                          "content": "비공개 팀으로 전환하려면 설정 페이지의 \\[팀 설정 > 일반]의 공개 범위에서 ‘비공개’를 선택하세요. 설정을 저장하면 즉시 팀이 비공개로 전환됩니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "설정 페이지의 **[팀 설정 > 일반]**에서 **공개 범위**를 설정하시면 됩니다. 여기서 **‘비공개’**를 선택한 뒤 설정을 저장하면 팀이 즉시 비공개로 전환됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "설정 페이지의 **[팀 설정 > 일반]**에서 **공개 범위**를 설정하시면 됩니다. 여기서 **‘비공개’**를 선택한 뒤 설정을 저장하면 팀이 즉시 비공개로 전환됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "PE03",
+          "description": "직접 절차 존재: 워크스페이스 멤버 비활성화",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "a13246bf-f95b-454f-a915-74e92f4ae246",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "워크스페이스 멤버를 비활성화하려면 어떻게 해야 하나요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "a13246bf-f95b-454f-a915-74e92f4ae246",
+                "ragRunId": "3acf5ee2-9895-40f9-b241-4f6b78e1ed5f",
+                "answer": {
+                  "answerMarkdown": "멤버 페이지에서 비활성화할 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤, **비활성화**를 클릭하시면 됩니다.[1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "멤버",
+                    "sectionPath": [
+                      "멤버 비활성화"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "워크스페이스 멤버를 비활성화하려면 어떻게 해야 하나요?",
+                "resolvedQuery": "워크스페이스 멤버를 비활성화하려면 어떻게 해야 하나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 3521,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 32,
+                    "outputTokens": null,
+                    "latencyMs": 262,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v22",
+                    "inputTokens": 6238,
+                    "outputTokens": 135,
+                    "latencyMs": 3211,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "멤버"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "워크스페이스 멤버를 비활성화하려면 어떻게 해야 하나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "워크스페이스 멤버를 비활성화하려면 어떻게 해야 하나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3232,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:6a09b6285b28",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "멤버 비활성화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "3c7ba56137fad745d3f659f2eec123126b1ce27eca49c41ffb7c46d977e00ac9",
+                        "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.942014548268478,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.7909715707229055,
+                            "latencyMs": 276
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3230,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:dc7240487954",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "846aa225db6b21c0bcb70f94090ed47d8acead69e62aeba00e282185d8d8df9a",
+                        "content": "워크스페이스 멤버는 좌측 사이드바의 \\[워크스페이스 > 멤버] 또는 설정 페이지의 \\[워크스페이스 > 멤버] 페이지에서 확인할 수 있습니다. 해당 페이지에는 현재 활성화된 멤버와, 과거에 있었던 비활성화된 멤버가 모두 존재합니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 10.986063248745623,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.6366997349494147,
+                            "latencyMs": 276
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3242,
+                        "documentVersionId": 2417,
+                        "documentId": "da8743ff8cae",
+                        "sectionId": "da8743ff8cae:e2b4dc113d2f",
+                        "documentTitle": "팀",
+                        "sectionPath": [
+                          "팀",
+                          "팀 멤버"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/overview.md",
+                        "contentHash": "a1668a8ddf0d2dd407692bed6be484747e020abe14e7449641e3f8773d37667a",
+                        "content": "워크스페이스의 멤버는 여러 팀에 동시에 속할 수 있습니다. 팀 멤버는 각자의 직군과 경력 정보를 지정할 수 있으며, 이 데이터를 기반으로 Riido AI가 팀 구조를 분석하고 일정 계획을 더욱 정확하게 지원할 수 있습니다.\n\n팀 멤버가 더 이상 팀에서 활동하지 않는다면, 비활성화를 통해 접근을 제한할 수 있습니다. 비활성화된 멤버는 팀에 접근할 수 없지만, 기존 데이터와 기록은 그대로 유지됩니다.\n\n만약 멤버를 영구 삭제하면, 해당 멤버와 관련된 모든 정보가 팀에서 완전히 삭제되므로 주의가 필요합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.19575158434548,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6778534528255672,
+                            "latencyMs": 276
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3231,
+                        "documentVersionId": 2415,
+                        "documentId": "567f0ce8042c",
+                        "sectionId": "567f0ce8042c:a71a73e4ac34",
+                        "documentTitle": "멤버",
+                        "sectionPath": [
+                          "멤버",
+                          "권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                        "contentHash": "7904fbb4987e17151ebf07a8ee4bd1543c378ff21eeb76314a0597ba94a1de17",
+                        "content": "워크스페이스의 모든 사용자는 정해진 권한을 가지게 됩니다. 권한을 통해 사용자별로 워크스페이스에서 수행 가능한 동작을 제한할 수 있습니다.\n\n무료 요금제에서, 워크스페이스의 모든 멤버는 관리자 권한을 가지게 됩니다.\n\n#### 관리자\n\n관리자는 워크스페이스의 모든 동작을 수행할 수 있습니다. 멤버를 관리하고, 설정을 업데이트하고, 모든 프로젝트와 스프린트 그리고 팀에 대한 관리 권한을 가지게 됩니다.\n\n#### 멤버\n\n멤버는 프로젝트, 작업, 미팅 등 워크스페이스의 모든 데이터에 접근이 가능하며, 동료와 함께 협업이 가능합니다. 다만, 본인이 속하지 않은 비공개 팀은 확인할 수 없으며, 워크스페이스 수준의 설정 편집이 불가능합니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.031009615384615385,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 7.895308631544018,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5170184508396045,
+                            "latencyMs": 276
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3228,
+                        "documentVersionId": 2414,
+                        "documentId": "7591069b70f9",
+                        "sectionId": "7591069b70f9:852f2729c6f3",
+                        "documentTitle": "워크스페이스",
+                        "sectionPath": [
+                          "워크스페이스",
+                          "워크스페이스 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/workspaces/overview.md",
+                        "contentHash": "4ff353be30ca0ea2fb00474e536e39025abc6084aff81cc03b10345d1fca3486",
+                        "content": "워크스페이스 설정으로 이동하기 위해서는, 좌측 사이드바의 \\[워크스페이스 > 설정] 버튼을 클릭하여 이동할 수 있습니다. 설정 페이지에서는 로고, 이름과 같은 기본적인 워크스페이스 정보부터 워크스페이스 멤버, 외부 연동, 알림 등에 대한 설정이 가능합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030303030303030304,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 7.437919616373785,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.4951735016228107,
+                            "latencyMs": 276
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v22",
+                        "inputTokens": 6238,
+                        "outputTokens": 135,
+                        "latencyMs": 3211,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "PROCEDURE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "워크스페이스 멤버를 비활성화하는 방법",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3232,
+                          "documentVersionId": 2415,
+                          "documentId": "567f0ce8042c",
+                          "sectionId": "567f0ce8042c:6a09b6285b28",
+                          "documentTitle": "멤버",
+                          "sectionPath": [
+                            "멤버",
+                            "멤버 비활성화"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/workspaces/members.md",
+                          "content": "워크스페이스 멤버를 비활성화하기 위해서는, 멤버 페이지에서 해당 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤 ‘비활성화’를 클릭합니다.\n\n비활성화된 멤버는 더 이상 워크스페이스에 접근할 수 없으며, 만약 유료 요금제를 사용 중이라면, 비활성화된 멤버는 다음 결제 주기부터 요금 청구 대상에서 자동으로 제외됩니다.\n\n비활성화된 멤버를 완전히 삭제할 수는 없습니다. 이는 해당 멤버가 작성하거나 담당했던 작업, 문서 등의 기록을 유지하기 위함입니다. 즉, 데이터는 그대로 남아 있지만 더 이상 워크스페이스에 접근할 수 없는 상태가 됩니다. 나중에 같은 멤버를 다시 초대하더라도 새로운 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "멤버 페이지에서 비활성화할 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤, **비활성화**를 클릭하시면 됩니다.[SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "멤버 페이지에서 비활성화할 멤버의 오른쪽에 있는 점 3개 버튼을 클릭한 뒤, **비활성화**를 클릭하시면 됩니다.[1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2180 @@
+{
+  "experimentVersion": "openai-generation-model-comparison-v1",
+  "executedAt": "2026-09-12T05:28:34.394428+00:00",
+  "repositoryRevision": "167ba78052054de9274a2768a9f8c04068bd74f8",
+  "candidateConfigs": [
+    {
+      "id": "C",
+      "model": "gpt-5.6-terra",
+      "input_price_per_million_usd": 2.0,
+      "output_price_per_million_usd": 12.0
+    }
+  ],
+  "prompts": {
+    "generation": "v40",
+    "sourcePlanning": "v33",
+    "answer": "v23"
+  },
+  "fixedInputs": {
+    "casesPath": "evaluation/source_planning_related_guidance_cases.json",
+    "casesSha256": "4c0750b2b07fcd3a1c74252ecd2df8e9690b77131e11724546bc8a4b646753d0",
+    "fixtureSourcePath": "evaluation/baselines/customer-support-v3-final-v33-full.json",
+    "fixtureSourceSha256": "90ce661f37161ed3e0972670b76c2da397ca0d7dfe87549b51718b6bdef9d7c3",
+    "supplementalFixtureSources": [],
+    "turnCount": 8,
+    "retrievalFrozen": true,
+    "queryRewriteFrozen": true
+  },
+  "excludedCaseIds": [
+    "MQ027",
+    "MQ040",
+    "MQ066"
+  ],
+  "runs": [
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "repeatNo": 1,
+      "results": [
+        {
+          "caseId": "RC006",
+          "turnNo": 1,
+          "description": "프로젝트를 백로그로 역이동할 수 있는지 문의",
+          "originalQuestion": "혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?",
+          "generationQuery": "혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?",
+          "expected": {
+            "question": "혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "RELATED_GUIDANCE",
+            "expectedLeadConceptGroups": [
+              [
+                "프로젝트"
+              ],
+              [
+                "백로그"
+              ],
+              [
+                "확인할 수 없",
+                "확인되지 않",
+                "근거가 없"
+              ]
+            ],
+            "expectedAnswerConceptGroups": [
+              [
+                "백로그"
+              ],
+              [
+                "프로젝트",
+                "목표",
+                "작업"
+              ],
+              [
+                "반대",
+                "역방향",
+                "방향과는 다",
+                "요청하신 방향과 다"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "계획: 백로그"
+            ],
+            "forbiddenAnswerPhrases": [
+              "프로젝트를 백로그로 이동할 수 있습니다"
+            ],
+            "manualReviewCriteria": [
+              "프로젝트에서 백로그로 이동할 수 있다고 추론하지 않는다.",
+              "백로그에서 프로젝트·목표·작업으로 전환하는 반대 방향임을 명시한다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "작업 목록에 있는 프로젝트를 백로그로 이동할 수 있는지와 그 방법은 제공된 안내에서 확인되지 않습니다.\n\n다만 백로그에서는 `전환` 버튼을 눌러 프로젝트·목표·작업으로 전환할 수 있습니다. 이는 백로그에서 프로젝트로 바꾸는 절차로, 요청하신 프로젝트에서 백로그로 이동하는 방향과는 다릅니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "작업으로 전환"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            }
+          ],
+          "latencyMs": 6379,
+          "inputTokens": 10025,
+          "outputTokens": 312,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "RELATED_GUIDANCE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "작업 목록에 있는 프로젝트를 백로그로 이동할 수 있는지와 그 방법"
+              ],
+              "related_guidance": [
+                {
+                  "information_unit": "백로그에서 프로젝트로 전환하는 공식 절차(요청한 프로젝트→백로그 이동과 반대 방향)",
+                  "source_ids": [
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_2"
+            ],
+            "selectedSectionIds": [
+              "11957633d8b2:26264fecfd4a"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC007",
+          "turnNo": 1,
+          "description": "특정 워크스페이스의 결제 완료 상태 조회",
+          "originalQuestion": "현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.",
+          "generationQuery": "현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.",
+          "expected": {
+            "question": "현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "RELATED_GUIDANCE",
+            "expectedLeadConceptGroups": [
+              [
+                "결제"
+              ],
+              [
+                "완료",
+                "상태"
+              ],
+              [
+                "확인할 수 없",
+                "확인해 드릴 수 없",
+                "확인되지 않",
+                "알 수 없"
+              ]
+            ],
+            "expectedAnswerConceptGroups": [
+              [
+                "설정"
+              ],
+              [
+                "워크스페이스"
+              ],
+              [
+                "청구"
+              ],
+              [
+                "요금제",
+                "결제 정보"
+              ],
+              [
+                "이전 결제 내역",
+                "결제 내역"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구독 및 결제"
+            ],
+            "forbiddenAnswerPhrases": [
+              "결제가 완료되었습니다"
+            ],
+            "manualReviewCriteria": [
+              "사용자의 실제 결제 완료 여부를 단정하지 않는다.",
+              "일반 결제·환불 정책이 아니라 청구 확인 위치만 관련 안내로 제공한다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "현재 워크스페이스에서 결제가 실제로 완료되었는지는 제공된 안내만으로 확인할 수 없습니다.\n\n결제 관련 정보는 설정 페이지의 **[워크스페이스 > 청구]**에서 확인할 수 있습니다. 이곳에서 현재 워크스페이스의 요금제, 결제 정보, 이전 결제 내역을 확인하세요. [1]",
+          "citations": [
+            {
+              "documentTitle": "구독 및 결제",
+              "sectionPath": [
+                "구독 및 결제",
+                "결제 및 청구 관리"
+              ],
+              "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md"
+            }
+          ],
+          "latencyMs": 3683,
+          "inputTokens": 10279,
+          "outputTokens": 219,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "RELATED_GUIDANCE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "현재 사용자의 워크스페이스에서 결제가 실제로 완료되었는지 여부"
+              ],
+              "related_guidance": [
+                {
+                  "information_unit": "워크스페이스의 요금제·결제 정보·이전 결제 내역 확인 위치",
+                  "source_ids": [
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_2"
+            ],
+            "selectedSectionIds": [
+              "95a1b20de638:5e49b96fcb2e"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC018",
+          "turnNo": 2,
+          "description": "캘린더 동기화 이유 대신 공식 적용 범위를 안내",
+          "originalQuestion": "해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!",
+          "generationQuery": "해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!",
+          "expected": {
+            "fixtureTurnNo": 2,
+            "question": "해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "RELATED_GUIDANCE",
+            "expectedLeadConceptGroups": [
+              [
+                "이유",
+                "원인"
+              ],
+              [
+                "확인할 수 없",
+                "확인되지 않",
+                "설명하지 않",
+                "나와 있지 않"
+              ]
+            ],
+            "expectedAnswerConceptGroups": [
+              [
+                "미팅"
+              ],
+              [
+                "작업"
+              ],
+              [
+                "마감일"
+              ],
+              [
+                "연동 대상이 아",
+                "연동 대상에 포함되지 않",
+                "동기화되지 않",
+                "연동되지 않"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구글 캘린더"
+            ],
+            "manualReviewCriteria": [
+              "공식 적용 범위를 연동 이유로 바꿔서 설명하지 않는다.",
+              "미팅만 양방향 연동되고 작업 마감일은 대상이 아니라는 범위만 안내한다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "구글 캘린더 연동이 미팅에만 적용되고 작업의 마감일·다른 일정 정보에는 적용되지 않는 이유는 제공된 안내에서 확인되지 않습니다.\n\n현재 구글 캘린더와 양방향 연동되는 항목은 뤼이도 내부의 **미팅**만입니다. 작업의 마감일과 그 밖의 일정 정보는 현재 연동 대상이 아닙니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "구글 캘린더",
+              "sectionPath": [
+                "구글 캘린더",
+                "자주 묻는 질문 (FAQ)"
+              ],
+              "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md"
+            }
+          ],
+          "latencyMs": 4644,
+          "inputTokens": 10519,
+          "outputTokens": 302,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "RELATED_GUIDANCE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "구글 캘린더 연동이 미팅에만 적용되고 작업의 마감일·다른 일정 정보에는 적용되지 않는 이유"
+              ],
+              "related_guidance": [
+                {
+                  "information_unit": "구글 캘린더 연동의 현재 적용 범위(미팅만 양방향 연동되며 작업 마감일은 연동 대상이 아님)",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "5623097e1502:76d8211bc501"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC040",
+          "turnNo": 1,
+          "description": "워크스페이스 삭제·이름·Key 변경 복합 질문의 부분 답변 금지",
+          "originalQuestion": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "generationQuery": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "expected": {
+            "question": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+            "expectedStatus": "WITHHELD",
+            "expectedPlanningStatus": "WITHHELD",
+            "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+            "manualReviewCriteria": [
+              "삭제 영향·이름 변경·Key 변경 중 일부만 관련 안내로 제공하지 않는다.",
+              "PARTIAL 상태나 부분 답변을 암묵적으로 만들지 않는다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "WITHHELD",
+          "withheldReason": "INSUFFICIENT_EVIDENCE",
+          "answerMarkdown": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다.",
+          "citations": [],
+          "latencyMs": 3237,
+          "inputTokens": 6556,
+          "outputTokens": 229,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "WITHHELD",
+              "answer_type": "PROCEDURE",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "개별 워크스페이스를 삭제했을 때 다른 워크스페이스까지 삭제되는지와 삭제 영향",
+                "새 워크스페이스를 생성하지 않고 기존 워크스페이스 이름을 변경하는 방법",
+                "넘버링 앞에 쓰는 Key 값을 변경하는 방법"
+              ],
+              "related_guidance": [],
+              "withheld_reason": "INSUFFICIENT_EVIDENCE"
+            },
+            "selectedSourceIds": [],
+            "selectedSectionIds": [],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 0,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC012",
+          "turnNo": 2,
+          "description": "소셜 로그인 비밀번호 질문에 무관한 근거 사용 금지",
+          "originalQuestion": "비번찾기 누르면 외부 서비스 로그인으로 회원가입된 계정은 비밀번호를 찾을 수 없습니다라고 뜨네요. 아예 외부 서비스로 가입하면 비번 자체가 없는 건가요?",
+          "generationQuery": "비번찾기 누르면 외부 서비스 로그인으로 회원가입된 계정은 비밀번호를 찾을 수 없습니다라고 뜨네요. 아예 외부 서비스로 가입하면 비번 자체가 없는 건가요?",
+          "expected": {
+            "fixtureTurnNo": 2,
+            "question": "비번찾기 누르면 외부 서비스 로그인으로 회원가입된 계정은 비밀번호를 찾을 수 없습니다라고 뜨네요. 아예 외부 서비스로 가입하면 비번 자체가 없는 건가요?",
+            "expectedStatus": "WITHHELD",
+            "expectedPlanningStatus": "WITHHELD",
+            "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+            "manualReviewCriteria": [
+              "비밀번호와 단어만 겹치는 다른 기능 문서를 관련 안내로 사용하지 않는다.",
+              "외부 서비스 계정의 비밀번호 존재 여부를 추론하지 않는다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "WITHHELD",
+          "withheldReason": "INSUFFICIENT_EVIDENCE",
+          "answerMarkdown": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다.",
+          "citations": [],
+          "latencyMs": 2151,
+          "inputTokens": 7079,
+          "outputTokens": 136,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "WITHHELD",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "외부 서비스 로그인으로 가입한 계정에 뤼이도 자체 비밀번호가 존재하는지 여부와 비밀번호 찾기 제한의 이유"
+              ],
+              "related_guidance": [],
+              "withheld_reason": "INSUFFICIENT_EVIDENCE"
+            },
+            "selectedSourceIds": [],
+            "selectedSectionIds": [],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 0,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC010",
+          "turnNo": 1,
+          "description": "백로그 정의 직접 답변 회귀",
+          "originalQuestion": "백로그가 뭐여",
+          "generationQuery": "백로그가 뭐여",
+          "expected": {
+            "question": "백로그가 뭐여",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "백로그"
+              ],
+              [
+                "계획",
+                "정리"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "계획: 백로그"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "백로그는 검토를 마친 작업을 구조적으로 정리하고, 우선순위와 실행 순서를 계획하는 공간입니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "개요"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            }
+          ],
+          "latencyMs": 4388,
+          "inputTokens": 9835,
+          "outputTokens": 173,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "DEFINITION",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "백로그의 의미와 용도",
+                  "source_ids": [
+                    "SOURCE_3"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_3"
+            ],
+            "selectedSectionIds": [
+              "11957633d8b2:a6f5feefa6e5"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC023",
+          "turnNo": 1,
+          "description": "백로그 기능 요약 직접 답변 회귀",
+          "originalQuestion": "백로그 기능 설명",
+          "generationQuery": "백로그 기능 설명",
+          "expected": {
+            "question": "백로그 기능 설명",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "백로그"
+              ],
+              [
+                "우선순위",
+                "계획"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "계획: 백로그"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "백로그는 검토를 마친 작업을 정리하고 우선순위와 실행 순서를 계획하는 기능입니다. [1]\n\n- **구조화:** 백로그 섹션과 백로그 아이템의 2단계 구조로 구성되며, 섹션별로 주제를 구분해 항목을 정리할 수 있습니다. [2]\n- **속성 관리:** 담당자, 라벨, 중요도, 긴급도, 투표, 예상 기간, 예상 시작일을 관리할 수 있습니다. 중요도는 5단계, 긴급도는 4단계로 우선순위 판단에 활용됩니다. [3]\n- **전환:** ‘전환’ 버튼으로 백로그를 프로젝트·목표·작업으로 전환할 수 있으며, 작업으로 전환하면 기존 정보가 그대로 유지됩니다. [4]",
+          "citations": [
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "개요"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            },
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "구조"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            },
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "속성"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            },
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "작업으로 전환"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            }
+          ],
+          "latencyMs": 5464,
+          "inputTokens": 10421,
+          "outputTokens": 373,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "FEATURE_SUMMARY",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "백로그 기능의 목적과 활용",
+                  "source_ids": [
+                    "SOURCE_3"
+                  ]
+                },
+                {
+                  "information_unit": "백로그의 구조와 항목 정리 방식",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                },
+                {
+                  "information_unit": "백로그에서 관리할 수 있는 주요 속성 정보",
+                  "source_ids": [
+                    "SOURCE_4"
+                  ]
+                },
+                {
+                  "information_unit": "백로그를 프로젝트·목표·작업으로 전환하는 기능",
+                  "source_ids": [
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_3",
+              "SOURCE_1",
+              "SOURCE_4",
+              "SOURCE_2"
+            ],
+            "selectedSectionIds": [
+              "11957633d8b2:a6f5feefa6e5",
+              "11957633d8b2:8e468f02bf3a",
+              "11957633d8b2:aa8af54aa5cd",
+              "11957633d8b2:26264fecfd4a"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC008",
+          "turnNo": 1,
+          "description": "워크스페이스 결제 단위 직접 답변 회귀",
+          "originalQuestion": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "generationQuery": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "expected": {
+            "question": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "워크스페이스"
+              ],
+              [
+                "Business"
+              ],
+              [
+                "사용자",
+                "시트",
+                "멤버"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구독 및 결제"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "네. 뤼이도의 요금과 구독은 관리자 개인이 아니라 워크스페이스 단위로 적용되며, 요금은 해당 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. 따라서 Business 요금제를 구독한 워크스페이스에 포함된 팀원에게도 해당 워크스페이스의 구독이 적용됩니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "구독 및 결제",
+              "sectionPath": [
+                "구독 및 결제",
+                "결제"
+              ],
+              "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md"
+            }
+          ],
+          "latencyMs": 5503,
+          "inputTokens": 10841,
+          "outputTokens": 295,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "Business 요금제가 관리자 개인이 아닌 워크스페이스 단위 구독으로 적용되는지와 워크스페이스에 포함된 팀원의 적용 범위",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5"
+            ],
+            "selectedSectionIds": [
+              "95a1b20de638:dd62a0b71715"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    },
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "repeatNo": 2,
+      "results": [
+        {
+          "caseId": "RC006",
+          "turnNo": 1,
+          "description": "프로젝트를 백로그로 역이동할 수 있는지 문의",
+          "originalQuestion": "혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?",
+          "generationQuery": "혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?",
+          "expected": {
+            "question": "혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "RELATED_GUIDANCE",
+            "expectedLeadConceptGroups": [
+              [
+                "프로젝트"
+              ],
+              [
+                "백로그"
+              ],
+              [
+                "확인할 수 없",
+                "확인되지 않",
+                "근거가 없"
+              ]
+            ],
+            "expectedAnswerConceptGroups": [
+              [
+                "백로그"
+              ],
+              [
+                "프로젝트",
+                "목표",
+                "작업"
+              ],
+              [
+                "반대",
+                "역방향",
+                "방향과는 다",
+                "요청하신 방향과 다"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "계획: 백로그"
+            ],
+            "forbiddenAnswerPhrases": [
+              "프로젝트를 백로그로 이동할 수 있습니다"
+            ],
+            "manualReviewCriteria": [
+              "프로젝트에서 백로그로 이동할 수 있다고 추론하지 않는다.",
+              "백로그에서 프로젝트·목표·작업으로 전환하는 반대 방향임을 명시한다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "작업 목록에 있는 프로젝트를 백로그로 이동할 수 있는지와 그 방법은 제공된 안내에서 확인되지 않습니다.\n\n공식 안내에는 반대 방향인 **백로그 항목을 프로젝트로 전환**하는 방법이 안내되어 있습니다. 백로그에서 `전환` 버튼을 누르면 프로젝트·목표·작업으로 전환할 수 있으며, 작업으로 전환하는 경우 기존 정보는 유지됩니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "작업으로 전환"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            }
+          ],
+          "latencyMs": 5254,
+          "inputTokens": 10023,
+          "outputTokens": 323,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "RELATED_GUIDANCE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "작업 목록에 있는 프로젝트를 백로그로 이동할 수 있는지와 그 방법"
+              ],
+              "related_guidance": [
+                {
+                  "information_unit": "백로그 항목을 프로젝트로 전환하는 공식 절차(질문한 방향과 반대 방향)",
+                  "source_ids": [
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_2"
+            ],
+            "selectedSectionIds": [
+              "11957633d8b2:26264fecfd4a"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC007",
+          "turnNo": 1,
+          "description": "특정 워크스페이스의 결제 완료 상태 조회",
+          "originalQuestion": "현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.",
+          "generationQuery": "현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.",
+          "expected": {
+            "question": "현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "RELATED_GUIDANCE",
+            "expectedLeadConceptGroups": [
+              [
+                "결제"
+              ],
+              [
+                "완료",
+                "상태"
+              ],
+              [
+                "확인할 수 없",
+                "확인해 드릴 수 없",
+                "확인되지 않",
+                "알 수 없"
+              ]
+            ],
+            "expectedAnswerConceptGroups": [
+              [
+                "설정"
+              ],
+              [
+                "워크스페이스"
+              ],
+              [
+                "청구"
+              ],
+              [
+                "요금제",
+                "결제 정보"
+              ],
+              [
+                "이전 결제 내역",
+                "결제 내역"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구독 및 결제"
+            ],
+            "forbiddenAnswerPhrases": [
+              "결제가 완료되었습니다"
+            ],
+            "manualReviewCriteria": [
+              "사용자의 실제 결제 완료 여부를 단정하지 않는다.",
+              "일반 결제·환불 정책이 아니라 청구 확인 위치만 관련 안내로 제공한다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "현재 워크스페이스의 실제 결제 완료 여부는 여기서 확인할 수 없습니다.\n\n결제 상태와 관련 정보는 설정 페이지의 **워크스페이스 > 청구**에서 확인할 수 있습니다. 이 페이지에서 현재 워크스페이스의 요금제, 결제 정보, 이전 결제 내역을 확인하세요. [1]",
+          "citations": [
+            {
+              "documentTitle": "구독 및 결제",
+              "sectionPath": [
+                "구독 및 결제",
+                "결제 및 청구 관리"
+              ],
+              "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md"
+            }
+          ],
+          "latencyMs": 5156,
+          "inputTokens": 10280,
+          "outputTokens": 215,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "RELATED_GUIDANCE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "현재 사용자의 워크스페이스가 실제로 결제 완료되었는지 여부"
+              ],
+              "related_guidance": [
+                {
+                  "information_unit": "현재 워크스페이스의 요금제·결제 정보·이전 결제 내역 확인 위치",
+                  "source_ids": [
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_2"
+            ],
+            "selectedSectionIds": [
+              "95a1b20de638:5e49b96fcb2e"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC018",
+          "turnNo": 2,
+          "description": "캘린더 동기화 이유 대신 공식 적용 범위를 안내",
+          "originalQuestion": "해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!",
+          "generationQuery": "해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!",
+          "expected": {
+            "fixtureTurnNo": 2,
+            "question": "해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "RELATED_GUIDANCE",
+            "expectedLeadConceptGroups": [
+              [
+                "이유",
+                "원인"
+              ],
+              [
+                "확인할 수 없",
+                "확인되지 않",
+                "설명하지 않",
+                "나와 있지 않"
+              ]
+            ],
+            "expectedAnswerConceptGroups": [
+              [
+                "미팅"
+              ],
+              [
+                "작업"
+              ],
+              [
+                "마감일"
+              ],
+              [
+                "연동 대상이 아",
+                "연동 대상에 포함되지 않",
+                "동기화되지 않",
+                "연동되지 않"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구글 캘린더"
+            ],
+            "manualReviewCriteria": [
+              "공식 적용 범위를 연동 이유로 바꿔서 설명하지 않는다.",
+              "미팅만 양방향 연동되고 작업 마감일은 대상이 아니라는 범위만 안내한다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "작업의 캘린더(작업 마감일·기타 일정 정보)가 구글 캘린더 연동 대상이 아닌 이유는 제공된 안내에서 확인되지 않습니다.\n\n현재 구글 캘린더와 양방향 연동되는 대상은 뤼이도 내부의 **미팅**뿐입니다. 작업의 마감일이나 기타 일정 정보는 연동 대상이 아닙니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "구글 캘린더",
+              "sectionPath": [
+                "구글 캘린더",
+                "자주 묻는 질문 (FAQ)"
+              ],
+              "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md"
+            }
+          ],
+          "latencyMs": 4535,
+          "inputTokens": 10526,
+          "outputTokens": 319,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "RELATED_GUIDANCE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "작업의 캘린더(작업 마감일·기타 일정 정보)가 구글 캘린더 연동 대상이 아닌 이유"
+              ],
+              "related_guidance": [
+                {
+                  "information_unit": "구글 캘린더 연동 대상 범위: 뤼이도 내부 미팅만 양방향 연동되며 작업 마감일 및 기타 일정 정보는 연동되지 않음",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "5623097e1502:76d8211bc501"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC040",
+          "turnNo": 1,
+          "description": "워크스페이스 삭제·이름·Key 변경 복합 질문의 부분 답변 금지",
+          "originalQuestion": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "generationQuery": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "expected": {
+            "question": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+            "expectedStatus": "WITHHELD",
+            "expectedPlanningStatus": "WITHHELD",
+            "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+            "manualReviewCriteria": [
+              "삭제 영향·이름 변경·Key 변경 중 일부만 관련 안내로 제공하지 않는다.",
+              "PARTIAL 상태나 부분 답변을 암묵적으로 만들지 않는다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "WITHHELD",
+          "withheldReason": "INSUFFICIENT_EVIDENCE",
+          "answerMarkdown": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다.",
+          "citations": [],
+          "latencyMs": 3482,
+          "inputTokens": 6556,
+          "outputTokens": 252,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "WITHHELD",
+              "answer_type": "PROCEDURE",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "워크스페이스 삭제 시 다른 모든 워크스페이스에 미치는 영향",
+                "새 워크스페이스를 생성하지 않고 워크스페이스 이름을 변경하는 방법",
+                "넘버링 앞에 쓰는 Key 값을 변경하는 방법"
+              ],
+              "related_guidance": [],
+              "withheld_reason": "INSUFFICIENT_EVIDENCE"
+            },
+            "selectedSourceIds": [],
+            "selectedSectionIds": [],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 0,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC012",
+          "turnNo": 2,
+          "description": "소셜 로그인 비밀번호 질문에 무관한 근거 사용 금지",
+          "originalQuestion": "비번찾기 누르면 외부 서비스 로그인으로 회원가입된 계정은 비밀번호를 찾을 수 없습니다라고 뜨네요. 아예 외부 서비스로 가입하면 비번 자체가 없는 건가요?",
+          "generationQuery": "비번찾기 누르면 외부 서비스 로그인으로 회원가입된 계정은 비밀번호를 찾을 수 없습니다라고 뜨네요. 아예 외부 서비스로 가입하면 비번 자체가 없는 건가요?",
+          "expected": {
+            "fixtureTurnNo": 2,
+            "question": "비번찾기 누르면 외부 서비스 로그인으로 회원가입된 계정은 비밀번호를 찾을 수 없습니다라고 뜨네요. 아예 외부 서비스로 가입하면 비번 자체가 없는 건가요?",
+            "expectedStatus": "WITHHELD",
+            "expectedPlanningStatus": "WITHHELD",
+            "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+            "manualReviewCriteria": [
+              "비밀번호와 단어만 겹치는 다른 기능 문서를 관련 안내로 사용하지 않는다.",
+              "외부 서비스 계정의 비밀번호 존재 여부를 추론하지 않는다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "WITHHELD",
+          "withheldReason": "INSUFFICIENT_EVIDENCE",
+          "answerMarkdown": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다.",
+          "citations": [],
+          "latencyMs": 2847,
+          "inputTokens": 7079,
+          "outputTokens": 142,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "WITHHELD",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "외부 서비스 로그인으로 가입한 계정에 별도의 뤼이도 비밀번호가 존재하는지 여부",
+                "외부 서비스 로그인 계정에서 비밀번호 찾기 안내가 표시되는 정확한 정책과 처리 방법"
+              ],
+              "related_guidance": [],
+              "withheld_reason": "INSUFFICIENT_EVIDENCE"
+            },
+            "selectedSourceIds": [],
+            "selectedSectionIds": [],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 0,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC010",
+          "turnNo": 1,
+          "description": "백로그 정의 직접 답변 회귀",
+          "originalQuestion": "백로그가 뭐여",
+          "generationQuery": "백로그가 뭐여",
+          "expected": {
+            "question": "백로그가 뭐여",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "백로그"
+              ],
+              [
+                "계획",
+                "정리"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "계획: 백로그"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "백로그는 검토를 마친 작업을 구조적으로 정리하고, 우선순위와 실행 순서를 계획하는 공간입니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "개요"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            }
+          ],
+          "latencyMs": 5032,
+          "inputTokens": 9835,
+          "outputTokens": 179,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "DEFINITION",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "백로그의 의미와 용도",
+                  "source_ids": [
+                    "SOURCE_3"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_3"
+            ],
+            "selectedSectionIds": [
+              "11957633d8b2:a6f5feefa6e5"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC023",
+          "turnNo": 1,
+          "description": "백로그 기능 요약 직접 답변 회귀",
+          "originalQuestion": "백로그 기능 설명",
+          "generationQuery": "백로그 기능 설명",
+          "expected": {
+            "question": "백로그 기능 설명",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "백로그"
+              ],
+              [
+                "우선순위",
+                "계획"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "계획: 백로그"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "백로그는 검토를 마친 작업을 구조적으로 정리하고, 우선순위와 실행 순서를 계획하는 기능입니다. [1]\n\n- **계획 및 실행 준비**: 당장 시작하지 않는 작업도 정리해 두었다가 팀 상황에 맞춰 실행으로 옮길 수 있습니다. [1]\n- **2단계 구조화**: `백로그 섹션 → 백로그 아이템` 구조로, 섹션을 주제별로 만들고 그 안에 항목을 정리할 수 있습니다. [2]\n- **속성 관리**: 담당자, 라벨, 중요도(5단계), 긴급도(4단계), 투표, 예상 기간, 예상 시작일을 설정해 작업 정보를 관리할 수 있습니다. [3]\n- **전환**: `전환` 버튼으로 백로그 항목을 프로젝트·목표·작업으로 전환할 수 있으며, 작업으로 전환하면 기존 정보가 유지됩니다. [4]",
+          "citations": [
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "개요"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            },
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "구조"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            },
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "속성"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            },
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "작업으로 전환"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            }
+          ],
+          "latencyMs": 5099,
+          "inputTokens": 10419,
+          "outputTokens": 404,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "FEATURE_SUMMARY",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "백로그 기능의 목적과 활용",
+                  "source_ids": [
+                    "SOURCE_3"
+                  ]
+                },
+                {
+                  "information_unit": "백로그의 구조와 정리 방식",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                },
+                {
+                  "information_unit": "백로그에서 제공하는 주요 속성 정보",
+                  "source_ids": [
+                    "SOURCE_4"
+                  ]
+                },
+                {
+                  "information_unit": "백로그 항목을 프로젝트·목표·작업으로 전환하는 기능",
+                  "source_ids": [
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_3",
+              "SOURCE_1",
+              "SOURCE_4",
+              "SOURCE_2"
+            ],
+            "selectedSectionIds": [
+              "11957633d8b2:a6f5feefa6e5",
+              "11957633d8b2:8e468f02bf3a",
+              "11957633d8b2:aa8af54aa5cd",
+              "11957633d8b2:26264fecfd4a"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC008",
+          "turnNo": 1,
+          "description": "워크스페이스 결제 단위 직접 답변 회귀",
+          "originalQuestion": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "generationQuery": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "expected": {
+            "question": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "워크스페이스"
+              ],
+              [
+                "Business"
+              ],
+              [
+                "사용자",
+                "시트",
+                "멤버"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구독 및 결제"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "네. 뤼이도 요금제는 개인별이 아니라 워크스페이스 단위로 구독·결제 정보가 적용되므로, 관리자가 속한 워크스페이스가 Business 요금제라면 그 워크스페이스에 포함된 다른 팀원에게도 해당 요금제가 적용됩니다. 요금은 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "구독 및 결제",
+              "sectionPath": [
+                "구독 및 결제",
+                "결제"
+              ],
+              "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md"
+            }
+          ],
+          "latencyMs": 5240,
+          "inputTokens": 10832,
+          "outputTokens": 336,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "관리자가 Business 요금제인 워크스페이스에서 다른 팀원들에게도 해당 요금제가 적용되는지 여부",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5"
+            ],
+            "selectedSectionIds": [
+              "95a1b20de638:dd62a0b71715"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    },
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "repeatNo": 3,
+      "results": [
+        {
+          "caseId": "RC006",
+          "turnNo": 1,
+          "description": "프로젝트를 백로그로 역이동할 수 있는지 문의",
+          "originalQuestion": "혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?",
+          "generationQuery": "혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?",
+          "expected": {
+            "question": "혹시 작업 목록에 있는 프로젝트를 백로그로 이동시킬 수 있나요?",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "RELATED_GUIDANCE",
+            "expectedLeadConceptGroups": [
+              [
+                "프로젝트"
+              ],
+              [
+                "백로그"
+              ],
+              [
+                "확인할 수 없",
+                "확인되지 않",
+                "근거가 없"
+              ]
+            ],
+            "expectedAnswerConceptGroups": [
+              [
+                "백로그"
+              ],
+              [
+                "프로젝트",
+                "목표",
+                "작업"
+              ],
+              [
+                "반대",
+                "역방향",
+                "방향과는 다",
+                "요청하신 방향과 다"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "계획: 백로그"
+            ],
+            "forbiddenAnswerPhrases": [
+              "프로젝트를 백로그로 이동할 수 있습니다"
+            ],
+            "manualReviewCriteria": [
+              "프로젝트에서 백로그로 이동할 수 있다고 추론하지 않는다.",
+              "백로그에서 프로젝트·목표·작업으로 전환하는 반대 방향임을 명시한다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "작업 목록에 있는 프로젝트를 백로그로 이동할 수 있는지와 그 방법은 제공된 안내에서 확인되지 않습니다.\n\n공식 안내에는 **백로그 항목을 프로젝트로 전환**하는 절차가 안내되어 있습니다. 이는 요청하신 프로젝트를 백로그로 이동하는 방향과는 반대입니다.\n\n백로그에서 `전환` 버튼을 누르면 프로젝트, 목표 또는 작업으로 전환할 수 있으며, 작업으로 전환할 때는 기존 정보가 유지됩니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "작업으로 전환"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            }
+          ],
+          "latencyMs": 5937,
+          "inputTokens": 10026,
+          "outputTokens": 376,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "RELATED_GUIDANCE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "작업 목록에 있는 프로젝트를 백로그로 이동할 수 있는지와 그 방법"
+              ],
+              "related_guidance": [
+                {
+                  "information_unit": "백로그를 프로젝트로 전환하는 공식 절차(요청한 프로젝트→백로그 이동과는 반대 방향)",
+                  "source_ids": [
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_2"
+            ],
+            "selectedSectionIds": [
+              "11957633d8b2:26264fecfd4a"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC007",
+          "turnNo": 1,
+          "description": "특정 워크스페이스의 결제 완료 상태 조회",
+          "originalQuestion": "현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.",
+          "generationQuery": "현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.",
+          "expected": {
+            "question": "현재 제 워크스페이스가 결제 완료되었는지 궁금합니다.",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "RELATED_GUIDANCE",
+            "expectedLeadConceptGroups": [
+              [
+                "결제"
+              ],
+              [
+                "완료",
+                "상태"
+              ],
+              [
+                "확인할 수 없",
+                "확인해 드릴 수 없",
+                "확인되지 않",
+                "알 수 없"
+              ]
+            ],
+            "expectedAnswerConceptGroups": [
+              [
+                "설정"
+              ],
+              [
+                "워크스페이스"
+              ],
+              [
+                "청구"
+              ],
+              [
+                "요금제",
+                "결제 정보"
+              ],
+              [
+                "이전 결제 내역",
+                "결제 내역"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구독 및 결제"
+            ],
+            "forbiddenAnswerPhrases": [
+              "결제가 완료되었습니다"
+            ],
+            "manualReviewCriteria": [
+              "사용자의 실제 결제 완료 여부를 단정하지 않는다.",
+              "일반 결제·환불 정책이 아니라 청구 확인 위치만 관련 안내로 제공한다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "현재 워크스페이스에서 결제가 실제로 완료되었는지는 제공된 안내만으로 확인할 수 없습니다.\n\n결제 상태와 관련 정보는 설정 페이지의 **워크스페이스 > 청구**에서 확인할 수 있습니다. 이곳에서 현재 워크스페이스의 요금제, 결제 정보, 이전 결제 내역을 확인하세요. [1]",
+          "citations": [
+            {
+              "documentTitle": "구독 및 결제",
+              "sectionPath": [
+                "구독 및 결제",
+                "결제 및 청구 관리"
+              ],
+              "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md"
+            }
+          ],
+          "latencyMs": 4322,
+          "inputTokens": 10279,
+          "outputTokens": 219,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "RELATED_GUIDANCE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "현재 사용자의 워크스페이스에서 결제가 실제로 완료되었는지 여부"
+              ],
+              "related_guidance": [
+                {
+                  "information_unit": "워크스페이스의 요금제·결제 정보·이전 결제 내역 확인 위치",
+                  "source_ids": [
+                    "SOURCE_2"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_2"
+            ],
+            "selectedSectionIds": [
+              "95a1b20de638:5e49b96fcb2e"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC018",
+          "turnNo": 2,
+          "description": "캘린더 동기화 이유 대신 공식 적용 범위를 안내",
+          "originalQuestion": "해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!",
+          "generationQuery": "해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!",
+          "expected": {
+            "fixtureTurnNo": 2,
+            "question": "해결했습니다! 근데 캘린더가 미팅에서만 연동되는 이유가 있을까요? 작업에 있는 캘린더에는 연동이 안되는거 같아서요!",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "RELATED_GUIDANCE",
+            "expectedLeadConceptGroups": [
+              [
+                "이유",
+                "원인"
+              ],
+              [
+                "확인할 수 없",
+                "확인되지 않",
+                "설명하지 않",
+                "나와 있지 않"
+              ]
+            ],
+            "expectedAnswerConceptGroups": [
+              [
+                "미팅"
+              ],
+              [
+                "작업"
+              ],
+              [
+                "마감일"
+              ],
+              [
+                "연동 대상이 아",
+                "연동 대상에 포함되지 않",
+                "동기화되지 않",
+                "연동되지 않"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구글 캘린더"
+            ],
+            "manualReviewCriteria": [
+              "공식 적용 범위를 연동 이유로 바꿔서 설명하지 않는다.",
+              "미팅만 양방향 연동되고 작업 마감일은 대상이 아니라는 범위만 안내한다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "캘린더 연동이 미팅에만 적용되고 작업의 마감일·일정 정보에는 적용되지 않는 이유는 제공된 안내에서 확인할 수 없습니다.\n\n현재 구글 캘린더 양방향 연동은 뤼이도 내부의 **미팅**에만 적용됩니다. 작업의 마감일이나 그 밖의 일정 정보는 현재 연동 대상이 아닙니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "구글 캘린더",
+              "sectionPath": [
+                "구글 캘린더",
+                "자주 묻는 질문 (FAQ)"
+              ],
+              "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md"
+            }
+          ],
+          "latencyMs": 5094,
+          "inputTokens": 10533,
+          "outputTokens": 339,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "RELATED_GUIDANCE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "캘린더 연동이 미팅에만 적용되고 작업의 캘린더(마감일·일정 정보)에는 적용되지 않는 이유"
+              ],
+              "related_guidance": [
+                {
+                  "information_unit": "구글 캘린더 연동의 현재 적용 범위: 뤼이도 내부 미팅만 양방향 연동되며, 작업 마감일과 다른 일정 정보는 연동 대상이 아님",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_1"
+            ],
+            "selectedSectionIds": [
+              "5623097e1502:76d8211bc501"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC040",
+          "turnNo": 1,
+          "description": "워크스페이스 삭제·이름·Key 변경 복합 질문의 부분 답변 금지",
+          "originalQuestion": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "generationQuery": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "expected": {
+            "question": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+            "expectedStatus": "WITHHELD",
+            "expectedPlanningStatus": "WITHHELD",
+            "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+            "manualReviewCriteria": [
+              "삭제 영향·이름 변경·Key 변경 중 일부만 관련 안내로 제공하지 않는다.",
+              "PARTIAL 상태나 부분 답변을 암묵적으로 만들지 않는다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "WITHHELD",
+          "withheldReason": "INSUFFICIENT_EVIDENCE",
+          "answerMarkdown": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다.",
+          "citations": [],
+          "latencyMs": 3581,
+          "inputTokens": 6556,
+          "outputTokens": 251,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "WITHHELD",
+              "answer_type": "GENERAL",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "워크스페이스를 삭제했을 때 다른 워크스페이스를 포함한 데이터·접근 범위에 미치는 영향",
+                "새 워크스페이스를 생성하지 않고 기존 워크스페이스 이름을 변경하는 방법",
+                "넘버링 앞에 사용하는 Key 값을 변경하는 방법"
+              ],
+              "related_guidance": [],
+              "withheld_reason": "INSUFFICIENT_EVIDENCE"
+            },
+            "selectedSourceIds": [],
+            "selectedSectionIds": [],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 0,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC012",
+          "turnNo": 2,
+          "description": "소셜 로그인 비밀번호 질문에 무관한 근거 사용 금지",
+          "originalQuestion": "비번찾기 누르면 외부 서비스 로그인으로 회원가입된 계정은 비밀번호를 찾을 수 없습니다라고 뜨네요. 아예 외부 서비스로 가입하면 비번 자체가 없는 건가요?",
+          "generationQuery": "비번찾기 누르면 외부 서비스 로그인으로 회원가입된 계정은 비밀번호를 찾을 수 없습니다라고 뜨네요. 아예 외부 서비스로 가입하면 비번 자체가 없는 건가요?",
+          "expected": {
+            "fixtureTurnNo": 2,
+            "question": "비번찾기 누르면 외부 서비스 로그인으로 회원가입된 계정은 비밀번호를 찾을 수 없습니다라고 뜨네요. 아예 외부 서비스로 가입하면 비번 자체가 없는 건가요?",
+            "expectedStatus": "WITHHELD",
+            "expectedPlanningStatus": "WITHHELD",
+            "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+            "manualReviewCriteria": [
+              "비밀번호와 단어만 겹치는 다른 기능 문서를 관련 안내로 사용하지 않는다.",
+              "외부 서비스 계정의 비밀번호 존재 여부를 추론하지 않는다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "WITHHELD",
+          "withheldReason": "INSUFFICIENT_EVIDENCE",
+          "answerMarkdown": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다.",
+          "citations": [],
+          "latencyMs": 2561,
+          "inputTokens": 7079,
+          "outputTokens": 154,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "WITHHELD",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "외부 서비스 로그인으로 회원가입된 계정에 별도 비밀번호가 존재하는지 여부와 비밀번호 찾기 제한의 조건"
+              ],
+              "related_guidance": [],
+              "withheld_reason": "INSUFFICIENT_EVIDENCE"
+            },
+            "selectedSourceIds": [],
+            "selectedSectionIds": [],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 0,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC010",
+          "turnNo": 1,
+          "description": "백로그 정의 직접 답변 회귀",
+          "originalQuestion": "백로그가 뭐여",
+          "generationQuery": "백로그가 뭐여",
+          "expected": {
+            "question": "백로그가 뭐여",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "백로그"
+              ],
+              [
+                "계획",
+                "정리"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "계획: 백로그"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "백로그는 검토를 마친 작업을 구조적으로 정리하고, 우선순위와 실행 순서를 계획하는 공간입니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "개요"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            }
+          ],
+          "latencyMs": 3110,
+          "inputTokens": 9835,
+          "outputTokens": 138,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "DEFINITION",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "백로그의 의미와 용도",
+                  "source_ids": [
+                    "SOURCE_3"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_3"
+            ],
+            "selectedSectionIds": [
+              "11957633d8b2:a6f5feefa6e5"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC023",
+          "turnNo": 1,
+          "description": "백로그 기능 요약 직접 답변 회귀",
+          "originalQuestion": "백로그 기능 설명",
+          "generationQuery": "백로그 기능 설명",
+          "expected": {
+            "question": "백로그 기능 설명",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "백로그"
+              ],
+              [
+                "우선순위",
+                "계획"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "계획: 백로그"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "백로그는 검토를 마친 작업을 구조적으로 정리하고 우선순위와 실행 순서를 계획하는 기능입니다. [1]\n\n- **섹션·아이템 구조**: 백로그 섹션과 그 안의 백로그 아이템으로 이루어진 2단계 구조로, 주제별로 항목을 정리하고 필요한 정보를 한눈에 확인할 수 있습니다. [2]\n- **전환**: `전환` 버튼으로 백로그 항목을 프로젝트, 목표 또는 작업으로 전환할 수 있으며, 작업으로 전환해도 기존 정보는 유지됩니다. [3]\n- **속성 정보**: 담당자, 라벨, 중요도, 긴급도, 투표, 예상 기간, 예상 시작일을 지정할 수 있습니다. [4]",
+          "citations": [
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "개요"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            },
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "구조"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            },
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "작업으로 전환"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            },
+            {
+              "documentTitle": "계획: 백로그",
+              "sectionPath": [
+                "계획: 백로그",
+                "속성"
+              ],
+              "sourceUrl": "https://docs.riido.io/issues/backlog.md"
+            }
+          ],
+          "latencyMs": 7509,
+          "inputTokens": 10431,
+          "outputTokens": 493,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "FEATURE_SUMMARY",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "백로그의 목적과 계획 단계에서의 활용",
+                  "source_ids": [
+                    "SOURCE_3"
+                  ]
+                },
+                {
+                  "information_unit": "백로그 섹션과 백로그 아이템으로 구성된 정리 구조",
+                  "source_ids": [
+                    "SOURCE_1"
+                  ]
+                },
+                {
+                  "information_unit": "백로그 항목을 프로젝트·목표·작업으로 전환하는 기능",
+                  "source_ids": [
+                    "SOURCE_2"
+                  ]
+                },
+                {
+                  "information_unit": "백로그에서 지정할 수 있는 속성 정보",
+                  "source_ids": [
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_3",
+              "SOURCE_1",
+              "SOURCE_2",
+              "SOURCE_4"
+            ],
+            "selectedSectionIds": [
+              "11957633d8b2:a6f5feefa6e5",
+              "11957633d8b2:8e468f02bf3a",
+              "11957633d8b2:26264fecfd4a",
+              "11957633d8b2:aa8af54aa5cd"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC008",
+          "turnNo": 1,
+          "description": "워크스페이스 결제 단위 직접 답변 회귀",
+          "originalQuestion": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "generationQuery": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "expected": {
+            "question": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "워크스페이스"
+              ],
+              [
+                "Business"
+              ],
+              [
+                "사용자",
+                "시트",
+                "멤버"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구독 및 결제"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "네. 뤼이도는 워크스페이스 단위로 하나의 구독과 결제 정보를 가지므로, 관리자가 속한 워크스페이스가 Business 요금제라면 같은 워크스페이스에 포함된 다른 팀원에게도 해당 요금제가 적용됩니다. 요금은 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "구독 및 결제",
+              "sectionPath": [
+                "구독 및 결제",
+                "결제"
+              ],
+              "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md"
+            }
+          ],
+          "latencyMs": 5756,
+          "inputTokens": 10832,
+          "outputTokens": 358,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "관리자가 Business 요금제이면 같은 워크스페이스의 다른 팀원들에게도 Business 요금제가 적용되는지",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5"
+            ],
+            "selectedSectionIds": [
+              "95a1b20de638:dd62a0b71715"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    }
+  ],
+  "summaries": [
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "turnExecutionCount": 24,
+      "passedCount": 24,
+      "failedCount": 0,
+      "errorCount": 0,
+      "completedCount": 18,
+      "withheldCount": 6,
+      "inputTokens": 226676,
+      "outputTokens": 6537,
+      "estimatedCostUsd": 0.531796,
+      "averageLatencyMs": 4582,
+      "p50LatencyMs": 4644,
+      "p95LatencyMs": 6379,
+      "planningRegenerationCount": 0,
+      "validationRegenerationCount": 0
+    }
+  ]
+}

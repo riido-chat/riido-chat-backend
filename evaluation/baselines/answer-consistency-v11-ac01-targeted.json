@@ -1,0 +1,3608 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-06T05:24:28.181643+00:00",
+  "casesVersion": "answer-consistency-v1",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "4ec0c8a00423b51d0b624319caa314983d033301",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.4-mini"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v3",
+        "sha256": "7bc9d807d37827d2a8f2b2e8bc9b184191c5cc4b947b3c78c9dd991da2d8c801"
+      },
+      "sourcePlanning": {
+        "version": "v10",
+        "sha256": "c4199751fb13f059e8179408c7f0b8a8746d13ef0404304925b451d17041c984"
+      },
+      "sourcePlanRegeneration": {
+        "version": "v10-plan-repair-1",
+        "sha256": "1a2fc28ce1aa6727b34d35bc3acbe05eced8a4543b386562bb049f4faa505bea"
+      },
+      "answer": {
+        "version": "v11",
+        "sha256": "ed20456e292708e1aff3d1362186c4bacdc7690fe10e8210a1b2ddb5a4ff6860"
+      },
+      "answerValidationRegeneration": {
+        "version": "v11-repair-1",
+        "sha256": "e6326642eb795b5badc4e66cb715e9d6c87765c6fa0c797efce93bfcc4dde621"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "4ec0c8a00423b51d0b624319caa314983d033301",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v11"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 10,
+    "uniqueCaseCount": 1,
+    "totalCaseExecutionCount": 10,
+    "passedCaseExecutionCount": 10,
+    "failedCaseExecutionCount": 0,
+    "perCase": [
+      {
+        "id": "AC01",
+        "executionCount": 10,
+        "passedCount": 10,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "NEW_CONVERSATION",
+        "executionCount": 10,
+        "passedCount": 10,
+        "failedCount": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-06T05:23:55.672030+00:00",
+      "results": [
+        {
+          "id": "AC01",
+          "description": "정상 단독 질문: 디스코드 정의와 뤼이도 연동 역할",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "19dbab8d-5f48-4a2f-bc11-1f04d466ec48",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "디스코드는 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "19dbab8d-5f48-4a2f-bc11-1f04d466ec48",
+                "ragRunId": "beff184e-eec3-48d2-b25c-4fb63dbf7fc2",
+                "answer": {
+                  "answerMarkdown": "디스코드는 팀이 주요 소통 도구로 사용하는 공간입니다. [1]\n\n뤼이도와 디스코드를 연동하면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. 또한 작업 변경 사항을 즉시 팀에 공유할 수 있고, 작업 맥락 누락을 방지할 수 있습니다. [1][2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "디스코드 연동으로 얻는 핵심 가치"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "디스코드는 뭐야?",
+                "resolvedQuery": "디스코드는 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 4003,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 9,
+                    "outputTokens": null,
+                    "latencyMs": 710,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v11",
+                    "inputTokens": 5237,
+                    "outputTokens": 197,
+                    "latencyMs": 3180,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "디스코드",
+                  "디스코드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "디스코드는 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "디스코드는 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3340,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:20faf711ea89",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "740efefc6c1be27207ea3aa49ad4c3f5ee7b45ebb2f181e38508f5311d87dc96",
+                        "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.443523086806051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.4500844426022126,
+                            "latencyMs": 754
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3341,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:d048c70e1bf1",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "디스코드 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "1236eade37752ebc92cc927657dd5da2b25cd6a059476d51be65cfa253805a8c",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 5.329739894265772,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.40146058633450954,
+                            "latencyMs": 754
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3343,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:2a2928a908fc",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "50e0a89fdf07635cab19daf5ca2eec60bfd0e719b008924f4fad33f2c2004891",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 디스코드 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 디스코드 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.516822629201774,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.38750627568523044,
+                            "latencyMs": 754
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.544238452900547,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3940666380733636,
+                            "latencyMs": 754
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.8135478929837525,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.24088559411360855,
+                            "latencyMs": 754
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v11",
+                        "inputTokens": 5237,
+                        "outputTokens": 197,
+                        "latencyMs": 3180,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "디스코드 연동의 기능/의미",
+                            "source_ids": [
+                              "SOURCE_1",
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3340,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:20faf711ea89",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3341,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:d048c70e1bf1",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "디스코드 연동으로 얻는 핵심 가치"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 공간입니다. [SOURCE_1]\n\n뤼이도와 디스코드를 연동하면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. 또한 작업 변경 사항을 즉시 팀에 공유할 수 있고, 작업 맥락 누락을 방지할 수 있습니다. [SOURCE_1][SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "디스코드는 팀이 주요 소통 도구로 사용하는 공간입니다. [1]\n\n뤼이도와 디스코드를 연동하면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. 또한 작업 변경 사항을 즉시 팀에 공유할 수 있고, 작업 맥락 누락을 방지할 수 있습니다. [1][2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    },
+    {
+      "repeatNo": 2,
+      "executedAt": "2026-09-06T05:23:59.747260+00:00",
+      "results": [
+        {
+          "id": "AC01",
+          "description": "정상 단독 질문: 디스코드 정의와 뤼이도 연동 역할",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "6507fcf9-20de-497a-8df1-373db675a036",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "디스코드는 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "6507fcf9-20de-497a-8df1-373db675a036",
+                "ragRunId": "d48b50e1-b3cd-46ce-b749-5e94d5b379f9",
+                "answer": {
+                  "answerMarkdown": "디스코드는 팀이 주요 소통 도구로 사용하는 공간입니다. [1]\n\n뤼이도와 연동되면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. 또한 작업 변경 사항을 즉시 팀에 공유할 수 있고, 작업 맥락 누락을 방지할 수 있습니다. [1] [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "디스코드 연동으로 얻는 핵심 가치"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "디스코드는 뭐야?",
+                "resolvedQuery": "디스코드는 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2882,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 9,
+                    "outputTokens": null,
+                    "latencyMs": 277,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v11",
+                    "inputTokens": 5233,
+                    "outputTokens": 191,
+                    "latencyMs": 2548,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "디스코드",
+                  "디스코드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "디스코드는 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "디스코드는 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3340,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:20faf711ea89",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "740efefc6c1be27207ea3aa49ad4c3f5ee7b45ebb2f181e38508f5311d87dc96",
+                        "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.443523086806051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.4500844426022126,
+                            "latencyMs": 295
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3341,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:d048c70e1bf1",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "디스코드 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "1236eade37752ebc92cc927657dd5da2b25cd6a059476d51be65cfa253805a8c",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 5.329739894265772,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.40146058633450954,
+                            "latencyMs": 295
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3343,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:2a2928a908fc",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "50e0a89fdf07635cab19daf5ca2eec60bfd0e719b008924f4fad33f2c2004891",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 디스코드 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 디스코드 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.516822629201774,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.38750627568523044,
+                            "latencyMs": 295
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.544238452900547,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3940666380733636,
+                            "latencyMs": 295
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.8135478929837525,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.24088559411360855,
+                            "latencyMs": 295
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v11",
+                        "inputTokens": 5233,
+                        "outputTokens": 191,
+                        "latencyMs": 2548,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "디스코드가 무엇인지",
+                            "source_ids": [
+                              "SOURCE_1",
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3340,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:20faf711ea89",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3341,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:d048c70e1bf1",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "디스코드 연동으로 얻는 핵심 가치"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 공간입니다. [SOURCE_1]\n\n뤼이도와 연동되면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. 또한 작업 변경 사항을 즉시 팀에 공유할 수 있고, 작업 맥락 누락을 방지할 수 있습니다. [SOURCE_1] [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "디스코드는 팀이 주요 소통 도구로 사용하는 공간입니다. [1]\n\n뤼이도와 연동되면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. 또한 작업 변경 사항을 즉시 팀에 공유할 수 있고, 작업 맥락 누락을 방지할 수 있습니다. [1] [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 2
+        }
+      ]
+    },
+    {
+      "repeatNo": 3,
+      "executedAt": "2026-09-06T05:24:02.664572+00:00",
+      "results": [
+        {
+          "id": "AC01",
+          "description": "정상 단독 질문: 디스코드 정의와 뤼이도 연동 역할",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "c6c39e23-2643-440a-ad80-6534a3d158eb",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "디스코드는 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "c6c39e23-2643-440a-ad80-6534a3d158eb",
+                "ragRunId": "7cc21ec0-f687-413a-9475-40f31d48529f",
+                "answer": {
+                  "answerMarkdown": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. [1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "디스코드는 뭐야?",
+                "resolvedQuery": "디스코드는 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2609,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 9,
+                    "outputTokens": null,
+                    "latencyMs": 150,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v11",
+                    "inputTokens": 4850,
+                    "outputTokens": 159,
+                    "latencyMs": 2397,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "디스코드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "디스코드는 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "디스코드는 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3340,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:20faf711ea89",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "740efefc6c1be27207ea3aa49ad4c3f5ee7b45ebb2f181e38508f5311d87dc96",
+                        "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.443523086806051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.4500844426022126,
+                            "latencyMs": 166
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3341,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:d048c70e1bf1",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "디스코드 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "1236eade37752ebc92cc927657dd5da2b25cd6a059476d51be65cfa253805a8c",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 5.329739894265772,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.40146058633450954,
+                            "latencyMs": 166
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3343,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:2a2928a908fc",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "50e0a89fdf07635cab19daf5ca2eec60bfd0e719b008924f4fad33f2c2004891",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 디스코드 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 디스코드 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.516822629201774,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.38750627568523044,
+                            "latencyMs": 166
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.544238452900547,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3940666380733636,
+                            "latencyMs": 166
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.8135478929837525,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.24088559411360855,
+                            "latencyMs": 166
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v11",
+                        "inputTokens": 4850,
+                        "outputTokens": 159,
+                        "latencyMs": 2397,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "디스코드가 무엇인지",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3340,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:20faf711ea89",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. [SOURCE_1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. [1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 3
+        }
+      ]
+    },
+    {
+      "repeatNo": 4,
+      "executedAt": "2026-09-06T05:24:05.326709+00:00",
+      "results": [
+        {
+          "id": "AC01",
+          "description": "정상 단독 질문: 디스코드 정의와 뤼이도 연동 역할",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "4bf92dc8-d2dc-4b43-ac83-6a286d05a27d",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "디스코드는 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "4bf92dc8-d2dc-4b43-ac83-6a286d05a27d",
+                "ragRunId": "b1aab163-53eb-4d1b-a860-98e4c933a20c",
+                "answer": {
+                  "answerMarkdown": "디스코드는 팀이 주요 소통 도구로 사용하는 도구입니다. [1]\n\n뤼이도와 디스코드를 연동하면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "디스코드는 뭐야?",
+                "resolvedQuery": "디스코드는 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 3015,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 9,
+                    "outputTokens": null,
+                    "latencyMs": 169,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v11",
+                    "inputTokens": 4849,
+                    "outputTokens": 164,
+                    "latencyMs": 2781,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "디스코드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "디스코드는 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "디스코드는 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3340,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:20faf711ea89",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "740efefc6c1be27207ea3aa49ad4c3f5ee7b45ebb2f181e38508f5311d87dc96",
+                        "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.443523086806051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.4500844426022126,
+                            "latencyMs": 187
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3341,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:d048c70e1bf1",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "디스코드 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "1236eade37752ebc92cc927657dd5da2b25cd6a059476d51be65cfa253805a8c",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 5.329739894265772,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.40146058633450954,
+                            "latencyMs": 187
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3343,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:2a2928a908fc",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "50e0a89fdf07635cab19daf5ca2eec60bfd0e719b008924f4fad33f2c2004891",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 디스코드 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 디스코드 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.516822629201774,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.38750627568523044,
+                            "latencyMs": 187
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.544238452900547,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3940666380733636,
+                            "latencyMs": 187
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.8135478929837525,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.24088559411360855,
+                            "latencyMs": 187
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v11",
+                        "inputTokens": 4849,
+                        "outputTokens": 164,
+                        "latencyMs": 2781,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "디스코드는 뭐야",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3340,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:20faf711ea89",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 도구입니다. [SOURCE_1]\n\n뤼이도와 디스코드를 연동하면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "디스코드는 팀이 주요 소통 도구로 사용하는 도구입니다. [1]\n\n뤼이도와 디스코드를 연동하면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 4
+        }
+      ]
+    },
+    {
+      "repeatNo": 5,
+      "executedAt": "2026-09-06T05:24:08.387126+00:00",
+      "results": [
+        {
+          "id": "AC01",
+          "description": "정상 단독 질문: 디스코드 정의와 뤼이도 연동 역할",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "56d6db5e-0683-47ea-b0ec-0fe5d0614a93",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "디스코드는 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "56d6db5e-0683-47ea-b0ec-0fe5d0614a93",
+                "ragRunId": "f231bb12-d950-4917-aa56-d02007615f39",
+                "answer": {
+                  "answerMarkdown": "디스코드는 팀이 주요 소통 도구로 사용하는 도구입니다. [1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "디스코드는 뭐야?",
+                "resolvedQuery": "디스코드는 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 3322,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 9,
+                    "outputTokens": null,
+                    "latencyMs": 138,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v11",
+                    "inputTokens": 4850,
+                    "outputTokens": 166,
+                    "latencyMs": 3120,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "디스코드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "디스코드는 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "디스코드는 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3340,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:20faf711ea89",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "740efefc6c1be27207ea3aa49ad4c3f5ee7b45ebb2f181e38508f5311d87dc96",
+                        "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.443523086806051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.4500844426022126,
+                            "latencyMs": 154
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3341,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:d048c70e1bf1",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "디스코드 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "1236eade37752ebc92cc927657dd5da2b25cd6a059476d51be65cfa253805a8c",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 5.329739894265772,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.40146058633450954,
+                            "latencyMs": 154
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3343,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:2a2928a908fc",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "50e0a89fdf07635cab19daf5ca2eec60bfd0e719b008924f4fad33f2c2004891",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 디스코드 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 디스코드 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.516822629201774,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.38750627568523044,
+                            "latencyMs": 154
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.544238452900547,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3940666380733636,
+                            "latencyMs": 154
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.8135478929837525,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.24088559411360855,
+                            "latencyMs": 154
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v11",
+                        "inputTokens": 4850,
+                        "outputTokens": 166,
+                        "latencyMs": 3120,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "디스코드가 무엇인지",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3340,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:20faf711ea89",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 도구입니다. [SOURCE_1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "디스코드는 팀이 주요 소통 도구로 사용하는 도구입니다. [1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 5
+        }
+      ]
+    },
+    {
+      "repeatNo": 6,
+      "executedAt": "2026-09-06T05:24:11.748031+00:00",
+      "results": [
+        {
+          "id": "AC01",
+          "description": "정상 단독 질문: 디스코드 정의와 뤼이도 연동 역할",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "1972873b-50ac-43d9-bbac-24057c167e20",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "디스코드는 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "1972873b-50ac-43d9-bbac-24057c167e20",
+                "ragRunId": "cba6a503-54ca-494f-bd1f-1f58798a3391",
+                "answer": {
+                  "answerMarkdown": "디스코드는 팀이 주요 소통 도구로 사용하는 공간입니다. [1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "디스코드는 뭐야?",
+                "resolvedQuery": "디스코드는 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 3288,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 9,
+                    "outputTokens": null,
+                    "latencyMs": 147,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v11",
+                    "inputTokens": 4850,
+                    "outputTokens": 159,
+                    "latencyMs": 3066,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "디스코드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "디스코드는 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "디스코드는 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3340,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:20faf711ea89",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "740efefc6c1be27207ea3aa49ad4c3f5ee7b45ebb2f181e38508f5311d87dc96",
+                        "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.443523086806051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.4500844426022126,
+                            "latencyMs": 164
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3341,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:d048c70e1bf1",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "디스코드 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "1236eade37752ebc92cc927657dd5da2b25cd6a059476d51be65cfa253805a8c",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 5.329739894265772,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.40146058633450954,
+                            "latencyMs": 164
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3343,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:2a2928a908fc",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "50e0a89fdf07635cab19daf5ca2eec60bfd0e719b008924f4fad33f2c2004891",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 디스코드 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 디스코드 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.516822629201774,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.38750627568523044,
+                            "latencyMs": 164
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.544238452900547,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3940666380733636,
+                            "latencyMs": 164
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.8135478929837525,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.24088559411360855,
+                            "latencyMs": 164
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v11",
+                        "inputTokens": 4850,
+                        "outputTokens": 159,
+                        "latencyMs": 3066,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "디스코드의 개요",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3340,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:20faf711ea89",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 공간입니다. [SOURCE_1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "디스코드는 팀이 주요 소통 도구로 사용하는 공간입니다. [1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 6
+        }
+      ]
+    },
+    {
+      "repeatNo": 7,
+      "executedAt": "2026-09-06T05:24:15.061918+00:00",
+      "results": [
+        {
+          "id": "AC01",
+          "description": "정상 단독 질문: 디스코드 정의와 뤼이도 연동 역할",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "806e9686-2b90-4161-834f-44ed3aca6177",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "디스코드는 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "806e9686-2b90-4161-834f-44ed3aca6177",
+                "ragRunId": "5fe02efc-f5ef-4b65-8098-ca630f53d9b9",
+                "answer": {
+                  "answerMarkdown": "디스코드는 팀이 주요 소통 도구로 사용하는 도구입니다. [1]\n\n뤼이도와 디스코드가 연동되면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다. [1] [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "디스코드 연동으로 얻는 핵심 가치"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "디스코드는 뭐야?",
+                "resolvedQuery": "디스코드는 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2910,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 9,
+                    "outputTokens": null,
+                    "latencyMs": 152,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v11",
+                    "inputTokens": 5232,
+                    "outputTokens": 175,
+                    "latencyMs": 2724,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "디스코드",
+                  "디스코드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "디스코드는 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "디스코드는 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3340,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:20faf711ea89",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "740efefc6c1be27207ea3aa49ad4c3f5ee7b45ebb2f181e38508f5311d87dc96",
+                        "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.443523086806051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.4500844426022126,
+                            "latencyMs": 162
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3341,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:d048c70e1bf1",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "디스코드 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "1236eade37752ebc92cc927657dd5da2b25cd6a059476d51be65cfa253805a8c",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 5.329739894265772,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.40146058633450954,
+                            "latencyMs": 162
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3343,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:2a2928a908fc",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "50e0a89fdf07635cab19daf5ca2eec60bfd0e719b008924f4fad33f2c2004891",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 디스코드 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 디스코드 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.516822629201774,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.38750627568523044,
+                            "latencyMs": 162
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.544238452900547,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3940666380733636,
+                            "latencyMs": 162
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.8135478929837525,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.24088559411360855,
+                            "latencyMs": 162
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v11",
+                        "inputTokens": 5232,
+                        "outputTokens": 175,
+                        "latencyMs": 2724,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "디스코드는 뭐야",
+                            "source_ids": [
+                              "SOURCE_1",
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3340,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:20faf711ea89",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3341,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:d048c70e1bf1",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "디스코드 연동으로 얻는 핵심 가치"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 도구입니다. [SOURCE_1]\n\n뤼이도와 디스코드가 연동되면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다. [SOURCE_1] [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "디스코드는 팀이 주요 소통 도구로 사용하는 도구입니다. [1]\n\n뤼이도와 디스코드가 연동되면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다. [1] [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 7
+        }
+      ]
+    },
+    {
+      "repeatNo": 8,
+      "executedAt": "2026-09-06T05:24:18.000004+00:00",
+      "results": [
+        {
+          "id": "AC01",
+          "description": "정상 단독 질문: 디스코드 정의와 뤼이도 연동 역할",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "cad27c33-25f1-4f3a-9543-4ac22d1ae7f1",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "디스코드는 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "cad27c33-25f1-4f3a-9543-4ac22d1ae7f1",
+                "ragRunId": "97a1b8cf-72b6-4389-973d-89bd8fb869cf",
+                "answer": {
+                  "answerMarkdown": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. [1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "디스코드는 뭐야?",
+                "resolvedQuery": "디스코드는 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 2886,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 9,
+                    "outputTokens": null,
+                    "latencyMs": 172,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v11",
+                    "inputTokens": 4850,
+                    "outputTokens": 159,
+                    "latencyMs": 2675,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "디스코드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "디스코드는 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "디스코드는 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3340,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:20faf711ea89",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "740efefc6c1be27207ea3aa49ad4c3f5ee7b45ebb2f181e38508f5311d87dc96",
+                        "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.443523086806051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.4500844426022126,
+                            "latencyMs": 183
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3341,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:d048c70e1bf1",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "디스코드 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "1236eade37752ebc92cc927657dd5da2b25cd6a059476d51be65cfa253805a8c",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 5.329739894265772,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.40146058633450954,
+                            "latencyMs": 183
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3343,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:2a2928a908fc",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "50e0a89fdf07635cab19daf5ca2eec60bfd0e719b008924f4fad33f2c2004891",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 디스코드 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 디스코드 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.516822629201774,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.38750627568523044,
+                            "latencyMs": 183
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.544238452900547,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3940666380733636,
+                            "latencyMs": 183
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.8135478929837525,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.24088559411360855,
+                            "latencyMs": 183
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v11",
+                        "inputTokens": 4850,
+                        "outputTokens": 159,
+                        "latencyMs": 2675,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "디스코드가 무엇인지",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3340,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:20faf711ea89",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. [SOURCE_1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. [1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의가 뤼이도에 자동으로 기록됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 8
+        }
+      ]
+    },
+    {
+      "repeatNo": 9,
+      "executedAt": "2026-09-06T05:24:20.914247+00:00",
+      "results": [
+        {
+          "id": "AC01",
+          "description": "정상 단독 질문: 디스코드 정의와 뤼이도 연동 역할",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "72e962b5-27ae-4f89-b7ad-2433b54eb492",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "디스코드는 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "72e962b5-27ae-4f89-b7ad-2433b54eb492",
+                "ragRunId": "4ae3a48c-6b57-4aaa-a710-7a982cde69be",
+                "answer": {
+                  "answerMarkdown": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. 뤼이도와 연동되면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 한 논의가 뤼이도에 자동으로 기록됩니다. [1]\n\n또한 이 연동을 통해 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동 공지가 줄고, 양방향 댓글 동기화로 작업 맥락 누락을 방지할 수 있습니다. 일일 리포트는 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 디스코드 채널로 전달하며, 협업 채널 일원화로 PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있습니다. [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "디스코드 연동으로 얻는 핵심 가치"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "디스코드는 뭐야?",
+                "resolvedQuery": "디스코드는 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 3668,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 9,
+                    "outputTokens": null,
+                    "latencyMs": 168,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v11",
+                    "inputTokens": 5240,
+                    "outputTokens": 281,
+                    "latencyMs": 3451,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "디스코드",
+                  "디스코드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "디스코드는 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "디스코드는 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3340,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:20faf711ea89",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "740efefc6c1be27207ea3aa49ad4c3f5ee7b45ebb2f181e38508f5311d87dc96",
+                        "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.443523086806051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.4500844426022126,
+                            "latencyMs": 183
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3341,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:d048c70e1bf1",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "디스코드 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "1236eade37752ebc92cc927657dd5da2b25cd6a059476d51be65cfa253805a8c",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 5.329739894265772,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.40146058633450954,
+                            "latencyMs": 183
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3343,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:2a2928a908fc",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "50e0a89fdf07635cab19daf5ca2eec60bfd0e719b008924f4fad33f2c2004891",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 디스코드 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 디스코드 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.516822629201774,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.38750627568523044,
+                            "latencyMs": 183
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.544238452900547,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3940666380733636,
+                            "latencyMs": 183
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.8135478929837525,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.24088559411360855,
+                            "latencyMs": 183
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v11",
+                        "inputTokens": 5240,
+                        "outputTokens": 281,
+                        "latencyMs": 3451,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "디스코드 연동의 기능/역할이 무엇인지",
+                            "source_ids": [
+                              "SOURCE_1",
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3340,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:20faf711ea89",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3341,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:d048c70e1bf1",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "디스코드 연동으로 얻는 핵심 가치"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. 뤼이도와 연동되면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 한 논의가 뤼이도에 자동으로 기록됩니다. [SOURCE_1]\n\n또한 이 연동을 통해 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동 공지가 줄고, 양방향 댓글 동기화로 작업 맥락 누락을 방지할 수 있습니다. 일일 리포트는 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 디스코드 채널로 전달하며, 협업 채널 일원화로 PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있습니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. 뤼이도와 연동되면 뤼이도의 핵심 업데이트가 실시간으로 디스코드에 전달되고, 디스코드에서 한 논의가 뤼이도에 자동으로 기록됩니다. [1]\n\n또한 이 연동을 통해 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동 공지가 줄고, 양방향 댓글 동기화로 작업 맥락 누락을 방지할 수 있습니다. 일일 리포트는 당일 오전의 미팅과 작업 현황을 자동 정리해 개인 디스코드 채널로 전달하며, 협업 채널 일원화로 PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있습니다. [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 9
+        }
+      ]
+    },
+    {
+      "repeatNo": 10,
+      "executedAt": "2026-09-06T05:24:24.621077+00:00",
+      "results": [
+        {
+          "id": "AC01",
+          "description": "정상 단독 질문: 디스코드 정의와 뤼이도 연동 역할",
+          "mode": "NEW_CONVERSATION",
+          "passed": true,
+          "conversationId": "b3d968fb-3188-4775-a8ba-bd6805404bcd",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "디스코드는 뭐야?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "b3d968fb-3188-4775-a8ba-bd6805404bcd",
+                "ragRunId": "ac7085c1-ac26-48db-9db7-45ced38205a4",
+                "answer": {
+                  "answerMarkdown": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. [1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트를 실시간으로 디스코드에 전달하고, 디스코드에서 이루어진 논의를 뤼이도에 자동으로 기록할 수 있습니다. [1]\n\n또한 이 연동의 가치로는 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄이고, 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지하며, 당일 오전의 미팅과 작업 현황을 개인 디스코드 채널로 자동 정리해 전달하고, PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있다는 점이 제시되어 있습니다. [2]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "개요"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  },
+                  {
+                    "citationNumber": 2,
+                    "documentTitle": "디스코드",
+                    "sectionPath": [
+                      "디스코드 연동으로 얻는 핵심 가치"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "디스코드는 뭐야?",
+                "resolvedQuery": "디스코드는 뭐야?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 3522,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 9,
+                    "outputTokens": null,
+                    "latencyMs": 159,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v11",
+                    "inputTokens": 5232,
+                    "outputTokens": 293,
+                    "latencyMs": 3312,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 2,
+                "citationDocumentTitles": [
+                  "디스코드",
+                  "디스코드"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "디스코드는 뭐야?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "디스코드는 뭐야?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3340,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:20faf711ea89",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "740efefc6c1be27207ea3aa49ad4c3f5ee7b45ebb2f181e38508f5311d87dc96",
+                        "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 6.443523086806051,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.4500844426022126,
+                            "latencyMs": 170
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3341,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:d048c70e1bf1",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "디스코드 연동으로 얻는 핵심 가치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "1236eade37752ebc92cc927657dd5da2b25cd6a059476d51be65cfa253805a8c",
+                        "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 5.329739894265772,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.40146058633450954,
+                            "latencyMs": 170
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3343,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:2a2928a908fc",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "자주 묻는 질문 (FAQ)"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "50e0a89fdf07635cab19daf5ca2eec60bfd0e719b008924f4fad33f2c2004891",
+                        "content": "### 요금제의 차이가 있나요?\n\n없습니다. 요금제의 종류와 무관하게 디스코드 연동의 모든 기능을 제약 없이 사용할 수 있습니다.\n\n### 알림이 너무 많이 와요.\n\n세부적인 알림 조정이 가능합니다.\n\n* 워크스페이스 전제 알림: \\[설정 > 워크스페이스 > 알림]에서 관리\n* 페이지 · 댓글 단위 알림: 각 페이지 우측 상단의 `···` 버튼을 클릭하여 ‘알림 받기/끄기’로 설정\n\n### 디스코드 연동에 대해 추가 지원을 받을 수 있나요?\n\n네, 언제든 환영합니다. 디스코드 연동 사용 중 발생하는 피드백이나 지원이 필요하다면 [고객 문의](https://swyg.channel.io/home)를 통해 연락해 주세요.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 5.516822629201774,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.38750627568523044,
+                            "latencyMs": 170
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3342,
+                        "documentVersionId": 2444,
+                        "documentId": "ee834b371049",
+                        "sectionId": "ee834b371049:6fe68edda26a",
+                        "documentTitle": "디스코드",
+                        "sectionPath": [
+                          "디스코드",
+                          "연동 설정 가이드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                        "contentHash": "f3392b22573cd0a2fdab27de4264346aee78be467cf7e40f81555384a121a9a1",
+                        "content": "디스코드 연동은 워크스페이스 단위로 이루어지며, 이후 팀별로 세부 채널을 설정합니다.\n\n#### 1) 워크스페이스 연동:\n\n1. \\[설정 > 워크스페이스 > 외부 연동 > Discord] 페이지로 이동합니다.\n2. ‘연동하기’ 버튼을 클릭하고, 뤼이도와 연결할 디스코드 계정과 서버를 승인합니다.\n\n#### 2) 팀별 채널 연결:\n\n1. 연동이 완료되면 동일한 페이지에서 팀별로 알림을 보낼 디스코드 채널을 선택합니다.\n2. 하나의 뤼이도 팀은 하나의 디스코드 채널에 연결되어, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.\n\n#### 3) 사용자 연결:\n\n1. 뤼이도 계정과 디스코드 계정이 동일한 이메일이면 자동으로 연결됩니다.\n2. 필요하면 수동으로 직접 연결할 수도 있습니다.\n3. 계정 연결을 통해 사용자를 언급하면, 개인화된 정보를 받을 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 4.544238452900547,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.3940666380733636,
+                            "latencyMs": 170
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3355,
+                        "documentVersionId": 2447,
+                        "documentId": "c225265a1fa1",
+                        "sectionId": "c225265a1fa1:c94c162f41b5",
+                        "documentTitle": "알림",
+                        "sectionPath": [
+                          "알림",
+                          "참고"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/notifications.md",
+                        "contentHash": "bb34459b5161a64f9f6993ffa86d0e751bd0d64a9741ec79a7a94473e1e33fae",
+                        "content": "* [슬랙](https://docs.riido.io/integrations/slack.md)이나 디스코드 연동 시, 주요 알림을 외부 툴에서도 실시간으로 받아볼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 4.8135478929837525,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.24088559411360855,
+                            "latencyMs": 170
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.4-mini",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v11",
+                        "inputTokens": 5232,
+                        "outputTokens": 293,
+                        "latencyMs": 3312,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "디스코드는 뭐야",
+                            "source_ids": [
+                              "SOURCE_1",
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3340,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:20faf711ea89",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "개요"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "디스코드를 주요 소통 도구로 사용하는 팀에게는 프로젝트 관리 툴과 디스코드 서버 간의 정보 단절이 빈번하게 발생합니다. 기존의 오래된 방식은 디스코드에서 논의 후, 뤼이도에 수동 업데이트 하는 비효율적인 프로세스를 강요하여, 중요한 작업 정보가 디스코드 서버에 갇히는 결과를 낳았습니다.\n\n뤼이도의 디스코드 연동은 이 간극을 완전히 해소합니다. 뤼이도의 모든 핵심 업데이트는 실시간으로 디스코드에 전달되고, 디스코드에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다.\n\n이제 사용자는 가장 익숙한 공간인 디스코드에서 자연스럽게 작업 흐름을 이어갈 수 있으며, 정보의 흐름을 쫓는 데 시간을 낭비할 필요가 없습니다."
+                        },
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3341,
+                          "documentVersionId": 2444,
+                          "documentId": "ee834b371049",
+                          "sectionId": "ee834b371049:d048c70e1bf1",
+                          "documentTitle": "디스코드",
+                          "sectionPath": [
+                            "디스코드",
+                            "디스코드 연동으로 얻는 핵심 가치"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/integrations/discord.md",
+                          "content": "기능: 실시간 알림 발송 / 뤼이도 연동의 가치: 작업 변경 사항을 즉시 팀에 공유할 수 있어 수동으로 공지할 필요가 없어집니다. / 전통 툴의 불편함: 작업 상태 변경 후 별도로 공지해야 했습니다.\n기능: 양방향 댓글 동기화 / 뤼이도 연동의 가치: 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지합니다. / 전통 툴의 불편함: 논의 내용은 디스코드에 갇히고, 툴에 다시 수동으로 요약해야 했습니다.\n기능: 일일 리포트 / 뤼이도 연동의 가치: 당일 오전에 미팅, 작업 현황이 자동 정리되어 개인 디스코드 채널로 전달되어 중요한 일정을 놓치지 않게 도와줍니다. / 전통 툴의 불편함: 미팅 일정을 매번 수동으로 공지하거나 캘린더를 따로 확인해야 했습니다.\n기능: 협업 채널 일원화 / 뤼이도 연동의 가치: PM/관리자는 뤼이도에서, 실무자는 디스코드에서 각자의 툴을 벗어나지 않고도 동일한 정보를 공유합니다. / 전통 툴의 불편함: 정보 확인을 위해 디스코드와 툴을 끊임없이 오가야 했습니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. [SOURCE_1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트를 실시간으로 디스코드에 전달하고, 디스코드에서 이루어진 논의를 뤼이도에 자동으로 기록할 수 있습니다. [SOURCE_1]\n\n또한 이 연동의 가치로는 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄이고, 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지하며, 당일 오전의 미팅과 작업 현황을 개인 디스코드 채널로 자동 정리해 전달하고, PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있다는 점이 제시되어 있습니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "디스코드는 팀이 주요 소통 도구로 사용하는 서비스입니다. [1]\n\n뤼이도에서는 디스코드 연동을 통해 뤼이도의 핵심 업데이트를 실시간으로 디스코드에 전달하고, 디스코드에서 이루어진 논의를 뤼이도에 자동으로 기록할 수 있습니다. [1]\n\n또한 이 연동의 가치로는 작업 변경 사항을 즉시 팀에 공유해 수동 공지를 줄이고, 디스코드에서 논의해도 작업 맥락이 뤼이도에 자동 기록되어 정보 누락을 방지하며, 당일 오전의 미팅과 작업 현황을 개인 디스코드 채널로 자동 정리해 전달하고, PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 동일한 정보를 공유할 수 있다는 점이 제시되어 있습니다. [2]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 10
+        }
+      ]
+    }
+  ]
+}

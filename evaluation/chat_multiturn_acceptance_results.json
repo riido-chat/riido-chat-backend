@@ -1,0 +1,2853 @@
+{
+  "executedAt": "2026-09-02T07:42:40.642260+00:00",
+  "repositoryRevision": "820b291d62c9c025817339f722dae5ecbbdc8c7e",
+  "casesVersion": "v3",
+  "apiBaseUrl": "http://localhost:8000",
+  "models": {
+    "queryRewrite": "gpt-5.4-mini",
+    "embedding": "text-embedding-3-large",
+    "generation": "gpt-5.4-mini"
+  },
+  "prompts": {
+    "queryRewrite": "v3",
+    "generation": "v4"
+  },
+  "indexVersion": {
+    "id": 1121,
+    "version": "idx-20260829T100556338602Z-081f9c7a",
+    "status": "ACTIVE",
+    "createdAt": "2026-08-29T10:05:56.338602+00:00",
+    "activatedAt": "2026-08-29T10:06:01.248164+00:00"
+  },
+  "summary": {
+    "totalCaseCount": 18,
+    "passedCaseCount": 17,
+    "failedCaseCount": 1
+  },
+  "results": [
+    {
+      "id": "MT01",
+      "description": "단일 대상을 대명사로 이어서 설정 방법 질문",
+      "passed": false,
+      "conversationId": "e0e6af54-3c45-45d6-b076-9edb2996b7f5",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "스프린트가 뭐야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "e0e6af54-3c45-45d6-b076-9edb2996b7f5",
+            "ragRunId": "42e9a126-1332-4c80-b459-27ee6aff0798",
+            "answer": {
+              "answerMarkdown": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. [1]\n\n뤼이도에서는 정해진 기간과 마감일을 바탕으로 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련하는 데 활용됩니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "스프린트",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/sprints/overview.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "스프린트가 뭐야?",
+            "resolvedQuery": "스프린트가 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "스프린트"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "그건 어떻게 설정해?",
+          "passed": false,
+          "failures": [
+            "status 불일치: expected=COMPLETED, actual=WITHHELD",
+            "DB status 불일치: expected=COMPLETED, actual=WITHHELD"
+          ],
+          "httpStatus": 200,
+          "response": {
+            "status": "WITHHELD",
+            "conversationId": "e0e6af54-3c45-45d6-b076-9edb2996b7f5",
+            "ragRunId": "55f7a395-f8c6-41d8-af42-1a1d988c0fdb",
+            "answer": null,
+            "withheld": {
+              "reasonCode": "UNVERIFIABLE_ANSWER",
+              "message": "답변의 근거 출처를 확인할 수 없어 답변을 제공하지 않습니다."
+            },
+            "citations": []
+          },
+          "db": {
+            "status": "WITHHELD",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "그건 어떻게 설정해?",
+            "resolvedQuery": "스프린트는 어떻게 설정하나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": "UNVERIFIABLE_ANSWER",
+            "errorCode": null,
+            "citationValidated": false,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 0,
+            "citationDocumentTitles": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT02",
+      "description": "명시된 후속 대상의 공개 범위 질문",
+      "passed": true,
+      "conversationId": "ed635bfd-9272-4d09-8cd0-e8eabdee4485",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "저장된 보기가 뭐야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "ed635bfd-9272-4d09-8cd0-e8eabdee4485",
+            "ragRunId": "3e360b01-bed5-42f4-8694-46aad2d39f48",
+            "answer": {
+              "answerMarkdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 볼 수 있게 도와줍니다.[1]\n\n또한 매번 같은 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄여 주고, 개인용 보기를 만들거나 팀원들과 공통 기준을 공유하는 데도 사용할 수 있습니다.[1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "저장된 보기",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "저장된 보기가 뭐야?",
+            "resolvedQuery": "저장된 보기가 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "저장된 보기"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "그 보기는 나만 볼 수 있어?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "ed635bfd-9272-4d09-8cd0-e8eabdee4485",
+            "ragRunId": "6665d55d-1252-4b04-9978-1cac7b1f1cfd",
+            "answer": {
+              "answerMarkdown": "아니요. 저장된 보기는 개인용으로도, 팀 전체에 공개해서도 만들 수 있습니다. 보기를 만들 때 공개 범위를 선택할 수 있으며, `나만 보기`는 개인 참고용이나 실험적인 설정을 저장할 때 적합합니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "저장된 보기",
+                "sectionPath": [
+                  "공개 범위"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "그 보기는 나만 볼 수 있어?",
+            "resolvedQuery": "저장된 보기는 나만 볼 수 있나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "저장된 보기"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT03",
+      "description": "이전 문맥을 버리는 독립적인 새 주제",
+      "passed": true,
+      "conversationId": "acc87639-4b4f-42f1-8f0d-bd66283b9dc5",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "스프린트가 뭐야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "acc87639-4b4f-42f1-8f0d-bd66283b9dc5",
+            "ragRunId": "a90acf56-1eae-4d14-9d6d-7b00e1755e8b",
+            "answer": {
+              "answerMarkdown": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 바탕으로 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "스프린트",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/sprints/overview.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "스프린트가 뭐야?",
+            "resolvedQuery": "스프린트가 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "스프린트"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "슬랙 연동은 어떻게 해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "acc87639-4b4f-42f1-8f0d-bd66283b9dc5",
+            "ragRunId": "3f781f54-3288-416b-a184-169fd8770577",
+            "answer": {
+              "answerMarkdown": "슬랙 연동은 워크스페이스 단위로 먼저 연결한 뒤, 팀별로 알림을 보낼 채널을 지정하는 방식입니다.[1]\n\n1. `설정 > 워크스페이스 > 외부 연동 > Slack` 페이지로 이동합니다.[1]\n2. `연동하기` 버튼을 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다.[1]\n3. 연동이 완료되면 같은 페이지에서 팀별로 알림을 보낼 슬랙 채널을 선택합니다.[1]\n\n참고로 하나의 뤼이도 팀은 하나의 슬랙 채널에 연결되며, 해당 팀에서 발생한 활동은 모두 지정된 채널로 전달됩니다.[1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "연동 설정 가이드"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "슬랙 연동은 어떻게 해?",
+            "resolvedQuery": "슬랙 연동은 어떻게 해?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "슬랙"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT04",
+      "description": "가리키는 대상이 둘 이상인 모호한 후속 질문",
+      "passed": true,
+      "conversationId": "11241c56-fffb-4328-bb40-e1dd160f5767",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "프로젝트와 목표는 어떤 차이가 있어?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "11241c56-fffb-4328-bb40-e1dd160f5767",
+            "ragRunId": "3ef7cdc9-78c8-4e6a-a111-af4675793bdf",
+            "answer": {
+              "answerMarkdown": "프로젝트는 팀 전체가 집중해야 하는 큰 단위의 업무이고, 목표는 프로젝트 내에서 일정 기간 안에 달성해야 하는 중간 단위의 목표입니다. [1]\n\n또한 프로젝트는 여러 개의 목표를 포함할 수 있고, 목표는 하나 이상의 작업으로 구성됩니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "실행: 작업",
+                "sectionPath": [
+                  "구조"
+                ],
+                "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "프로젝트와 목표는 어떤 차이가 있어?",
+            "resolvedQuery": "프로젝트와 목표는 어떤 차이가 있어?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "실행: 작업"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "그건 어떻게 삭제해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "WITHHELD",
+            "conversationId": "11241c56-fffb-4328-bb40-e1dd160f5767",
+            "ragRunId": "04ba165b-e31d-4994-9ac2-9f7cfb1cc6ea",
+            "answer": null,
+            "withheld": {
+              "reasonCode": "AMBIGUOUS_QUESTION",
+              "message": "질문의 의미가 명확하지 않아 답변하기 어렵습니다. 질문을 조금 더 구체적으로 작성해주세요."
+            },
+            "citations": []
+          },
+          "db": {
+            "status": "WITHHELD",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "그건 어떻게 삭제해?",
+            "resolvedQuery": null,
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": "AMBIGUOUS_QUESTION",
+            "errorCode": null,
+            "citationValidated": null,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 0,
+            "citationCount": 0,
+            "citationDocumentTitles": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT05",
+      "description": "비공개 팀 단일 대상을 대명사로 이어서 설정 질문",
+      "passed": true,
+      "conversationId": "29536df8-501e-4b2b-b70c-e70e0dca9c3b",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "비공개 팀은 뭐야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "29536df8-501e-4b2b-b70c-e70e0dca9c3b",
+            "ragRunId": "0d7a6240-d490-49ce-9265-c81d9fbee6fa",
+            "answer": {
+              "answerMarkdown": "비공개 팀은 일부 멤버만 접근해야 하는 작업을 안전하게 관리하기 위한 팀입니다. 주로 고객 데이터, HR, 재무 관리 같은 업무에 사용됩니다. [1]\n\n비공개 팀은 비즈니스 요금제 이상부터 사용할 수 있고, 참여 중인 사용자만 접근할 수 있습니다. 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다. [1] [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "비공개 팀",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/teams/private-teams.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "비공개 팀",
+                "sectionPath": [
+                  "접근 권한"
+                ],
+                "sourceUrl": "https://docs.riido.io/teams/private-teams.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "비공개 팀은 뭐야?",
+            "resolvedQuery": "비공개 팀은 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "비공개 팀",
+              "비공개 팀"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "그건 어떻게 설정해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "29536df8-501e-4b2b-b70c-e70e0dca9c3b",
+            "ragRunId": "9094d6e3-320f-42ed-ba82-e09e8510916e",
+            "answer": {
+              "answerMarkdown": "비공개 팀은 설정 페이지의 `[팀 설정 > 일반]`에서 공개 범위를 `비공개`로 선택해 설정합니다. 설정을 저장하면 팀이 즉시 비공개로 전환됩니다.[1]\n\n참고로 비공개 팀은 비즈니스 요금제 이상에서 사용할 수 있습니다.[2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "비공개 팀",
+                "sectionPath": [
+                  "설정"
+                ],
+                "sourceUrl": "https://docs.riido.io/teams/private-teams.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "비공개 팀",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/teams/private-teams.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "그건 어떻게 설정해?",
+            "resolvedQuery": "비공개 팀은 어떻게 설정하나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "비공개 팀",
+              "비공개 팀"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT06",
+      "description": "저장된 보기 단일 대상을 대명사로 이어서 생성 질문",
+      "passed": true,
+      "conversationId": "254bd5f3-91f4-4b18-a7c4-f30c00811c81",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "저장된 보기가 뭐야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "254bd5f3-91f4-4b18-a7c4-f30c00811c81",
+            "ragRunId": "4ab3c8b4-c650-4dc3-897c-3a931f90202d",
+            "answer": {
+              "answerMarkdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. [1]\n\n프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있게 도와줍니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "저장된 보기",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "저장된 보기가 뭐야?",
+            "resolvedQuery": "저장된 보기가 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "저장된 보기"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "그건 어떻게 만들어?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "254bd5f3-91f4-4b18-a7c4-f30c00811c81",
+            "ragRunId": "0aaeb9ad-ad6b-488c-927a-27d1566e7f21",
+            "answer": {
+              "answerMarkdown": "저장된 보기는 두 가지 방법으로 만들 수 있습니다. [1]\n\n1. **사이드바에서 새로 만들기**: 사이드바의 `저장된 보기` 메뉴를 클릭한 뒤, 작업 또는 백로그 중 어떤 페이지의 보기인지 선택하고 조건을 처음부터 설정해 생성합니다. [1]\n2. **현재 필터 조건 저장**: 백로그 또는 작업 페이지에서 필터나 정렬 조건을 설정한 뒤, 우측 상단의 `저장된 보기 생성` 버튼을 클릭하면 현재 적용된 조건이 그대로 저장됩니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "저장된 보기",
+                "sectionPath": [
+                  "보기 생성하기"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "그건 어떻게 만들어?",
+            "resolvedQuery": "저장된 보기는 어떻게 만드나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "저장된 보기"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT07",
+      "description": "휴지통 위치를 생략한 복구 질문",
+      "passed": true,
+      "conversationId": "2595631b-74e6-4e11-ad02-e66901a58a17",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "뤼이도 휴지통은 어떤 기능이야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "2595631b-74e6-4e11-ad02-e66901a58a17",
+            "ragRunId": "9d818f68-ba00-4377-967c-1630cc24d9e8",
+            "answer": {
+              "answerMarkdown": "뤼이도 휴지통은 삭제한 작업, 목표, 프로젝트 등을 바로 사라지지 않게 임시 보관하고, 실수로 삭제한 경우 복구할 수 있게 해주는 기능입니다. 보관된 항목은 30일 후 자동으로 영구 삭제됩니다.[1]\n\n휴지통에서는 삭제된 항목을 유형별로 확인할 수 있고, 각 항목의 남은 보관 기간도 볼 수 있습니다.[2] 삭제된 페이지는 삭제 전과 동일한 형태로 열람할 수 있으며, 필요한 경우 바로 복구하거나 영구 삭제할 수 있습니다.[3]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "휴지통",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/data/trash.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "휴지통",
+                "sectionPath": [
+                  "휴지통 사용법"
+                ],
+                "sourceUrl": "https://docs.riido.io/data/trash.md"
+              },
+              {
+                "citationNumber": 3,
+                "documentTitle": "휴지통",
+                "sectionPath": [
+                  "삭제된 페이지 보기"
+                ],
+                "sourceUrl": "https://docs.riido.io/data/trash.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "뤼이도 휴지통은 어떤 기능이야?",
+            "resolvedQuery": "뤼이도 휴지통은 어떤 기능이야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 3,
+            "citationDocumentTitles": [
+              "휴지통",
+              "휴지통",
+              "휴지통"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "거기서 삭제한 작업을 어떻게 복구해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "2595631b-74e6-4e11-ad02-e66901a58a17",
+            "ragRunId": "046be04e-e482-4ee0-9608-61d8bb94f1fb",
+            "answer": {
+              "answerMarkdown": "삭제한 작업은 휴지통에서 바로 복구할 수 있습니다. 휴지통에서 항목을 열거나, 해당 페이지 상단 배너의 `복구` 버튼을 누르면 삭제 이전의 위치로 자동 복원됩니다. [1][2]\n\n또한 페이지 상단 메뉴의 `휴지통` 버튼을 클릭하면 삭제된 항목을 확인할 수 있습니다. [3]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "휴지통",
+                "sectionPath": [
+                  "복구 및 영구 삭제"
+                ],
+                "sourceUrl": "https://docs.riido.io/data/trash.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "휴지통",
+                "sectionPath": [
+                  "삭제된 페이지 보기"
+                ],
+                "sourceUrl": "https://docs.riido.io/data/trash.md"
+              },
+              {
+                "citationNumber": 3,
+                "documentTitle": "휴지통",
+                "sectionPath": [
+                  "휴지통 사용법"
+                ],
+                "sourceUrl": "https://docs.riido.io/data/trash.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "거기서 삭제한 작업을 어떻게 복구해?",
+            "resolvedQuery": "뤼이도 휴지통에서 삭제한 작업을 어떻게 복구하나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 3,
+            "citationDocumentTitles": [
+              "휴지통",
+              "휴지통",
+              "휴지통"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT08",
+      "description": "작업 상태 대상을 생략한 추가 방법 질문",
+      "passed": true,
+      "conversationId": "22759fb4-abb6-44dd-91df-0b2c7ca8a1c0",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "팀의 작업 상태는 뭐야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "22759fb4-abb6-44dd-91df-0b2c7ca8a1c0",
+            "ragRunId": "b51e7e35-350d-41e2-8cd0-c82d190b067a",
+            "answer": {
+              "answerMarkdown": "작업 상태는 팀에서 정한 업무 흐름을 정의하고 관리하는 기능입니다. 계획 단계부터 작업 완료 이후의 운영 단계까지, 팀의 실제 업무 방식에 맞게 구성할 수 있습니다.[1]\n\n기본 단계는 `계획 > 준비됨 > 진행 중 > 완료 > 운영`이며, 각 단계 안에서 세부 작업 상태를 자유롭게 추가하거나 수정할 수 있습니다.[1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "작업 상태",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/teams/statuses.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "팀의 작업 상태는 뭐야?",
+            "resolvedQuery": "팀의 작업 상태는 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "작업 상태"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "추가하려면 어디서 설정해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "22759fb4-abb6-44dd-91df-0b2c7ca8a1c0",
+            "ragRunId": "d824367b-5ea2-432f-a453-2c8cce900288",
+            "answer": {
+              "answerMarkdown": "작업 상태는 **팀 설정 페이지의 ‘작업 상태’ 메뉴**에서 추가하실 수 있습니다. [1]\n\n또한 작업 상태 화면에서 **‘상태 추가’ 버튼**을 클릭해 새로운 상태를 만들 수 있습니다. [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "팀",
+                "sectionPath": [
+                  "팀 설정"
+                ],
+                "sourceUrl": "https://docs.riido.io/teams/overview.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "작업 상태",
+                "sectionPath": [
+                  "설정"
+                ],
+                "sourceUrl": "https://docs.riido.io/teams/statuses.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "추가하려면 어디서 설정해?",
+            "resolvedQuery": "작업 상태를 추가하려면 어디서 설정하나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "팀",
+              "작업 상태"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT09",
+      "description": "슬랙 연동 뒤 알림 범위 조정 질문",
+      "passed": true,
+      "conversationId": "b2c9edad-cd07-4044-9faa-13defb42d6f9",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "슬랙 연동은 어떤 기능을 제공해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "b2c9edad-cd07-4044-9faa-13defb42d6f9",
+            "ragRunId": "f8cd6b19-2dcd-4f7e-a73e-735f767d1456",
+            "answer": {
+              "answerMarkdown": "슬랙 연동은 작업 변경 사항을 실시간으로 알림 발송하고, 슬랙에서 한 논의를 뤼이도에 자동으로 기록하는 양방향 댓글 동기화, 당일 오전의 미팅·작업 현황을 개인 슬랙 채널로 정리해 보내는 일일 리포트, 그리고 PM/관리자와 실무자가 각자의 툴을 벗어나지 않고도 같은 정보를 공유하는 협업 채널 일원화를 제공합니다. [1]\n\n또한 연동은 워크스페이스 단위로 설정하며, 팀별로 알림을 보낼 슬랙 채널을 지정할 수 있고, 사용자 계정은 이메일이 같으면 자동 연결되며 필요하면 수동 연결도 가능합니다. [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "슬랙 연동으로 얻는 핵심 가치"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "연동 설정 가이드"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "슬랙 연동은 어떤 기능을 제공해?",
+            "resolvedQuery": "슬랙 연동은 어떤 기능을 제공해?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "슬랙",
+              "슬랙"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "알림이 너무 많으면 어떻게 줄여?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "b2c9edad-cd07-4044-9faa-13defb42d6f9",
+            "ragRunId": "16c2d54b-8cee-4058-8088-05df6c3aef49",
+            "answer": {
+              "answerMarkdown": "알림은 세부적으로 조정하실 수 있습니다. 워크스페이스 전체 알림은 `설정 > 워크스페이스 > 알림`에서 관리하고, 페이지·댓글 단위 알림은 각 페이지 우측 상단의 `···` 버튼에서 ‘알림 받기/끄기’로 설정하시면 됩니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "자주 묻는 질문 (FAQ)"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "알림이 너무 많으면 어떻게 줄여?",
+            "resolvedQuery": "슬랙 연동 알림이 너무 많으면 어떻게 줄이나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "슬랙"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT10",
+      "description": "구글 캘린더 연동 뒤 동기화 범위 질문",
+      "passed": true,
+      "conversationId": "22c20692-6d69-4c2b-934b-a7a8e5d539da",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "구글 캘린더 연동은 어떤 기능이야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "22c20692-6d69-4c2b-934b-a7a8e5d539da",
+            "ragRunId": "4aaaf4ad-fb1d-47f4-880d-9b4519afb3f0",
+            "answer": {
+              "answerMarkdown": "구글 캘린더 연동은 뤼이도와 구글 캘린더의 미팅 일정을 양방향으로 동기화하는 기능입니다. 뤼이도에서 생성한 미팅이 구글 캘린더에 자동 등록되고, 구글 캘린더에서 만든 일정도 뤼이도 미팅 목록에 자동으로 표시됩니다. [1]\n\n또한 제목, 참여자, 시간, 장소 같은 정보가 서로 동기화되며, 뤼이도와 구글 캘린더 어느 쪽에서 수정해도 즉시 반영됩니다. [1] [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "자동화",
+                "sectionPath": [
+                  "구글 캘린더 연동"
+                ],
+                "sourceUrl": "https://docs.riido.io/meetings/automations.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "구글 캘린더",
+                "sectionPath": [
+                  "미팅 일정 동기화 방식"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "구글 캘린더 연동은 어떤 기능이야?",
+            "resolvedQuery": "구글 캘린더 연동은 어떤 기능이야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "자동화",
+              "구글 캘린더"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "작업 마감일도 동기화돼?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "22c20692-6d69-4c2b-934b-a7a8e5d539da",
+            "ragRunId": "2cc0e8e4-484b-436b-93f2-a0c15ff74045",
+            "answer": {
+              "answerMarkdown": "아니요. 뤼이도 내부의 ‘미팅’만 구글 캘린더와 양방향 연동되며, 작업의 마감일은 현재 연동 대상이 아닙니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "구글 캘린더",
+                "sectionPath": [
+                  "자주 묻는 질문 (FAQ)"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "작업 마감일도 동기화돼?",
+            "resolvedQuery": "구글 캘린더 연동에서 작업 마감일도 동기화되나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "구글 캘린더"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT11",
+      "description": "여러 연동 중 현재 질문이 슬랙을 명시하는 후속 질문",
+      "passed": true,
+      "conversationId": "0a857961-0d36-43c0-8bef-8e4233dbd4fb",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "슬랙과 디스코드는 각각 어떻게 연동해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "0a857961-0d36-43c0-8bef-8e4233dbd4fb",
+            "ragRunId": "8307aa31-d29d-4d51-951d-eb0166eb06ad",
+            "answer": {
+              "answerMarkdown": "슬랙은 워크스페이스 단위로 연동한 뒤, 팀별로 알림을 보낼 채널을 설정합니다. 먼저 `설정 > 워크스페이스 > 외부 연동 > Slack` 페이지로 이동해 `연동하기`를 클릭하고, 뤼이도와 연결할 슬랙 계정과 워크스페이스를 승인합니다. 연동이 끝나면 같은 페이지에서 팀별 슬랙 채널을 선택하시면 됩니다. [1]\n\n디스코드는 댓글 알림을 외부 툴에서 실시간으로 받아볼 수 있도록 연동할 수 있습니다. 다만 제공된 안내에는 디스코드의 구체적인 설정 절차는 나와 있지 않습니다. [2][3]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "연동 설정 가이드"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "알림",
+                "sectionPath": [
+                  "참고"
+                ],
+                "sourceUrl": "https://docs.riido.io/data/notifications.md"
+              },
+              {
+                "citationNumber": 3,
+                "documentTitle": "댓글",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/docs/comments.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "슬랙과 디스코드는 각각 어떻게 연동해?",
+            "resolvedQuery": "슬랙과 디스코드는 각각 어떻게 연동해?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 3,
+            "citationDocumentTitles": [
+              "슬랙",
+              "알림",
+              "댓글"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "그중 슬랙에서 비공개 채널은 어떻게 연결해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "0a857961-0d36-43c0-8bef-8e4233dbd4fb",
+            "ragRunId": "b6101eb0-6e67-4c6e-983f-be857ed6dbe9",
+            "answer": {
+              "answerMarkdown": "비공개 채널도 연결할 수 있습니다. 워크스페이스를 연동한 뒤, 연결하려는 비공개 채널에서 뤼이도 봇을 `@riido`로 언급해 초대하시면 됩니다. 그러면 해당 채널이 뤼이도의 슬랙 연동 채널에 표시됩니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "자주 묻는 질문 (FAQ)"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "그중 슬랙에서 비공개 채널은 어떻게 연결해?",
+            "resolvedQuery": "슬랙에서 비공개 채널은 어떻게 연결하나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "슬랙"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT12",
+      "description": "여러 작업 계층 중 대상을 고르지 않은 후속 질문",
+      "passed": true,
+      "conversationId": "8866fe96-345e-4e0d-ba6f-80ad4ea55be3",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "프로젝트, 목표, 작업은 어떤 관계야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "8866fe96-345e-4e0d-ba6f-80ad4ea55be3",
+            "ragRunId": "77ba82b2-58c4-499e-b3f2-ec451ca12391",
+            "answer": {
+              "answerMarkdown": "프로젝트, 목표, 작업은 **트리 형태의 계층 구조**로 연결됩니다. `프로젝트 → 목표 → 작업 → 하위 작업` 순서로 이어지며, 각각이 상위 단위와 하위 단위의 관계를 가집니다. [1]\n\n구체적으로, 프로젝트는 팀 전체가 집중해야 하는 큰 단위의 업무이고 여러 개의 목표를 포함할 수 있습니다. 목표는 프로젝트 내에서 일정 기간 안에 달성해야 하는 중간 단위의 목표이며, 하나 이상의 작업으로 구성됩니다. 작업은 실제로 수행되는 실행 단위의 업무입니다. [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "작업 관계도",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/diagram.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "실행: 작업",
+                "sectionPath": [
+                  "구조"
+                ],
+                "sourceUrl": "https://docs.riido.io/issues/work-items.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "프로젝트, 목표, 작업은 어떤 관계야?",
+            "resolvedQuery": "프로젝트, 목표, 작업은 어떤 관계야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "작업 관계도",
+              "실행: 작업"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "그중 하나를 삭제하면 어떻게 돼?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "WITHHELD",
+            "conversationId": "8866fe96-345e-4e0d-ba6f-80ad4ea55be3",
+            "ragRunId": "35924f4e-1c79-4d16-ba76-6b525d9e27ee",
+            "answer": null,
+            "withheld": {
+              "reasonCode": "AMBIGUOUS_QUESTION",
+              "message": "질문의 의미가 명확하지 않아 답변하기 어렵습니다. 질문을 조금 더 구체적으로 작성해주세요."
+            },
+            "citations": []
+          },
+          "db": {
+            "status": "WITHHELD",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "그중 하나를 삭제하면 어떻게 돼?",
+            "resolvedQuery": null,
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": "AMBIGUOUS_QUESTION",
+            "errorCode": null,
+            "citationValidated": null,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 0,
+            "citationCount": 0,
+            "citationDocumentTitles": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT13",
+      "description": "저장된 보기 문맥을 버리고 휴지통으로 전환",
+      "passed": true,
+      "conversationId": "44741cdb-d556-474c-bde9-8443f9dbe2c5",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "저장된 보기가 뭐야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "44741cdb-d556-474c-bde9-8443f9dbe2c5",
+            "ragRunId": "752ba994-d829-45ae-87f7-75461afb0fc9",
+            "answer": {
+              "answerMarkdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. [1]\n\n프로젝트, 우선순위, 담당자, 라벨 같은 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "저장된 보기",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "저장된 보기가 뭐야?",
+            "resolvedQuery": "저장된 보기가 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "저장된 보기"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "휴지통에서 삭제한 작업을 어떻게 복구해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "44741cdb-d556-474c-bde9-8443f9dbe2c5",
+            "ragRunId": "2842cf32-225a-4486-8752-092ddf23df89",
+            "answer": {
+              "answerMarkdown": "휴지통에서 삭제한 작업은 휴지통 또는 해당 페이지 상단 배너의 `복구` 버튼을 눌러 즉시 되돌릴 수 있습니다. 복구된 항목은 삭제 이전의 위치로 자동 복원됩니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "휴지통",
+                "sectionPath": [
+                  "복구 및 영구 삭제"
+                ],
+                "sourceUrl": "https://docs.riido.io/data/trash.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "휴지통에서 삭제한 작업을 어떻게 복구해?",
+            "resolvedQuery": "휴지통에서 삭제한 작업을 어떻게 복구해?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "휴지통"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT14",
+      "description": "범위 밖 보류 뒤 독립적인 스프린트 주제로 전환",
+      "passed": true,
+      "conversationId": "c84b96d7-eb60-4a57-9eed-97b4e7ccd8a6",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "뤼이도에서 직원 급여를 계산할 수 있어?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "WITHHELD",
+            "conversationId": "c84b96d7-eb60-4a57-9eed-97b4e7ccd8a6",
+            "ragRunId": "dca55fee-279f-477e-9122-f31904750ad4",
+            "answer": null,
+            "withheld": {
+              "reasonCode": "OUT_OF_SCOPE",
+              "message": "해당 질문은 이용가이드 범위를 벗어나 답변할 수 없습니다."
+            },
+            "citations": []
+          },
+          "db": {
+            "status": "WITHHELD",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "뤼이도에서 직원 급여를 계산할 수 있어?",
+            "resolvedQuery": "뤼이도에서 직원 급여를 계산할 수 있어?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": "OUT_OF_SCOPE",
+            "errorCode": null,
+            "citationValidated": null,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 0,
+            "citationDocumentTitles": []
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "스프린트 시작 요일은 어떻게 바꿔?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "c84b96d7-eb60-4a57-9eed-97b4e7ccd8a6",
+            "ragRunId": "7703b6c1-68c5-41b8-8506-09222dea3922",
+            "answer": {
+              "answerMarkdown": "스프린트 시작 요일은 `팀 설정 > 스프린트`에서 관리할 수 있습니다. 스프린트 설정에서 시작 요일을 변경하면 됩니다. [1]\n\n기존 스프린트 주기를 변경하면 현재 스프린트는 설정한 요일까지 유지된 후, 다음 스프린트가 새로 시작됩니다. 주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다. [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "스프린트",
+                "sectionPath": [
+                  "스프린트 설정"
+                ],
+                "sourceUrl": "https://docs.riido.io/sprints/overview.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "스프린트",
+                "sectionPath": [
+                  "스프린트 시작 요일"
+                ],
+                "sourceUrl": "https://docs.riido.io/sprints/overview.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "스프린트 시작 요일은 어떻게 바꿔?",
+            "resolvedQuery": "스프린트 시작 요일은 어떻게 바꿔?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "스프린트",
+              "스프린트"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT15",
+      "description": "범위 밖 보류 질문의 대상을 다시 가리키는 후속 질문",
+      "passed": true,
+      "conversationId": "ce70748f-1115-410c-bb5e-d89d007b363c",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "뤼이도에서 직원 급여를 계산할 수 있어?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "WITHHELD",
+            "conversationId": "ce70748f-1115-410c-bb5e-d89d007b363c",
+            "ragRunId": "91ecca7f-cf19-42a6-b969-4e7af977ca4d",
+            "answer": null,
+            "withheld": {
+              "reasonCode": "OUT_OF_SCOPE",
+              "message": "해당 질문은 이용가이드 범위를 벗어나 답변할 수 없습니다."
+            },
+            "citations": []
+          },
+          "db": {
+            "status": "WITHHELD",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "뤼이도에서 직원 급여를 계산할 수 있어?",
+            "resolvedQuery": "뤼이도에서 직원 급여를 계산할 수 있어?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": "OUT_OF_SCOPE",
+            "errorCode": null,
+            "citationValidated": null,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 0,
+            "citationDocumentTitles": []
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "그 기능은 어디서 설정해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "WITHHELD",
+            "conversationId": "ce70748f-1115-410c-bb5e-d89d007b363c",
+            "ragRunId": "43782e1c-0e32-4762-9b72-607ddf153046",
+            "answer": null,
+            "withheld": {
+              "reasonCode": "OUT_OF_SCOPE",
+              "message": "해당 질문은 이용가이드 범위를 벗어나 답변할 수 없습니다."
+            },
+            "citations": []
+          },
+          "db": {
+            "status": "WITHHELD",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "그 기능은 어디서 설정해?",
+            "resolvedQuery": "뤼이도 직원 급여 계산 기능은 어디서 설정하나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": "OUT_OF_SCOPE",
+            "errorCode": null,
+            "citationValidated": null,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 0,
+            "citationDocumentTitles": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT16",
+      "description": "멤버 비활성화 뒤 재초대 계정 처리 질문",
+      "passed": true,
+      "conversationId": "f9ab73cf-db82-425b-81c7-253b1c74bd24",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "워크스페이스 멤버를 비활성화하면 어떻게 돼?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "f9ab73cf-db82-425b-81c7-253b1c74bd24",
+            "ragRunId": "2793838e-42f9-47a8-8372-3209715b9494",
+            "answer": {
+              "answerMarkdown": "워크스페이스 멤버를 비활성화하면 더 이상 워크스페이스에 접근할 수 없습니다. 유료 요금제를 사용 중이라면 다음 결제 주기부터 요금 청구 대상에서도 자동으로 제외됩니다. [1]\n\n또한 비활성화된 멤버는 완전히 삭제되지 않아서, 그 멤버가 작성하거나 담당했던 작업·문서 등의 기록은 그대로 유지됩니다. 나중에 같은 멤버를 다시 초대해도 새 계정이 생기는 것이 아니라, 이전 계정이 다시 활성 상태로 전환됩니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "멤버",
+                "sectionPath": [
+                  "멤버 비활성화"
+                ],
+                "sourceUrl": "https://docs.riido.io/workspaces/members.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "워크스페이스 멤버를 비활성화하면 어떻게 돼?",
+            "resolvedQuery": "워크스페이스 멤버를 비활성화하면 어떻게 돼?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "멤버"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "나중에 다시 초대하면 새 계정이 생겨?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "f9ab73cf-db82-425b-81c7-253b1c74bd24",
+            "ragRunId": "a3573795-a98e-4a0b-8321-86aaf2c1dc56",
+            "answer": {
+              "answerMarkdown": "아니요. 비활성화된 멤버를 나중에 다시 초대하더라도 새 계정이 생성되는 것이 아니라, 이전 계정이 그대로 활성 상태로 전환됩니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "멤버",
+                "sectionPath": [
+                  "멤버 비활성화"
+                ],
+                "sourceUrl": "https://docs.riido.io/workspaces/members.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "나중에 다시 초대하면 새 계정이 생겨?",
+            "resolvedQuery": "워크스페이스 멤버를 나중에 다시 초대하면 새 계정이 생기나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "멤버"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT17",
+      "description": "구독 취소 뒤 데이터 유지 여부 질문",
+      "passed": true,
+      "conversationId": "21303e4b-5768-4b61-b23f-06dc101ee60e",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "뤼이도 구독을 취소하면 어떻게 돼?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "21303e4b-5768-4b61-b23f-06dc101ee60e",
+            "ragRunId": "d3b11724-50ce-4201-9771-74a9d7245380",
+            "answer": {
+              "answerMarkdown": "구독을 취소해도 워크스페이스는 삭제되지 않고 무료 요금제로 전환됩니다. 다만 데이터는 삭제되지 않으며, 200개가 넘는 작업이 있으면 새 작업을 더 만들 수 없고, 팀이 2개 이상이면 새 팀을 만들 수 없습니다. 또한 모든 워크스페이스 멤버는 관리자가 됩니다. [1]\n\n구독 취소는 다음 구독 주기에 맞춰 적용되며, 구독 기간 중 취소에 대한 환불은 제공되지 않습니다. 월별 결제라면 결제 월의 마지막 날에, 연간 결제라면 결제 연도의 마지막 날에 적용됩니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "구독 및 결제",
+                "sectionPath": [
+                  "구독 변경 또는 취소"
+                ],
+                "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "뤼이도 구독을 취소하면 어떻게 돼?",
+            "resolvedQuery": "뤼이도 구독을 취소하면 어떻게 돼?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "구독 및 결제"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "기존 데이터도 삭제돼?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "21303e4b-5768-4b61-b23f-06dc101ee60e",
+            "ragRunId": "327ea8ed-2e0c-425c-b63b-da7c918520a0",
+            "answer": {
+              "answerMarkdown": "아니요. 구독을 취소해 무료 요금제로 전환되더라도 워크스페이스는 삭제되지 않으며, 그 어떤 데이터도 삭제되지 않습니다. [1]\n\n다만 무료 전환 후에는 200개가 넘는 작업이 생성되어 있었다면 더 이상 새로운 작업을 생성할 수 없고, 팀이 2개 이상이라면 더 이상 새로운 팀을 생성할 수 없습니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "구독 및 결제",
+                "sectionPath": [
+                  "구독 변경 또는 취소"
+                ],
+                "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "기존 데이터도 삭제돼?",
+            "resolvedQuery": "뤼이도 구독을 취소하면 기존 데이터도 삭제되나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              1
+            ],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "구독 및 결제"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MT18",
+      "description": "최근 5턴 안의 구글 캘린더 연동을 선택하는 긴 대화",
+      "passed": true,
+      "conversationId": "cccc6639-a0b7-48fa-82fe-a1af99a3c26a",
+      "turns": [
+        {
+          "turnNo": 1,
+          "question": "스프린트가 뭐야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "cccc6639-a0b7-48fa-82fe-a1af99a3c26a",
+            "ragRunId": "fd8f9526-df48-4e84-98d8-0f8221736bc5",
+            "answer": {
+              "answerMarkdown": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. [1]\n\n뤼이도에서는 스프린트를 통해 팀이 정해진 기간과 마감일 안에서 집중해서 일하고, 회고를 반복하며 업무 방식을 조정할 수 있습니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "스프린트",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/sprints/overview.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 1,
+            "userQuery": "스프린트가 뭐야?",
+            "resolvedQuery": "스프린트가 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "스프린트"
+            ]
+          }
+        },
+        {
+          "turnNo": 2,
+          "question": "슬랙 연동은 어떤 기능이야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "cccc6639-a0b7-48fa-82fe-a1af99a3c26a",
+            "ragRunId": "40e11169-36e9-427a-813f-18b4a5707eb8",
+            "answer": {
+              "answerMarkdown": "슬랙 연동은 뤼이도의 작업 업데이트와 논의를 슬랙과 연결해 주는 기능입니다. 뤼이도의 핵심 업데이트는 실시간으로 슬랙에 전달되고, 슬랙에서 이루어진 논의는 뤼이도에 자동으로 기록됩니다. [1]\n\n또한 실시간 알림 발송, 양방향 댓글 동기화, 일일 리포트, 협업 채널 일원화 기능을 제공합니다. [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "슬랙",
+                "sectionPath": [
+                  "슬랙 연동으로 얻는 핵심 가치"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/slack.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 2,
+            "userQuery": "슬랙 연동은 어떤 기능이야?",
+            "resolvedQuery": "슬랙 연동은 어떤 기능이야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "슬랙",
+              "슬랙"
+            ]
+          }
+        },
+        {
+          "turnNo": 3,
+          "question": "저장된 보기는 뭐야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "cccc6639-a0b7-48fa-82fe-a1af99a3c26a",
+            "ragRunId": "a156392e-080b-4c32-b0a9-bfd0a5716525",
+            "answer": {
+              "answerMarkdown": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해 자주 확인하는 조건을 빠르게 열람할 수 있습니다. [1]\n\n매번 같은 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄여 주고, 개인용 보기나 팀과 공유하는 보기로도 활용할 수 있습니다. [1][2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "저장된 보기",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "저장된 보기",
+                "sectionPath": [
+                  "공개 범위"
+                ],
+                "sourceUrl": "https://docs.riido.io/views/custom-views.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 3,
+            "userQuery": "저장된 보기는 뭐야?",
+            "resolvedQuery": "저장된 보기는 뭐야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "저장된 보기",
+              "저장된 보기"
+            ]
+          }
+        },
+        {
+          "turnNo": 4,
+          "question": "휴지통은 어떤 기능이야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "cccc6639-a0b7-48fa-82fe-a1af99a3c26a",
+            "ragRunId": "ca4a66e3-f1f2-499a-a2dc-b16fff1beae4",
+            "answer": {
+              "answerMarkdown": "휴지통은 삭제한 작업, 목표, 프로젝트 등을 바로 사라지지 않게 임시로 보관하고, 필요하면 다시 복구할 수 있게 해주는 기능입니다. [1]\n\n휴지통에 보관된 항목은 30일 후 자동으로 영구 삭제되며, 항목을 직접 확인하거나 바로 복구·영구 삭제할 수도 있습니다. [1] [2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "휴지통",
+                "sectionPath": [
+                  "개요"
+                ],
+                "sourceUrl": "https://docs.riido.io/data/trash.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "휴지통",
+                "sectionPath": [
+                  "복구 및 영구 삭제"
+                ],
+                "sourceUrl": "https://docs.riido.io/data/trash.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 4,
+            "userQuery": "휴지통은 어떤 기능이야?",
+            "resolvedQuery": "휴지통은 어떤 기능이야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "휴지통",
+              "휴지통"
+            ]
+          }
+        },
+        {
+          "turnNo": 5,
+          "question": "댓글은 어떻게 작성해?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "cccc6639-a0b7-48fa-82fe-a1af99a3c26a",
+            "ragRunId": "9bed2b65-a38e-48b0-9ab7-4a4dc9dac7c5",
+            "answer": {
+              "answerMarkdown": "작업 또는 미팅 페이지 하단에서 언제든지 댓글을 남길 수 있습니다. 댓글은 블록 기반 에디터로 구성되어 있어 텍스트뿐 아니라 이미지, 코드 블록, 링크 등 다양한 형식을 추가할 수 있습니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "댓글",
+                "sectionPath": [
+                  "댓글 작성"
+                ],
+                "sourceUrl": "https://docs.riido.io/docs/comments.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 5,
+            "userQuery": "댓글은 어떻게 작성해?",
+            "resolvedQuery": "댓글은 어떻게 작성해?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "댓글"
+            ]
+          }
+        },
+        {
+          "turnNo": 6,
+          "question": "구글 캘린더 연동은 어떤 기능이야?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "cccc6639-a0b7-48fa-82fe-a1af99a3c26a",
+            "ragRunId": "6fb6e346-7d4d-4698-9ad8-5ecddc4115d4",
+            "answer": {
+              "answerMarkdown": "구글 캘린더 연동은 뤼이도에서 생성하거나 수정한 미팅과 구글 캘린더의 일정을 서로 자동으로 맞춰 주는 기능입니다. 양방향 동기화가 되어, 한쪽에서 바꾸면 다른 쪽에도 즉시 반영됩니다. [1][2]\n\n이 연동이 활성화되면 뤼이도에서 생성된 미팅이 구글 캘린더에 자동 등록되고, 구글 캘린더에서 만든 일정도 뤼이도 미팅 목록에 자동 표시됩니다. 미팅의 제목, 설명, 시간, 장소, 참여자 변경도 서로 동기화됩니다. [1][2]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "자동화",
+                "sectionPath": [
+                  "구글 캘린더 연동"
+                ],
+                "sourceUrl": "https://docs.riido.io/meetings/automations.md"
+              },
+              {
+                "citationNumber": 2,
+                "documentTitle": "구글 캘린더",
+                "sectionPath": [
+                  "미팅 일정 동기화 방식"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 6,
+            "userQuery": "구글 캘린더 연동은 어떤 기능이야?",
+            "resolvedQuery": "구글 캘린더 연동은 어떤 기능이야?",
+            "contextStrategy": "NEW_TOPIC",
+            "contextTurnCount": 0,
+            "selectedTurnNos": [],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 2,
+            "citationDocumentTitles": [
+              "자동화",
+              "구글 캘린더"
+            ]
+          }
+        },
+        {
+          "turnNo": 7,
+          "question": "그 연동에서 작업 마감일도 동기화돼?",
+          "passed": true,
+          "failures": [],
+          "httpStatus": 200,
+          "response": {
+            "status": "COMPLETED",
+            "conversationId": "cccc6639-a0b7-48fa-82fe-a1af99a3c26a",
+            "ragRunId": "2d8649f6-58bb-4474-8d02-9d298db45160",
+            "answer": {
+              "answerMarkdown": "아니요. 뤼이도 내부의 ‘미팅’만 구글 캘린더와 양방향 연동되며, 작업의 마감일이나 다른 일정 정보는 현재 연동 대상이 아닙니다. [1]"
+            },
+            "citations": [
+              {
+                "citationNumber": 1,
+                "documentTitle": "구글 캘린더",
+                "sectionPath": [
+                  "자주 묻는 질문 (FAQ)"
+                ],
+                "sourceUrl": "https://docs.riido.io/integrations/google-calendar.md"
+              }
+            ]
+          },
+          "db": {
+            "status": "COMPLETED",
+            "indexVersionId": 1121,
+            "turnNo": 7,
+            "userQuery": "그 연동에서 작업 마감일도 동기화돼?",
+            "resolvedQuery": "구글 캘린더 연동에서 작업 마감일도 동기화되나요?",
+            "contextStrategy": "FOLLOW_UP_WINDOW",
+            "contextTurnCount": 1,
+            "selectedTurnNos": [
+              6
+            ],
+            "withheldReasonCode": null,
+            "errorCode": null,
+            "citationValidated": true,
+            "modelCalls": [
+              {
+                "purpose": "QUERY_REWRITE",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v3",
+                "retryCount": 0
+              },
+              {
+                "purpose": "QUERY_EMBEDDING",
+                "status": "SUCCESS",
+                "model": "text-embedding-3-large",
+                "promptVersion": null,
+                "retryCount": 0
+              },
+              {
+                "purpose": "ANSWER_GENERATION",
+                "status": "SUCCESS",
+                "model": "gpt-5.4-mini",
+                "promptVersion": "v4",
+                "retryCount": 0
+              }
+            ],
+            "retrievalResultCount": 20,
+            "citationCount": 1,
+            "citationDocumentTitles": [
+              "구글 캘린더"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

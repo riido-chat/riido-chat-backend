@@ -1,0 +1,462 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-09T04:16:07.754902+00:00",
+  "casesVersion": "mvp-quality-v3",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "26a0222c4db369911c6c1a6ac2bf64c32859fbd5",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.6-terra"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v8",
+        "sha256": "6382fe3033a461b851ee88b65c0c8a24aeb74ac940df13fbc3e96ea1f79c3dbb"
+      },
+      "sourcePlanning": {
+        "version": "v26",
+        "sha256": "51b17bb5c1f9493d7f41a374b66ff97974d615fb1237b5f6cd38a4cf813375fa"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v26-repair-1",
+        "sha256": "a9cb946a47d9fa4277404dcfe2b1f562997f0b62732a779fc4d69283467aa94f"
+      },
+      "answer": {
+        "version": "v21",
+        "sha256": "9afaf45fc0f0d7cc4eaef3af37b4179d36cfe482b6c8a5504cdd71e9751a1643"
+      },
+      "answerValidationRegeneration": {
+        "version": "v21-repair-1",
+        "sha256": "23a77c53d67f0307ab715b937ff22361799ba84e49b46a4e693b1f88fc37ddcc"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "26a0222c4db369911c6c1a6ac2bf64c32859fbd5",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.6-terra",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v35"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 1,
+    "uniqueCaseCount": 1,
+    "totalCaseExecutionCount": 1,
+    "passedCaseExecutionCount": 1,
+    "failedCaseExecutionCount": 0,
+    "executionErrorCaseExecutionCount": 0,
+    "criteriaMismatchCaseExecutionCount": 0,
+    "perCase": [
+      {
+        "id": "MQ039",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-09T04:16:02.409192+00:00",
+      "results": [
+        {
+          "id": "MQ039",
+          "description": "스프린트 기간 설정",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "032a68c1-8fb0-4693-94b3-bca80b9cca44",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "스프린트 기간은 몇 주로 설정할 수 있어?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "032a68c1-8fb0-4693-94b3-bca80b9cca44",
+                "ragRunId": "c755322c-4116-4960-8e58-6d29f9bc63ae",
+                "answer": {
+                  "answerMarkdown": "스프린트 기간은 주 단위로 최소 1주부터 최대 8주까지 설정할 수 있습니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 기간"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "스프린트 기간은 몇 주로 설정할 수 있어?",
+                "resolvedQuery": "스프린트 기간은 몇 주로 설정할 수 있어?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 5287,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 19,
+                    "outputTokens": null,
+                    "latencyMs": 854,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v35",
+                    "inputTokens": 7783,
+                    "outputTokens": 117,
+                    "latencyMs": 4347,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "스프린트"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "스프린트 기간은 몇 주로 설정할 수 있어?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "스프린트 기간은 몇 주로 설정할 수 있어?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3300,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:8f39a6741f94",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "30c49ede2036a0dcf966b4c2033000bd7edb3a5d1fd765340871d1e3aefe167c",
+                        "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 10.02527684870875,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.6314988618145646,
+                            "latencyMs": 885
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3301,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:1c82492f0b2a",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 기간"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "fea5253ffb2ae1231e90bdcca3ebb35ea55c457a988039db70bca98472a61f24",
+                        "content": "하나의 스프린트가 지속되는 기간입니다. 주 단위로 설정할 수 있으며, 최소 1주부터 최대 8주까지 설정 가능합니다.\n\n* 일반적으로 1\\~2주는 짧은 반복과 빠른 실행에 적합합니다.\n* 3주 이상은 중장기 프로젝트의 진행 추적에 유용합니다.\n\n팀 규모와 업무 성격에 따라 적정 주기를 설정하는 것을 권장합니다.\n\n예: 초기 스타트업 팀 — 1주 / 대규모 프로젝트 팀 — 2\\~3주",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 8.767722512009222,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.782458627363641,
+                            "latencyMs": 885
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3299,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:203889cf792c",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "35e456517f89ebe937bf0af7f3ee21c6c8db19f1b38912cafc8f675701ac05e6",
+                        "content": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다.\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 7.379614864980241,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5402923242209889,
+                            "latencyMs": 885
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3303,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:7a8e11bfc496",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "미리 생성할 다가올 스프린트 개수"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "44a05662ad01974d320173403f923d39732de87c22f5bc027b781e1077d9d52b",
+                        "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 6.456322959093718,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.6039488725700395,
+                            "latencyMs": 885
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3302,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:48338ffe0288",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 시작 요일"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "d157c06165cd8fb9c70026d16b625c5ed3c02a83db9a7622b3343a82accdbe29",
+                        "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.03055037313432836,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 6.151046948246035,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5670767186461411,
+                            "latencyMs": 885
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v35",
+                        "inputTokens": 7783,
+                        "outputTokens": 117,
+                        "latencyMs": 4347,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "스프린트 기간의 설정 가능 주 수 범위",
+                            "source_ids": [
+                              "SOURCE_2"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_2",
+                          "chunkId": 3301,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:1c82492f0b2a",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 기간"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "하나의 스프린트가 지속되는 기간입니다. 주 단위로 설정할 수 있으며, 최소 1주부터 최대 8주까지 설정 가능합니다.\n\n* 일반적으로 1\\~2주는 짧은 반복과 빠른 실행에 적합합니다.\n* 3주 이상은 중장기 프로젝트의 진행 추적에 유용합니다.\n\n팀 규모와 업무 성격에 따라 적정 주기를 설정하는 것을 권장합니다.\n\n예: 초기 스타트업 팀 — 1주 / 대규모 프로젝트 팀 — 2\\~3주"
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "스프린트 기간은 주 단위로 최소 1주부터 최대 8주까지 설정할 수 있습니다. [SOURCE_2]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "스프린트 기간은 주 단위로 최소 1주부터 최대 8주까지 설정할 수 있습니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    }
+  ]
+}

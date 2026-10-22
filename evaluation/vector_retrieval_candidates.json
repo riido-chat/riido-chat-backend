@@ -1,0 +1,2282 @@
+[
+  {
+    "question_id": "Q01",
+    "question": "새로 들어온 요청을 검토한 뒤 백로그나 바로 실행할 작업으로 넘기려면 어떻게 해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "11957633d8b2:a0709b43f1a9",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 신규 생성된 백로그",
+        "score": 0.5250265550777753
+      },
+      {
+        "rank": 2,
+        "section_id": "11957633d8b2:a6f5feefa6e5",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 개요",
+        "score": 0.5155367232233516
+      },
+      {
+        "rank": 3,
+        "section_id": "11957633d8b2:cce467185dfa",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 전환된 백로그",
+        "score": 0.4995012523368012
+      },
+      {
+        "rank": 4,
+        "section_id": "11957633d8b2:26264fecfd4a",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 작업으로 전환",
+        "score": 0.48126093997524944
+      },
+      {
+        "rank": 5,
+        "section_id": "11957633d8b2:8e468f02bf3a",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 구조",
+        "score": 0.4369589688448696
+      },
+      {
+        "rank": 6,
+        "section_id": "11957633d8b2:aa8af54aa5cd",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 속성",
+        "score": 0.42231850967534157
+      },
+      {
+        "rank": 7,
+        "section_id": "9d9ba80dfef6:b545c692c53d",
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 작업 처리",
+        "score": 0.42004576721365783
+      },
+      {
+        "rank": 8,
+        "section_id": "9d9ba80dfef6:2e1668de5714",
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 개요",
+        "score": 0.400865436876067
+      },
+      {
+        "rank": 9,
+        "section_id": "c837145b4afd:55978b839cb4",
+        "document_title": "중복 작업 감지",
+        "section_path": "중복 작업 감지 > 중복 작업 감지 사용하는 법",
+        "score": 0.39716399103532796
+      },
+      {
+        "rank": 10,
+        "section_id": "0ffc2d8de31e:363a8e5906f7",
+        "document_title": "소개",
+        "section_path": "소개 > 인기 페이지",
+        "score": 0.3680936035900988
+      }
+    ]
+  },
+  {
+    "question_id": "Q02",
+    "question": "백로그 항목을 프로젝트나 실제 작업으로 바꾸면 기존 정보도 그대로 따라가나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "11957633d8b2:cce467185dfa",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 전환된 백로그",
+        "score": 0.6966194494863179
+      },
+      {
+        "rank": 2,
+        "section_id": "11957633d8b2:26264fecfd4a",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 작업으로 전환",
+        "score": 0.6828278258916689
+      },
+      {
+        "rank": 3,
+        "section_id": "11957633d8b2:aa8af54aa5cd",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 속성",
+        "score": 0.6318996171485313
+      },
+      {
+        "rank": 4,
+        "section_id": "11957633d8b2:a6f5feefa6e5",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 개요",
+        "score": 0.5871296914504975
+      },
+      {
+        "rank": 5,
+        "section_id": "11957633d8b2:8e468f02bf3a",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 구조",
+        "score": 0.544341552500123
+      },
+      {
+        "rank": 6,
+        "section_id": "11957633d8b2:a0709b43f1a9",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 신규 생성된 백로그",
+        "score": 0.5103678461428549
+      },
+      {
+        "rank": 7,
+        "section_id": "fcb3c228f5a0:7ce560cd7b49",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기",
+        "score": 0.47537924296957157
+      },
+      {
+        "rank": 8,
+        "section_id": "949ddd65a2a5:4c10db99d1ad",
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 속성",
+        "score": 0.47423262882489303
+      },
+      {
+        "rank": 9,
+        "section_id": "c837145b4afd:55978b839cb4",
+        "document_title": "중복 작업 감지",
+        "section_path": "중복 작업 감지 > 중복 작업 감지 사용하는 법",
+        "score": 0.470674066927636
+      },
+      {
+        "rank": 10,
+        "section_id": "2edd9ad4a6fa:c0f4071b4014",
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 0.4582932927949561
+      }
+    ]
+  },
+  {
+    "question_id": "Q03",
+    "question": "현재 적용한 필터와 정렬 조건을 저장해서 다음에도 똑같이 불러오려면 어떻게 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "688dd8ac7efd:0d980cb3f519",
+        "document_title": "필터",
+        "section_path": "필터 > 저장된 보기",
+        "score": 0.6869097777511365
+      },
+      {
+        "rank": 2,
+        "section_id": "333984364686:294a258fc7b7",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 보기 편집하기",
+        "score": 0.5756677766762498
+      },
+      {
+        "rank": 3,
+        "section_id": "688dd8ac7efd:1ad5bfa76f8e",
+        "document_title": "필터",
+        "section_path": "필터 > 필터 적용하기",
+        "score": 0.5661991623726287
+      },
+      {
+        "rank": 4,
+        "section_id": "688dd8ac7efd:05afebae0312",
+        "document_title": "필터",
+        "section_path": "필터 > 개요",
+        "score": 0.5495971659191169
+      },
+      {
+        "rank": 5,
+        "section_id": "333984364686:5db9d1f52377",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 보기 생성하기",
+        "score": 0.5326781990408949
+      },
+      {
+        "rank": 6,
+        "section_id": "333984364686:4cf1d0445a55",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 개요",
+        "score": 0.5321639041224531
+      },
+      {
+        "rank": 7,
+        "section_id": "688dd8ac7efd:c36e82021bba",
+        "document_title": "필터",
+        "section_path": "필터 > 필터 카테고리",
+        "score": 0.41450931198449825
+      },
+      {
+        "rank": 8,
+        "section_id": "333984364686:ba056589ecd1",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 공개 범위",
+        "score": 0.38769424168879985
+      },
+      {
+        "rank": 9,
+        "section_id": "fcb3c228f5a0:7ce560cd7b49",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기",
+        "score": 0.37967538879396645
+      },
+      {
+        "rank": 10,
+        "section_id": "6cfca70f98e5:83dcb926d388",
+        "document_title": "검색",
+        "section_path": "검색 > 검색 시작하기",
+        "score": 0.3601345413523884
+      }
+    ]
+  },
+  {
+    "question_id": "Q04",
+    "question": "빈 문서에 팀에서 만든 문서 템플릿을 적용하려면 어떻게 해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "c7f7233f8cd2:514df535f932",
+        "document_title": "문서 템플릿",
+        "section_path": "문서 템플릿 > 템플릿 적용",
+        "score": 0.6612980051998131
+      },
+      {
+        "rank": 2,
+        "section_id": "c7f7233f8cd2:903fc62edea3",
+        "document_title": "문서 템플릿",
+        "section_path": "문서 템플릿 > 개요",
+        "score": 0.6097322789028256
+      },
+      {
+        "rank": 3,
+        "section_id": "c7f7233f8cd2:01fd815455b0",
+        "document_title": "문서 템플릿",
+        "section_path": "문서 템플릿 > 템플릿 생성",
+        "score": 0.5180158657399252
+      },
+      {
+        "rank": 4,
+        "section_id": "da8743ff8cae:9135af8d0050",
+        "document_title": "팀",
+        "section_path": "팀 > 팀 설정",
+        "score": 0.4242512349440275
+      },
+      {
+        "rank": 5,
+        "section_id": "d639f52b10eb:f5fb72a47de5",
+        "document_title": "자동화",
+        "section_path": "자동화 > 미팅 반복 설정",
+        "score": 0.4208661211998682
+      },
+      {
+        "rank": 6,
+        "section_id": "aacfc8cf7480:ca57cf9e9b84",
+        "document_title": "에디터",
+        "section_path": "에디터 > 문서 형식 적용",
+        "score": 0.40274324523830995
+      },
+      {
+        "rank": 7,
+        "section_id": "205de439d5a8:e3b8955d07f1",
+        "document_title": "미팅",
+        "section_path": "미팅 > 미팅 생성",
+        "score": 0.3687570293452245
+      },
+      {
+        "rank": 8,
+        "section_id": "da8743ff8cae:62a522a003fd",
+        "document_title": "팀",
+        "section_path": "팀 > 나의 팀",
+        "score": 0.3673839308303244
+      },
+      {
+        "rank": 9,
+        "section_id": "0ffc2d8de31e:363a8e5906f7",
+        "document_title": "소개",
+        "section_path": "소개 > 인기 페이지",
+        "score": 0.3668126051184001
+      },
+      {
+        "rank": 10,
+        "section_id": "6c3b150c3146:6c9e58fb04ca",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 설정",
+        "score": 0.3593033962841896
+      }
+    ]
+  },
+  {
+    "question_id": "Q05",
+    "question": "보관함에 넣은 완료 작업을 다시 진행 가능한 상태로 되돌릴 수 있나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "fcb3c228f5a0:4fb20bbf5133",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 작업 보관함",
+        "score": 0.6586705308210339
+      },
+      {
+        "rank": 2,
+        "section_id": "fcb3c228f5a0:7ce560cd7b49",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기",
+        "score": 0.645839218537899
+      },
+      {
+        "rank": 3,
+        "section_id": "fcb3c228f5a0:87393c951ab1",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 개요",
+        "score": 0.6043764101571887
+      },
+      {
+        "rank": 4,
+        "section_id": "9d9ba80dfef6:9b27cc48daca",
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 검토된 대기 작업",
+        "score": 0.5778055038662777
+      },
+      {
+        "rank": 5,
+        "section_id": "949ddd65a2a5:56598b0ddfc0",
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 작업 보관",
+        "score": 0.5690816629636006
+      },
+      {
+        "rank": 6,
+        "section_id": "9d9ba80dfef6:b545c692c53d",
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 작업 처리",
+        "score": 0.523536221445162
+      },
+      {
+        "rank": 7,
+        "section_id": "333984364686:4cf1d0445a55",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 개요",
+        "score": 0.5032063680349095
+      },
+      {
+        "rank": 8,
+        "section_id": "a7061c4853df:a5d15ef4cee0",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 개요",
+        "score": 0.4798670027215367
+      },
+      {
+        "rank": 9,
+        "section_id": "11957633d8b2:26264fecfd4a",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 작업으로 전환",
+        "score": 0.477193076428429
+      },
+      {
+        "rank": 10,
+        "section_id": "a7061c4853df:73e63632e555",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 복구 및 영구 삭제",
+        "score": 0.47647514991931383
+      }
+    ]
+  },
+  {
+    "question_id": "Q06",
+    "question": "실수로 삭제한 작업을 원래 프로젝트와 팀 위치로 복구하려면 어떻게 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "a7061c4853df:73e63632e555",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 복구 및 영구 삭제",
+        "score": 0.6123090109898495
+      },
+      {
+        "rank": 2,
+        "section_id": "a7061c4853df:a5d15ef4cee0",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 개요",
+        "score": 0.56858860190432
+      },
+      {
+        "rank": 3,
+        "section_id": "fcb3c228f5a0:7ce560cd7b49",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기",
+        "score": 0.4640691949860909
+      },
+      {
+        "rank": 4,
+        "section_id": "a7061c4853df:4c7aa16de474",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 삭제된 페이지 보기",
+        "score": 0.45219659506084475
+      },
+      {
+        "rank": 5,
+        "section_id": "a7061c4853df:6f88dd13099e",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 휴지통 사용법",
+        "score": 0.44360664571234576
+      },
+      {
+        "rank": 6,
+        "section_id": "11957633d8b2:26264fecfd4a",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 작업으로 전환",
+        "score": 0.4286145312723436
+      },
+      {
+        "rank": 7,
+        "section_id": "fcb3c228f5a0:4fb20bbf5133",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 작업 보관함",
+        "score": 0.425678665150621
+      },
+      {
+        "rank": 8,
+        "section_id": "333984364686:4cf1d0445a55",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 개요",
+        "score": 0.4240250528311986
+      },
+      {
+        "rank": 9,
+        "section_id": "2edd9ad4a6fa:c0f4071b4014",
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 0.41446439120641365
+      },
+      {
+        "rank": 10,
+        "section_id": "fcb3c228f5a0:87393c951ab1",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 개요",
+        "score": 0.41225984040232055
+      }
+    ]
+  },
+  {
+    "question_id": "Q07",
+    "question": "현재 사용 중인 팀을 비공개 팀으로 전환하려면 어디에서 설정해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "6c3b150c3146:6c9e58fb04ca",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 설정",
+        "score": 0.7520018691525983
+      },
+      {
+        "rank": 2,
+        "section_id": "6c3b150c3146:9f525d515668",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 개요",
+        "score": 0.5927165308738385
+      },
+      {
+        "rank": 3,
+        "section_id": "da8743ff8cae:9135af8d0050",
+        "document_title": "팀",
+        "section_path": "팀 > 팀 설정",
+        "score": 0.5640556703662146
+      },
+      {
+        "rank": 4,
+        "section_id": "da8743ff8cae:62a522a003fd",
+        "document_title": "팀",
+        "section_path": "팀 > 나의 팀",
+        "score": 0.5237030323028553
+      },
+      {
+        "rank": 5,
+        "section_id": "da8743ff8cae:26bbdd776a1e",
+        "document_title": "팀",
+        "section_path": "팀 > 팀 관리",
+        "score": 0.5072673796469338
+      },
+      {
+        "rank": 6,
+        "section_id": "6c3b150c3146:f4771653dfff",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 접근 권한",
+        "score": 0.5057024561365162
+      },
+      {
+        "rank": 7,
+        "section_id": "333984364686:ba056589ecd1",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 공개 범위",
+        "score": 0.48046045063129883
+      },
+      {
+        "rank": 8,
+        "section_id": "11957633d8b2:26264fecfd4a",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 작업으로 전환",
+        "score": 0.46665767168027505
+      },
+      {
+        "rank": 9,
+        "section_id": "da8743ff8cae:e2b4dc113d2f",
+        "document_title": "팀",
+        "section_path": "팀 > 팀 멤버",
+        "score": 0.4351641182458814
+      },
+      {
+        "rank": 10,
+        "section_id": "7591069b70f9:852f2729c6f3",
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 워크스페이스 설정",
+        "score": 0.42655109958437387
+      }
+    ]
+  },
+  {
+    "question_id": "Q08",
+    "question": "스프린트 시작 요일을 바꾸면 현재 진행 중인 스프린트에는 어떻게 반영되나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "261e80b246e8:48338ffe0288",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 시작 요일",
+        "score": 0.7869922700855793
+      },
+      {
+        "rank": 2,
+        "section_id": "261e80b246e8:8f39a6741f94",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 설정",
+        "score": 0.600064403534536
+      },
+      {
+        "rank": 3,
+        "section_id": "261e80b246e8:1c82492f0b2a",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 기간",
+        "score": 0.5468802906198911
+      },
+      {
+        "rank": 4,
+        "section_id": "2c428c0d81be:91e1e3f290e3",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 참고",
+        "score": 0.4990749262354688
+      },
+      {
+        "rank": 5,
+        "section_id": "261e80b246e8:7a8e11bfc496",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 미리 생성할 다가올 스프린트 개수",
+        "score": 0.48787078008439666
+      },
+      {
+        "rank": 6,
+        "section_id": "40ac0f0ac641:6bbc22c7fbca",
+        "document_title": "자동화",
+        "section_path": "자동화 > 개요",
+        "score": 0.48625031511685646
+      },
+      {
+        "rank": 7,
+        "section_id": "261e80b246e8:203889cf792c",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 개요",
+        "score": 0.4635732863873846
+      },
+      {
+        "rank": 8,
+        "section_id": "2c428c0d81be:7d100b73fa0e",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 개요",
+        "score": 0.4510059025867459
+      },
+      {
+        "rank": 9,
+        "section_id": "2c428c0d81be:012f04cb7b63",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 그래프 보는 법",
+        "score": 0.4424225224067878
+      },
+      {
+        "rank": 10,
+        "section_id": "2c428c0d81be:c496ba980f67",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 그래프 해석 팁",
+        "score": 0.42733695635587754
+      }
+    ]
+  },
+  {
+    "question_id": "Q09",
+    "question": "앞으로 진행할 스프린트 세 개를 미리 생성하려면 어떤 설정을 사용해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "261e80b246e8:7a8e11bfc496",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 미리 생성할 다가올 스프린트 개수",
+        "score": 0.7164590786575544
+      },
+      {
+        "rank": 2,
+        "section_id": "261e80b246e8:8f39a6741f94",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 설정",
+        "score": 0.5035076698615407
+      },
+      {
+        "rank": 3,
+        "section_id": "261e80b246e8:1c82492f0b2a",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 기간",
+        "score": 0.4614013389440701
+      },
+      {
+        "rank": 4,
+        "section_id": "40ac0f0ac641:6bbc22c7fbca",
+        "document_title": "자동화",
+        "section_path": "자동화 > 개요",
+        "score": 0.4519507615944308
+      },
+      {
+        "rank": 5,
+        "section_id": "261e80b246e8:48338ffe0288",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 시작 요일",
+        "score": 0.4226544185864878
+      },
+      {
+        "rank": 6,
+        "section_id": "2c428c0d81be:91e1e3f290e3",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 참고",
+        "score": 0.4142752495233175
+      },
+      {
+        "rank": 7,
+        "section_id": "40ac0f0ac641:03c976577bcd",
+        "document_title": "자동화",
+        "section_path": "자동화 > 자동화 설정",
+        "score": 0.4087093866557394
+      },
+      {
+        "rank": 8,
+        "section_id": "2c428c0d81be:012f04cb7b63",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 그래프 보는 법",
+        "score": 0.40337993496776037
+      },
+      {
+        "rank": 9,
+        "section_id": "2c428c0d81be:7d100b73fa0e",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 개요",
+        "score": 0.40074146623852136
+      },
+      {
+        "rank": 10,
+        "section_id": "261e80b246e8:203889cf792c",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 개요",
+        "score": 0.3893169459082573
+      }
+    ]
+  },
+  {
+    "question_id": "Q10",
+    "question": "특정 페이지나 댓글에서 더 이상 알림을 받고 싶지 않을 때는 어떻게 끄나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "c225265a1fa1:8056485bc27c",
+        "document_title": "알림",
+        "section_path": "알림 > 알림 설정",
+        "score": 0.676531400358283
+      },
+      {
+        "rank": 2,
+        "section_id": "854f9556fa9d:1b058ab0fb93",
+        "document_title": "댓글",
+        "section_path": "댓글 > 댓글 구독",
+        "score": 0.5151274706207538
+      },
+      {
+        "rank": 3,
+        "section_id": "c225265a1fa1:21a1e3032cdd",
+        "document_title": "알림",
+        "section_path": "알림 > 알림 확인하기",
+        "score": 0.458389538843189
+      },
+      {
+        "rank": 4,
+        "section_id": "854f9556fa9d:edc1995fd7ea",
+        "document_title": "댓글",
+        "section_path": "댓글 > 댓글에 이모지로 반응하기",
+        "score": 0.43759989873640115
+      },
+      {
+        "rank": 5,
+        "section_id": "c225265a1fa1:567b1cd31b93",
+        "document_title": "알림",
+        "section_path": "알림 > 알림 활용하기",
+        "score": 0.42088873163273965
+      },
+      {
+        "rank": 6,
+        "section_id": "854f9556fa9d:9fac9564ad00",
+        "document_title": "댓글",
+        "section_path": "댓글 > 댓글 작성",
+        "score": 0.41445599864165006
+      },
+      {
+        "rank": 7,
+        "section_id": "c225265a1fa1:4e5a6172d25a",
+        "document_title": "알림",
+        "section_path": "알림 > 개요",
+        "score": 0.41208529105448033
+      },
+      {
+        "rank": 8,
+        "section_id": "854f9556fa9d:8b788f7e829c",
+        "document_title": "댓글",
+        "section_path": "댓글 > 댓글 수정",
+        "score": 0.4073794295488523
+      },
+      {
+        "rank": 9,
+        "section_id": "c225265a1fa1:c94c162f41b5",
+        "document_title": "알림",
+        "section_path": "알림 > 참고",
+        "score": 0.4031970964100091
+      },
+      {
+        "rank": 10,
+        "section_id": "a7061c4853df:4c7aa16de474",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 삭제된 페이지 보기",
+        "score": 0.40275586892991977
+      }
+    ]
+  },
+  {
+    "question_id": "Q11",
+    "question": "저장된 보기를 나만 사용하거나 팀 전체에 공개하도록 설정할 수 있나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "333984364686:ba056589ecd1",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 공개 범위",
+        "score": 0.6989478446711658
+      },
+      {
+        "rank": 2,
+        "section_id": "333984364686:4cf1d0445a55",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 개요",
+        "score": 0.5732903264981283
+      },
+      {
+        "rank": 3,
+        "section_id": "333984364686:294a258fc7b7",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 보기 편집하기",
+        "score": 0.5588815337235056
+      },
+      {
+        "rank": 4,
+        "section_id": "333984364686:5db9d1f52377",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 보기 생성하기",
+        "score": 0.5198317398941401
+      },
+      {
+        "rank": 5,
+        "section_id": "688dd8ac7efd:0d980cb3f519",
+        "document_title": "필터",
+        "section_path": "필터 > 저장된 보기",
+        "score": 0.5032080271602544
+      },
+      {
+        "rank": 6,
+        "section_id": "949ddd65a2a5:6036f1478624",
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 외부 공유",
+        "score": 0.4648357720842444
+      },
+      {
+        "rank": 7,
+        "section_id": "a7061c4853df:4c7aa16de474",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 삭제된 페이지 보기",
+        "score": 0.4413894563430304
+      },
+      {
+        "rank": 8,
+        "section_id": "6c3b150c3146:6c9e58fb04ca",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 설정",
+        "score": 0.4338625923835273
+      },
+      {
+        "rank": 9,
+        "section_id": "a7061c4853df:73e63632e555",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 복구 및 영구 삭제",
+        "score": 0.42599716609714
+      },
+      {
+        "rank": 10,
+        "section_id": "da8743ff8cae:62a522a003fd",
+        "document_title": "팀",
+        "section_path": "팀 > 나의 팀",
+        "score": 0.4078833755276402
+      }
+    ]
+  },
+  {
+    "question_id": "Q12",
+    "question": "팀에서 새로운 작업 상태를 추가하거나 기존 상태를 삭제하려면 어디서 설정하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "a26e14ee99d1:8ddbdaa9dc9b",
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 설정",
+        "score": 0.6846720307479773
+      },
+      {
+        "rank": 2,
+        "section_id": "a26e14ee99d1:ede573b9b2c7",
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 개요",
+        "score": 0.5711311842050153
+      },
+      {
+        "rank": 3,
+        "section_id": "1c0005b1dfeb:802f5a7b91ac",
+        "document_title": "대시보드",
+        "section_path": "대시보드 > 작업",
+        "score": 0.5536453114490373
+      },
+      {
+        "rank": 4,
+        "section_id": "da8743ff8cae:9135af8d0050",
+        "document_title": "팀",
+        "section_path": "팀 > 팀 설정",
+        "score": 0.5470697931812024
+      },
+      {
+        "rank": 5,
+        "section_id": "1c0005b1dfeb:fca726772b8f",
+        "document_title": "대시보드",
+        "section_path": "대시보드 > 최근 활동",
+        "score": 0.5014358121833978
+      },
+      {
+        "rank": 6,
+        "section_id": "da8743ff8cae:62a522a003fd",
+        "document_title": "팀",
+        "section_path": "팀 > 나의 팀",
+        "score": 0.48623056296813383
+      },
+      {
+        "rank": 7,
+        "section_id": "da8743ff8cae:26bbdd776a1e",
+        "document_title": "팀",
+        "section_path": "팀 > 팀 관리",
+        "score": 0.47333536168630297
+      },
+      {
+        "rank": 8,
+        "section_id": "2edd9ad4a6fa:c0f4071b4014",
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 0.4715957224430207
+      },
+      {
+        "rank": 9,
+        "section_id": "949ddd65a2a5:4c10db99d1ad",
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 속성",
+        "score": 0.4662582944207303
+      },
+      {
+        "rank": 10,
+        "section_id": "40ac0f0ac641:03c976577bcd",
+        "document_title": "자동화",
+        "section_path": "자동화 > 자동화 설정",
+        "score": 0.46028423349358927
+      }
+    ]
+  },
+  {
+    "question_id": "Q13",
+    "question": "뤄이도 워크스페이스를 슬랙과 연결하고 팀별 알림 채널을 지정하려면 어떻게 해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "43e5e2414349:b60d8edf2d0a",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 0.6040404539910925
+      },
+      {
+        "rank": 2,
+        "section_id": "43e5e2414349:9976bd5ed072",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 자주 묻는 질문 (FAQ)",
+        "score": 0.5150125777957114
+      },
+      {
+        "rank": 3,
+        "section_id": "43e5e2414349:6ec68508c108",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 슬랙 연동으로 얻는 핵심 가치",
+        "score": 0.4905123249978054
+      },
+      {
+        "rank": 4,
+        "section_id": "ee834b371049:6fe68edda26a",
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 연동 설정 가이드",
+        "score": 0.4874498179856013
+      },
+      {
+        "rank": 5,
+        "section_id": "43e5e2414349:4fdacd7803e6",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 개요",
+        "score": 0.46831279931483816
+      },
+      {
+        "rank": 6,
+        "section_id": "d639f52b10eb:f9d910a50c33",
+        "document_title": "자동화",
+        "section_path": "자동화 > 구글 캘린더 연동",
+        "score": 0.45870075049407566
+      },
+      {
+        "rank": 7,
+        "section_id": "c225265a1fa1:c94c162f41b5",
+        "document_title": "알림",
+        "section_path": "알림 > 참고",
+        "score": 0.45215018571842536
+      },
+      {
+        "rank": 8,
+        "section_id": "854f9556fa9d:f59ce20fded2",
+        "document_title": "댓글",
+        "section_path": "댓글 > 개요",
+        "score": 0.44228523024479904
+      },
+      {
+        "rank": 9,
+        "section_id": "c225265a1fa1:4e5a6172d25a",
+        "document_title": "알림",
+        "section_path": "알림 > 개요",
+        "score": 0.4410999002557573
+      },
+      {
+        "rank": 10,
+        "section_id": "5623097e1502:b8b2000bc35a",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 0.4349944765890963
+      }
+    ]
+  },
+  {
+    "question_id": "Q14",
+    "question": "디스코드 서버를 뤄이도에 연결한 다음 팀별 채널을 지정하는 방법을 알려주세요.",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "ee834b371049:6fe68edda26a",
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 연동 설정 가이드",
+        "score": 0.6356185195378565
+      },
+      {
+        "rank": 2,
+        "section_id": "43e5e2414349:b60d8edf2d0a",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 0.5228924463776075
+      },
+      {
+        "rank": 3,
+        "section_id": "ee834b371049:20faf711ea89",
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 개요",
+        "score": 0.4702010161407695
+      },
+      {
+        "rank": 4,
+        "section_id": "ee834b371049:d048c70e1bf1",
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 디스코드 연동으로 얻는 핵심 가치",
+        "score": 0.44929523182293396
+      },
+      {
+        "rank": 5,
+        "section_id": "5623097e1502:b8b2000bc35a",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 0.44379381959948383
+      },
+      {
+        "rank": 6,
+        "section_id": "6e9c13b73663:ef1266158078",
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > 설치 가이드",
+        "score": 0.4052491644358047
+      },
+      {
+        "rank": 7,
+        "section_id": "a13bfdc38996:8f9d2cf72c3e",
+        "document_title": "피그마",
+        "section_path": "피그마 > 연동 설정 가이드",
+        "score": 0.40368190956823147
+      },
+      {
+        "rank": 8,
+        "section_id": "b86425eb9784:c2921a208e92",
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 연동 설정 가이드",
+        "score": 0.3889325105874486
+      },
+      {
+        "rank": 9,
+        "section_id": "d639f52b10eb:f9d910a50c33",
+        "document_title": "자동화",
+        "section_path": "자동화 > 구글 캘린더 연동",
+        "score": 0.3629214427187776
+      },
+      {
+        "rank": 10,
+        "section_id": "6e9c13b73663:cd786201dd96",
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > MCP 사용 사례",
+        "score": 0.36038148950241533
+      }
+    ]
+  },
+  {
+    "question_id": "Q15",
+    "question": "구글 캘린더를 워크스페이스에 연동하고 팀별 캘린더를 선택하려면 어떻게 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "5623097e1502:b8b2000bc35a",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 0.6777713002831739
+      },
+      {
+        "rank": 2,
+        "section_id": "d639f52b10eb:f9d910a50c33",
+        "document_title": "자동화",
+        "section_path": "자동화 > 구글 캘린더 연동",
+        "score": 0.5762194028633738
+      },
+      {
+        "rank": 3,
+        "section_id": "5623097e1502:0c33dc302925",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 미팅 일정 동기화 방식",
+        "score": 0.516810155282378
+      },
+      {
+        "rank": 4,
+        "section_id": "5623097e1502:a731f8580273",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 개요",
+        "score": 0.5079635670969901
+      },
+      {
+        "rank": 5,
+        "section_id": "7591069b70f9:852f2729c6f3",
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 워크스페이스 설정",
+        "score": 0.480180119027083
+      },
+      {
+        "rank": 6,
+        "section_id": "7591069b70f9:97c40b93dde0",
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 여러 워크스페이스에 참여",
+        "score": 0.4796279673055117
+      },
+      {
+        "rank": 7,
+        "section_id": "43e5e2414349:b60d8edf2d0a",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 0.46518895495035717
+      },
+      {
+        "rank": 8,
+        "section_id": "5623097e1502:76d8211bc501",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 자주 묻는 질문 (FAQ)",
+        "score": 0.46080191858812847
+      },
+      {
+        "rank": 9,
+        "section_id": "7591069b70f9:9d78075e912d",
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 개요",
+        "score": 0.4498574486707769
+      },
+      {
+        "rank": 10,
+        "section_id": "6cfca70f98e5:caab890e232f",
+        "document_title": "검색",
+        "section_path": "검색 > 검색 결과 활용하기",
+        "score": 0.4310865989211444
+      }
+    ]
+  },
+  {
+    "question_id": "Q16",
+    "question": "깃허브 Organization과 Repository를 뤄이도 워크스페이스에 연결하는 절차가 궁금해요.",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "b86425eb9784:c2921a208e92",
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 연동 설정 가이드",
+        "score": 0.6635912131588745
+      },
+      {
+        "rank": 2,
+        "section_id": "b86425eb9784:85561efaf97e",
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 뤼이도와 Github 연결",
+        "score": 0.5245029614645722
+      },
+      {
+        "rank": 3,
+        "section_id": "b86425eb9784:1870cc7c719b",
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 개요",
+        "score": 0.5236125559196811
+      },
+      {
+        "rank": 4,
+        "section_id": "764f1bb9b2d9:edc324ca1f86",
+        "document_title": "핵심 개념",
+        "section_path": "핵심 개념 > 기본 개념",
+        "score": 0.424126227903429
+      },
+      {
+        "rank": 5,
+        "section_id": "b86425eb9784:fb7196c378c9",
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 작업 상태 자동화",
+        "score": 0.4088916615942162
+      },
+      {
+        "rank": 6,
+        "section_id": "7591069b70f9:9d78075e912d",
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 개요",
+        "score": 0.3980372073600398
+      },
+      {
+        "rank": 7,
+        "section_id": "a13bfdc38996:8f9d2cf72c3e",
+        "document_title": "피그마",
+        "section_path": "피그마 > 연동 설정 가이드",
+        "score": 0.38965021269425415
+      },
+      {
+        "rank": 8,
+        "section_id": "0ffc2d8de31e:363a8e5906f7",
+        "document_title": "소개",
+        "section_path": "소개 > 인기 페이지",
+        "score": 0.3814177782684216
+      },
+      {
+        "rank": 9,
+        "section_id": "43e5e2414349:b60d8edf2d0a",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 0.37905405310393725
+      },
+      {
+        "rank": 10,
+        "section_id": "2edd9ad4a6fa:c0f4071b4014",
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 0.3744523744731294
+      }
+    ]
+  },
+  {
+    "question_id": "Q17",
+    "question": "피그마에서 뤄이도 플러그인을 설치하고 계정을 연결하려면 어떻게 해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "a13bfdc38996:8f9d2cf72c3e",
+        "document_title": "피그마",
+        "section_path": "피그마 > 연동 설정 가이드",
+        "score": 0.6849122912881432
+      },
+      {
+        "rank": 2,
+        "section_id": "a13bfdc38996:5cace80db708",
+        "document_title": "피그마",
+        "section_path": "피그마 > 피그마 뤼이도 플러그인",
+        "score": 0.5873917839993967
+      },
+      {
+        "rank": 3,
+        "section_id": "a13bfdc38996:6edc1374729e",
+        "document_title": "피그마",
+        "section_path": "피그마 > 자주 묻는 질문 (FAQ)",
+        "score": 0.5743277083750318
+      },
+      {
+        "rank": 4,
+        "section_id": "a13bfdc38996:245ede639654",
+        "document_title": "피그마",
+        "section_path": "피그마 > 피그마 연동",
+        "score": 0.5237163791231478
+      },
+      {
+        "rank": 5,
+        "section_id": "a13bfdc38996:ab6532b44988",
+        "document_title": "피그마",
+        "section_path": "피그마 > 개요",
+        "score": 0.5212956654881027
+      },
+      {
+        "rank": 6,
+        "section_id": "d639f52b10eb:f9d910a50c33",
+        "document_title": "자동화",
+        "section_path": "자동화 > 구글 캘린더 연동",
+        "score": 0.4300732523710187
+      },
+      {
+        "rank": 7,
+        "section_id": "b86425eb9784:c2921a208e92",
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 연동 설정 가이드",
+        "score": 0.4297605849680306
+      },
+      {
+        "rank": 8,
+        "section_id": "43e5e2414349:b60d8edf2d0a",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 0.42853811936697994
+      },
+      {
+        "rank": 9,
+        "section_id": "ee834b371049:6fe68edda26a",
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 연동 설정 가이드",
+        "score": 0.4149427321876116
+      },
+      {
+        "rank": 10,
+        "section_id": "b86425eb9784:85561efaf97e",
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 뤼이도와 Github 연결",
+        "score": 0.4149087154908101
+      }
+    ]
+  },
+  {
+    "question_id": "Q18",
+    "question": "ChatGPT에 뤄이도 MCP를 연결하려면 어떤 설정을 해야 하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "6e9c13b73663:ef1266158078",
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > 설치 가이드",
+        "score": 0.5482233898664237
+      },
+      {
+        "rank": 2,
+        "section_id": "6e9c13b73663:58cd615292d6",
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > 개요",
+        "score": 0.40319951829920286
+      },
+      {
+        "rank": 3,
+        "section_id": "6e9c13b73663:cd786201dd96",
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > MCP 사용 사례",
+        "score": 0.37538235181198487
+      },
+      {
+        "rank": 4,
+        "section_id": "43e5e2414349:b60d8edf2d0a",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 0.3744898152356744
+      },
+      {
+        "rank": 5,
+        "section_id": "5623097e1502:b8b2000bc35a",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 0.3594475410724395
+      },
+      {
+        "rank": 6,
+        "section_id": "a13bfdc38996:8f9d2cf72c3e",
+        "document_title": "피그마",
+        "section_path": "피그마 > 연동 설정 가이드",
+        "score": 0.3574599176959139
+      },
+      {
+        "rank": 7,
+        "section_id": "ee834b371049:6fe68edda26a",
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 연동 설정 가이드",
+        "score": 0.35390140955219573
+      },
+      {
+        "rank": 8,
+        "section_id": "b86425eb9784:c2921a208e92",
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 연동 설정 가이드",
+        "score": 0.3457377882734103
+      },
+      {
+        "rank": 9,
+        "section_id": "b86425eb9784:85561efaf97e",
+        "document_title": "깃허브",
+        "section_path": "깃허브 > 뤼이도와 Github 연결",
+        "score": 0.31331267837990173
+      },
+      {
+        "rank": 10,
+        "section_id": "673858aecdcf:593dd4fa3def",
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 연결 추가하기",
+        "score": 0.30525220901223427
+      }
+    ]
+  },
+  {
+    "question_id": "Q19",
+    "question": "구글 캘린더를 연결했는데 작업 마감일이 캘린더에 표시되지 않아요. 연동 오류인가요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "5623097e1502:76d8211bc501",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 자주 묻는 질문 (FAQ)",
+        "score": 0.6036739549120532
+      },
+      {
+        "rank": 2,
+        "section_id": "5623097e1502:a731f8580273",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 개요",
+        "score": 0.5250596324802504
+      },
+      {
+        "rank": 3,
+        "section_id": "5623097e1502:b8b2000bc35a",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 0.5193217061801777
+      },
+      {
+        "rank": 4,
+        "section_id": "d639f52b10eb:f9d910a50c33",
+        "document_title": "자동화",
+        "section_path": "자동화 > 구글 캘린더 연동",
+        "score": 0.5175562541176435
+      },
+      {
+        "rank": 5,
+        "section_id": "5623097e1502:0c33dc302925",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 미팅 일정 동기화 방식",
+        "score": 0.4868676950255303
+      },
+      {
+        "rank": 6,
+        "section_id": "949ddd65a2a5:28c75fba571f",
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 다양한 보기",
+        "score": 0.37021061124820387
+      },
+      {
+        "rank": 7,
+        "section_id": "1c0005b1dfeb:802f5a7b91ac",
+        "document_title": "대시보드",
+        "section_path": "대시보드 > 작업",
+        "score": 0.36801671116392154
+      },
+      {
+        "rank": 8,
+        "section_id": "9d9ba80dfef6:6fc3432260ff",
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 속성",
+        "score": 0.3662875048740313
+      },
+      {
+        "rank": 9,
+        "section_id": "949ddd65a2a5:b1af22cab7a1",
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 작업 관리",
+        "score": 0.3584308470254094
+      },
+      {
+        "rank": 10,
+        "section_id": "673858aecdcf:593dd4fa3def",
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 연결 추가하기",
+        "score": 0.3571506251930975
+      }
+    ]
+  },
+  {
+    "question_id": "Q20",
+    "question": "슬랙 연동 후 알림이 너무 많이 오는데 알림 범위를 줄일 수 있나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "43e5e2414349:9976bd5ed072",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 자주 묻는 질문 (FAQ)",
+        "score": 0.5616215252724225
+      },
+      {
+        "rank": 2,
+        "section_id": "c225265a1fa1:c94c162f41b5",
+        "document_title": "알림",
+        "section_path": "알림 > 참고",
+        "score": 0.5393280291716235
+      },
+      {
+        "rank": 3,
+        "section_id": "43e5e2414349:b60d8edf2d0a",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 0.5193093521600339
+      },
+      {
+        "rank": 4,
+        "section_id": "43e5e2414349:6ec68508c108",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 슬랙 연동으로 얻는 핵심 가치",
+        "score": 0.5148063863108879
+      },
+      {
+        "rank": 5,
+        "section_id": "c225265a1fa1:8056485bc27c",
+        "document_title": "알림",
+        "section_path": "알림 > 알림 설정",
+        "score": 0.4689937410044698
+      },
+      {
+        "rank": 6,
+        "section_id": "ee834b371049:2a2928a908fc",
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 자주 묻는 질문 (FAQ)",
+        "score": 0.43055020292192026
+      },
+      {
+        "rank": 7,
+        "section_id": "43e5e2414349:4fdacd7803e6",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 개요",
+        "score": 0.42026451768047346
+      },
+      {
+        "rank": 8,
+        "section_id": "c225265a1fa1:4e5a6172d25a",
+        "document_title": "알림",
+        "section_path": "알림 > 개요",
+        "score": 0.4124717786683547
+      },
+      {
+        "rank": 9,
+        "section_id": "c225265a1fa1:21a1e3032cdd",
+        "document_title": "알림",
+        "section_path": "알림 > 알림 확인하기",
+        "score": 0.4050299980328368
+      },
+      {
+        "rank": 10,
+        "section_id": "c225265a1fa1:567b1cd31b93",
+        "document_title": "알림",
+        "section_path": "알림 > 알림 활용하기",
+        "score": 0.40493209031754507
+      }
+    ]
+  },
+  {
+    "question_id": "Q21",
+    "question": "슬랙 연동 설정에서 비공개 채널이 보이지 않는데 어떻게 연결하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "43e5e2414349:b60d8edf2d0a",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 연동 설정 가이드",
+        "score": 0.5523846106078397
+      },
+      {
+        "rank": 2,
+        "section_id": "43e5e2414349:9976bd5ed072",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 자주 묻는 질문 (FAQ)",
+        "score": 0.4976714938807063
+      },
+      {
+        "rank": 3,
+        "section_id": "c225265a1fa1:c94c162f41b5",
+        "document_title": "알림",
+        "section_path": "알림 > 참고",
+        "score": 0.40052542162526616
+      },
+      {
+        "rank": 4,
+        "section_id": "6c3b150c3146:6c9e58fb04ca",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 설정",
+        "score": 0.3841913938881032
+      },
+      {
+        "rank": 5,
+        "section_id": "43e5e2414349:6ec68508c108",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 슬랙 연동으로 얻는 핵심 가치",
+        "score": 0.38362466355572167
+      },
+      {
+        "rank": 6,
+        "section_id": "ee834b371049:6fe68edda26a",
+        "document_title": "디스코드",
+        "section_path": "디스코드 > 연동 설정 가이드",
+        "score": 0.37877457768210576
+      },
+      {
+        "rank": 7,
+        "section_id": "6c3b150c3146:f4771653dfff",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 접근 권한",
+        "score": 0.3713056332867112
+      },
+      {
+        "rank": 8,
+        "section_id": "43e5e2414349:4fdacd7803e6",
+        "document_title": "슬랙",
+        "section_path": "슬랙 > 개요",
+        "score": 0.3687985817703261
+      },
+      {
+        "rank": 9,
+        "section_id": "6c3b150c3146:9f525d515668",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 개요",
+        "score": 0.3459664530815316
+      },
+      {
+        "rank": 10,
+        "section_id": "5623097e1502:b8b2000bc35a",
+        "document_title": "구글 캘린더",
+        "section_path": "구글 캘린더 > 연동 설정 가이드",
+        "score": 0.32047837279944213
+      }
+    ]
+  },
+  {
+    "question_id": "Q22",
+    "question": "기존 작업 상태를 삭제하려고 하는데 삭제되지 않는 이유가 무엇인가요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "9d9ba80dfef6:b545c692c53d",
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 작업 처리",
+        "score": 0.45858223519429475
+      },
+      {
+        "rank": 2,
+        "section_id": "fcb3c228f5a0:87393c951ab1",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 개요",
+        "score": 0.4431646027053999
+      },
+      {
+        "rank": 3,
+        "section_id": "fcb3c228f5a0:7ce560cd7b49",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 보관된 작업을 다시 활성화하기",
+        "score": 0.42926830501473245
+      },
+      {
+        "rank": 4,
+        "section_id": "fcb3c228f5a0:4fb20bbf5133",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 작업 보관함",
+        "score": 0.4279843936318679
+      },
+      {
+        "rank": 5,
+        "section_id": "a26e14ee99d1:8ddbdaa9dc9b",
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 설정",
+        "score": 0.4039441196454938
+      },
+      {
+        "rank": 6,
+        "section_id": "1c0005b1dfeb:802f5a7b91ac",
+        "document_title": "대시보드",
+        "section_path": "대시보드 > 작업",
+        "score": 0.39552552150343123
+      },
+      {
+        "rank": 7,
+        "section_id": "11957633d8b2:cce467185dfa",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 전환된 백로그",
+        "score": 0.39465034291770906
+      },
+      {
+        "rank": 8,
+        "section_id": "949ddd65a2a5:56598b0ddfc0",
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 작업 보관",
+        "score": 0.3909128852701653
+      },
+      {
+        "rank": 9,
+        "section_id": "c837145b4afd:55978b839cb4",
+        "document_title": "중복 작업 감지",
+        "section_path": "중복 작업 감지 > 중복 작업 감지 사용하는 법",
+        "score": 0.38414924833948505
+      },
+      {
+        "rank": 10,
+        "section_id": "a26e14ee99d1:2786f7438a88",
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 진행 중",
+        "score": 0.38326192125686775
+      }
+    ]
+  },
+  {
+    "question_id": "Q23",
+    "question": "비활성화한 워크스페이스 멤버를 완전히 삭제할 수 없어요. 다시 초대하면 새 계정이 만들어지나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "567f0ce8042c:6a09b6285b28",
+        "document_title": "멤버",
+        "section_path": "멤버 > 멤버 비활성화",
+        "score": 0.6904672314073627
+      },
+      {
+        "rank": 2,
+        "section_id": "da8743ff8cae:e2b4dc113d2f",
+        "document_title": "팀",
+        "section_path": "팀 > 팀 멤버",
+        "score": 0.5656237845863504
+      },
+      {
+        "rank": 3,
+        "section_id": "567f0ce8042c:dc7240487954",
+        "document_title": "멤버",
+        "section_path": "멤버 > 개요",
+        "score": 0.5312713317452235
+      },
+      {
+        "rank": 4,
+        "section_id": "6c3b150c3146:f4771653dfff",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 접근 권한",
+        "score": 0.4846073587438249
+      },
+      {
+        "rank": 5,
+        "section_id": "da8743ff8cae:26bbdd776a1e",
+        "document_title": "팀",
+        "section_path": "팀 > 팀 관리",
+        "score": 0.4827073892983278
+      },
+      {
+        "rank": 6,
+        "section_id": "7591069b70f9:9d78075e912d",
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 개요",
+        "score": 0.44009564230753706
+      },
+      {
+        "rank": 7,
+        "section_id": "7591069b70f9:97c40b93dde0",
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 여러 워크스페이스에 참여",
+        "score": 0.41693752972126474
+      },
+      {
+        "rank": 8,
+        "section_id": "6c3b150c3146:9f525d515668",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 개요",
+        "score": 0.41298830689673505
+      },
+      {
+        "rank": 9,
+        "section_id": "95a1b20de638:c6dbd3a17dd8",
+        "document_title": "구독 및 결제",
+        "section_path": "구독 및 결제 > 워크스페이스에 멤버 추가하기",
+        "score": 0.4125312794942493
+      },
+      {
+        "rank": 10,
+        "section_id": "567f0ce8042c:a71a73e4ac34",
+        "document_title": "멤버",
+        "section_path": "멤버 > 권한",
+        "score": 0.40886107117061743
+      }
+    ]
+  },
+  {
+    "question_id": "Q24",
+    "question": "팀을 삭제했는데 다시 복구할 수 있나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "a7061c4853df:73e63632e555",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 복구 및 영구 삭제",
+        "score": 0.5807790533031995
+      },
+      {
+        "rank": 2,
+        "section_id": "a7061c4853df:a5d15ef4cee0",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 개요",
+        "score": 0.526097919484613
+      },
+      {
+        "rank": 3,
+        "section_id": "da8743ff8cae:26bbdd776a1e",
+        "document_title": "팀",
+        "section_path": "팀 > 팀 관리",
+        "score": 0.47806129875477854
+      },
+      {
+        "rank": 4,
+        "section_id": "a7061c4853df:4c7aa16de474",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 삭제된 페이지 보기",
+        "score": 0.47498312674454035
+      },
+      {
+        "rank": 5,
+        "section_id": "da8743ff8cae:e2b4dc113d2f",
+        "document_title": "팀",
+        "section_path": "팀 > 팀 멤버",
+        "score": 0.4498817474164367
+      },
+      {
+        "rank": 6,
+        "section_id": "da8743ff8cae:62a522a003fd",
+        "document_title": "팀",
+        "section_path": "팀 > 나의 팀",
+        "score": 0.43661834522265375
+      },
+      {
+        "rank": 7,
+        "section_id": "da8743ff8cae:62b414e2b349",
+        "document_title": "팀",
+        "section_path": "팀 > 개요",
+        "score": 0.4329483600138788
+      },
+      {
+        "rank": 8,
+        "section_id": "6c3b150c3146:9f525d515668",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 개요",
+        "score": 0.4083304402346234
+      },
+      {
+        "rank": 9,
+        "section_id": "333984364686:ba056589ecd1",
+        "document_title": "저장된 보기",
+        "section_path": "저장된 보기 > 공개 범위",
+        "score": 0.4060139124625549
+      },
+      {
+        "rank": 10,
+        "section_id": "a7061c4853df:6f88dd13099e",
+        "document_title": "휴지통",
+        "section_path": "휴지통 > 휴지통 사용법",
+        "score": 0.40249990076806097
+      }
+    ]
+  },
+  {
+    "question_id": "Q25",
+    "question": "워크스페이스와 팀은 각각 어떤 단위이고 서로 어떤 관계인가요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "7591069b70f9:9d78075e912d",
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 개요",
+        "score": 0.641628485750791
+      },
+      {
+        "rank": 2,
+        "section_id": "da8743ff8cae:62b414e2b349",
+        "document_title": "팀",
+        "section_path": "팀 > 개요",
+        "score": 0.5859447197414486
+      },
+      {
+        "rank": 3,
+        "section_id": "da8743ff8cae:e2b4dc113d2f",
+        "document_title": "팀",
+        "section_path": "팀 > 팀 멤버",
+        "score": 0.5423345423720565
+      },
+      {
+        "rank": 4,
+        "section_id": "7591069b70f9:97c40b93dde0",
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 여러 워크스페이스에 참여",
+        "score": 0.511161752453544
+      },
+      {
+        "rank": 5,
+        "section_id": "764f1bb9b2d9:edc324ca1f86",
+        "document_title": "핵심 개념",
+        "section_path": "핵심 개념 > 기본 개념",
+        "score": 0.4995918433494122
+      },
+      {
+        "rank": 6,
+        "section_id": "567f0ce8042c:a71a73e4ac34",
+        "document_title": "멤버",
+        "section_path": "멤버 > 권한",
+        "score": 0.47432598410055293
+      },
+      {
+        "rank": 7,
+        "section_id": "7591069b70f9:852f2729c6f3",
+        "document_title": "워크스페이스",
+        "section_path": "워크스페이스 > 워크스페이스 설정",
+        "score": 0.4576517091191472
+      },
+      {
+        "rank": 8,
+        "section_id": "6cfca70f98e5:caab890e232f",
+        "document_title": "검색",
+        "section_path": "검색 > 검색 결과 활용하기",
+        "score": 0.44668759011363857
+      },
+      {
+        "rank": 9,
+        "section_id": "6c3b150c3146:9f525d515668",
+        "document_title": "비공개 팀",
+        "section_path": "비공개 팀 > 개요",
+        "score": 0.44136894422407513
+      },
+      {
+        "rank": 10,
+        "section_id": "567f0ce8042c:dc7240487954",
+        "document_title": "멤버",
+        "section_path": "멤버 > 개요",
+        "score": 0.43024347349493297
+      }
+    ]
+  },
+  {
+    "question_id": "Q26",
+    "question": "대기 작업과 백로그는 어떤 차이가 있고 각각 언제 사용하는 공간인가요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "11957633d8b2:a6f5feefa6e5",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 개요",
+        "score": 0.6410267304680847
+      },
+      {
+        "rank": 2,
+        "section_id": "11957633d8b2:aa8af54aa5cd",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 속성",
+        "score": 0.5631764595835171
+      },
+      {
+        "rank": 3,
+        "section_id": "9d9ba80dfef6:2e1668de5714",
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 개요",
+        "score": 0.5569724960868765
+      },
+      {
+        "rank": 4,
+        "section_id": "11957633d8b2:cce467185dfa",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 전환된 백로그",
+        "score": 0.5124105515769841
+      },
+      {
+        "rank": 5,
+        "section_id": "11957633d8b2:8e468f02bf3a",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 구조",
+        "score": 0.49658165799806775
+      },
+      {
+        "rank": 6,
+        "section_id": "9d9ba80dfef6:b545c692c53d",
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 작업 처리",
+        "score": 0.4892502179995384
+      },
+      {
+        "rank": 7,
+        "section_id": "11957633d8b2:a0709b43f1a9",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 신규 생성된 백로그",
+        "score": 0.48391409610421166
+      },
+      {
+        "rank": 8,
+        "section_id": "11957633d8b2:26264fecfd4a",
+        "document_title": "계획: 백로그",
+        "section_path": "계획: 백로그 > 작업으로 전환",
+        "score": 0.47553464790385824
+      },
+      {
+        "rank": 9,
+        "section_id": "0ffc2d8de31e:363a8e5906f7",
+        "document_title": "소개",
+        "section_path": "소개 > 인기 페이지",
+        "score": 0.4485364157406456
+      },
+      {
+        "rank": 10,
+        "section_id": "2edd9ad4a6fa:c0f4071b4014",
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 0.44449806588218643
+      }
+    ]
+  },
+  {
+    "question_id": "Q27",
+    "question": "프로젝트, 목표, 작업, 하위작업은 어떤 계층 구조로 구성되나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "949ddd65a2a5:09e9b2c9384c",
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 구조",
+        "score": 0.762519283680188
+      },
+      {
+        "rank": 2,
+        "section_id": "9b9516882026:e32fcf17e277",
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 개요",
+        "score": 0.6828143301570081
+      },
+      {
+        "rank": 3,
+        "section_id": "2edd9ad4a6fa:c0f4071b4014",
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 0.6337550761228521
+      },
+      {
+        "rank": 4,
+        "section_id": "9b9516882026:b527f7f75ac6",
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 계층 구조 시각화",
+        "score": 0.631589234066115
+      },
+      {
+        "rank": 5,
+        "section_id": "9b9516882026:45b415ba30ac",
+        "document_title": "작업 관계도",
+        "section_path": "작업 관계도 > 보기 위치",
+        "score": 0.570792002712813
+      },
+      {
+        "rank": 6,
+        "section_id": "949ddd65a2a5:4c10db99d1ad",
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 속성",
+        "score": 0.5670011722698481
+      },
+      {
+        "rank": 7,
+        "section_id": "949ddd65a2a5:c8a1279e8417",
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 개요",
+        "score": 0.542261141814311
+      },
+      {
+        "rank": 8,
+        "section_id": "764f1bb9b2d9:edc324ca1f86",
+        "document_title": "핵심 개념",
+        "section_path": "핵심 개념 > 기본 개념",
+        "score": 0.5421596642726461
+      },
+      {
+        "rank": 9,
+        "section_id": "0ffc2d8de31e:363a8e5906f7",
+        "document_title": "소개",
+        "section_path": "소개 > 인기 페이지",
+        "score": 0.526866079912328
+      },
+      {
+        "rank": 10,
+        "section_id": "764f1bb9b2d9:f196ea27ae96",
+        "document_title": "핵심 개념",
+        "section_path": "핵심 개념 > 효율적인 프로젝트 관리",
+        "score": 0.4969789376799505
+      }
+    ]
+  },
+  {
+    "question_id": "Q28",
+    "question": "작업 관계에서 '차단 중'과 '차단됨'은 어떻게 다른가요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "673858aecdcf:b1d03b889c87",
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 관계 유형별 동작",
+        "score": 0.5482992049259082
+      },
+      {
+        "rank": 2,
+        "section_id": "9d9ba80dfef6:b545c692c53d",
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 작업 처리",
+        "score": 0.5013165580424986
+      },
+      {
+        "rank": 3,
+        "section_id": "673858aecdcf:7d8048c2174c",
+        "document_title": "작업간 연결",
+        "section_path": "작업간 연결 > 개요",
+        "score": 0.47281349184081023
+      },
+      {
+        "rank": 4,
+        "section_id": "a26e14ee99d1:781c27b9eaaa",
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 완료 상태",
+        "score": 0.42712517977054953
+      },
+      {
+        "rank": 5,
+        "section_id": "2edd9ad4a6fa:c0f4071b4014",
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 작업 구조",
+        "score": 0.41379528223313944
+      },
+      {
+        "rank": 6,
+        "section_id": "a26e14ee99d1:2786f7438a88",
+        "document_title": "작업 상태",
+        "section_path": "작업 상태 > 진행 중",
+        "score": 0.4136680757434785
+      },
+      {
+        "rank": 7,
+        "section_id": "949ddd65a2a5:4c10db99d1ad",
+        "document_title": "실행: 작업",
+        "section_path": "실행: 작업 > 속성",
+        "score": 0.4135914117460272
+      },
+      {
+        "rank": 8,
+        "section_id": "9d9ba80dfef6:6fc3432260ff",
+        "document_title": "계획: 대기 작업",
+        "section_path": "계획: 대기 작업 > 속성",
+        "score": 0.396370912853624
+      },
+      {
+        "rank": 9,
+        "section_id": "567f0ce8042c:6a09b6285b28",
+        "document_title": "멤버",
+        "section_path": "멤버 > 멤버 비활성화",
+        "score": 0.383230448877516
+      },
+      {
+        "rank": 10,
+        "section_id": "fcb3c228f5a0:4fb20bbf5133",
+        "document_title": "운영: 보관 작업",
+        "section_path": "운영: 보관 작업 > 작업 보관함",
+        "score": 0.38249538873306443
+      }
+    ]
+  },
+  {
+    "question_id": "Q29",
+    "question": "스프린트 그래프의 보라색 점선과 보라색 실선은 각각 무엇을 의미하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "2c428c0d81be:012f04cb7b63",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 그래프 보는 법",
+        "score": 0.5448577604770606
+      },
+      {
+        "rank": 2,
+        "section_id": "2c428c0d81be:c496ba980f67",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 그래프 해석 팁",
+        "score": 0.5414322771988332
+      },
+      {
+        "rank": 3,
+        "section_id": "2c428c0d81be:91e1e3f290e3",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 참고",
+        "score": 0.4219286577607395
+      },
+      {
+        "rank": 4,
+        "section_id": "2c428c0d81be:7d100b73fa0e",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 개요",
+        "score": 0.4114235815111438
+      },
+      {
+        "rank": 5,
+        "section_id": "2c428c0d81be:dc2014df6707",
+        "document_title": "스프린트 그래프",
+        "section_path": "스프린트 그래프 > 지난 스프린트 그래프 보는 법",
+        "score": 0.3746474850927345
+      },
+      {
+        "rank": 6,
+        "section_id": "261e80b246e8:1c82492f0b2a",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 기간",
+        "score": 0.3566940552110156
+      },
+      {
+        "rank": 7,
+        "section_id": "261e80b246e8:203889cf792c",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 개요",
+        "score": 0.3330196398984654
+      },
+      {
+        "rank": 8,
+        "section_id": "261e80b246e8:48338ffe0288",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 시작 요일",
+        "score": 0.32870768119675287
+      },
+      {
+        "rank": 9,
+        "section_id": "261e80b246e8:8f39a6741f94",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 스프린트 설정",
+        "score": 0.3156305884271067
+      },
+      {
+        "rank": 10,
+        "section_id": "261e80b246e8:7a8e11bfc496",
+        "document_title": "스프린트",
+        "section_path": "스프린트 > 미리 생성할 다가올 스프린트 개수",
+        "score": 0.276863598757656
+      }
+    ]
+  },
+  {
+    "question_id": "Q30",
+    "question": "뤄이도 AI 에이전트는 기존 AI 도구와 무엇이 다르고 어떤 프로젝트 맥락을 이해하나요?",
+    "candidates": [
+      {
+        "rank": 1,
+        "section_id": "7e2418cfc86d:b32001724300",
+        "document_title": "AI 에이전트 (Beta)",
+        "section_path": "AI 에이전트 (Beta) > 개요",
+        "score": 0.6454983603191008
+      },
+      {
+        "rank": 2,
+        "section_id": "7e2418cfc86d:7c9dfa18bcff",
+        "document_title": "AI 에이전트 (Beta)",
+        "section_path": "AI 에이전트 (Beta) > 이용 가이드",
+        "score": 0.5160999666750606
+      },
+      {
+        "rank": 3,
+        "section_id": "6e9c13b73663:58cd615292d6",
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > 개요",
+        "score": 0.47520532483426514
+      },
+      {
+        "rank": 4,
+        "section_id": "6e9c13b73663:cd786201dd96",
+        "document_title": "MCP 서버",
+        "section_path": "MCP 서버 > MCP 사용 사례",
+        "score": 0.45578230006100307
+      },
+      {
+        "rank": 5,
+        "section_id": "2a49ad92d587:25d477bd271b",
+        "document_title": "프로젝트 일정 자동 생성",
+        "section_path": "프로젝트 일정 자동 생성 > Riido AI 사용하는 법",
+        "score": 0.4400266063403311
+      },
+      {
+        "rank": 6,
+        "section_id": "2a49ad92d587:0c8d65cfc82f",
+        "document_title": "프로젝트 일정 자동 생성",
+        "section_path": "프로젝트 일정 자동 생성 > 개요",
+        "score": 0.42651511596730185
+      },
+      {
+        "rank": 7,
+        "section_id": "2edd9ad4a6fa:c76be8dc28ab",
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > The Riido Way",
+        "score": 0.41919470501612777
+      },
+      {
+        "rank": 8,
+        "section_id": "6cfca70f98e5:5af76782a711",
+        "document_title": "검색",
+        "section_path": "검색 > 개요",
+        "score": 0.395996754926109
+      },
+      {
+        "rank": 9,
+        "section_id": "2edd9ad4a6fa:8d9518c4f378",
+        "document_title": "작업 흐름으로 이해하는 프로젝트 관리",
+        "section_path": "작업 흐름으로 이해하는 프로젝트 관리 > 개요",
+        "score": 0.3898369191089166
+      },
+      {
+        "rank": 10,
+        "section_id": "764f1bb9b2d9:edc324ca1f86",
+        "document_title": "핵심 개념",
+        "section_path": "핵심 개념 > 기본 개념",
+        "score": 0.3883526915538905
+      }
+    ]
+  }
+]

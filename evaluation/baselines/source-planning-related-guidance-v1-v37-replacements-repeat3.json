@@ -1,0 +1,496 @@
+{
+  "experimentVersion": "openai-generation-model-comparison-v1",
+  "executedAt": "2026-09-10T10:30:03.693541+00:00",
+  "repositoryRevision": "327c7f5db73213bb8ead7ecf5ca8b9d622ba7e2b",
+  "candidateConfigs": [
+    {
+      "id": "C",
+      "model": "gpt-5.6-terra",
+      "input_price_per_million_usd": 2.0,
+      "output_price_per_million_usd": 12.0
+    }
+  ],
+  "prompts": {
+    "generation": "v37",
+    "sourcePlanning": "v28",
+    "answer": "v23"
+  },
+  "fixedInputs": {
+    "casesPath": "evaluation/source_planning_related_guidance_cases.json",
+    "casesSha256": "4c0750b2b07fcd3a1c74252ecd2df8e9690b77131e11724546bc8a4b646753d0",
+    "fixtureSourcePath": "evaluation/baselines/customer-support-v3-final-v33-full.json",
+    "fixtureSourceSha256": "90ce661f37161ed3e0972670b76c2da397ca0d7dfe87549b51718b6bdef9d7c3",
+    "supplementalFixtureSources": [],
+    "turnCount": 2,
+    "retrievalFrozen": true,
+    "queryRewriteFrozen": true
+  },
+  "excludedCaseIds": [
+    "MQ027",
+    "MQ040",
+    "MQ066"
+  ],
+  "runs": [
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "repeatNo": 1,
+      "results": [
+        {
+          "caseId": "RC040",
+          "turnNo": 1,
+          "description": "워크스페이스 삭제·이름·Key 변경 복합 질문의 부분 답변 금지",
+          "originalQuestion": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "generationQuery": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "expected": {
+            "question": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+            "expectedStatus": "WITHHELD",
+            "expectedPlanningStatus": "WITHHELD",
+            "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+            "manualReviewCriteria": [
+              "삭제 영향·이름 변경·Key 변경 중 일부만 관련 안내로 제공하지 않는다.",
+              "PARTIAL 상태나 부분 답변을 암묵적으로 만들지 않는다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "WITHHELD",
+          "withheldReason": "INSUFFICIENT_EVIDENCE",
+          "answerMarkdown": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다.",
+          "citations": [],
+          "latencyMs": 8318,
+          "inputTokens": 5622,
+          "outputTokens": 409,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "WITHHELD",
+              "answer_type": "GENERAL",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "워크스페이스를 삭제했을 때 다른 모든 워크스페이스도 함께 삭제되는지 여부",
+                "새 워크스페이스를 만들지 않고 기존 워크스페이스 이름을 변경하는 구체적인 방법",
+                "넘버링 앞에 쓰는 Key 값을 변경할 수 있는지와 그 방법"
+              ],
+              "related_guidance": [],
+              "withheld_reason": "INSUFFICIENT_EVIDENCE"
+            },
+            "selectedSourceIds": [],
+            "selectedSectionIds": [],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 0,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC008",
+          "turnNo": 1,
+          "description": "워크스페이스 결제 단위 직접 답변 회귀",
+          "originalQuestion": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "generationQuery": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "expected": {
+            "question": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "워크스페이스"
+              ],
+              [
+                "Business"
+              ],
+              [
+                "사용자",
+                "시트",
+                "멤버"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구독 및 결제"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "네. 뤼이도의 요금은 개인별이 아니라 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산되며, 워크스페이스마다 하나의 구독과 결제 정보를 가집니다. 따라서 관리자가 속한 워크스페이스에서 Business 요금제를 구독한다면, 해당 워크스페이스에 포함된 다른 팀원도 그 구독 범위에 포함됩니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "구독 및 결제",
+              "sectionPath": [
+                "구독 및 결제",
+                "결제"
+              ],
+              "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md"
+            }
+          ],
+          "latencyMs": 6631,
+          "inputTokens": 9898,
+          "outputTokens": 320,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "Business 요금제가 관리자 개인이 아닌 워크스페이스 단위로 적용되는지와 다른 팀원의 적용 범위",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5"
+            ],
+            "selectedSectionIds": [
+              "95a1b20de638:dd62a0b71715"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    },
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "repeatNo": 2,
+      "results": [
+        {
+          "caseId": "RC040",
+          "turnNo": 1,
+          "description": "워크스페이스 삭제·이름·Key 변경 복합 질문의 부분 답변 금지",
+          "originalQuestion": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "generationQuery": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "expected": {
+            "question": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+            "expectedStatus": "WITHHELD",
+            "expectedPlanningStatus": "WITHHELD",
+            "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+            "manualReviewCriteria": [
+              "삭제 영향·이름 변경·Key 변경 중 일부만 관련 안내로 제공하지 않는다.",
+              "PARTIAL 상태나 부분 답변을 암묵적으로 만들지 않는다."
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "WITHHELD",
+          "withheldReason": "INSUFFICIENT_EVIDENCE",
+          "answerMarkdown": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다.",
+          "citations": [],
+          "latencyMs": 5233,
+          "inputTokens": 5622,
+          "outputTokens": 313,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "WITHHELD",
+              "answer_type": "PROCEDURE",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "사용하지 않는 워크스페이스를 삭제했을 때 다른 모든 워크스페이스도 함께 삭제되는지 여부",
+                "새 워크스페이스를 생성하지 않고 기존 워크스페이스 이름을 변경하는 실제 방법",
+                "넘버링 앞에 사용하는 Key 값을 변경하는 방법"
+              ],
+              "related_guidance": [],
+              "withheld_reason": "INSUFFICIENT_EVIDENCE"
+            },
+            "selectedSourceIds": [],
+            "selectedSectionIds": [],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 0,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC008",
+          "turnNo": 1,
+          "description": "워크스페이스 결제 단위 직접 답변 회귀",
+          "originalQuestion": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "generationQuery": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "expected": {
+            "question": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "워크스페이스"
+              ],
+              [
+                "Business"
+              ],
+              [
+                "사용자",
+                "시트",
+                "멤버"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구독 및 결제"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "네. 뤼이도는 워크스페이스 단위로 하나의 구독과 결제 정보를 가지며, 요금은 해당 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. 따라서 관리자가 Business 요금제를 사용하는 워크스페이스에 포함된 다른 팀원도 해당 워크스페이스의 구독 기준이 적용됩니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "구독 및 결제",
+              "sectionPath": [
+                "구독 및 결제",
+                "결제"
+              ],
+              "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md"
+            }
+          ],
+          "latencyMs": 5603,
+          "inputTokens": 9898,
+          "outputTokens": 274,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "관리자가 Business 요금제를 사용하는 워크스페이스에서 다른 팀원에게도 해당 요금제가 적용되는지 여부",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5"
+            ],
+            "selectedSectionIds": [
+              "95a1b20de638:dd62a0b71715"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    },
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "repeatNo": 3,
+      "results": [
+        {
+          "caseId": "RC040",
+          "turnNo": 1,
+          "description": "워크스페이스 삭제·이름·Key 변경 복합 질문의 부분 답변 금지",
+          "originalQuestion": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "generationQuery": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+          "expected": {
+            "question": "안 쓰는 워크스페이스를 삭제하면 모든 워크스페이스가 삭제되는 건가요? 새 워크스페이스를 생성하지 않고 이름을 바꾸는 방법과 넘버링 앞에 쓰는 Key 값을 변경하는 방법도 궁금합니다.",
+            "expectedStatus": "WITHHELD",
+            "expectedPlanningStatus": "WITHHELD",
+            "expectedWithheldReason": "INSUFFICIENT_EVIDENCE",
+            "manualReviewCriteria": [
+              "삭제 영향·이름 변경·Key 변경 중 일부만 관련 안내로 제공하지 않는다.",
+              "PARTIAL 상태나 부분 답변을 암묵적으로 만들지 않는다."
+            ]
+          },
+          "passed": false,
+          "failures": [
+            "status 불일치: expected=WITHHELD, actual=COMPLETED",
+            "withheld reason 불일치: expected=INSUFFICIENT_EVIDENCE, actual=None",
+            "planning status 불일치: expected=WITHHELD, actual=RELATED_GUIDANCE"
+          ],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "안 쓰는 워크스페이스를 삭제할 때 모든 워크스페이스가 함께 삭제되는지와, 넘버링 앞에 쓰는 Key 값을 변경하는 방법은 제공된 안내에서 확인되지 않습니다. 또한 이름 변경을 위한 구체적인 저장·적용 절차도 확인되지 않습니다.\n\n워크스페이스 설정은 좌측 사이드바에서 **[워크스페이스 > 설정]**을 클릭해 열 수 있습니다. 이 페이지에서는 워크스페이스의 기본 정보인 로고와 이름 등을 설정할 수 있습니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "워크스페이스",
+              "sectionPath": [
+                "워크스페이스",
+                "워크스페이스 설정"
+              ],
+              "sourceUrl": "https://docs.riido.io/workspaces/overview.md"
+            }
+          ],
+          "latencyMs": 8549,
+          "inputTokens": 9150,
+          "outputTokens": 477,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "RELATED_GUIDANCE",
+              "answer_type": "PROCEDURE",
+              "answer_scope": "MULTI_DETAIL",
+              "evidence_requirements": [],
+              "optional_context": [],
+              "unanswered_information": [
+                "안 쓰는 워크스페이스를 삭제했을 때 모든 워크스페이스가 함께 삭제되는지 여부",
+                "새 워크스페이스를 생성하지 않고 워크스페이스 이름을 변경하는 구체적인 방법",
+                "넘버링 앞에 쓰는 Key 값을 변경하는 방법"
+              ],
+              "related_guidance": [
+                {
+                  "information_unit": "워크스페이스 설정 페이지의 위치와 기본 워크스페이스 정보 설정 가능 범위(이름 포함)",
+                  "source_ids": [
+                    "SOURCE_4"
+                  ]
+                }
+              ],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_4"
+            ],
+            "selectedSectionIds": [
+              "7591069b70f9:852f2729c6f3"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        },
+        {
+          "caseId": "RC008",
+          "turnNo": 1,
+          "description": "워크스페이스 결제 단위 직접 답변 회귀",
+          "originalQuestion": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "generationQuery": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+          "expected": {
+            "question": "관리자가 Business 요금제이면 다른 팀원들도 Business 요금제가 적용되나요?",
+            "expectedStatus": "COMPLETED",
+            "expectedPlanningStatus": "ANSWERABLE",
+            "expectedAnswerConceptGroups": [
+              [
+                "워크스페이스"
+              ],
+              [
+                "Business"
+              ],
+              [
+                "사용자",
+                "시트",
+                "멤버"
+              ]
+            ],
+            "minimumCitationCount": 1,
+            "expectedCitationDocumentTitlesAny": [
+              "구독 및 결제"
+            ]
+          },
+          "passed": true,
+          "failures": [],
+          "status": "COMPLETED",
+          "withheldReason": null,
+          "answerMarkdown": "네. 뤼이도는 워크스페이스 단위로 하나의 구독과 결제 정보를 가지며, 요금은 워크스페이스에 포함된 사용자(시트) 수를 기준으로 계산됩니다. 따라서 관리자가 속한 워크스페이스가 Business 요금제를 구독 중이라면, 그 워크스페이스의 다른 팀원도 해당 구독에 포함됩니다. [1]",
+          "citations": [
+            {
+              "documentTitle": "구독 및 결제",
+              "sectionPath": [
+                "구독 및 결제",
+                "결제"
+              ],
+              "sourceUrl": "https://docs.riido.io/workspaces/plans-and-billing.md"
+            }
+          ],
+          "latencyMs": 6029,
+          "inputTokens": 9892,
+          "outputTokens": 287,
+          "retryCount": 0,
+          "errorCode": null,
+          "errorMessage": null,
+          "stageTrace": {
+            "sourcePlan": {
+              "status": "ANSWERABLE",
+              "answer_type": "GENERAL",
+              "answer_scope": "SUMMARY",
+              "evidence_requirements": [
+                {
+                  "information_unit": "관리자가 Business 요금제인 경우 다른 팀원들에게도 Business 요금제가 적용되는지",
+                  "source_ids": [
+                    "SOURCE_5"
+                  ]
+                }
+              ],
+              "optional_context": [],
+              "unanswered_information": [],
+              "related_guidance": [],
+              "withheld_reason": null
+            },
+            "selectedSourceIds": [
+              "SOURCE_5"
+            ],
+            "selectedSectionIds": [
+              "95a1b20de638:dd62a0b71715"
+            ],
+            "planningAttemptCount": 1,
+            "planningRegenerationCount": 0,
+            "answerAttemptCount": 1,
+            "validationRegenerationCount": 0,
+            "validationErrors": []
+          }
+        }
+      ]
+    }
+  ],
+  "summaries": [
+    {
+      "candidateId": "C",
+      "model": "gpt-5.6-terra",
+      "turnExecutionCount": 6,
+      "passedCount": 5,
+      "failedCount": 1,
+      "errorCount": 0,
+      "completedCount": 4,
+      "withheldCount": 2,
+      "inputTokens": 50082,
+      "outputTokens": 2080,
+      "estimatedCostUsd": 0.125124,
+      "averageLatencyMs": 6727,
+      "p50LatencyMs": 6029,
+      "p95LatencyMs": 8549,
+      "planningRegenerationCount": 0,
+      "validationRegenerationCount": 0
+    }
+  ]
+}

@@ -1,0 +1,302 @@
+import unittest
+from unittest.mock import AsyncMock, Mock
+
+from app.retrieval.bm25_retriever import BM25Retriever
+from app.retrieval.hybrid_retriever import (
+    CANDIDATE_K,
+    DEFAULT_FINAL_TOP_K,
+    RRF_RANK_CONSTANT,
+    HybridRetriever,
+    expand_retrieval_query,
+    fuse_rrf_results,
+)
+from app.core.model_trace import ModelCallTrace
+from app.retrieval.models import RetrievalChunk, RetrievalResult, VectorSearchCall
+from app.retrieval.vector_retriever import VectorRetriever
+
+
+class HybridRetrieverTest(unittest.IsolatedAsyncioTestCase):
+    def setUp(self) -> None:
+        self.bm25_retriever = Mock(spec=BM25Retriever)
+        self.vector_retriever = AsyncMock(spec=VectorRetriever)
+        self.retriever = HybridRetriever(
+            self.bm25_retriever,
+            self.vector_retriever,
+        )
+
+    async def test_fuses_candidates_by_chunk_id_with_rrf(self) -> None:
+        chunk_a = self._chunk("a")
+        chunk_b = self._chunk("b")
+        chunk_c = self._chunk("c")
+        self.bm25_retriever.search.return_value = [
+            self._result(chunk_a, score=100.0, rank=1),
+            self._result(chunk_b, score=50.0, rank=2),
+        ]
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall(
+            results=(
+                self._result(chunk_b, score=0.9, rank=1),
+                self._result(chunk_c, score=0.8, rank=2),
+            )
+        )
+
+        results = await self.retriever.search("사용자 질문", top_k=10)
+
+        self.bm25_retriever.search.assert_called_once_with(
+            "사용자 질문",
+            top_k=CANDIDATE_K,
+        )
+        self.vector_retriever.search_with_trace.assert_awaited_once_with(
+            "사용자 질문",
+            top_k=CANDIDATE_K,
+        )
+        self.assertEqual(
+            [chunk_b, chunk_a, chunk_c],
+            [result.chunk for result in results],
+        )
+        self.assertEqual([1, 2, 3], [result.final_rank for result in results])
+        self.assertEqual([2, 1, None], [result.bm25_rank for result in results])
+        self.assertEqual([1, None, 2], [result.vector_rank for result in results])
+        self.assertAlmostEqual(
+            1.0 / (RRF_RANK_CONSTANT + 2)
+            + 1.0 / (RRF_RANK_CONSTANT + 1),
+            results[0].rrf_score,
+        )
+        self.assertAlmostEqual(
+            1.0 / (RRF_RANK_CONSTANT + 1),
+            results[1].rrf_score,
+        )
+
+    def test_expands_riido_service_definition_query(self) -> None:
+        for query in ("뤼이도는 어떤 서비스야?", "뤼이도가 뭐야?"):
+            with self.subTest(query=query):
+                self.assertEqual(
+                    "뤼이도 서비스 소개",
+                    expand_retrieval_query(query),
+                )
+
+    def test_does_not_expand_feature_or_external_service_query(self) -> None:
+        for query in ("스프린트는 어떤 기능이야?", "슬랙은 어떤 서비스야?"):
+            with self.subTest(query=query):
+                self.assertEqual(query, expand_retrieval_query(query))
+
+    def test_normalizes_workspace_seat_billing_query(self) -> None:
+        self.assertEqual(
+            "Pro 요금제 워크스페이스 사용자 시트 결제",
+            expand_retrieval_query(
+                "pro 요금제는 팀 단위로 결제하나요? 팀원이 바뀌면 어떻게 되나요?"
+            ),
+        )
+
+    async def test_uses_expanded_query_for_both_retrievers(self) -> None:
+        self.bm25_retriever.search.return_value = []
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall()
+
+        await self.retriever.search_with_trace("뤼이도는 어떤 서비스야?")
+
+        expanded = "뤼이도 서비스 소개"
+        self.bm25_retriever.search.assert_called_once_with(
+            expanded,
+            top_k=CANDIDATE_K,
+        )
+        self.vector_retriever.search_with_trace.assert_awaited_once_with(
+            expanded,
+            top_k=CANDIDATE_K,
+        )
+
+    async def test_uses_default_final_top_five(self) -> None:
+        self.bm25_retriever.search.return_value = [
+            self._result(self._chunk(str(index)), score=1.0, rank=index)
+            for index in range(1, 11)
+        ]
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall()
+
+        results = await self.retriever.search("질문")
+
+        self.assertEqual(DEFAULT_FINAL_TOP_K, len(results))
+        self.assertEqual(
+            list(range(1, DEFAULT_FINAL_TOP_K + 1)),
+            [result.final_rank for result in results],
+        )
+
+    async def test_allows_top_ten_for_evaluation(self) -> None:
+        self.bm25_retriever.search.return_value = [
+            self._result(self._chunk(str(index)), score=1.0, rank=index)
+            for index in range(1, 11)
+        ]
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall()
+
+        results = await self.retriever.search("평가 질문", top_k=10)
+
+        self.assertEqual(10, len(results))
+        self.assertEqual(list(range(1, 11)), [result.final_rank for result in results])
+
+    async def test_rejects_invalid_top_k_before_search(self) -> None:
+        for top_k in (0, -1):
+            with self.subTest(top_k=top_k):
+                with self.assertRaisesRegex(ValueError, "top_k"):
+                    await self.retriever.search("질문", top_k=top_k)
+
+        self.bm25_retriever.search.assert_not_called()
+        self.vector_retriever.search_with_trace.assert_not_awaited()
+
+    async def test_forwards_model_call_checkpoint_to_vector_retriever(self) -> None:
+        before_model_call = AsyncMock()
+        self.bm25_retriever.search.return_value = []
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall()
+
+        await self.retriever.search_with_trace(
+            "질문",
+            before_model_call=before_model_call,
+        )
+
+        self.vector_retriever.search_with_trace.assert_awaited_once_with(
+            "질문",
+            top_k=CANDIDATE_K,
+            before_model_call=before_model_call,
+        )
+
+    async def test_trace_keeps_every_candidate_of_both_retrievers(self) -> None:
+        chunk_a = self._chunk("a")
+        chunk_b = self._chunk("b")
+        chunk_c = self._chunk("c")
+        embedding_call = ModelCallTrace(
+            provider="openai",
+            model_name="text-embedding-3-large",
+            succeeded=True,
+            latency_ms=21,
+        )
+        self.bm25_retriever.search.return_value = [
+            self._result(chunk_a, score=100.0, rank=1),
+            self._result(chunk_b, score=50.0, rank=2),
+        ]
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall(
+            results=(self._result(chunk_c, score=0.8, rank=1),),
+            latency_ms=42,
+            embedding_call=embedding_call,
+        )
+
+        call = await self.retriever.search_with_trace("질문", top_k=1)
+
+        self.assertIsNone(call.error)
+        self.assertEqual(2, len(call.bm25_results))
+        self.assertEqual(1, len(call.vector_results))
+        # 융합에서 탈락한 후보도 남는다
+        self.assertEqual(1, len(call.fused_results))
+        self.assertEqual(42, call.vector_latency_ms)
+        self.assertIs(embedding_call, call.embedding_call)
+
+    async def test_trace_exposes_retrieval_query_and_query_embedding(self) -> None:
+        embedding = (0.1, 0.2, 0.3)
+        self.bm25_retriever.search.return_value = []
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall(
+            query_embedding=embedding
+        )
+
+        call = await self.retriever.search_with_trace("뤼이도는 어떤 서비스야?")
+
+        self.assertEqual("뤼이도 서비스 소개", call.retrieval_query)
+        self.assertEqual(embedding, call.query_embedding)
+
+    async def test_trace_keeps_retrieval_query_when_bm25_fails(self) -> None:
+        self.bm25_retriever.search.side_effect = RuntimeError("bm25 unavailable")
+
+        call = await self.retriever.search_with_trace("질문")
+
+        self.assertIsNotNone(call.error)
+        self.assertEqual("질문", call.retrieval_query)
+        self.assertIsNone(call.query_embedding)
+
+    async def test_trace_keeps_candidates_when_vector_search_fails(self) -> None:
+        failure = RuntimeError("embedding unavailable")
+        self.bm25_retriever.search.return_value = [
+            self._result(self._chunk("a"), score=1.0, rank=1)
+        ]
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall(
+            error=failure
+        )
+
+        call = await self.retriever.search_with_trace("질문")
+
+        self.assertIs(failure, call.error)
+        self.assertEqual(1, len(call.bm25_results))
+        self.assertEqual((), call.fused_results)
+
+    async def test_trace_reports_fusion_failure(self) -> None:
+        unindexed = self._chunk("a")
+        unindexed = RetrievalChunk(
+            **{
+                **unindexed.__dict__,
+                "index_version_id": None,
+            }
+        )
+        self.bm25_retriever.search.return_value = [
+            self._result(unindexed, score=1.0, rank=1)
+        ]
+        self.vector_retriever.search_with_trace.return_value = VectorSearchCall()
+
+        call = await self.retriever.search_with_trace("질문")
+
+        self.assertIsInstance(call.error, ValueError)
+        self.assertEqual((), call.fused_results)
+
+    def test_keeps_different_chunk_ids_with_same_section_id(self) -> None:
+        bm25_chunk = self._chunk("a", section_id="shared-section")
+        vector_chunk = self._chunk("b", section_id="shared-section")
+
+        results = fuse_rrf_results(
+            [self._result(bm25_chunk, score=1.0, rank=1)],
+            [self._result(vector_chunk, score=1.0, rank=1)],
+            top_k=2,
+        )
+
+        self.assertEqual(
+            [bm25_chunk.chunk_id, vector_chunk.chunk_id],
+            [result.chunk.chunk_id for result in results],
+        )
+
+    def test_uses_chunk_id_for_deterministic_rrf_ties(self) -> None:
+        chunk_a = self._chunk("a")
+        chunk_b = self._chunk("b")
+
+        results = fuse_rrf_results(
+            [self._result(chunk_b, score=100.0, rank=1)],
+            [self._result(chunk_a, score=-100.0, rank=1)],
+            top_k=2,
+        )
+
+        self.assertEqual(
+            [chunk_a.chunk_id, chunk_b.chunk_id],
+            [result.chunk.chunk_id for result in results],
+        )
+        self.assertEqual(results[0].rrf_score, results[1].rrf_score)
+
+    @staticmethod
+    def _result(
+        chunk: RetrievalChunk,
+        score: float,
+        rank: int,
+    ) -> RetrievalResult:
+        return RetrievalResult(chunk=chunk, score=score, rank=rank)
+
+    @staticmethod
+    def _chunk(
+        name: str,
+        section_id: str = "",
+    ) -> RetrievalChunk:
+        chunk_id = int(name) if name.isdigit() else ord(name[0])
+        return RetrievalChunk(
+            document_id=f"document-{name}",
+            section_id=section_id or f"section-{name}",
+            document_title=f"문서 {name}",
+            section_path=(f"문서 {name}", f"섹션 {name}"),
+            source_url=f"https://docs.riido.io/document-{name}.md",
+            category="guide",
+            content=f"본문 {name}",
+            chunk_id=chunk_id,
+            document_version_id=chunk_id + 1000,
+            index_version_id=1,
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

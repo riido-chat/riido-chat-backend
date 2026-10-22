@@ -1,0 +1,3 @@
+*.sh text eol=lf
+# 프롬프트 본문은 바이트 단위 지문으로 고정하므로 체크아웃 줄바꿈을 LF 로 둔다.
+app/prompts/**/*.md text eol=lf

@@ -1,0 +1,1963 @@
+{
+  "schemaVersion": "v2",
+  "executedAt": "2026-09-09T04:12:16.056878+00:00",
+  "casesVersion": "real-customer-cases-v4",
+  "evaluationMode": "CASE_DEFINED_WITH_NEW_CONVERSATION_PER_REPEAT",
+  "executionMode": "in-process",
+  "evaluator": {
+    "repositoryRevision": "26a0222c4db369911c6c1a6ac2bf64c32859fbd5",
+    "workingTreeDirty": true,
+    "importedModelContract": {
+      "queryRewrite": "gpt-5.4-mini",
+      "embedding": "text-embedding-3-large",
+      "generation": "gpt-5.6-terra"
+    },
+    "prompts": {
+      "queryRewrite": {
+        "version": "v8",
+        "sha256": "6382fe3033a461b851ee88b65c0c8a24aeb74ac940df13fbc3e96ea1f79c3dbb"
+      },
+      "sourcePlanning": {
+        "version": "v25",
+        "sha256": "c5ab2531560503affe79a5c94fac5b24c3895b922e80b5850583bf09ce4308df"
+      },
+      "sourcePlanningRegeneration": {
+        "version": "v25-repair-1",
+        "sha256": "d69896097eceb5b04d2f8b5aaa1be0b46fffe4aac559dc580e61c85f113cc083"
+      },
+      "answer": {
+        "version": "v21",
+        "sha256": "9afaf45fc0f0d7cc4eaef3af37b4179d36cfe482b6c8a5504cdd71e9751a1643"
+      },
+      "answerValidationRegeneration": {
+        "version": "v21-repair-1",
+        "sha256": "23a77c53d67f0307ab715b937ff22361799ba84e49b46a4e693b1f88fc37ddcc"
+      }
+    },
+    "callSettings": {
+      "queryRewrite": {
+        "maxOutputTokens": 512,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanning": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "sourcePlanRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answer": {
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      },
+      "answerValidationRegeneration": {
+        "maxCount": 1,
+        "temperature": "OMITTED",
+        "reasoning": "OMITTED"
+      }
+    }
+  },
+  "executionTarget": {
+    "apiBaseUrl": null,
+    "repositoryRevision": "26a0222c4db369911c6c1a6ac2bf64c32859fbd5",
+    "repositoryRevisionSource": "IN_PROCESS_EVALUATOR",
+    "observedModelCalls": [
+      {
+        "purpose": "QUERY_EMBEDDING",
+        "provider": "openai",
+        "requestedModel": "text-embedding-3-large",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": null
+      },
+      {
+        "purpose": "ANSWER_GENERATION",
+        "provider": "openai",
+        "requestedModel": "gpt-5.6-terra",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v34"
+      },
+      {
+        "purpose": "QUERY_REWRITE",
+        "provider": "openai",
+        "requestedModel": "gpt-5.4-mini",
+        "responseModel": null,
+        "responseModelAvailability": "UNAVAILABLE",
+        "promptVersion": "v8"
+      }
+    ]
+  },
+  "databaseSnapshot": {
+    "source": "CONFIGURED_DATABASE",
+    "indexVersion": {
+      "id": 1938,
+      "version": "idx-20260905T092921909660Z-453fb7fa",
+      "status": "ACTIVE",
+      "documentCount": 39,
+      "documentContentFingerprint": "d94f167af87ce39af26127d05e663870d3bebfceb869bff5240e1664da0bef80",
+      "createdAt": "2026-09-05T09:29:21.909660+00:00",
+      "activatedAt": "2026-09-05T09:29:26.502198+00:00"
+    }
+  },
+  "summary": {
+    "repetitionCount": 1,
+    "uniqueCaseCount": 5,
+    "totalCaseExecutionCount": 5,
+    "passedCaseExecutionCount": 4,
+    "failedCaseExecutionCount": 1,
+    "executionErrorCaseExecutionCount": 0,
+    "criteriaMismatchCaseExecutionCount": 1,
+    "perCase": [
+      {
+        "id": "RC086",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "RC087",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "RC088",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "RC089",
+        "executionCount": 1,
+        "passedCount": 1,
+        "failedCount": 0
+      },
+      {
+        "id": "RC090",
+        "executionCount": 1,
+        "passedCount": 0,
+        "failedCount": 1
+      }
+    ],
+    "perMode": [
+      {
+        "mode": "CONTINUOUS_CONVERSATION",
+        "executionCount": 5,
+        "passedCount": 4,
+        "failedCount": 1
+      }
+    ]
+  },
+  "runs": [
+    {
+      "repeatNo": 1,
+      "executedAt": "2026-09-09T04:11:51.342472+00:00",
+      "results": [
+        {
+          "id": "RC086",
+          "description": "보관함에서 프로젝트 하위 항목을 선택할 수 없는 동작 문의",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "03dd01ae-996d-4837-8173-e952aa262126",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "리스트 뷰에서는 프로젝트를 선택하면 하위 항목도 선택할 수 있는데, 보관함에서는 프로젝트를 선택해도 하위 항목들이 선택되지 않습니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "03dd01ae-996d-4837-8173-e952aa262126",
+                "ragRunId": "07b0540f-6391-43a6-86a9-17f7da12f3e2",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "리스트 뷰에서는 프로젝트를 선택하면 하위 항목도 선택할 수 있는데, 보관함에서는 프로젝트를 선택해도 하위 항목들이 선택되지 않습니다.",
+                "resolvedQuery": "리스트 뷰에서는 프로젝트를 선택하면 하위 항목도 선택할 수 있는데, 보관함에서는 프로젝트를 선택해도 하위 항목들이 선택되지 않습니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 3834,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 57,
+                    "outputTokens": null,
+                    "latencyMs": 441,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 4826,
+                    "outputTokens": 137,
+                    "latencyMs": 3301,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "리스트 뷰에서는 프로젝트를 선택하면 하위 항목도 선택할 수 있는데, 보관함에서는 프로젝트를 선택해도 하위 항목들이 선택되지 않습니다.",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "리스트 뷰에서는 프로젝트를 선택하면 하위 항목도 선택할 수 있는데, 보관함에서는 프로젝트를 선택해도 하위 항목들이 선택되지 않습니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3283,
+                        "documentVersionId": 2427,
+                        "documentId": "9b9516882026",
+                        "sectionId": "9b9516882026:45b415ba30ac",
+                        "documentTitle": "작업 관계도",
+                        "sectionPath": [
+                          "작업 관계도",
+                          "보기 위치"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/diagram.md",
+                        "contentHash": "e2c78221986d926a71902ca363ddef120c62f2df7d8f86eae878ba5187f36c95",
+                        "content": "#### 대시보드\n\n팀 전체의 프로젝트 구조를 한눈에 파악할 수 있습니다. 여러 프로젝트 간의 관계나 전체 진행 흐름을 종합적으로 검토할 때 유용합니다.\n\n#### 작업 상세 페이지\n\n선택한 작업을 중심으로, 해당 작업과 연결된 상위 · 하위 작업만 집중적으로 볼 수 있습니다. 지금 진행 중인 업무가 전체 목표 안에서 어떤 위치에 있는지 쉽게 이해할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.031544957774465976,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 20.190122960073,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.43556021114307897,
+                            "latencyMs": 471
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3273,
+                        "documentVersionId": 2424,
+                        "documentId": "fcb3c228f5a0",
+                        "sectionId": "fcb3c228f5a0:7ce560cd7b49",
+                        "documentTitle": "운영: 보관 작업",
+                        "sectionPath": [
+                          "운영: 보관 작업",
+                          "보관된 작업을 다시 활성화하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/archived-items.md",
+                        "contentHash": "7a19fe9b4e00e9ba41f7823dc3c0e3a02fc541788ea61cfce244bae47cfdb5b0",
+                        "content": "보관된 작업은 언제든 다시 활성화하여, 실행 가능한 상태로 되돌릴 수 있습니다. 업데이트가 필요한 기능이나 추가 개선이 필요할 때, 보관된 작업을 꺼내어 실행 흐름으로 자연스럽게 이어갈 수 있습니다.\n\n프로젝트나 목표 단위로만 다시 활성화할 수도 있으며, 이 경우 하위 작업은 보관 상태로 유지됩니다. 이 방식을 통해 필요한 작업만 선별적으로 이어갈 수 있으며, 불필요한 복잡도를 줄일 수 있습니다.\n\n이처럼 모든 기록은 그대로 보존되어 과거의 맥락을 잃지 않은 채 이어받을 수 있습니다. 이는 뤼이도의 철학인 “지속적인 개선과 성장”을 실천하는 가장 직접적인 방식입니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031054405392392875,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 13.43275271451159,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.4453421516039786,
+                            "latencyMs": 471
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3362,
+                        "documentVersionId": 2449,
+                        "documentId": "a7061c4853df",
+                        "sectionId": "a7061c4853df:73e63632e555",
+                        "documentTitle": "휴지통",
+                        "sectionPath": [
+                          "휴지통",
+                          "복구 및 영구 삭제"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/trash.md",
+                        "contentHash": "8a5c72f41d87c81930f5de6399ed251b9e0da4509f30f9965fb12b675a730e49",
+                        "content": "#### 복구\n\n* 실수로 삭제한 항목은 휴지통 또는 해당 페이지 상단 배너의 ‘복구’ 버튼을 통해 즉시 되돌릴 수 있습니다.\n* 복구된 항목은 삭제 이전의 위치(예: 원래 속한 프로젝트나 팀)로 자동 복원됩니다.\n\n#### 영구 삭제\n\n* 더 이상 보관할 필요가 없는 항목은 휴지통 또는 해당 페이지 상단 배너의 ‘영구 삭제’ 버튼을 눌러 즉시 삭제할 수 있습니다.\n* 영구 삭제된 항목은 시스템 상에서도 복구할 수 없습니다.\n\n휴지통에 보관되는 기간(30일)이 지나면, 모든 데이터는 자동으로 삭제됩니다. 삭제 이후에는 시스템 상에서도 복원할 수 없으니 주의가 필요합니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03057889822595705,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 8,
+                            "rawScore": 13.172056428364108,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.44129641003332,
+                            "latencyMs": 471
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3360,
+                        "documentVersionId": 2449,
+                        "documentId": "a7061c4853df",
+                        "sectionId": "a7061c4853df:a5d15ef4cee0",
+                        "documentTitle": "휴지통",
+                        "sectionPath": [
+                          "휴지통",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/trash.md",
+                        "contentHash": "9e837740d0487478456502e95517b5b335da0717250d310a3fe4cbd9f2e62d65",
+                        "content": "작업, 목표, 프로젝트 등 주요 항목을 삭제하면, 바로 사라지지 않고 휴지통에 임시 보관됩니다. 실수로 삭제한 경우에도 복구할 수 있으며, 보관된 항목은 30일 후 자동으로 영구 삭제됩니다.\n\n휴지통은 팀의 실수를 최소화하고, 삭제된 데이터를 안전하게 관리할 수 있도록 설계되었습니다. 필요한 경우, 삭제된 페이지를 열어 확인하거나 바로 복구할 수도 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.029877369007803793,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 13.845723852636665,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.4174681447034567,
+                            "latencyMs": 471
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3284,
+                        "documentVersionId": 2428,
+                        "documentId": "333984364686",
+                        "sectionId": "333984364686:4cf1d0445a55",
+                        "documentTitle": "저장된 보기",
+                        "sectionPath": [
+                          "저장된 보기",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/custom-views.md",
+                        "contentHash": "e7afd5b0757aa68f8f710d5dde8970e7252b199c505ad7be7cbb3970e488f00c",
+                        "content": "저장된 보기는 작업을 특정 조건으로 필터링한 상태를 저장해두고 다시 불러올 수 있는 기능입니다. 프로젝트, 우선순위, 담당자, 라벨 등 다양한 기준으로 작업을 분류해, 자주 확인하는 조건을 반복 없이 빠르게 열람할 수 있도록 도와줍니다.\n\n매번 동일한 조건으로 필터링하거나 정렬해야 하는 번거로움을 줄이고, 특히 여러 팀이나 다양한 업무 흐름을 동시에 관리하는 사용자에게 효율적인 작업 환경을 제공합니다.\n\n나만의 업무 방식에 맞는 개인용 보기를 만들거나, 팀원들과 공통의 기준을 공유할 수 있어 몰입도 높은 작업 환경과 협업의 일관성을 동시에 만들어낼 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5028114258902225,
+                            "latencyMs": 471
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 4826,
+                        "outputTokens": 137,
+                        "latencyMs": 3301,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC087",
+          "description": "미팅 페이지 너비와 라벨 가로 스크롤 UI 개선 요청",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "970504bd-9473-4b69-8a6e-fb79948210ea",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "미팅 페이지 너비를 브라우저 창 크기만큼 확장할 수 있으면 좋겠습니다. 라벨을 여러 개 구성하면 가로 스크롤이 나와서 불편합니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "970504bd-9473-4b69-8a6e-fb79948210ea",
+                "ragRunId": "05efb1f8-d839-47b0-aa37-ab333dde23b8",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "미팅 페이지 너비를 브라우저 창 크기만큼 확장할 수 있으면 좋겠습니다. 라벨을 여러 개 구성하면 가로 스크롤이 나와서 불편합니다.",
+                "resolvedQuery": "미팅 페이지 너비를 브라우저 창 크기만큼 확장할 수 있으면 좋겠습니다. 라벨을 여러 개 구성하면 가로 스크롤이 나와서 불편합니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2693,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 67,
+                    "outputTokens": null,
+                    "latencyMs": 198,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 4693,
+                    "outputTokens": 117,
+                    "latencyMs": 2452,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "미팅 페이지 너비를 브라우저 창 크기만큼 확장할 수 있으면 좋겠습니다. 라벨을 여러 개 구성하면 가로 스크롤이 나와서 불편합니다.",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "미팅 페이지 너비를 브라우저 창 크기만큼 확장할 수 있으면 좋겠습니다. 라벨을 여러 개 구성하면 가로 스크롤이 나와서 불편합니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3313,
+                        "documentVersionId": 2435,
+                        "documentId": "205de439d5a8",
+                        "sectionId": "205de439d5a8:ab3c26c5b87e",
+                        "documentTitle": "미팅",
+                        "sectionPath": [
+                          "미팅",
+                          "미팅 보드"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/meetings/overview.md",
+                        "contentHash": "7843ed605d3e77fd3a7374b85c242bc5aee8c706bb4ba95e4dfb9de0dc2c60e6",
+                        "content": "미팅 보드는 참여자별로 회의 내용을 직접 작성하고 공유하는 공간입니다. 각 라벨별 입력 영역이 생성되어 회의가 자연스럽게 구조화됩니다.\n\n* 미리 정의된 라벨(예: Done, Todo, Issue 등)에 따라 참여자별 입력 칸이 자동 생성됩니다.\n* 각 참여자는 라벨별로 자신의 진행 상황을 기록할 수 있습니다.\n* 작성된 보드는 팀원 모두가 한눈에 확인할 수 있어, 실시간 협업과 회의 후 기록 관리에 유용합니다.\n\n미팅 보드를 통해 미팅은 단순한 메모가 아니라, 팀의 실행 상태를 한눈에 정리하고 의사결정을 빠르게 내리는 도구로 활용됩니다. 회의 중 떠오른 아이디어나 작업은 미팅 보드에서 바로 작업으로 전환할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03177805800756621,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 8.331246230028665,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.41518824989798286,
+                            "latencyMs": 211
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3349,
+                        "documentVersionId": 2446,
+                        "documentId": "6cfca70f98e5",
+                        "sectionId": "6cfca70f98e5:83dcb926d388",
+                        "documentTitle": "검색",
+                        "sectionPath": [
+                          "검색",
+                          "검색 시작하기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/search.md",
+                        "contentHash": "2168059e9c1dfa93c63fa708e7d3e58138b4cffe3cb8d0e6aa8aeb8c84e89ff1",
+                        "content": "* 좌측 사이드바 상단의 ‘검색’ 버튼을 클릭하여 검색창을 열 수 있습니다.\n* 검색창에 키워드를 입력하면, 입력과 동시에 관련 항목이 실시간으로 표시됩니다.\n* 키워드는 제목뿐 아니라 내용, 담당자, 라벨 등 다양한 조건으로 검색할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03036576949620428,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.592013251426792,
+                            "latencyMs": 0
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.3195392012765442,
+                            "latencyMs": 211
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3314,
+                        "documentVersionId": 2435,
+                        "documentId": "205de439d5a8",
+                        "sectionId": "205de439d5a8:7ba6be853871",
+                        "documentTitle": "미팅",
+                        "sectionPath": [
+                          "미팅",
+                          "작업과 연결"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/meetings/overview.md",
+                        "contentHash": "c88bf14e5cc05be9210977985eaaf2b6594155cc1ea1384e0c62bf82ee055227",
+                        "content": "뤼이도의 미팅은 단순한 공유를 넘어 실제 작업과 연결됩니다. 미팅에서 논의된 작업을 직접 연결할 수 있으며, 작업 상세 페이지에서도 해당 작업이 어떤 미팅에서 다뤄졌는지 확인할 수 있습니다.\n\n이를 통해 미팅과 실행이 끊김 없이 이어지고, 미팅에서 나온 논의와 결정을 작업 맥락에서 자연스럽게 추적할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 11.04576004916327,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3245,
+                        "documentVersionId": 2418,
+                        "documentId": "6c3b150c3146",
+                        "sectionId": "6c3b150c3146:f4771653dfff",
+                        "documentTitle": "비공개 팀",
+                        "sectionPath": [
+                          "비공개 팀",
+                          "접근 권한"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/teams/private-teams.md",
+                        "contentHash": "80c0510d1462160992cf9f27aaeb2393b4e4b23dde7b54c1b6aec911c81e7a3a",
+                        "content": "비공개 팀은 해당 팀에 참여 중인 사용자만 접근할 수 있습니다. 즉, 초대받지 않은 사용자는 팀 목록이나 내부 정보를 볼 수 없습니다.\n\n워크스페이스 관리자는 워크스페이스의 팀 페이지에서 모든 비공개 팀을 확인하고 직접 참여할 수도 있습니다. 단, 회사의 보안 정책상 관리자더라도 열람해서는 안 되는 정보가 포함되어 있을 수 있습니다. 따라서, 비공개 팀에 참여하기 전에는 팀원과 충분히 논의하는 것이 좋습니다. 참여를 시도하면 이 내용을 안내하는 경고 창이 표시됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 9.985453193937325,
+                            "latencyMs": 0
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3312,
+                        "documentVersionId": 2435,
+                        "documentId": "205de439d5a8",
+                        "sectionId": "205de439d5a8:e3b8955d07f1",
+                        "documentTitle": "미팅",
+                        "sectionPath": [
+                          "미팅",
+                          "미팅 생성"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/meetings/overview.md",
+                        "contentHash": "1ec1b61703b6d956ec478956d8ab9e029fe0fbd946faf414b092df6e300abc77",
+                        "content": "미팅은 다음 두 가지 방식으로 생성할 수 있습니다:\n\n#### 1. 기본 생성:\n\n* 새로운 미팅을 처음부터 설정하여 생성합니다.\n* 미팅 제목, 참여자, 시간, 장소 등을 자유롭게 지정할 수 있습니다.\n\n#### 2. 템플릿으로 생성:\n\n* 미리 정의된 미팅 형식을 불러와, 빠르게 미팅을 시작할 수 있습니다.\n* 예: 데일리 스탠드업, 회고 등",
+                        "fusedRank": 5,
+                        "fusedScore": 0.016129032258064516,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.34647655202964434,
+                            "latencyMs": 211
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 4693,
+                        "outputTokens": 117,
+                        "latencyMs": 2452,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC088",
+          "description": "목표로 구성한 작업을 프로젝트로 변경하는 기능 문의",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "0f85f465-b5c7-4607-b79f-9c31dd6c933a",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "목표로 구성한 작업이 스케일이 커질 경우 프로젝트로 올려 크게 다루고 싶은데, 목표로 구성한 작업을 프로젝트로 변경할 수 있나요?",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "0f85f465-b5c7-4607-b79f-9c31dd6c933a",
+                "ragRunId": "b7b29855-5c1c-44ee-81bd-f60476326432",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "목표로 구성한 작업이 스케일이 커질 경우 프로젝트로 올려 크게 다루고 싶은데, 목표로 구성한 작업을 프로젝트로 변경할 수 있나요?",
+                "resolvedQuery": "목표로 구성한 작업이 스케일이 커질 경우 프로젝트로 올려 크게 다루고 싶은데, 목표로 구성한 작업을 프로젝트로 변경할 수 있나요?",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2149,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 71,
+                    "outputTokens": null,
+                    "latencyMs": 153,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 5057,
+                    "outputTokens": 93,
+                    "latencyMs": 1946,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "목표로 구성한 작업이 스케일이 커질 경우 프로젝트로 올려 크게 다루고 싶은데, 목표로 구성한 작업을 프로젝트로 변경할 수 있나요?",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "목표로 구성한 작업이 스케일이 커질 경우 프로젝트로 올려 크게 다루고 싶은데, 목표로 구성한 작업을 프로젝트로 변경할 수 있나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3265,
+                        "documentVersionId": 2423,
+                        "documentId": "949ddd65a2a5",
+                        "sectionId": "949ddd65a2a5:09e9b2c9384c",
+                        "documentTitle": "실행: 작업",
+                        "sectionPath": [
+                          "실행: 작업",
+                          "구조"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/work-items.md",
+                        "contentHash": "ca76e341261001501c5fe06adc997d5067c3a59497120910ef4658943d8729ce",
+                        "content": "작업은 아래와 같은 계층 구조로 구성됩니다.\n\n### 프로젝트 (Project)\n\n팀 전체가 집중해야 하는 큰 단위의 업무입니다. 여러 개의 목표를 포함할 수 있습니다.\n\n### 목표 (Milestone)\n\n프로젝트 내에서 일정 기간 안에 달성해야 하는 중간 단위의 목표입니다. 하나 이상의 작업으로 구성됩니다.\n\n### 작업 (Task)\n\n실제로 수행되는 실행 단위의 업무입니다. 담당자, 일정, 우선순위 등 세부 속성을 바탕으로 관리됩니다.\n\n### 하위작업 (Subtask)\n\n하나의 작업을 더 세분화한 단위입니다. 단일 작업의 범위가 크거나, 여러 단계로 나누어 처리해야 할 경우 활용합니다. 하위 작업은 상위 작업과 연결되어 있으나, 상위 작업과 다른 목표와 프로젝트를 가질 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03252247488101534,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 27.819818657027355,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5552398430504203,
+                            "latencyMs": 167
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3261,
+                        "documentVersionId": 2422,
+                        "documentId": "11957633d8b2",
+                        "sectionId": "11957633d8b2:26264fecfd4a",
+                        "documentTitle": "계획: 백로그",
+                        "sectionPath": [
+                          "계획: 백로그",
+                          "작업으로 전환"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/backlog.md",
+                        "contentHash": "13c06dbe37e4c4b7aced2f5af86dcd8002d4cff30b3599b6487e498bed58e508",
+                        "content": "‘전환’ 버튼을 눌러 프로젝트, 목표, 작업으로 전환할 수 있습니다. 작업으로 전환 시에는 기존의 모든 정보가 그대로 유지되어, 실행 단계에서 이어서 작업을 진행할 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031099324975891997,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 8,
+                            "rawScore": 13.283793133456046,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5936709800264665,
+                            "latencyMs": 167
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3264,
+                        "documentVersionId": 2423,
+                        "documentId": "949ddd65a2a5",
+                        "sectionId": "949ddd65a2a5:c8a1279e8417",
+                        "documentTitle": "실행: 작업",
+                        "sectionPath": [
+                          "실행: 작업",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/work-items.md",
+                        "contentHash": "500e52fba23b1b94b3f73effb379ebeb26cf6a44510eb59a8332de321a81aba1",
+                        "content": "작업은 뤼이도의 실행 단계에서 핵심이 되는 구조입니다. \\[프로젝트 → 목표 → 작업]으로 이어지는 계층 구조는 팀의 일정을 체계적으로 나누고, 큰 방향부터 세부 실행까지 논리적으로 연결할 수 있게 도와줍니다.\n\n각 작업은 ‘준비됨 → 진행 중 → 완료’의 업무 흐름 속에서 진행되며, 모든 과정의 맥락과 책임이 명확하게 설정됩니다. 이 구조 덕분에 협업은 더 쉬워지고, 진행 상황 파악도 훨씬 수월해집니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.030776515151515152,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 4,
+                            "rawScore": 14.170033326407584,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.464033945175113,
+                            "latencyMs": 167
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3281,
+                        "documentVersionId": 2427,
+                        "documentId": "9b9516882026",
+                        "sectionId": "9b9516882026:e32fcf17e277",
+                        "documentTitle": "작업 관계도",
+                        "sectionPath": [
+                          "작업 관계도",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/diagram.md",
+                        "contentHash": "fe703516b8c743115d6b92b429e5c253519b800bd29839297afd331d13345ad4",
+                        "content": "작업 관계도는 팀의 프로젝트 구조를 트리 형태로 시각화한 다이어그램입니다. 프로젝트→ 목표→ 작업→ 하위 작업으로 이어지는 계층 구조를 기반으로, 팀의 업무가 어떤 구조로 연결되어 있는지 한눈에 파악할 수 있습니다.\n\n이를 통해 팀은 현재 어떤 목표 아래 어떤 작업들이 진행 중인지, 그리고 각 작업이 어떤 상위 단위에 속해 있는지를 명확히 이해할 수 있습니다. 시각적으로 구조를 파악함으로써, 팀의 방향성과 진행 상황을 쉽게 점검할 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 13.83353133148524,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.47833759018895616,
+                            "latencyMs": 167
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3252,
+                        "documentVersionId": 2420,
+                        "documentId": "2edd9ad4a6fa",
+                        "sectionId": "2edd9ad4a6fa:c0f4071b4014",
+                        "documentTitle": "작업 흐름으로 이해하는 프로젝트 관리",
+                        "sectionPath": [
+                          "작업 흐름으로 이해하는 프로젝트 관리",
+                          "작업 구조"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/workflow.md",
+                        "contentHash": "84ff53ccde96268f7d7626b41474071c77343df8bd0148a7cfe4c0892d8adbc1",
+                        "content": "### 1. 계획 (Plan)\n\n> 아직 실행되지 않은 작업들을 선별하고 정리하는 단계입니다.\n\n#### 대기 작업\n\n외부에서 유입된 초기 작업들이 모이는 곳입니다. 아직 정제되지 않았으며, 검토와 선별이 필요한 날것 상태입니다.\n\n#### 백로그\n\n검토를 마친 작업들이 우선순위에 따라 정리되는 공간입니다. 당장은 실행하지 않지만, 팀의 방향성과 흐름에 맞춰 언제든 작업으로 전환될 준비가 되어 있는 상태입니다.\n\n### 2. 실행 (Execution)\n\n> 실제 업무가 진행되는 중심 단계로, 계층 구조를 기반으로 작업이 구조적으로 실행됩니다.\n\n#### 프로젝트 → 목표 → 작업\n\n계층 구조를 통해 큰 흐름부터 세부 단위까지 논리적으로 정리됩니다.\n\n* 프로젝트 (Project): 팀의 큰 단위 업무\n* 목표 (Milestone): 프로젝트 안에서 일정 기간 내 달성해야 할 단위\n* 작업 (Task): 실제로 수행되는 세부 작업 단위\n\n#### 작업 상태\n\n각 작업은 아래 세 가지 상태 중 하나를 가집니다. [각 상태에는 팀별로 커스터마이징이 가능하며, 상태별로 여러 단계를 만들 수 있습니다.](https://docs.riido.io/teams/statuses.md) 이 작업 상태는 리스트, 칸반, 그래프, 캘린더 등의 다양한 보기를 통해 직관적으로 파악할 수 있습니다.\n\n* 준비됨: 작업이 할당되었지만 아직 시작되지 않은 상태\n* 진행 중: 작업이 시작되었으며, 개발, 리뷰 등의 상태\n* 완료: 완료된 작업\n\n### 3. 운영 (Operation)\n\n> 완료된 작업을 보관하고, 기록과 회고를 통해 더 나은 실행을 위한 기반을 마련하는 단계입니다.\n\n#### 보관\n\n완료되었지만 여전히 중요한 정보로 남아야 하는 작업들을 모아두는 공간입니다. 언제든지 다시 실행 단계로 이동할 수 있으며, 팀은 업무의 연속성과 개선의 기반을 확보할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029850746268656716,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 7,
+                            "rawScore": 13.627011691238359,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.46369479322052265,
+                            "latencyMs": 167
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 5057,
+                        "outputTokens": 93,
+                        "latencyMs": 1946,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC089",
+          "description": "캘린더에 프로젝트와 목표 기간을 표시하는 기능 요청",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": true,
+          "conversationId": "cf577ea3-7113-43c2-82d7-5df22fb92952",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "캘린더 뷰에서 작업뿐 아니라 프로젝트와 목표도 기간으로 표시할 수 있으면 좋겠습니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "cf577ea3-7113-43c2-82d7-5df22fb92952",
+                "ragRunId": "d7276709-affa-41bd-846d-0400100351ba",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "캘린더 뷰에서 작업뿐 아니라 프로젝트와 목표도 기간으로 표시할 수 있으면 좋겠습니다.",
+                "resolvedQuery": "캘린더 뷰에서 작업뿐 아니라 프로젝트와 목표도 기간으로 표시할 수 있으면 좋겠습니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 2350,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 47,
+                    "outputTokens": null,
+                    "latencyMs": 160,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 4629,
+                    "outputTokens": 102,
+                    "latencyMs": 2140,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "캘린더 뷰에서 작업뿐 아니라 프로젝트와 목표도 기간으로 표시할 수 있으면 좋겠습니다.",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "캘린더 뷰에서 작업뿐 아니라 프로젝트와 목표도 기간으로 표시할 수 있으면 좋겠습니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3282,
+                        "documentVersionId": 2427,
+                        "documentId": "9b9516882026",
+                        "sectionId": "9b9516882026:b527f7f75ac6",
+                        "documentTitle": "작업 관계도",
+                        "sectionPath": [
+                          "작업 관계도",
+                          "계층 구조 시각화"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/views/diagram.md",
+                        "contentHash": "22b77fbdb4470504aed2effc51588a73b4202635ee908066fd78dab30c78d100",
+                        "content": "작업 관계도에서는 프로젝트, 목표, 작업, 하위 작업이 트리 형태로 표시됩니다. 각 작업을 클릭하면 해당 작업의 상세 페이지로 이동할 수 있습니다.\n\n* 드래그를 통해 관계도를 자유롭게 이동할 수 있습니다.\n* 확대/축소를 통해 세부 구조와 전체 맥락을 전환할 수 있습니다.\n* 현재 작업과 직접 연결된 작업은 색이 진하게 표시되어, 복잡한 구조 속 관계를 직관적으로 파악할 수 있습니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.030798389007344232,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 9.683419567389429,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 7,
+                            "rawScore": 0.44395704110944334,
+                            "latencyMs": 174
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3299,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:203889cf792c",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "35e456517f89ebe937bf0af7f3ee21c6c8db19f1b38912cafc8f675701ac05e6",
+                        "content": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다.\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.029877369007803793,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 8.52318176014531,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 9,
+                            "rawScore": 0.4401631764498992,
+                            "latencyMs": 174
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3261,
+                        "documentVersionId": 2422,
+                        "documentId": "11957633d8b2",
+                        "sectionId": "11957633d8b2:26264fecfd4a",
+                        "documentTitle": "계획: 백로그",
+                        "sectionPath": [
+                          "계획: 백로그",
+                          "작업으로 전환"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/backlog.md",
+                        "contentHash": "13c06dbe37e4c4b7aced2f5af86dcd8002d4cff30b3599b6487e498bed58e508",
+                        "content": "‘전환’ 버튼을 눌러 프로젝트, 목표, 작업으로 전환할 수 있습니다. 작업으로 전환 시에는 기존의 모든 정보가 그대로 유지되어, 실행 단계에서 이어서 작업을 진행할 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.02919863597612958,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 7.48580945525754,
+                            "latencyMs": 1
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 8,
+                            "rawScore": 0.44058646039995997,
+                            "latencyMs": 174
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3267,
+                        "documentVersionId": 2423,
+                        "documentId": "949ddd65a2a5",
+                        "sectionId": "949ddd65a2a5:28c75fba571f",
+                        "documentTitle": "실행: 작업",
+                        "sectionPath": [
+                          "실행: 작업",
+                          "다양한 보기"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/issues/work-items.md",
+                        "contentHash": "244f515b91b952d8a2d7661e8bc1debcb7793fc99482bbf468f753833e2d12b1",
+                        "content": "작업은 다음과 같이 다양한 보기를 통해 확인하고 관리할 수 있습니다:\n\n| 리스트                                                                                            | 칸반                                 | 그래프                       | 캘린더                                |\n| ---------------------------------------------------------------------------------------------- | ---------------------------------- | ------------------------- | ---------------------------------- |\n|  가장 기본적인 보기 형태로, 작업을 빠르게 스캔하거나 정렬할 때 적합합니다.  뤼이도의 계층 구조를 가장 명확하게 보여주는 방식입니다.  | 상태를 기준으로 작업 흐름을 보드 형태로 시각화한 형태입니다. | 작업의 우선순위를 한눈에 파악할 수 있습니다. | 마감일과 일정을 중심으로 작업을 정리하고 확인할 수 있습니다. |",
+                        "fusedRank": 4,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.5152904979604864,
+                            "latencyMs": 174
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3361,
+                        "documentVersionId": 2449,
+                        "documentId": "a7061c4853df",
+                        "sectionId": "a7061c4853df:6f88dd13099e",
+                        "documentTitle": "휴지통",
+                        "sectionPath": [
+                          "휴지통",
+                          "휴지통 사용법"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/data/trash.md",
+                        "contentHash": "8347f284a9aa4fe9e1cde0915753d4a53b2bc668ca3a119654553214603a98bc",
+                        "content": "* 각 페이지 상단 메뉴의 ‘휴지통’ 버튼을 클릭하면, 삭제된 항목을 확인할 수 있습니다.\n* 휴지통에서는 항목이 유형별(작업 / 목표 / 프로젝트 등)로 분류되어 표시됩니다.\n* 각 항목 우측에는 남은 보관 기간이 표시되어, 언제 영구 삭제되는지 한눈에 확인할 수 있습니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.01639344262295082,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 12.307747941515801,
+                            "latencyMs": 1
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 4629,
+                        "outputTokens": 102,
+                        "latencyMs": 2140,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        },
+        {
+          "id": "RC090",
+          "description": "기존 스프린트 도입 상황의 시작일 유연성 문의와 보충 설명",
+          "mode": "CONTINUOUS_CONVERSATION",
+          "passed": false,
+          "conversationId": "7e8547ff-31b4-4b23-988c-e34d43f4a07e",
+          "turns": [
+            {
+              "turnNo": 1,
+              "question": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+              "passed": false,
+              "failures": [
+                "status 불일치: expected=WITHHELD, actual=COMPLETED",
+                "withheld reason 불일치: expected_any=['INSUFFICIENT_EVIDENCE'], actual=None",
+                "DB status 불일치: expected=WITHHELD, actual=COMPLETED"
+              ],
+              "httpStatus": 200,
+              "response": {
+                "status": "COMPLETED",
+                "conversationId": "7e8547ff-31b4-4b23-988c-e34d43f4a07e",
+                "ragRunId": "83372fc3-c323-4e25-83f7-4e8d4a6b154e",
+                "answer": {
+                  "answerMarkdown": "스프린트 시작 요일을 설정하면 처음 활성화할 때 해당 요일부터 첫 스프린트가 시작됩니다. 이후 기존 스프린트 주기를 변경하면 현재 스프린트는 새로 설정한 요일까지 유지되고, 그다음 스프린트가 새로 시작됩니다. [1]\n\n다만 주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [1]"
+                },
+                "citations": [
+                  {
+                    "citationNumber": 1,
+                    "documentTitle": "스프린트",
+                    "sectionPath": [
+                      "스프린트 시작 요일"
+                    ],
+                    "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                    "sourceKind": "GITBOOK"
+                  }
+                ]
+              },
+              "db": {
+                "status": "COMPLETED",
+                "indexVersionId": 1938,
+                "turnNo": 1,
+                "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                "contextStrategy": "NEW_TOPIC",
+                "contextTurnCount": 0,
+                "selectedTurnNos": [],
+                "withheldReasonCode": null,
+                "errorCode": null,
+                "citationValidated": true,
+                "totalLatencyMs": 8019,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 78,
+                    "outputTokens": null,
+                    "latencyMs": 192,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 7711,
+                    "outputTokens": 431,
+                    "latencyMs": 7772,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 1,
+                "citationDocumentTitles": [
+                  "스프린트"
+                ],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                    "candidateTurns": [],
+                    "selectedTurns": [],
+                    "contextStrategy": "NEW_TOPIC",
+                    "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다."
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3302,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:48338ffe0288",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 시작 요일"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "d157c06165cd8fb9c70026d16b625c5ed3c02a83db9a7622b3343a82accdbe29",
+                        "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 23.701200132894655,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6411632830158984,
+                            "latencyMs": 206
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3300,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:8f39a6741f94",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "30c49ede2036a0dcf966b4c2033000bd7edb3a5d1fd765340871d1e3aefe167c",
+                        "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.031754032258064516,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 17.631192361765887,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 4,
+                            "rawScore": 0.5669626375312758,
+                            "latencyMs": 206
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3299,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:203889cf792c",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "35e456517f89ebe937bf0af7f3ee21c6c8db19f1b38912cafc8f675701ac05e6",
+                        "content": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다.\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.03076923076923077,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 15.751645869875151,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5530109603365749,
+                            "latencyMs": 206
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3303,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:7a8e11bfc496",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "미리 생성할 다가올 스프린트 개수"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "44a05662ad01974d320173403f923d39732de87c22f5bc027b781e1077d9d52b",
+                        "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03036576949620428,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 9,
+                            "rawScore": 14.20665236789397,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5684458278881557,
+                            "latencyMs": 206
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3309,
+                        "documentVersionId": 2434,
+                        "documentId": "40ac0f0ac641",
+                        "sectionId": "40ac0f0ac641:6bbc22c7fbca",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/automations.md",
+                        "contentHash": "e4a0d98606608d268f52c4c09b9062ae703b2b9cc6ea84b143eb868a6f608a0a",
+                        "content": "스프린트를 시작하거나 종료할 때마다 반복되는 작업이 있다면, 자동화 기능을 통해 한 번의 설정으로 처리할 수 있습니다. 작업을 일일이 수동으로 정리하지 않아도 되기 때문에 팀은 실행에 더 집중할 수 있고, 스프린트 리듬도 자연스럽게 유지됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.030303030303030304,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 6,
+                            "rawScore": 15.157236648128025,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.5134806816413381,
+                            "latencyMs": 206
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 7711,
+                        "outputTokens": 431,
+                        "latencyMs": 7772,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "SUMMARY",
+                        "evidence_requirements": [
+                          {
+                            "information_unit": "첫 스프린트와 이후 스프린트의 시작 시점을 시작 요일 설정 및 기존 주기 변경 시점에 따라 조정할 수 있는지",
+                            "source_ids": [
+                              "SOURCE_1"
+                            ]
+                          }
+                        ],
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [
+                        {
+                          "sourceId": "SOURCE_1",
+                          "chunkId": 3302,
+                          "documentVersionId": 2432,
+                          "documentId": "261e80b246e8",
+                          "sectionId": "261e80b246e8:48338ffe0288",
+                          "documentTitle": "스프린트",
+                          "sectionPath": [
+                            "스프린트",
+                            "스프린트 시작 요일"
+                          ],
+                          "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                          "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다."
+                        }
+                      ],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "ANSWERABLE",
+                        "answer_markdown": "스프린트 시작 요일을 설정하면 처음 활성화할 때 해당 요일부터 첫 스프린트가 시작됩니다. 이후 기존 스프린트 주기를 변경하면 현재 스프린트는 새로 설정한 요일까지 유지되고, 그다음 스프린트가 새로 시작됩니다. [SOURCE_1]\n\n다만 주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [SOURCE_1]",
+                        "withheld_reason": null
+                      },
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 1,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": "스프린트 시작 요일을 설정하면 처음 활성화할 때 해당 요일부터 첫 스프린트가 시작됩니다. 이후 기존 스프린트 주기를 변경하면 현재 스프린트는 새로 설정한 요일까지 유지되고, 그다음 스프린트가 새로 시작됩니다. [1]\n\n다만 주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [1]",
+                    "citationValidated": true
+                  },
+                  "terminal": {
+                    "status": "COMPLETED",
+                    "failureStage": null,
+                    "reason": null
+                  }
+                }
+              }
+            },
+            {
+              "turnNo": 2,
+              "question": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+              "passed": true,
+              "failures": [],
+              "httpStatus": 200,
+              "response": {
+                "status": "WITHHELD",
+                "conversationId": "7e8547ff-31b4-4b23-988c-e34d43f4a07e",
+                "ragRunId": "bf1dc03a-e0e4-497c-a555-42e711844016",
+                "answer": null,
+                "withheld": {
+                  "reasonCode": "INSUFFICIENT_EVIDENCE",
+                  "message": "이용가이드에서 질문에 답할 충분한 근거를 찾지 못했습니다."
+                },
+                "citations": []
+              },
+              "db": {
+                "status": "WITHHELD",
+                "indexVersionId": 1938,
+                "turnNo": 2,
+                "userQuery": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+                "resolvedQuery": "스프린트 시작 요일은 오늘 이전 날짜도 선택할 수 있나요? 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정할 수 있나요?",
+                "contextStrategy": "FOLLOW_UP_WINDOW",
+                "contextTurnCount": 1,
+                "selectedTurnNos": [
+                  1
+                ],
+                "withheldReasonCode": "INSUFFICIENT_EVIDENCE",
+                "errorCode": null,
+                "citationValidated": null,
+                "totalLatencyMs": 5465,
+                "modelCalls": [
+                  {
+                    "purpose": "QUERY_REWRITE",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.4-mini",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v8",
+                    "inputTokens": 3741,
+                    "outputTokens": 88,
+                    "latencyMs": 1481,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "QUERY_EMBEDDING",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "text-embedding-3-large",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": null,
+                    "inputTokens": 79,
+                    "outputTokens": null,
+                    "latencyMs": 484,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  },
+                  {
+                    "purpose": "ANSWER_GENERATION",
+                    "status": "SUCCESS",
+                    "provider": "openai",
+                    "requestedModel": "gpt-5.6-terra",
+                    "responseModel": null,
+                    "responseModelAvailability": "UNAVAILABLE",
+                    "promptVersion": "v34",
+                    "inputTokens": 4580,
+                    "outputTokens": 126,
+                    "latencyMs": 3419,
+                    "retryCount": 0,
+                    "errorMessage": null
+                  }
+                ],
+                "retrievalResultCount": 20,
+                "citationCount": 0,
+                "citationDocumentTitles": [],
+                "stageTrace": {
+                  "queryResolution": {
+                    "originalQuestion": "이미 진행하던 스프린트를 관리하려는 상황이라 오늘 이전 날짜도 선택하고 싶고, 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정하고 싶습니다.",
+                    "candidateTurns": [
+                      {
+                        "ragRunId": "83372fc3-c323-4e25-83f7-4e8d4a6b154e",
+                        "turnNo": 1,
+                        "status": "COMPLETED",
+                        "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "answerContent": "스프린트 시작 요일을 설정하면 처음 활성화할 때 해당 요일부터 첫 스프린트가 시작됩니다. 이후 기존 스프린트 주기를 변경하면 현재 스프린트는 새로 설정한 요일까지 유지되고, 그다음 스프린트가 새로 시작됩니다. [1]\n\n다만 주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [1]",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "selectedTurns": [
+                      {
+                        "status": "COMPLETED",
+                        "turnNo": 1,
+                        "ragRunId": "83372fc3-c323-4e25-83f7-4e8d4a6b154e",
+                        "userQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "answerContent": "스프린트 시작 요일을 설정하면 처음 활성화할 때 해당 요일부터 첫 스프린트가 시작됩니다. 이후 기존 스프린트 주기를 변경하면 현재 스프린트는 새로 설정한 요일까지 유지되고, 그다음 스프린트가 새로 시작됩니다. [1]\n\n다만 주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 뒤 적용하는 것이 권장됩니다. [1]",
+                        "resolvedQuery": "기존 프로젝트를 진행하는 중에 스프린트를 도입하려고 합니다. 첫 스프린트 시작 날짜와 다음 스프린트 시작 날짜를 유연하게 정할 수 있으면 좋겠습니다.",
+                        "withheldReasonCode": null
+                      }
+                    ],
+                    "contextStrategy": "FOLLOW_UP_WINDOW",
+                    "resolvedQuery": "스프린트 시작 요일은 오늘 이전 날짜도 선택할 수 있나요? 스프린트가 끝난 뒤 회고와 계획 수립을 고려해 다음 일정의 시작 날짜와 기간도 정할 수 있나요?"
+                  },
+                  "retrieval": {
+                    "top5": [
+                      {
+                        "chunkId": 3302,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:48338ffe0288",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 시작 요일"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "d157c06165cd8fb9c70026d16b625c5ed3c02a83db9a7622b3343a82accdbe29",
+                        "content": "스프린트가 시작되는 기준 요일입니다.\n\n처음 스프린트를 활성화할 경우, 설정한 요일부터 새로운 스프린트가 시작됩니다. 기존 스프린트 주기를 변경하면, 현재 스프린트는 설정한 요일까지 유지된 후 다음 스프린트가 새로 시작됩니다.\n\n주기 변경은 예정된 작업 일정에 영향을 줄 수 있으므로, 현재 스프린트가 종료된 후 적용하는 것을 권장합니다.",
+                        "fusedRank": 1,
+                        "fusedScore": 0.03278688524590164,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 1,
+                            "rawScore": 27.124534495939805,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 1,
+                            "rawScore": 0.6664834963274269,
+                            "latencyMs": 498
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3300,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:8f39a6741f94",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "스프린트 설정"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "30c49ede2036a0dcf966b4c2033000bd7edb3a5d1fd765340871d1e3aefe167c",
+                        "content": "스프린트 설정은 \\[팀 설정 > 스프린트]에서 관리할 수 있습니다. 스프린트 기간, 시작 요일, 다가올 스프린트 개수를 설정하면 자동으로 스프린트가 활성화됩니다.",
+                        "fusedRank": 2,
+                        "fusedScore": 0.03200204813108039,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 2,
+                            "rawScore": 23.464821233041746,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 3,
+                            "rawScore": 0.5543657330506356,
+                            "latencyMs": 498
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3303,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:7a8e11bfc496",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "미리 생성할 다가올 스프린트 개수"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "44a05662ad01974d320173403f923d39732de87c22f5bc027b781e1077d9d52b",
+                        "content": "다가올 스프린트를 미리 생성해둘 수 있는 설정입니다. 이를 통해 다음 주기의 작업을 미리 배정하거나, 앞으로의 일정 계획을 더 체계적으로 준비할 수 있습니다.\n\n예를 들어, ‘다가올 스프린트 3개’를 설정하면 향후 3회차 스프린트 일정이 자동으로 생성됩니다.",
+                        "fusedRank": 3,
+                        "fusedScore": 0.0315136476426799,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 5,
+                            "rawScore": 17.256448197513073,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 2,
+                            "rawScore": 0.5679228335593703,
+                            "latencyMs": 498
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3299,
+                        "documentVersionId": 2432,
+                        "documentId": "261e80b246e8",
+                        "sectionId": "261e80b246e8:203889cf792c",
+                        "documentTitle": "스프린트",
+                        "sectionPath": [
+                          "스프린트",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/overview.md",
+                        "contentHash": "35e456517f89ebe937bf0af7f3ee21c6c8db19f1b38912cafc8f675701ac05e6",
+                        "content": "스프린트는 일정한 주기로 작업을 계획하고 실행하는 단위입니다. 정해진 기간과 마감일을 통해 팀의 집중력을 높이고, 지속적인 리듬과 회고의 기반을 마련할 수 있습니다.\n\n뤼이도의 스프린트는 프로젝트, 목표, 작업과 유기적으로 연결되어 팀의 업무 방식을 유연하게 조정할 수 있도록 설계되었습니다. 스프린트를 활용하면 팀은 단기간의 집중 실행과 회고를 반복하며, 점진적으로 더 나은 일 하는 방식을 만들어갈 수 있습니다.",
+                        "fusedRank": 4,
+                        "fusedScore": 0.03125763125763126,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 3,
+                            "rawScore": 23.239531736078295,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 5,
+                            "rawScore": 0.5032622576234809,
+                            "latencyMs": 498
+                          }
+                        ]
+                      },
+                      {
+                        "chunkId": 3309,
+                        "documentVersionId": 2434,
+                        "documentId": "40ac0f0ac641",
+                        "sectionId": "40ac0f0ac641:6bbc22c7fbca",
+                        "documentTitle": "자동화",
+                        "sectionPath": [
+                          "자동화",
+                          "개요"
+                        ],
+                        "sourceUrl": "https://docs.riido.io/sprints/automations.md",
+                        "contentHash": "e4a0d98606608d268f52c4c09b9062ae703b2b9cc6ea84b143eb868a6f608a0a",
+                        "content": "스프린트를 시작하거나 종료할 때마다 반복되는 작업이 있다면, 자동화 기능을 통해 한 번의 설정으로 처리할 수 있습니다. 작업을 일일이 수동으로 정리하지 않아도 되기 때문에 팀은 실행에 더 집중할 수 있고, 스프린트 리듬도 자연스럽게 유지됩니다.",
+                        "fusedRank": 5,
+                        "fusedScore": 0.029857397504456328,
+                        "retrievers": [
+                          {
+                            "type": "BM25",
+                            "rank": 8,
+                            "rawScore": 13.970057403809646,
+                            "latencyMs": 2
+                          },
+                          {
+                            "type": "VECTOR",
+                            "rank": 6,
+                            "rawScore": 0.4593658428781042,
+                            "latencyMs": 498
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "modelCalls": [
+                      {
+                        "purpose": "ANSWER_GENERATION",
+                        "status": "SUCCESS",
+                        "provider": "openai",
+                        "requestedModel": "gpt-5.6-terra",
+                        "responseModel": null,
+                        "responseModelAvailability": "UNAVAILABLE",
+                        "promptVersion": "v34",
+                        "inputTokens": 4580,
+                        "outputTokens": 126,
+                        "latencyMs": 3419,
+                        "retryCount": 0,
+                        "errorMessage": null
+                      }
+                    ],
+                    "planningOutput": {
+                      "availability": "AVAILABLE",
+                      "value": {
+                        "status": "WITHHELD",
+                        "answer_type": "GENERAL",
+                        "answer_scope": "MULTI_DETAIL",
+                        "evidence_requirements": [],
+                        "withheld_reason": "INSUFFICIENT_EVIDENCE"
+                      },
+                      "reason": null
+                    },
+                    "selectedSources": {
+                      "availability": "AVAILABLE",
+                      "value": [],
+                      "reason": null
+                    },
+                    "preValidationAnswer": {
+                      "availability": "AVAILABLE",
+                      "value": null,
+                      "reason": null
+                    },
+                    "validationError": null,
+                    "validationErrors": [],
+                    "planningAttemptCount": 1,
+                    "planningRegenerationCount": 0,
+                    "planningRegenerationModelCall": null,
+                    "initialPlanningOutput": null,
+                    "planningRegenerationOutput": null,
+                    "answerAttemptCount": 0,
+                    "validationRegenerationCount": 0,
+                    "validationRegenerationModelCall": null,
+                    "validationRegenerationAnswer": null,
+                    "finalAnswer": null,
+                    "citationValidated": null
+                  },
+                  "terminal": {
+                    "status": "WITHHELD",
+                    "failureStage": "GENERATION_DECISION",
+                    "reason": "INSUFFICIENT_EVIDENCE"
+                  }
+                }
+              }
+            }
+          ],
+          "repeatNo": 1
+        }
+      ]
+    }
+  ]
+}
