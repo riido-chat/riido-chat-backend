@@ -34,6 +34,7 @@ from app.question_grouping.models import (
     SubproblemCatalogItem,
 )
 from app.question_grouping.payload import build_judge_presentation, split_criteria
+from evaluation.judge_eval import cache_group
 from evaluation.judge_eval import cli
 from evaluation.judge_eval import golden as golden_mod
 from evaluation.judge_eval.clients import (
@@ -939,6 +940,32 @@ class EstimateTest(RegistryCase):
         self.assertEqual(json.loads(stdout.getvalue())["calls"], 5)
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
             cli.main(["run", "--registry", str(self.root), "--golden-version", GOLDEN_VERSION, "--suite", SUITE_A, "--judge", "luna"])
+
+
+class CacheGroupPolicyTest(unittest.TestCase):
+    def test_claude_cap_and_input_safety_are_applied_to_cache_group_estimate(self):
+        turn = SimpleNamespace(judged=True, payload_bytes=b"{}", payload_verified=True)
+        context = SimpleNamespace(
+            group={
+                "groupId": "cache-path",
+                "groupVersion": "2.0.0",
+                "groupSha256": "test-hash",
+                "members": [{"labels": {"path": "P3"}}],
+            },
+            golden=SimpleNamespace(version="1.0.1"),
+            turns=[turn],
+        )
+
+        estimate = cache_group.estimate_cache_group(context, "claude-haiku")["estimate"]
+
+        self.assertEqual(cache_group.CLAUDE_COMPARISON_MAX_OUTPUT_TOKENS, 1024)
+        self.assertEqual(cache_group.CLAUDE_BUDGET_USD, 20.0)
+        self.assertEqual(cache_group.CLAUDE_INPUT_TOKEN_SAFETY_MULTIPLIER, 1.15)
+        self.assertEqual(estimate["inputTokenSafetyMultiplier"], 1.15)
+        self.assertAlmostEqual(
+            estimate["upperUsd"] - estimate["estimatedUsd"],
+            (1024 - 80) * DEFAULT_PRICES["claude-haiku"].output / 1_000_000,
+        )
 
 
 # ---------------------------------------------------------------- 채점

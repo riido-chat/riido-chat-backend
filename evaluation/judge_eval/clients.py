@@ -661,11 +661,17 @@ def estimate(
     prices: Prices,
     *,
     max_output_tokens: Optional[int] = None,
+    input_token_safety_multiplier: float = 1.0,
 ) -> Dict[str, Any]:
     judged = [turn for turn in prepared if turn.judged]
     ratio = CHARS_PER_TOKEN[variant.name]
     multiplier = TOKENIZER_TOKEN_MULTIPLIER.get(variant.name, 1.0)
-    input_tokens = [int(-(-request_chars(variant.name, turn) * multiplier // ratio)) for turn in judged]
+    if input_token_safety_multiplier < 1.0:
+        raise ValueError("input_token_safety_multiplier 는 1.0 이상이어야 합니다")
+    input_tokens = [
+        int(-(-request_chars(variant.name, turn) * multiplier * input_token_safety_multiplier // ratio))
+        for turn in judged
+    ]
     total_input = sum(input_tokens)
     mean_output = MEAN_OUTPUT_TOKENS[variant.name]
     default_max_output = JUDGE_MAX_OUTPUT_TOKENS if variant.name == "luna" else (
@@ -686,6 +692,8 @@ def estimate(
         "tokenizerTokenMultiplier": multiplier,
         "prices": {"input": prices.input, "output": prices.output, "cachedInput": prices.cached_input},
     }
+    if input_token_safety_multiplier != 1.0:
+        result["inputTokenSafetyMultiplier"] = input_token_safety_multiplier
     if prices.input is None:
         result["estimatedUsd"] = None
         result["upperUsd"] = None
