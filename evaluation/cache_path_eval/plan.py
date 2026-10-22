@@ -125,19 +125,19 @@ def _reject_expected_label_keys(value: Any) -> None:
 
 def _reference_manifest(manifest: Mapping[str, Any]) -> dict[str, Any]:
     """Project only immutable references; never pass scoring labels or text."""
-    return {
+    projected = {
         "group": manifest["group"],
         "goldenVersion": manifest["goldenVersion"],
         "sourceCorpusVersion": manifest.get("sourceCorpusVersion"),
-        "inputs": {
-            "draftsSha256": manifest["inputs"]["draftsSha256"],
-            "judgeLabelsSha256": manifest["inputs"]["judgeLabelsSha256"],
-        },
+        "inputs": dict(manifest["inputs"]),
         "turns": [
             {"itemId": turn["itemId"], "turnNo": turn["turnNo"]}
             for turn in manifest["turns"]
         ],
     }
+    if "evaluationGroup" in manifest:
+        projected["evaluationGroup"] = dict(manifest["evaluationGroup"])
+    return projected
 
 
 @dataclass(frozen=True)

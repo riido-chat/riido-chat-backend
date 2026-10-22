@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,6 +26,131 @@ from evaluation.cache_path_eval.store import CachePathRunMetadata
 
 class FrozenCacheInputError(ValueError):
     """The selected private cache corpus does not match its immutable pins."""
+
+
+def load_canonical_cache_path_manifest(
+    *,
+    golden_root: Path,
+    group_path: Path,
+    metadata: CachePathRunMetadata,
+) -> dict[str, Any]:
+    """Project the official versioned cache group into the runner's scoring manifest."""
+    repository_root = golden_root.resolve()
+    if metadata.source_corpus_version is not None:
+        raise FrozenCacheInputError(
+            "정본 A/C 그룹 실행에는 legacy sourceCorpusVersion을 지정하지 않아야 합니다."
+        )
+    try:
+        actual_root = Path(
+            subprocess.run(
+                ["git", "-C", str(repository_root), "rev-parse", "--show-toplevel"],
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+        ).resolve()
+        if actual_root != repository_root:
+            raise FrozenCacheInputError("골든 입력은 registry Git 저장소 루트여야 합니다.")
+        head = subprocess.run(
+            ["git", "-C", str(repository_root), "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        if head != metadata.golden_commit:
+            raise FrozenCacheInputError("골든 registry git commit이 실행 metadata와 다릅니다.")
+        relative = group_path.resolve().relative_to(repository_root).as_posix()
+        if not re.fullmatch(r"golden/groups/cache-path/[0-9]+\.[0-9]+\.[0-9]+\.json", relative):
+            raise FrozenCacheInputError("공식 cache-path 그룹 파일만 사용할 수 있습니다.")
+
+        def read_blob(path: str) -> bytes:
+            return subprocess.run(
+                ["git", "-C", str(repository_root), "show", f"HEAD:{path}"],
+                check=True,
+                capture_output=True,
+            ).stdout
+
+        group_bytes = read_blob(relative)
+        if group_path.resolve().read_bytes() != group_bytes:
+            raise FrozenCacheInputError("선택한 평가 그룹 파일이 registry HEAD와 다릅니다.")
+        golden_bytes = read_blob("golden/manifest.json")
+        a_bytes = read_blob("golden/items/A.jsonl")
+        c_bytes = read_blob("golden/items/C.jsonl")
+        source_bytes = read_blob("golden/sources/channeltalk-qa-reviewed-20260804.html")
+        group = json.loads(group_bytes.decode("utf-8"))
+        golden_manifest = json.loads(golden_bytes.decode("utf-8"))
+        group_file_sha = hashlib.sha256(group_bytes).hexdigest()
+        item_sha = hashlib.sha256(b"A\0" + a_bytes + b"\0C\0" + c_bytes).hexdigest()
+        source_sha = hashlib.sha256(source_bytes).hexdigest()
+    except FrozenCacheInputError:
+        raise
+    except (OSError, subprocess.CalledProcessError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
+        raise FrozenCacheInputError("공식 cache-path 그룹을 읽을 수 없습니다.") from error
+
+    content = {key: value for key, value in group.items() if key != "groupSha256"}
+    group_digest = hashlib.sha256(
+        json.dumps(content, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    frozen_group = ((golden_manifest.get("frozen") or {}).get("files") or {}).get(relative)
+    if not isinstance(frozen_group, Mapping) or frozen_group.get("sha256") != group_file_sha:
+        raise FrozenCacheInputError("골든 manifest와 평가 그룹 파일 해시가 다릅니다.")
+    if group.get("groupId") != "cache-path" or group.get("groupSha256") != group_digest:
+        raise FrozenCacheInputError("공식 평가 그룹의 식별자 또는 내용 해시가 잘못되었습니다.")
+    if group.get("sourceGoldenVersion") != metadata.golden_version or golden_manifest.get("goldenVersion") != metadata.golden_version:
+        raise FrozenCacheInputError("평가 그룹과 실행 metadata의 골든 버전이 다릅니다.")
+
+    a_items = {
+        item["id"]: item
+        for item in (json.loads(line) for line in a_bytes.decode("utf-8").splitlines() if line.strip())
+    }
+    c_items = {
+        item["id"]: item
+        for item in (json.loads(line) for line in c_bytes.decode("utf-8").splitlines() if line.strip())
+    }
+    turns = []
+    for member in group.get("members", ()):
+        if not isinstance(member, Mapping) or not isinstance(member.get("labels"), Mapping):
+            raise FrozenCacheInputError("공식 평가 그룹 문항 형식이 잘못되었습니다.")
+        item_id, turn_no, labels = member.get("itemId"), member.get("turnNo"), member["labels"]
+        path = labels.get("path")
+        if not isinstance(item_id, str) or not isinstance(turn_no, int) or path not in {"P1", "P3", "P4", "P6"}:
+            raise FrozenCacheInputError("공식 평가 그룹 참조 형식이 잘못되었습니다.")
+        item = a_items.get(item_id) or c_items.get(item_id)
+        if item is None or turn_no < 1 or turn_no > len(item.get("turns", [])):
+            raise FrozenCacheInputError("공식 평가 그룹 참조가 A/C 정본에 없습니다.")
+        projected = {
+            "itemId": item_id,
+            "path": path,
+            "turnNo": turn_no,
+            "kind": "exact_hit" if path == "P1" else "judge",
+            "expectedExactHit": labels.get("expectedExactHit"),
+            "expectedServed": labels.get("expectedServed"),
+        }
+        if path != "P1":
+            projected["expectedJudgeDecision"] = labels.get("expectedJudgeDecision")
+            projected["expectedSubproblemKeysAny"] = labels.get("expectedSubproblemKeysAny", [])
+        if path == "P6":
+            projected["expectedSelectedTurnNos"] = labels.get("expectedSelectedTurnNos", [])
+        turns.append(projected)
+
+    return {
+        "group": "cache-path",
+        "goldenVersion": metadata.golden_version,
+        "sourceCorpusVersion": None,
+        "evaluationGroup": {
+            "groupId": group["groupId"],
+            "groupVersion": group["groupVersion"],
+            "groupSha256": group_digest,
+            "groupFileSha256": group_file_sha,
+        },
+        "inputs": {
+            "draftsSha256": None,
+            "judgeLabelsSha256": None,
+            "canonicalItemsSha256": item_sha,
+            "sourceHtmlSha256": source_sha,
+        },
+        "turns": turns,
+    }
 
 
 @dataclass(frozen=True)
@@ -48,6 +174,7 @@ class FrozenCacheCorpusLoader:
         self._selection_manifest = selection_manifest
         self._metadata = metadata
         self._payload: Optional[Mapping[str, Any]] = None
+        self._canonical_payload: Optional[dict[str, Any]] = None
         self._allowed_refs = {
             (turn.get("itemId"), turn.get("turnNo"))
             for turn in selection_manifest.get("turns", ())
@@ -135,6 +262,212 @@ class FrozenCacheCorpusLoader:
         self._payload = payload
         return payload
 
+    def _load_canonical_payload(self) -> Mapping[str, Any]:
+        """Read the canonical A/C turns and their original ChannelTalk source."""
+        if self._canonical_payload is not None:
+            return self._canonical_payload
+        group = self._selection_manifest.get("evaluationGroup")
+        inputs = self._selection_manifest.get("inputs")
+        if not isinstance(group, Mapping) or not isinstance(inputs, Mapping):
+            raise FrozenCacheInputError("정본 평가 그룹 provenance가 없습니다.")
+        if group.get("groupId") != "cache-path" or not isinstance(group.get("groupVersion"), str):
+            raise FrozenCacheInputError("정본 평가 그룹 식별자가 잘못되었습니다.")
+        try:
+            repository_root = Path(
+                subprocess.run(
+                    ["git", "-C", str(self._golden_root), "rev-parse", "--show-toplevel"],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                ).stdout.strip()
+            ).resolve()
+            if repository_root != self._golden_root:
+                raise FrozenCacheInputError("골든 입력은 registry Git 저장소 루트여야 합니다.")
+            head = subprocess.run(
+                ["git", "-C", str(repository_root), "rev-parse", "HEAD"],
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+            if head != self._metadata.golden_commit:
+                raise FrozenCacheInputError("골든 registry git commit이 실행 metadata와 다릅니다.")
+
+            def read_blob(relative: str) -> bytes:
+                return subprocess.run(
+                    ["git", "-C", str(repository_root), "show", f"HEAD:{relative}"],
+                    check=True,
+                    capture_output=True,
+                ).stdout
+
+            golden_bytes = read_blob("golden/manifest.json")
+            group_relative = f"golden/groups/cache-path/{group['groupVersion']}.json"
+            group_bytes = read_blob(group_relative)
+            a_bytes = read_blob("golden/items/A.jsonl")
+            c_bytes = read_blob("golden/items/C.jsonl")
+            source_relative = "golden/sources/channeltalk-qa-reviewed-20260804.html"
+            source_bytes = read_blob(source_relative)
+            golden_manifest = json.loads(golden_bytes.decode("utf-8"))
+            group_payload = json.loads(group_bytes.decode("utf-8"))
+            a_items = [json.loads(line) for line in a_bytes.decode("utf-8").splitlines() if line.strip()]
+            c_items = [json.loads(line) for line in c_bytes.decode("utf-8").splitlines() if line.strip()]
+            source_match = re.search(
+                rb"const\s+records\s*=\s*(\[.*?\])\s*;",
+                source_bytes,
+                re.DOTALL,
+            )
+            if source_match is None:
+                raise FrozenCacheInputError("고정 ChannelTalk 원본에서 상담 기록을 찾지 못했습니다.")
+            source_records = json.loads(source_match.group(1).decode("utf-8"))
+        except FrozenCacheInputError:
+            raise
+        except (OSError, subprocess.CalledProcessError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
+            raise FrozenCacheInputError("정본 평가 입력을 읽을 수 없습니다.") from error
+
+        frozen_files = ((golden_manifest.get("frozen") or {}).get("files") or {})
+        group_file_sha = hashlib.sha256(group_bytes).hexdigest()
+        items_sha = hashlib.sha256(b"A\0" + a_bytes + b"\0C\0" + c_bytes).hexdigest()
+        source_sha = hashlib.sha256(source_bytes).hexdigest()
+        expected_group_file = frozen_files.get(group_relative)
+        if not isinstance(expected_group_file, dict) or expected_group_file.get("sha256") != group_file_sha:
+            raise FrozenCacheInputError("골든 manifest와 평가 그룹 파일 해시가 다릅니다.")
+        if golden_manifest.get("goldenVersion") != self._metadata.golden_version:
+            raise FrozenCacheInputError("정본 골든 버전이 실행 metadata와 다릅니다.")
+        if group_payload.get("sourceGoldenVersion") != self._metadata.golden_version:
+            raise FrozenCacheInputError("평가 그룹과 실행 metadata의 골든 버전이 다릅니다.")
+        group_content = {key: value for key, value in group_payload.items() if key != "groupSha256"}
+        group_digest = hashlib.sha256(
+            json.dumps(group_content, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        if group_payload.get("groupSha256") != group_digest or group.get("groupSha256") != group_digest:
+            raise FrozenCacheInputError("평가 그룹의 내용 해시가 실행 manifest와 다릅니다.")
+        if group.get("groupFileSha256") != group_file_sha:
+            raise FrozenCacheInputError("평가 그룹 파일이 실행 manifest와 다릅니다.")
+        if inputs.get("canonicalItemsSha256") != items_sha or inputs.get("sourceHtmlSha256") != source_sha:
+            raise FrozenCacheInputError("정본 문항 또는 원본 대화의 해시가 실행 manifest와 다릅니다.")
+        group_refs = {
+            (member.get("itemId"), member.get("turnNo"))
+            for member in group_payload.get("members", ())
+            if isinstance(member, Mapping)
+        }
+        if group_refs != self._allowed_refs:
+            raise FrozenCacheInputError("실행 reference가 공식 평가 그룹과 다릅니다.")
+
+        item_by_id = {item.get("id"): item for item in [*a_items, *c_items] if isinstance(item, dict)}
+        source_by_id = {record.get("sample_id"): record for record in source_records if isinstance(record, dict)}
+        self._canonical_payload = {
+            "items": item_by_id,
+            "sources": source_by_id,
+            "group": group_payload,
+            "groupFileSha256": group_file_sha,
+            "canonicalItemsSha256": items_sha,
+            "sourceHtmlSha256": source_sha,
+        }
+        return self._canonical_payload
+
+    @staticmethod
+    def _canonical_source_answer(item: Mapping[str, Any], turn_no: int, source: Mapping[str, Any]) -> Optional[str]:
+        spans = [
+            span for span in item.get("sourceSpans", ())
+            if isinstance(span, Mapping) and span.get("turnNo") == turn_no
+        ]
+        message_numbers = [span.get("messageNo") for span in spans]
+        if not message_numbers or any(isinstance(number, bool) or not isinstance(number, int) for number in message_numbers):
+            return None
+        conversation = source.get("conversation")
+        if not isinstance(conversation, list):
+            return None
+        user_indices = [
+            index for index, message in enumerate(conversation)
+            if isinstance(message, Mapping) and message.get("role") == "user"
+        ]
+        last_user_ordinal = max(message_numbers)
+        if last_user_ordinal < 1 or last_user_ordinal > len(user_indices):
+            return None
+        last_user_index = user_indices[last_user_ordinal - 1]
+        next_user_index = (
+            user_indices[last_user_ordinal]
+            if last_user_ordinal < len(user_indices)
+            else len(conversation)
+        )
+        replies = [
+            message.get("text", "").strip()
+            for message in conversation[last_user_index + 1 : next_user_index]
+            if isinstance(message, Mapping)
+            and message.get("role") in {"bot", "manager"}
+            and isinstance(message.get("text"), str)
+            and message.get("text", "").strip()
+        ]
+        return "\n\n".join(replies) if replies else None
+
+    def _load_canonical_turn(self, item_id: str, turn_no: int) -> FrozenCacheTurnInput:
+        payload = self._load_canonical_payload()
+        item = payload["items"].get(item_id)
+        if not isinstance(item, Mapping):
+            raise FrozenCacheInputError("선택한 정본 문항이 A/C JSONL에 없습니다.")
+        turns = item.get("turns")
+        if not isinstance(turns, list) or turn_no > len(turns):
+            raise FrozenCacheInputError("선택한 정본 턴이 없습니다.")
+        current = turns[turn_no - 1]
+        question = current.get("question") if isinstance(current, Mapping) else None
+        if not isinstance(question, str) or not question.strip():
+            raise FrozenCacheInputError("선택한 정본 턴의 질문이 없습니다.")
+
+        history_synthetic = item.get("historySynthetic", False)
+        if not isinstance(history_synthetic, bool):
+            raise FrozenCacheInputError("historySynthetic 표식 형식이 잘못되었습니다.")
+        source_id = item.get("sourceId")
+        source = None
+        if isinstance(source_id, str) and source_id.startswith("channeltalk:"):
+            source = payload["sources"].get(source_id.partition(":")[2])
+
+        candidates: list[QueryRewriteCandidateTurn] = []
+        for prior_no, prior in enumerate(turns[: turn_no - 1], start=1):
+            if not isinstance(prior, Mapping):
+                continue
+            prior_question = prior.get("question")
+            if not isinstance(prior_question, str) or not prior_question.strip():
+                continue
+            answer = prior.get("historyAnswer")
+            content: Optional[str] = None
+            status = QueryRewriteTurnStatus.COMPLETED
+            withheld_reason = None
+            if isinstance(answer, Mapping):
+                answer_status = answer.get("status")
+                if answer_status == "COMPLETED":
+                    content = answer.get("content")
+                elif answer_status == "WITHHELD":
+                    reason = answer.get("withheldReasonCode", answer.get("withheldReason"))
+                    try:
+                        withheld_reason = FinalWithheldReason(reason)
+                    except (TypeError, ValueError) as error:
+                        raise FrozenCacheInputError("고정된 이전 보류 턴의 사유가 잘못되었습니다.") from error
+                    status = QueryRewriteTurnStatus.WITHHELD
+                else:
+                    raise FrozenCacheInputError("고정된 이전 턴 상태를 지원하지 않습니다.")
+            elif source is not None:
+                content = self._canonical_source_answer(item, prior_no, source)
+            if status == QueryRewriteTurnStatus.COMPLETED and (not isinstance(content, str) or not content.strip()):
+                # Production history contains only completed/withheld RAG runs.
+                # Unanswered source turns are therefore omitted from candidates.
+                continue
+            candidates.append(
+                QueryRewriteCandidateTurn(
+                    rag_run_id=self._candidate_id(item_id, prior_no),
+                    turn_no=prior_no,
+                    status=status,
+                    user_query=prior_question.strip(),
+                    resolved_query=prior_question.strip() if prior_no == 1 else None,
+                    answer_content=content.strip() if isinstance(content, str) else None,
+                    withheld_reason_code=withheld_reason,
+                )
+            )
+        candidates = candidates[-MAX_QUERY_REWRITE_TURNS:]
+        return FrozenCacheTurnInput(
+            question=question.strip(),
+            candidates=tuple(candidates),
+            history_synthetic=history_synthetic,
+        )
+
     def load_turn(self, item_id: str, turn_no: int) -> FrozenCacheTurnInput:
         """Resolve one opaque reference; expected labels and route fields are ignored."""
 
@@ -144,6 +477,8 @@ class FrozenCacheCorpusLoader:
             raise FrozenCacheInputError("턴 번호가 잘못되었습니다.")
         if (item_id, turn_no) not in self._allowed_refs:
             raise FrozenCacheInputError("선택한 reference가 run manifest에 없습니다.")
+        if isinstance(self._selection_manifest.get("evaluationGroup"), Mapping):
+            return self._load_canonical_turn(item_id, turn_no)
         payload = self._load_payload()
         selected_item = next(
             (item for item in payload.get("items", ()) if item.get("id") == item_id),

@@ -21,7 +21,7 @@ OBSERVATION_FIELDS = {
 }
 MANIFEST_TURN_FIELDS = {
     "itemId", "path", "turnNo", "kind", "expectedExactHit", "expectedServed",
-    "expectedJudgeDecision", "expectedSubproblemKeysAny",
+    "expectedJudgeDecision", "expectedSubproblemKeysAny", "expectedSelectedTurnNos",
 }
 
 
@@ -96,6 +96,14 @@ def _validate_manifest(manifest: Any) -> List[Dict[str, Any]]:
             raise CachePathEvalError(f"context-only 턴에는 캐시 기대 결과를 둘 수 없습니다: {key}")
         if row["kind"] != "context_only" and not isinstance(row.get("expectedServed"), bool):
             raise CachePathEvalError(f"캐시 기대 결과가 없습니다: {key}")
+        if "expectedSelectedTurnNos" in row:
+            selected = row["expectedSelectedTurnNos"]
+            if (
+                not isinstance(selected, list)
+                or any(isinstance(value, bool) or not isinstance(value, int) or value < 1 for value in selected)
+                or selected != sorted(set(selected))
+            ):
+                raise CachePathEvalError(f"문맥 선택 기대값이 잘못되었습니다: {key}")
     return turns
 
 
@@ -190,7 +198,7 @@ def evaluate(manifest: Dict[str, Any], observations: Sequence[Dict[str, Any]], o
         }
         by_path[path]["all"] = _summarize_group(path_rows, observed)
     overall = _summarize_group(turns, observed)
-    return {
+    result = {
         "resultSchemaVersion": 1,
         "group": "cache-path",
         "runMode": "offline-observations",
@@ -200,9 +208,17 @@ def evaluate(manifest: Dict[str, Any], observations: Sequence[Dict[str, Any]], o
             "draftsSha256": manifest["inputs"].get("draftsSha256"),
             "judgeLabelsSha256": manifest["inputs"].get("judgeLabelsSha256"),
             "observationsSha256": observation_sha256,
+            **{
+                key: manifest["inputs"][key]
+                for key in ("canonicalItemsSha256", "sourceHtmlSha256")
+                if key in manifest["inputs"]
+            },
         },
         "summary": {"all": overall, "paths": by_path},
     }
+    if "evaluationGroup" in manifest:
+        result["evaluationGroup"] = dict(manifest["evaluationGroup"])
+    return result
 
 
 def build_parser() -> argparse.ArgumentParser:

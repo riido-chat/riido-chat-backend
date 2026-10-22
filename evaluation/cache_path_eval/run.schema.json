@@ -11,6 +11,7 @@
   "properties": {
     "schemaVersion": {"const": 1},
     "group": {"const": "cache-path"},
+    "evaluationGroup": {"$ref": "#/$defs/evaluationGroup"},
     "runId": {"type": "string", "minLength": 1},
     "goldenVersion": {"type": "string", "minLength": 1},
     "goldenCommit": {"$ref": "#/$defs/sha40"},
@@ -21,6 +22,8 @@
       "properties": {
         "draftsSha256": {"$ref": "#/$defs/sha256"},
         "judgeLabelsSha256": {"$ref": "#/$defs/sha256"},
+        "canonicalItemsSha256": {"$ref": "#/$defs/sha256"},
+        "sourceHtmlSha256": {"$ref": "#/$defs/sha256"},
         "observationsSha256": {"$ref": "#/$defs/sha256"}
       }
     },
@@ -56,6 +59,16 @@
   "$defs": {
     "sha40": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "evaluationGroup": {
+      "type": "object", "additionalProperties": false,
+      "required": ["groupId", "groupVersion", "groupSha256", "groupFileSha256"],
+      "properties": {
+        "groupId": {"const": "cache-path"},
+        "groupVersion": {"type": "string", "minLength": 1},
+        "groupSha256": {"$ref": "#/$defs/sha256"},
+        "groupFileSha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
     "metric": {
       "type": "object", "additionalProperties": false,
       "required": ["turns", "outcomes", "ineligibleServed", "nextStage", "latencyMs", "modelCalls", "embeddingCalls"],
@@ -123,6 +136,7 @@
         "expectedServed": {"type": "boolean"},
         "expectedJudgeDecision": {"type": "string"},
         "expectedSubproblemKeysAny": {"type": "array", "items": {"type": "string"}},
+        "expectedSelectedTurnNos": {"type": "array", "items": {"type": "integer", "minimum": 1}},
         "outcome": {"enum": ["SERVED", "SHADOW", "GROUP_DISABLED", "REJECTED", "SKIPPED", "FAILED"]},
         "nextStage": {"enum": ["PASS", "FAIL", "NOT_APPLICABLE"]},
         "latencyMs": {"type": "integer", "minimum": 0},

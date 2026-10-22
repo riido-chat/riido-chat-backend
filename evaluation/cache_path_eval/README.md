@@ -101,14 +101,23 @@ factory를, profile에 embedder/rewrite/judge 의존성을 직접 주입해야 �
 이 의존성을 실행하지 않으며 callback 실행은 run 예약 뒤에 시작한다. Bootstrap은 등록 후
 `run_cache_path_cli(..., execution_adapter=create_riido_cache_decision_execution_adapter())`를
 호출한다. CLI의 기본 `main()`은 DB/model 의존성을 만들지 않고 adapter가 주입되지 않으면 거부한다.
-private registry의 `golden/manifest.json`은 `golden_commit`에 고정되고,
-`golden/sources/cache-drafts.json`은 frozen manifest hash 및 선택 manifest의 `draftsSha256`로
-검증되며 draft 진단 상태(`status: draft`)도 확인한다. Runtime은 고정된 source corpus에서 질문과
-명시된 이전 턴 문맥을 비공개로 읽고 운영과 동일하게 가장 최근의 유효한 이전 턴 최대 5개만
-rewrite 입력으로 제공한다. 미지원된 prior-turn 상태는 fail closed 한다. 공개 manifest와 결과에는
-그 원문을 복사하지 않는다.
+구형 선택 manifest는 private registry의 `golden/manifest.json`과
+`golden/sources/cache-drafts.json`의 frozen hash, draft 진단 상태(`status: draft`)를 검증한다.
+Runtime은 고정된 source corpus에서 질문과 명시된 이전 턴 문맥을 비공개로 읽고 운영과 동일하게 가장
+최근의 유효한 이전 턴 최대 5개만 rewrite 입력으로 제공한다. 공개 manifest와 결과에는 그 원문을 복사하지
+않는다.
 Factory에는 source corpus version, 입력 provenance 해시, `{itemId, turnNo}` 참조만 전달하고,
 runtime judge 입력에서는 `path`, `kind`, expected labels를 제외한다.
+
+공식 A/C 정본을 실행할 때는 `golden/groups/cache-path/2.0.0.json`을 `--manifest`로 지정한다.
+CLI는 고정된 registry `HEAD`에서 해당 그룹, `A.jsonl`, `C.jsonl`, 원본
+`channeltalk-qa-reviewed-20260804.html`을 읽고 그룹·문항·원본 해시를 검증한다. 결과에는 그룹 버전과
+그룹/파일/A·C/원본 HTML 해시만 기록하며 질문이나 답변 원문은 복사하지 않는다. 이 모드에서는
+`sourceCorpusVersion`을 `null`로 둔다. 그룹은 ABC 문항을 바꾸지 않고 기존 참조와 기대 라벨만 연결한다.
+P6 문맥은 정본 턴의 `historyAnswer`가 있으면 그 고정값을 사용하고, 없으면 `sourceSpans`로 연결한
+원본 상담에서 해당 사용자 턴 뒤의 실제 응답 메시지를 읽는다. 답변이 없는 미완료 이전 턴은 운영의
+유효 후보 목록과 같이 제외한다. 첫 턴 외의 `resolvedQuery`가 원본에 없을 때는 값을 만들어 채우지 않고
+`null`을 전달하며, 운영 Query Rewrite와 동일하게 원래 사용자 질문으로 대체된다.
 
 ## 고정 입력 평가 계획
 

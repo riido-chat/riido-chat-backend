@@ -5,6 +5,7 @@ import json
 import subprocess
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -18,12 +19,14 @@ from app.question_grouping.question_vector import (
 from evaluation.cache_path_eval.golden_inputs import (
     FrozenCacheCorpusLoader,
     FrozenCacheInputError,
+    load_canonical_cache_path_manifest,
 )
 from evaluation.cache_path_eval.profile_registry import (
     clear_profiles_for_tests,
     resolve_profile_factory,
 )
 from evaluation.cache_path_eval.profiles.riido_chat import register_riido_chat_profile
+from evaluation.cache_path_eval.run import project_reference_manifest
 from evaluation.cache_path_eval.store import CachePathRunMetadata
 
 
@@ -52,6 +55,54 @@ def _metadata(golden_commit: str) -> CachePathRunMetadata:
 
 
 class FrozenCacheInputTests(unittest.TestCase):
+    def test_official_cache_path_group_reads_original_p6_context_with_pinned_provenance(self):
+        commit = subprocess.run(
+            ["git", "-C", str(GOLDEN_ROOT), "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        metadata = replace(_metadata(commit), source_corpus_version=None)
+        manifest = load_canonical_cache_path_manifest(
+            golden_root=GOLDEN_ROOT,
+            group_path=GOLDEN_ROOT / "golden" / "groups" / "cache-path" / "2.0.0.json",
+            metadata=metadata,
+        )
+        self.assertEqual(85, len(manifest["turns"]))
+        self.assertEqual(
+            {"P1": 20, "P3": 32, "P4": 14, "P6": 19},
+            {path: sum(turn["path"] == path for turn in manifest["turns"]) for path in ("P1", "P3", "P4", "P6")},
+        )
+        self.assertEqual("2.0.0", manifest["evaluationGroup"]["groupVersion"])
+        self.assertEqual(
+            "d198be87e7dedeb498d3646625c83f9e7887665fc25290238d64aa1f037689e1",
+            manifest["inputs"]["sourceHtmlSha256"],
+        )
+
+        references = project_reference_manifest(manifest)
+        self.assertTrue(all(set(turn) == {"itemId", "turnNo"} for turn in references["turns"]))
+        loader = FrozenCacheCorpusLoader(
+            golden_root=GOLDEN_ROOT,
+            selection_manifest=references,
+            metadata=metadata,
+        )
+        loaded_all = {
+            (turn["itemId"], turn["turnNo"]): loader.load_turn(turn["itemId"], turn["turnNo"])
+            for turn in manifest["turns"]
+        }
+        p6_turns = [turn for turn in manifest["turns"] if turn["path"] == "P6"]
+        for turn in p6_turns:
+            loaded = loaded_all[(turn["itemId"], turn["turnNo"])]
+            candidate_by_turn = {candidate.turn_no: candidate for candidate in loaded.candidates}
+            self.assertTrue(set(turn["expectedSelectedTurnNos"]).issubset(candidate_by_turn))
+            for selected_turn_no in turn["expectedSelectedTurnNos"]:
+                candidate = candidate_by_turn[selected_turn_no]
+                self.assertTrue(
+                    (candidate.answer_content and candidate.answer_content.strip())
+                    or candidate.withheld_reason_code is not None
+                )
+            self.assertFalse(hasattr(loaded, "expected_selected_turn_nos"))
+
     def test_loads_only_selected_question_and_explicit_prior_context_from_git_blob(self):
         with tempfile.TemporaryDirectory() as temp:
             registry = Path(temp)
