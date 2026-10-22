@@ -56,12 +56,22 @@ def _metadata(golden_commit: str) -> CachePathRunMetadata:
 
 class FrozenCacheInputTests(unittest.TestCase):
     def test_official_cache_path_group_reads_original_p6_context_with_pinned_provenance(self):
+        if not (GOLDEN_ROOT / ".git").exists():
+            self.skipTest("private evaluation registry submodule is unavailable in this checkout")
         commit = subprocess.run(
             ["git", "-C", str(GOLDEN_ROOT), "rev-parse", "HEAD"],
             check=True,
             capture_output=True,
             text=True,
         ).stdout.strip()
+        repository_root = subprocess.run(
+            ["git", "-C", str(GOLDEN_ROOT), "rev-parse", "--show-toplevel"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        if Path(repository_root).resolve() != GOLDEN_ROOT.resolve():
+            self.skipTest("private evaluation registry submodule is not initialized")
         metadata = replace(_metadata(commit), source_corpus_version=None)
         manifest = load_canonical_cache_path_manifest(
             golden_root=GOLDEN_ROOT,

@@ -477,7 +477,7 @@ class FrozenCacheCorpusLoader:
             raise FrozenCacheInputError("턴 번호가 잘못되었습니다.")
         if (item_id, turn_no) not in self._allowed_refs:
             raise FrozenCacheInputError("선택한 reference가 run manifest에 없습니다.")
-        if isinstance(self._selection_manifest.get("evaluationGroup"), Mapping):
+        if isinstance(getattr(self, "_selection_manifest", {}).get("evaluationGroup"), Mapping):
             return self._load_canonical_turn(item_id, turn_no)
         payload = self._load_payload()
         selected_item = next(
