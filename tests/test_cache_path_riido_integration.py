@@ -11,6 +11,10 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from app.core.model_trace import ModelCallTrace
+from app.core.model_trace import ModelRequestEvidence, canonical_request_sha256
+from app.core.stage_settings import StageSettings
+from app.question_grouping.judge_client import build_judge_request
+from app.question_grouping.jev_judge_client import JEV_PROMPT_VERSION
 from app.question_grouping.constants import EXACT_SOURCE_SUBPROBLEM_VERSION_STALE
 from app.retrieval.embedding import (
     OPENAI_EMBEDDING_DIMENSIONS,
@@ -22,10 +26,15 @@ from evaluation.cache_path_eval.cli import run_cache_path_cli
 from evaluation.cache_path_eval.profile_registry import clear_profiles_for_tests
 from evaluation.cache_path_eval.profiles.riido_chat import (
     create_riido_cache_decision_execution_adapter,
+    create_riido_chat_plan_binding,
     register_riido_chat_profile,
 )
 from evaluation.cache_path_eval.readonly_service import EmbeddingConfigIdentity
 from evaluation.cache_path_eval.store import CachePathRunMetadata
+from evaluation.cache_path_eval.plan import CachePathPlanRunSpec, execute_cache_path_plan
+from evaluation.cache_path_eval.plan_store import CachePathPlanStore
+from evaluation.cache_path_eval.store import CachePathRunStore
+from evaluation.core.plan import EvaluationPlan, EvaluationVariant
 from app.retrieval.models import HybridRetrievalResult, HybridSearchCall
 from tests.test_help_chatbot_identity import (
     ALPHA_CHUNK,
@@ -61,7 +70,7 @@ class _ReadOnlyData:
         self.contexts = []
         self.snapshot = snapshot
 
-    def open_snapshot(self, _metadata):
+    def open_snapshot(self, _metadata, **_kwargs):
         context = _SnapshotContext(self.snapshot)
         self.contexts.append(context)
         return context
@@ -217,25 +226,54 @@ class RiidoCachePathCliIntegrationTests(unittest.IsolatedAsyncioTestCase):
                     )
 
             class Judge:
-                provider = "test"
-
-                def __init__(self):
+                def __init__(self, provider="test"):
+                    self.provider = provider
                     self.calls = 0
+                    self.payloads = []
+                    self.params = []
 
-                async def judge(self, _payload, *, before_model_call, **_kwargs):
+                async def judge(self, payload, *, before_model_call, **kwargs):
                     self.calls += 1
+                    stage = kwargs["stage"]
+                    self.payloads.append(payload)
+                    self.params.append(stage.request_params())
+                    request = build_judge_request(payload, stage)
+                    request_evidence = ModelRequestEvidence(
+                        common_input_sha256=canonical_request_sha256(payload),
+                        request_sha256=canonical_request_sha256(request),
+                        input_transform_version="openai-judge-json-v1",
+                        instructions_sha256=hashlib.sha256(stage.instructions.encode()).hexdigest(),
+                        response_model_name=stage.model_name,
+                    )
                     return SimpleNamespace(
                         trace=ModelCallTrace(
-                            provider="test", model_name="judge-v1", succeeded=True,
-                            latency_ms=2, prompt_version="prompt-v1",
+                            provider=self.provider, model_name=stage.model_name, succeeded=True,
+                            latency_ms=2, prompt_version=stage.prompt_version,
+                            request_evidence=request_evidence,
                         ),
                         output_text=_judge_output("CONNECT"),
                         failure=None,
                     )
 
+            class StrictJevJudge(Judge):
+                async def judge(self, payload, *, before_model_call, **kwargs):
+                    stage = kwargs["stage"]
+                    from app import prompts
+
+                    self.asserted_stage = stage
+                    if stage.prompt_version != JEV_PROMPT_VERSION:
+                        raise AssertionError("strict Jev client requires its registered prompt version")
+                    if stage.instructions != prompts.get("judge", JEV_PROMPT_VERSION):
+                        raise AssertionError("strict Jev client requires registered prompt instructions")
+                    if stage.request_params():
+                        raise AssertionError("strict Jev client requires empty request params")
+                    return await super().judge(payload, before_model_call=before_model_call, **kwargs)
+
             class FakeHybridRetriever:
+                calls = 0
+
                 def __init__(self, *_args, **_kwargs):
-                    pass
+                    type(self).calls += 1
 
                 async def search_with_trace(self, query):
                     return HybridSearchCall(
@@ -265,7 +303,11 @@ class RiidoCachePathCliIntegrationTests(unittest.IsolatedAsyncioTestCase):
                 semantic_cache_enabled=True,
                 stage_settings=SimpleNamespace(
                     rewrite=object(),
-                    judge=SimpleNamespace(model_name="judge-v1", prompt_version="prompt-v1"),
+                    judge=StageSettings(
+                        model_name="judge-v1",
+                        prompt_version="prompt-v1",
+                        instructions="synthetic test instructions",
+                    ),
                 ),
             )
             snapshot = SimpleNamespace(
@@ -311,6 +353,291 @@ class RiidoCachePathCliIntegrationTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(1, rewrite.calls)
             self.assertEqual(1, judge.calls)
             self.assertTrue(Path(output.result_path).is_file())
+
+            # The plan binding performs common preparation once, then reuses the
+            # same presentation for each target judge through the child lifecycle.
+            target_prompt = "question-grouping-v7-2"
+            variants_metadata = {
+                "variant-a": replace(
+                    metadata,
+                    run_id="riido-plan-a",
+                    judge_model_version="judge-alt-a",
+                    judge_prompt_version=target_prompt,
+                ),
+                "variant-b": replace(
+                    metadata,
+                    run_id="riido-plan-b",
+                    judge_model_version="judge-alt-b",
+                    judge_prompt_version=JEV_PROMPT_VERSION,
+                ),
+            }
+            request_params = {
+                "reasoning": {"effort": "low"},
+                "max_output_tokens": 128,
+            }
+            specs = {
+                "variant-a": CachePathPlanRunSpec(
+                    variants_metadata["variant-a"],
+                    {"evaluationOnlyJudgeOverride": True, "judgeParams": request_params},
+                ),
+                "variant-b": CachePathPlanRunSpec(
+                    variants_metadata["variant-b"],
+                    {"evaluationOnlyJudgeOverride": True, "judgeParams": {}},
+                ),
+            }
+            variants = tuple(
+                EvaluationVariant(variant_id, spec.metadata.run_id, spec.variant_configuration())
+                for variant_id, spec in specs.items()
+            )
+            plan_manifest = {
+                "group": "cache-path",
+                "goldenVersion": "golden-v1",
+                "sourceCorpusVersion": "corpus-v1",
+                "inputs": {"draftsSha256": drafts_hash, "judgeLabelsSha256": "e" * 64},
+                "turns": [
+                    {
+                        "itemId": "SYN-EXACT", "path": "P1", "turnNo": 1,
+                        "kind": "exact_hit", "expectedExactHit": True, "expectedServed": True,
+                    },
+                    {
+                        "itemId": "SYN-EXACT", "path": "P6", "turnNo": 2,
+                        "kind": "judge", "expectedExactHit": False, "expectedServed": True,
+                        "expectedJudgeDecision": "CONNECT", "expectedSubproblemKeysAny": ["alpha.enable"],
+                    },
+                ],
+            }
+            selection_hash = hashlib.sha256(
+                json.dumps(plan_manifest, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
+            ).hexdigest()
+            variant_a_client = Judge(provider="fake-provider-a")
+            variant_b_client = StrictJevJudge(provider="fake-jev")
+            variant_clients = {
+                "variant-a": variant_a_client,
+                "variant-b": variant_b_client,
+            }
+            client_factory_calls = []
+
+            def select_judge_client(variant, spec):
+                client_factory_calls.append((variant.variant_id, spec.metadata.judge_model_version))
+                return variant_clients[variant.variant_id]
+
+            def validate_judge_client_selection(_variant, spec):
+                if spec.metadata.judge_model_version == "judge-alt-invalid-client":
+                    raise ValueError("judge client selection is not configured")
+
+            shared_preparer, prepared_profile_factory = create_riido_chat_plan_binding(
+                service_key="HELP_CHATBOT",
+                base_metadata=metadata,
+                service_data=service_data,
+                embedder=embedder,
+                query_rewrite_service=rewrite,
+                judge_client=judge,
+                golden_root=registry,
+                judge_client_factory=select_judge_client,
+                judge_client_validator=validate_judge_client_selection,
+                evaluation_only_judge_override=True,
+            )
+
+            # An invalid plan fails preflight before source preparation or the
+            # per-variant transport factory can run.
+            with self.assertRaisesRegex(ValueError, "selection hash"):
+                await execute_cache_path_plan(
+                    plan=EvaluationPlan("riido-invalid-plan", "cache-path", "0" * 64, variants),
+                    manifest=plan_manifest,
+                    run_specs=specs,
+                    store=CachePathRunStore(registry),
+                    plan_store=CachePathPlanStore(registry),
+                    execution_adapter=create_riido_cache_decision_execution_adapter(),
+                    shared_input_preparer=shared_preparer,
+                    prepared_profile_factory=prepared_profile_factory,
+                )
+            self.assertEqual([], client_factory_calls)
+            self.assertEqual(1, rewrite.calls)
+
+            # Provider-specific prompt and params errors are rejected by plan
+            # preflight, before shared rewrite/embedding preparation or client
+            # construction can incur costs.
+            invalid_metadata = replace(
+                variants_metadata["variant-b"], run_id="riido-plan-invalid-params"
+            )
+            invalid_specs = {
+                "variant-invalid": CachePathPlanRunSpec(
+                    invalid_metadata,
+                    {
+                        "evaluationOnlyJudgeOverride": True,
+                        "judgeParams": {"max_output_tokens": 0},
+                    },
+                )
+            }
+            invalid_variants = tuple(
+                EvaluationVariant(key, spec.metadata.run_id, spec.variant_configuration())
+                for key, spec in invalid_specs.items()
+            )
+            invalid_selection_hash = hashlib.sha256(
+                json.dumps(plan_manifest, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
+            ).hexdigest()
+            rewrite_before_invalid_settings = rewrite.calls
+            retrievals_before_invalid_settings = FakeHybridRetriever.calls
+            with self.assertRaisesRegex(ValueError, "max_output_tokens"):
+                await execute_cache_path_plan(
+                    plan=EvaluationPlan("riido-invalid-settings", "cache-path", invalid_selection_hash, invalid_variants),
+                    manifest=plan_manifest,
+                    run_specs=invalid_specs,
+                    store=CachePathRunStore(registry),
+                    plan_store=CachePathPlanStore(registry),
+                    execution_adapter=create_riido_cache_decision_execution_adapter(),
+                    shared_input_preparer=shared_preparer,
+                    prepared_profile_factory=prepared_profile_factory,
+                )
+            self.assertEqual(rewrite_before_invalid_settings, rewrite.calls)
+            self.assertEqual(retrievals_before_invalid_settings, FakeHybridRetriever.calls)
+            self.assertEqual([], client_factory_calls)
+
+            invalid_client_metadata = replace(
+                variants_metadata["variant-b"],
+                run_id="riido-plan-invalid-client",
+                judge_model_version="judge-alt-invalid-client",
+            )
+            invalid_client_specs = {
+                "variant-invalid-client": CachePathPlanRunSpec(
+                    invalid_client_metadata,
+                    {"evaluationOnlyJudgeOverride": True, "judgeParams": {}},
+                )
+            }
+            invalid_client_variants = tuple(
+                EvaluationVariant(key, spec.metadata.run_id, spec.variant_configuration())
+                for key, spec in invalid_client_specs.items()
+            )
+            with self.assertRaisesRegex(ValueError, "client selection"):
+                await execute_cache_path_plan(
+                    plan=EvaluationPlan(
+                        "riido-invalid-client",
+                        "cache-path",
+                        invalid_selection_hash,
+                        invalid_client_variants,
+                    ),
+                    manifest=plan_manifest,
+                    run_specs=invalid_client_specs,
+                    store=CachePathRunStore(registry),
+                    plan_store=CachePathPlanStore(registry),
+                    execution_adapter=create_riido_cache_decision_execution_adapter(),
+                    shared_input_preparer=shared_preparer,
+                    prepared_profile_factory=prepared_profile_factory,
+                )
+            self.assertEqual(rewrite_before_invalid_settings, rewrite.calls)
+            self.assertEqual(retrievals_before_invalid_settings, FakeHybridRetriever.calls)
+            self.assertEqual([], client_factory_calls)
+
+            invalid_prompt_metadata = replace(
+                variants_metadata["variant-b"],
+                run_id="riido-plan-invalid-prompt",
+                judge_prompt_version="unregistered-prompt-v0",
+            )
+            invalid_prompt_specs = {
+                "variant-invalid-prompt": CachePathPlanRunSpec(
+                    invalid_prompt_metadata,
+                    {"evaluationOnlyJudgeOverride": True, "judgeParams": {}},
+                )
+            }
+            invalid_prompt_variants = tuple(
+                EvaluationVariant(key, spec.metadata.run_id, spec.variant_configuration())
+                for key, spec in invalid_prompt_specs.items()
+            )
+            with self.assertRaisesRegex(ValueError, "not registered"):
+                await execute_cache_path_plan(
+                    plan=EvaluationPlan(
+                        "riido-invalid-prompt",
+                        "cache-path",
+                        invalid_selection_hash,
+                        invalid_prompt_variants,
+                    ),
+                    manifest=plan_manifest,
+                    run_specs=invalid_prompt_specs,
+                    store=CachePathRunStore(registry),
+                    plan_store=CachePathPlanStore(registry),
+                    execution_adapter=create_riido_cache_decision_execution_adapter(),
+                    shared_input_preparer=shared_preparer,
+                    prepared_profile_factory=prepared_profile_factory,
+                )
+            self.assertEqual(rewrite_before_invalid_settings, rewrite.calls)
+            self.assertEqual(retrievals_before_invalid_settings, FakeHybridRetriever.calls)
+            self.assertEqual([], client_factory_calls)
+
+            judge_calls_before_plan = judge.calls
+            rewrite_calls_before_plan = rewrite.calls
+            retrievals_before_plan = FakeHybridRetriever.calls
+
+            with patch("evaluation.cache_path_eval.profiles.riido_chat.HybridRetriever", FakeHybridRetriever):
+                plan_output = await execute_cache_path_plan(
+                    plan=EvaluationPlan("riido-plan-variants", "cache-path", selection_hash, variants),
+                    manifest=plan_manifest,
+                    run_specs=specs,
+                    store=CachePathRunStore(registry),
+                    plan_store=CachePathPlanStore(registry),
+                    execution_adapter=create_riido_cache_decision_execution_adapter(),
+                    shared_input_preparer=shared_preparer,
+                    prepared_profile_factory=prepared_profile_factory,
+                )
+
+            self.assertEqual(1, rewrite.calls - rewrite_calls_before_plan)
+            self.assertEqual(1, FakeHybridRetriever.calls - retrievals_before_plan)
+            self.assertEqual(judge_calls_before_plan, judge.calls)
+            self.assertEqual(2, len(plan_output.results))
+            self.assertEqual(
+                [("variant-a", "judge-alt-a"), ("variant-b", "judge-alt-b")],
+                client_factory_calls,
+            )
+            self.assertEqual(1, variant_clients["variant-a"].calls)
+            self.assertEqual(1, variant_clients["variant-b"].calls)
+            self.assertEqual(request_params, variant_a_client.params[0])
+            self.assertEqual({}, variant_b_client.params[0])
+            from app import prompts
+            self.assertEqual(JEV_PROMPT_VERSION, variant_b_client.asserted_stage.prompt_version)
+            self.assertEqual(
+                prompts.get("judge", JEV_PROMPT_VERSION),
+                variant_b_client.asserted_stage.instructions,
+            )
+            self.assertEqual({}, specs["variant-b"].profile_config_dict()["judgeParams"])
+            plan_record = json.loads(Path(plan_output.result_path).read_text(encoding="utf-8"))
+            from app import prompts
+
+            persisted_plan_text = json.dumps(plan_record)
+            self.assertEqual(1, plan_record["preparationEvidence"]["sharedModelCalls"])
+            self.assertEqual(0, plan_record["preparationEvidence"]["sharedEmbeddingCalls"])
+            self.assertNotIn(FIRST_QUESTION, json.dumps(plan_record))
+            self.assertNotIn(FOLLOW_UP_QUESTION, json.dumps(plan_record))
+            self.assertNotIn("synthetic prior answer", json.dumps(plan_record))
+            self.assertNotIn("resolved synthetic followup", json.dumps(plan_record))
+            self.assertNotIn(prompts.get("judge", target_prompt), persisted_plan_text)
+            plan_payloads = [
+                variant_clients["variant-a"].payloads[0],
+                variant_clients["variant-b"].payloads[0],
+            ]
+            self.assertEqual(2, len(plan_payloads))
+            self.assertEqual(
+                {canonical_request_sha256(payload) for payload in plan_payloads},
+                {canonical_request_sha256(plan_payloads[0])},
+            )
+            frozen_payload = plan_payloads[0]
+            frozen_hash = canonical_request_sha256(frozen_payload)
+            for spec in specs.values():
+                child = json.loads((registry / "evals" / "cache-path" / f"{spec.metadata.run_id}.json").read_text())
+                self.assertEqual(["SERVED", "SERVED"], [row["outcome"] for row in child["observations"]], json.dumps(child["observations"], ensure_ascii=False))
+                exact, classified = child["observations"]
+                self.assertEqual(0, exact["modelCalls"])
+                self.assertEqual(0, exact["embeddingCalls"])
+                request_evidence = classified["evidence"]["modelCalls"][0]["requestEvidence"]
+                self.assertEqual(frozen_hash, request_evidence["commonInputSha256"])
+                self.assertEqual(spec.metadata.judge_model_version, classified["evidence"]["modelCalls"][0]["modelName"])
+                self.assertEqual(spec.metadata.judge_prompt_version, classified["evidence"]["modelCalls"][0]["promptVersion"])
+                expected_provider = variant_clients[
+                    "variant-a" if spec.metadata.judge_model_version == "judge-alt-a" else "variant-b"
+                ].provider
+                self.assertEqual(expected_provider, classified["evidence"]["modelCalls"][0]["provider"])
+                self.assertNotIn(prompts.get("judge", target_prompt), json.dumps(child))
+                self.assertNotIn(FIRST_QUESTION, json.dumps(child))
+                self.assertNotIn(FOLLOW_UP_QUESTION, json.dumps(child))
+                self.assertNotIn("synthetic prior answer", json.dumps(child))
 
 
 if __name__ == "__main__":
