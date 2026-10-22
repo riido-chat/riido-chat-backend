@@ -4,6 +4,10 @@
     python -m evaluation.judge_eval run --suite judge-official-A --judge luna --golden-version 1.0.0 --estimate
 
     # 실제 측정 (--live 가 있어야 실제 API 를 부른다)
+    python -m evaluation.judge_eval run --suite judge-official-A --judge claude-haiku --golden-version 1.0.0 \\
+        --criteria criteria/<파일>.md --build-commit <40자리 SHA> --profile-key HELP_CHATBOT \\
+        --profile-revision-id 12 --output evaluation/registry/evals/<실행 ID>/judge-official-A.claude.run1.json --live
+
     python -m evaluation.judge_eval run --suite judge-official-A --judge jev --golden-version 1.0.0 \\
         --criteria criteria/<파일>.md --build-commit <40자리 SHA> --profile-key HELP_CHATBOT \\
         --profile-revision-id 12 --input-price <USD/100만 토큰> \\
@@ -611,14 +615,27 @@ def compare_results(registry: Path, base: Path, candidate: Path, *, holdout: boo
 
 
 def _live_adapter(judge: str) -> Any:
-    from evaluation.judge_eval.clients import JevJudge, LunaJudge, urllib_jev_transport
+    from evaluation.judge_eval.clients import (
+        ClaudeJudge,
+        JevJudge,
+        LunaJudge,
+        urllib_claude_transport,
+        urllib_jev_transport,
+    )
 
     if judge == "luna":
         return LunaJudge()
-    key = os.environ.get("TYPESAFE_API_KEY", "").strip()
+    if judge == "jev":
+        key = os.environ.get("TYPESAFE_API_KEY", "").strip()
+        if not key:
+            raise GoldenError("TYPESAFE_API_KEY 환경 변수가 필요합니다")
+        return JevJudge(urllib_jev_transport(key))
+    if not judge.startswith("claude-"):
+        raise GoldenError(f"지원하지 않는 판별 모델입니다: {judge}")
+    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
     if not key:
-        raise GoldenError("TYPESAFE_API_KEY 환경 변수가 필요합니다")
-    return JevJudge(urllib_jev_transport(key))
+        raise GoldenError("ANTHROPIC_API_KEY 환경 변수가 필요합니다")
+    return ClaudeJudge(urllib_claude_transport(key), variant=variant_by_name(judge))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -629,7 +646,10 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     run.add_argument("--golden-version", required=True, help="기대 골든셋 버전 (manifest 와 다르면 멈춤)")
     run.add_argument("--suite", required=True)
-    run.add_argument("--judge", required=True, choices=sorted(("luna", "jev")))
+    run.add_argument(
+        "--judge", required=True,
+        choices=sorted(("luna", "jev", "claude-haiku", "claude-sonnet", "claude-opus", "claude-fable")),
+    )
     run.add_argument("--output", type=Path)
     run.add_argument("--ledger", type=Path, help="실행 기록부 (기본 <등록부>/evals/run-ledger.jsonl)")
     run.add_argument("--criteria", help="등록부 기준 상대 경로 criteria/<파일>.md")

@@ -35,11 +35,17 @@ from app.question_grouping.payload import build_judge_presentation, split_criter
 from evaluation.judge_eval import cli
 from evaluation.judge_eval import golden as golden_mod
 from evaluation.judge_eval.clients import (
+    CLAUDE_TOOL_NAME,
+    ClaudeJudge,
+    DEFAULT_PRICES,
     JEV_NONE_KEY,
     JevJudge,
     LunaJudge,
     Prices,
+    build_claude_request,
     build_jev_request,
+    request_chars,
+    variant_by_name,
 )
 from evaluation.judge_eval.golden import GoldenError, HoldoutRefused, Label
 from evaluation.judge_eval.inputs import request_sha256
@@ -428,6 +434,27 @@ class FakeJevTransport:
                 "body": {"model": "jev-1.13.0", "answers": {"세부문제": answer}, "usage": {"input_tokens": 3000, "output_tokens": 4}}}
 
 
+class FakeClaudeTransport:
+    def __init__(self, result=None, statuses=None):
+        self.result = result or {"decision": "SEPARATE", "subproblemKey": None, "confidence": 0.99}
+        self.requests: List[Dict[str, Any]] = []
+        self.statuses = list(statuses or [])
+
+    async def __call__(self, request):
+        self.requests.append(request)
+        if self.statuses:
+            return {"ok": False, "httpStatus": self.statuses.pop(0)}
+        return {
+            "ok": True,
+            "httpStatus": 200,
+            "body": {
+                "model": "claude-haiku-5-5",
+                "content": [{"type": "tool_use", "name": CLAUDE_TOOL_NAME, "input": self.result}],
+                "usage": {"input_tokens": 2600, "output_tokens": 24, "cache_read_input_tokens": 100},
+            },
+        }
+
+
 def luna_adapter(openai=None):
     return LunaJudge(openai_client=openai or FakeOpenAI())
 
@@ -488,8 +515,10 @@ class InputIdentityTest(RegistryCase):
     def test_both_models_receive_the_same_payload_bytes(self):
         openai = FakeOpenAI()
         transport = FakeJevTransport()
+        claude_transport = FakeClaudeTransport()
         luna = self.run_live(self.config("luna", name="luna"), luna_adapter(openai))
         jev = self.run_live(self.config("jev", name="jev"), jev_adapter(transport))
+        claude = self.run_live(self.config("claude-haiku", name="claude"), ClaudeJudge(claude_transport))
 
         self.assertEqual(luna["schemaVersion"], "2")
         self.assertEqual(
@@ -503,6 +532,15 @@ class InputIdentityTest(RegistryCase):
         jev_raw = [json.loads(l) for l in (self.tmp / "out/jev.raw.jsonl").read_text().splitlines()]
         self.assertEqual([(l["itemId"], l["inputSha256"]) for l in luna_raw], [(l["itemId"], l["inputSha256"]) for l in jev_raw])
         self.assertEqual(luna["summary"]["inputs"]["inputSetSha256"], jev["summary"]["inputs"]["inputSetSha256"])
+        self.assertEqual(luna["summary"]["inputs"]["inputSetSha256"], claude["summary"]["inputs"]["inputSetSha256"])
+
+        claude_raw = [json.loads(l) for l in (self.tmp / "out/claude.raw.jsonl").read_text().splitlines()]
+        judged_turns = [turn for turn in cli.prepare(self.config("claude-haiku"), live=True).turns if turn.judged]
+        self.assertEqual(
+            [request["messages"][0]["content"].encode("utf-8") for request in claude_transport.requests],
+            [turn.payload_bytes for turn in judged_turns],
+        )
+        self.assertEqual([line.get("inputSha256") for line in claude_raw], [line.get("inputSha256") for line in luna_raw])
 
         # luna 가 받은 input 문자열의 해시가 기록한 입력 해시와 같고, 동결 요청 해시와도 같다
         for line in luna_raw:
@@ -718,14 +756,88 @@ class RunCapTest(RegistryCase):
 # ---------------------------------------------------------------- 추정
 
 
+class ClaudeAdapterTest(RegistryCase):
+    def test_variants_record_distinct_models_and_tier_prices(self):
+        names = ("claude-haiku", "claude-sonnet", "claude-opus", "claude-fable")
+        models = [variant_by_name(name).model for name in names]
+        self.assertEqual(len(models), len(set(models)))
+        self.assertEqual(
+            [(DEFAULT_PRICES[name].input, DEFAULT_PRICES[name].output) for name in names],
+            [(0.10, 0.50), (2.0, 10.0), (4.0, 20.0), (10.0, 50.0)],
+        )
+        self.assertEqual(
+            [variant_by_name(name).settings["toolChoice"] for name in names],
+            ["tool", "auto", "auto", "auto"],
+        )
+        requests = [
+            build_claude_request(
+                b"{}", model=variant_by_name(name).model,
+                force_tool=variant_by_name(name).settings["toolChoice"] == "tool",
+            )
+            for name in names
+        ]
+        self.assertEqual(
+            [request["tool_choice"] for request in requests],
+            [{"type": "tool", "name": CLAUDE_TOOL_NAME}, {"type": "auto"}, {"type": "auto"}, {"type": "auto"}],
+        )
+        self.assertTrue(all(request["tools"][0]["strict"] for request in requests))
+
+    def test_mapping_rejects_unknown_keys_and_inconsistent_decisions(self):
+        turn = next(turn for turn in cli.prepare(self.config("claude-haiku"), live=True).turns if turn.judged)
+        for result, reason in (
+            ({"decision": "CONNECT", "subproblemKey": "invented", "confidence": 0.99}, "UNKNOWN_SUBPROBLEM_KEY"),
+            ({"decision": "SEPARATE", "subproblemKey": turn.presented_keys[0], "confidence": 0.99}, "INCONSISTENT_RESULT"),
+            ({"decision": "CONNECT", "subproblemKey": turn.presented_keys[0], "confidence": 1.1}, "INVALID_CONFIDENCE"),
+        ):
+            with self.subTest(result=result):
+                outcome = asyncio.run(ClaudeJudge(FakeClaudeTransport(result)).judge(turn))
+                self.assertEqual((outcome.decision, outcome.subproblem_key, outcome.invalid_reason),
+                                 ("UNCLASSIFIED", None, reason))
+
+    def test_usage_latency_attempts_and_safe_error_recording(self):
+        turn = next(turn for turn in cli.prepare(self.config("claude-haiku"), live=True).turns if turn.judged)
+        transport = FakeClaudeTransport(statuses=[503])
+        outcome = asyncio.run(ClaudeJudge(transport).judge(turn))
+        self.assertEqual(outcome.attempts, 2)
+        self.assertEqual((outcome.usage.input_tokens, outcome.usage.output_tokens, outcome.usage.cached_input_tokens),
+                         (2600, 24, 100))
+        self.assertIsNotNone(outcome.latency_ms)
+
+        class SecretFailure:
+            async def __call__(self, request):
+                return {"ok": False, "httpStatus": None, "error": "sk-secret-value"}
+
+        failed = asyncio.run(ClaudeJudge(SecretFailure()).judge(turn))
+        self.assertEqual(failed.error, "Claude 호출 실패: transport failure")
+        self.assertNotIn("sk-secret", failed.error)
+
+    def test_request_preserves_utf8_payload_bytes_and_cli_selects_claude(self):
+        turn = next(turn for turn in cli.prepare(self.config("claude-haiku"), live=True).turns if turn.judged)
+        request = build_claude_request(turn.payload_bytes, model="claude-haiku-5-5")
+        self.assertEqual(request["messages"][0]["content"].encode("utf-8"), turn.payload_bytes)
+        tool_overhead = json.dumps(
+            {"tools": request["tools"], "tool_choice": request["tool_choice"]}, ensure_ascii=False
+        )
+        self.assertEqual(
+            request_chars("claude-haiku", turn),
+            len(request["system"]) + len(request["messages"][0]["content"]) + len(tool_overhead),
+        )
+        args = cli.build_parser().parse_args(["run", "--suite", SUITE_A, "--golden-version", GOLDEN_VERSION,
+                                              "--judge", "claude-haiku", "--estimate"])
+        self.assertEqual(args.judge, "claude-haiku")
+
+
 class EstimateTest(RegistryCase):
     def test_estimate_counts_calls_without_calling_or_logging(self):
         with mock.patch.object(LunaJudge, "judge", side_effect=AssertionError("모델을 부름")), \
-                mock.patch.object(JevJudge, "judge", side_effect=AssertionError("모델을 부름")):
+                mock.patch.object(JevJudge, "judge", side_effect=AssertionError("모델을 부름")), \
+                mock.patch.object(ClaudeJudge, "judge", side_effect=AssertionError("모델을 부름")):
             luna = cli.run_estimate(self.config("luna"))
             jev = cli.run_estimate(self.config("jev"))
+            claude = cli.run_estimate(self.config("claude-haiku"))
         self.assertEqual((luna["turns"], luna["calls"], luna["skippedTurns"], luna["callsUpperWithRetries"]), (6, 5, 1, 10))
         self.assertEqual(jev["calls"], 5)
+        self.assertEqual(claude["calls"], 5)
         self.assertGreater(luna["estimatedInputTokens"], 0)
         self.assertGreater(luna["upperUsd"], luna["estimatedUsd"])
         self.assertEqual(luna["payloadCheck"], {"judgedTurns": 5, "verified": 5, "unverified": 0})
@@ -903,7 +1015,12 @@ class SchemaConformanceTest(RegistryCase):
     def test_results_conform_to_registry_schema(self):
         golden = golden_mod.open_golden(self.root, GOLDEN_VERSION)
         checker = cli.load_schema_checker(golden)
-        for judge, adapter in (("luna", luna_adapter()), ("jev", jev_adapter())):
+        adapters = [("luna", luna_adapter()), ("jev", jev_adapter())]
+        adapters.extend(
+            (name, ClaudeJudge(FakeClaudeTransport(), variant=variant_by_name(name)))
+            for name in ("claude-haiku", "claude-sonnet", "claude-opus", "claude-fable")
+        )
+        for judge, adapter in adapters:
             result = self.run_live(self.config(judge, name=judge), adapter)
             self.assertEqual(checker(result), [])
         broken = dict(result, suite="judge-unknown")
