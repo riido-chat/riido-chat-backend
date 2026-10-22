@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://riido-evals.invalid/schemas/evaluation-plan-state.schema.json",
+  "title": "Private evaluation plan lifecycle state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "planId", "group", "selectionSha256", "planSha256", "status", "variantIds", "completedVariants"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "planId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$"},
+    "group": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$"},
+    "selectionSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "planSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "inputSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "preparationEvidence": {"$ref": "#/$defs/metadataObject"},
+    "status": {"enum": ["RUNNING", "SUCCEEDED", "FAILED", "FINALIZATION_INCOMPLETE"]},
+    "variantIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$"}
+    },
+    "completedVariants": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/resultReference"}
+    },
+    "failureStage": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,99}$"},
+    "errorType": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,99}$"},
+    "failedVariantId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"enum": ["FAILED", "FINALIZATION_INCOMPLETE"]}}},
+      "then": {"required": ["failureStage", "errorType"]}
+    },
+    {
+      "if": {"properties": {"status": {"enum": ["RUNNING", "SUCCEEDED"]}}},
+      "then": {"not": {"anyOf": [{"required": ["failureStage"]}, {"required": ["errorType"]}]}}
+    }
+  ],
+  "$defs": {
+    "metadataValue": {
+      "oneOf": [
+        {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,199}$"},
+        {"type": "number"},
+        {"type": "boolean"},
+        {"type": "null"},
+        {"type": "array", "items": {"$ref": "#/$defs/metadataValue"}},
+        {"$ref": "#/$defs/metadataObject"}
+      ]
+    },
+    "metadataObject": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$": {"$ref": "#/$defs/metadataValue"}
+      },
+      "additionalProperties": false
+    },
+    "resultReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["variantId", "runId", "resultPath", "resultSha256"],
+      "properties": {
+        "variantId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$"},
+        "runId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$"},
+        "resultPath": {"type": "string", "minLength": 1},
+        "resultSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    }
+  }
+}

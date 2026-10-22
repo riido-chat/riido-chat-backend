@@ -110,6 +110,39 @@ rewrite 입력으로 제공한다. 미지원된 prior-turn 상태는 fail closed
 Factory에는 source corpus version, 입력 provenance 해시, `{itemId, turnNo}` 참조만 전달하고,
 runtime judge 입력에서는 `path`, `kind`, expected labels를 제외한다.
 
+## 고정 입력 평가 계획
+
+`plan.py`의 `execute_cache_path_plan`은 하나의 고정 manifest와 N개의 cache-path run 설정을
+`evaluation.core.plan.run_evaluation_plan`에 연결한다. 계획과 모든 child run ID를 사전 검증하고,
+parent plan은 shared input 준비 전에 원자적으로 예약한다. 각 child run ID는 기존 단일 실행 lifecycle에
+들어갈 때 따로 예약되며 plan 전체의 원자성은 보장하지 않는다. 중간 child 예약 경합은 안전하게 실패하고
+기존 결과를 보존하지만, 그 전에 발생한 shared preparation 비용은 되돌릴 수 없다. shared input preparer는 label-free reference manifest를 한 번만 받고,
+variant별 prepared profile factory에는 해당 variant/spec, 같은 immutable `PreparedCacheInputs`,
+그리고 같은 reference manifest를 전달한다. factory는 런타임 질문과 judge 입력을 다시 읽거나 만들지 말고,
+bundle의 `payload_for_turn`에서 준비된 값을 가져와야 한다. payload 내부는 canonical JSON snapshot이고
+접근할 때마다 새 복사본을 돌려준다. expected labels는 scoring manifest에만 남는다.
+
+각 variant는 기존 `execute_cache_path_run`과 `CacheDecisionExecutionAdapter`를 사용하므로 child run은
+기존 checkpoint와 `evals/cache-path/<run-id>.json` 결과 형식을 유지한다. plan ledger는 child 결과
+경로와 SHA-256만 연결하며 prepared input 값은 기록하지 않는다. 공유 준비 비용은 parent의
+`preparationEvidence`에 기록하고 child별 모델·임베딩 횟수에 중복 합산하지 않는다. 준비가 실패해
+prepared bundle을 반환하기 전에 끝나면 현재 port는 실패 형식만 기록할 수 있어 그 시도의 상세 비용은
+ledger에 남지 않는다.
+
+parent variant configuration에는 judge model/prompt version, `profileConfigSha256`, 그리고 복원 가능한
+`profileConfig` snapshot이 기록된다. `profileConfig`는 threshold와 같이 실행에 영향을 주는 안전한 JSON
+설정만 담는다. credential, prompt 본문, 임의 텍스트 또는 절대 경로 같은 data locator는 넣지 말고, 필요한
+data source는 shared preparer 주입 경계에서 선택한다.
+
+실제 service/DB snapshot, judge/embedding client와 provider bootstrap은 이 모듈 바깥에서 명시적으로
+주입해야 한다. prepared profile factory는 query rewrite와 embedding을 다시 호출하지 않고 준비된 query와
+후보를 사용해야 한다. DB gate view 역시 injected data 경계에서 읽는다. 입력 payload hash는 전달된
+payload를 고정하지만 DB 전체 view가 여러 run에서 같은 시점임을 보장하지 않는다. 현재는 고정 입력
+capable factory와 shared-input preparer의 경계만 제공하며 production Jev transport 또는 credentials
+bootstrap을 제공하지 않는다. `compare_cache_path_plan`은 완료 plan의
+child hash를 확인한 뒤 기존 summary counter를 읽기 전용으로 보여준다. 자동으로 우승 variant를 고르거나
+통계적 유의성을 주장하지 않는다.
+
 ## 프로필 선택 실행 경계
 
 `profile_registry.py`는 service key를 factory에 연결하며, factory는 동기 또는 async일 수 있다.
