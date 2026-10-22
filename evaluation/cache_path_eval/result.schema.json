@@ -7,6 +7,16 @@
   "properties": {
     "resultSchemaVersion": {"const": 1},
     "group": {"const": "cache-path"},
+    "evaluationGroup": {
+      "type": "object", "additionalProperties": false,
+      "required": ["groupId", "groupVersion", "groupSha256", "groupFileSha256"],
+      "properties": {
+        "groupId": {"const": "cache-path"},
+        "groupVersion": {"type": "string", "minLength": 1},
+        "groupSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "groupFileSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
     "runMode": {"const": "offline-observations"},
     "goldenVersion": {"type": "string"},
     "sourceCorpusVersion": {"type": ["string", "null"]},
@@ -17,6 +27,8 @@
       "properties": {
         "draftsSha256": {"type": ["string", "null"]},
         "judgeLabelsSha256": {"type": ["string", "null"]},
+        "canonicalItemsSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "sourceHtmlSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
         "observationsSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
       }
     },

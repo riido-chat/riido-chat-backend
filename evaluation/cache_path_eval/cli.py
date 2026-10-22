@@ -70,6 +70,14 @@ async def run_cache_path_cli(
 ) -> Any:
     metadata, profile_config = load_run_config(config_path)
     manifest = _load_json(manifest_path, "frozen manifest")
+    if isinstance(manifest, dict) and manifest.get("groupId") == "cache-path":
+        from evaluation.cache_path_eval.golden_inputs import load_canonical_cache_path_manifest
+
+        manifest = load_canonical_cache_path_manifest(
+            golden_root=registry_root,
+            group_path=manifest_path,
+            metadata=metadata,
+        )
     if not isinstance(manifest, dict) or manifest.get("group") != "cache-path":
         raise ValueError("선택 manifest가 cache-path 형식이 아닙니다.")
     if manifest.get("goldenVersion") != metadata.golden_version:

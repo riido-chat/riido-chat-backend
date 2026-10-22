@@ -60,12 +60,10 @@ def project_reference_manifest(manifest: Mapping[str, Any]) -> dict[str, Any]:
     }
     if "sourceCorpusVersion" in manifest:
         projected["sourceCorpusVersion"] = manifest["sourceCorpusVersion"]
+    if "evaluationGroup" in manifest:
+        projected["evaluationGroup"] = dict(manifest["evaluationGroup"])
     if "inputs" in manifest:
-        inputs = manifest["inputs"]
-        projected["inputs"] = {
-            "draftsSha256": inputs["draftsSha256"],
-            "judgeLabelsSha256": inputs["judgeLabelsSha256"],
-        }
+        projected["inputs"] = dict(manifest["inputs"])
     return projected
 
 

@@ -28,6 +28,7 @@ _MANIFEST_TURN_FIELDS = {
     "expectedServed",
     "expectedJudgeDecision",
     "expectedSubproblemKeysAny",
+    "expectedSelectedTurnNos",
 }
 
 
@@ -163,6 +164,7 @@ class CachePathRunStore:
         record = {
             "schemaVersion": 1,
             "group": "cache-path",
+            **({"evaluationGroup": dict(manifest["evaluationGroup"])} if "evaluationGroup" in manifest else {}),
             "runId": metadata.run_id,
             "goldenVersion": metadata.golden_version,
             "goldenCommit": metadata.golden_commit,
@@ -170,6 +172,11 @@ class CachePathRunStore:
             "inputs": {
                 "draftsSha256": manifest_inputs["draftsSha256"],
                 "judgeLabelsSha256": manifest_inputs["judgeLabelsSha256"],
+                **{
+                    key: manifest_inputs[key]
+                    for key in ("canonicalItemsSha256", "sourceHtmlSha256")
+                    if key in manifest_inputs
+                },
                 "observationsSha256": observation_sha256,
             },
             "target": {
@@ -208,10 +215,30 @@ class CachePathRunStore:
         if not isinstance(turns, list) or not turns:
             raise CachePathStoreError("manifest에 문항 턴 목록이 없습니다.")
         manifest_inputs = manifest.get("inputs")
-        if not isinstance(manifest_inputs, dict) or set(manifest_inputs) != {"draftsSha256", "judgeLabelsSha256"}:
+        allowed_input_fields = {
+            "draftsSha256", "judgeLabelsSha256", "canonicalItemsSha256", "sourceHtmlSha256"
+        }
+        if (
+            not isinstance(manifest_inputs, dict)
+            or not {"draftsSha256", "judgeLabelsSha256"}.issubset(manifest_inputs)
+            or set(manifest_inputs) - allowed_input_fields
+        ):
             raise CachePathStoreError("manifest 입력 해시가 없거나 형식이 잘못되었습니다.")
         if any(value is not None and (not isinstance(value, str) or not _SHA64.fullmatch(value)) for value in manifest_inputs.values()):
             raise CachePathStoreError("manifest 입력 해시 형식이 잘못되었습니다.")
+        group_provenance = manifest.get("evaluationGroup")
+        if group_provenance is not None:
+            if (
+                not isinstance(group_provenance, Mapping)
+                or set(group_provenance) != {"groupId", "groupVersion", "groupSha256", "groupFileSha256"}
+                or group_provenance.get("groupId") != "cache-path"
+                or not isinstance(group_provenance.get("groupVersion"), str)
+                or not _SHA64.fullmatch(str(group_provenance.get("groupSha256", "")))
+                or not _SHA64.fullmatch(str(group_provenance.get("groupFileSha256", "")))
+                or not _SHA64.fullmatch(str(manifest_inputs.get("canonicalItemsSha256", "")))
+                or not _SHA64.fullmatch(str(manifest_inputs.get("sourceHtmlSha256", "")))
+            ):
+                raise CachePathStoreError("정본 평가 그룹 provenance가 잘못되었습니다.")
         expected: set[tuple[str, int]] = set()
         for turn in turns:
             if not isinstance(turn, dict):
@@ -239,6 +266,14 @@ class CachePathRunStore:
                 keys = turn.get("expectedSubproblemKeysAny")
                 if not isinstance(keys, list) or any(not isinstance(value, str) for value in keys):
                     raise CachePathStoreError("manifest 세부 문제 key가 잘못되었습니다.")
+            if "expectedSelectedTurnNos" in turn:
+                selected = turn["expectedSelectedTurnNos"]
+                if (
+                    not isinstance(selected, list)
+                    or any(isinstance(value, bool) or not isinstance(value, int) or value < 1 for value in selected)
+                    or selected != sorted(set(selected))
+                ):
+                    raise CachePathStoreError("manifest 문맥 선택 기대값이 잘못되었습니다.")
             key = (item_id, turn_no)
             if key in expected:
                 raise CachePathStoreError("manifest에 중복 문항 턴이 있습니다.")
