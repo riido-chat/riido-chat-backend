@@ -270,6 +270,18 @@ python -m unittest discover -s tests -v
 - `tests/` 의 `*_db.py` 는 DB 통합 테스트로 `DATABASE_URL` 과 마이그레이션이 준비돼야 실행된다. 검색·생성·멀티턴 평가용 테스트와 Chat API·DB E2E 수용 baseline(`test_chat_acceptance_db.py`)도 같은 디렉터리에 있다.
 - `evaluation/` 에는 평가 스크립트·데이터와 `baselines/` 재실행 기록이 있다.
 
+캐시 그룹 판별 모델 비교에서 호출 오류가 난 턴만 다시 시도하려면, 같은 모델의 전체 실행 결과를 원본으로 지정한다. 원본과 그룹 hash, 문항·턴 ID, 동결 입력 hash를 확인한 뒤 오류 행만 한 번 호출하고, 별도의 재시도 기록과 병합된 전체 결과를 비공개 `evaluation/registry/evals/cache-path/` 아래에 저장한다. 기존 결과 파일은 덮어쓰지 않는다. Claude 재시도는 공유 $20 예산 장부에 오류 턴의 상한 비용을 먼저 예약하며, 출력 한도 1024 토큰과 입력 토큰 1.15 안전 계수를 적용한다.
+
+```bash
+python -m evaluation.judge_eval.cache_group retry-errors \
+  --judge claude-haiku \
+  --source evaluation/registry/evals/cache-path/claude-haiku-full.json \
+  --output evaluation/registry/evals/cache-path/claude-haiku-retry.json \
+  --merged-output evaluation/registry/evals/cache-path/claude-haiku-merged.json
+```
+
+`--source`는 `run`으로 만든 전체 결과여야 하며, 재시도 JSON과 `.raw.jsonl`, 병합 결과가 이미 있으면 실행을 거부한다.
+
 ### 배포 자동화
 
 ```text

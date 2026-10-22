@@ -4,6 +4,10 @@
     python -m evaluation.judge_eval run --suite judge-official-A --judge luna --golden-version 1.0.0 --estimate
 
     # 실제 측정 (--live 가 있어야 실제 API 를 부른다)
+    python -m evaluation.judge_eval run --suite judge-official-A --judge claude-haiku --golden-version 1.0.0 \\
+        --criteria criteria/<파일>.md --build-commit <40자리 SHA> --profile-key HELP_CHATBOT \\
+        --profile-revision-id 12 --output evaluation/registry/evals/<실행 ID>/judge-official-A.claude.run1.json --live
+
     python -m evaluation.judge_eval run --suite judge-official-A --judge jev --golden-version 1.0.0 \\
         --criteria criteria/<파일>.md --build-commit <40자리 SHA> --profile-key HELP_CHATBOT \\
         --profile-revision-id 12 --input-price <USD/100만 토큰> \\
@@ -18,13 +22,15 @@
 - 보류 시험셋 묶음(judge-official-B 등)은 --holdout 과 확정해 커밋한 criteria/ 파일이 모두 있어야 연다.
   추정과 채점도 같다. 보고용 묶음의 실제 측정은 확정한 criteria/ 파일이 있어야 한다.
 - (묶음, 모델, 골든셋 버전) 마다 실행 2회까지. 1회차가 주 결과다. 실행은 모델을 부르기 전에 기록부에 남긴다.
-- payload 확인(strict, 기본): 재구성한 판별 요청 해시가 동결 payloadSha256 과 다른 턴이 있으면 멈춘다.
-  record 는 진행하되 턴마다 확인 여부를 남긴다. 어느 쪽을 쓸지는 사전 등록 기준에 적는다.
+- 입력 확인(strict, 기본): 동결 payloadSha256 과 요청 입력 해시가 다른 턴이 있거나
+  운영 지시문 해시가 동결 환경과 다르면 멈춘다. `instructions` 는 동결 당시 별도 해시로 확인한다.
+  record 는 입력 해시 불일치를 기록하고 진행한다. 사용 여부는 사전 등록 기준에 적는다.
 - 결과 파일은 덮어쓰지 않는다. 쓰기 전에 등록부의 eval-result.schema.json 으로 검사한다.
 """
 
 import argparse
 import asyncio
+import hashlib
 import importlib.util
 import json
 import os
@@ -51,6 +57,7 @@ from evaluation.judge_eval.clients import (
 from evaluation.judge_eval.golden import Golden, GoldenError, HoldoutRefused, Label, Selection, TurnKey
 from evaluation.judge_eval.inputs import PreparedTurn, prepare_turns
 from evaluation.judge_eval.scoring import TurnScore, compare, score_turn, summarize
+from app.question_grouping.prompt_v7_2 import JUDGE_INSTRUCTIONS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REGISTRY = PROJECT_ROOT / "evaluation" / "registry"
@@ -151,6 +158,10 @@ def run_estimate(config: RunConfig) -> Dict[str, Any]:
             "goldenVersion": prepared.golden.version,
             "layers": prepared.selection.layers,
             "payloadCheck": payload_status(prepared.turns),
+            "instructionsSha256Verified": (
+                (prepared.environment.get("judge") or {}).get("instructionsSha256")
+                == hashlib.sha256(JUDGE_INSTRUCTIONS.encode("utf-8")).hexdigest()
+            ),
         }
     )
     return result
@@ -296,6 +307,10 @@ def _check_live_preconditions(config: RunConfig, golden: Golden) -> None:
     ):
         raise GoldenError("--profile-revision-id 에 서빙 중인 양의 프로필 버전 ID를 준다")
     environment = golden_mod.load_environment(golden)
+    expected_instructions_sha256 = (environment.get("judge") or {}).get("instructionsSha256")
+    actual_instructions_sha256 = hashlib.sha256(JUDGE_INSTRUCTIONS.encode("utf-8")).hexdigest()
+    if expected_instructions_sha256 != actual_instructions_sha256:
+        raise GoldenError("현재 판별 지시문이 동결 환경의 instructionsSha256 과 다릅니다")
     if _baseline_build_commit(environment) is None:
         raise GoldenError("동결 입력 환경에 기준 앱 커밋 SHA가 없습니다")
     index_version_id = (environment.get("index") or {}).get("indexVersionId")
@@ -380,7 +395,7 @@ async def execute_run(config: RunConfig, adapter: Optional[Any]) -> Dict[str, An
     if config.payload_check == "strict" and status["unverified"]:
         raise GoldenError(
             f"재구성한 판별 요청 {status['unverified']}/{status['judgedTurns']}턴이 동결 payloadSha256 과 다릅니다. "
-            "동결 보충 파일(문서 outline, 정본 적용 제외 규칙)을 등록하거나, 사전 등록 기준에 적고 --payload-check record 로 돌린다"
+            "동결 입력과 보충 파일을 확인하거나, 사전 등록 기준에 적고 --payload-check record 로 돌린다"
         )
     assert config.output is not None
     ledger_mod.append_run(
@@ -610,15 +625,38 @@ def compare_results(registry: Path, base: Path, candidate: Path, *, holdout: boo
 # ---------------------------------------------------------------- 명령줄
 
 
-def _live_adapter(judge: str) -> Any:
-    from evaluation.judge_eval.clients import JevJudge, LunaJudge, urllib_jev_transport
+def _live_adapter(
+    judge: str,
+    *,
+    max_attempts: Optional[int] = None,
+    max_output_tokens: Optional[int] = None,
+) -> Any:
+    from evaluation.judge_eval.clients import (
+        ClaudeJudge,
+        JevJudge,
+        LunaJudge,
+        urllib_claude_transport,
+        urllib_jev_transport,
+    )
 
     if judge == "luna":
-        return LunaJudge()
-    key = os.environ.get("TYPESAFE_API_KEY", "").strip()
+        return LunaJudge(max_attempts=max_attempts)
+    if judge == "jev":
+        key = os.environ.get("TYPESAFE_API_KEY", "").strip()
+        if not key:
+            raise GoldenError("TYPESAFE_API_KEY 환경 변수가 필요합니다")
+        return JevJudge(urllib_jev_transport(key), max_attempts=max_attempts)
+    if not judge.startswith("claude-"):
+        raise GoldenError(f"지원하지 않는 판별 모델입니다: {judge}")
+    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
     if not key:
-        raise GoldenError("TYPESAFE_API_KEY 환경 변수가 필요합니다")
-    return JevJudge(urllib_jev_transport(key))
+        raise GoldenError("ANTHROPIC_API_KEY 환경 변수가 필요합니다")
+    return ClaudeJudge(
+        urllib_claude_transport(key),
+        variant=variant_by_name(judge),
+        max_attempts=max_attempts,
+        max_output_tokens=max_output_tokens,
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -629,7 +667,10 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     run.add_argument("--golden-version", required=True, help="기대 골든셋 버전 (manifest 와 다르면 멈춤)")
     run.add_argument("--suite", required=True)
-    run.add_argument("--judge", required=True, choices=sorted(("luna", "jev")))
+    run.add_argument(
+        "--judge", required=True,
+        choices=sorted(("luna", "jev", "claude-haiku", "claude-sonnet", "claude-opus", "claude-fable")),
+    )
     run.add_argument("--output", type=Path)
     run.add_argument("--ledger", type=Path, help="실행 기록부 (기본 <등록부>/evals/run-ledger.jsonl)")
     run.add_argument("--criteria", help="등록부 기준 상대 경로 criteria/<파일>.md")

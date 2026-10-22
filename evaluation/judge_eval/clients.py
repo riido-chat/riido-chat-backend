@@ -16,6 +16,8 @@
 """
 
 import asyncio
+import copy
+import hashlib
 import json
 import time
 import urllib.error
@@ -32,8 +34,10 @@ from app.question_grouping.constants import (
     JUDGE_PROVIDER,
     JUDGE_REASONING_EFFORT,
 )
-from app.question_grouping.decision import build_turn_judgment
+from app.question_grouping.decision import build_turn_judgment, normalize_judgment
 from app.question_grouping.judge_client import QuestionJudgeClient, build_judge_request
+from app.core.stage_settings import StageSettings
+from app.question_grouping.prompt_v7_2 import JUDGE_INSTRUCTIONS, JUDGE_OUTPUT_SCHEMA
 from evaluation.judge_eval.inputs import PreparedTurn, request_sha256
 
 JEV_RULES_PATH = Path(__file__).with_name("jev_rules_set_p.json")
@@ -50,6 +54,35 @@ JEV_NONE_TEXT = "위 어느 세부 문제에도 해당하지 않음"
 JEV_MAX_ATTEMPTS = 2
 JEV_RETRY_DELAY_SECONDS = 2.0
 JEV_TIMEOUT_SECONDS = 90.0
+
+# This is a model comparison, not the currently configured production default.
+# Keep the prompt and judgment normalization on the production path while pinning
+# the requested OpenAI comparison model explicitly.
+LUNA_COMPARISON_MODEL = "gpt-6-luna"
+LUNA_COMPARISON_STAGE = StageSettings(
+    model_name=LUNA_COMPARISON_MODEL,
+    prompt_version=JUDGE_PROMPT_VERSION,
+    instructions=JUDGE_INSTRUCTIONS,
+    params={
+        "reasoning": {"effort": JUDGE_REASONING_EFFORT},
+        "max_output_tokens": JUDGE_MAX_OUTPUT_TOKENS,
+    },
+)
+
+CLAUDE_ENDPOINT = "https://api.anthropic.com/v1/messages"
+CLAUDE_PROMPT_VERSION = JUDGE_PROMPT_VERSION
+CLAUDE_MAX_ATTEMPTS = 2
+CLAUDE_MAX_OUTPUT_TOKENS = 256
+CLAUDE_TIMEOUT_SECONDS = 90.0
+CLAUDE_API_VERSION = "2023-06-01"
+CLAUDE_TOOL_NAME = "submit_judge_result"
+CLAUDE_SYSTEM = JUDGE_INSTRUCTIONS
+# Anthropic's strict tool schema rejects numeric minimum/maximum constraints.
+# Keep the same fields and production normalization, but enforce confidence bounds
+# in normalize_judgment (which already rejects non-finite/out-of-range values).
+CLAUDE_RESULT_SCHEMA: Dict[str, Any] = copy.deepcopy(JUDGE_OUTPUT_SCHEMA)
+CLAUDE_RESULT_SCHEMA["properties"]["confidence"].pop("minimum", None)
+CLAUDE_RESULT_SCHEMA["properties"]["confidence"].pop("maximum", None)
 
 
 @dataclass(frozen=True)
@@ -77,7 +110,7 @@ VARIANTS: Dict[str, Variant] = {
     "luna": Variant(
         name="luna",
         provider=JUDGE_PROVIDER,
-        model=JUDGE_MODEL,
+        model=LUNA_COMPARISON_MODEL,
         prompt_version=JUDGE_PROMPT_VERSION,
         reasoning_effort=JUDGE_REASONING_EFFORT,
         max_attempts=JUDGE_MAX_ATTEMPTS,
@@ -111,6 +144,47 @@ VARIANTS: Dict[str, Variant] = {
         },
     ),
 }
+
+# Anthropic documents forced tool choice as unsupported for Sonnet 5.5, Opus 5.5, and Fable 5.1; auto is required there.
+for _claude_name, _claude_model in (
+    ("claude-haiku", "claude-haiku-5-5"),
+    ("claude-sonnet", "claude-sonnet-5-5"),
+    ("claude-opus", "claude-opus-5-5"),
+    ("claude-fable", "claude-fable-5-1"),
+):
+    VARIANTS[_claude_name] = Variant(
+        name=_claude_name,
+        provider="anthropic",
+        model=_claude_model,
+        prompt_version=CLAUDE_PROMPT_VERSION,
+        reasoning_effort=None,
+        max_attempts=CLAUDE_MAX_ATTEMPTS,
+        settings={
+            "endpoint": CLAUDE_ENDPOINT,
+            "apiVersion": CLAUDE_API_VERSION,
+            "primitive": "tool_choice",
+            "toolChoice": "tool" if _claude_name == "claude-haiku" else "auto",
+            "tool": CLAUDE_TOOL_NAME,
+            "maxOutputTokens": CLAUDE_MAX_OUTPUT_TOKENS,
+            "maxAttempts": CLAUDE_MAX_ATTEMPTS,
+            "inputSemantics": "production v7.2 instructions and output schema; prepared payload JSON bytes preserved as the sole user message",
+            "systemPromptSha256": hashlib.sha256(CLAUDE_SYSTEM.encode("utf-8")).hexdigest(),
+            "toolSchemaSha256": hashlib.sha256(
+                json.dumps(
+                    CLAUDE_RESULT_SCHEMA,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest(),
+            "decisionMapping": {
+                "CONNECT": "presented subproblem key only",
+                "SEPARATE": "no applicable presented candidate",
+                "UNCLASSIFIED": "ambiguous, insufficient, or invalid result",
+            },
+        },
+    )
+del _claude_name, _claude_model
 
 
 def variant_by_name(name: str) -> Variant:
@@ -157,16 +231,21 @@ class JudgeOutcome:
 class LunaJudge:
     variant = VARIANTS["luna"]
 
-    def __init__(self, openai_client: Any = None) -> None:
+    def __init__(self, openai_client: Any = None, *, max_attempts: Optional[int] = None) -> None:
         # openai_client 가 None 이면 QuestionJudgeClient 가 설정의 OPENAI_API_KEY 로 만든다 (--live 전용).
         self._client = QuestionJudgeClient(client=openai_client)
+        self._max_attempts = self.variant.max_attempts if max_attempts is None else max_attempts
+        if self._max_attempts < 1:
+            raise ValueError("max_attempts must be positive")
 
     async def judge(self, turn: PreparedTurn) -> JudgeOutcome:
         assert turn.payload_bytes is not None and turn.presentation is not None
         payload = json.loads(turn.payload_bytes)
         if build_judge_request(payload)["input"].encode("utf-8") != turn.payload_bytes:
             raise RuntimeError(f"{turn.key}: luna 요청 input 이 준비한 payload 와 다릅니다")
-        call = await self._client.judge(payload)
+        call = await self._client.judge(
+            payload, stage=LUNA_COMPARISON_STAGE, max_attempts=self._max_attempts
+        )
         trace = call.trace
         usage = Usage(
             input_tokens=trace.input_tokens,
@@ -194,6 +273,11 @@ class LunaJudge:
             raw={
                 "output": None if normalized is None else normalized.raw_output,
                 "normalization": None if normalized is None else normalized.normalization_judgment_input(),
+                "responseModel": (
+                    None
+                    if trace.request_evidence is None
+                    else trace.request_evidence.response_model_name
+                ),
             },
             latency_ms=trace.latency_ms,
             usage=usage,
@@ -243,9 +327,18 @@ def _transient(outcome: Mapping[str, Any]) -> bool:
 class JevJudge:
     variant = VARIANTS["jev"]
 
-    def __init__(self, transport: JevTransport, *, retry_delay: float = JEV_RETRY_DELAY_SECONDS) -> None:
+    def __init__(
+        self,
+        transport: JevTransport,
+        *,
+        retry_delay: float = JEV_RETRY_DELAY_SECONDS,
+        max_attempts: Optional[int] = None,
+    ) -> None:
         self._transport = transport
         self._retry_delay = retry_delay
+        self._max_attempts = self.variant.max_attempts if max_attempts is None else max_attempts
+        if self._max_attempts < 1:
+            raise ValueError("max_attempts must be positive")
 
     async def judge(self, turn: PreparedTurn) -> JudgeOutcome:
         assert turn.payload_bytes is not None
@@ -254,7 +347,7 @@ class JevJudge:
         started = time.perf_counter()
         attempts = 1
         outcome = await self._transport(body)
-        if _transient(outcome) and attempts < JEV_MAX_ATTEMPTS:
+        if _transient(outcome) and attempts < self._max_attempts:
             await asyncio.sleep(self._retry_delay)
             attempts += 1
             outcome = await self._transport(body)
@@ -299,6 +392,171 @@ class JevJudge:
         )
 
 
+# ---------------------------------------------------------------- Claude
+
+
+ClaudeTransport = Callable[[Dict[str, Any]], Awaitable[Dict[str, Any]]]
+
+
+def build_claude_request(
+    payload_bytes: bytes,
+    *,
+    model: str,
+    force_tool: bool = True,
+    max_tokens: int = CLAUDE_MAX_OUTPUT_TOKENS,
+) -> Dict[str, Any]:
+    """Build the Claude request while keeping the prepared payload verbatim."""
+
+    return {
+        "model": model,
+        "max_tokens": max_tokens,
+        "system": CLAUDE_SYSTEM,
+        "messages": [{"role": "user", "content": payload_bytes.decode("utf-8")}],
+        "tools": [{
+            "name": CLAUDE_TOOL_NAME,
+            "description": "Return the judge classification.",
+            "input_schema": CLAUDE_RESULT_SCHEMA,
+            "strict": True,
+        }],
+        "tool_choice": {"type": "tool", "name": CLAUDE_TOOL_NAME} if force_tool else {"type": "auto"},
+    }
+
+
+def _claude_transient(outcome: Mapping[str, Any]) -> bool:
+    status = outcome.get("httpStatus")
+    return bool(outcome.get("retryable")) or (
+        not outcome.get("ok") and (status == 429 or (isinstance(status, int) and status >= 500))
+    )
+
+
+class ClaudeJudge:
+    variant = VARIANTS["claude-haiku"]
+
+    def __init__(
+        self,
+        transport: ClaudeTransport,
+        *,
+        variant: Optional[Variant] = None,
+        max_attempts: Optional[int] = None,
+        max_output_tokens: Optional[int] = None,
+    ) -> None:
+        self._transport = transport
+        if variant is not None:
+            self.variant = variant
+        self._max_attempts = self.variant.max_attempts if max_attempts is None else max_attempts
+        self._max_output_tokens = (
+            self.variant.settings.get("maxOutputTokens", CLAUDE_MAX_OUTPUT_TOKENS)
+            if max_output_tokens is None
+            else max_output_tokens
+        )
+        if self._max_attempts < 1:
+            raise ValueError("max_attempts must be positive")
+        if self._max_output_tokens < 1:
+            raise ValueError("max_output_tokens must be positive")
+
+    async def judge(self, turn: PreparedTurn) -> JudgeOutcome:
+        assert turn.payload_bytes is not None
+        request = build_claude_request(
+            turn.payload_bytes,
+            model=self.variant.model,
+            force_tool=self.variant.settings.get("toolChoice") == "tool",
+            max_tokens=self._max_output_tokens,
+        )
+        if request["messages"][0]["content"].encode("utf-8") != turn.payload_bytes:
+            raise RuntimeError(f"{turn.key}: Claude 요청 input 이 준비한 payload 와 다릅니다")
+        started = time.perf_counter()
+        attempts = 0
+        while True:
+            attempts += 1
+            try:
+                outcome = await self._transport(request)
+            except Exception as error:  # noqa: BLE001 - do not leak request or credential details
+                outcome = {"ok": False, "httpStatus": None, "error": type(error).__name__, "retryable": True}
+            if _claude_transient(outcome) and attempts < self._max_attempts:
+                await asyncio.sleep(0.5)
+                continue
+            break
+        latency = int((time.perf_counter() - started) * 1000)
+        if not outcome.get("ok"):
+            status = outcome.get("httpStatus")
+            detail = f"HTTP {status}" if isinstance(status, int) else "transport failure"
+            return JudgeOutcome(
+                decision=None,
+                error=f"Claude 호출 실패: {detail}",
+                latency_ms=latency,
+                attempts=attempts,
+                raw={"httpStatus": status},
+            )
+
+        response = outcome.get("body") or {}
+        usage_body = response.get("usage") or {}
+        usage = Usage(
+            input_tokens=usage_body.get("input_tokens"),
+            output_tokens=usage_body.get("output_tokens"),
+            cached_input_tokens=usage_body.get("cache_read_input_tokens"),
+        )
+        blocks = response.get("content") or []
+        stop_reason = response.get("stop_reason")
+        submitted = next(
+            (block.get("input") for block in blocks if block.get("type") == "tool_use" and block.get("name") == CLAUDE_TOOL_NAME),
+            None,
+        )
+        raw = {"model": response.get("model"), "result": submitted, "stopReason": stop_reason}
+        if stop_reason == "max_tokens":
+            return JudgeOutcome(
+                decision="UNCLASSIFIED", error="Claude 응답이 출력 토큰 한도에 도달했습니다",
+                raw=raw, latency_ms=latency, usage=usage, attempts=attempts,
+            )
+        if not isinstance(submitted, Mapping):
+            return JudgeOutcome(
+                decision="UNCLASSIFIED", invalid_reason="UNPARSEABLE_OUTPUT", raw=raw,
+                latency_ms=latency, usage=usage, attempts=attempts,
+            )
+
+        normalized = normalize_judgment(json.dumps(submitted, ensure_ascii=False), turn.presentation)
+        decision = normalized.decision.value
+        key = None if normalized.subproblem is None else normalized.subproblem.key
+        return JudgeOutcome(
+            decision=decision,
+            subproblem_key=key,
+            confidence=normalized.confidence,
+            invalid_reason=normalized.invalid_reason,
+            raw={"model": response.get("model"), "output": submitted,
+                 "normalization": normalized.normalization_judgment_input()},
+            latency_ms=latency,
+            usage=usage,
+            attempts=attempts,
+        )
+
+
+def urllib_claude_transport(api_key: str, *, timeout: float = CLAUDE_TIMEOUT_SECONDS) -> ClaudeTransport:
+    """Anthropic Messages API transport; credentials and response bodies never enter errors."""
+
+    def post(body: Dict[str, Any]) -> Dict[str, Any]:
+        request = urllib.request.Request(
+            CLAUDE_ENDPOINT,
+            data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": CLAUDE_API_VERSION,
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                return {"ok": True, "httpStatus": response.status, "body": json.loads(response.read().decode("utf-8"))}
+        except urllib.error.HTTPError as error:
+            return {"ok": False, "httpStatus": error.code}
+        except Exception as error:  # noqa: BLE001 - response text may contain user or secret data
+            return {"ok": False, "httpStatus": None, "error": type(error).__name__, "retryable": True}
+
+    async def transport(body: Dict[str, Any]) -> Dict[str, Any]:
+        return await asyncio.to_thread(post, body)
+
+    return transport
+
+
 def urllib_jev_transport(api_key: str, *, timeout: float = JEV_TIMEOUT_SECONDS) -> JevTransport:
     """TypeSafe systemone 실제 전송 (--live 전용). 키는 출력하지 않고 오류에는 상태만 남긴다."""
 
@@ -335,19 +593,30 @@ class Prices:
     cached_input: Optional[float] = None
 
 
-# luna 단가: evaluation/run_generation_model_comparison.py CANDIDATE_CONFIGS 의 gpt-5.6-luna (0.20, 1.20).
-# 캐시 입력 단가는 저장소에 없다 (#204 작업 목록 "평가 단가표에 캐시 입력 단가" 대기).
-# Jev 단가는 저장소에 없다. 인자로 받는다.
+# Luna 비교 단가: OpenAI 공식 가격표의 gpt-6-luna 짧은 문맥 표준 단가 (USD / MTok).
+# 캐시 입력은 실행에서 사용될 수 있으므로 upperUsd 는 캐시 할인을 제외한 상한으로 남긴다.
+# Jev 가격은 TypeSafe 공식 공개 가격표의 입력 토큰 단가이며 출력은 무료다.
+# Claude rates are Anthropic first-party API standard input/output and cache-read prices (USD/MTok),
+# from https://platform.claude.com/docs/en/about-claude/pricing. Haiku's input rate assumes prompts <= 100k tokens.
 DEFAULT_PRICES: Dict[str, Prices] = {
-    "luna": Prices(input=0.20, output=1.20, cached_input=None),
-    "jev": Prices(input=None, output=None, cached_input=None),
+    "luna": Prices(input=0.10, output=0.50, cached_input=0.01),
+    "jev": Prices(input=0.042, output=0.0, cached_input=None),
+    "claude-haiku": Prices(input=0.10, output=0.50, cached_input=0.01),
+    "claude-sonnet": Prices(input=2.0, output=10.0, cached_input=0.10),
+    "claude-opus": Prices(input=4.0, output=20.0, cached_input=0.20),
+    "claude-fable": Prices(input=10.0, output=50.0, cached_input=0.25),
 }
 
-# 문자 수 → 토큰 추정 비율과 턴당 출력 토큰. 2026-10-01 탐색 실행의 A층 159턴 실측 토큰
-# (Claude outputs/version-history-20260928/luna-judge-run 의 ids-only 결과, luna 평균 입력 5,300.5 출력 373.7,
-# Jev 평균 입력 3,073.1)과 이 모듈이 보충 파일 없이 재구성한 같은 턴의 요청 문자 수로 맞췄다. 추정용이며 보고 수치가 아니다.
-CHARS_PER_TOKEN = {"luna": 3.38, "jev": 2.02}
-MEAN_OUTPUT_TOKENS = {"luna": 374, "jev": 0}
+# 문자 수 → 토큰 추정 비율과 턴당 출력 토큰. Luna와 Jev는 2026-10-01 탐색 실행 A층의
+# 실측 토큰에 맞춘 비율이다. Claude는 문자 비율 추정에 모델 tokenizer 안내를 반영한다.
+# 모두 실행 전 계획값이며 실제 청구와 결과 보고에는 API 사용량을 쓴다.
+CHARS_PER_TOKEN = {"luna": 3.38, "jev": 2.02, "claude-haiku": 3.0, "claude-sonnet": 3.0,
+                   "claude-opus": 3.0, "claude-fable": 3.0}
+# Anthropic says Claude 4.7 and later tokenizers produce approximately 30% more tokens
+# for the same text. All Claude variants below use that newer tokenizer generation.
+TOKENIZER_TOKEN_MULTIPLIER = {name: 1.3 for name in VARIANTS if name.startswith("claude-")}
+MEAN_OUTPUT_TOKENS = {"luna": 374, "jev": 0, "claude-haiku": 80, "claude-sonnet": 80,
+                      "claude-opus": 80, "claude-fable": 80}
 
 
 def request_chars(variant: str, turn: PreparedTurn) -> int:
@@ -357,7 +626,13 @@ def request_chars(variant: str, turn: PreparedTurn) -> int:
         request = build_judge_request(payload)
         schema = json.dumps(request["text"]["format"]["schema"], ensure_ascii=False)
         return len(request["instructions"]) + len(request["input"]) + len(schema)
-    return len(json.dumps(build_jev_request(payload), ensure_ascii=False))
+    if variant == "jev":
+        return len(json.dumps(build_jev_request(payload), ensure_ascii=False))
+    request = build_claude_request(turn.payload_bytes, model=variant_by_name(variant).model)
+    tool_overhead = json.dumps(
+        {"tools": request["tools"], "tool_choice": request["tool_choice"]}, ensure_ascii=False
+    )
+    return len(CLAUDE_SYSTEM) + len(turn.payload_bytes.decode("utf-8")) + len(tool_overhead)
 
 
 def turn_cost(variant: str, usage: Usage, prices: Prices) -> Dict[str, Optional[float]]:
@@ -368,22 +643,41 @@ def turn_cost(variant: str, usage: Usage, prices: Prices) -> Dict[str, Optional[
     input_tokens = usage.input_tokens or 0
     output_tokens = usage.output_tokens or 0
     output_cost = output_tokens * (prices.output or 0.0) / 1e6
-    upper = input_tokens * prices.input / 1e6 + output_cost
+    long_haiku = variant == "claude-haiku" and prices.input == 0.10 and input_tokens > 100_000
+    input_price = 0.25 if long_haiku else prices.input
+    upper = input_tokens * input_price / 1e6 + output_cost
     cached_tokens = usage.cached_input_tokens or 0
     if prices.cached_input is None or not cached_tokens:
         cached = upper
     else:
-        cached = (input_tokens - cached_tokens) * prices.input / 1e6 + cached_tokens * prices.cached_input / 1e6 + output_cost
+        cached_price = 0.025 if long_haiku and prices.cached_input == 0.01 else prices.cached_input
+        cached = (input_tokens - cached_tokens) * input_price / 1e6 + cached_tokens * cached_price / 1e6 + output_cost
     return {"cachedUsd": cached, "upperUsd": upper}
 
 
-def estimate(variant: Variant, prepared: List[PreparedTurn], prices: Prices) -> Dict[str, Any]:
+def estimate(
+    variant: Variant,
+    prepared: List[PreparedTurn],
+    prices: Prices,
+    *,
+    max_output_tokens: Optional[int] = None,
+    input_token_safety_multiplier: float = 1.0,
+) -> Dict[str, Any]:
     judged = [turn for turn in prepared if turn.judged]
     ratio = CHARS_PER_TOKEN[variant.name]
-    input_tokens = [int(-(-request_chars(variant.name, turn) // ratio)) for turn in judged]
+    multiplier = TOKENIZER_TOKEN_MULTIPLIER.get(variant.name, 1.0)
+    if input_token_safety_multiplier < 1.0:
+        raise ValueError("input_token_safety_multiplier 는 1.0 이상이어야 합니다")
+    input_tokens = [
+        int(-(-request_chars(variant.name, turn) * multiplier * input_token_safety_multiplier // ratio))
+        for turn in judged
+    ]
     total_input = sum(input_tokens)
     mean_output = MEAN_OUTPUT_TOKENS[variant.name]
-    max_output = JUDGE_MAX_OUTPUT_TOKENS if variant.name == "luna" else 0
+    default_max_output = JUDGE_MAX_OUTPUT_TOKENS if variant.name == "luna" else (
+        CLAUDE_MAX_OUTPUT_TOKENS if variant.name.startswith("claude-") else 0
+    )
+    max_output = default_max_output if max_output_tokens is None else max_output_tokens
     result: Dict[str, Any] = {
         "variant": variant.name,
         "model": variant.model,
@@ -395,16 +689,25 @@ def estimate(variant: Variant, prepared: List[PreparedTurn], prices: Prices) -> 
         "meanInputTokensPerCall": round(total_input / len(judged), 1) if judged else 0,
         "assumedOutputTokensPerCall": mean_output,
         "charsPerToken": ratio,
+        "tokenizerTokenMultiplier": multiplier,
         "prices": {"input": prices.input, "output": prices.output, "cachedInput": prices.cached_input},
     }
+    if input_token_safety_multiplier != 1.0:
+        result["inputTokenSafetyMultiplier"] = input_token_safety_multiplier
     if prices.input is None:
         result["estimatedUsd"] = None
         result["upperUsd"] = None
         result["note"] = "단가를 모름. --input-price 로 준다"
         return result
-    expected = (total_input * prices.input + len(judged) * mean_output * (prices.output or 0.0)) / 1e6
-    upper = variant.max_attempts * (total_input * prices.input + len(judged) * max_output * (prices.output or 0.0)) / 1e6
+    input_cost = sum(
+        tokens * (0.25 if variant.name == "claude-haiku" and prices.input == 0.10 and tokens > 100_000 else prices.input)
+        for tokens in input_tokens
+    )
+    expected = (input_cost + len(judged) * mean_output * (prices.output or 0.0)) / 1e6
+    upper = variant.max_attempts * (input_cost + len(judged) * max_output * (prices.output or 0.0)) / 1e6
     result["estimatedUsd"] = round(expected, 6)
     result["upperUsd"] = round(upper, 6)
     result["note"] = "upperUsd 는 캐시 할인 없음, 모든 호출 재시도, 출력 상한 토큰을 가정"
+    if variant.name.startswith("claude-"):
+        result["note"] += "; 입력 토큰 수는 문자 비율 추정에 Anthropic 의 약 30% 토큰 증가 안내를 반영. Haiku 는 요청 입력이 100k 토큰을 넘으면 상위 단가 적용"
     return result

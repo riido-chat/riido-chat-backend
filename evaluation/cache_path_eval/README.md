@@ -181,3 +181,41 @@ metadata나 결과에 복사하지 않는다.
 `RiidoChatCachePathEvaluationProfile`은 읽기 전용 서비스 데이터 포트와 비공개 평가 provenance
 포트를 주입받는 경계다. 운영 `ChatService` 콜백을 재사용하면 그룹 판정·캐시 시도·턴 로그를 운영
 테이블에 쓸 수 있으므로 평가 어댑터로 등록해서는 안 된다.
+
+## 캐시 그룹 모델 비교
+
+`evaluation.judge_eval.cache_group`은 별도 비공개 골든 저장소의 `cache-path@2.0.0` 그룹을
+사용해 캐시 판별 모델만 비교한다. P1 정확 적중 20건은 모델을 호출하지 않고, 판별 대상 P3/P4/P6
+65건만 실행한다. 실행 전 그룹·골든 manifest와 운영 payload 해시를 검증하며, 결과와 원시 모델 출력,
+호출·비용 ledger는 비공개 등록부에 저장한다. 질문을 결과에 복사하지 않는다.
+
+```sh
+python -m evaluation.judge_eval.cache_group prepare \
+  --registry /private/path/riido-evals \
+  --group golden/groups/cache-path/2.0.0.json
+
+python -m evaluation.judge_eval.cache_group smoke \
+  --registry /private/path/riido-evals \
+  --group golden/groups/cache-path/2.0.0.json \
+  --judge claude-haiku \
+  --output /private/path/riido-evals/evals/cache-path/smoke/<run-id>.json
+
+python -m evaluation.judge_eval.cache_group run \
+  --registry /private/path/riido-evals \
+  --group golden/groups/cache-path/2.0.0.json \
+  --judge luna \
+  --output /private/path/riido-evals/evals/cache-path/<run-id>.json
+```
+
+지원 모델 별칭은 `luna`(gpt-6-luna), `jev`(jev-latest), `claude-haiku`, `claude-sonnet`,
+`claude-opus`, `claude-fable`이다. OpenAI와 TypeSafe는 개인 환경의 `OPENAI_API_KEY`,
+`TYPESAFE_API_KEY`, Anthropic은 `ANTHROPIC_API_KEY`를 사용한다. Claude 요청은 호출당 한 번만
+시도하고 출력 상한 1024토큰으로 예약 비용을 계산한다. 이전 512토큰 설정은 Haiku, Sonnet,
+Opus 실제 실행에서 각각 2건, 36건, 51건의 응답을 잘라 비교 결과를 불완전하게 만들었다.
+상한은 실제로 확인된 사용량을 반영해 1024토큰으로 올렸으며, 사용자가 승인한 총 $20 한도에서
+각 모델 실행 전에 누적 사용·예약액을 포함해 비용을 확인한다. 네 모델을 모두 65건씩 실행하는
+보수적 상한 추정은 입력 토큰에 15% 안전 여유를 둬 약 $15.25이며, 기존 사용·예약액을 더한
+계획 상한은 약 $21.23다. 이 여유는 이전 실제 Claude 응답에서 입력 토큰 사용량이 문자 기반
+추정치보다 약 8~10% 높았던 점을 반영한다. $20 예산에서는 모든 모델을 다시 실행할 수 없으므로
+각 실행은 예산 검사에 따라 승인되며, Fable 실행 여부는 앞선 실제 비용을 반영한다.
+Claude가 출력 상한에 도달하면 해당 결과는 오류로 기록하고 유효한 판정으로 취급하지 않는다.
