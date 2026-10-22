@@ -8,6 +8,7 @@
 
 import asyncio
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -48,7 +49,7 @@ from evaluation.judge_eval.clients import (
     variant_by_name,
 )
 from evaluation.judge_eval.golden import GoldenError, HoldoutRefused, Label
-from evaluation.judge_eval.inputs import request_sha256
+from evaluation.judge_eval.inputs import frozen_request_sha256, request_sha256
 from evaluation.judge_eval.ledger import RunCapReached
 from evaluation.judge_eval.scoring import (
     binom_cdf,
@@ -225,7 +226,7 @@ def frozen_row(item_id: str, layer: str, judged: bool, entries: Dict[str, Dict[s
         "presentedSubproblemKeys": [item.key for item in presentation.subproblems],
         "documentCandidates": documents,
         "presentedDocumentIds": [doc.id for doc in presentation.documents],
-        "payloadSha256": request_sha256(build_judge_request(presentation.payload)),
+        "payloadSha256": frozen_request_sha256(build_judge_request(presentation.payload)),
         "notJudgedReason": None,
     })
     return row
@@ -254,8 +255,12 @@ def build_registry(root: Path, *, schema_from: Optional[Path] = None) -> Path:
     )
     catalog = {"meta": {"fingerprint": "fp-test"}, "entries": list(entries.values())}
     (root / "golden/frozen/catalog-HELP_CHATBOT-20990101.json").write_text(json.dumps(catalog, ensure_ascii=False), encoding="utf-8")
-    environment = {"mainRepo": {"commit": "0" * 40}, "catalog": {"fingerprint": "fp-test"},
-                   "index": {"documentGroup": "HELP_CHATBOT", "indexVersionId": 10, "version": "idx-test"}}
+    environment = {
+        "mainRepo": {"commit": "0" * 40},
+        "catalog": {"fingerprint": "fp-test"},
+        "index": {"documentGroup": "HELP_CHATBOT", "indexVersionId": 10, "version": "idx-test"},
+        "judge": {"instructionsSha256": hashlib.sha256(cli.JUDGE_INSTRUCTIONS.encode("utf-8")).hexdigest()},
+    }
     (root / "golden/frozen/environment-20990101.json").write_text(json.dumps(environment), encoding="utf-8")
     judge_suite = {"kind": "official", "reportable": True, "stage": "judge", "requireConfirmed": True,
                    "turnFilter": [{"field": "expectedJudgeDecision", "op": "exists"}]}
@@ -616,6 +621,15 @@ class InputIdentityTest(RegistryCase):
             golden_mod.open_golden(self.root, GOLDEN_VERSION)
 
 
+class FrozenRequestHashTest(unittest.TestCase):
+    def test_instructions_are_hashed_separately_from_frozen_request(self):
+        request = {"model": "judge-model", "input": "payload", "instructions": "first prompt"}
+        changed = dict(request, instructions="second prompt")
+
+        self.assertNotEqual(request_sha256(request), request_sha256(changed))
+        self.assertEqual(frozen_request_sha256(request), frozen_request_sha256(changed))
+
+
 # ---------------------------------------------------------------- 보류 시험셋
 
 
@@ -752,6 +766,15 @@ class RunCapTest(RegistryCase):
             self.run_live(self.config("luna"), luna_adapter())
         self.assertEqual(self.ledger_runs(), [])
 
+    def test_live_refuses_when_frozen_instructions_hash_differs(self):
+        self.update_environment(
+            lambda environment: environment["judge"].update({"instructionsSha256": "0" * 64})
+        )
+        golden = golden_mod.open_golden(self.root, GOLDEN_VERSION)
+        with self.assertRaisesRegex(GoldenError, "instructionsSha256"):
+            cli._check_live_preconditions(self.config("luna"), golden)
+        self.assertEqual(self.ledger_runs(), [])
+
 
 # ---------------------------------------------------------------- 추정
 
@@ -840,6 +863,8 @@ class EstimateTest(RegistryCase):
         self.assertEqual(claude["calls"], 5)
         self.assertGreater(luna["estimatedInputTokens"], 0)
         self.assertGreater(luna["upperUsd"], luna["estimatedUsd"])
+        self.assertEqual(claude["tokenizerTokenMultiplier"], 1.3)
+        self.assertGreater(claude["estimatedInputTokens"], 0)
         self.assertEqual(luna["payloadCheck"], {"judgedTurns": 5, "verified": 5, "unverified": 0})
         unpriced = cli.run_estimate(self.config("jev", prices=Prices(None, None, None)))
         self.assertIsNone(unpriced["estimatedUsd"])

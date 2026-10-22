@@ -16,6 +16,7 @@
 """
 
 import asyncio
+import hashlib
 import json
 import time
 import urllib.error
@@ -154,6 +155,15 @@ for _claude_name, _claude_model in (
             "maxOutputTokens": CLAUDE_MAX_OUTPUT_TOKENS,
             "maxAttempts": CLAUDE_MAX_ATTEMPTS,
             "inputSemantics": "prepared payload JSON bytes preserved as the sole user message",
+            "systemPromptSha256": hashlib.sha256(CLAUDE_SYSTEM.encode("utf-8")).hexdigest(),
+            "toolSchemaSha256": hashlib.sha256(
+                json.dumps(
+                    CLAUDE_RESULT_SCHEMA,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest(),
             "decisionMapping": {
                 "CONNECT": "presented subproblem key only",
                 "SEPARATE": "no applicable presented candidate",
@@ -563,11 +573,14 @@ DEFAULT_PRICES: Dict[str, Prices] = {
     "claude-fable": Prices(input=10.0, output=50.0, cached_input=0.25),
 }
 
-# 문자 수 → 토큰 추정 비율과 턴당 출력 토큰. 2026-10-01 탐색 실행의 A층 159턴 실측 토큰
-# (Claude outputs/version-history-20260928/luna-judge-run 의 ids-only 결과, luna 평균 입력 5,300.5 출력 373.7,
-# Jev 평균 입력 3,073.1)과 이 모듈이 보충 파일 없이 재구성한 같은 턴의 요청 문자 수로 맞췄다. 추정용이며 보고 수치가 아니다.
+# 문자 수 → 토큰 추정 비율과 턴당 출력 토큰. Luna와 Jev는 2026-10-01 탐색 실행 A층의
+# 실측 토큰에 맞춘 비율이다. Claude는 문자 비율 추정에 모델 tokenizer 안내를 반영한다.
+# 모두 실행 전 계획값이며 실제 청구와 결과 보고에는 API 사용량을 쓴다.
 CHARS_PER_TOKEN = {"luna": 3.38, "jev": 2.02, "claude-haiku": 3.0, "claude-sonnet": 3.0,
                    "claude-opus": 3.0, "claude-fable": 3.0}
+# Anthropic says Claude 4.7 and later tokenizers produce approximately 30% more tokens
+# for the same text. All Claude variants below use that newer tokenizer generation.
+TOKENIZER_TOKEN_MULTIPLIER = {name: 1.3 for name in VARIANTS if name.startswith("claude-")}
 MEAN_OUTPUT_TOKENS = {"luna": 374, "jev": 0, "claude-haiku": 80, "claude-sonnet": 80,
                       "claude-opus": 80, "claude-fable": 80}
 
@@ -611,7 +624,8 @@ def turn_cost(variant: str, usage: Usage, prices: Prices) -> Dict[str, Optional[
 def estimate(variant: Variant, prepared: List[PreparedTurn], prices: Prices) -> Dict[str, Any]:
     judged = [turn for turn in prepared if turn.judged]
     ratio = CHARS_PER_TOKEN[variant.name]
-    input_tokens = [int(-(-request_chars(variant.name, turn) // ratio)) for turn in judged]
+    multiplier = TOKENIZER_TOKEN_MULTIPLIER.get(variant.name, 1.0)
+    input_tokens = [int(-(-request_chars(variant.name, turn) * multiplier // ratio)) for turn in judged]
     total_input = sum(input_tokens)
     mean_output = MEAN_OUTPUT_TOKENS[variant.name]
     max_output = JUDGE_MAX_OUTPUT_TOKENS if variant.name == "luna" else (
@@ -628,6 +642,7 @@ def estimate(variant: Variant, prepared: List[PreparedTurn], prices: Prices) -> 
         "meanInputTokensPerCall": round(total_input / len(judged), 1) if judged else 0,
         "assumedOutputTokensPerCall": mean_output,
         "charsPerToken": ratio,
+        "tokenizerTokenMultiplier": multiplier,
         "prices": {"input": prices.input, "output": prices.output, "cachedInput": prices.cached_input},
     }
     if prices.input is None:
@@ -645,5 +660,5 @@ def estimate(variant: Variant, prepared: List[PreparedTurn], prices: Prices) -> 
     result["upperUsd"] = round(upper, 6)
     result["note"] = "upperUsd 는 캐시 할인 없음, 모든 호출 재시도, 출력 상한 토큰을 가정"
     if variant.name.startswith("claude-"):
-        result["note"] += "; 입력 토큰 수는 문자 비율 기반 추정이며 Haiku 는 요청 입력이 100k 토큰을 넘으면 상위 단가를 적용"
+        result["note"] += "; 입력 토큰 수는 문자 비율 추정에 Anthropic 의 약 30% 토큰 증가 안내를 반영. Haiku 는 요청 입력이 100k 토큰을 넘으면 상위 단가 적용"
     return result

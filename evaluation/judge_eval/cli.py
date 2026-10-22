@@ -22,13 +22,15 @@
 - 보류 시험셋 묶음(judge-official-B 등)은 --holdout 과 확정해 커밋한 criteria/ 파일이 모두 있어야 연다.
   추정과 채점도 같다. 보고용 묶음의 실제 측정은 확정한 criteria/ 파일이 있어야 한다.
 - (묶음, 모델, 골든셋 버전) 마다 실행 2회까지. 1회차가 주 결과다. 실행은 모델을 부르기 전에 기록부에 남긴다.
-- payload 확인(strict, 기본): 재구성한 판별 요청 해시가 동결 payloadSha256 과 다른 턴이 있으면 멈춘다.
-  record 는 진행하되 턴마다 확인 여부를 남긴다. 어느 쪽을 쓸지는 사전 등록 기준에 적는다.
+- 입력 확인(strict, 기본): 동결 payloadSha256 과 요청 입력 해시가 다른 턴이 있거나
+  운영 지시문 해시가 동결 환경과 다르면 멈춘다. `instructions` 는 동결 당시 별도 해시로 확인한다.
+  record 는 입력 해시 불일치를 기록하고 진행한다. 사용 여부는 사전 등록 기준에 적는다.
 - 결과 파일은 덮어쓰지 않는다. 쓰기 전에 등록부의 eval-result.schema.json 으로 검사한다.
 """
 
 import argparse
 import asyncio
+import hashlib
 import importlib.util
 import json
 import os
@@ -55,6 +57,7 @@ from evaluation.judge_eval.clients import (
 from evaluation.judge_eval.golden import Golden, GoldenError, HoldoutRefused, Label, Selection, TurnKey
 from evaluation.judge_eval.inputs import PreparedTurn, prepare_turns
 from evaluation.judge_eval.scoring import TurnScore, compare, score_turn, summarize
+from app.question_grouping.prompt_v7_2 import JUDGE_INSTRUCTIONS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REGISTRY = PROJECT_ROOT / "evaluation" / "registry"
@@ -155,6 +158,10 @@ def run_estimate(config: RunConfig) -> Dict[str, Any]:
             "goldenVersion": prepared.golden.version,
             "layers": prepared.selection.layers,
             "payloadCheck": payload_status(prepared.turns),
+            "instructionsSha256Verified": (
+                (prepared.environment.get("judge") or {}).get("instructionsSha256")
+                == hashlib.sha256(JUDGE_INSTRUCTIONS.encode("utf-8")).hexdigest()
+            ),
         }
     )
     return result
@@ -300,6 +307,10 @@ def _check_live_preconditions(config: RunConfig, golden: Golden) -> None:
     ):
         raise GoldenError("--profile-revision-id 에 서빙 중인 양의 프로필 버전 ID를 준다")
     environment = golden_mod.load_environment(golden)
+    expected_instructions_sha256 = (environment.get("judge") or {}).get("instructionsSha256")
+    actual_instructions_sha256 = hashlib.sha256(JUDGE_INSTRUCTIONS.encode("utf-8")).hexdigest()
+    if expected_instructions_sha256 != actual_instructions_sha256:
+        raise GoldenError("현재 판별 지시문이 동결 환경의 instructionsSha256 과 다릅니다")
     if _baseline_build_commit(environment) is None:
         raise GoldenError("동결 입력 환경에 기준 앱 커밋 SHA가 없습니다")
     index_version_id = (environment.get("index") or {}).get("indexVersionId")
@@ -384,7 +395,7 @@ async def execute_run(config: RunConfig, adapter: Optional[Any]) -> Dict[str, An
     if config.payload_check == "strict" and status["unverified"]:
         raise GoldenError(
             f"재구성한 판별 요청 {status['unverified']}/{status['judgedTurns']}턴이 동결 payloadSha256 과 다릅니다. "
-            "동결 보충 파일(문서 outline, 정본 적용 제외 규칙)을 등록하거나, 사전 등록 기준에 적고 --payload-check record 로 돌린다"
+            "동결 입력과 보충 파일을 확인하거나, 사전 등록 기준에 적고 --payload-check record 로 돌린다"
         )
     assert config.output is not None
     ledger_mod.append_run(

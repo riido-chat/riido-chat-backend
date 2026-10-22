@@ -2,7 +2,9 @@
 
 운영 코드(app.question_grouping.payload.build_judge_presentation, judge_client.build_judge_request)를
 그대로 부른다. 동결 행의 seed 와 검색 순위로 섞기를 재현하고, 제시 순서가 동결 기록과 다르면 멈춘다.
-판별 요청 해시가 동결 payloadSha256 과 같으면 2026-10-01 판별 실행의 입력과 바이트까지 같다는 뜻이다.
+동결 payloadSha256 은 2026-10-01 실행기에서 `instructions` 를 별도 기록한 요청 객체의 해시다.
+따라서 재구성 요청에서는 `instructions` 를 빼고 해시를 비교한다. 지시문 자체는 동결 환경의
+`instructionsSha256` 으로 따로 확인한다.
 
 모델에 주는 입력은 턴마다 한 번 만든 payload_bytes 하나다. luna 는 이것을 responses.create 의 input
 문자열로 그대로 보내고, Jev 는 같은 바이트를 읽어 요청을 만든다. 두 모델이 받는 판별 입력(질의, 후보,
@@ -46,6 +48,12 @@ def request_sha256(request: Mapping[str, Any]) -> str:
 
     text = json.dumps(request, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return sha256_bytes(text.encode("utf-8"))
+
+
+def frozen_request_sha256(request: Mapping[str, Any]) -> str:
+    """동결 당시 별도 보관한 instructions 를 제외한 판별 요청 해시."""
+
+    return request_sha256({key: value for key, value in request.items() if key != "instructions"})
 
 
 @dataclass(frozen=True)
@@ -173,7 +181,7 @@ def prepare_turn(
         payload_bytes=request["input"].encode("utf-8"),
         presentation=presentation,
         frozen_payload_sha256=row["payloadSha256"],
-        request_sha256=request_sha256(request),
+        request_sha256=frozen_request_sha256(request),
         presented_keys=presented,
     )
 
