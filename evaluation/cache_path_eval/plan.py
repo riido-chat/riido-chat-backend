@@ -417,6 +417,9 @@ class CachePathEvaluationPlanExecutor:
             }
             if config != expected_config:
                 raise ValueError("variant configuration must bind judge versions and complete profile config")
+            validator = getattr(self._prepared_profile_factory, "validate_variant", None)
+            if callable(validator):
+                validator(variant, spec)
             self._store.validate_manifest(metadata, self._manifest)
             self._store.check_available(metadata)
         if getattr(self._prepared_profile_factory, "supports_fixed_prepared_inputs", False) is not True:

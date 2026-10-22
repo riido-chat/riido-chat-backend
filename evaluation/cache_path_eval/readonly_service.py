@@ -82,7 +82,7 @@ class ReadOnlyRiidoServiceData:
 
     @asynccontextmanager
     async def open_snapshot(
-        self, metadata: CachePathRunMetadata
+        self, metadata: CachePathRunMetadata, *, allow_judge_override: bool = False
     ) -> AsyncIterator[ReadOnlyServiceSnapshot]:
         session = self._session_factory()
         session.autoflush = False
@@ -95,7 +95,9 @@ class ReadOnlyRiidoServiceData:
             await session.execute(
                 text("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
             )
-            selection, revision = await self._select_settings(session, metadata)
+            selection, revision = await self._select_settings(
+                session, metadata, allow_judge_override=allow_judge_override
+            )
             snapshot = ReadOnlyServiceSnapshot(
                 selection=selection,
                 catalog_reader=QuestionCatalogReader(session),
@@ -119,7 +121,10 @@ class ReadOnlyRiidoServiceData:
 
     @staticmethod
     async def _select_settings(
-        session: AsyncSession, metadata: CachePathRunMetadata
+        session: AsyncSession,
+        metadata: CachePathRunMetadata,
+        *,
+        allow_judge_override: bool = False,
     ) -> tuple[SelectedServiceSettings, ChatProfileRevision]:
         selected = (
             await session.execute(
@@ -173,13 +178,13 @@ class ReadOnlyRiidoServiceData:
                 f"Selected profile revision is not supported by this application: {error}"
             ) from error
 
-        if metadata.judge_model_version is not None and (
+        if not allow_judge_override and metadata.judge_model_version is not None and (
             metadata.judge_model_version != stage_settings.judge.model_name
         ):
             raise ReadOnlyServiceSnapshotError(
                 "Selected judge model does not match run metadata."
             )
-        if metadata.judge_prompt_version is not None and (
+        if not allow_judge_override and metadata.judge_prompt_version is not None and (
             metadata.judge_prompt_version != stage_settings.judge.prompt_version
         ):
             raise ReadOnlyServiceSnapshotError(

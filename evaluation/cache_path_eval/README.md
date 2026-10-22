@@ -143,6 +143,29 @@ bootstrap을 제공하지 않는다. `compare_cache_path_plan`은 완료 plan의
 child hash를 확인한 뒤 기존 summary counter를 읽기 전용으로 보여준다. 자동으로 우승 variant를 고르거나
 통계적 유의성을 주장하지 않는다.
 
+Riido 계획 실행은 `profiles.riido_chat.create_riido_chat_plan_binding`으로 shared-input preparer와
+prepared profile factory를 함께 만든다. 준비기는 선택한 턴마다 정확 캐시를 먼저 확인하고, 미제공 경로의
+질의 재작성·검색·질문 벡터·후보 presentation을 한 번 계산한다. presentation payload와 검색/후보 객체는
+프로세스 메모리에서만 공유한다. parent `preparationEvidence`에는 재작성/임베딩 호출 수와 집계된 비용
+측정값만 기록하고, 각 child 관측에는 해당 child가 실제 실행한 분류 호출만 기록한다. parent에서 확인한
+exact decision도 메모리에서 공유하므로 exact hit는 payload가 없는 입력으로 고정되고 각 child의 기존
+`CACHE_DECISION` exact 처리 경로에서 judge를 호출하지 않는다.
+
+기본적으로 각 child의 judge model/prompt는 선택한 production profile revision과 일치해야 한다. 평가용으로
+다른 judge를 비교할 때는 일반 `judge_client_factory(variant, spec)`를 binding에 주입하고
+`evaluation_only_judge_override=True`로 만든 뒤 모든 child의 `profileConfig.evaluationOnlyJudgeOverride`를
+`true`로 설정한다. factory는 plan preflight와 shared preparation 이후 variant마다 한 번 호출된다.
+variant metadata의
+`judgeModelVersion`/`judgePromptVersion`이 실제 요청 대상이며 등록된 `judge` prompt 버전을 불러 사용한다.
+서비스 profile revision, index, embedding, cache 설정은 계속 선택 metadata와 검증한다.
+`profileConfig.judgeParams`에는 `reasoning`과 `max_output_tokens`만 안전한 JSON 값으로 지정할 수 있다.
+키가 없으면 선택된 production stage의 요청 설정을 유지하고, `{}`를 지정하면 빈 요청 설정을 사용하므로
+provider별 단계 계약을 설정만으로 표현할 수 있다. 모델 ID, 등록 prompt 버전, 요청 설정은 plan preflight에서
+검증되며 이 검증이 끝나기 전에는 공통 rewrite/embedding 준비와 variant client factory가 실행되지 않는다.
+credential이 필요 없는 provider-client 선택 검증은 선택적으로 `judge_client_validator(variant, spec)`에
+주입할 수 있다. 실제 client factory는 preflight와 shared preparation 뒤에 실행된다. 검증은 prompt 본문을
+metadata나 결과에 복사하지 않는다.
+
 ## 프로필 선택 실행 경계
 
 `profile_registry.py`는 service key를 factory에 연결하며, factory는 동기 또는 async일 수 있다.
